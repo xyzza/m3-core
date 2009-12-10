@@ -1,0 +1,6 @@
+﻿syntax: regexp
+
+^\.tmp
+^\.project
+^\.pydevproject
+.pyc
