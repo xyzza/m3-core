@@ -169,8 +169,3 @@ class HtmlMessageTest(EmailNotify):
         EmailNotify.__init__(self, 'HtmlMessageTest.html')
         
 
-
-#TODO: Разобраться с профилем пользователя. Что это за класс?
-#TODO: Допилить надежность.
-#TODO: Неправильно отправляется HTML. Нужно указывать MIME тип.
-#TODO: Возможность расслки списку.
