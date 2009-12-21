@@ -46,11 +46,7 @@ class ProfileInformationRequired(Exception):
 def load_mail_template_from_storage(templateName):
     ''' Возвращает экземпляр Template созданный из почтового шаблона '''
     # Если задан путь к собственным шаблонам, то ищем сначала в нём
-    try:
-        settings.MAIL_TEMPLATE_FOLDER
-    except AttributeError:
-        pass
-    else:
+    if hasattr(settings, 'MAIL_TEMPLATE_FOLDER'):
         full_name = path.join(settings.MAIL_TEMPLATE_FOLDER, templateName)
         if path.isfile(full_name):
             line = open(full_name).read()
@@ -115,9 +111,9 @@ class EmailNotify():
         context = Context();
         if profile:
             # Заполняем поля контекста из профиля пользователя
-            if not profile.user_name:
+            if not hasattr(profile, 'user_name'):
                 raise ProfileInformationRequired('Не задано имя профиля')
-            if not profile.email:
+            if not hasattr(profile, 'email'):
                 raise ProfileInformationRequired('Не задан почтовый адрес пользователя')
             context['user_name'] = profile.user_name
             context['user_email'] = profile.email
