@@ -4,7 +4,7 @@
 в декораторе и зарезервированы
 Пример:
 class MyModel_History(BaseMyModel):
-    history_object_id = models.IntegerField()
+    history_object_id = models.IntegerField(db_index = True)
     history_time_stamp = models.DateTimeField(auto_now = True)
     
 где BaseMyModel - абстрактный класс от которого наследована модель для которой ведется история
@@ -37,13 +37,13 @@ def history_support(history_model):
             history_row = instance._history_model()
             history_row.history_object_id = instance.id
             # Копируем все поля таблицы в класс истории
+            reserved_fields = ['id', 'history_object_id', 'history_time_stamp']
             for field in sender._meta.local_fields:
                 attr = field.attname
-                if not (attr in ['id', 'history_time_stamp']):
+                if not (attr in reserved_fields):
                     value = instance.__getattribute__(attr)
                     history_row.__setattr__(attr, value)
                     
-            history_row.history_object_id = instance.id
             history_row.save()
         
         def get_history(self, reverse = False):
