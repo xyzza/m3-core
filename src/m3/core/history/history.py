@@ -52,15 +52,17 @@ def history_support(history_model):
                 raise ValueError('Модель не поддерживает историю!')
             result = self._history_model.objects.filter(history_object_id = self.id)
             if reverse:
-                return result.order_by('-history_time_stamp')
+                return result.order_by('-history_time_stamp', '-id')
             else:
-                return result.order_by('history_time_stamp')
+                return result.order_by('history_time_stamp', 'id')
         
-        # Ссылка на модель истории, чтобы быстро предоставлять методы работы с историей 
-        model_class._history_model = history_model
-        model_class.get_history = get_history
-        post_save.connect(_on_save_history, model_class, weak = False)
+        # Ссылка на модель истории, чтобы быстро предоставлять методы работы с историей
+        if not hasattr(model_class, '_history_model'):
+            model_class._history_model = history_model
+            model_class.get_history = get_history
+            post_save.connect(_on_save_history, model_class, weak = False)
         return model_class    
 
     return wrapper
 
+#FIXME: Если в модели на поля наложена уникальность, то история будет падать. Нужен хак для убивания уникальности.
