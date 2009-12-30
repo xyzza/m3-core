@@ -2,6 +2,7 @@
 from django.db.models.base import ModelBase
 from django.db import models
 import datetime
+import copy
 
 class InformationRegistryMeta(ModelBase):
     '''
@@ -28,7 +29,7 @@ class InformationRegistryMeta(ModelBase):
         for model in clazz.managed_models:
             for field in model._meta.local_fields:
                 if field.attname not in ignored:
-                    all_fields.append((field, model.__name__, field.attname))
+                    all_fields.append((field, model.__name__, field.name))
         
         # Формируем список полей которые будут созданы в регистре:
         # Класс, полное имя, соответствие
@@ -69,9 +70,10 @@ class InformationRegistryMeta(ModelBase):
         
         # Создаем такие же поля, но не клонируем, т.к. нужны лишь некоторые свойства
         for field, name in fields_to_make:
-            new_field = field.__class__(null = field.null, max_length = field.max_length,
-                                        choices = field.choices)
-            # Привязка
+            new_field = copy.copy(field)
+            # Нужно грохнуть уникальность чтобы не сбивать вставку истории
+            new_field.primary_key = False
+            new_field._unique = False
             new_field.contribute_to_class(clazz, name)
          
         return clazz
@@ -151,5 +153,6 @@ class BaseInformationRegistry(models.Model):
     class Meta:
         abstract = True
 
+#FIXME: 
 #TODO: Сделать возможность хранения нескольких id моделей
 #TODO: Сделать возможность хранения нескольких id моделей
