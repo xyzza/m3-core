@@ -19,7 +19,7 @@ class InformationRegistryMeta(ModelBase):
         else:
             return clazz
         
-        if len(clazz.managed_models) == 0:
+        if (len(clazz.managed_models) == 0) or (hasattr(clazz, '_fields_conformity')):
             return clazz
         
         # Получаем все экземпляры полей, имена моделей и имена полей
@@ -133,9 +133,11 @@ class BaseInformationRegistry(models.Model):
         cls.mapping(new_record, *args, **kwargs)
     
     @classmethod
-    def get_object(cls, obj, date):
+    def get_object(cls, obj, date = None):
         check_obj(obj)
-        return cls.objects.order_by('-history_time_stamp').filter(history_time_stamp__lte = date)[0]
+        date = date or datetime.datetime.now()
+        result = cls.objects.order_by('-history_time_stamp')
+        return result.filter(history_time_stamp__lte = date, history_object_id = obj.id)[0]
     
     @classmethod
     def get_history(cls, obj, reverse = False):
