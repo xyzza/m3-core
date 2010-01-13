@@ -50,7 +50,7 @@ class InformationRegistryMeta(ModelBase):
                         fields_conformity[name] = name
                         break
                 else:
-                    raise ValueError('Поле %s не найдено в указанных моделях %s' % (name, m_fields))
+                    raise ValueError(u'Поле %s не найдено в указанных моделях %s' % (name, m_fields))
         elif isinstance(m_fields, dict):
             # Уже есть строгое соответствие
             for key, value in m_fields.items():
@@ -61,10 +61,10 @@ class InformationRegistryMeta(ModelBase):
                         fields_conformity[key] = value
                         break
                 else:
-                    raise ValueError('Имя модели и поля %s.%s указанное в managed_fields \
+                    raise ValueError(u'Имя модели и поля %s.%s указанное в managed_fields \
                                      не найдены в managed_models %s' % (m_name, f_name, m_fields))
         else:
-            raise TypeError('Неверный тип managed_fields')
+            raise TypeError(u'Неверный тип managed_fields')
         
         clazz._fields_conformity = fields_conformity
         
@@ -80,7 +80,7 @@ class InformationRegistryMeta(ModelBase):
         
 def check_obj(obj):
     if not isinstance(obj, models.Model):
-        raise TypeError('Объект по которому запрашивается история должен быть наследником models.Model')
+        raise TypeError(u'Объект по которому запрашивается история должен быть наследником models.Model')
 
 
 class BaseInformationRegistry(models.Model):
@@ -100,7 +100,7 @@ class BaseInformationRegistry(models.Model):
         # Попробуем дернуть нужные нам поля из каждого объекта
         for obj in args:
             if not isinstance(obj, tuple(self.managed_models)):
-                raise TypeError('Нужно передавать экземпляр модели')
+                raise TypeError(u'Нужно передавать экземпляр модели')
             for orig_name, pseudonym in self._fields_conformity.items():
                 if '.' in orig_name:
                     # Нужно точное соответствие
@@ -116,7 +116,7 @@ class BaseInformationRegistry(models.Model):
         # Попробуем заполнить по полям из словаря
         for name, value in kwargs.items():
             if not hasattr(self, name):
-                raise AttributeError('Регистр не содержит атрибут с именем %s' % name)
+                raise AttributeError(u'Регистр не содержит атрибут с именем %s' % name)
             self.__setattr__(name, value)
         
         # Откуда-то нужно достать id
