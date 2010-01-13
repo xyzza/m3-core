@@ -44,7 +44,7 @@ def make_report_from_object(obj, dump_to_file = None):
     if dump_to_file is not None:
         assert isinstance(dump_to_file, str)
         with open(dump_to_file, "w") as f:
-            f.write(result)
+            f.write(result.encode("utf-8"))
     
     make_report_from_json_string(result)
     
