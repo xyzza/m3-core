@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.encoding import is_protected_type, smart_unicode
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import simplejson
+from django.core import serializers
 import datetime
 import os
 import zipfile
@@ -14,6 +15,13 @@ import tempfile
 
 
 #============================ ЛОГИКА ===============================
+
+DEFAULT_REPLICA_FIELD = 'replica'
+DEFAULT_CREATE_FIELD  = 'created'
+DEFAULT_MODIFY_FIELD  = 'modified'
+
+def get_filename_for_model(model_class):
+    return model_class._meta.app_label + '.' + model_class._meta.module_name + '.json'
 
 class SerializationStream(object):
     def __init__(self, filename, model_type):
@@ -60,10 +68,11 @@ class SerializationStream(object):
                 related = getattr(related, field.rel.field_name)
         self._fields[field.name] = smart_unicode(related, strings_only=True)
     
-    def write_object(self, obj):
+    def write_object(self, obj, is_related_object):
         '''
         Записывает объект в файл выгрузки
         @param obj: Объект потомок models.Model
+        @param is_related_object: Флаг того что объект зависимый
         '''
         assert isinstance(obj, self._model_type)
         if obj.id in self._saved_objects:
@@ -72,6 +81,7 @@ class SerializationStream(object):
         # Не забыть запятую
         if not self._first:
             self._file.write(',\n')
+        self._first = False
         
         # Переводим сериализуемые поля объекта в словарь
         self._fields = {}
@@ -84,10 +94,14 @@ class SerializationStream(object):
                     self._handle_fk_field(obj, field, related_objects)
         for field in obj._meta.many_to_many:
             if field.serialize:
-                    self._handle_m2m_field(obj, field, related_objects)
+                self._handle_m2m_field(obj, field, related_objects)
+        
+        # Флаг того что объект зависимый и модифицированный
+        if is_related_object is not None:
+            self._fields["__modify"] = int(is_related_object)
         
         self._file.write('"%s": ' % obj.id)
-        simplejson.dump(self._fields, self._file, cls = DjangoJSONEncoder, indent = 4)    
+        simplejson.dump(self._fields, self._file, cls = DjangoJSONEncoder, indent = 4, ensure_ascii = False)    
         self._saved_objects.append(obj.id)
         
         return related_objects
@@ -97,39 +111,131 @@ class SerializationStream(object):
         self._file.write('}')
         self._file.close()
 
-class WriteController:
-    def __init__(self, import_file):
-        self._zip_file = zipfile.ZipFile(import_file, 'w', zipfile.ZIP_DEFLATED)
+class WriteController(object):
+    def __init__(self, export_file, managed_models, last_sync_time):
+        self._zip_file = zipfile.ZipFile(export_file, 'w', zipfile.ZIP_DEFLATED)
         self._stream_pool = {}
         self._temp_dir = tempfile.mkdtemp()
+        self._managed_models = managed_models
+        self._last_sync_time = last_sync_time
+        
+    def _is_related_object(self, obj):
+        ''' 
+        Зависимым объект считается если он не указан явно в managed_models
+        Возвращает None - не зависимый, False - зав. немодиф, True - зав. модиф
+        '''
+        if obj.__class__ in self._managed_models.keys():
+            return
+        if getattr(obj, DEFAULT_MODIFY_FIELD) >= self._last_sync_time:
+            return True
+        else:
+            return False
         
     def write_object(self, obj):
         '''
-        
-        @param obj:
+        Записывает объект в один из файлов выгрузки, соответствующий приложению и имени модели.
+        @param obj: Объект потомок models.Model
         '''
         model_type = obj.__class__
         # Получаем файловый поток для класса модели
         if not self._stream_pool.has_key(model_type):
-            filename = os.path.join(self._temp_dir, model_type.__name__ + '.json')
+            filename = get_filename_for_model(obj)
+            filename = os.path.join(self._temp_dir, filename)
             stream = SerializationStream(filename, model_type)
             self._stream_pool[model_type] = stream
         else:
             stream = self._stream_pool[model_type]
             
-        related_objects = stream.write_object(obj)
+        related_objects = stream.write_object(obj, self._is_related_object())
         for rel_obj in related_objects:
             self.write_object(rel_obj)
-            
-    def pack(self):        
-        # Закрываем открытые файлы
+    
+    def pack(self):
+        ''' Запаковывает файлы выгрузки в zip архив '''
         for stream in self._stream_pool.values():
             stream.close()
             self._zip_file.write(stream.filename, os.path.basename(stream.filename))
             os.remove(stream.filename)
         
+class ReadController(object):
+    def __init__(self, import_file):
+        # Распаковываем во временную папку
+        self.temp_dir = tempfile.mkdtemp()
+        arch = zipfile.ZipFile(import_file)
+        arch.extractall(self.temp_dir)
+        #
+        self._objects_pool = {}
+        
+    def close(self):
+        # Удаляем мусор после себя
+        for filename in self.arch.namelist():
+            os.remove(os.path.join(self.temp_dir, filename))
+    
+    def get_stream_for_type(self, type):
+        model_class = type
+        #if isinstance(type, str):
+        #    model_class = models.get_model()
+        
+        if self._objects_pool.has_key(model_class):
+            return self._objects_pool[model_class]
+        else:
+            filename = get_filename_for_model(model_class)
+            file = open(os.path.join(self.temp_dir, filename), "r")
+            objects = simplejson.load(file)
+            file.close()
+            self._objects_pool[model_class] = objects
+            return objects
+            
+    
+    def get_fields_for_object(self, type, pk):
+        return self.get_stream_for_type(type)[str(pk)]
+    
+    def import_object(self, model_type, in_obj, options):
+        '''
+        3. Записываем
+        '''
+        # Определяем есть в базе уже модель такого типа с таким же кодом репликации
+        # если да, то используем ее для перезаписи, иначе создаем новую
+        model = model_type;
+        repl_code_field = options[0]
+        import_repl_code = in_obj[repl_code_field]
+        kwargs = {repl_code_field: import_repl_code}
+        try:
+            out_obj = model.objects.get(**kwargs)
+        except:
+            out_obj = model()
+        
+        # Простые поля заполняем исходя из значений. Для ссылочных полей сначала загружаем зависимые объекты
+        mod_time_name = options[1]
+        for field in out_obj._meta.local_fields:
+            if field.serialize:
+                field_name = field.name
+                # Поле со штампом модификации не изменяем
+                if field_name == mod_time_name:
+                    continue
+                if field.rel is None:
+                    # Можно просто присвоить
+                    value = field.to_python(in_obj[field_name])
+                    setattr(out_obj, field_name, value)
+                else:
+                    # Нужно присвоить соответствующий экземпляр
+                    related_type = field.rel.to
+                    related_in_obj = self.get_fields_for_object(related_type, in_obj[field_name])
+                    value = self.import_object(related_type, related_in_obj, options)
+                    setattr(out_obj, field_name, value)
+        # Много-ко-многим идут сами по себе
+        for field in out_obj._meta.many_to_many:
+            if field.serialize:
+                # Присвоить все экземпляры разом
+                pass
+                    
+        # Записываем
+        out_obj.save()
+        
+        return out_obj
+    
 
-class BaseReplication:
+class BaseReplication(object):
     '''
     Базовый класс для импорта и экспорта файлов репликаций.
     
@@ -143,15 +249,28 @@ class BaseReplication:
             Если уже есть с таким же кодом репликации - перезаписываем, 
             иначе создаем новую запись
         '''
-        pass
-    
+        
+        rc = ReadController(import_filename)
+        
+        # 
+        for model_type, options in self.managed_models.items():
+            items = rc.get_stream_for_type(model_type)
+            for dict_object in items.itervalues():
+                rc.import_object(model_type, dict_object, options)
+        
+        rc.close()
+        
         
     def do_export(self, export_filename, last_sync_time):
-        '''  '''
+        '''
+        
+        @param export_filename:
+        @param last_sync_time:
+        '''
         assert len(self.managed_models) > 0, u"Ни одна модель не указана в managed_models"
         assert isinstance(last_sync_time, datetime.datetime), u"last_sync_time должен быть типа datetime"
         
-        writer = WriteController(export_filename)
+        writer = WriteController(export_filename, self.managed_models, last_sync_time)
         kwargs = {}
         # Проходим все указанные модели
         for model_type, options in self.managed_models.items():
