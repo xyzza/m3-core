@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 from django.forms.formsets import ManagementForm
-﻿#coding:utf-8
 
 # --------------------------------------------------
 # Классы, обслуживающие процесс миграции базы данных
