@@ -18,9 +18,11 @@ import tempfile
 
 DEFAULT_REPLICA_FIELD = 'replica'
 DEFAULT_CREATE_FIELD  = 'created'
-DEFAULT_MODIFY_FIELD  = 'modified'
+DEFAULT_MODIFY_FIELD  = 'mod_time'
+JSON_MODIFY_ATTRIBUTE = '__modify'
 
 def get_filename_for_model(model_class):
+    ''' Возвращает имя JSON файла для класса модели '''
     return model_class._meta.app_label + '.' + model_class._meta.module_name + '.json'
 
 class SerializationStream(object):
@@ -98,10 +100,12 @@ class SerializationStream(object):
         
         # Флаг того что объект зависимый и модифицированный
         if is_related_object is not None:
-            self._fields["__modify"] = int(is_related_object)
+            self._fields[JSON_MODIFY_ATTRIBUTE] = int(is_related_object)
         
         self._file.write('"%s": ' % obj.id)
-        simplejson.dump(self._fields, self._file, cls = DjangoJSONEncoder, indent = 4, ensure_ascii = False)    
+        # Напрямую писать нельзя! Связано с кодировкой консоли.
+        ser_str = simplejson.dumps(self._fields, cls = DjangoJSONEncoder, indent = 4, ensure_ascii = False)
+        self._file.write(ser_str.encode("utf-8"))
         self._saved_objects.append(obj.id)
         
         return related_objects
@@ -146,7 +150,7 @@ class WriteController(object):
         else:
             stream = self._stream_pool[model_type]
             
-        related_objects = stream.write_object(obj, self._is_related_object())
+        related_objects = stream.write_object(obj, self._is_related_object(obj))
         for rel_obj in related_objects:
             self.write_object(rel_obj)
     
@@ -161,10 +165,11 @@ class ReadController(object):
     def __init__(self, import_file):
         # Распаковываем во временную папку
         self.temp_dir = tempfile.mkdtemp()
-        arch = zipfile.ZipFile(import_file)
-        arch.extractall(self.temp_dir)
+        self.arch = zipfile.ZipFile(import_file)
+        self.arch.extractall(self.temp_dir)
         #
         self._objects_pool = {}
+        self._imported_objects = {}
         
     def close(self):
         # Удаляем мусор после себя
@@ -188,22 +193,37 @@ class ReadController(object):
             
     
     def get_fields_for_object(self, type, pk):
+        ''' Возвращает словарь с полями объекта извлеченные по типу и первичному ключу '''
         return self.get_stream_for_type(type)[str(pk)]
     
-    def import_object(self, model_type, in_obj, options):
+    def import_object(self, model_type, obj_dict, options):
         '''
-        3. Записываем
+        
         '''
+        model = model_type;
+        # Проверяем, был ли этот объект уже импортирован?
+        #cache = self._imported_objects.get(model_type, None)
+        #if cache is not None:
+            
+        
         # Определяем есть в базе уже модель такого типа с таким же кодом репликации
         # если да, то используем ее для перезаписи, иначе создаем новую
-        model = model_type;
         repl_code_field = options[0]
-        import_repl_code = in_obj[repl_code_field]
+        import_repl_code = obj_dict[repl_code_field]
         kwargs = {repl_code_field: import_repl_code}
+        already_exist = False
         try:
             out_obj = model.objects.get(**kwargs)
+            already_exist = True
         except:
-            out_obj = model()
+            out_obj = model() 
+        
+        # Если объект уже существует в базе
+        if already_exist:
+            related_flag = obj_dict.get(JSON_MODIFY_ATTRIBUTE, -1)
+            # И объект зависимый, то переписывать его можно только если он модифицирован
+            if related_flag == 0:
+                return out_obj
         
         # Простые поля заполняем исходя из значений. Для ссылочных полей сначала загружаем зависимые объекты
         mod_time_name = options[1]
@@ -215,22 +235,36 @@ class ReadController(object):
                     continue
                 if field.rel is None:
                     # Можно просто присвоить
-                    value = field.to_python(in_obj[field_name])
+                    value = field.to_python(obj_dict[field_name])
                     setattr(out_obj, field_name, value)
                 else:
                     # Нужно присвоить соответствующий экземпляр
                     related_type = field.rel.to
-                    related_in_obj = self.get_fields_for_object(related_type, in_obj[field_name])
-                    value = self.import_object(related_type, related_in_obj, options)
+                    related_obj_dict = self.get_fields_for_object(related_type, obj_dict[field_name])
+                    value = self.import_object(related_type, related_obj_dict, options)
                     setattr(out_obj, field_name, value)
-        # Много-ко-многим идут сами по себе
+                    
+        out_obj.save()
+        
+        # Много-ко-многим идут сами по себе + нужно чтобы объект был сохранен
+        have_m2m = False
         for field in out_obj._meta.many_to_many:
             if field.serialize:
-                # Присвоить все экземпляры разом
-                pass
-                    
-        # Записываем
-        out_obj.save()
+                field_name = field.name
+                related_type = field.rel.to
+                # Сериализованное M2M значение представляет собой список первичных ключей,
+                # но т.к. мы оперируем ключами чужой базы в нашей они будут другими
+                # По ходу обработки зависимых объектов будем присваивать новые ключи
+                new_pkeys = []
+                for pk in field.to_python(obj_dict[field_name]):
+                    related_obj_dict = self.get_fields_for_object(related_type, pk)
+                    value = self.import_object(related_type, related_obj_dict, options)
+                    new_pkeys.append(value)
+                setattr(out_obj, field_name, new_pkeys)
+                have_m2m = True
+        # Записываем опять
+        if have_m2m:
+            out_obj.save()
         
         return out_obj
     
@@ -255,7 +289,7 @@ class BaseReplication(object):
         # 
         for model_type, options in self.managed_models.items():
             items = rc.get_stream_for_type(model_type)
-            for dict_object in items.itervalues():
+            for dict_object in items.values():
                 rc.import_object(model_type, dict_object, options)
         
         rc.close()
@@ -263,7 +297,9 @@ class BaseReplication(object):
         
     def do_export(self, export_filename, last_sync_time):
         '''
-        
+        Выгружает объекты указанные в словаре managed_models с условием что их время модификации >= last_sync_time
+        Тянет с собой все зависимые объекты. Каждый зависимый объект помечается флагом модифицированности.
+        Каждому классу модели соответствует свой JSON файл, которые потом запаковываются в ZIP архив.
         @param export_filename:
         @param last_sync_time:
         '''
