@@ -4,15 +4,12 @@ from django.db import models
 from django.utils.encoding import is_protected_type, smart_unicode
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import simplejson
-from django.core import serializers
 import datetime
 import os
 import zipfile
 import tempfile
 
-#========================== ИСКЛЮЧЕНИЯ =============================
-
-
+__all__ = ['BaseReplication']
 
 #============================ ЛОГИКА ===============================
 
@@ -196,15 +193,24 @@ class ReadController(object):
         ''' Возвращает словарь с полями объекта извлеченные по типу и первичному ключу '''
         return self.get_stream_for_type(type)[str(pk)]
     
-    def import_object(self, model_type, obj_dict, options):
+    def import_object(self, model_type, obj_dict, pk, options):
         '''
-        
+        При необходимости импортирует объект в текущую БД.
+        Возвращает импортированный объект или уже существующий объект
+        @param model_type: Класс модели объекта
+        @param obj_dict: Словарь со значениями полей импортируемого объекта
+        @param pk: Первичный ключ в импорте
+        @param options: Опции полей заданные в классе реплики
         '''
         model = model_type;
         # Проверяем, был ли этот объект уже импортирован?
-        #cache = self._imported_objects.get(model_type, None)
-        #if cache is not None:
-            
+        #cached_pkeys = self._imported_objects.get(model_type, None)
+        #if cached_pkeys is not None:
+        #    cached_obj = cached_pkeys.get(pk, None)
+        #    if cached_obj is not None:
+        #        return cached_obj
+        #else:
+        #    self._imported_objects[model_type] = {}
         
         # Определяем есть в базе уже модель такого типа с таким же кодом репликации
         # если да, то используем ее для перезаписи, иначе создаем новую
@@ -240,8 +246,9 @@ class ReadController(object):
                 else:
                     # Нужно присвоить соответствующий экземпляр
                     related_type = field.rel.to
-                    related_obj_dict = self.get_fields_for_object(related_type, obj_dict[field_name])
-                    value = self.import_object(related_type, related_obj_dict, options)
+                    pk = obj_dict[field_name]
+                    related_obj_dict = self.get_fields_for_object(related_type, pk)
+                    value = self.import_object(related_type, related_obj_dict, pk, options)
                     setattr(out_obj, field_name, value)
                     
         out_obj.save()
@@ -258,13 +265,16 @@ class ReadController(object):
                 new_pkeys = []
                 for pk in field.to_python(obj_dict[field_name]):
                     related_obj_dict = self.get_fields_for_object(related_type, pk)
-                    value = self.import_object(related_type, related_obj_dict, options)
+                    value = self.import_object(related_type, related_obj_dict, pk, options)
                     new_pkeys.append(value)
                 setattr(out_obj, field_name, new_pkeys)
                 have_m2m = True
         # Записываем опять
         if have_m2m:
             out_obj.save()
+        
+        # Добавляем результат в кэш
+        #self._imported_objects[model_type][pk] = out_obj
         
         return out_obj
     
@@ -289,8 +299,8 @@ class BaseReplication(object):
         # 
         for model_type, options in self.managed_models.items():
             items = rc.get_stream_for_type(model_type)
-            for dict_object in items.values():
-                rc.import_object(model_type, dict_object, options)
+            for pk, dict_object in items.items():
+                rc.import_object(model_type, dict_object, pk, options)
         
         rc.close()
         
@@ -321,4 +331,7 @@ class BaseReplication(object):
                 writer.write_object(obj)
             
         writer.pack()        
+
+#TODO: Профайлить код на наличие узких мест
+#TODO: Прикрутить часто встречающиеся исключения
 
