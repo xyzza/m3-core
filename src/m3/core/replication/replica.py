@@ -203,41 +203,61 @@ class ExportResult(object):
         return result
         
 #============================= ИМПОРТ ============================
-        
-class ReadController(object):
-    def __init__(self, import_file):
+
+class ImportResult(object):
+    ''' Класс содержит результаты импорта объетов в БД '''
+    def __init__(self):
+        # Созданные заного объекты
+        self.created = 0
+        # Перезаписанные объекты
+        self.modifyed = 0
+    
+    def add(self, already_exists):
+        if already_exists:
+            self.modifyed += 1
+        else:
+            self.created += 1
+
+class ImportController(object):
+    def __init__(self, import_file, managed_models):
         # Распаковываем во временную папку
         self.temp_dir = tempfile.mkdtemp()
         self.arch = zipfile.ZipFile(import_file)
         self.arch.extractall(self.temp_dir)
         #
-        self._objects_pool = {}
-        self._imported_objects = {}
+        self._objects_pool = self._imported_objects = {}
+        self.managed_models = managed_models
+        self.result = ImportResult()
         
     def close(self):
         # Удаляем мусор после себя
         for filename in self.arch.namelist():
             os.remove(os.path.join(self.temp_dir, filename))
     
-    def get_stream_for_type(self, type):
-        model_class = type
-        #if isinstance(type, str):
-        #    model_class = models.get_model()
-        
-        if self._objects_pool.has_key(model_class):
-            return self._objects_pool[model_class]
+    def get_stream_for_type(self, model_type):
+        ''' Возвращает десериализованное содержимое файла для заданного класса модели '''    
+        if self._objects_pool.has_key(model_type):
+            return self._objects_pool[model_type]
         else:
-            filename = get_filename_for_model(model_class)
+            filename = get_filename_for_model(model_type)
             file = open(os.path.join(self.temp_dir, filename), "r")
             objects = simplejson.load(file)
             file.close()
-            self._objects_pool[model_class] = objects
+            self._objects_pool[model_type] = objects
             return objects
             
     
     def get_fields_for_object(self, type, pk):
         ''' Возвращает словарь с полями объекта извлеченные по типу и первичному ключу '''
         return self.get_stream_for_type(type)[str(pk)]
+    
+    def get_replica_field_name(self, model_type):
+        ''' Возвращает код репликации для модели. Для зависимых моделей он не задан явно и берется из константы '''
+        replica = self.managed_models.get(model_type, None)
+        if replica == None:
+            return DEFAULT_REPLICA_FIELD
+        else:
+            return replica[0]
     
     def import_object(self, model_type, obj_dict, pk, options):
         '''
@@ -258,9 +278,9 @@ class ReadController(object):
         #else:
         #    self._imported_objects[model_type] = {}
         
+        repl_code_field = self.get_replica_field_name(model_type) 
         # Определяем есть в базе уже модель такого типа с таким же кодом репликации
         # если да, то используем ее для перезаписи, иначе создаем новую
-        repl_code_field = options[0]
         import_repl_code = obj_dict[repl_code_field]
         kwargs = {repl_code_field: import_repl_code}
         already_exist = False
@@ -322,6 +342,8 @@ class ReadController(object):
         # Добавляем результат в кэш
         #self._imported_objects[model_type][pk] = out_obj
         
+        self.result.add(already_exist)
+        
         return out_obj
 
 
@@ -330,13 +352,8 @@ class BaseReplication(object):
     managed_models = {}
     
     def do_import(self, import_filename):
-        '''
-        Распаковываем содержимое в файла
-        Для каждой записи:
-            Если уже есть с таким же кодом репликации - перезаписываем, 
-            иначе создаем новую запись
-        '''
-        rc = ReadController(import_filename)
+        ''' Импортирует объекты из файла экспорта в БД. '''
+        rc = ImportController(import_filename, self.managed_models)
         # 
         for model_type, options in self.managed_models.items():
             items = rc.get_stream_for_type(model_type)
@@ -344,7 +361,7 @@ class BaseReplication(object):
                 rc.import_object(model_type, dict_object, pk, options)
         
         rc.close()
-        
+        return rc.result
         
     def do_export(self, export_filename, last_sync_time):
         '''
@@ -376,6 +393,4 @@ class BaseReplication(object):
 
 #TODO: Профайлить код на наличие узких мест
 #TODO: Прикрутить часто встречающиеся исключения
-#TODO: Отладочный режим, в котором будет возвращаться класс с результатом работы.
-#TODO: Не отслеживаются обратные зависимости!!!
 
