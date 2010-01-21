@@ -285,12 +285,9 @@ class ReportGenerator{
 				String key = cell_text.substring(start_tag + 1, end_tag);
 				String tag = cell_text.substring(start_tag, end_tag + 1);
 				Object value = obj.get(key);
-				// Значение для переменной не найдено
+				// Значение для переменной не найдено, значит разработчики так и задумали (оптимистично)
 				if (value == null)
-					if (this.ignore_missing_variables)
-						value = cell_text;
-					else
-						throw new Exception("Not found value for key " + key);
+					value = "";
 				cell_text = cell_text.replace(tag, value.toString());
 				outCell.setCellValue(cell_text);
 			}
@@ -328,19 +325,11 @@ class ReportGenerator{
 		return merged_cells;
 	}
 	
-	boolean ignore_missing_variables = false;
-	
 	/**
 	 * Генерация отчета.
 	 * @throws Exception
 	 */
 	public void generate() throws Exception {
-		// Глобальные опции
-		Object value = root.get("IGNORE_MISSING_VARIABLES");
-		if (value != null){
-			this.ignore_missing_variables = Boolean.parseBoolean(value.toString());
-		}
-		
 		Range range = new Range();
 		range.start_row = in_sheet.getFirstRowNum();
 		range.end_row = in_sheet.getLastRowNum();
