@@ -96,6 +96,9 @@ class BaseReport:
         # Создаем абсолютные пути
         obj["TEMPLATE_FILE_PATH"] = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.template_name)
         obj["OUTPUT_FILE_PATH"]   = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.result_name)
+        if settings.DEBUG:
+            # В режиме отладки не ругаемся на недостающие переменные
+            obj["IGNORE_MISSING_VARIABLES"] = "True"
         
         make_report_from_object(obj)
     
