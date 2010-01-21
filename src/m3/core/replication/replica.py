@@ -9,24 +9,33 @@ import os
 import zipfile
 import tempfile
 
-__all__ = ['BaseReplication']
+__all__ = ['BaseReplication', 'ExportResult', 'ImportResult']
 
-#============================ ЛОГИКА ===============================
+#============================ КОНСТАНТЫ ===============================
 
 DEFAULT_REPLICA_FIELD = 'replica'
 DEFAULT_CREATE_FIELD  = 'created'
 DEFAULT_MODIFY_FIELD  = 'mod_time'
 JSON_MODIFY_ATTRIBUTE = '__modify'
 
+#======================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ======================
+
 def get_filename_for_model(model_class):
     ''' Возвращает имя JSON файла для класса модели '''
     return model_class._meta.app_label + '.' + model_class._meta.module_name + '.json'
 
+#=========================== ЭКСПОРТ ==================================
+
 class SerializationStream(object):
     def __init__(self, filename, model_type):
+        '''
+        @param filename: Имя файла в который будут писаться объекты
+        @param model_type: Класс модели объектов
+        '''
         self._model_type = model_type
-        self._saved_objects = []
+        self._saved_objects = set()
         self._first = True
+        self.result = ExportResult()
         self.filename = filename
         self._file = open(filename, "w")
         self._file.write('{')
@@ -103,8 +112,9 @@ class SerializationStream(object):
         # Напрямую писать нельзя! Связано с кодировкой консоли.
         ser_str = simplejson.dumps(self._fields, cls = DjangoJSONEncoder, indent = 4, ensure_ascii = False)
         self._file.write(ser_str.encode("utf-8"))
-        self._saved_objects.append(obj.id)
         
+        self.result.add(is_related_object)
+        self._saved_objects.add(obj.id)
         return related_objects
     
     def close(self):
@@ -112,11 +122,12 @@ class SerializationStream(object):
         self._file.write('}')
         self._file.close()
 
-class WriteController(object):
+
+class ExportController(object):
     def __init__(self, export_file, managed_models, last_sync_time):
         self._zip_file = zipfile.ZipFile(export_file, 'w', zipfile.ZIP_DEFLATED)
-        self._stream_pool = {}
         self._temp_dir = tempfile.mkdtemp()
+        self._stream_pool = {}
         self._managed_models = managed_models
         self._last_sync_time = last_sync_time
         
@@ -157,6 +168,41 @@ class WriteController(object):
             stream.close()
             self._zip_file.write(stream.filename, os.path.basename(stream.filename))
             os.remove(stream.filename)
+                
+    def get_result(self):
+        ''' Возвращает список объектов которые должны были попасть в выгрузку '''
+        result = ExportResult()
+        for stream in self._stream_pool.values():
+            result += stream.result
+        return result
+
+
+class ExportResult(object):
+    ''' Класс содержит результаты экспорта объектов из БД '''
+    def __init__(self):
+        # Количество объектов описанных в классе реплики и отобранных по условию >= last_sync_time
+        self.changed = 0
+        # Количество зависимых и измененных экспортируемых объектов
+        self.related = 0
+        # Количество зависимых и неизмененных экспортируемых объектов 
+        self.referenced = 0
+        
+    def add(self, is_related_object):
+        if is_related_object == None:
+            self.changed += 1
+        elif is_related_object == True:
+            self.related += 1
+        elif is_related_object == False:
+            self.referenced += 1
+            
+    def __add__(a, b):
+        result = ExportResult()
+        result.changed = a.changed + b.changed
+        result.related = a.related + b.related
+        result.referenced = a.referenced + b.referenced
+        return result
+        
+#============================= ИМПОРТ ============================
         
 class ReadController(object):
     def __init__(self, import_file):
@@ -277,13 +323,10 @@ class ReadController(object):
         #self._imported_objects[model_type][pk] = out_obj
         
         return out_obj
-    
+
 
 class BaseReplication(object):
-    '''
-    Базовый класс для импорта и экспорта файлов репликаций.
-    
-    '''
+    ''' Базовый класс для импорта и экспорта файлов репликаций. '''
     managed_models = {}
     
     def do_import(self, import_filename):
@@ -293,9 +336,7 @@ class BaseReplication(object):
             Если уже есть с таким же кодом репликации - перезаписываем, 
             иначе создаем новую запись
         '''
-        
         rc = ReadController(import_filename)
-        
         # 
         for model_type, options in self.managed_models.items():
             items = rc.get_stream_for_type(model_type)
@@ -316,7 +357,7 @@ class BaseReplication(object):
         assert len(self.managed_models) > 0, u"Ни одна модель не указана в managed_models"
         assert isinstance(last_sync_time, datetime.datetime), u"last_sync_time должен быть типа datetime"
         
-        writer = WriteController(export_filename, self.managed_models, last_sync_time)
+        writer = ExportController(export_filename, self.managed_models, last_sync_time)
         kwargs = {}
         # Проходим все указанные модели
         for model_type, options in self.managed_models.items():
@@ -330,8 +371,11 @@ class BaseReplication(object):
             for obj in objects:
                 writer.write_object(obj)
             
-        writer.pack()        
+        writer.pack()
+        return writer.get_result()
 
 #TODO: Профайлить код на наличие узких мест
 #TODO: Прикрутить часто встречающиеся исключения
+#TODO: Отладочный режим, в котором будет возвращаться класс с результатом работы.
+#TODO: Не отслеживаются обратные зависимости!!!
 
