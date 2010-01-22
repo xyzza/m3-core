@@ -9,24 +9,33 @@ import os
 import zipfile
 import tempfile
 
-__all__ = ['BaseReplication']
+__all__ = ['BaseReplication', 'ExportResult', 'ImportResult']
 
-#============================ ЛОГИКА ===============================
+#============================ КОНСТАНТЫ ===============================
 
 DEFAULT_REPLICA_FIELD = 'replica'
 DEFAULT_CREATE_FIELD  = 'created'
 DEFAULT_MODIFY_FIELD  = 'mod_time'
 JSON_MODIFY_ATTRIBUTE = '__modify'
 
+#======================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ======================
+
 def get_filename_for_model(model_class):
     ''' Возвращает имя JSON файла для класса модели '''
     return model_class._meta.app_label + '.' + model_class._meta.module_name + '.json'
 
+#=========================== ЭКСПОРТ ==================================
+
 class SerializationStream(object):
     def __init__(self, filename, model_type):
+        '''
+        @param filename: Имя файла в который будут писаться объекты
+        @param model_type: Класс модели объектов
+        '''
         self._model_type = model_type
-        self._saved_objects = []
+        self._saved_objects = set()
         self._first = True
+        self.result = ExportResult()
         self.filename = filename
         self._file = open(filename, "w")
         self._file.write('{')
@@ -103,8 +112,9 @@ class SerializationStream(object):
         # Напрямую писать нельзя! Связано с кодировкой консоли.
         ser_str = simplejson.dumps(self._fields, cls = DjangoJSONEncoder, indent = 4, ensure_ascii = False)
         self._file.write(ser_str.encode("utf-8"))
-        self._saved_objects.append(obj.id)
         
+        self.result.add(is_related_object)
+        self._saved_objects.add(obj.id)
         return related_objects
     
     def close(self):
@@ -112,11 +122,12 @@ class SerializationStream(object):
         self._file.write('}')
         self._file.close()
 
-class WriteController(object):
+
+class ExportController(object):
     def __init__(self, export_file, managed_models, last_sync_time):
         self._zip_file = zipfile.ZipFile(export_file, 'w', zipfile.ZIP_DEFLATED)
-        self._stream_pool = {}
         self._temp_dir = tempfile.mkdtemp()
+        self._stream_pool = {}
         self._managed_models = managed_models
         self._last_sync_time = last_sync_time
         
@@ -157,35 +168,82 @@ class WriteController(object):
             stream.close()
             self._zip_file.write(stream.filename, os.path.basename(stream.filename))
             os.remove(stream.filename)
+                
+    def get_result(self):
+        ''' Возвращает список объектов которые должны были попасть в выгрузку '''
+        result = ExportResult()
+        for stream in self._stream_pool.values():
+            result += stream.result
+        return result
+
+
+class ExportResult(object):
+    ''' Класс содержит результаты экспорта объектов из БД '''
+    def __init__(self):
+        # Количество объектов описанных в классе реплики и отобранных по условию >= last_sync_time
+        self.changed = 0
+        # Количество зависимых и измененных экспортируемых объектов
+        self.related = 0
+        # Количество зависимых и неизмененных экспортируемых объектов 
+        self.referenced = 0
         
-class ReadController(object):
-    def __init__(self, import_file):
+    def add(self, is_related_object):
+        if is_related_object == None:
+            self.changed += 1
+        elif is_related_object == True:
+            self.related += 1
+        elif is_related_object == False:
+            self.referenced += 1
+            
+    def __add__(a, b):
+        result = ExportResult()
+        result.changed = a.changed + b.changed
+        result.related = a.related + b.related
+        result.referenced = a.referenced + b.referenced
+        return result
+        
+#============================= ИМПОРТ ============================
+
+class ImportResult(object):
+    ''' Класс содержит результаты импорта объетов в БД '''
+    def __init__(self):
+        # Созданные заного объекты
+        self.created = 0
+        # Перезаписанные объекты
+        self.modifyed = 0
+    
+    def add(self, already_exists):
+        if already_exists:
+            self.modifyed += 1
+        else:
+            self.created += 1
+
+class ImportController(object):
+    def __init__(self, import_file, managed_models):
         # Распаковываем во временную папку
         self.temp_dir = tempfile.mkdtemp()
         self.arch = zipfile.ZipFile(import_file)
         self.arch.extractall(self.temp_dir)
         #
-        self._objects_pool = {}
-        self._imported_objects = {}
+        self._objects_pool = self._imported_objects = {}
+        self.managed_models = managed_models
+        self.result = ImportResult()
         
     def close(self):
         # Удаляем мусор после себя
         for filename in self.arch.namelist():
             os.remove(os.path.join(self.temp_dir, filename))
     
-    def get_stream_for_type(self, type):
-        model_class = type
-        #if isinstance(type, str):
-        #    model_class = models.get_model()
-        
-        if self._objects_pool.has_key(model_class):
-            return self._objects_pool[model_class]
+    def get_stream_for_type(self, model_type):
+        ''' Возвращает десериализованное содержимое файла для заданного класса модели '''    
+        if self._objects_pool.has_key(model_type):
+            return self._objects_pool[model_type]
         else:
-            filename = get_filename_for_model(model_class)
+            filename = get_filename_for_model(model_type)
             file = open(os.path.join(self.temp_dir, filename), "r")
             objects = simplejson.load(file)
             file.close()
-            self._objects_pool[model_class] = objects
+            self._objects_pool[model_type] = objects
             return objects
             
     
@@ -193,7 +251,23 @@ class ReadController(object):
         ''' Возвращает словарь с полями объекта извлеченные по типу и первичному ключу '''
         return self.get_stream_for_type(type)[str(pk)]
     
-    def import_object(self, model_type, obj_dict, pk, options):
+    def get_replica_field_name(self, model_type):
+        ''' Возвращает код репликации для модели. Для зависимых моделей он не задан явно и берется из константы '''
+        options = self.managed_models.get(model_type, None)
+        if options == None:
+            return DEFAULT_REPLICA_FIELD
+        else:
+            return options[0]
+    
+    def get_mod_time_field_name(self, model_type):
+        ''' Возвращает имя поля последней модификации для заданного класса модели '''
+        options = self.managed_models.get(model_type, None)
+        if options == None:
+            return DEFAULT_MODIFY_FIELD
+        else:
+            return options[1]
+    
+    def import_object(self, model_type, obj_dict, pk):
         '''
         При необходимости импортирует объект в текущую БД.
         Возвращает импортированный объект или уже существующий объект
@@ -212,9 +286,9 @@ class ReadController(object):
         #else:
         #    self._imported_objects[model_type] = {}
         
+        repl_code_field = self.get_replica_field_name(model_type) 
         # Определяем есть в базе уже модель такого типа с таким же кодом репликации
         # если да, то используем ее для перезаписи, иначе создаем новую
-        repl_code_field = options[0]
         import_repl_code = obj_dict[repl_code_field]
         kwargs = {repl_code_field: import_repl_code}
         already_exist = False
@@ -232,7 +306,7 @@ class ReadController(object):
                 return out_obj
         
         # Простые поля заполняем исходя из значений. Для ссылочных полей сначала загружаем зависимые объекты
-        mod_time_name = options[1]
+        mod_time_name = self.get_mod_time_field_name(model_type)
         for field in out_obj._meta.local_fields:
             if field.serialize:
                 field_name = field.name
@@ -248,7 +322,7 @@ class ReadController(object):
                     related_type = field.rel.to
                     pk = obj_dict[field_name]
                     related_obj_dict = self.get_fields_for_object(related_type, pk)
-                    value = self.import_object(related_type, related_obj_dict, pk, options)
+                    value = self.import_object(related_type, related_obj_dict, pk)
                     setattr(out_obj, field_name, value)
                     
         out_obj.save()
@@ -265,7 +339,7 @@ class ReadController(object):
                 new_pkeys = []
                 for pk in field.to_python(obj_dict[field_name]):
                     related_obj_dict = self.get_fields_for_object(related_type, pk)
-                    value = self.import_object(related_type, related_obj_dict, pk, options)
+                    value = self.import_object(related_type, related_obj_dict, pk)
                     new_pkeys.append(value)
                 setattr(out_obj, field_name, new_pkeys)
                 have_m2m = True
@@ -276,34 +350,26 @@ class ReadController(object):
         # Добавляем результат в кэш
         #self._imported_objects[model_type][pk] = out_obj
         
+        self.result.add(already_exist)
+        
         return out_obj
-    
+
 
 class BaseReplication(object):
-    '''
-    Базовый класс для импорта и экспорта файлов репликаций.
-    
-    '''
+    ''' Базовый класс для импорта и экспорта файлов репликаций. '''
     managed_models = {}
     
     def do_import(self, import_filename):
-        '''
-        Распаковываем содержимое в файла
-        Для каждой записи:
-            Если уже есть с таким же кодом репликации - перезаписываем, 
-            иначе создаем новую запись
-        '''
-        
-        rc = ReadController(import_filename)
-        
+        ''' Импортирует объекты из файла экспорта в БД. '''
+        rc = ImportController(import_filename, self.managed_models)
         # 
-        for model_type, options in self.managed_models.items():
+        for model_type in self.managed_models.keys():
             items = rc.get_stream_for_type(model_type)
             for pk, dict_object in items.items():
-                rc.import_object(model_type, dict_object, pk, options)
+                rc.import_object(model_type, dict_object, pk)
         
         rc.close()
-        
+        return rc.result
         
     def do_export(self, export_filename, last_sync_time):
         '''
@@ -316,7 +382,7 @@ class BaseReplication(object):
         assert len(self.managed_models) > 0, u"Ни одна модель не указана в managed_models"
         assert isinstance(last_sync_time, datetime.datetime), u"last_sync_time должен быть типа datetime"
         
-        writer = WriteController(export_filename, self.managed_models, last_sync_time)
+        writer = ExportController(export_filename, self.managed_models, last_sync_time)
         kwargs = {}
         # Проходим все указанные модели
         for model_type, options in self.managed_models.items():
@@ -330,7 +396,8 @@ class BaseReplication(object):
             for obj in objects:
                 writer.write_object(obj)
             
-        writer.pack()        
+        writer.pack()
+        return writer.get_result()
 
 #TODO: Профайлить код на наличие узких мест
 #TODO: Прикрутить часто встречающиеся исключения

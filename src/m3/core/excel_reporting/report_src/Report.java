@@ -285,8 +285,9 @@ class ReportGenerator{
 				String key = cell_text.substring(start_tag + 1, end_tag);
 				String tag = cell_text.substring(start_tag, end_tag + 1);
 				Object value = obj.get(key);
+				// Значение для переменной не найдено, значит разработчики так и задумали (оптимистично)
 				if (value == null)
-					throw new Exception("Not found value for key " + key);
+					value = "";
 				cell_text = cell_text.replace(tag, value.toString());
 				outCell.setCellValue(cell_text);
 			}
