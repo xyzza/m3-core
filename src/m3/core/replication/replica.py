@@ -253,13 +253,21 @@ class ImportController(object):
     
     def get_replica_field_name(self, model_type):
         ''' Возвращает код репликации для модели. Для зависимых моделей он не задан явно и берется из константы '''
-        replica = self.managed_models.get(model_type, None)
-        if replica == None:
+        options = self.managed_models.get(model_type, None)
+        if options == None:
             return DEFAULT_REPLICA_FIELD
         else:
-            return replica[0]
+            return options[0]
     
-    def import_object(self, model_type, obj_dict, pk, options):
+    def get_mod_time_field_name(self, model_type):
+        ''' Возвращает имя поля последней модификации для заданного класса модели '''
+        options = self.managed_models.get(model_type, None)
+        if options == None:
+            return DEFAULT_MODIFY_FIELD
+        else:
+            return options[1]
+    
+    def import_object(self, model_type, obj_dict, pk):
         '''
         При необходимости импортирует объект в текущую БД.
         Возвращает импортированный объект или уже существующий объект
@@ -298,7 +306,7 @@ class ImportController(object):
                 return out_obj
         
         # Простые поля заполняем исходя из значений. Для ссылочных полей сначала загружаем зависимые объекты
-        mod_time_name = options[1]
+        mod_time_name = self.get_mod_time_field_name(model_type)
         for field in out_obj._meta.local_fields:
             if field.serialize:
                 field_name = field.name
@@ -314,7 +322,7 @@ class ImportController(object):
                     related_type = field.rel.to
                     pk = obj_dict[field_name]
                     related_obj_dict = self.get_fields_for_object(related_type, pk)
-                    value = self.import_object(related_type, related_obj_dict, pk, options)
+                    value = self.import_object(related_type, related_obj_dict, pk)
                     setattr(out_obj, field_name, value)
                     
         out_obj.save()
@@ -331,7 +339,7 @@ class ImportController(object):
                 new_pkeys = []
                 for pk in field.to_python(obj_dict[field_name]):
                     related_obj_dict = self.get_fields_for_object(related_type, pk)
-                    value = self.import_object(related_type, related_obj_dict, pk, options)
+                    value = self.import_object(related_type, related_obj_dict, pk)
                     new_pkeys.append(value)
                 setattr(out_obj, field_name, new_pkeys)
                 have_m2m = True
@@ -355,10 +363,10 @@ class BaseReplication(object):
         ''' Импортирует объекты из файла экспорта в БД. '''
         rc = ImportController(import_filename, self.managed_models)
         # 
-        for model_type, options in self.managed_models.items():
+        for model_type in self.managed_models.keys():
             items = rc.get_stream_for_type(model_type)
             for pk, dict_object in items.items():
-                rc.import_object(model_type, dict_object, pk, options)
+                rc.import_object(model_type, dict_object, pk)
         
         rc.close()
         return rc.result
