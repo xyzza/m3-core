@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from django.db import models
+from django.db import models, transaction
 from django.utils.encoding import is_protected_type, smart_unicode
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import simplejson
+from django.conf import settings
+import tarfile
 import datetime
 import os
-import zipfile
 import tempfile
 
 __all__ = ['BaseReplication', 'ExportResult', 'ImportResult']
@@ -110,7 +111,10 @@ class SerializationStream(object):
         
         self._file.write('"%s": ' % obj.id)
         # Напрямую писать нельзя! Связано с кодировкой консоли.
-        ser_str = simplejson.dumps(self._fields, cls = DjangoJSONEncoder, indent = 4, ensure_ascii = False)
+        indent = 4
+        if not settings.DEBUG:
+            indent = None
+        ser_str = simplejson.dumps(self._fields, cls = DjangoJSONEncoder, indent = indent, ensure_ascii = False)
         self._file.write(ser_str.encode("utf-8"))
         
         self.result.add(is_related_object)
@@ -125,7 +129,7 @@ class SerializationStream(object):
 
 class ExportController(object):
     def __init__(self, export_file, managed_models, last_sync_time):
-        self._zip_file = zipfile.ZipFile(export_file, 'w', zipfile.ZIP_DEFLATED)
+        self._archive = tarfile.open(export_file, 'w:bz2')
         self._temp_dir = tempfile.mkdtemp()
         self._stream_pool = {}
         self._managed_models = managed_models
@@ -163,11 +167,13 @@ class ExportController(object):
             self.write_object(rel_obj)
     
     def pack(self):
-        ''' Запаковывает файлы выгрузки в zip архив '''
+        ''' Запаковывает файлы выгрузки в tar.bz2 архив и удаляет мусор из временной папки '''
         for stream in self._stream_pool.values():
             stream.close()
-            self._zip_file.write(stream.filename, os.path.basename(stream.filename))
+            self._archive.add(stream.filename, os.path.basename(stream.filename))
             os.remove(stream.filename)
+        self._archive.close()
+        os.removedirs(self._temp_dir)
                 
     def get_result(self):
         ''' Возвращает список объектов которые должны были попасть в выгрузку '''
@@ -221,9 +227,9 @@ class ImportResult(object):
 class ImportController(object):
     def __init__(self, import_file, managed_models):
         # Распаковываем во временную папку
-        self.temp_dir = tempfile.mkdtemp()
-        self.arch = zipfile.ZipFile(import_file)
-        self.arch.extractall(self.temp_dir)
+        self._temp_dir = tempfile.mkdtemp()
+        self._archive = tarfile.open(import_file, 'r:bz2')
+        self._archive.extractall(self._temp_dir)
         #
         self._objects_pool = self._imported_objects = {}
         self.managed_models = managed_models
@@ -231,8 +237,9 @@ class ImportController(object):
         
     def close(self):
         # Удаляем мусор после себя
-        for filename in self.arch.namelist():
-            os.remove(os.path.join(self.temp_dir, filename))
+        for member in self._archive.getmembers():
+            os.remove(os.path.join(self._temp_dir, member.name))
+        os.removedirs(self._temp_dir)
     
     def get_stream_for_type(self, model_type):
         ''' Возвращает десериализованное содержимое файла для заданного класса модели '''    
@@ -240,7 +247,7 @@ class ImportController(object):
             return self._objects_pool[model_type]
         else:
             filename = get_filename_for_model(model_type)
-            file = open(os.path.join(self.temp_dir, filename), "r")
+            file = open(os.path.join(self._temp_dir, filename), "r")
             objects = simplejson.load(file)
             file.close()
             self._objects_pool[model_type] = objects
@@ -359,6 +366,7 @@ class BaseReplication(object):
     ''' Базовый класс для импорта и экспорта файлов репликаций. '''
     managed_models = {}
     
+    @transaction.commit_on_success
     def do_import(self, import_filename):
         ''' Импортирует объекты из файла экспорта в БД. '''
         rc = ImportController(import_filename, self.managed_models)
