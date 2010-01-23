@@ -231,7 +231,8 @@ class ImportController(object):
         self._archive = tarfile.open(import_file, 'r:bz2')
         self._archive.extractall(self._temp_dir)
         #
-        self._objects_pool = self._imported_objects = {}
+        self._objects_pool = {}
+        self._imported_objects_cache = {}
         self.managed_models = managed_models
         self.result = ImportResult()
         
@@ -274,31 +275,31 @@ class ImportController(object):
         else:
             return options[1]
     
-    def import_object(self, model_type, obj_dict, pk):
+    def import_object(self, model_type, pk):
         '''
         При необходимости импортирует объект в текущую БД.
         Возвращает импортированный объект или уже существующий объект
         @param model_type: Класс модели объекта
-        @param obj_dict: Словарь со значениями полей импортируемого объекта
-        @param pk: Первичный ключ в импорте
-        @param options: Опции полей заданные в классе реплики
+        @param pk: Первичный ключ импортируемого объекта
         '''
-        model = model_type;
-        # Проверяем, был ли этот объект уже импортирован?
-        #cached_pkeys = self._imported_objects.get(model_type, None)
-        #if cached_pkeys is not None:
-        #    cached_obj = cached_pkeys.get(pk, None)
-        #    if cached_obj is not None:
-        #        return cached_obj
-        #else:
-        #    self._imported_objects[model_type] = {}
+        # Проверяем, был ли этот объект уже импортирован? Тогда достаем из кеша. 
+        cached_pkeys = self._imported_objects_cache.get(model_type, None)
+        if cached_pkeys is not None:
+            cached_obj = cached_pkeys.get(str(pk), None)
+            if cached_obj is not None:
+                return cached_obj
+        else:
+            self._imported_objects_cache[model_type] = {}
         
-        repl_code_field = self.get_replica_field_name(model_type) 
+        obj_fields = self.get_fields_for_object(model_type, pk)        
+        repl_code_field = self.get_replica_field_name(model_type)
+        
         # Определяем есть в базе уже модель такого типа с таким же кодом репликации
         # если да, то используем ее для перезаписи, иначе создаем новую
-        import_repl_code = obj_dict[repl_code_field]
+        import_repl_code = obj_fields[repl_code_field]
         kwargs = {repl_code_field: import_repl_code}
         already_exist = False
+        model = model_type;
         try:
             out_obj = model.objects.get(**kwargs)
             already_exist = True
@@ -307,7 +308,7 @@ class ImportController(object):
         
         # Если объект уже существует в базе
         if already_exist:
-            related_flag = obj_dict.get(JSON_MODIFY_ATTRIBUTE, -1)
+            related_flag = obj_fields.get(JSON_MODIFY_ATTRIBUTE, -1)
             # И объект зависимый, то переписывать его можно только если он модифицирован
             if related_flag == 0:
                 return out_obj
@@ -322,14 +323,13 @@ class ImportController(object):
                     continue
                 if field.rel is None:
                     # Можно просто присвоить
-                    value = field.to_python(obj_dict[field_name])
+                    value = field.to_python(obj_fields[field_name])
                     setattr(out_obj, field_name, value)
                 else:
                     # Нужно присвоить соответствующий экземпляр
                     related_type = field.rel.to
-                    pk = obj_dict[field_name]
-                    related_obj_dict = self.get_fields_for_object(related_type, pk)
-                    value = self.import_object(related_type, related_obj_dict, pk)
+                    pk = obj_fields[field_name]
+                    value = self.import_object(related_type, pk)
                     setattr(out_obj, field_name, value)
                     
         out_obj.save()
@@ -344,19 +344,17 @@ class ImportController(object):
                 # но т.к. мы оперируем ключами чужой базы в нашей они будут другими
                 # По ходу обработки зависимых объектов будем присваивать новые ключи
                 new_pkeys = []
-                for pk in field.to_python(obj_dict[field_name]):
-                    related_obj_dict = self.get_fields_for_object(related_type, pk)
-                    value = self.import_object(related_type, related_obj_dict, pk)
+                for pk in field.to_python(obj_fields[field_name]):
+                    value = self.import_object(related_type, pk)
                     new_pkeys.append(value)
                 setattr(out_obj, field_name, new_pkeys)
                 have_m2m = True
-        # Записываем опять
+        
         if have_m2m:
             out_obj.save()
         
         # Добавляем результат в кэш
-        #self._imported_objects[model_type][pk] = out_obj
-        
+        self._imported_objects_cache[model_type][pk] = out_obj
         self.result.add(already_exist)
         
         return out_obj
@@ -373,8 +371,8 @@ class BaseReplication(object):
         # 
         for model_type in self.managed_models.keys():
             items = rc.get_stream_for_type(model_type)
-            for pk, dict_object in items.items():
-                rc.import_object(model_type, dict_object, pk)
+            for pk in items.keys():
+                rc.import_object(model_type, pk)
         
         rc.close()
         return rc.result
@@ -406,7 +404,4 @@ class BaseReplication(object):
             
         writer.pack()
         return writer.get_result()
-
-#TODO: Профайлить код на наличие узких мест
-#TODO: Прикрутить часто встречающиеся исключения
 
