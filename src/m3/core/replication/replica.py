@@ -67,8 +67,8 @@ class SerializationStream(object):
         Возвразает ID зависимого объекта. Причем зависимость допускается только по первичному ключу.
         ''' 
         related = getattr(obj, field.name)
-        related_objects.append(related)
         if related is not None:
+            related_objects.append(related)
             if field.rel.field_name == related._meta.pk.name:
                 # Related to remote object via primary key
                 related = related._get_pk_val()
