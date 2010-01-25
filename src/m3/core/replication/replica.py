@@ -380,26 +380,21 @@ class BaseReplication(object):
         rc.close()
         return rc.result
     
-    def get_objects_for_export(self, *args, **kwargs):
+    def get_objects_for_export(self, model_type, last_sync_time, options):
         '''
         Возвращает список объектов для экспорта. Может быть перекрыта в потомках. 
         '''
-        last_sync_time = kwargs['last_sync_time']
+        assert issubclass(model_type, models.Model), u"Экспортируемый объект должен быть моделью Django"
         assert isinstance(last_sync_time, datetime.datetime), u"last_sync_time должен быть типа datetime"
+        assert isinstance(options, list)
         
-        result = []
+        # Выбираем подходящие объекты
+        ts_name = options[1] + '__gte'
         filter = {}
-        # Проходим все указанные модели
-        for model_type, options in self.managed_models.items():
-            assert issubclass(model_type, models.Model)
-            assert isinstance(options, list)
-            # Выбираем подходящие объекты
-            ts_name = options[1] + '__gte'
-            filter[ts_name] = last_sync_time
-            objects = model_type.objects.filter(**filter)
-            result.extend(objects)
+        filter[ts_name] = last_sync_time
+        objects = model_type.objects.filter(**filter)
 
-        return result
+        return objects
     
     def do_export(self, export_filename, last_sync_time):
         '''
@@ -412,10 +407,12 @@ class BaseReplication(object):
         assert len(self.managed_models) > 0, u"Ни одна модель не указана в managed_models"
         
         writer = ExportController(export_filename, self.managed_models, last_sync_time)
-        objects = self.get_objects_for_export(last_sync_time = last_sync_time)
-        for obj in objects:
-            writer.write_object(obj)
-            
+        # Проходим все указанные модели
+        for model_type, options in self.managed_models.items():
+            objects = self.get_objects_for_export(model_type, last_sync_time, options)
+            for obj in objects:
+                writer.write_object(obj)
+
         writer.pack()
         return writer.get_result()
 
