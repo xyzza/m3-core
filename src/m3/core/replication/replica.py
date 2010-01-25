@@ -366,7 +366,10 @@ class BaseReplication(object):
     
     @transaction.commit_on_success
     def do_import(self, import_filename):
-        ''' Импортирует объекты из файла экспорта в БД. '''
+        '''
+        Импортирует объекты из файла экспорта в БД.
+        @param import_filename: Имя архива TAR.BZ2
+        '''
         rc = ImportController(import_filename, self.managed_models)
         # 
         for model_type in self.managed_models.keys():
@@ -376,32 +379,40 @@ class BaseReplication(object):
         
         rc.close()
         return rc.result
+    
+    def get_objects_for_export(self, model_type, last_sync_time, options):
+        '''
+        Возвращает список объектов для экспорта. Может быть перекрыта в потомках. 
+        '''
+        assert issubclass(model_type, models.Model), u"Экспортируемый объект должен быть моделью Django"
+        assert isinstance(last_sync_time, datetime.datetime), u"last_sync_time должен быть типа datetime"
+        assert isinstance(options, list)
         
+        # Выбираем подходящие объекты
+        ts_name = options[1] + '__gte'
+        filter = {}
+        filter[ts_name] = last_sync_time
+        objects = model_type.objects.filter(**filter)
+
+        return objects
+    
     def do_export(self, export_filename, last_sync_time):
         '''
         Выгружает объекты указанные в словаре managed_models с условием что их время модификации >= last_sync_time
         Тянет с собой все зависимые объекты. Каждый зависимый объект помечается флагом модифицированности.
-        Каждому классу модели соответствует свой JSON файл, которые потом запаковываются в ZIP архив.
-        @param export_filename:
-        @param last_sync_time:
+        Каждому классу модели соответствует свой JSON файл, которые потом запаковываются в TAR.BZ2 архив.
+        @param export_filename: Имя архива
+        @param last_sync_time: Время последней модификации
         '''
         assert len(self.managed_models) > 0, u"Ни одна модель не указана в managed_models"
-        assert isinstance(last_sync_time, datetime.datetime), u"last_sync_time должен быть типа datetime"
         
         writer = ExportController(export_filename, self.managed_models, last_sync_time)
-        kwargs = {}
         # Проходим все указанные модели
         for model_type, options in self.managed_models.items():
-            assert issubclass(model_type, models.Model)
-            assert isinstance(options, list)
-            # Выбираем подходящие объекты
-            ts_name = options[1] + '__gte'
-            kwargs[ts_name] = last_sync_time
-            objects = model_type.objects.filter(**kwargs)
-            # Пишем объекты
+            objects = self.get_objects_for_export(model_type, last_sync_time, options)
             for obj in objects:
                 writer.write_object(obj)
-            
+
         writer.pack()
         return writer.get_result()
 
