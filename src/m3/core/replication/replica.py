@@ -275,23 +275,23 @@ class ImportController(object):
         else:
             return options[1]
     
-    def import_object(self, model_type, pk):
+    def import_object(self, model_type, obj_pk):
         '''
         При необходимости импортирует объект в текущую БД.
         Возвращает импортированный объект или уже существующий объект
         @param model_type: Класс модели объекта
-        @param pk: Первичный ключ импортируемого объекта
+        @param obj_pk: Первичный ключ импортируемого объекта
         '''
         # Проверяем, был ли этот объект уже импортирован? Тогда достаем из кеша. 
         cached_pkeys = self._imported_objects_cache.get(model_type, None)
         if cached_pkeys is not None:
-            cached_obj = cached_pkeys.get(str(pk), None)
+            cached_obj = cached_pkeys.get(str(obj_pk), None)
             if cached_obj is not None:
                 return cached_obj
         else:
             self._imported_objects_cache[model_type] = {}
         
-        obj_fields = self.get_fields_for_object(model_type, pk)        
+        obj_fields = self.get_fields_for_object(model_type, obj_pk)        
         repl_code_field = self.get_replica_field_name(model_type)
         
         # Определяем есть в базе уже модель такого типа с таким же кодом репликации
@@ -329,7 +329,10 @@ class ImportController(object):
                     # Нужно присвоить соответствующий экземпляр
                     related_type = field.rel.to
                     pk = obj_fields[field_name]
-                    value = self.import_object(related_type, pk)
+                    if pk == None:
+                        value = None
+                    else:
+                        value = self.import_object(related_type, pk)
                     setattr(out_obj, field_name, value)
                     
         out_obj.save()
@@ -354,7 +357,7 @@ class ImportController(object):
             out_obj.save()
         
         # Добавляем результат в кэш
-        self._imported_objects_cache[model_type][pk] = out_obj
+        self._imported_objects_cache[model_type][str(obj_pk)] = out_obj
         self.result.add(already_exist)
         
         return out_obj
@@ -380,7 +383,7 @@ class BaseReplication(object):
         rc.close()
         return rc.result
     
-    def get_objects_for_export(self, model_type, last_sync_time, options):
+    def get_objects_for_export(self, model_type, last_sync_time, options, *args, **kwargs):
         '''
         Возвращает список объектов для экспорта. Может быть перекрыта в потомках. 
         '''
@@ -396,7 +399,7 @@ class BaseReplication(object):
 
         return objects
     
-    def do_export(self, export_filename, last_sync_time):
+    def do_export(self, export_filename, last_sync_time, *args, **kwargs):
         '''
         Выгружает объекты указанные в словаре managed_models с условием что их время модификации >= last_sync_time
         Тянет с собой все зависимые объекты. Каждый зависимый объект помечается флагом модифицированности.
@@ -409,7 +412,7 @@ class BaseReplication(object):
         writer = ExportController(export_filename, self.managed_models, last_sync_time)
         # Проходим все указанные модели
         for model_type, options in self.managed_models.items():
-            objects = self.get_objects_for_export(model_type, last_sync_time, options)
+            objects = self.get_objects_for_export(model_type, last_sync_time, options, *args, **kwargs)
             for obj in objects:
                 writer.write_object(obj)
 
