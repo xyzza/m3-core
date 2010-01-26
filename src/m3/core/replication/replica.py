@@ -376,9 +376,14 @@ class BaseReplication(object):
         rc = ImportController(import_filename, self.managed_models)
         # 
         for model_type in self.managed_models.keys():
-            items = rc.get_stream_for_type(model_type)
-            for pk in items.keys():
-                rc.import_object(model_type, pk)
+            try:
+                items = rc.get_stream_for_type(model_type)
+            except IOError:
+                # Если при экспорте не было создано файла для модели, значит по ней данных нет
+                pass
+            else:
+                for pk in items.keys():
+                    rc.import_object(model_type, pk)
         
         rc.close()
         return rc.result
