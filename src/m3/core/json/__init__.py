@@ -9,6 +9,12 @@ class M3JSONEncoder(json.JSONEncoder):
         cleaned_dict = {}
         dict = obj.__dict__
         for attribute in dict.keys():
+            if len(attribute) > 3 and attribute[len(attribute)-3:len(attribute)] == '_id':
+                try:
+                    field_name = attribute[0:len(attribute)-3]
+                    cleaned_dict[field_name + '_ref_name'] = getattr(getattr(obj, field_name), 'name')
+                except:
+                    pass
             if len(attribute) > 6 and attribute[len(attribute)-6:len(attribute)] == '_cache':
                 try:
                     cleaned_dict[attribute[1:len(attribute)-6] + '_ref_name'] = dict['name']
