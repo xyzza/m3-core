@@ -24,7 +24,7 @@ def init_logging(logs_path):
     loggers = [('root',         logging.NOTSET, 'root'),
                ('error_logger', logging.ERROR,  'error'),
                ('info_logger',  logging.INFO,   'info')]
-    formatter = logging.Formatter("%(asctime)s - %(message)s")
+    formatter = logging.Formatter("[%(asctime)s] %(message)s")
     formatter.datefmt = '%Y-%m-%d %H:%M:%S'
     for lname, level, fname in loggers:
         t = logging.getLogger(lname)
@@ -35,7 +35,6 @@ def init_logging(logs_path):
         t.addHandler(handler)
     
     logging.m3_set_up_done = True
-    info(u'Запуск сервера')
 
 def get_session_info(request):
     '''
