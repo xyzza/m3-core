@@ -2,6 +2,8 @@
 
 import logging.handlers
 import os
+import sys
+import traceback
 from django.http import HttpResponseServerError, HttpRequest
 from django.template.loader import render_to_string
 
@@ -21,9 +23,11 @@ def init_logging(logs_path):
     if not os.path.exists(logs_path):
         os.mkdir(logs_path)
         
-    loggers = [('root',         logging.NOTSET, 'root'),
-               ('error_logger', logging.ERROR,  'error'),
-               ('info_logger',  logging.INFO,   'info')]
+    loggers = [('root',         logging.NOTSET, 'root.log'),
+               ('error_logger', logging.ERROR,  'error.log'),
+               ('info_logger',  logging.INFO,   'info.log'),
+               ('debug_logger',  logging.DEBUG,   'debug.log'),
+               ('warning_logger',  logging.DEBUG,   'warning.log')]
     formatter = logging.Formatter("[%(asctime)s] %(message)s")
     formatter.datefmt = '%Y-%m-%d %H:%M:%S'
     for lname, level, fname in loggers:
@@ -47,8 +51,8 @@ def get_session_info(request):
     # Юзер
     user = request.user
     if user and user.is_authenticated():
-        result += ' - ' + user.email + '; ' + user.get_full_name()
-    return result
+        result += ' - ' + user.email + ', ' + user.get_full_name()
+    return result + '. '
 
 #====================== ФУНКЦИИ АНАЛОГИЧНЫЕ LOGGING =====================
 # Если передать именованный аргумент request = ... , то к сообщению будет
@@ -58,28 +62,39 @@ def get_session_info(request):
 def info(msg, *args, **kwargs):
     log = logging.getLogger('info_logger')
     msg = get_session_info(kwargs.get('request', None)) + msg
-    log.info(msg, *args, **kwargs)
+    log.info(msg)
 
 def error(msg, *args, **kwargs):
     log = logging.getLogger('error_logger')
     msg = get_session_info(kwargs.get('request', None)) + msg
-    log.error(msg, *args, **kwargs)
+    log.error(msg)
 
 def debug(msg, *args, **kwargs):
     log = logging.getLogger('debug_logger')
     msg = get_session_info(kwargs.get('request', None)) + msg
-    log.debug(msg, *args, **kwargs)
+    log.debug(msg)
+
+def exception(msg, *args, **kwargs):
+    log = logging.getLogger('error_logger')
+    msg = get_session_info(kwargs.get('request', None)) + msg
+    log.error(msg)
+    try:
+        exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+        tb = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
+        log.error(u''.join(tb))
+    except:
+        pass
 
 def warning(msg, *args, **kwargs):
     log = logging.getLogger('warning_logger')
     msg = get_session_info(kwargs.get('request', None)) + msg
-    log.warning(msg, *args, **kwargs)
+    log.warning(msg)
 
 def catch_error_500(request, *args, **kwargs):
     '''
     Функция для перехвата ошибок сервера в боевом режиме.
     Возвращает страницу 500 определенную пользователем. 
     '''
-    error(get_session_info(request), exc_info = True)
+    exception(get_session_info(request), exc_info = True)
     return HttpResponseServerError(render_to_string("500.html"))
     
