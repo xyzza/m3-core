@@ -68,7 +68,11 @@ def make_report_from_json_string(json_str):
     '''
     # При передаче данных через стандартные потоки ввода/вывода
     # важно кодировать/декодировать в кодировку консоли
-    encoding_name = sys.stdout.encoding
+    if hasattr(sys.stdout, 'encoding'):
+        encoding_name = sys.stdout.encoding
+    else:
+        # Под нормальным сервером перекодировка не нужна
+        encoding_name = 'utf-8'
     process = sub.Popen(['java', '-jar', JAR_FULL_PATH, encoding_name], 
                         stdin = sub.PIPE, stdout = sub.PIPE, stderr = sub.PIPE)
     result_out, result_err = process.communicate(input = json_str.encode(encoding_name))
