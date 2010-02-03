@@ -27,6 +27,14 @@ class Validator:
         rule.callback_on_success = on_success
         rule.callback_on_fail = on_fail
         self.rules.append(rule)
+        
+    def addrule_failed(self, fail_msg, on_success=None, on_fail=None):
+        rule = FailedValidationRule()
+        rule.fail_msg = fail_msg
+        rule.callback_on_success = on_success
+        rule.callback_on_fail = on_fail
+        self.rules.append(rule)
+        
 #------------------------------------------------------------------------------
 # методы добавления правил валидации 
 #------------------------------------------------------------------------------ 
@@ -68,6 +76,13 @@ class NotEmptyValidationRule(BaseValidationRule):
     '''
     def check(self):
         return True if self.value else False
+    
+class FailedValidationRule(BaseValidationRule):
+    '''
+    Правило валидации, которое заведомо является неправильным
+    '''
+    def check(self):
+        return False # надо тупо записать текущее сообщение в список ошибок
 
 #===============================================================================
 # Исключительная ситуация 
