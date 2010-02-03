@@ -98,8 +98,14 @@ class BaseReport:
             raise ReportGeneratorError(u"result_name должен быть переопределен")
         
         # Создаем абсолютные пути
-        obj["TEMPLATE_FILE_PATH"] = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.template_name)
-        obj["OUTPUT_FILE_PATH"]   = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.result_name)
+        tfp = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.template_name)
+        ofp = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.result_name)
+        if sys.platform.find('linux') > -1:
+            # os.path.normpath - нормализует неправильно
+            tfp = tfp.replace('\\', '/')
+            ofp = ofp.replace('\\', '/')
+        obj["TEMPLATE_FILE_PATH"] = tfp
+        obj["OUTPUT_FILE_PATH"]   = ofp
         
         make_report_from_object(obj)
     
