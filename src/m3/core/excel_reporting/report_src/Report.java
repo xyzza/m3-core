@@ -307,10 +307,6 @@ class ReportGenerator{
 			out_sheet.setColumnWidth(i, width);
 		}
 		
-		// Новую закладку делаем активной
-		in_book.setActiveSheet(in_book.getSheetIndex(out_sheet));
-		in_book.setSelectedTab(in_book.getSheetIndex(out_sheet));
-		
 		// Копируем кучу параметров листа
 		out_sheet.setAutobreaks(in_sheet.getAutobreaks());
 		out_sheet.setDisplayFormulas(in_sheet.isDisplayFormulas());
@@ -368,10 +364,23 @@ class ReportGenerator{
 		range.end_row = in_sheet.getLastRowNum();
 		renderRange(root, range, range.start_row);
 		
+		// Копируем область печати
+		String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
+		
 		// Подмена листов. Удаляем шаблонный лист и активируем результат
 		String name = in_sheet.getSheetName();
 		in_book.removeSheetAt(in_book.getSheetIndex(in_sheet));
 		in_book.setSheetName(in_book.getSheetIndex(out_sheet), name);
+		
+		if (area != null){
+			int t = area.indexOf('!');
+			area = area.substring(t + 1);
+			in_book.setPrintArea(in_book.getSheetIndex(out_sheet), area);
+		}
+		
+		// Новую закладку делаем активной
+		in_book.setActiveSheet(in_book.getSheetIndex(out_sheet));
+		in_book.setSelectedTab(in_book.getSheetIndex(out_sheet));
 		
 	    // Пишем результат
 		String outfile = (String)root.get("OUTPUT_FILE_PATH");
