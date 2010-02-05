@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -305,6 +306,38 @@ class ReportGenerator{
 			int width = in_sheet.getColumnWidth(i);
 			out_sheet.setColumnWidth(i, width);
 		}
+		
+		// Новую закладку делаем активной
+		in_book.setActiveSheet(in_book.getSheetIndex(out_sheet));
+		in_book.setSelectedTab(in_book.getSheetIndex(out_sheet));
+		
+		// Копируем кучу параметров листа
+		out_sheet.setAutobreaks(in_sheet.getAutobreaks());
+		out_sheet.setDisplayFormulas(in_sheet.isDisplayFormulas());
+		out_sheet.setDisplayGridlines(in_sheet.isDisplayGridlines());
+		out_sheet.setDisplayZeros(in_sheet.isDisplayZeros());
+		out_sheet.setDisplayRowColHeadings(in_sheet.isDisplayRowColHeadings());
+		
+		// Копируем кучу параметров печати
+		PrintSetup out_print = out_sheet.getPrintSetup();
+		PrintSetup in_print = in_sheet.getPrintSetup();
+		out_print.setCopies(in_print.getCopies());
+		out_print.setDraft(in_print.getDraft());
+		out_print.setFitHeight(in_print.getFitHeight());
+		out_print.setFitWidth(in_print.getFitWidth());
+		out_print.setFooterMargin(in_print.getFooterMargin());
+		out_print.setHeaderMargin(in_print.getHeaderMargin());
+		out_print.setHResolution(in_print.getHResolution());
+		out_print.setLandscape(in_print.getLandscape());
+		out_print.setLeftToRight(in_print.getLeftToRight());
+		out_print.setNoColor(in_print.getNoColor());
+		out_print.setNoOrientation(in_print.getNoOrientation());
+		out_print.setNotes(in_print.getNotes());
+		out_print.setPageStart(in_print.getPageStart());
+		out_print.setPaperSize(in_print.getPaperSize());
+		out_print.setScale(in_print.getScale());
+		out_print.setVResolution(in_print.getVResolution());
+		
 		return out_sheet;
 	}
 	
@@ -339,7 +372,6 @@ class ReportGenerator{
 		String name = in_sheet.getSheetName();
 		in_book.removeSheetAt(in_book.getSheetIndex(in_sheet));
 		in_book.setSheetName(in_book.getSheetIndex(out_sheet), name);
-		in_book.setActiveSheet(in_book.getSheetIndex(out_sheet));
 		
 	    // Пишем результат
 		String outfile = (String)root.get("OUTPUT_FILE_PATH");
