@@ -321,14 +321,20 @@ class ImportController(object):
                 # Поле со штампом модификации не изменяем
                 if field_name == mod_time_name:
                     continue
+                # В более новых версиях ПО могут появиться поля которых нет в более старых
+                # тогда при загрузке старой выгрузки они игнорируются
+                try:
+                    field_value = obj_fields[field_name]
+                except KeyError:
+                    continue
                 if field.rel is None:
                     # Можно просто присвоить
-                    value = field.to_python(obj_fields[field_name])
+                    value = field.to_python(field_value)
                     setattr(out_obj, field_name, value)
                 else:
                     # Нужно присвоить соответствующий экземпляр
                     related_type = field.rel.to
-                    pk = obj_fields[field_name]
+                    pk = field_value
                     if pk == None:
                         value = None
                     else:
@@ -343,11 +349,17 @@ class ImportController(object):
             if field.serialize:
                 field_name = field.name
                 related_type = field.rel.to
+                # В более новых версиях ПО могут появиться поля которых нет в более старых
+                # тогда при загрузке старой выгрузки они игнорируются
+                try:
+                    field_value = obj_fields[field_name]
+                except KeyError:
+                    continue
                 # Сериализованное M2M значение представляет собой список первичных ключей,
                 # но т.к. мы оперируем ключами чужой базы в нашей они будут другими
                 # По ходу обработки зависимых объектов будем присваивать новые ключи
                 new_pkeys = []
-                for pk in field.to_python(obj_fields[field_name]):
+                for pk in field.to_python(field_value):
                     value = self.import_object(related_type, pk)
                     new_pkeys.append(value)
                 setattr(out_obj, field_name, new_pkeys)
