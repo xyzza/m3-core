@@ -3,5 +3,5 @@
 ^\.tmp
 ^\.project
 ^\.pydevproject
-.pyc
+.pyc$
 ^\.settings
