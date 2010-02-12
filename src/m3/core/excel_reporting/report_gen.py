@@ -87,9 +87,9 @@ class BaseReport:
     # Определяет путь к файлу результата относительно папки результатов
     result_name = ''
     
-    def make_report(self):
+    def make_report(self, *args, **kwargs):
         ''' Запускает формирование отчета '''
-        obj = self.collect()
+        obj = self.collect(*args, **kwargs)
         if not isinstance(obj, dict):
             raise ReportGeneratorError(u"Собранные данные должны быть упакованы в словарь")
         if len(self.template_name) == 0:
