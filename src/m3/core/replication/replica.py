@@ -9,6 +9,7 @@ import tarfile
 import datetime
 import os
 import tempfile
+from south.models import MigrationHistory
 
 __all__ = ['BaseReplication', 'ExportResult', 'ImportResult']
 
@@ -18,6 +19,13 @@ DEFAULT_REPLICA_FIELD = 'replica'
 DEFAULT_CREATE_FIELD  = 'created'
 DEFAULT_MODIFY_FIELD  = 'mod_time'
 JSON_MODIFY_ATTRIBUTE = '__modify'
+
+VERSION_EQUAL =  0
+VERSION_LESS  = -1
+VERSION_MORE  =  1
+
+APP_VERSION_FILENAME = '__app_verison.json'
+DB_VERSION_FILENAME  = '__db_version.json'
 
 #======================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ======================
 
@@ -128,13 +136,26 @@ class SerializationStream(object):
 
 
 class ExportController(object):
-    def __init__(self, export_file, managed_models, last_sync_time):
+    def __init__(self, export_file, managed_models, last_sync_time, app_ver, db_ver):
         self._archive = tarfile.open(export_file, 'w:bz2')
         self._temp_dir = tempfile.mkdtemp()
         self._stream_pool = {}
         self._managed_models = managed_models
         self._last_sync_time = last_sync_time
-        
+        self._additional_data = []
+        self._write_version_info(app_ver, APP_VERSION_FILENAME)
+        self._write_version_info(db_ver, DB_VERSION_FILENAME)
+    
+    def _write_version_info(self, version, fname):
+        '''
+        Сериализует информацию о версии в файл
+        '''
+        filename = os.path.join(self._temp_dir, fname)
+        with open(filename, "w") as file:
+            s = simplejson.dumps(version, indent = 4, ensure_ascii = False)
+            file.write(s)
+        self._additional_data.append(filename)
+    
     def _is_related_object(self, obj):
         ''' 
         Зависимым объект считается если он не указан явно в managed_models
@@ -172,6 +193,11 @@ class ExportController(object):
             stream.close()
             self._archive.add(stream.filename, os.path.basename(stream.filename))
             os.remove(stream.filename)
+        # Дополнительная информация к выгрузке
+        for file in self._additional_data:
+            self._archive.add(file, os.path.basename(file))
+            os.remove(file)
+        # Усё ;)
         self._archive.close()
         os.removedirs(self._temp_dir)
                 
@@ -426,7 +452,8 @@ class BaseReplication(object):
         '''
         assert len(self.managed_models) > 0, u"Ни одна модель не указана в managed_models"
         
-        writer = ExportController(export_filename, self.managed_models, last_sync_time)
+        writer = ExportController(export_filename, self.managed_models, last_sync_time,\
+                                  self.get_app_version(), self.get_db_version())
         # Проходим все указанные модели
         for model_type, options in self.managed_models.items():
             objects = self.get_objects_for_export(model_type, last_sync_time, options, *args, **kwargs)
@@ -436,3 +463,66 @@ class BaseReplication(object):
         writer.pack()
         return writer.get_result()
 
+    def _extract_version_info(self, import_filename, version_type):
+        '''
+        Извлекает из архива выгрузки информацию о версии
+        '''
+        arc = tarfile.open(import_filename, 'r:bz2')
+        try:
+            file = arc.extractfile(version_type)
+            version = simplejson.load(file)
+            file.close()
+        except KeyError:
+            # KeyError кидает tarfile если такого файла в архиве нет
+            return None
+        finally:
+            arc.close()
+        
+        return version
+
+    def get_db_version(self):
+        '''
+        Возвращает версию БД исходя из состояния миграций South
+        '''
+        # Для каждого приложения определяем последнюю миграцию
+        result = {}
+        for app_name in MigrationHistory.objects.distinct().values('app_name'):
+            app_name = app_name['app_name']
+            migration = MigrationHistory.objects.filter(app_name = app_name).latest('migration').migration
+            num = int(migration[:4])
+            result[app_name] = num
+        return result
+        
+    def get_app_version(self):
+        '''
+        Функция заглушка, т.к. получение версии специфично для конкретного прикладного приложения.
+        '''
+        return {}
+    
+    def check_versions(self, import_filename):
+        '''
+        Запускает проверку версий миграции
+        '''
+        import_app_ver = self._extract_version_info(import_filename, APP_VERSION_FILENAME)
+        import_db_ver = self._extract_version_info(import_filename, DB_VERSION_FILENAME)
+        main_app_ver = self.get_app_version()
+        main_db_ver = self.get_db_version()
+        return self._check(main_app_ver, main_db_ver, import_app_ver, import_db_ver)
+    
+    def _check(self, main_app_ver, main_db_ver, import_app_ver, import_db_ver):
+        '''
+        Реализует дефолтное поведение при сравнении версий миграции. Сравниваются только версии БД
+        '''
+        # Сравниваем номер миграции каждого нашего приложения с тем что пришло из вне
+        for app_name, migration_num in main_db_ver.items():
+            # Если в выгрузке нет приложения которое есть у нас, значит у них версия старее
+            if not import_db_ver.has_key(app_name):
+                return VERSION_LESS
+            
+            import_num = import_db_ver[app_name]
+            if import_num > migration_num:
+                return VERSION_MORE
+            elif import_num < migration_num:
+                return VERSION_LESS
+        
+        return VERSION_EQUAL
