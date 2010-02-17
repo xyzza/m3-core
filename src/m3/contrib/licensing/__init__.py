@@ -8,7 +8,7 @@
 import django.dispatch
 import ConfigParser
 import datetime
-from django.http import HttpResponse
+#from django.http import HttpResponse
 from m3.contrib.licensing import helpers
 
 class LicensingError(Exception):
