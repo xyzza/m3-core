@@ -22,11 +22,15 @@ class RequestActivity(models.Model):
         period - конец отчетного периода
         avg_request_time - среднее время запроса
         total_requests - всего запросов
+        a_avg_request_time  - среднее время запроса от ананимусов
+        a_total_requests    - всего запросов от ананимусов
         request_type - тип запроса (версия 0.2 - всегда пустое)
     '''
     period = models.DateTimeField()
     avg_request_time = models.IntegerField() # в милисекундах
     total_requests = models.IntegerField()
+    a_avg_request_time = models.IntegerField() # в милисекундах
+    a_total_requests = models.IntegerField()
     request_type = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
