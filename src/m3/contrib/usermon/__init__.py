@@ -25,26 +25,36 @@ class MonitoringController(object):
         
         def __init__(self):
             '''
-                request_count - количество запросов
-                request_sum_time_load - суммарное время обработки запросов
-                request_sum_time_load - начало текущего запроса
+                auth_request_count - количество запросов от аутентифицированных пользователей
+                anon_request_count - от анонимов
+                
+                auth_request_sum_time_load - суммарное время обработки запросов от аутентифицированных пользователей
+                anon_request_sum_time_load - от анонимов
+                
                 first_request_time - время первого запроса, от которого отсчитывается интервал до сохранения
                      информации о средних показателях
                      
                last_user_activity - определяется в _flush - время последней активности пользователя 
                    (не меньше определенного значения)
             '''
-            self.request_count = 0
-            self.request_sum_time_load = 0
+            self.auth_request_count = 0
+            self.anon_request_count = 0
+            
+            self.auth_request_sum_time_load = 0
+            self.anon_request_sum_time_load = 0
+            
             self.last_request_time = datetime.now()  
             self.first_request_time = datetime.now()
             #self.last_user_activity = datetime.now()
             
-        def request_end_processing(self):
+        def request_end_processing(self, user):
             '''
             Сохраняет среднее значение
             '''
-            self.request_sum_time_load += self._get_deltatime()
+            if user.is_authenticated():
+                self.auth_request_sum_time_load += self._get_deltatime()
+            else:
+                self.anon_request_sum_time_load += self._get_deltatime()
 
         def _get_deltatime(self):
             '''
@@ -58,21 +68,26 @@ class MonitoringController(object):
             Фиксирует запрос в экземпляре
             '''
             self._flush(user) # может быть уже пора сделать сохранение в базу?
-            self.request_count += 1
+            if user.is_authenticated():
+                self.auth_request_count += 1
+            else: 
+                self.anon_request_count += 1
+            
             self.last_request_time = datetime.now()
         
         def _flush(self, user):
             '''
             Заносит информацию в бд и обнуляет единственный экземпляр класса
             '''
-            dt_user_activity = 60 # Период добавления информации об активности пользователей, в секундах (по умолчанию 60 = 1 минута)
-            if not hasattr(self, 'last_user_activity') or (datetime.now() - self.last_user_activity).seconds > dt_user_activity:
-                # добавление записей в UserActivity 
-                user_activity = UserActivity()
-                user_activity.user_id = user
-                user_activity.save()    
-                
-                self.last_user_activity = datetime.now()       
+            if user.is_authenticated():
+                dt_user_activity = 60 # Период добавления информации об активности пользователей, в секундах (по умолчанию 60 = 1 минута)
+                if not hasattr(self, 'last_user_activity') or (datetime.now() - self.last_user_activity).seconds > dt_user_activity:
+                    # добавление записей в UserActivity 
+                    user_activity = UserActivity()
+                    user_activity.user_id = user
+                    user_activity.save()    
+                    
+                    self.last_user_activity = datetime.now()       
             
             dt_req_activity = 15*60 # Период добавления информации о средних показателях, в секундах (по умолчанию 15*60 = 15 минут)
             if self.first_request_time and (datetime.now() - self.first_request_time).seconds > dt_req_activity: # нужно записать информацию в б
@@ -84,8 +99,20 @@ class MonitoringController(object):
                                                datetime.now().hour,
                                                datetime.now().minute,
                                                datetime.now().second,)
-                req_activity.total_requests = self.request_count
-                req_activity.avg_request_time = round(self.request_sum_time_load / self.request_count)
+                # Аутентифицированные:
+                req_activity.total_requests = self.auth_request_count
+                if self.auth_request_count:
+                    req_activity.avg_request_time = round(self.auth_request_sum_time_load / self.auth_request_count)
+                else:
+                    req_activity.avg_request_time = 0
+                
+                # Анонимы:
+                req_activity.a_total_requests = self.anon_request_count
+                if self.anon_request_count:
+                    req_activity.a_avg_request_time = round(self.anon_request_sum_time_load / self.anon_request_count)
+                else:
+                    req_activity.a_avg_request_time = 0
+                
                 #req_activity.request_type = None # Пока не трогаем это поле
                 req_activity.save()
                 
@@ -116,39 +143,50 @@ class UsermonMiddleware:
     '''
     
     def process_request(self, request):
-        if get_user(request).is_authenticated(): # актуально только для аутентифицированных пользователей
-            try:
-                mon = MonitoringController()
-                mon.add_request_stat(get_user(request))
-            except:
-                pass    
+        try:
+            mon = MonitoringController()
+            mon.add_request_stat(get_user(request))
+        except:
+            pass    
 #        import time # тесты
 #        time.sleep(1)
         return None
     
-    def process_response(self, request, response):
-        if get_user(request).is_authenticated():
-            try:
-                mon = MonitoringController()
-                mon.request_end_processing()
-            except:
-                pass
+    def process_response(self, request, response): 
+        try:
+            mon = MonitoringController()
+            mon.request_end_processing(get_user(request))
+        except:
+            pass
         
 ##     тесты
-#        pr = 'сумма времени обработки запросов: %s <br> \
+#        if mon.auth_request_count:
+#            avg =round(mon.auth_request_sum_time_load / mon.auth_request_count)
+#        else:
+#            avg = 0
+#        
+#        if mon.anon_request_count:
+#            a_avg = round(mon.anon_request_sum_time_load / mon.anon_request_count)
+#        else: 
+#            a_avg = 0
+#            
+#        if hasattr(mon, 'last_user_activity'):
+#            last_user_activity = mon.last_user_activity
+#        else:
+#            last_user_activity = datetime.now()
+#            
+#        pr = 'сумма времени обработки запросов аутент.: %s - анонимы: %s<br> \
 #            время обработки последнего запроса:%s  <br> \
-#            кол-ва запросов всего:%s <br> \
-#            среднее (сумма/кол-во): %s <br> \
+#            среднее (сумма/кол-во) аутент: %s  анонимы: %s<br> \
 #            округленное cреднее:%s <br> \
 #            осталось до записи(req_activity): %s <br> \
 #            (user_activity): %s' \
-#            % (mon.request_sum_time_load, 
+#            % (mon.auth_request_sum_time_load, mon.anon_request_sum_time_load,
 #               mon._get_deltatime(), 
-#               mon.request_count,
-#               mon.request_sum_time_load / mon.request_count,
-#               round(mon.request_sum_time_load / mon.request_count),
-#               15*60 - (datetime.now() - mon.first_request_time).seconds,
-#               60 - (datetime.now() - mon.last_user_activity).seconds
+#               mon.auth_request_count,
+#               avg, a_avg,
+#               20 - (datetime.now() - mon.first_request_time).seconds,
+#               10 - (datetime.now() - last_user_activity).seconds
 #               )
 #        return HttpResponse(pr)
         return response
