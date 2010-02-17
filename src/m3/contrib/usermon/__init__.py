@@ -117,18 +117,24 @@ class UsermonMiddleware:
     
     def process_request(self, request):
         if get_user(request).is_authenticated(): # актуально только для аутентифицированных пользователей
-            mon = MonitoringController()
-            mon.add_request_stat(get_user(request))    
+            try:
+                mon = MonitoringController()
+                mon.add_request_stat(get_user(request))
+            except:
+                pass    
 #        import time # тесты
 #        time.sleep(1)
         return None
     
     def process_response(self, request, response):
         if get_user(request).is_authenticated():
-            mon = MonitoringController()
-            mon.request_end_processing()
+            try:
+                mon = MonitoringController()
+                mon.request_end_processing()
+            except:
+                pass
         
-#     тесты
+##     тесты
 #        pr = 'сумма времени обработки запросов: %s <br> \
 #            время обработки последнего запроса:%s  <br> \
 #            кол-ва запросов всего:%s <br> \
