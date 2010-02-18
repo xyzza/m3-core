@@ -17,6 +17,12 @@ class LicensingError(Exception):
     '''
     pass
 
+class InheritanceError(Exception):
+    '''
+        Исключения этого вида говорят о том, что некоторые методы в классе необходимо перепределить
+    '''
+    pass
+
 # Определение сигнала
 signal_license_key = django.dispatch.Signal(providing_args=['app_key',])
 def check_license_key(self, app_key):
@@ -45,10 +51,6 @@ class ApplicationLicKey:
     '''
     def __init__(self):
         self.__key_body = ''
-        self.org_name = ''
-        self.since = ''
-        self.until = ''
-        self.max_users = ''
 
     def __set_key(self):
         '''
@@ -67,7 +69,7 @@ class ApplicationLicKey:
         '''
             Создает и возвращает объект ConfigParser.ConfigParser()
         '''
-        key_body = self.__key_body or self.__set_key()
+        key_body = self.__set_key() # self.__key_body or 
         if not key_body:
             return None
         
@@ -75,6 +77,7 @@ class ApplicationLicKey:
             config = ConfigParser.ConfigParser()
             config.readfp(key_body)
         except:
+            #raise
             config = None
         return config
         
@@ -91,23 +94,9 @@ class ApplicationLicKey:
     def fill(self):
         '''
             Заполняет объект значениями из модели StoredLicKey
-        '''        
-
-        conf = self.get_config()
-        if conf:
-            self.org_name   = self.get_config_value(conf,'info','orgname')
-            self.since      = self.get_config_value(conf,'info', 'since')
-            self.until      = self.get_config_value(conf,'info', 'until')
-            self.max_users  = -1
-  
-    # Следующий код должен находится в наследующем классе    
-    #def get_demo_mode(self):
-    #    return self.__demo_mode
-    #
-    #def set_demo_mode(self, demo_mode):
-    #    self.__demo_mode = demo_mode
-    #    
-    #demo_mode = property(set_demo_mode, get_demo_mode)
+            Перепределить в наследующем классе
+        ''' 
+        raise InheritanceError       
 
 class LicenseMiddleware:
     '''
@@ -122,51 +111,24 @@ class LicenseMiddleware:
                Иначе, если сгенирировано исключение, ключ считается не подлинным, у объекта проставляется 
                demo_mode = True, и в переменную request.session['m3_license_key'] пишется произвольное значение
        '''
-
+       
        last_modify = request.session.get('m3_license_key_lastupdate') or (datetime.datetime.now() - datetime.timedelta(days=360))
-       if datetime.datetime.now() - datetime.timedelta(seconds=3600*24) < last_modify:
+       if datetime.datetime.now() - datetime.timedelta(seconds=3600*24) < last_modify: # <
            return None
        else:
            request.session['m3_license_key_lastupdate'] = datetime.datetime.now()
-           if not isinstance(request.session.get('m3_license_key'), ApplicationLicKey):
-               request.session['m3_license_key'] = ApplicationLicKey()
-               return None
                
            try: 
-               # не правильно передовать всю сессию целиком!
+               # неправильно передовать всю сессию целиком!
                check_license_key(self, request.session)
-           except LicensingError:
+           except LicensingError, message:
                # Ключ не верный - продолжаем работать, но с определенным экземпляром, 
                # например включающим - demo_mode = true
                pass
+               #return HttpResponse('Cracked!' + '<br>' + request.session['m3_license_key']._hsh) # тесты 
+           except Exception, message:
+               pass
+               #raise
            
            return None
-           #return HttpResponse(request.session['m3_license_key'].org_name)
-       
-def callback_check_signal(sender, **kwargs):
-    '''
-        Здесь можно проверить лицензию. и сгенерить исключение, если ключ не подлинный
-    '''    
-    if isinstance(kwargs.get('app_key').get('m3_license_key'), ApplicationLicKey):
-        app_key_session = kwargs.get('app_key').get('m3_license_key')
-    else:
-        raise LicensingError
-    
-    # здесь может быть проверка объекта app_key на подлинность
-    # если ключ неверный можно устанавливать различные поля объекта, например demo_mode = True
-    # и в дальнейшем во вьюхе разделять смысл работы в зависимости от этих полей
-  
-    app_key = ApplicationLicKey()
-    app_key.fill()
-    
-    # Проверка, например:
-    # app_key.hash = app_key_session.hash
-    
-    # Проверили, если не устраивает, то 
-    app_key.demo_mode = True
-       
-    kwargs.get('app_key')['m3_license_key'] = app_key
-    return None
-
-# Подписываемся на сигнал   
-signal_license_key.connect(callback_check_signal) 
+           #return HttpResponse('Correct key!' + '<br>' +request.session['m3_license_key']._hsh) # тесты
