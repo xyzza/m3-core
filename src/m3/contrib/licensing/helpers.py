@@ -6,12 +6,25 @@
 '''
 from m3.contrib.licensing.models import StoredLicKey
 
+# Проверяет, корректен ли загружаемый файл, если ConfigParser справится с загрузкой => корректен 
+import StringIO
+import ConfigParser
+
+
 def add_key(key_body):
     '''
     В случае отсутствия предыдущего установленного ключа 
     функция add_key добавляет новую запись в таблицу модели StoredLicKey. 
     В противном случае происходит замена содержимого поля body у существующей записи.    
     '''
+    try:
+        str_key = StringIO.StringIO(key_body)
+        config = ConfigParser.ConfigParser()
+        config.readfp(str_key)
+    except:
+        # Неверный ключ
+        raise
+    
     if StoredLicKey.objects.count() > 0:
         key = StoredLicKey.objects.all()[0]
         key.body = key_body
