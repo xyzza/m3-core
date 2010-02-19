@@ -67,6 +67,7 @@ class ApplicationLicKey:
  
     def get_config(self):
         '''
+        
             Создает и возвращает объект ConfigParser.ConfigParser()
         '''
         key_body = self.__set_key() # self.__key_body or 
@@ -77,8 +78,9 @@ class ApplicationLicKey:
             config = ConfigParser.ConfigParser()
             config.readfp(key_body)
         except:
-            #raise
-            config = None
+            # отдаем исключение выше
+            raise
+            #config = None
         return config
         
     def get_config_value(self, conf, section, item):
