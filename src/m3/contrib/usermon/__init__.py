@@ -83,7 +83,15 @@ class MonitoringController(object):
                 dt_user_activity = 60 # Период добавления информации об активности пользователей, в секундах (по умолчанию 60 = 1 минута)
                 if not hasattr(self, 'last_user_activity') or (datetime.now() - self.last_user_activity).seconds > dt_user_activity:
                     # добавление записей в UserActivity 
-                    user_activity = UserActivity()
+                    
+                    if UserActivity.objects.filter(user_id=user).count() == 1 :
+                        user_activity = UserActivity.objects.get(user_id=user)
+                    elif UserActivity.objects.filter(user_id=user).count() > 1:
+                        UserActivity.objects.filter(user_id=user).delete()
+                        user_activity = UserActivity()
+                    else:
+                        user_activity = UserActivity()
+                    
                     user_activity.user_id = user
                     user_activity.save()    
                     
