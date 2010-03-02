@@ -3,7 +3,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -268,6 +271,18 @@ class ReportGenerator{
 		}
 	}
 
+	/*
+	 * В строке может встретится специальный тег M3 обозначающий что в ней содержится
+	 * тип данных не поддерживаемый напрямую JSON
+	 * Тег обозначается #m3..# , где .. 2 символа под обозначение типа 
+	 */
+	private String getTypeTagFromString(String value){
+		if ((value.length() >= 6) && (value.substring(0, 3).equals("#m3")) && (value.charAt(5) == '#')){
+			return value.substring(3, 5);
+		}
+		return null;
+	}
+	
 	/**
 	 * Поиск и обработка тега ЗАМЕНА в ячейке 
 	 * @param outCell 
@@ -275,7 +290,6 @@ class ReportGenerator{
 	 * @throws Exception 
 	 */
 	private void processReplaceTag(Cell outCell, JSONObject obj) throws Exception {
-		// TODO Auto-generated method stub
 		if (outCell.getCellType() != Cell.CELL_TYPE_STRING)
 			return;
 		String cell_text = outCell.getStringCellValue();
@@ -286,11 +300,47 @@ class ReportGenerator{
 				String key = cell_text.substring(start_tag + 1, end_tag);
 				String tag = cell_text.substring(start_tag, end_tag + 1);
 				Object value = obj.get(key);
+				
 				// Значение для переменной не найдено, значит разработчики так и задумали (оптимистично)
 				if (value == null)
 					value = "";
-				cell_text = cell_text.replace(tag, value.toString());
-				outCell.setCellValue(cell_text);
+				
+				// Если в ячейке есть еще что-то кроме тега, значит нужно заменять как строку, например: заголовки отчетов.
+				// Если в ячейке только тег, то нужно сохранить исходный тип ячейки
+				String str_value = value.toString();
+				if (outCell.getStringCellValue().length() == tag.length()){
+					if (value.getClass() == String.class){
+						// Строка может быть не просто строка, а специальный тип
+						String inner_type = getTypeTagFromString(str_value);
+						if (inner_type != null){
+							str_value = str_value.substring(6);
+							if (inner_type.equals("dd")){
+								Date d = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
+								outCell.setCellValue(d);
+							}else if (inner_type.equals("tt")){
+								Date d = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
+								outCell.setCellValue(d);
+							}else if (inner_type.equals("dt")){
+								Date d = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(str_value);
+								outCell.setCellValue(d);
+							}else
+								throw new Exception("Unknown M3 type token " + str_value);
+						}else
+							outCell.setCellValue(str_value);
+					}else if (value.getClass() == Long.class){
+						outCell.setCellValue(Long.parseLong(str_value));
+					}else if (value.getClass() == Double.class){
+						outCell.setCellValue(Double.parseDouble(str_value));
+					}else if (value.getClass() == Boolean.class){
+						outCell.setCellValue(Boolean.parseBoolean(str_value));
+					}
+				}else{	
+					// Если внутри есть специальный тег типа, то удаляем его
+					if (getTypeTagFromString(str_value) != null)
+						str_value = str_value.substring(6);
+					cell_text = cell_text.replace(tag, str_value);
+					outCell.setCellValue(cell_text);
+				}
 			}
 		}
 	}

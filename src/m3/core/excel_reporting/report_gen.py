@@ -2,12 +2,13 @@
 
 import subprocess as sub
 from django.conf import settings
-from django.utils import importlib
-import json
+from django.utils import importlib, simplejson
 import sys
 import os
 from django.template import loader
 from django.template.context import Context
+import datetime
+import decimal
 
 __all__ = ['BaseReport', 'ReportGeneratorError', 'ReportGeneratorNotResponse']
 
@@ -43,6 +44,28 @@ def __check_process(encoding_name, process, result_err):
         raise ReportGeneratorError(result_err)
     
 
+class ReportJSONEncoder(simplejson.JSONEncoder):
+    """
+    Сырой словарь с данными может содержать типы данных не поддерживаемых JSON.
+    Для этого определяем свои правила сериализации типов (по аналогии с джанговским)
+    """
+    # Немецкий формат (не менять! я жестко прописал java генераторе)
+    DATE_FORMAT = "%d.%m.%Y"
+    TIME_FORMAT = "%H:%M:%S"
+
+    def default(self, o):
+        if isinstance(o, datetime.datetime):
+            return "#m3dt#" + o.strftime("%s %s" % (self.DATE_FORMAT, self.TIME_FORMAT))
+        elif isinstance(o, datetime.date):
+            return "#m3dd#" + o.strftime(self.DATE_FORMAT)
+        elif isinstance(o, datetime.time):
+            return "#m3tt#" + o.strftime(self.TIME_FORMAT)
+        elif isinstance(o, decimal.Decimal):
+            return str(o)
+        else:
+            return super(ReportJSONEncoder, self).default(o)
+
+
 def make_report_from_object(obj, dump_to_file = None):
     '''
     Вызывает генератор отчета и передает ему объект с исходными данными
@@ -50,11 +73,10 @@ def make_report_from_object(obj, dump_to_file = None):
     @param dump_to_file: Файл в который записывается результат сериализации (для отладки)
     '''
     assert isinstance(obj, dict)
-    indent = 0
-    if dump_to_file is not None:
-        indent = 4;
-    result = json.dumps(obj, skipkeys = True, indent = indent, ensure_ascii = False)
     
+    indent = 4 if dump_to_file != None else 0;
+    result = simplejson.dumps(obj, skipkeys = True, ensure_ascii = False, cls = ReportJSONEncoder, indent = indent)
+        
     # Для отладки пишем результат в файл
     if dump_to_file is not None:
         assert isinstance(dump_to_file, str)
