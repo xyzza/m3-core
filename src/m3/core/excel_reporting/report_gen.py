@@ -6,6 +6,10 @@ from django.utils import importlib
 import json
 import sys
 import os
+from django.template import loader
+from django.template.context import Context
+
+__all__ = ['BaseReport', 'ReportGeneratorError', 'ReportGeneratorNotResponse']
 
 #============================== ПАРАМЕТРЫ ================================
 
@@ -60,7 +64,6 @@ def make_report_from_object(obj, dump_to_file = None):
     make_report_from_json_string(result)
     
 
-
 def make_report_from_json_string(json_str):
     '''
     Вызавает генератор отчета и передает ему в качестве исходных данных JSON строку.
@@ -77,42 +80,71 @@ def make_report_from_json_string(json_str):
                         stdin = sub.PIPE, stdout = sub.PIPE, stderr = sub.PIPE)
     result_out, result_err = process.communicate(input = json_str.encode(encoding_name))
     __check_process(encoding_name, process, result_err)
+    
+    
+def make_html_report_from_object(obj):
+    pass
+ 
  
 class BaseReport:
     ''' Базовый класс для создания отчетов '''
     
     # Определяет путь к файлу шаблона относительно папки шаблонов
     template_name = ''
+    html_template_name = ''
     
     # Определяет путь к файлу результата относительно папки результатов
     result_name = ''
+    # Строка в которую отрендерился html шаблон
+    html_result_string = ''
+    
+    def _norm_path(self, path):
+        if sys.platform.find('linux') > -1:
+            # os.path.normpath - нормализует неправильно
+            path = path.replace('\\', '/')
+        return path
     
     def make_report(self, *args, **kwargs):
         ''' Запускает формирование отчета '''
         obj = self.collect(*args, **kwargs)
         if not isinstance(obj, dict):
-            raise ReportGeneratorError(u"Собранные данные должны быть упакованы в словарь")
-        if len(self.template_name) == 0:
-            raise ReportGeneratorError(u"template_name должен быть переопределен")
-        if len(self.result_name) == 0:
-            raise ReportGeneratorError(u"result_name должен быть переопределен")
+            raise ReportGeneratorError("Collected data must be packed in the dictionary")
         
-        # Создаем абсолютные пути
-        tfp = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.template_name)
-        ofp = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.result_name)
-        if sys.platform.find('linux') > -1:
-            # os.path.normpath - нормализует неправильно
-            tfp = tfp.replace('\\', '/')
-            ofp = ofp.replace('\\', '/')
-        obj["TEMPLATE_FILE_PATH"] = tfp
-        obj["OUTPUT_FILE_PATH"]   = ofp
+        # С версии 2.0 политика партии поменялась
+        # Теперь отчеты могут генериться в несколько форматов, соответственно некоторые из них нам
+        # нужны не всегда. Поэтому если имя до одного из шаблонов не задано, это не вызывает ошибку,
+        # а отключает генерацию по данному шаблону
+        if len(self.template_name) > 0:
+            if len(self.result_name) == 0:
+                raise ReportGeneratorError("Field result_name must be overrided")
+            # Создаем абсолютные пути
+            tfp = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.template_name)
+            ofp = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.result_name)
+            tfp = self._norm_path(tfp)
+            ofp = self._norm_path(ofp)
+            obj["TEMPLATE_FILE_PATH"] = tfp
+            obj["OUTPUT_FILE_PATH"]   = ofp
+            # Тут генерится экселька
+            make_report_from_object(obj)
         
-        make_report_from_object(obj)
+        if len(self.html_template_name) > 0:
+            tfp = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, self.html_template_name)
+            tfp = self._norm_path(tfp)
+            # Загружаем шаблон из файла
+            self._temp = loader.get_template(tfp)
+            self._cont = Context(obj)
+            
+    def get_html_result(self, params):
+        '''
+        Рендерит HTML отчет на основе контекста собраннаго в make_report и дополнительных
+        параметров **params. Возвращает HTML строку.
+        '''
+        assert isinstance(params, dict)
+        self._cont.update(params)
+        return self._temp.render(self._cont)
     
     def collect(self):
         ''' Функция отвечающая за формирование данных '''
-        raise NotImplemented(u"Функция сбора данных должна быть переопределена в классах потомках")
-    
-    
+        raise NotImplemented("The function of data collection should be overrided in child classes")
     
 
