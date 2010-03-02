@@ -17,12 +17,6 @@ class LicensingError(Exception):
     '''
     pass
 
-class InheritanceError(Exception):
-    '''
-        Исключения этого вида говорят о том, что некоторые методы в классе необходимо перепределить
-    '''
-    pass
-
 # Определение сигнала
 signal_license_key = django.dispatch.Signal(providing_args=['app_key',])
 def check_license_key(self, app_key):
@@ -96,7 +90,7 @@ class ApplicationLicKey:
             Заполняет объект значениями из модели StoredLicKey
             Перепределить в наследующем классе
         ''' 
-        raise InheritanceError       
+        raise NotImplementedError     
 
 class LicenseMiddleware:
     '''
