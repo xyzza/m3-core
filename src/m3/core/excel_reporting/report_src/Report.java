@@ -257,11 +257,18 @@ class ReportGenerator{
 	 * @throws Exception 
 	 */
 	private void copyRowWithReplace(JSONObject obj, int write_to_row, int inserted_rows, Row current_row) throws Exception {
+		boolean autoHeight = false;
 		for (Cell current_cell: current_row){
 			Row out_row = out_sheet.getRow(write_to_row + inserted_rows);
 			if (out_row == null)
 				out_row = out_sheet.createRow(write_to_row + inserted_rows);
-			out_row.setHeight(current_row.getHeight());
+			// Если в комментарии автовысота, то не переписываем высоту строки
+			org.apache.poi.ss.usermodel.Comment comm = current_cell.getCellComment();
+			if (comm!=null)
+				if (comm.getString().getString().toUpperCase().equals("#АВТОВЫСОТА"))
+					autoHeight = true;
+			if (!autoHeight)
+				out_row.setHeight(current_row.getHeight());
 			Cell out_cell = out_row.getCell(current_cell.getColumnIndex(), Row.CREATE_NULL_AS_BLANK);
 			copyCell(current_cell, out_cell);
 			
