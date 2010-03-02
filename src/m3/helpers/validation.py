@@ -66,7 +66,7 @@ class BaseValidationRule(object):
         self.value = ''
         self.fail_msg = ''
         self.callback_on_success = None
-        self.callback_on_failed = None
+        self.callback_on_fail = None
     def check(self):
         return True
         
