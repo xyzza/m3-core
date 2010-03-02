@@ -29,12 +29,13 @@ class BaseExtWindow(ExtUIComponent):
         self.buttons = []
         
     def render_buttons(self):
-        js = 'buttons:['
-        for button in self.buttons:
-            js += button.as_js() + ','
-        if js[-1] == ',':
-            js = js[0:len(js)-1]
-        return js + ']'
+#        js = 'buttons:['
+#        for button in self.buttons:
+#            js += button.render() + ','
+#        if js[-1] == ',':
+#            js = js[0:len(js)-1]
+#        return js + ']'
+        return 'buttons:[%s]' % ','.join([button.render() for button in self.buttons])
     
     def render(self):
         return render_component(self)

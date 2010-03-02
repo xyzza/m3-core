@@ -13,6 +13,10 @@ class ExtStringField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtStringField, self).__init__(*args, **kwargs)
+        self.name = ''
+        self.label = ''
+        self.value = ''
+        self.width = ''
         
     def render(self):
         js = 'new Ext.form.TextField({'
@@ -20,7 +24,10 @@ class ExtStringField(BaseExtField):
             js += 'name:"' + self.name + '",'
         if self.label:
             js += 'fieldLabel:"' + self.label + '",'
-        
+        if self.value:
+            js += 'value:"' + self.value + '",'
+        if self.width:
+            js += 'width:' + self.width + ','
         return js + 'id:"' + self.client_id + '"})'
         
 class ExtDateField(BaseExtField):
