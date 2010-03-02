@@ -4,7 +4,7 @@ Created on 27.02.2010
 
 @author: akvarats
 '''
-from m3.ui.ext import ExtUIComponent
+from m3.ui.ext.base import ExtUIComponent
 
 class BaseExtControl(ExtUIComponent):
     def __init__(self, *args, **kwargs):

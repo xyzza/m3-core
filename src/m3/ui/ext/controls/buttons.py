@@ -15,7 +15,7 @@ class ExtButton(BaseExtControl):
         super(ExtButton, self).__init__(self, *args, **kwargs)
         self.text = 'Кнопка'
         
-        # мена событий для кнопки
+        # событие нажатия на кнопку
         self.handler_pressed = ''
         
     def as_js(self):

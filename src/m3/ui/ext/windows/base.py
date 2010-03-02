@@ -5,8 +5,10 @@ Created on 25.02.2010
 @author: akvarats
 '''
 
-from m3.ui.ext import ExtUIComponent
+from m3.ui.ext.base import ExtUIComponent
+from m3.ui.ext.renderers import ExtWindowRenderer
 from m3.ui.ext import render_component
+from m3.ui.ext import render_template
 
 class BaseExtWindow(ExtUIComponent):
     '''
@@ -14,7 +16,10 @@ class BaseExtWindow(ExtUIComponent):
     '''
     def __init__(self, *args, **kwargs):
         super(BaseExtWindow, self).__init__(*args, **kwargs)
-        self.template='ext-windows/ext-window.js'
+        self.template = 'ext-windows/ext-window.js'
+        self.template_globals = ''
+        self.renderer = ExtWindowRenderer()
+        self.renderer.window = self
         
         # параметры окна
         self.width = 400
@@ -33,3 +38,8 @@ class BaseExtWindow(ExtUIComponent):
     
     def render(self):
         return render_component(self)
+    
+    def render_globals(self):
+        if self.template_globals:
+            return render_template(self.template_globals, {'window': self})
+        return ''
