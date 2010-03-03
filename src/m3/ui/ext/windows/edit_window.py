@@ -12,6 +12,7 @@ class ExtEditWindow(BaseExtWindow):
         super(ExtEditWindow, self).__init__(*args, **kwargs)
         self.__form = None
         self.renderer.template = 'ext-script/ext-editwindowscript.js' 
+        self.init_component(*args, **kwargs)
         
     #=======================================================================
     # Свойство класса form

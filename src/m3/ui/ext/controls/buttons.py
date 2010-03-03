@@ -17,10 +17,13 @@ class ExtButton(BaseExtControl):
         
         # событие нажатия на кнопку
         self.handler_pressed = ''
+        self.init_component(*args, **kwargs)
         
-    def as_js(self):
-        js = ''
-        js += '{text:' + '"' + self.text + '"'
-        if self.handler_pressed:
-            js += ',handler:' + self.handler_pressed
-        return js + '}'
+    def render(self):
+#        js = ''
+#        js += '{text:' + '"' + self.text + '"'
+#        if self.handler_pressed:
+#            js += ',handler:' + self.handler_pressed
+#        return js + '}'
+        return '{text: "%s" %s}' \
+            % ((self.text, '') if not self.handler_pressed else (self.text, ',handler: %s' % self.handler_pressed))

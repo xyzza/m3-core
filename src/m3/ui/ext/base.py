@@ -68,3 +68,13 @@ class ExtUIComponent(object):
     
     def get_script(self):
         return self.renderer.get_script()
+    
+    def init_component(self, *args, **kwargs):
+        '''
+            Заполняет атрибуты экземпляра значениями в kwargs
+        '''
+        for k, v in kwargs.items():
+            if self.__dict__.has_key(k):
+                self.__setattr__(k, v)
+            else:
+                raise AttributeError('Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__))
