@@ -628,20 +628,29 @@ class ReportGenerator{
 	 * Важно! Таги должны быть заданы в первой строке или первой колонке! Интервал повторения один и непрерывный!
 	 * @param sheet Страница для обработки
 	 */
-	private void processRepeatTags(int destSheetIndex, Sheet sheet){
+	private RepeatedArea processRepeatTags(int destSheetIndex, Sheet sheet){
+		RepeatedArea area = new RepeatedArea();
 		// Ищем сначала повторения строк
 		Cell start = Scan(sheet, -1, -1, "#ПовторятьСтроку", true);
 		if (start != null){
 			Cell end = Scan(sheet, start.getRowIndex(), -1, "##ПовторятьСтроку", true);
 			if (end != null){
 				// Есть завершающий тег, то повторять интервал между ними
-				in_book.setRepeatingRowsAndColumns(destSheetIndex, -1, -1, start.getRowIndex(), end.getRowIndex());
+				area.start_row = start.getRowIndex();
+				area.end_row = end.getRowIndex();
 			}else{
 				// Если нет закрывающего тега, то повторять только одну строку
-				in_book.setRepeatingRowsAndColumns(destSheetIndex, -1, -1, start.getRowIndex(), start.getRowIndex());
+				area.start_row = start.getRowIndex();
+				area.end_row = start.getRowIndex();
 			}
 		}
 		//TODO: Ищем теперь ищем повторения колонок
+		
+		return area;
+	}
+	
+	public void setRepeatedArea(int destSheetIndex, RepeatedArea area){
+		in_book.setRepeatingRowsAndColumns(destSheetIndex, area.start_col, area.end_col, area.start_row, area.end_row);
 	}
 	
 	/**
@@ -659,7 +668,7 @@ class ReportGenerator{
 		range.end_row = in_sheet.getLastRowNum();
 		renderRange(root, range, range.start_row);
 		
-		processRepeatTags(in_book.getSheetIndex(out_sheet), in_sheet);
+		RepeatedArea rep_area = processRepeatTags(in_book.getSheetIndex(out_sheet), in_sheet);
 		
 		// Копируем область печати (больше не копируем - должна определяться сама при предв. просмотре в экселе)
 //		String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
@@ -674,6 +683,8 @@ class ReportGenerator{
 //			area = area.substring(t + 1);
 //			in_book.setPrintArea(in_book.getSheetIndex(out_sheet), area);
 //		}
+		
+		setRepeatedArea(in_book.getSheetIndex(out_sheet), rep_area);
 		
 		// Новую закладку делаем активной
 		in_book.setActiveSheet(in_book.getSheetIndex(out_sheet));
@@ -706,6 +717,16 @@ class SheetRegion{
 	int end_row;
 	int start_col;
 	int end_col;
+}
+
+/*
+ * Хранит повторяемую область для печати
+ */
+class RepeatedArea{
+	int start_row = -1;
+	int end_row = -1;
+	int start_col = -1;
+	int end_col = -1;
 }
 
 //TODO: Копирование рисунков
