@@ -695,12 +695,42 @@ class ReportGenerator{
 	}
 	
 	/**
+	 * Удаляет со страницы все строки с тегами #, ##, %, %% которые
+	 * @param sheet Целевая страница
+	 */
+	private void clean_unused_tags(Sheet sheet){
+		// Перебор строк
+		for (int row_num = sheet.getLastRowNum(); row_num >= sheet.getFirstRowNum(); row_num--){
+			Row row = sheet.getRow(row_num);
+			if (row == null)
+				continue;
+			boolean has_tag = false;
+			// Перебор колонок
+			for (Cell cell: row){
+				if (cell.getCellType() == Cell.CELL_TYPE_STRING){
+					String value = cell.getStringCellValue();
+					if ((value.length() > 3) && (value.indexOf("%") == 0)){
+						has_tag = true;
+						break;
+					}
+				}
+			}
+			// Удаляем если есть мусор
+			if (has_tag){
+				//sheet.removeRow(row);
+				sheet.shiftRows(row_num + 1, sheet.getLastRowNum(), -1);
+			}
+		}
+	}
+	
+	/**
 	 * Генерация отчета.
 	 * @throws Exception
 	 */
 	public void generate() throws Exception {
 		// Предварительная развертка горизонтальных регионов		
 		grow_horizontal_regions();
+		clean_unused_tags(in_sheet);
 		
 		merged_regions = getMergedRegions(in_sheet);
 		
