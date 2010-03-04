@@ -1,3 +1,10 @@
+/*
+ * Excel report generator for platform BARS M3
+ * Author: Safiullin Vadim
+ * License: BSD
+ * Version: 0.2 development in progress
+ */
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,8 +16,11 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.Footer;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -41,7 +51,7 @@ public class Report {
 		ReportGenerator report = null;
 		if (args.length == 2)
 			// Для отладки запускай с параметрами
-			// "s://STAND_ALONE_SOFTWARE//_DEV//workspace//report//media//json.txt" "windows-1251" 
+			// "windows-1251" "s://STAND_ALONE_SOFTWARE//_DEV//workspace//report//media//json.txt" 
 			report = ReportGenerator.createFromFiles(args[0], args[1]);
 		else if (args.length == 1){
 			report = ReportGenerator.createFromStdin(args[0]);
@@ -94,7 +104,6 @@ class ReportGenerator{
 		this.root = json;
 		in_sheet = book.getSheetAt(0);
 		out_sheet = createShadowSheet();
-		merged_regions = getMergedRegions(in_sheet);
 	}
 	
 	/**
@@ -104,7 +113,6 @@ class ReportGenerator{
 	 */
 	private void copyCell(Cell oldCell, Cell newCell){
         newCell.setCellStyle(oldCell.getCellStyle());
-        newCell.setCellComment(oldCell.getCellComment());
 
         // Копирум значение
         switch (oldCell.getCellType()) {
@@ -115,7 +123,7 @@ class ReportGenerator{
             	newCell.setCellValue(oldCell.getNumericCellValue());
                 break;
             case HSSFCell.CELL_TYPE_BLANK:
-            	//newCell.setCellValue(HSSFCell.CELL_TYPE_BLANK);
+            	newCell.setCellValue("");
                 break;
             case HSSFCell.CELL_TYPE_BOOLEAN:
             	newCell.setCellValue(oldCell.getBooleanCellValue());
@@ -263,7 +271,7 @@ class ReportGenerator{
 			if (out_row == null)
 				out_row = out_sheet.createRow(write_to_row + inserted_rows);
 			// Если в комментарии автовысота, то не переписываем высоту строки
-			org.apache.poi.ss.usermodel.Comment comm = current_cell.getCellComment();
+			Comment comm = current_cell.getCellComment();
 			if (comm!=null)
 				if (comm.getString().getString().toUpperCase().equals("#АВТОВЫСОТА"))
 					autoHeight = true;
@@ -391,6 +399,14 @@ class ReportGenerator{
 		out_print.setScale(in_print.getScale());
 		out_print.setVResolution(in_print.getVResolution());
 		
+		// Колонтитулы, мать их, неправильно ставит MS Office 2007
+		// Если генератор падает тут, значит колонтитул нужно прописать вручную
+		Footer in_foot = in_sheet.getFooter();
+		Footer out_foot = out_sheet.getFooter();
+		out_foot.setCenter(in_foot.getCenter());
+		out_foot.setLeft(in_foot.getLeft());
+		out_foot.setRight(in_foot.getRight());
+				
 		return out_sheet;
 	}
 	
@@ -412,28 +428,252 @@ class ReportGenerator{
 	}
 	
 	/**
+	 * Сдвигает все содержимое вправо
+	 * @param start_row Начальная строка интервала сдвига
+	 * @param end_row Конечная строка интервала сдвига
+	 * @param start_col Колонка с которой начинается сдвиг (включительно)
+	 * @param offset Количество смещаемых колонок
+	 */
+	private void horizontalShift(Sheet sheet, int start_row, int end_row, int start_col, int offset){
+		for (int row_num = start_row; row_num <= end_row; row_num++){
+			Row current_row = sheet.getRow(row_num);
+			if (current_row == null)
+				continue;
+			
+			// Нужно брать ячейки с конца строки по start_col и копировать их на offset позиций правее
+			short last_col = current_row.getLastCellNum();
+			for (short col_num = last_col; col_num >= start_col; col_num--){
+				Cell current_cell = current_row.getCell(col_num);
+				if (current_cell == null)
+					continue;
+				
+				Cell new_cell = safeGetCell(sheet, row_num, col_num + offset);
+				copyCell(current_cell, new_cell);
+			}
+		}
+	}
+	
+	/**
+	 * Фундаментальный метод!
+	 * Безопасно возвращает ячейку, если ее нет, то создает пустую
+	 * @param destSheet Страница из которой берется ячейка
+	 * @param row_offset Номер строки ячейки
+	 * @param col_offset Номер колонки ячейки
+	 * @return Cell
+	 */
+	private Cell safeGetCell(Sheet destSheet, int row_num, int col_num){
+		Row r = destSheet.getRow(row_num);
+		if (r == null)
+			r = destSheet.createRow(row_num);
+		Cell c = r.getCell(col_num);
+		if (c == null)
+			c = r.createCell(col_num);
+		return c;
+	}
+	
+	/**
+	 * Фундаментальный метод!
+	 * Копирует прямоугольный регион из одной книги в другую по заданным координатам
+	 * @param sourceRegion Координаты исходного региона на странице
+	 * @param sourceSheet Исходная страница с которой читаем ячейки
+	 * @param destSheet Целевая страница на которую пишем ячейки
+	 * @param row_offset Номер строки с которая начинается запись региона
+	 * @param col_offset Номер колонки с которой начинается запись региона
+	 */
+	private void copyRegion(SheetRegion sourceRegion, Sheet sourceSheet, Sheet destSheet, int row_offset, int col_offset){
+		// Для каждой строки в регионе
+		for (int row_num = sourceRegion.start_row; row_num <= sourceRegion.end_row; row_num++){
+			Row current_row = sourceSheet.getRow(row_num);
+			if (current_row == null)
+				continue;
+			
+			// Для каждой ячейки в строке региона
+			for (int col_num = sourceRegion.start_col; col_num <= sourceRegion.end_col; col_num++){
+				Cell current_cell = current_row.getCell(col_num, Row.CREATE_NULL_AS_BLANK);
+				
+				// Создаем целевую ячейку и копируем в неё
+				int y = row_offset + row_num - sourceRegion.start_row;
+				int x = col_offset + col_num - sourceRegion.start_col;
+				Cell destCell = safeGetCell(destSheet, y, x);
+				copyCell(current_cell, destCell);
+			}
+		}
+		
+		// !!! Копирование смежных регионов !!!
+		// Подразумевается что внутри региона смежные ячейки не вылезают наружу.
+		// Не могу представить случай когда это пригодилось бы.
+		ArrayList<CellRangeAddress> mregions = getMergedRegions(sourceSheet);
+		for (int row_num = sourceRegion.start_row; row_num <= sourceRegion.end_row; row_num++){
+			for (int col_num = sourceRegion.start_col; col_num <= sourceRegion.end_col; col_num++){
+				// Ищем пересечение координат текущей ячейки с началом одного из смежных регионов
+				for (CellRangeAddress reg: mregions){
+					if ((reg.getFirstRow() == row_num) && (reg.getFirstColumn() == col_num)){
+						// Новый регион нужно сместить на разницу между исходным и целевым регионом
+						int delta_y = row_offset - sourceRegion.start_row;
+						int delta_x = col_offset - sourceRegion.start_col;
+						CellRangeAddress new_nreg = new CellRangeAddress(
+								reg.getFirstRow() + delta_y,
+								reg.getLastRow() + delta_y,
+								reg.getFirstColumn() + delta_x,
+								reg.getLastColumn() + delta_x);
+						destSheet.addMergedRegion(new_nreg);
+					}
+				}
+			}
+		}
+	}
+	
+	private void makeMeHappy() {
+		SheetRegion tag_region = new SheetRegion();
+		boolean found = false;
+		String tag_key = "";
+		String tag = "";
+		// Ищем начальный тег горизонтального региона
+		mainLoop:
+		for (int row_num = in_sheet.getFirstRowNum(); row_num<= in_sheet.getLastRowNum(); row_num++){
+			Row current_row = in_sheet.getRow(row_num);
+			if (current_row == null)
+				continue;
+			for (Cell current_cell: current_row){
+				if (current_cell.getCellType() == Cell.CELL_TYPE_STRING){
+					// В зависимости от того что мы ищем: начало или конец
+					if (current_cell.getStringCellValue().charAt(0) == '%') {
+						System.out.println("Found at ");
+						System.out.println(current_cell.getRowIndex());
+						System.out.println(current_cell.getColumnIndex());
+						// Теперь нужно найти конец тега
+						
+						tag = current_cell.getStringCellValue();
+						String[] strs = current_cell.getStringCellValue().split(" ");
+						tag_key = strs[0].substring(1);
+						
+						tag_region.start_row  = current_cell.getRowIndex() + 1;
+						tag_region.start_col  = current_cell.getColumnIndex();
+						tag_region.end_col = tag_region.start_col + Integer.parseInt(strs[1]) - 1;
+						break mainLoop;
+					}
+				}
+			}
+		}
+		// Ищем конечный тег горизонтального региона
+		for (int row_num = tag_region.start_row; row_num<= in_sheet.getLastRowNum(); row_num++){
+			Row current_row = in_sheet.getRow(row_num);
+			if (current_row != null){
+				Cell cell = current_row.getCell(tag_region.start_col);
+				if ((cell != null) && (cell.getCellType() == Cell.CELL_TYPE_STRING)){
+					if (cell.getStringCellValue().equals('%' + tag)){
+						tag_region.end_row = row_num - 1;
+						found = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		// Оооо! Мля! Неужели нашли!
+		if (found){
+			JSONArray arr = (JSONArray)root.get(tag_key);
+			
+			// Перед копированием сдвигаем вправо ячейки
+			int offset = arr.size() * (tag_region.end_col - tag_region.start_col + 1);
+			horizontalShift(in_sheet, tag_region.start_row,	tag_region.end_row, tag_region.end_col + 1, offset);
+			
+			for (int i=0; i<arr.size(); i++){
+				int col_offset = tag_region.end_col + i * (tag_region.end_col - tag_region.start_col + 1) + 1;
+				copyRegion(tag_region, in_sheet, in_sheet, tag_region.start_row, col_offset);
+			}
+		}
+	}
+	
+	private Cell Scan(Sheet sheet, int start_row, int end_row, String token, boolean in_comments){
+		int srow = start_row;
+		if (start_row < 0)
+			srow = sheet.getFirstRowNum();
+		int erow = end_row;
+		if (end_row < 0)
+			erow = sheet.getLastRowNum();
+		for (int row_num = srow; row_num <= erow; row_num++){
+			Row row = sheet.getRow(row_num);
+			if (row == null)
+				continue;
+			for (Cell cell: row){
+				// Откуда берем текст
+				String text = "";
+				if (in_comments == true){
+					// Из коммента
+					Comment comm = cell.getCellComment();
+					if (comm == null)
+						continue;
+					text = comm.getString().getString();
+				}else{
+					// Из самого содержимого
+					if (cell.getCellType() == Cell.CELL_TYPE_STRING)
+						text = cell.getStringCellValue();
+					else
+						continue;
+				}
+				
+				// Сравнение
+				if (text.toUpperCase().equals(token.toUpperCase()))
+					return cell;
+				
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Обрабатывает на странице теги повторяющихся строк и колонок. Это нужно например для заголовков длинных таблиц.
+	 * Теги определяются в комментариях #ПовторятьСтроку и #ПовторятьКолонку и закрываются на ##...
+	 * Важно! Таги должны быть заданы в первой строке или первой колонке! Интервал повторения один и непрерывный!
+	 * @param sheet Страница для обработки
+	 */
+	private void processRepeatTags(int destSheetIndex, Sheet sheet){
+		// Ищем сначала повторения строк
+		Cell start = Scan(sheet, -1, -1, "#ПовторятьСтроку", true);
+		if (start != null){
+			Cell end = Scan(sheet, start.getRowIndex(), -1, "##ПовторятьСтроку", true);
+			if (end != null){
+				// Есть завершающий тег, то повторять интервал между ними
+				in_book.setRepeatingRowsAndColumns(destSheetIndex, -1, -1, start.getRowIndex(), end.getRowIndex());
+			}else{
+				// Если нет закрывающего тега, то повторять только одну строку
+				in_book.setRepeatingRowsAndColumns(destSheetIndex, -1, -1, start.getRowIndex(), start.getRowIndex());
+			}
+		}
+		//TODO: Ищем теперь ищем повторения колонок
+	}
+	
+	/**
 	 * Генерация отчета.
 	 * @throws Exception
 	 */
 	public void generate() throws Exception {
+		// Предварительная развертка горизонтальных регионов		
+		//makeMeHappy();
+		
+		merged_regions = getMergedRegions(in_sheet);
+		
 		Range range = new Range();
 		range.start_row = in_sheet.getFirstRowNum();
 		range.end_row = in_sheet.getLastRowNum();
 		renderRange(root, range, range.start_row);
 		
-		// Копируем область печати
-		String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
+		processRepeatTags(in_book.getSheetIndex(out_sheet), in_sheet);
+		
+		// Копируем область печати (больше не копируем - должна определяться сама при предв. просмотре в экселе)
+//		String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
 		
 		// Подмена листов. Удаляем шаблонный лист и активируем результат
 		String name = in_sheet.getSheetName();
 		in_book.removeSheetAt(in_book.getSheetIndex(in_sheet));
 		in_book.setSheetName(in_book.getSheetIndex(out_sheet), name);
 		
-		if (area != null){
-			int t = area.indexOf('!');
-			area = area.substring(t + 1);
-			in_book.setPrintArea(in_book.getSheetIndex(out_sheet), area);
-		}
+//		if (area != null){
+//			int t = area.indexOf('!');
+//			area = area.substring(t + 1);
+//			in_book.setPrintArea(in_book.getSheetIndex(out_sheet), area);
+//		}
 		
 		// Новую закладку делаем активной
 		in_book.setActiveSheet(in_book.getSheetIndex(out_sheet));
@@ -445,8 +685,12 @@ class ReportGenerator{
 	    in_book.write(fileOut);
 	    fileOut.close();
 	}
+
 }
 
+/*
+ * Хер пойми что он делает, я уже забыл! ;)
+ */
 class Range{
 	String name;
 	int cell_num;
@@ -454,5 +698,18 @@ class Range{
 	int end_row;
 }
 
+/*
+ * Класс описывает прямоугольную область на страце
+ */
+class SheetRegion{
+	int start_row;
+	int end_row;
+	int start_col;
+	int end_col;
+}
+
 //TODO: Копирование рисунков
-//TODO: Написать стресс тест
+//TODO: Переписать все к чертям собачим
+//TODO: Прославиться на весь мир
+//TODO: Написать о себе статью в википедии
+
