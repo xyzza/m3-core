@@ -1,7 +1,7 @@
 function entry_point(){
-    var window = {{ renderer.window.render }};
+    var win = {{ renderer.window.render }};
     
-    window.show();
+    win.show();
 }
 
 entry_point();

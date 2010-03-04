@@ -15,6 +15,24 @@ class BaseExtWindow(ExtUIComponent):
     Базовый класс для всех окон в системе
     '''
     def __init__(self, *args, **kwargs):
+        '''
+        Атрибуты экземпляров:
+            template - Шаблон для рендеринга
+            template_globals - Шаблон произвольных функций
+            renderer - Ссылка на объект ExtWindowRenderer() 
+            
+            width - Ширина
+            height - Высота
+            title - Заголовок
+            top_container - Контейнер для содержащихся на форме элементов
+            buttons - Имеющиеся кнопки
+            layuot - Тип расположения контейнера
+            modal - Модальное окно
+            maximizable - Возможность развернуть на весь экран
+            minimizable - Возможность свернуть
+            maximized - Развернута на весь экран
+            minimized - Свернута
+        '''
         super(BaseExtWindow, self).__init__(*args, **kwargs)
         self.template = 'ext-windows/ext-window.js'
         self.template_globals = ''
@@ -25,8 +43,11 @@ class BaseExtWindow(ExtUIComponent):
         self.width = 400
         self.height = 300
         self.title = ''
-        self.top_container = None # контейнер для содержащихся на форме элементов
+        self.top_container = None
         self.buttons = []
+        
+        self.layuot = ''
+        self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
         
     def render_buttons(self):
 #        js = 'buttons:['
