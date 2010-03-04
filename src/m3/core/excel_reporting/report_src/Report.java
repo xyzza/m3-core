@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
@@ -281,7 +280,7 @@ class ReportGenerator{
 			copyCell(current_cell, out_cell);
 			
 			// Подстановка значений в скопированный ячейке
-			processReplaceTag(out_cell, obj);
+			processReplaceTag(out_cell, obj, "");
 			
 		}
 	}
@@ -304,7 +303,7 @@ class ReportGenerator{
 	 * @param obj спозиционированный JSON объект
 	 * @throws Exception 
 	 */
-	private void processReplaceTag(Cell outCell, JSONObject obj) throws Exception {
+	private void processReplaceTag(Cell outCell, JSONObject obj, String token_prefix) throws Exception {
 		if (outCell.getCellType() != Cell.CELL_TYPE_STRING)
 			return;
 		String cell_text = outCell.getStringCellValue();
@@ -313,6 +312,15 @@ class ReportGenerator{
 			int end_tag = cell_text.indexOf('$', start_tag + 1);
 			if (end_tag > -1){
 				String key = cell_text.substring(start_tag + 1, end_tag);
+				
+				// Подходят только ключи с заданным префиксом
+				if (token_prefix.length() > 0)
+					if (key.indexOf(token_prefix) != 0)
+						return;
+					else
+						// Нужно удалить префикс из ключа
+						key = key.substring(token_prefix.length());
+				
 				String tag = cell_text.substring(start_tag, end_tag + 1);
 				Object value = obj.get(key);
 				
@@ -523,80 +531,107 @@ class ReportGenerator{
 		}
 	}
 	
-	private void makeMeHappy() {
-		SheetRegion tag_region = new SheetRegion();
-		boolean found = false;
-		String tag_key = "";
-		String tag = "";
-		// Ищем начальный тег горизонтального региона
-		mainLoop:
-		for (int row_num = in_sheet.getFirstRowNum(); row_num<= in_sheet.getLastRowNum(); row_num++){
-			Row current_row = in_sheet.getRow(row_num);
-			if (current_row == null)
+	/*
+	 * Обрабатывает все теги подстановки в заданном регионе
+	 */
+	private void processTagsInRegion(Sheet sheet, SheetRegion region, JSONObject obj, String token_prefix) throws Exception{
+		// Перебор строк
+		for (int row_num = region.start_row; row_num <= region.end_row; row_num++){
+			Row row = sheet.getRow(row_num);
+			if (row == null)
 				continue;
-			for (Cell current_cell: current_row){
-				if (current_cell.getCellType() == Cell.CELL_TYPE_STRING){
-					// В зависимости от того что мы ищем: начало или конец
-					if (current_cell.getStringCellValue().charAt(0) == '%') {
-						System.out.println("Found at ");
-						System.out.println(current_cell.getRowIndex());
-						System.out.println(current_cell.getColumnIndex());
-						// Теперь нужно найти конец тега
-						
-						tag = current_cell.getStringCellValue();
-						String[] strs = current_cell.getStringCellValue().split(" ");
-						tag_key = strs[0].substring(1);
-						
-						tag_region.start_row  = current_cell.getRowIndex() + 1;
-						tag_region.start_col  = current_cell.getColumnIndex();
-						tag_region.end_col = tag_region.start_col + Integer.parseInt(strs[1]) - 1;
-						break mainLoop;
-					}
-				}
-			}
-		}
-		// Ищем конечный тег горизонтального региона
-		for (int row_num = tag_region.start_row; row_num<= in_sheet.getLastRowNum(); row_num++){
-			Row current_row = in_sheet.getRow(row_num);
-			if (current_row != null){
-				Cell cell = current_row.getCell(tag_region.start_col);
-				if ((cell != null) && (cell.getCellType() == Cell.CELL_TYPE_STRING)){
-					if (cell.getStringCellValue().equals('%' + tag)){
-						tag_region.end_row = row_num - 1;
-						found = true;
-						break;
-					}
-				}
-			}
-		}
-		
-		// Оооо! Мля! Неужели нашли!
-		if (found){
-			JSONArray arr = (JSONArray)root.get(tag_key);
-			
-			// Перед копированием сдвигаем вправо ячейки
-			int offset = arr.size() * (tag_region.end_col - tag_region.start_col + 1);
-			horizontalShift(in_sheet, tag_region.start_row,	tag_region.end_row, tag_region.end_col + 1, offset);
-			
-			for (int i=0; i<arr.size(); i++){
-				int col_offset = tag_region.end_col + i * (tag_region.end_col - tag_region.start_col + 1) + 1;
-				copyRegion(tag_region, in_sheet, in_sheet, tag_region.start_row, col_offset);
+			// Перебор колонок
+			for (int col_num = region.start_col; col_num <= region.end_col; col_num++){
+				Cell cell = row.getCell(col_num);
+				if (cell == null)
+					continue;
+				
+				processReplaceTag(cell, obj, token_prefix + '.');
+				
 			}
 		}
 	}
 	
-	private Cell Scan(Sheet sheet, int start_row, int end_row, String token, boolean in_comments){
+	private void grow_horizontal_regions() throws Exception {
+		// Вложенные теги оставляем до лучших времен
+		// Пока будем искать на листе все теги сверху вниз и слева на право
+		
+		int start_scan_row = 0;
+		for(;;){
+			// Ищем начальный тег горизонтального региона
+			Cell start_cell = Scan(in_sheet, start_scan_row, -1, -1, -1, "%", false, 1);
+			if (start_cell == null)
+				break;
+			
+			String[] strs = start_cell.getStringCellValue().split(" ");
+			String tag_key = strs[0].substring(1);
+			
+			SheetRegion tag_region = new SheetRegion();
+			tag_region.start_row = start_cell.getRowIndex() + 1;
+			tag_region.start_col = start_cell.getColumnIndex();
+			tag_region.end_col = tag_region.start_col + Integer.parseInt(strs[1]) - 1;
+			String tag = start_cell.getStringCellValue();
+			
+			// Ищем конечный тег горизонтального региона
+			Cell end_cell = Scan(in_sheet, tag_region.start_row, -1, tag_region.start_col, tag_region.start_col, "%" + tag, false, 0);
+			if (end_cell == null)
+				throw new Exception("End of region " + tag + " not found");
+			tag_region.end_row = end_cell.getRowIndex() - 1;
+			
+			// Количество регионов которые нужно раскопировать
+			JSONArray arr =	(JSONArray)root.get(tag_key);
+			int size = arr.size() - 1;
+			
+			// Сдвиг ячеек справа от региона и копирование
+			int offset = (size) * (tag_region.end_col - tag_region.start_col + 1);
+			horizontalShift(in_sheet, tag_region.start_row,	tag_region.end_row, tag_region.end_col + 1, offset);
+			for (int i = 0; i < size; i++){
+				int col_offset = tag_region.end_col + i * (tag_region.end_col - tag_region.start_col + 1) + 1;
+				copyRegion(tag_region, in_sheet, in_sheet, tag_region.start_row, col_offset);
+			}
+			
+			// Обработка тегов внутри скопированных областей И САМОЙ исходной области
+			String token_prefix = tag_key;
+			for (int i = 0; i < size + 1; i++){
+				JSONObject obj = (JSONObject)arr.get(i);
+				processTagsInRegion(in_sheet, tag_region, obj, token_prefix);
+				tag_region = tag_region.shift(0, tag_region.end_col - tag_region.start_col + 1);
+			}
+			
+			start_scan_row = tag_region.end_row + 2;
+		}
+	}
+	
+	private Cell Scan(Sheet sheet, SheetRegion region, String token, boolean in_comments, int mode){
+		return Scan(sheet, region.start_row, region.end_row, region.start_col, region.end_col, token, in_comments, mode);
+	}
+	
+	private Cell Scan(Sheet sheet, int start_row, int end_row, int start_col, int end_col, 
+					  String token, boolean in_comments, int mode){
+		// Подготовка интервалов
 		int srow = start_row;
 		if (start_row < 0)
 			srow = sheet.getFirstRowNum();
 		int erow = end_row;
 		if (end_row < 0)
 			erow = sheet.getLastRowNum();
+		// Перебор строк
 		for (int row_num = srow; row_num <= erow; row_num++){
 			Row row = sheet.getRow(row_num);
 			if (row == null)
 				continue;
-			for (Cell cell: row){
+			// Интервал для колонок
+			int scol = start_col;
+			if (scol < 0)
+				scol = row.getFirstCellNum();
+			int ecol = end_col;
+			if (ecol < 0)
+				ecol = row.getLastCellNum();
+			// Перебор колонок
+			for (int col_num = scol; col_num <= ecol; col_num++){
+				Cell cell = row.getCell(col_num);
+				if (cell == null)
+					continue;
 				// Откуда берем текст
 				String text = "";
 				if (in_comments == true){
@@ -613,10 +648,16 @@ class ReportGenerator{
 						continue;
 				}
 				
-				// Сравнение
-				if (text.toUpperCase().equals(token.toUpperCase()))
-					return cell;
-				
+				// Сравнение зависит от режима
+				// 0 - полное регистронезависимое соответствие
+				// 1 - с начала строки (как правило поиск начала тега)
+				if (mode == 0){
+					if (text.toUpperCase().equals(token.toUpperCase()))
+						return cell;
+				}else if (mode == 1){
+					if (text.substring(0, token.length()).equals(token))
+						return cell;
+				}
 			}
 		}
 		return null;
@@ -631,9 +672,9 @@ class ReportGenerator{
 	private RepeatedArea processRepeatTags(int destSheetIndex, Sheet sheet){
 		RepeatedArea area = new RepeatedArea();
 		// Ищем сначала повторения строк
-		Cell start = Scan(sheet, -1, -1, "#ПовторятьСтроку", true);
+		Cell start = Scan(sheet, -1, -1, 0, 0, "#ПовторятьСтроку", true, 0);
 		if (start != null){
-			Cell end = Scan(sheet, start.getRowIndex(), -1, "##ПовторятьСтроку", true);
+			Cell end = Scan(sheet, start.getRowIndex(), -1, 0, 0, "##ПовторятьСтроку", true, 0);
 			if (end != null){
 				// Есть завершающий тег, то повторять интервал между ними
 				area.start_row = start.getRowIndex();
@@ -659,7 +700,7 @@ class ReportGenerator{
 	 */
 	public void generate() throws Exception {
 		// Предварительная развертка горизонтальных регионов		
-		//makeMeHappy();
+		grow_horizontal_regions();
 		
 		merged_regions = getMergedRegions(in_sheet);
 		
@@ -717,6 +758,18 @@ class SheetRegion{
 	int end_row;
 	int start_col;
 	int end_col;
+	
+	/**
+	 * Возвращает новый регион со вдвинутыми координатами
+	 */
+	public SheetRegion shift(int delta_row, int delta_col) {
+		SheetRegion region = new SheetRegion();
+		region.start_row = start_row + delta_row;
+		region.end_row = end_row + delta_row;
+		region.start_col = start_col + delta_col;
+		region.end_col = end_col + delta_col;
+		return region;
+	}
 }
 
 /*
