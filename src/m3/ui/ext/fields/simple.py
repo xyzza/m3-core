@@ -13,10 +13,6 @@ class ExtStringField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtStringField, self).__init__(*args, **kwargs)
-        self.name = ''
-        self.label = ''
-        self.value = ''
-        self.width = ''
         self.init_component(*args, **kwargs)
         
     def render(self):

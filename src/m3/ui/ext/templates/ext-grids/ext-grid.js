@@ -1,4 +1,5 @@
 new Ext.grid.GridPanel({
+	id: '{{ component.client_id }}',
     title: '{{ component.title }}',
 
     {% if component.title %}

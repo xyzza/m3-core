@@ -13,3 +13,5 @@ class BaseExtField(ExtUIComponent):
         
         self.label = ''
         self.name = ''
+        self.value = ''
+        self.width = ''

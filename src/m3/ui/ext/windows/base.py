@@ -26,7 +26,7 @@ class BaseExtWindow(ExtUIComponent):
             title - Заголовок
             top_container - Контейнер для содержащихся на форме элементов
             buttons - Имеющиеся кнопки
-            layuot - Тип расположения контейнера
+            layout - Тип расположения контейнера
             modal - Модальное окно
             maximizable - Возможность развернуть на весь экран
             minimizable - Возможность свернуть
@@ -46,7 +46,7 @@ class BaseExtWindow(ExtUIComponent):
         self.top_container = None
         self.buttons = []
         
-        self.layuot = ''
+        self.layout = ''
         self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
         
     def render_buttons(self):
