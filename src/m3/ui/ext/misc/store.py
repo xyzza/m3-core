@@ -6,39 +6,56 @@ Created on 3.3.2010
 '''
 
 from base import BaseExtStore
+from m3.ui.ext import render_component
 
 class ExtDataStore(BaseExtStore):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data = [], *args, **kwargs):
         super(ExtDataStore, self).__init__(*args, **kwargs)
-        self.data = args[0] # По умолчанию первым параметром передаются данные на заполнение store
+        self.data = data # По умолчанию первым параметром передаются данные на заполнение store
+        self.template = 'ext-misc/ext-data-store.js'
+        
+        self.__columns = [] # Для заполнения полей в шаблоне
         self.init_component(*args, **kwargs)
         
     def load_data(self, data):
         self.data = data
         
     def render(self, columns):
-        sections = []
-        for record in self.data:
-            values = []
-            for value in record:
-                values.append(value) 
-
-            sections.append("['%s']" % "','".join(values))
-        return '[%s]' % ','.join(sections)
+        self.__columns = columns
+        return render_component(self)
+    
+    def render_fields(self):
+        '''
+            Прописывается в шаблоне и заполняется при рендеринге
+        '''
+        return ','.join(['{name: "%s"}' % column.data_index for column in self.__columns]) 
+    
+    def render_data(self):
+        '''
+            Прописывается в шаблоне и заполняется при рендеринге
+        '''
+        res = []
+        for item in self.data:    
+            res.append('[%s]' % ','.join(['"%s"' % subitem for subitem in item]))   
+        return ','.join(res)
+            
     
 class ExtJsonStore(BaseExtStore):
     def __init__(self, *args, **kwargs):
         super(ExtJsonStore, self).__init__(*args, **kwargs)
+        self.template = 'ext-misc/ext-json-store.js'
+        self.__columns = [] # Для заполнения полей в шаблоне
         self.url = ''
         self.auto_load = False
         self.init_component(*args, **kwargs)
         
     def render(self, columns):
-        js = 'id: "%s"' % self.client_id
-        js += '' if not self.url else ',url: "%s"' % self.url
-        js += '' if not self.auto_load else ',autoLoad: "%s"' % str(self.auto_load).lower()
-        js += ',fields:[%s]' % ','.join(['{name: "%s", mapping: "%s"}' % (column.data_index , column.data_index) for column in columns])       
-        return 'new Ext.data.JsonStore({%s})' % js
+        self.__columns = columns
+        return render_component(self)
         
-        
+    def render_fields(self):
+        '''
+            Прописывается в шаблоне и заполняется при рендеринге
+        '''
+        return ','.join(['{name: "%s"}' % column.data_index for column in self.__columns]) 
         

@@ -18,6 +18,7 @@ class ExtButton(BaseExtControl):
         self.template = 'ext-controls/ext-simple-button.js'
         self.text = ''
         self.handler = ''
+        self.icon = ''
         self.init_component(*args, **kwargs)
         
     def render(self):

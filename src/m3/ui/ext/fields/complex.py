@@ -14,16 +14,33 @@ class ExtDictSelectField(BaseExtField):
     '''
     Поле с выбором из справочника
     '''
-    def __init__(self, url='',*args, **kwargs):
+    def __init__(self, url='', 
+                 icon_select='', 
+                 icon_clean='',
+                 text_select = '',
+                 text_clean = '',
+                 *args, 
+                 **kwargs):
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-dict-select-field.js' 
+
+        # здесь находится обработчик кнопки очистить
+        # рендерится не в своем окружении, то есть не self.clean_button.render_globals(), так как при этом не получит
+        # доступ к объекту ExtDictSelectField
+        self.template_globals = 'ext-script/ext-dict-select-field-handler.js'  
         
         handler = ExtConnection(url=url, 
                                 method='GET',
                                 parameters=dict(field_id=self.client_id))
         
-        self.select_button = ExtButton(text = u'Выбрать',handler=handler)
-        self.clean_button = ExtButton(text = 'Очистить', handler='function(){Ext.getCmp("%s").setValue('')}' % self.client_id)
+        self.select_button = ExtButton(text = text_select,
+                                       handler = handler, 
+                                       icon = icon_select)
+        
+        self.clean_button = ExtButton(text = text_clean,
+                                      icon = icon_clean,
+                                      handler=self.render_globals())
+                                      
         self.init_component(*args, **kwargs)
         
     def render(self):

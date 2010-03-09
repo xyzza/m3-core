@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from django import template as django_template
 
+from m3.ui.ext import render_template
 
 class ExtUIScriptRenderer(object):
     '''
@@ -54,6 +55,7 @@ class ExtUIComponent(object):
     '''
     def __init__(self, *args, **kwargs):
         self.template = ''
+        self.template_globals = ''
         self.client_id = 'cmp_' + str(uuid4())[0:8]
         # рендерер, используемый для вывода соответствующего компонента
         self.renderer = ExtUIScriptRenderer()
@@ -64,6 +66,14 @@ class ExtUIComponent(object):
         отображения самого компонента. За рендер полного javascript
         отвечает метод get_script()
         '''
+        return ''
+    
+    def render_globals(self):
+        '''
+            Рендерит и возвращает js-код, который помещен в template_globals
+        '''
+        if self.template_globals:
+            return render_template(self.template_globals, {'component': self})
         return ''
     
     def get_script(self):

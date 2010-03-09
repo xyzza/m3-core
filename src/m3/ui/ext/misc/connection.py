@@ -13,7 +13,7 @@ class ExtConnection(ExtUIComponent):
         self.template = 'ext-script/ext-connection.js'
         self.url = ''
         self.method = ''
-        self.parameters = ''
+        self.parameters = {}
         self.init_component(*args, **kwargs)
         
     def render(self):

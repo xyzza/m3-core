@@ -7,8 +7,7 @@ Created on 25.02.2010
 
 from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.renderers import ExtWindowRenderer
-from m3.ui.ext import render_component
-from m3.ui.ext import render_template
+from m3.ui.ext import render_component, render_template
 
 class BaseExtWindow(ExtUIComponent):
     '''
@@ -50,12 +49,6 @@ class BaseExtWindow(ExtUIComponent):
         self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
         
     def render_buttons(self):
-#        js = 'buttons:['
-#        for button in self.buttons:
-#            js += button.render() + ','
-#        if js[-1] == ',':
-#            js = js[0:len(js)-1]
-#        return js + ']'
         return 'buttons:[%s]' % ','.join([button.render() for button in self.buttons])
     
     def render(self):
@@ -63,5 +56,5 @@ class BaseExtWindow(ExtUIComponent):
     
     def render_globals(self):
         if self.template_globals:
-            return render_template(self.template_globals, {'window': self})
+            return render_template(self.template_globals, {'component': self, 'window': self})
         return ''

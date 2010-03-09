@@ -5,3 +5,9 @@
 ^\.pydevproject
 .pyc$
 ^\.settings
+relre:.old$
+relre:~$
+glob:src/m3/contrib/licensing/generate_licensing_hash.py
+relre:log$
+relre:.orig$
+relre:~[0-9]+
