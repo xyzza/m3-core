@@ -1,4 +1,5 @@
 function (){
+	{% if component.ask_before_deleting %}
     Ext.Msg.show({
         title: 'Подтверждение',
         msg: 'Вы действительно хотите очистить значение?',
@@ -12,4 +13,9 @@ function (){
             }
         }
     });
+	{% else %}
+		var client_id = '{{ component.client_id }}'; 
+        Ext.getCmp(client_id).setValue(''); 
+		Ext.getCmp(client_id).reference_id='';
+	{% endif%}
 }

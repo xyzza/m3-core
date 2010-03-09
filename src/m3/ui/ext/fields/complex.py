@@ -29,6 +29,8 @@ class ExtDictSelectField(BaseExtField):
         # доступ к объекту ExtDictSelectField
         self.template_globals = 'ext-script/ext-dict-select-field-handler.js'  
         
+        self.ask_before_deleting=True
+        
         handler = ExtConnection(url=url, 
                                 method='GET',
                                 parameters=dict(field_id=self.client_id))
@@ -38,10 +40,12 @@ class ExtDictSelectField(BaseExtField):
                                        icon = icon_select)
         
         self.clean_button = ExtButton(text = text_clean,
-                                      icon = icon_clean,
-                                      handler=self.render_globals())
+                                      icon = icon_clean)
                                       
         self.init_component(*args, **kwargs)
+        
+        # После init_component, чтобы ask_before_deleting проициниализировалось
+        self.clean_button.handler=self.render_globals()
         
     def render(self):
         return render_component(self)
