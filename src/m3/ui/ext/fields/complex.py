@@ -14,34 +14,22 @@ class ExtDictSelectField(BaseExtField):
     '''
     Поле с выбором из справочника
     '''
-    def __init__(self, url='', 
-                 icon_select='', 
-                 icon_clean='',
-                 text_select = '',
-                 text_clean = '',
-                 *args, 
-                 **kwargs):
+    def __init__(self, url='', method='GET', *args, **kwargs):
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-dict-select-field.js' 
 
-        # здесь находится обработчик кнопки очистить
+        # здесь находится обработчик кнопки "Очистить"
         # рендерится не в своем окружении, то есть не self.clean_button.render_globals(), так как при этом не получит
         # доступ к объекту ExtDictSelectField
         self.template_globals = 'ext-script/ext-dict-select-field-handler.js'  
         
         self.ask_before_deleting=True
         
-        handler = ExtConnection(url=url, 
-                                method='GET',
-                                parameters=dict(field_id=self.client_id))
+        handler = ExtConnection(url=url, method=method, parameters=dict(field_id=self.client_id))
         
-        self.select_button = ExtButton(text = text_select,
-                                       handler = handler, 
-                                       icon = icon_select)
+        self.select_button = ExtButton(text=u'Выбрать',handler=handler)
+        self.clean_button = ExtButton(text=u'Очистить')                                  
         
-        self.clean_button = ExtButton(text = text_clean,
-                                      icon = icon_clean)
-                                      
         self.init_component(*args, **kwargs)
         
         # После init_component, чтобы ask_before_deleting проициниализировалось
@@ -55,3 +43,11 @@ class ExtDictSelectField(BaseExtField):
     
     def render_clean_button(self):
         return self.clean_button.render()
+    
+    def set_buttons_icon(self, icon_select='', icon_clean=''):
+        self.select_button.icon = icon_select
+        self.clean_button.icon = icon_clean
+        
+    def set_buttons_text(self, text_select='', text_clean=''):
+        self.select_button.text = text_select
+        self.clean_button.text = text_clean

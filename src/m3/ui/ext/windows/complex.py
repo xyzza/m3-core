@@ -25,7 +25,8 @@ class ExtDictSelectWindow(BaseExtWindow):
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
              
         self.template_globals = 'ext-script/ext-button-select-window.js'  
-        self.dict_attr = {}
+        self.attr_id  = ''
+        self.attr_text = ''
         
         self.init_component(*args, **kwargs)
     
@@ -45,15 +46,30 @@ class ExtDictSelectWindow(BaseExtWindow):
     
     grid = property(_get_grid, _set_grid)
     
-    # Свойство для быстрого доступа к кнопке выбора значения
     @property
     def select_dict_button(self):
+        '''
+            Свойство для быстрого доступа к кнопке выбора значения
+        '''
         return self.buttons[0]
     
+    @property
+    def cancel_dict_button(self):
+        '''
+            Свойство для быстрого доступа к кнопке отмены значения
+        '''
+        return self.buttons[1]
+    
     def __get_field_id(self, request):
+        '''
+            Инкапсуляция над выбором id текстового поля из запроса с клиента
+        '''
         return request.GET.get('field_id')
     
     def set_attr(self, id='', text=''):
+        '''
+            Говорит о том, из какой колонки будет браться id значения, а из какого text
+        '''
         self.attr_id = id
         self.attr_text = text
         
