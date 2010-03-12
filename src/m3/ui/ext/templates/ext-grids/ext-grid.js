@@ -14,4 +14,11 @@ new Ext.grid.GridPanel({
 	height: 600,
 	stateful: true,
 	viewConfig: {forceFit: true}
+	
+	{%if component.show_banded_columns%}
+		//Плагин обработки объединенных колонок
+		,plugins: new Ext.ux.grid.ColumnHeaderGroup({
+			rows: {{ component.render_banded_columns_list|safe }}
+		})
+	{%endif%}
 })
