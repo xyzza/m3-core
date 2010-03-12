@@ -27,7 +27,7 @@ class ExtGrid(BaseExtPanel):
     
     def render_banded_columns_list(self):
         '''
-        Возвращает JS массив состоящий массивов с описанием объединенных колонок.
+        Возвращает JS массив состоящий из массивов с описанием объединенных колонок.
         Каждый вложенный массив соответствует уровню шапки грида от верхней к нижней. 
         '''
         result = '['
@@ -85,6 +85,7 @@ class ExtGridColumn(ExtUIComponent):
         self.data_index = ''
         self.align = ''
         self.colspan = ''
+        self.width = 150
         self.init_component(*args, **kwargs)
         
     def render(self):
@@ -99,6 +100,8 @@ class ExtGridColumn(ExtUIComponent):
             js += ',align: "%s"' % self.align
         if self.colspan:
             js += ',colspan: %s' % self.colspan
+        if self.width:
+            js += ',width: %s' % self.width
         return '{%s}' % js
         
         
