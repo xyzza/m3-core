@@ -20,21 +20,9 @@ class ExtForm(BaseExtPanel):
         return render_component(self)
     
     def render_items(self):
-#        js = ''
-#        for item in self.items:
-#            js += (item.render() + ',')
-#            
-#        if js and js[-1] == ',':
-#            js = js[:-1]
-#        return js
         return ','.join([item.render() for item in self.items])
     
     def _get_fields(self):       
-#        result = []
-#        for item in self.items:
-#            if issubclass(item, BaseExtField):
-#                result.append(item)
-#        return result
         return [item for item in self.items if issubclass(item, BaseExtField)]
 
     fields = property(_get_fields)

@@ -1,5 +1,6 @@
 function(){
 	var tree = new Ext.ux.tree.TreeGrid({
+		id: '{{ component.client_id}}',
 	    useArrows: true,
 	    autoScroll: true,
 	    animate: true,

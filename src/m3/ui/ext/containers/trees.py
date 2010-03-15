@@ -60,7 +60,7 @@ class ExtTreeNode(ExtUIComponent):
         self.text = ''
         self.leaf = False
         self.has_children = False
-        self.node_id = ''
+        #self.node_id = '' # используется client_id
         self.expanded = False
         self.auto_check = False
         self.children = []
