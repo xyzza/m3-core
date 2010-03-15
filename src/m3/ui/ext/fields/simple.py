@@ -24,9 +24,47 @@ class ExtStringField(BaseExtField):
         return 'new Ext.form.TextField({%s})' % js
 
         
-class ExtDateField(BaseExtField):
+class ExtDateField(ExtStringField):
     '''
     Поле ввода даты
     '''
     def __init__(self, *args, **kwargs):
-        super(ExtStringField, self).__init__(*args, **kwargs)
+        super(ExtDateField, self).__init__(*args, **kwargs)
+        
+    def render(self):
+        js = 'id: "%s"' % self.client_id
+        js += '' if not self.name else ',name: "%s"' % self.name
+        js += '' if not self.label else ',fieldLabel: "%s"' % self.label
+        js += '' if not self.value else ',value: "%s"' % self.value
+        js += '' if not self.width else ',width: "%s"' % self.width
+        return 'new Ext.form.DateField({%s})' % js
+    
+class ExtNumberField(ExtStringField):
+    '''
+    Поле ввода числового значения
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtNumberField, self).__init__(*args, **kwargs)
+        
+    def render(self):
+        js = 'id: "%s"' % self.client_id
+        js += '' if not self.name else ',name: "%s"' % self.name
+        js += '' if not self.label else ',fieldLabel: "%s"' % self.label
+        js += '' if not self.value else ',value: "%s"' % self.value
+        js += '' if not self.width else ',width: "%s"' % self.width
+        return 'new Ext.form.NumberField({%s})' % js  
+    
+class ExtComboBox(ExtStringField):
+    '''
+    Поле комбобокс
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtComboBox, self).__init__(*args, **kwargs)
+        
+    def render(self):
+        js = 'id: "%s"' % self.client_id
+        js += '' if not self.name else ',name: "%s"' % self.name
+        js += '' if not self.label else ',fieldLabel: "%s"' % self.label
+        js += '' if not self.value else ',value: "%s"' % self.value
+        js += '' if not self.width else ',width: "%s"' % self.width
+        return 'new Ext.form.ComboBox({%s})' % js
