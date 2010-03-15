@@ -1,7 +1,10 @@
 {# new Ext.tree.AsyncTreeNode -- нельзя использовать, так как работает не корректно с вложеной иерархией #} 
 {
-    'draggable': '{{ component.draggable|lower }}'
-	,'expanded': '{{ component.expanded|lower }}'
+	'expanded': '{{ component.expanded|lower }}'
+	{% if component.node_id %}
+	,'id': '{{ component.node_id }}'
+	{% endif %}
+    
 	{% for k, v in component.items.items %}
 		,{{ k }}:'{{ v }}'	
 	{%endfor%}

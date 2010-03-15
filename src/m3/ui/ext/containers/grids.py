@@ -15,11 +15,13 @@ class ExtGrid(BaseExtPanel):
         self.template = 'ext-grids/ext-grid.js'
         self.columns = []
         self.store = ''
+        
         self.init_component(*args, **kwargs)
+        
         # protected
-        self.plugins = []
         self.show_banded_columns = False
         self.banded_columns = SortedDict()
+        
         
         
     def render(self):

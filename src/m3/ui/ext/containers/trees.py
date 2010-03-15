@@ -6,7 +6,7 @@ Created on 11.3.2010
 '''
 
 from base import BaseExtPanel
-from m3.ui.ext.fields.base import BaseExtField
+from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.misc.base import BaseExtStore
 from m3.ui.ext import render_component
 from m3.ui.ext.containers import ExtGridColumn
@@ -53,7 +53,7 @@ class ExtTree(BaseExtPanel):
     def add_column(self,**kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
     
-class ExtTreeNode(BaseExtField):
+class ExtTreeNode(ExtUIComponent):
     def __init__(self,*args, **kwargs):
         super(ExtTreeNode, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree-node.js'
@@ -61,7 +61,6 @@ class ExtTreeNode(BaseExtField):
         self.leaf = False
         self.has_children = False
         self.node_id = ''
-        self.draggable = False
         self.expanded = False
         self.auto_check = False
         self.children = []
