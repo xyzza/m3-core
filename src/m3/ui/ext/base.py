@@ -7,12 +7,12 @@ Created on 01.03.2010
 
 @author: akvarats
 '''
+
 from uuid import uuid4
-
 from django import template as django_template
-
 from m3.ui.ext import render_template
 
+#===============================================================================
 class ExtUIScriptRenderer(object):
     '''
     Класс, отвечающий за рендер файла скрипта, который
@@ -45,11 +45,9 @@ class ExtUIScriptRenderer(object):
         context = django_template.Context({'renderer': self})
         template = django_template.loader.get_template(self.template)
         return template.render(context) 
-    
+
 #===============================================================================
-# Базовый класс для компонентов пользовательского интерфейса
-#===============================================================================
-class ExtUIComponent(object):
+class BaseExtComponent(object):
     '''
     Базовый класс для всех компонентов пользовательского интерфейса
     '''
@@ -88,3 +86,21 @@ class ExtUIComponent(object):
                 self.__setattr__(k, v)
             else:
                 raise AttributeError('Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__))
+            
+#===============================================================================
+class ExtUIComponent(BaseExtComponent):
+    '''
+        Базовый класс для компонентов визуального интерфейса
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtUIComponent, self).__init__(*args, **kwargs)
+        self.style = {}
+        self.hidden = False
+        self.disabled = False
+        self.height = ''
+        self.width = ''
+        self.x = ''
+        self.y = ''
+        
+    def render_style(self):
+       return ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])

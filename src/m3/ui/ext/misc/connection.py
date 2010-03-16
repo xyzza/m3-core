@@ -10,7 +10,7 @@ from m3.ui.ext import render_component
 class ExtConnection(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(ExtConnection, self).__init__(*args, **kwargs)
-        self.template = 'ext-script/ext-connection.js'
+        self.template = 'ext-misc/ext-connection.js'
         self.url = ''
         self.method = ''
         self.parameters = {}

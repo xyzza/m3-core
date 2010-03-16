@@ -19,14 +19,11 @@ class ExtContainer(BaseExtContainer):
         return render_component(self)
     
     def render_items(self):
-        return ','.join([item.render() for item in self.__items])
+        return ','.join([item.render() for item in self.items])
     
-    def __get_items(self):
+    @property
+    def items(self):
         return self.__items
-    
-    def __set_items(self,items):
-        self.items = items
-        
-    items = property(__get_items, __set_items)
+
         
 

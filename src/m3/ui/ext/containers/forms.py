@@ -15,7 +15,7 @@ class ExtForm(BaseExtPanel):
         self.template = 'ext-panels/ext-form.js'
         self.layout = 'form'
         self.padding = ''
-        self.items = []
+        self.__items = []
         self.init_component(*args, **kwargs)
         
     def render(self):
@@ -24,17 +24,17 @@ class ExtForm(BaseExtPanel):
     def render_items(self):
         return ','.join([item.render() for item in self.items])
     
-    def _get_fields(self):       
-        return [item for item in self.items if issubclass(item, BaseExtField)]
+    @property
+    def items(self):       
+        return self.__items
 
-    fields = property(_get_fields)
 
 class ExtPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-panel.js'
         self.padding = ''
-        self.items = []
+        self.__items = []
         self.init_component(*args, **kwargs)
     
     def render(self):
@@ -43,7 +43,11 @@ class ExtPanel(BaseExtPanel):
     def render_items(self): 
         return ','.join([item.render() for item in self.items])    
     
+    @property
+    def items(self):
+        return self.__items
 
+    
 class ExtTabPanel(ExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)

@@ -11,7 +11,7 @@ from m3.ui.ext.misc import ExtConnection
 
 class ExtButton(BaseExtControl):
     '''
-    Просто кнопка
+        Кнопка
     '''
     def __init__(self, *args, **kwargs):
         super(ExtButton, self).__init__(self, *args, **kwargs)
@@ -22,17 +22,10 @@ class ExtButton(BaseExtControl):
         self.init_component(*args, **kwargs)
         
     def render(self):
-#        js = ''
-#        js += '{text:' + '"' + self.text + '"'
-#        if self.handler_pressed:
-#            js += ',handler:' + self.handler_pressed
-#        return js + '}'
-#        return '{xtype: "button", text: "%s" %s}' \
-#            % ((self.text, '') if not self.handler_pressed else (self.text, ',handler: %s' % self.handler_pressed))
         return render_component(self)
     
     def render_handler(self):
-        if type(self.handler) is ExtConnection:
+        if isinstance(self.handler, ExtConnection):
             return 'function(){%s}'% self.handler.render()
         else:
             return self.handler

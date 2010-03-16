@@ -17,38 +17,31 @@ class ExtToolbar(BaseExtContainer):
         self.__items = []
         self.init_component(*args, **kwargs)
 
-
     def render(self):
         return render_component(self)
     
     def render_items(self):
         res = []
         for item in self.items:
-            # Заведомо предположим, если тулбар
+            # Если объект нашей структуры классов, то пусть сам рендерится, если нет, отдаем так как есть.
             if type(item) is str or type(item) is unicode:
                 res.append(item)
             else:
-                res.append(item.render())
-                
+                res.append(item.render())         
         return ','.join(res)
         
     def add_fill(self):
-        self.__items.append('"->"')
+        self.items.append('"->"')
                 
     def add_separator(self):
-        self.__items.append('"-"')
+        self.items.append('"-"')
                 
     def add_spacer(self, width=2):
-        self.__items.append("{xtype: 'tbspacer', width: %d}" % width)
+        self.items.append("{xtype: 'tbspacer', width: %d}" % width)
                 
     def add_text_item(self, text_item):
-        self.__items.append('"%s"' % text_item)
-    
-        
-    def __get_items(self):
+        self.items.append('"%s"' % text_item)
+          
+    @property
+    def items(self):
         return self.__items
-    
-    def __set_items(self, items):
-        self.__items = items
-        
-    items = property(__get_items, __set_items)

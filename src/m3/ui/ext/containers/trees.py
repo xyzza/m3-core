@@ -18,7 +18,6 @@ class ExtTree(BaseExtPanel):
         self.nodes = []
         self.columns = []
         self.tree_loader = ExtTreeLoader(url=url)
-        self.title = ''
         self.init_component(*args, **kwargs)
     
     @staticmethod    
@@ -89,7 +88,7 @@ class ExtTreeNode(ExtUIComponent):
     
     def set_items(self, **kwargs):
         for k, v in kwargs.items():
-            self.__items[k] = v
+            self.items[k] = v
         
 class ExtTreeLoader(BaseExtStore):
     def __init__(self, *args, **kwargs):

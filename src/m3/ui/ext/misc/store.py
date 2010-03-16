@@ -13,7 +13,6 @@ class ExtDataStore(BaseExtStore):
         super(ExtDataStore, self).__init__(*args, **kwargs)
         self.data = data # По умолчанию первым параметром передаются данные на заполнение store
         self.template = 'ext-misc/ext-data-store.js'
-        
         self.__columns = [] # Для заполнения полей в шаблоне
         self.init_component(*args, **kwargs)
         
