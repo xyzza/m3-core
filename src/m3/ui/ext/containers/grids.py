@@ -23,7 +23,6 @@ class ExtGrid(BaseExtPanel):
         self.banded_columns = SortedDict()
         
         
-        
     def render(self):
         return render_component(self)
     
@@ -33,11 +32,8 @@ class ExtGrid(BaseExtPanel):
         Каждый вложенный массив соответствует уровню шапки грида от верхней к нижней. 
         '''
         result = '['
-        for level_list in self.banded_columns.values():
-            result += '['
-            for column in level_list:
-                result += column.render() + ','
-            result = result[:-1] + '],'
+        for level_list in self.banded_columns.values():       
+            result += '[' + ','.join([ column.render() for column in level_list ]) + '],'
         result = result[:-1] + ']'
         return result
     
@@ -73,6 +69,7 @@ class ExtGrid(BaseExtPanel):
         Удаляет все объединенные колонки из грида
         '''
         self.banded_columns.clear()
+        self.show_banded_columns = False
         
     def add_store(self, store):
         self.store = store
