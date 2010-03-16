@@ -15,3 +15,11 @@ class BaseExtField(ExtUIComponent):
         self.name = ''
         self.value = ''
         self.width = ''
+        self.style = {}
+        self.label_style = {}
+        
+    def render_style(self):
+       return ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])
+   
+    def render_label_style(self):
+       return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])

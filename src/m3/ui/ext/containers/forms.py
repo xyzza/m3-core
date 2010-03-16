@@ -14,6 +14,8 @@ class ExtForm(BaseExtPanel):
         super(ExtForm, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-form.js'
         self.layout = 'form'
+        self.padding = ''
+        self.items = []
         self.init_component(*args, **kwargs)
         
     def render(self):
@@ -31,7 +33,8 @@ class ExtPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-panel.js'
-        self.width = ''
+        self.padding = ''
+        self.items = []
         self.init_component(*args, **kwargs)
     
     def render(self):

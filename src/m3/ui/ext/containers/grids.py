@@ -31,11 +31,11 @@ class ExtGrid(BaseExtPanel):
         Возвращает JS массив состоящий из массивов с описанием объединенных колонок.
         Каждый вложенный массив соответствует уровню шапки грида от верхней к нижней. 
         '''
-        result = '['
+        result = []
         for level_list in self.banded_columns.values():       
-            result += '[' + ','.join([ column.render() for column in level_list ]) + '],'
-        result = result[:-1] + ']'
-        return result
+            result.append('[%s]' % ','.join([ column.render() for column in level_list ]))
+        return '[%s]' % ','.join(result) 
+
     
     def render_columns(self):
         return ','.join([column.render() for column in self.columns])

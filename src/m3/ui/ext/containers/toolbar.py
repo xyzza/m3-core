@@ -44,8 +44,6 @@ class ExtToolbar(BaseExtContainer):
     def add_text_item(self, text_item):
         self.__items.append('"%s"' % text_item)
     
-    #def add_button(self, text_button='', handler=''):
-    #    items.append('{%s} ') 
         
     def __get_items(self):
         return self.__items

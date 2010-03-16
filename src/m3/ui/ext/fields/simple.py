@@ -14,15 +14,11 @@ class ExtStringField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtStringField, self).__init__(*args, **kwargs)
+        self.template = 'ext-fields/ext-string-field.js'
         self.init_component(*args, **kwargs)
         
     def render(self):
-        js = 'id: "%s"' % self.client_id
-        js += '' if not self.name else ',name: "%s"' % self.name
-        js += '' if not self.label else ',fieldLabel: "%s"' % self.label
-        js += '' if not self.value else ',value: "%s"' % self.value
-        js += '' if not self.width else ',width: "%s"' % self.width
-        return 'new Ext.form.TextField({%s})' % js
+        return render_component(self)
 
         
 class ExtDateField(ExtStringField):
