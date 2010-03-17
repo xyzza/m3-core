@@ -425,6 +425,17 @@ class BaseReplication(object):
                 for pk in items.keys():
                     rc.import_object(model_type, pk)
         
+        # Обработка handled_models
+        for model_type in self.handled_models.keys():
+            try:
+                items = rc.get_stream_for_type(model_type)
+            except IOError:
+                # Если при экспорте не было создано файла для модели, значит по ней данных нет
+                continue
+            # Для каждого вызываем прикладную обработку
+            for obj in items.values():
+                self.handle_object(model_type, obj)
+        
         rc.close()
         return rc.result
     
@@ -541,8 +552,10 @@ class BaseReplication(object):
         
         return VERSION_EQUAL
     
-    def handle_object(self, obj):
+    def handle_object(self, model_type, obj):
         '''
         Используется для обработки значений таблиц handled_models на стороне прикладного приложения
+        @param model_type: Класс модели
+        @param obj: Словарь с полями модели
         '''
-        raise NotImplementedError()
+        pass
