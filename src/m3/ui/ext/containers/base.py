@@ -11,7 +11,6 @@ class BaseExtContainer(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtContainer, self).__init__(*args, **kwargs)
         self.layout = ''
-        self.items = []
         
 class BaseExtPanel(BaseExtContainer):
     def __init__(self, *args, **kwargs):
