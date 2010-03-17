@@ -10,6 +10,7 @@ import datetime
 import os
 import tempfile
 from south.models import MigrationHistory
+import itertools
 
 __all__ = ['BaseReplication', 'ExportResult', 'ImportResult']
 
@@ -404,6 +405,7 @@ class ImportController(object):
 class BaseReplication(object):
     ''' Базовый класс для импорта и экспорта файлов репликаций. '''
     managed_models = {}
+    handled_models = {}
     
     @transaction.commit_on_success
     def do_import(self, import_filename):
@@ -451,15 +453,27 @@ class BaseReplication(object):
         @param last_sync_time: Время последней модификации
         '''
         assert len(self.managed_models) > 0, u"Ни одна модель не указана в managed_models"
+        assert isinstance(self.managed_models, dict)
+        assert isinstance(self.handled_models, dict)
         
-        writer = ExportController(export_filename, self.managed_models, last_sync_time,\
+        # handled_models не должны пересекаться с managed_models, иначе они будут загружены как обычные
+        if len(set( self.handled_models.keys() ).\
+               intersection( set(self.managed_models.keys()) )) > 0:
+            raise ValueError('Types of handled_models intersect with types of managed_models')
+        
+        # В экспорте участвуют оба набора моделей
+        union_models = {}
+        union_models.update(self.managed_models)
+        union_models.update(self.handled_models)
+        writer = ExportController(export_filename, union_models, last_sync_time,\
                                   self.get_app_version(), self.get_db_version())
+        
         # Проходим все указанные модели
-        for model_type, options in self.managed_models.items():
+        for model_type, options in itertools.chain(self.managed_models.items(), self.handled_models.items()):
             objects = self.get_objects_for_export(model_type, last_sync_time, options, *args, **kwargs)
             for obj in objects:
                 writer.write_object(obj)
-
+        
         writer.pack()
         return writer.get_result()
 
@@ -526,3 +540,9 @@ class BaseReplication(object):
                 return VERSION_LESS
         
         return VERSION_EQUAL
+    
+    def handle_object(self, obj):
+        '''
+        Используется для обработки значений таблиц handled_models на стороне прикладного приложения
+        '''
+        raise NotImplementedError()
