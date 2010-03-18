@@ -9,8 +9,8 @@ from loading import get_workflow
 
 # Эти импорты нужны для работы сгенерированного через exec кода
 from meta import create_workflow_models, WorkflowModelBase, WorkflowStateModelBase,\
-                 WorkflowChildModelBase
+                 WorkflowChildModelBase, WorkflowWSOModelBase
 
 
 from core import Workflow, WorkflowStep
-from core import WorkflowModel, WorkflowStepModel
+from core import WorkflowModel, WorkflowStepModel, WorkflowWSOModel

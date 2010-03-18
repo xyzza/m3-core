@@ -9,6 +9,8 @@ Created on 10.03.2010
 
 from django.db import models
 from django.db.models.base import ModelBase
+from m3.workflow.exceptions import ImproperlyConfigured
+from m3.workflow.core import WorkflowWSObject
 
 #===============================================================================
 # Метакласс для моделей рабочих процессов
@@ -58,9 +60,11 @@ class WorkflowStateModelBase(ModelBase):
         
         return klass
     
+
 class WorkflowChildModelBase(ModelBase):
     '''
-    Базовый метакласс для модели хранения ссылок на порожденные процессы
+    Базовый метакласс для модели хранения ссылок на экземпляры дочерних рабочих процессов,
+    которые были порождены из текущего процесса
     '''
     def __new__(cls, name, bases, attrs):
         klass = super(WorkflowChildModelBase, cls).__new__(cls, name, bases, attrs)
@@ -73,12 +77,33 @@ class WorkflowChildModelBase(ModelBase):
         
         # child_workflow_id - идентификатор экземпляра порожденного рабочего потока
         models.PositiveIntegerField().contribute_to_class(klass, 'child_workflow_id')
-                
-#===============================================================================
-# Метакласс для моделей связок workflow и объектов
-#===============================================================================
+        
+        
+class WorkflowWSOModelBase(ModelBase):
+    '''
+    Базовый метакласс для модели хранения ссылок на порожденные процессы
+    '''
+    def __new__(cls, name, bases, attrs):
+        klass = super(WorkflowWSOModelBase, cls).__new__(cls, name, bases, attrs)
+        
+        # workflow - ссылка на соответствующий рабочий процесс
+        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model').contribute_to_class(klass, 'workflow')
+        
+        # Создаем ссылки на все объекты указанные в Meta нашего процесса
+        ws_objects = getattr(klass.WorkflowMeta.workflow.Meta, 'ws_objects', [])
+        if not isinstance(ws_objects, (list, tuple)):
+            raise ImproperlyConfigured('Attribute "ws_objects" in workflow Meta must be a list or tuple')
+        for obj in ws_objects:
+            if isinstance(obj, WorkflowWSObject):
+                model_type, field_name = obj.wso_class, obj.wso_field
+            elif isinstance(obj, tuple):
+                model_type, field_name = obj
+            else:
+                raise ImproperlyConfigured('Item of "ws_objects" must be a instance of WorkflowWSObject or tuple')
 
-
+            models.ForeignKey(model_type).contribute_to_class(klass, field_name)
+        
+    
 #===============================================================================
 # Создание классов для моделей рабочих процессов
 #===============================================================================
@@ -94,6 +119,7 @@ import %(workflow_module)s
 %(workflow_model)s
 %(workflow_step_model)s
 %(workflow_child_model)s
+%(workflow_wso_model)s
 '''
     WORKFLOW_MODEL_TEMPLATE = '''
 class %(class_name)sModel(m3_workflow.WorkflowModel):
@@ -119,20 +145,35 @@ class %(class_name)sChildModel(m3_workflow.WorkflowStepModel):
     class WorkflowMeta:
         workflow = %(class_name)s
 '''
+    WORKFLOW_WSO_MODEL_TEMPLATE = '''
+class %(class_name)sWSOModel(m3_workflow.WorkflowWSOModel):
+    __metaclass__ = m3_workflow.WorkflowWSOModelBase
+    class Meta:
+        db_table = '%(db_table)sWSO'
+    class WorkflowMeta:
+        workflow = %(class_name)s
+'''
+    WORKFLOW_DOC_MODEL_TEMPLATE = '''
+class 
+'''
 
-    model_text = WORKFLOW_MODEL_TEMPLATE % {'class_name': workflow_class.__name__,
-                                            'db_table': workflow_class.meta_dbtable(),
-                                            'full_class_name': workflow_class.meta_full_class_name()}
+    params = {'class_name': workflow_class.__name__,
+              'db_table': workflow_class.meta_dbtable(),
+              'full_class_name': workflow_class.meta_full_class_name()}
+
+    model_text       = WORKFLOW_MODEL_TEMPLATE % params
+    step_model_text  = WORKFLOW_STEP_MODEL_TEMPLATE % params
+    child_model_text = WORKFLOW_CHILD_MODEL_TEMPLATE % params
+    wso_model_text   = WORKFLOW_WSO_MODEL_TEMPLATE % params
     
-    step_model_text = WORKFLOW_STEP_MODEL_TEMPLATE % {'class_name': workflow_class.__name__,
-                                                      'db_table': workflow_class.meta_dbtable(),
-                                                      'full_class_name': workflow_class.meta_full_class_name()}
+    # Модели процесса которые есть всегда
+    result = FINAL_TEMPLATE % {'workflow_module': workflow_class.__module__,
+                               'workflow_model': model_text,
+                               'workflow_step_model': step_model_text,
+                               'workflow_child_model': child_model_text,
+                               'workflow_wso_model': wso_model_text}
     
-    child_model_text = WORKFLOW_CHILD_MODEL_TEMPLATE % {'class_name': workflow_class.__name__,
-                                                      'db_table': workflow_class.meta_dbtable(),
-                                                      'full_class_name': workflow_class.meta_full_class_name()}
+    # Модели которых может быть сколько угодно много
     
-    return FINAL_TEMPLATE % {'workflow_module': workflow_class.__module__,
-                             'workflow_model': model_text,
-                             'workflow_step_model': step_model_text,
-                             'workflow_child_model': child_model_text}
+    
+    return result

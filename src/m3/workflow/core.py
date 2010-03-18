@@ -6,7 +6,6 @@ Created on 10.03.2010
 '''
 
 from django.db import models
-from meta import WorkflowModelBase, WorkflowStateModelBase
 from m3.workflow.exceptions import ImproperlyConfigured
 
 class Workflow(object):
@@ -60,6 +59,29 @@ class WorkflowStepModel(models.Model):
     '''
     class Meta:
         abstract = True
+        
+class WorkflowWSOModel(models.Model):
+    class Meta:
+        abstract = True
+
+#===============================================================================
+# Непонятно что
+#===============================================================================
+
+class WorkflowWSObject(object):
+    '''
+    #TODO: Пока не понятно что это?
+    '''
+    def __init__(self, wso_class, wso_field):
+        '''
+        @param wso_class: задает класс модели, которая будет входить в рабочий набор потока
+        @param wso_field: задает имя поля, которое используется для храненения идентификатора 
+                          соответствующего объекта в моделе WorkflowWSORefModel.
+        '''
+        self.wso_class = wso_class
+        self.wso_field = wso_field
+
+
     
 #===============================================================================
 # Шаги рабочего процесса
