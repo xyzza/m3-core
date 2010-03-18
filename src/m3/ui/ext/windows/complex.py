@@ -33,19 +33,19 @@ class ExtDictSelectWindow(BaseExtWindow):
     def render(self):
         return render_component(self) 
     
-    def render_buttons(self):
+    def t_render_buttons(self):
         return 'buttons:[%s]' % ','.join([render_component(button) for button in self.buttons])
        
     # Свойство, отображающее grid на top_container для правильного рендеринга   
-    def _set_grid(self, value):
-        self.top_container = value
-        self.__grid = value
-    
-    def _get_grid(self):
+    @property
+    def grid(self):
         return self.__grid
     
-    grid = property(_get_grid, _set_grid)
-    
+    @grid.setter
+    def grid(self, value):
+        self.top_container = value
+        self.__grid = value
+   
     @property
     def select_dict_button(self):
         '''

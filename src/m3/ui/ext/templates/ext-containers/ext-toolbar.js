@@ -1,4 +1,4 @@
 new Ext.Toolbar({
 	'id': '{{ component.client_id }}',
-    items: [ {{ component.render_items|safe }} ]
+    items: [ {{ component.t_render_items|safe }} ]
 })

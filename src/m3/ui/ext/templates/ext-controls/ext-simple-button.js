@@ -3,7 +3,7 @@ new Ext.Button({
 	text: "{{ component.text }}",
 	icon: "{{ component.icon }}"
 	{% if component.handler %}
-		,handler: {{ component.render_handler|safe}}
+		,handler: {{ component.t_render_handler|safe}}
 	{% endif%}
 })
 

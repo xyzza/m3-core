@@ -23,13 +23,13 @@ class ExtDataStore(BaseExtStore):
         self.__columns = columns
         return render_component(self)
     
-    def render_fields(self):
+    def t_render_fields(self):
         '''
             Прописывается в шаблоне и заполняется при рендеринге
         '''
         return ','.join(['{name: "%s"}' % column.data_index for column in self.__columns]) 
     
-    def render_data(self):
+    def t_render_data(self):
         '''
             Прописывается в шаблоне и заполняется при рендеринге
         '''
@@ -52,7 +52,7 @@ class ExtJsonStore(BaseExtStore):
         self.__columns = columns
         return render_component(self)
         
-    def render_fields(self):
+    def t_render_fields(self):
         '''
             Прописывается в шаблоне и заполняется при рендеринге
         '''

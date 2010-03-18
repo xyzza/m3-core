@@ -16,6 +16,6 @@
 	{% endif %}
 	
 	{% if component.has_children %}
-	,'children': {{ component.render_children|safe }}
+	,'children': {{ component.t_render_children|safe }}
 	{% endif %}
 }

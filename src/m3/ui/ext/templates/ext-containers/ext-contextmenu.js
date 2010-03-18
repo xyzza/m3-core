@@ -1,11 +1,11 @@
 new Ext.menu.Menu({
 		id: '{{ component.client_id }}',
-		items: [{{ component.render_items|safe }}]
+		items: [{{ component.t_render_items|safe }}]
 		{# Прописываются имеющиеся обработчики #}
-		{% if component.listeners %}
+		{% if component.t_get_listeners %}
 			{# Прописываются имеющиеся обработчики #}
 			,listeners:{
-				{% for k, v in component.listeners.items %}
+				{% for k, v in component.t_get_listeners.items %}
 					{# Здесь рендерится контекстное меню #}
 					{% ifequal k "beforeshow" %}
 						beforeshow: {{ v|safe }}

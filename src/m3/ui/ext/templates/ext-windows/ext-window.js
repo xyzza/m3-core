@@ -12,5 +12,5 @@ new Ext.Window({
 	layout: '{{ component.layout}}', 
 	
     items:[{% if component.top_container %}{{ component.top_container.render|safe }}{% endif %}]  
-    {% if component.buttons %},{{ component.render_buttons|safe }}{% endif %}
+    {% if component.buttons %},{{ component.t_render_buttons|safe }}{% endif %}
 })

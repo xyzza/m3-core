@@ -14,7 +14,7 @@ new Ext.Container({
 				readOnly: true
 			}
 		},
-		{{ component.render_select_button|safe }},
-		{{ component.render_clean_button|safe }}
+		{{ component.t_render_select_button|safe }},
+		{{ component.t_render_clean_button|safe }}
 	]
 })

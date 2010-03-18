@@ -17,14 +17,14 @@ class ExtEditWindow(BaseExtWindow):
     #=======================================================================
     # Свойство класса form
     #=======================================================================
-    def __set_form(self, value):
+    @property
+    def form(self):
+        return self.__form
+ 
+    @form.setter
+    def form(self, value):
         self.top_container = value
         self.__form = value
-    
-    def __get_form(self):
-        return self.__form
-    
-    form = property(__get_form, __set_form)
     #=======================================================================
     
     

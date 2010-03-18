@@ -48,7 +48,7 @@ class BaseExtWindow(ExtUIComponent):
         self.layout = ''
         self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
         
-    def render_buttons(self):
+    def t_render_buttons(self):
         return 'buttons:[%s]' % ','.join([button.render() for button in self.buttons])
     
     def render(self):

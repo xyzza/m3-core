@@ -15,5 +15,5 @@ class BaseExtField(ExtUIComponent):
         self.value = ''
         self.label_style = {}
    
-    def render_label_style(self):
-       return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
+    def t_render_label_style(self):
+        return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])

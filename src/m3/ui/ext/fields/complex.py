@@ -38,10 +38,10 @@ class ExtDictSelectField(BaseExtField):
     def render(self):
         return render_component(self)
     
-    def render_select_button(self):
+    def t_render_select_button(self):
         return self.select_button.render()
     
-    def render_clean_button(self):
+    def t_render_clean_button(self):
         return self.clean_button.render()
     
     def set_buttons_icon(self, icon_select='', icon_clean=''):

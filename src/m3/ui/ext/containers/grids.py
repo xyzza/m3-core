@@ -26,7 +26,7 @@ class ExtGrid(BaseExtPanel):
     def render(self):
         return render_component(self)
     
-    def render_banded_columns_list(self):
+    def t_render_banded_columns(self):
         '''
         Возвращает JS массив состоящий из массивов с описанием объединенных колонок.
         Каждый вложенный массив соответствует уровню шапки грида от верхней к нижней. 
@@ -37,12 +37,11 @@ class ExtGrid(BaseExtPanel):
         return '[%s]' % ','.join(result) 
 
     
-    def render_columns(self):
+    def t_render_columns(self):
         return ','.join([column.render() for column in self.columns])
     
-    def render_store(self):
+    def t_render_store(self):
         return self.store.render(self.columns)
-    
     
     def add_column(self, **kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
@@ -74,10 +73,32 @@ class ExtGrid(BaseExtPanel):
         
     def add_store(self, store):
         self.store = store
-        
-    #----------------------------------------------------------------------------
-    # Врабберы над событиями listeners[...]
+     
+    def t_get_listeners(self):
+       ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
+       return self._listeners
+       
+    #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+    # Врапперы над событиями listeners[...]
+    #------------------------------------------------------------------------
+    @property
+    def handler_contextmenu(self):
+        return self._listeners.get('contextmenu')
     
+    @handler_contextmenu.setter
+    def handler_contextmenu(self, menu):
+        menu.container = self
+        self._listeners['contextmenu'] = menu
+        
+    @property
+    def handler_rowcontextmenu(self):
+        return self._listeners.get('rowcontextmenu')
+    
+    @handler_rowcontextmenu.setter
+    def handler_rowcontextmenu(self, menu):
+        menu.container = self
+        self._listeners['rowcontextmenu'] = menu
+    #----------------------------------------------------------------------------
     
     
 class ExtGridColumn(ExtUIComponent):

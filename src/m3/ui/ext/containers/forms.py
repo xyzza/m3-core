@@ -21,7 +21,7 @@ class ExtForm(BaseExtPanel):
     def render(self):
         return render_component(self)
     
-    def render_items(self):
+    def t_render_items(self):
         return ','.join([item.render() for item in self.items])
     
     @property

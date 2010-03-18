@@ -7,5 +7,5 @@ new Ext.FormPanel({
     {% else %}
     header: false,
     {% endif %}
-    items: [{{ component.render_items|safe }}]
+    items: [{{ component.t_render_items|safe }}]
 })

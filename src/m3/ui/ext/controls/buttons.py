@@ -24,7 +24,7 @@ class ExtButton(BaseExtControl):
     def render(self):
         return render_component(self)
     
-    def render_handler(self):
+    def t_render_handler(self):
         if isinstance(self.handler, ExtConnection):
             return 'function(){%s}'% self.handler.render()
         else:

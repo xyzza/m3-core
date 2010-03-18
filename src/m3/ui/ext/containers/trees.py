@@ -32,13 +32,13 @@ class ExtTree(BaseExtPanel):
                 ExtTree.nodes_auto_check(node)
         return render_component(self)
     
-    def render_tree_loader(self):
+    def t_render_tree_loader(self):
         return self.tree_loader.render()
     
-    def render_nodes(self):
+    def t_render_nodes(self):
         return ','.join([node.render() for node in self.nodes])
     
-    def render_columns(self):
+    def t_render_columns(self):
         return ','.join([column.render() for column in self.columns])
     
     def add_nodes(self, *args):
@@ -50,6 +50,33 @@ class ExtTree(BaseExtPanel):
     
     def add_column(self,**kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
+        
+    def t_get_listeners(self):
+       ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
+       return self._listeners
+   
+    #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+    # Врапперы над событиями listeners[...]
+    #------------------------------------------------------------------------
+    @property
+    def handler_contextmenu(self):
+        return self._listeners.get('contextmenu')
+    
+    @handler_contextmenu.setter
+    def handler_contextmenu(self, menu):
+        menu.container = self
+        self._listeners['contextmenu'] = menu
+    
+    @property
+    def handler_containercontextmenu(self):
+        return self._listeners.get('containercontextmenu')
+    
+    @handler_contextmenu.setter
+    def handler_containercontextmenu(self, menu):
+        menu.container = self
+        self._listeners['containercontextmenu'] = menu
+    #------------------------------------------------------------------------
+            
     
 class ExtTreeNode(ExtUIComponent):
     def __init__(self,*args, **kwargs):
@@ -69,8 +96,7 @@ class ExtTreeNode(ExtUIComponent):
     def render(self):
         return render_component(self)
     
-    def render_children(self):
- 
+    def t_render_children(self):
         return '[%s]' % ','.join([child.render() for child in self.children])
              
     def add_children(self, children):
