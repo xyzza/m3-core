@@ -57,6 +57,7 @@ class BaseExtComponent(object):
         self.client_id = 'cmp_' + str(uuid4())[0:8]
         # рендерер, используемый для вывода соответствующего компонента
         self.renderer = ExtUIScriptRenderer()
+        self.listeners = {}
     
     def render(self):
         '''
@@ -86,7 +87,9 @@ class BaseExtComponent(object):
                 self.__setattr__(k, v)
             else:
                 raise AttributeError('Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__))
-            
+    
+    def render_listeners(self):
+       return ','.join(['%s:%s' % (k, v) for k, v in self.listeners.items()])        
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):
     '''
@@ -97,10 +100,9 @@ class ExtUIComponent(BaseExtComponent):
         self.style = {}
         self.hidden = False
         self.disabled = False
-        self.height = ''
-        self.width = ''
-        self.x = ''
-        self.y = ''
+        self.height = self.width = ''
+        self.x = self.y = ''
+        
         
     def render_style(self):
        return ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])

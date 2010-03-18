@@ -43,6 +43,7 @@ class ExtGrid(BaseExtPanel):
     def render_store(self):
         return self.store.render(self.columns)
     
+    
     def add_column(self, **kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
         
@@ -73,6 +74,10 @@ class ExtGrid(BaseExtPanel):
         
     def add_store(self, store):
         self.store = store
+        
+    #----------------------------------------------------------------------------
+    # Врабберы над событиями listeners[...]
+    
     
     
 class ExtGridColumn(ExtUIComponent):

@@ -6,8 +6,7 @@ Created on 11.3.2010
 '''
 
 from base import BaseExtPanel
-from m3.ui.ext.base import ExtUIComponent
-from m3.ui.ext.misc.base import BaseExtStore
+from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from m3.ui.ext import render_component
 from m3.ui.ext.containers import ExtGridColumn
 
@@ -90,7 +89,7 @@ class ExtTreeNode(ExtUIComponent):
         for k, v in kwargs.items():
             self.items[k] = v
         
-class ExtTreeLoader(BaseExtStore):
+class ExtTreeLoader(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtTreeLoader, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree-loader.js'
