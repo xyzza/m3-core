@@ -6,7 +6,7 @@ Created on 10.03.2010
 '''
 
 from django.db import models
-from meta import WorkflowModelBase, WorkflowStepModelBase
+from meta import WorkflowModelBase, WorkflowStateModelBase
 from m3.workflow.exceptions import ImproperlyConfigured
 
 class Workflow(object):
