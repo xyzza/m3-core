@@ -64,6 +64,10 @@ class WorkflowWSOModel(models.Model):
     class Meta:
         abstract = True
 
+class WorkflowDocModel(models.Model):
+    class Meta:
+        abstract = True
+        
 #===============================================================================
 # Непонятно что
 #===============================================================================
@@ -81,7 +85,13 @@ class WorkflowWSObject(object):
         self.wso_class = wso_class
         self.wso_field = wso_field
 
-
+class WorkflowDocument(object):
+    '''
+    #TODO: Пока не понятно что это?
+    '''
+    def __init__(self, document_class, document_db_subname):
+        self.document_class = document_class
+        self.document_db_subname = document_db_subname
     
 #===============================================================================
 # Шаги рабочего процесса

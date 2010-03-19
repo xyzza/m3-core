@@ -10,7 +10,7 @@ Created on 10.03.2010
 from django.db import models
 from django.db.models.base import ModelBase
 from m3.workflow.exceptions import ImproperlyConfigured
-from m3.workflow.core import WorkflowWSObject
+from m3.workflow.core import WorkflowWSObject, WorkflowDocument
 
 #===============================================================================
 # Метакласс для моделей рабочих процессов
@@ -103,7 +103,19 @@ class WorkflowWSOModelBase(ModelBase):
 
             models.ForeignKey(model_type).contribute_to_class(klass, field_name)
         
-    
+class WorkflowDocModelBase(ModelBase):
+    def __new__(cls, name, bases, attrs):
+        klass = super(WorkflowDocModelBase, cls).__new__(cls, name, bases, attrs)
+        
+        # workflow - ссылка на соответствующий рабочий процесс
+        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model').contribute_to_class(klass, 'workflow')
+        
+        #+workflow_state : ForeignKey(MyWorkflowStateModel)
+        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'StateModel').contribute_to_class(klass, 'workflow_state')
+        
+        # created - серверные дата/время создания документа рабочего потока
+        models.DateTimeField(auto_now_add = True).contribute_to_class(klass, 'created')
+
 #===============================================================================
 # Создание классов для моделей рабочих процессов
 #===============================================================================
@@ -133,7 +145,7 @@ class %(class_name)sModel(m3_workflow.WorkflowModel):
 class %(class_name)sStateModel(m3_workflow.WorkflowStepModel):
     __metaclass__ = m3_workflow.WorkflowStateModelBase
     class Meta:
-        db_table = '%(db_table)sSteps'
+        db_table = '%(db_table)sState'
     class WorkflowMeta:
         workflow = %(class_name)s
 '''
@@ -154,12 +166,17 @@ class %(class_name)sWSOModel(m3_workflow.WorkflowWSOModel):
         workflow = %(class_name)s
 '''
     WORKFLOW_DOC_MODEL_TEMPLATE = '''
-class 
+class MyWorkflow_MyDocument_DocModel(m3_workflow.WorkflowDocModel):
+    __metaclass__ = m3_workflow.WorkflowDocModelBase
+    document = models.ForeignKey(%(DocModel)s)
+    class Meta:
+        db_table = '%(db_table)s'
+    class WorkflowMeta:
+        workflow = %(class_name)s
 '''
 
     params = {'class_name': workflow_class.__name__,
-              'db_table': workflow_class.meta_dbtable(),
-              'full_class_name': workflow_class.meta_full_class_name()}
+              'db_table': workflow_class.meta_dbtable()}
 
     model_text       = WORKFLOW_MODEL_TEMPLATE % params
     step_model_text  = WORKFLOW_STEP_MODEL_TEMPLATE % params
@@ -174,6 +191,12 @@ class
                                'workflow_wso_model': wso_model_text}
     
     # Модели которых может быть сколько угодно много
-    
+    result += '\n'
+    documents = getattr(workflow_class.Meta, 'documents', [])
+    for doc in documents:
+        assert isinstance(doc, WorkflowDocument)
+        result += WORKFLOW_DOC_MODEL_TEMPLATE % {'class_name': workflow_class.__name__,
+                                                 'db_table': workflow_class.meta_dbtable() + doc.document_class.document_class,
+                                                 'DocModel': doc.document_class.__name__}
     
     return result
