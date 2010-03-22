@@ -8,9 +8,12 @@ new Ext.Window({
 	maximizable: {{ component.maximizable|lower}},
 	maximized: {{ component.maximized|lower}},
 	minimized: {{ component.minimized|lower}},
+	closable: {{ component.closable|lower }},
+	{% if component.body_style %} bodyStyle : '{{ component.body_style }}', {% endif %}
 	
 	layout: '{{ component.layout}}', 
 	
     items:[{% if component.top_container %}{{ component.top_container.render|safe }}{% endif %}]  
     {% if component.buttons %},{{ component.t_render_buttons|safe }}{% endif %}
+
 })

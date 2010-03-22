@@ -48,6 +48,7 @@ class BaseExtWindow(ExtUIComponent):
         self.layout = ''
         self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
         self.closable = True
+        self.body_style = 'padding:5px;'
         
         
     def t_render_buttons(self):
