@@ -1,5 +1,5 @@
 function(){
-	{% for k, v in component.t_get_listeners.items %}
+	{% for k, v in component.t_render_listeners.items %}
 		{# Здесь рендерится контекстное меню #}
 		{% ifequal k "contextmenu" %}
 			var contmenu = {{ v.render }};
@@ -25,10 +25,10 @@ function(){
 		root: new Ext.tree.AsyncTreeNode({
 			children: [ {{ component.t_render_nodes|safe }} ]
         })
-        {% if component.t_get_listeners %}
+        {% if component.t_render_listeners %}
 			{# Прописываются имеющиеся обработчики #}
 			,listeners:{
-				{% for k, v in component.t_get_listeners.items %}
+				{% for k, v in component.t_render_listeners.items %}
 					{# Здесь рендерится контекстное меню #}
 					{% ifequal k "contextmenu" %}
 						contextmenu:

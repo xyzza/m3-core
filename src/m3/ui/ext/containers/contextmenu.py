@@ -34,10 +34,6 @@ class ExtContextMenu(BaseExtContainer):
             else:
                 res.append(item)
         return ','.join(res)
-        
-    def t_get_listeners(self):
-       ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
-       return self._listeners
    
     #----------------------------------------------------------------------------
     # Врапперы над событиями listeners[...]

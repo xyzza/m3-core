@@ -10,4 +10,5 @@ from base import BaseExtWindow
 class ExtWindow(BaseExtWindow):
     def __init__(self, *args, **kwargs):
         super(ExtWindow, self).__init__(*args, **kwargs)
+        self.init_component(*args, **kwargs)
     

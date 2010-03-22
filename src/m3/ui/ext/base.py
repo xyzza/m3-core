@@ -87,9 +87,10 @@ class BaseExtComponent(object):
                 self.__setattr__(k, v)
             else:
                 raise AttributeError('Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__))
-    
+                  
     def t_render_listeners(self):
-        return ','.join(['%s:%s' % (k, v) for k, v in self._listeners.items()])        
+       ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
+       return self._listeners
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):
     '''

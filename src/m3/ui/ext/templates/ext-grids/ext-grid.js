@@ -1,6 +1,6 @@
 function(){
 	
-	{% for k, v in component.t_get_listeners.items %}
+	{% for k, v in component.t_render_listeners.items %}
 		{# Здесь рендерится контекстное меню #}
 		{% ifequal k "contextmenu" %}
 			var contmenu = {{ v.render }};
@@ -33,10 +33,10 @@ function(){
 				rows: {{ component.t_render_banded_columns|safe }}
 			})
 		{%endif%}
-		{% if component.t_get_listeners %}
+		{% if component.t_render_listeners %}
 		{# Прописываются имеющиеся обработчики #}
 		,listeners:{
-			{% for k, v in component.t_get_listeners.items %}
+			{% for k, v in component.t_render_listeners.items %}
 				{# Здесь рендерится контекстное меню #}
 				{% ifequal k "contextmenu" %}
 					contextmenu:

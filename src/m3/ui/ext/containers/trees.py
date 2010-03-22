@@ -50,10 +50,6 @@ class ExtTree(BaseExtPanel):
     
     def add_column(self,**kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
-        
-    def t_get_listeners(self):
-       ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
-       return self._listeners
    
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
