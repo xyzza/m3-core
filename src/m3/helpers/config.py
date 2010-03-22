@@ -44,3 +44,34 @@ class ProjectConfig:
             if self.defauls.has_key((section,option)):
                 return self.defauls[(section,option)]
         return ''
+    
+    def get_bool(self, section, option):
+        '''
+        Безопастно возвращает булево из конфига
+        '''
+        value = self.get(section, option)
+        if (isinstance(value, str)) and (value.upper() == 'TRUE'):
+            return True
+        return False
+        
+    def get_int(self, section, option):
+        '''
+        Безопасно возвращает целое число из конфига
+        '''
+        value = self.get(section, option)
+        if isinstance(value, str):
+            try:
+                value = int(value)
+            except:
+                value = 0
+        return value
+        
+    def get_uint(self, section, option):
+        '''
+        Безопасно возвращает положительное целое число из конфига
+        '''
+        value = self.get_int(section, option)
+        if value < 0:
+            value = 0
+        return value
+    
