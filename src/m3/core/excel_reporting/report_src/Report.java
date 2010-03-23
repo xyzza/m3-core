@@ -122,7 +122,7 @@ class ReportGenerator{
             	newCell.setCellValue(oldCell.getNumericCellValue());
                 break;
             case HSSFCell.CELL_TYPE_BLANK:
-            	newCell.setCellValue("");
+            	newCell.setCellType(HSSFCell.CELL_TYPE_BLANK);
                 break;
             case HSSFCell.CELL_TYPE_BOOLEAN:
             	newCell.setCellValue(oldCell.getBooleanCellValue());
