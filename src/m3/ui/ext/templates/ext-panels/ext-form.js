@@ -1,11 +1,12 @@
 new Ext.FormPanel({
-    title: '{{ component.title }}',
-    layout: '{{ component.layout }}',
-    baseCls: 'x-plain',
+    title: '{{ component.title }}'
+    , layout: '{{ component.layout }}'
+    , baseCls: 'x-plain'
+    {% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
     {% if component.title %} 
-    header: true,
+    , header: true
     {% else %}
-    header: false,
+    , header: false
     {% endif %}
-    items: [{{ component.t_render_items|safe }}]
+    , items: [{{ component.t_render_items|safe }}]
 })

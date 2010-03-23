@@ -11,6 +11,7 @@ new Ext.Container({
 				fieldLabel: "{{ component.label }}",
 				value: "{{ component.value }}",
 				width: "{{ component.width }}",
+				{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
 				readOnly: true
 			}
 		},

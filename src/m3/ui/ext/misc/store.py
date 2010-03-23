@@ -5,7 +5,7 @@ Created on 3.3.2010
 @author: prefer
 '''
 
-from base import BaseExtStore
+from base_store import BaseExtStore
 from m3.ui.ext import render_component
 
 class ExtDataStore(BaseExtStore):

@@ -10,19 +10,20 @@ function(){
 	{% endfor%}
 	
 	var tree = new Ext.ux.tree.TreeGrid({
-		id: '{{ component.client_id}}',
-	    useArrows: true,
-	    autoScroll: true,
-	    animate: true,
-	    enableDD: true,
-	    containerScroll: true,
-	    border: false,
-		split: true,
-		title: '{{ component.title }}',
+		id: '{{ component.client_id}}'
+	    , useArrows: true
+	    , autoScroll: true
+	    , animate: true
+	    , enableDD: true
+	    , containerScroll: true
+	    , border: false
+		, split: true
+		, title: '{{ component.title }}'
+		{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
 		
-		columns:[{{ component.t_render_columns|safe }}],
-		loader: {{ component.t_render_tree_loader|safe }},	
-		root: new Ext.tree.AsyncTreeNode({
+		, columns:[{{ component.t_render_columns|safe }}]
+		, loader: {{ component.t_render_tree_loader|safe }}	
+		, root: new Ext.tree.AsyncTreeNode({
 			children: [ {{ component.t_render_nodes|safe }} ]
         })
         {% if component.t_render_listeners %}

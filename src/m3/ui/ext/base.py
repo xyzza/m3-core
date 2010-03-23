@@ -83,10 +83,9 @@ class BaseExtComponent(object):
             Заполняет атрибуты экземпляра значениями в kwargs
         '''
         for k, v in kwargs.items():
-            if self.__dict__.has_key(k):
-                self.__setattr__(k, v)
-            else:
-                raise AttributeError('Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__))
+            assert self.__dict__.has_key(k), 'Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__)
+            self.__setattr__(k, v)
+
                   
     def t_render_listeners(self):
        ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
@@ -103,6 +102,8 @@ class ExtUIComponent(BaseExtComponent):
         self.disabled = False
         self.height = self.width = ''
         self.x = self.y = ''
+        self.icon_cls = ''
+        self.html = ''
         
     def t_render_style(self):
-        return ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])
+        return '{%s}' % ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])

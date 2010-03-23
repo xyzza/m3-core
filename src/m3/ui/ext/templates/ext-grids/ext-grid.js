@@ -11,21 +11,22 @@ function(){
 	{% endfor%}
 	
 	var grid = new Ext.grid.GridPanel({
-		id: '{{ component.client_id }}',
-	    title: '{{ component.title }}',
+		id: '{{ component.client_id }}'
+	    , title: '{{ component.title }}'
 	
 	    {% if component.title %}
-	    header: true,
+	    , header: true
 	    {% else %}
-	    header: false,
+	    , header: false
 	    {% endif %}
 	    
-		store: {{ component.t_render_store|safe }},
-		columns: [{{ component.t_render_columns|safe }}],
-		stripeRows: true,
-		height: 600,
-		stateful: true,
-		viewConfig: {forceFit: true}
+		, store: {{ component.t_render_store|safe }}
+		, columns: [{{ component.t_render_columns|safe }}]
+		, stripeRows: true
+		, height: 600
+		, stateful: true
+		, viewConfig: {forceFit: true}
+		{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
 		
 		{%if component.show_banded_columns%}
 			//Плагин обработки объединенных колонок

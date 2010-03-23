@@ -1,6 +1,8 @@
 new Ext.menu.Menu({
-		id: '{{ component.client_id }}',
-		items: [{{ component.t_render_items|safe }}]
+		id: '{{ component.client_id }}'
+		, items: [{{ component.t_render_items|safe }}]
+		{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
+		
 		{# Прописываются имеющиеся обработчики #}
 		{% if component.t_render_listeners %}
 			{# Прописываются имеющиеся обработчики #}
