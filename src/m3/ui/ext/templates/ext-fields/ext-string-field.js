@@ -1,9 +1,12 @@
 new Ext.form.TextField({
 	id: '{{ component.client_id }}'
-	,name: '{{ component.name }}'
-	,fieldLabel: '{{ component.label }}'
-	,value: '{{ component.value }}'
-	,width: '{{ component.width }}'
+	{% if component.name %}, name: '{{ component.name }}' {% endif %}
+	{% if component.label %}, fieldLabel: '{{ component.label }}' {% endif %}
+	{% if component.value %}, value: '{{ component.value }}' {% endif %}
+	{% if component.width %}, width: '{{ component.width }}' {% endif %}
+	{% if component.height %}, height: '{{ component.height }}' {% endif %}
+	
+	{% if component.input_type %}, inputType: '{{ component.input_type }}' {% endif %}
 	{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
 	{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
 	

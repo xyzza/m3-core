@@ -46,8 +46,8 @@ class BaseExtWindow(ExtUIComponent):
         self.buttons = []
         
         self.layout = ''
-        self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
-        self.closable = True
+        self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = ''
+        self.closable = ''
         self.body_style = 'padding:5px;'
         
         

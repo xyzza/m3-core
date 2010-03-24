@@ -32,7 +32,6 @@ class ExtForm(BaseExtPanel):
     def items(self):       
         return self.__items
 
-
 class ExtPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)

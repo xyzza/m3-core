@@ -15,7 +15,9 @@ class ExtStringField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtStringField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-string-field.js'
-        # Свойства валидации специфичные для TextField
+        self.input_type = None        
+        
+		# Свойства валидации специфичные для TextField
         self.allow_blank = None
         self.min_length = self.min_length_text = None
         self.max_length = self.max_length_text = None
