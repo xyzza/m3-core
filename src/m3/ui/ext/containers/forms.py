@@ -16,6 +16,9 @@ class ExtForm(BaseExtPanel):
         self.layout = 'form'
         self.padding = ''
         self.__items = []
+        # Параметры специфичные для layout form
+        self.label_width = self.label_align = self.label_pad = None
+        
         self.init_component(*args, **kwargs)
         
     def render(self):

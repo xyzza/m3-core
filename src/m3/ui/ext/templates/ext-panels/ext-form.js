@@ -9,5 +9,8 @@ new Ext.FormPanel({
     {% else %}
     , header: false
     {% endif %}
+	{% if component.label_width  %}, labelWidth: '{{ component.label_width }}' {% endif %}
+	{% if component.label_align  %}, labelAlign: '{{ component.label_align }}' {% endif %}
+	{% if component.label_pad  %}, labelPad: '{{ component.label_pad }}' {% endif %}
     , items: [{{ component.t_render_items|safe }}]
 })
