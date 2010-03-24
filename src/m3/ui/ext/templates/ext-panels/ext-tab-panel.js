@@ -1,4 +1,5 @@
 new Ext.TabPanel({
+	id: '{{ component.client_id }}',
 	title:'{{component.title}}'
 	, activeTab:0
 	, autoWidth: true

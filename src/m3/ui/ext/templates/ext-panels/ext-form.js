@@ -1,4 +1,5 @@
 new Ext.FormPanel({
+	id: '{{ component.client_id }}',
     title: '{{ component.title }}'
     , layout: '{{ component.layout }}'
     , baseCls: 'x-plain'

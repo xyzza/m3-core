@@ -1,4 +1,5 @@
 new Ext.Panel({
+	id: '{{ component.client_id }}',
 	title:'{{ component.title }}'
 	{% if component.width %}, width:{{ component.width }} {% endif %}
 	{% if component.height %}, height: {{ component.height }} {% endif %}
