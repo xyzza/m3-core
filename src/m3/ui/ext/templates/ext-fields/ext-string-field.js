@@ -6,5 +6,14 @@ new Ext.form.TextField({
 	,width: '{{ component.width }}'
 	{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
 	{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
+	
+	{% if component.allow_blank %} ,allowBlank: {{ component.allow_blank }} {% endif %}
+	{% if component.min_length %} ,minLength: {{ component.min_length }} {% endif %}
+	{% if component.max_length %} ,maxLength: {{ component.max_length }} {% endif %}
+	{% if component.regex %} ,regex: {{ component.regex }} {% endif %}
+	{% if component.min_length_text %} ,minLengthText: {{ component.min_length_text }} {% endif %}
+	{% if component.max_length_text %} ,maxLengthText: {{ component.max_length_text }} {% endif %}
+	{% if component.regex_text %} ,regexText: {{ component.regex_text }} {% endif %}
+	
 	{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
 })

@@ -15,9 +15,18 @@ class ExtStringField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtStringField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-string-field.js'
+        # Свойства валидации специфичные для TextField
+        self.allow_blank = None
+        self.min_length = self.min_length_text = None
+        self.max_length = self.max_length_text = None
+        self.regex      = self.regex_text      = None
+        
         self.init_component(*args, **kwargs)
         
     def render(self):
+        # Из-за того что в шаблонах тег ifequal не поддерживает bool
+        if isinstance(self.allow_blank, bool) and (not self.allow_blank):
+            self.allow_blank = 'false'
         return render_component(self)
 
         
