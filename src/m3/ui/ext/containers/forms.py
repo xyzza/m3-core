@@ -15,6 +15,7 @@ class ExtForm(BaseExtPanel):
         self.template = 'ext-panels/ext-form.js'
         self.layout = 'form'
         self.padding = ''
+        self.url = ''
         self.__items = []
         # Параметры специфичные для layout form
         self.label_width = self.label_align = self.label_pad = None
