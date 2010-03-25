@@ -18,7 +18,7 @@ class ExtStringField(BaseExtField):
         self.input_type = None        
         
 		# Свойства валидации специфичные для TextField
-        self.allow_blank = None
+        self.allow_blank = self.vtype= None
         self.min_length = self.min_length_text = None
         self.max_length = self.max_length_text = None
         self.regex      = self.regex_text      = None
