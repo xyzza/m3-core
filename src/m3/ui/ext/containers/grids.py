@@ -99,7 +99,6 @@ class ExtGrid(BaseExtPanel):
     
     
 class ExtGridColumn(ExtUIComponent):
-    
     def __init__(self, *args, **kwargs):
         super(ExtGridColumn, self).__init__(*args, **kwargs)
         self.header = ''

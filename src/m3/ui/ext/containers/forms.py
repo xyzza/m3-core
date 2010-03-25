@@ -61,23 +61,17 @@ class ExtTabPanel(BaseExtPanel):
             Атрибут должен быть всегда типом panel
         '''
         def __setitem__(self, key, value):
-            if isinstance(value, ExtPanel):
-                super(ExtTabPanel.Tabs, self).__setitem__(key, value)
-            else:
-                raise TypeError('Value type "%s" isn\'t ExtPanel!' % value)
-            
+            assert isinstance(value, ExtPanel), 'Value type "%s" isn\'t ExtPanel!' % value
+            super(ExtTabPanel.Tabs, self).__setitem__(key, value)
+     
         def append(self, value):
-            if isinstance(value, ExtPanel):
-                super(ExtTabPanel.Tabs, self).append(value)
-            else:
-                raise TypeError('Value type "%s" isn\'t ExtPanel!' % value)       
+            assert isinstance(value, ExtPanel), 'Value type "%s" isn\'t ExtPanel!' % value
+            super(ExtTabPanel.Tabs, self).append(value)
     
-        def insert(self, value):
-            if isinstance(value, ExtPanel):
-                super(ExtTabPanel.Tabs, self).insert(value)
-            else:
-                raise TypeError('Value type "%s" isn\'t ExtPanel!' % value)  
-    
+        def insert(self, num, value):
+            assert isinstance(value, ExtPanel), 'Value type "%s" isn\'t ExtPanel!' % value
+            super(ExtTabPanel.Tabs, self).insert(num, value)
+
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-tab-panel.js'
@@ -90,24 +84,10 @@ class ExtTabPanel(BaseExtPanel):
     def render_tabs(self): 
         return ','.join([tab.render() for tab in self.tabs])
     
-#    def add_tab(self, panel, index=-1):
-#        if index<0 or index>len(self.tabs):
-#            self.tabs.append(panel)
-#        else:    
-#            self.tabs.insert(index, panel)
     def add_tab(self, **kwargs):
         panel = ExtPanel(**kwargs)
         self.tabs.append(panel)
         return panel
-    
-# По факту метод гет здесь не нужен, т.к.определяем свойство tabs
-#    def get_tab(self, index=-1):
-#        if index<0 or index>len(self.tabs):
-#            return self.tabs[len(self.tabs)-1]
-#        else:
-#            return self.tabs[index] 
-#    def get_tab(self, index):
-#        return self.tabs[index]
 
     @property
     def tabs(self):
