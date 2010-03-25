@@ -42,3 +42,16 @@ function(){
                        'failure_handler': 'failure:' + failure_handler + ',' if failure_handler else '',
                        'params': 'params:'  + params + ',' if params else '',
                        'invalid_handler': invalid_handler}
+
+
+def js_success_response():
+    '''
+    Возвращает Ext Ajax ответ что операция прошла успешно
+    '''
+    return '{success: true}'
+    
+def js_failure_response():
+    '''
+    Возвращает Ext Ajax ответ что операция прервана
+    '''
+    return '{success: false}'
