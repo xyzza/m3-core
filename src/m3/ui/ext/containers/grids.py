@@ -6,7 +6,6 @@ Created on 3.3.2010
 '''
 from m3.ui.ext.base import ExtUIComponent
 from base import BaseExtPanel
-from m3.ui.ext import render_component
 from django.utils.datastructures import SortedDict
 
 class ExtGrid(BaseExtPanel):
@@ -14,17 +13,13 @@ class ExtGrid(BaseExtPanel):
         super(ExtGrid, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-grid.js'
         self.columns = []
-        self.store = ''
-        
+        self.store = None
+    
         self.init_component(*args, **kwargs)
         
         # protected
         self.show_banded_columns = False
         self.banded_columns = SortedDict()
-        
-        
-    def render(self):
-        return render_component(self)
     
     def t_render_banded_columns(self):
         '''
@@ -101,11 +96,11 @@ class ExtGrid(BaseExtPanel):
 class ExtGridColumn(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(ExtGridColumn, self).__init__(*args, **kwargs)
-        self.header = ''
-        self.sortable = ''
-        self.data_index = ''
-        self.align = ''
-        self.colspan = ''
+        self.header = None
+        self.sortable = None
+        self.data_index = None
+        self.align = None
+        self.colspan = None
         self.width = 150
         self.init_component(*args, **kwargs)
         
@@ -124,5 +119,3 @@ class ExtGridColumn(ExtUIComponent):
         if self.width:
             js += ',width: %s' % self.width
         return '{%s}' % js
-        
-        

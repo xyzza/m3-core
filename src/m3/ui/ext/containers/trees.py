@@ -7,7 +7,6 @@ Created on 11.3.2010
 
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
-from m3.ui.ext import render_component
 from m3.ui.ext.containers import ExtGridColumn
 
 class ExtTree(BaseExtPanel):
@@ -25,14 +24,11 @@ class ExtTree(BaseExtPanel):
         for child in node.children:
             ExtTree.nodes_auto_check(child)         
     
-    def render(self):
+    def t_render_tree_loader(self):
         if not self.tree_loader.url:
             # Проставим у всех узлов автопроверку
             for node in self.nodes:
                 ExtTree.nodes_auto_check(node)
-        return render_component(self)
-    
-    def t_render_tree_loader(self):
         return self.tree_loader.render()
     
     def t_render_nodes(self):
@@ -78,7 +74,7 @@ class ExtTreeNode(ExtUIComponent):
     def __init__(self,*args, **kwargs):
         super(ExtTreeNode, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree-node.js'
-        self.text = ''
+        self.text = None
         self.leaf = False
         self.has_children = False
         #self.node_id = '' # используется client_id
@@ -89,8 +85,6 @@ class ExtTreeNode(ExtUIComponent):
 
         self.init_component(*args, **kwargs)
                 
-    def render(self):
-        return render_component(self)
     
     def t_render_children(self):
         return '[%s]' % ','.join([child.render() for child in self.children])
@@ -115,8 +109,5 @@ class ExtTreeLoader(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtTreeLoader, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree-loader.js'
-        self.url = ''
+        self.url = None
         self.init_component(*args, **kwargs)
-        
-    def render(self):
-        return render_component(self)

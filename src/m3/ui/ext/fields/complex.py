@@ -6,14 +6,11 @@ Created on 27.02.2010
 '''
 
 from base import BaseExtField
-from m3.ui.ext import render_component
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.misc import ExtConnection
 
 class ExtDictSelectField(BaseExtField):
-    '''
-    Поле с выбором из справочника
-    '''
+    '''Поле с выбором из справочника'''
     def __init__(self, url='', method='GET', *args, **kwargs):
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-dict-select-field.js' 
@@ -34,9 +31,6 @@ class ExtDictSelectField(BaseExtField):
         
         # После init_component, чтобы ask_before_deleting проициниализировалось
         self.clean_button.handler=self.render_globals()
-        
-    def render(self):
-        return render_component(self)
     
     def t_render_select_button(self):
         return self.select_button.render()

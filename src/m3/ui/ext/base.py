@@ -6,11 +6,12 @@
 Created on 01.03.2010
 
 @author: akvarats
+@author: prefer
 '''
 
 from uuid import uuid4
 from django import template as django_template
-from m3.ui.ext import render_template
+from m3.ui.ext import render_template, render_component
 
 #===============================================================================
 class ExtUIScriptRenderer(object):
@@ -65,7 +66,7 @@ class BaseExtComponent(object):
         отображения самого компонента. За рендер полного javascript
         отвечает метод get_script()
         '''
-        return ''
+        return render_component(self)
     
     def render_globals(self):
         '''
@@ -102,7 +103,6 @@ class ExtUIComponent(BaseExtComponent):
         self.disabled = False
         self.height = self.width = ''
         self.x = self.y = ''
-        self.icon_cls = ''
         self.html = ''
         
     def t_render_style(self):

@@ -9,7 +9,6 @@ Created on 9.03.10
 from base import BaseExtWindow
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.containers import ExtGrid, ExtGridColumn
-from m3.ui.ext import render_component
 
 class ExtDictSelectWindow(BaseExtWindow):
     def __init__(self, request, *args, **kwargs):
@@ -30,11 +29,8 @@ class ExtDictSelectWindow(BaseExtWindow):
         
         self.init_component(*args, **kwargs)
     
-    def render(self):
-        return render_component(self) 
-    
     def t_render_buttons(self):
-        return 'buttons:[%s]' % ','.join([render_component(button) for button in self.buttons])
+        return 'buttons:[%s]' % ','.join([button.render() for button in self.buttons])
        
     # Свойство, отображающее grid на top_container для правильного рендеринга   
     @property

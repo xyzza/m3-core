@@ -4,9 +4,7 @@ Created on 3.3.2010
 
 @author: prefer
 '''
-
 from base_store import BaseExtStore
-from m3.ui.ext import render_component
 
 class ExtDataStore(BaseExtStore):
     def __init__(self, data = [], *args, **kwargs):
@@ -21,18 +19,14 @@ class ExtDataStore(BaseExtStore):
         
     def render(self, columns):
         self.__columns = columns
-        return render_component(self)
+        return super(ExtDataStore, self).render()
     
     def t_render_fields(self):
-        '''
-            Прописывается в шаблоне и заполняется при рендеринге
-        '''
+        '''Прописывается в шаблоне и заполняется при рендеринге'''
         return ','.join(['{name: "%s"}' % column.data_index for column in self.__columns]) 
     
     def t_render_data(self):
-        '''
-            Прописывается в шаблоне и заполняется при рендеринге
-        '''
+        '''Прописывается в шаблоне и заполняется при рендеринге'''
         res = []
         for item in self.data:    
             res.append('[%s]' % ','.join(['"%s"' % subitem for subitem in item]))   
@@ -50,7 +44,7 @@ class ExtJsonStore(BaseExtStore):
         
     def render(self, columns):
         self.__columns = columns
-        return render_component(self)
+        return super(ExtJsonStore, self).render()
         
     def t_render_fields(self):
         '''

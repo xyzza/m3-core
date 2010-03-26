@@ -1,8 +1,17 @@
 new Ext.TabPanel({
-	id: '{{ component.client_id }}',
-	title:'{{component.title}}'
-	, activeTab:0
-	, autoWidth: true
-	{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
-	, items: [{{ component.render_tabs|safe }}]
+	id: '{{ component.client_id }}'
+	{% if component.disabled %} ,disabled: true {% endif %}
+	{% if component.hidden %} ,hidden: true {% endif %}
+	{% if component.width %} ,width: {{ component.width }} {% endif %}
+	{% if component.height %} ,height: {{ component.height }} {% endif %}
+	{% if component.html  %} ,html: '{{ component.html|safe }}' {% endif %}
+	{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
+	{% if component.x %} ,x: {{ component.x }} {% endif %}
+	{% if component.y %} ,y: {{ component.y }} {% endif %}
+	
+	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
+	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
+	,activeTab:0
+	,autoWidth: true
+	,items: [{{ component.render_tabs|safe }}]
 })

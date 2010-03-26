@@ -6,7 +6,6 @@ Created on 15.03.2010
 '''
 from m3.ui.ext.base import ExtUIComponent
 from base import BaseExtContainer
-from m3.ui.ext import render_component
 from m3.ui.ext.containers import ExtGrid, ExtTree
 
 class ExtContextMenu(BaseExtContainer):
@@ -22,9 +21,6 @@ class ExtContextMenu(BaseExtContainer):
         
     def add_spacer(self):
         self.__items.append('"-"')
-        
-    def render(self):
-        return render_component(self)
     
     def t_render_items(self):
         res = []
@@ -48,8 +44,8 @@ class ExtContextMenu(BaseExtContainer):
 class ExtContextMenuItem(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(ExtContextMenuItem, self).__init__(*args, **kwargs)
-        self.text = ''
-        self.handler = ''
+        self.text = None
+        self.handler = None
         self.init_component(*args, **kwargs)
         
     def render(self, container):

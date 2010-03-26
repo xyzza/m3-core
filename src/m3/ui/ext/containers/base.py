@@ -10,9 +10,10 @@ from m3.ui.ext.base import ExtUIComponent
 class BaseExtContainer(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtContainer, self).__init__(*args, **kwargs)
-        self.layout = ''
+        self.layout = None
         
 class BaseExtPanel(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(BaseExtPanel, self).__init__(*args, **kwargs)
-        self.title = ''
+        self.title = None
+        self.icon_cls = None

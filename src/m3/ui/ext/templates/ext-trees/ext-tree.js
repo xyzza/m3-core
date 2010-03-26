@@ -10,20 +10,29 @@ function(){
 	{% endfor%}
 	
 	var tree = new Ext.ux.tree.TreeGrid({
-		id: '{{ component.client_id}}'
-	    , useArrows: true
-	    , autoScroll: true
-	    , animate: true
-	    , enableDD: true
-	    , containerScroll: true
-	    , border: false
-		, split: true
-		, title: '{{ component.title }}'
-		{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
+		id: '{{ component.client_id }}'
+		{% if component.disabled %} ,disabled: true {% endif %}
+		{% if component.hidden %} ,hidden: true {% endif %}
+		{% if component.width %} ,width: {{ component.width }} {% endif %}
+		{% if component.height %} ,height: {{ component.height }} {% endif %}
+		{% if component.html  %} ,html: '{{ component.html|safe }}' {% endif %}
+		{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
+		{% if component.x %} ,x: {{ component.x }} {% endif %}
+		{% if component.y %} ,y: {{ component.y }} {% endif %}
 		
-		, columns:[{{ component.t_render_columns|safe }}]
-		, loader: {{ component.t_render_tree_loader|safe }}	
-		, root: new Ext.tree.AsyncTreeNode({
+		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
+		{% if component.title %} ,title: '{{ component.title }}' {% endif %}
+		
+	    ,useArrows: true
+	    ,autoScroll: true
+	    ,animate: true
+	    ,enableDD: true
+	    ,containerScroll: true
+	    ,border: false
+		,split: true
+		,columns:[{{ component.t_render_columns|safe }}]
+		,loader: {{ component.t_render_tree_loader|safe }}	
+		,root: new Ext.tree.AsyncTreeNode({
 			children: [ {{ component.t_render_nodes|safe }} ]
         })
         {% if component.t_render_listeners %}

@@ -1,4 +1,4 @@
-new Ext.Container({
+new Ext.form.DateField({
 	id: '{{ component.client_id }}'
 	{% if component.disabled %} ,disabled: true {% endif %}
 	{% if component.hidden %} ,hidden: true {% endif %}
@@ -9,6 +9,8 @@ new Ext.Container({
 	{% if component.x %} ,x: {{ component.x }} {% endif %}
 	{% if component.y %} ,y: {{ component.y }} {% endif %}
 	
-	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
-	,items: [{{ component.t_render_items|safe }}]
+	{% if component.label %} ,fieldLabel: '{{ component.label }}' {% endif %}
+	{% if component.name %} ,name: '{{ component.name }}' {% endif %}
+	{% if component.value %} ,value: '{{ component.value }}' {% endif %}
+	{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
 })

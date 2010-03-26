@@ -6,7 +6,6 @@ Created on 27.02.2010
 '''
 from m3.ui.ext.base import ExtUIComponent
 from base import BaseExtContainer
-from m3.ui.ext import render_component
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.fields.base import BaseExtField
 
@@ -16,9 +15,6 @@ class ExtContainer(BaseExtContainer):
         self.template = 'ext-containers/ext-container.js'
         self.__items = []
         self.init_component(*args, **kwargs)
-        
-    def render(self):
-        return render_component(self)
     
     def t_render_items(self):
         return ','.join([item.render() for item in self.items])
@@ -33,9 +29,6 @@ class ExtToolbar(BaseExtContainer):
         self.template = 'ext-containers/ext-toolbar.js'
         self.__items = []
         self.init_component(*args, **kwargs)
-
-    def render(self):
-        return render_component(self)
     
     def t_render_items(self):
         res = []

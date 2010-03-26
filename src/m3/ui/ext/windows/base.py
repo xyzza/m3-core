@@ -7,7 +7,7 @@ Created on 25.02.2010
 
 from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.renderers import ExtWindowRenderer
-from m3.ui.ext import render_component, render_template
+from m3.ui.ext import render_template
 
 class BaseExtWindow(ExtUIComponent):
     '''
@@ -41,21 +41,19 @@ class BaseExtWindow(ExtUIComponent):
         # параметры окна
         self.width = 400
         self.height = 300
-        self.title = ''
+        self.title = None
         self.top_container = None
         self.buttons = []
         
-        self.layout = ''
-        self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = ''
-        self.closable = ''
+        self.layout = None
+        self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
+        self.closable = True
         self.body_style = 'padding:5px;'
+        self.icon_cls = None
         
         
     def t_render_buttons(self):
         return 'buttons:[%s]' % ','.join([button.render() for button in self.buttons])
-    
-    def render(self):
-        return render_component(self)
     
     def render_globals(self):
         if self.template_globals:

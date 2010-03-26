@@ -12,21 +12,28 @@ function(){
 	
 	var grid = new Ext.grid.GridPanel({
 		id: '{{ component.client_id }}'
-	    , title: '{{ component.title }}'
-	
-	    {% if component.title %}
-	    , header: true
+		{% if component.disabled %} ,disabled: true {% endif %}
+		{% if component.hidden %} ,hidden: true {% endif %}
+		{% if component.width %} ,width: {{ component.width }} {% endif %}
+		{% if component.height %} ,height: {{ component.height }} {% endif %}
+		{% if component.html  %} ,html: '{{ component.html|safe }}' {% endif %}
+		{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
+		{% if component.x %} ,x: {{ component.x }} {% endif %}
+		{% if component.y %} ,y: {{ component.y }} {% endif %}
+		
+		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
+		
+	    {% if component.title %} 
+	    	,title: '{{ component.title }}' 
+	    	,header: true
 	    {% else %}
-	    , header: false
+	    	,header: false
 	    {% endif %}
-	    
-		, store: {{ component.t_render_store|safe }}
-		, columns: [{{ component.t_render_columns|safe }}]
-		, stripeRows: true
-		, height: 600
-		, stateful: true
-		, viewConfig: {forceFit: true}
-		{% if component.html  %}, html: '{{ component.html|safe }}' {% endif %}
+		,store: {{ component.t_render_store|safe }}
+		,columns: [{{ component.t_render_columns|safe }}]
+		,stripeRows: true
+		,stateful: true
+		,viewConfig: {forceFit: true}
 		
 		{%if component.show_banded_columns%}
 			//Плагин обработки объединенных колонок

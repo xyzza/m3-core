@@ -10,9 +10,9 @@ from m3.ui.ext.base import ExtUIComponent
 class BaseExtField(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtField, self).__init__(*args, **kwargs)
-        self.label = ''
-        self.name = ''
-        self.value = ''
+        self.label = None
+        self.name = None
+        self.value = None
         self.label_style = {}
    
     def t_render_label_style(self):
