@@ -118,6 +118,24 @@ class Action(object):
         '''
         raise NotImplementedError()
     
+    def get_packs_url(self):
+        '''
+        Возвращает путь всех паков на пути к экшену
+        '''
+        path = []
+        pack = self.parent
+        while pack != None:
+            path.append(pack.url)
+            pack = pack.parent
+        return ''.join( reversed(path) )
+    
+    def get_absolute_url(self):
+        '''
+        Возвращает полный путь от хоста до конечного экшена
+        '''
+        url = self.url.replace('$', '')
+        return self.get_packs_url() + url
+    
 class ActionPack(object):
     '''
     Базовый класс управления набором схожих по смыслу действий
@@ -170,11 +188,16 @@ class ActionController(object):
         return clazz
     
     def _build_pack_node(self, clazz, stack):
+        # Что-бы нам не передали, нужно создать экземпляр
         if isinstance(clazz, str):
             clazz = self._load_class(clazz)()
         elif isclass(clazz):
             clazz = clazz()
-            
+        
+        # Присваиваем родителя
+        if len(stack) > 0:
+            clazz.parent = stack[-1]
+        
         if isinstance(clazz, ActionPack):
             stack.append(clazz)
             # Бежим по экшенам
@@ -302,5 +325,5 @@ class ControllerCache(object):
             self._write_lock.release()
         return True
     
-#TODO: Прикрутить передаче параметров
-#TODO: Что-то сделать с контектом
+#TODO: Прикрутить передачу параметров
+#TODO: Что-то сделать с контекстом
