@@ -14,8 +14,7 @@ new Ext.form.ComboBox({
 	{% if component.value %} ,value: '{{ component.value }}' {% endif %}
 	{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
 	
-	,store:{{component.t_render_store|safe}}
-	,displayField:"{{component.display_field}}"
-	,triggerAction:'all'
-	,editable:false
+	,displayField:'{{component.display_field}}'
+    ,mode: 'local'
+    ,store:{{component.t_render_store|safe}}
 })
