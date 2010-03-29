@@ -1,12 +1,18 @@
 #coding:utf-8
+import threading
+from django.conf import settings
+from django.utils.importlib import import_module
+import re
+from django.http import Http404
+from inspect import isclass
 
 class ActionResult(object):
     '''
     Класс описывает результат выполнения Action'а
     '''
     
-    def __init__(self):
-        self.data = None
+    def __init__(self, data = None):
+        self.data = data
         
     def get_http_response(self):
         '''
@@ -35,7 +41,8 @@ class HttpReadyResult(ActionResult):
     Результат выполнения операции в виде готового HttpResponse. 
     Для данного класса в self.data храниться объект класса HttpResponse.
     '''
-    pass
+    def get_http_response(self):
+        return self.data
 
 class ExtUIComponentResult(ActionResult):
     '''
@@ -89,13 +96,13 @@ class Action(object):
         Предварительная обработка входящего запроса (request) и контекста (context)
         перед передачений на исполнение
         '''
-        return request
+        pass
     
     def post_run(self, request, context, response):
         '''
         Постобработка результата работы Action'а
         '''
-        return response
+        pass
     
     def context_declaration(self):
         '''
@@ -130,14 +137,14 @@ class ActionPack(object):
         Обработка входящего запроса HttpRequest перед передачений 
         на исполнение соответствующему Action'у
         '''
-        return request
+        pass
     
-    def post_run(self, response, context, response):
+    def post_run(self, request, context, response):
         '''
         Обработка исходящего ответа HttpResponse после исполнения запроса
         соответствующим Action'ом
         '''
-        return response
+        pass
     
 class ActionController(object):
     '''
@@ -147,18 +154,115 @@ class ActionController(object):
     
     def __init__(self):
         self.packs = []
+        self._patterns = []
+    
+    def _load_class(self, full_path):
+        '''
+        По полному пути загружает и созвращает класс 
+        '''
+        # Получаем имя модуля и класса в нём
+        dot = full_path.rindex('.')
+        mod_name = full_path[:dot]
+        pack_name = full_path[dot + 1:]
+        # Пробуем загрузить
+        mod = import_module(mod_name)
+        clazz = getattr(mod, pack_name)
+        return clazz
+    
+    def _build_pack_node(self, clazz, stack):
+        if isinstance(clazz, str):
+            clazz = self._load_class(clazz)()
+        elif isclass(clazz):
+            clazz = clazz()
+            
+        if isinstance(clazz, ActionPack):
+            stack.append(clazz)
+            # Бежим по экшенам
+            for action in clazz.actions:
+                self._build_pack_node(action, stack)
+            # Бежим по пакам
+            for pack in clazz.subpacks:
+                self._build_pack_node(pack, stack)
+            stack.pop()
+        else:
+            url_path = ''.join([x.url for x in stack]) + clazz.url
+            regex = re.compile(url_path, re.UNICODE)
+            # Запись паттерна состоит из:
+            # полного пути, компилированного выражения пути, стека паков и экшена
+            self._patterns.append( (url_path, regex, stack[:], clazz) )
+    
+    def _rebuild_patterns(self):
+        '''
+        Перестраивает внутренний список URL паттернов
+        '''
+        self._patterns = []
+        stack = []
+        for pack in self.packs:
+            self._build_pack_node(pack, stack)
+    
+    def _invoke(self, request, action, stack):
+        '''
+        Непосредственный вызов экшена с отработкой всех событий
+        '''
+        # Заполняем контект
+        rules = action.context_declaration()
+        context = self.build_context(request)
+        context.build(request, rules)
         
+        # Все ПРЕ обработчики
+        for pack in stack:
+            result = pack.pre_run(request, context)
+            if result != None:
+                return result
+        # Сам экшен
+        result = action.pre_run(request, context)
+        if result != None:
+            return result
+        response = action.run(request, context)
+        result = action.post_run(request, context, response)
+        if result != None:
+            return result
+        # Все ПОСТ обработчики с конца
+        for pack in reversed(stack):
+            result = pack.post_run(request, context, response)
+            if result != None:
+                return result
+        return response
+    
     def process_request(self, request):
         '''
         Обработка входящего запроса от клиента. Обрабатывается по аналогии с UrlResolver'ом Django
         '''
-        pass
+        if ControllerCache().populate():
+            self._rebuild_patterns()
+            
+        # Поиск подходящего под запрос экшена
+        key_url = request.path
+        for url, regex, stack, action in self._patterns:
+            match = regex.search(key_url)
+            if not match:
+                continue
+            
+            # Извлечение параметров из выражения (если есть)
+            #kwargs = match.groupdict()
+            #if kwargs:
+            #    args = ()
+            #else:
+            #    args = match.groups()
+            
+            # Непосредственный вызов экшена с отработкой всех событий
+            result = self._invoke(request, action, stack)
+            if isinstance(result, ActionResult):
+                return result.get_http_response()
+            return result
+        
+        raise Http404()
     
-    def find_action(self):
-        pass
-    
-    def build_context(self):
-        pass
+    def build_context(self, request):
+        '''
+        Выполняет построение контекста вызова операции ActionContext на основе переданного request
+        '''
+        return ActionContext()
     
 class ControllerCache(object):
     '''
@@ -166,12 +270,37 @@ class ControllerCache(object):
     в приложениях прикладного проекта объектов ActionPack.
     В системе существует только один объект данного класса.
     '''
+    _instance = None
+    
+    def __new__(cls, *dt, **mp):
+        # Возвращаем единственный экземпляр
+        if cls._instance == None:
+            cls._instance = super(ControllerCache, cls).__new__(cls, *dt, **mp)
+        return cls._instance
     
     def __init__(self):
-        self.loaded = False
-        
-    def populate(self):
-        pass
+        self._loaded = False
+        self._write_lock = threading.RLock()
     
-    def load_app_actions(self):
-        pass
+    def populate(self):
+        if self._loaded:
+            return False
+        self._write_lock.acquire()
+        try:
+            if self._loaded:
+                return False
+            # Из инитов всех приложения пытаемся выполнить register_ui_actions
+            for app_name in settings.INSTALLED_APPS:
+                try:
+                    module = import_module('.__init__', app_name)
+                except ImportError:
+                    continue
+                proc = getattr(module, 'register_ui_actions', None)
+                if callable(proc):
+                    proc()
+        finally:
+            self._write_lock.release()
+        return True
+    
+#TODO: Прикрутить передаче параметров
+#TODO: Что-то сделать с контектом
