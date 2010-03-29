@@ -5,7 +5,8 @@ Created on 27.02.2010
 @author: akvarats
 '''
 
-from base import BaseExtField
+from base import BaseExtField       
+from m3.ui.ext import render_component
         
 class ExtStringField(BaseExtField):
     '''
@@ -50,6 +51,9 @@ class ExtComboBox(BaseExtField):
     
     def set_store(self, store):
         self.store = store
+        
+    def t_render_store(self):
+        return self.store.render([self.display_field,])       
         
 class ExtTextArea(BaseExtField):
     '''Большое :) Текстовое поле'''
