@@ -6,7 +6,11 @@ Created on 25.02.2010
 '''
 
 from m3.ui.ext.fields.base import BaseExtField
+
+from m3.helpers.datastructures import TypedList
+# В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
+from m3.ui.ext.base import ExtUIComponent
 
 class ExtForm(BaseExtPanel):
     def __init__(self, *args, **kwargs):
@@ -15,7 +19,7 @@ class ExtForm(BaseExtPanel):
         self.layout = 'form'
         self.padding = None
         self.url = None
-        self.__items = []
+        self.__items = TypedList(type=ExtUIComponent)
         # Параметры специфичные для layout form
         self.label_width = self.label_align = self.label_pad = None
         
@@ -33,7 +37,7 @@ class ExtPanel(BaseExtPanel):
         super(ExtPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-panel.js'
         self.padding = None
-        self.__items = []
+        self.__items = TypedList(type=ExtUIComponent)
         self.init_component(*args, **kwargs)
     
     def render_items(self): 
@@ -48,31 +52,10 @@ class ExtTabPanel(BaseExtPanel):
     '''
         Класс, отвечающий за работу TabPanel
     '''
-    class Tabs(list):
-        '''
-            Вспомогательный класс, перекрывает три метода - добавление (append, insert) и изменение атрибута
-            Атрибут должен быть всегда типом panel
-        '''
-        def __init__(self, type):
-            super(ExtTabPanel.Tabs, self).__init__()
-            self.__type = type
-            
-        def __setitem__(self, key, value):
-            assert isinstance(value, self.__type), 'Type value "%s" isn\'t %s!' % (value, self.__type.__name__)
-            super(ExtTabPanel.Tabs, self).__setitem__(key, value)
-     
-        def append(self, value):
-            assert isinstance(value, self.__type), 'Type value "%s" isn\'t %s!' % (value, self.__type.__name__)
-            super(ExtTabPanel.Tabs, self).append(value)
-    
-        def insert(self, num, value):
-            assert isinstance(value, self.__type), 'Type value "%s" isn\'t %s!' % (value, self.__type.__name__)
-            super(ExtTabPanel.Tabs, self).insert(num, value)
-
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-tab-panel.js'
-        self.__tabs = ExtTabPanel.Tabs(type = ExtPanel)
+        self.__tabs = TypedList(type=ExtPanel)
         self.init_component(*args, **kwargs)
     
     def render_tabs(self): 

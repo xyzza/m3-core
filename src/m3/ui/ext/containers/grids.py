@@ -36,7 +36,7 @@ class ExtGrid(BaseExtPanel):
         return ','.join([column.render() for column in self.columns])
     
     def t_render_store(self):
-        return self.store.render(self.columns)
+        return self.store.render([column.data_index for column in self.columns])
     
     def add_column(self, **kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
@@ -69,7 +69,6 @@ class ExtGrid(BaseExtPanel):
     def add_store(self, store):
         self.store = store
 
-       
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------

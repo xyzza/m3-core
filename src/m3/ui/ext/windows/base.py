@@ -9,6 +9,10 @@ from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.renderers import ExtWindowRenderer
 from m3.ui.ext import render_template
 
+from m3.helpers.datastructures import TypedList
+# В качестве значений списка TypedList атрибутов могут выступать объекты:
+from m3.ui.ext.controls import ExtButton
+
 class BaseExtWindow(ExtUIComponent):
     '''
     Базовый класс для всех окон в системе
@@ -43,7 +47,7 @@ class BaseExtWindow(ExtUIComponent):
         self.height = 300
         self.title = None
         self.top_container = None
-        self.buttons = []
+        self.__buttons = TypedList(type=ExtButton)
         
         self.layout = None
         self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
@@ -51,6 +55,9 @@ class BaseExtWindow(ExtUIComponent):
         self.body_style = 'padding:5px;'
         self.icon_cls = None
         
+    @property
+    def buttons(self):
+        return self.__buttons
         
     def t_render_buttons(self):
         return 'buttons:[%s]' % ','.join([button.render() for button in self.buttons])

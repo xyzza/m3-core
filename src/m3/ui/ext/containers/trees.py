@@ -9,11 +9,14 @@ from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from m3.ui.ext.containers import ExtGridColumn
 
+from m3.helpers.datastructures import TypedList
+
+
 class ExtTree(BaseExtPanel):
     def __init__(self, url='', *args, **kwargs):
         super(ExtTree, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree.js'
-        self.nodes = []
+        self.nodes = TypedList(type=ExtTreeNode)
         self.columns = []
         self.tree_loader = ExtTreeLoader(url=url)
         self.init_component(*args, **kwargs)
@@ -39,10 +42,7 @@ class ExtTree(BaseExtPanel):
     
     def add_nodes(self, *args):
         for node in args:
-            if isinstance(node, ExtTreeNode):
-                self.nodes.append(node)
-            else:
-                raise TypeError('First parameter "%s" is not type of ExtTreeNode' % node)
+            self.nodes.append(node)
     
     def add_column(self,**kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
@@ -80,12 +80,10 @@ class ExtTreeNode(ExtUIComponent):
         #self.node_id = '' # используется client_id
         self.expanded = False
         self.auto_check = False
-        self.children = []
+        self.children = TypedList(type=ExtTreeNode)
         self.__items = {}
-
         self.init_component(*args, **kwargs)
-                
-    
+                 
     def t_render_children(self):
         return '[%s]' % ','.join([child.render() for child in self.children])
              
@@ -104,6 +102,7 @@ class ExtTreeNode(ExtUIComponent):
     def set_items(self, **kwargs):
         for k, v in kwargs.items():
             self.items[k] = v
+        
         
 class ExtTreeLoader(BaseExtComponent):
     def __init__(self, *args, **kwargs):

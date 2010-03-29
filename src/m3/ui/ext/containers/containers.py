@@ -9,11 +9,15 @@ from base import BaseExtContainer
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.fields.base import BaseExtField
 
+from m3.helpers.datastructures import TypedList
+# В качестве значений списка TypedList атрибутов могут выступать объекты:
+# ExtUIComponent - в классе контэйнер
+
 class ExtContainer(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtContainer, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-container.js'
-        self.__items = []
+        self.__items = TypedList(type = ExtUIComponent)
         self.init_component(*args, **kwargs)
     
     def t_render_items(self):

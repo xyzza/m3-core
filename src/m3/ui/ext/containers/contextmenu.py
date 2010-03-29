@@ -6,7 +6,10 @@ Created on 15.03.2010
 '''
 from m3.ui.ext.base import ExtUIComponent
 from base import BaseExtContainer
+
+# Меню может привязываться к:
 from m3.ui.ext.containers import ExtGrid, ExtTree
+
 
 class ExtContextMenu(BaseExtContainer):
     def __init__(self, *args, **kwargs):
@@ -40,6 +43,7 @@ class ExtContextMenu(BaseExtContainer):
     @handler_beforeshow.setter
     def handler_beforeshow(self, value):
         self._listeners['beforeshow'] = value
+        
         
 class ExtContextMenuItem(ExtUIComponent):
     def __init__(self, *args, **kwargs):

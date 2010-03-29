@@ -11,10 +11,10 @@ new Ext.Window({
     
     {% if component.title %} ,title: '{{ component.title }}' {% endif %}
 	{% if component.modal %}, modal: true {% endif %}
-	{% if component.minimizable %}, minimizable: true {% endif %}
-	{% if component.maximizable %}, maximizable: true {% endif %}
 	{% if component.maximized %}, maximized: true {% endif %}
 	{% if component.minimized %}, minimized: true {% endif %}
+	,minimizable: {{ component.minimizable|lower }}
+	,maximizable: {{ component.maximizable|lower  }}
 	,closable: {{ component.closable|lower }}
 
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
