@@ -172,9 +172,10 @@ class ActionController(object):
     их на исполнение соответствущим Action'ам
     '''
     
-    def __init__(self):
+    def __init__(self, url = ''):
         self.packs = []
         self._patterns = []
+        self.url = url
         self._rebuild_lock = threading.RLock()
     
     def _load_class(self, full_path):
@@ -334,3 +335,4 @@ class ControllerCache(object):
     
 #TODO: Прикрутить передачу параметров
 #TODO: Что-то сделать с контекстом
+#TODO: Переписать ресольвер на словарь, т.к. решили отказаться от параметров в паках
