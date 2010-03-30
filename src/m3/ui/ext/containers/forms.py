@@ -64,16 +64,14 @@ class ExtForm(BaseExtPanel):
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
                 val = value.strftime('%d.%m.%Y')
-                print val
                 item.value = val
             elif isinstance(item, ExtCheckBox):
-                item.checked = True if (value == True) or () or () else False
+                item.checked = True if (value == 'true') or (value == 'True') or (value == True) else False
             else:
                 item.value = str(value)
 
         
         fields = _parse_obj(object)
-        print fields
         if fields:
             for item in self.items:
                 new_val = fields.get(item.name, None)
@@ -113,6 +111,8 @@ class ExtForm(BaseExtPanel):
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
                 val = datetime.datetime.strptime(val, '%d.%m.%Y')
+            elif isinstance(item, ExtCheckBox):
+                val = item.checked
             return val
         
         
