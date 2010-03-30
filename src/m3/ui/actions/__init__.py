@@ -50,7 +50,8 @@ class ExtUIComponentResult(ActionResult):
     В self.data хранится некоторый наследник класса m3.ui.ext.ExtUiComponent.
     Метод get_http_response выполняет метод render у объекта в self.data.
     '''
-    pass
+    def get_http_response(self):
+        return self.data.render()
 
 class ExtUIScriptResult(ActionResult):
     '''
@@ -58,7 +59,8 @@ class ExtUIScriptResult(ActionResult):
     Единственное отличие заключается в том, что get_http_response должен сформировать
     готовый к отправке javascript. Т.е. должен быть вызван метод self.data.get_script()
     '''
-    pass
+    def get_http_response(self):
+        return self.data.get_script()
 
 class ActionContextDeclaration(object):
     '''
@@ -173,6 +175,7 @@ class ActionController(object):
     def __init__(self):
         self.packs = []
         self._patterns = []
+        self._rebuild_lock = threading.RLock()
     
     def _load_class(self, full_path):
         '''
@@ -214,14 +217,18 @@ class ActionController(object):
             # полного пути, компилированного выражения пути, стека паков и экшена
             self._patterns.append( (url_path, regex, stack[:], clazz) )
     
-    def _rebuild_patterns(self):
+    def rebuild_patterns(self):
         '''
         Перестраивает внутренний список URL паттернов
         '''
-        self._patterns = []
-        stack = []
-        for pack in self.packs:
-            self._build_pack_node(pack, stack)
+        self._rebuild_lock.acquire()
+        try:
+            self._patterns = []
+            stack = []
+            for pack in self.packs:
+                self._build_pack_node(pack, stack)
+        finally:
+            self._rebuild_lock.release()
     
     def _invoke(self, request, action, stack):
         '''
@@ -257,7 +264,7 @@ class ActionController(object):
         Обработка входящего запроса от клиента. Обрабатывается по аналогии с UrlResolver'ом Django
         '''
         if ControllerCache().populate():
-            self._rebuild_patterns()
+            self.rebuild_patterns()
             
         # Поиск подходящего под запрос экшена
         key_url = request.path
