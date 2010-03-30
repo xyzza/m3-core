@@ -5,6 +5,7 @@ from django.utils.importlib import import_module
 import re
 from django.http import Http404
 from inspect import isclass
+from django.utils.datastructures import MultiValueDict
 
 class ActionResult(object):
     '''
@@ -93,6 +94,9 @@ class Action(object):
     # Ссылка на ActionPack к которому принадлежит данный Action
     parent = None
     
+    # Ссылка на контроллер к которому принадлежит данный Action
+    controller = None
+    
     def pre_run(self, request, context):
         '''
         Предварительная обработка входящего запроса (request) и контекста (context)
@@ -124,6 +128,7 @@ class Action(object):
         '''
         Возвращает путь всех паков на пути к экшену
         '''
+        assert isinstance(self.parent, ActionPack)
         path = []
         pack = self.parent
         while pack != None:
@@ -135,8 +140,12 @@ class Action(object):
         '''
         Возвращает полный путь от хоста до конечного экшена
         '''
-        url = self.url.replace('$', '')
-        return self.get_packs_url() + url
+        assert isinstance(self.controller, ActionController)
+        # Очищаем от мусора рег. выр.
+        ignored_chars = ['^', '&', '$']
+        for char in ignored_chars:
+            url = self.url.replace(char, '')
+        return self.controller.url + self.get_packs_url() + url
     
 class ActionPack(object):
     '''
@@ -174,7 +183,7 @@ class ActionController(object):
     
     def __init__(self, url = ''):
         self.packs = []
-        self._patterns = []
+        self._patterns = MultiValueDict()
         self.url = url
         self._rebuild_lock = threading.RLock()
     
@@ -212,11 +221,13 @@ class ActionController(object):
                 self._build_pack_node(pack, stack)
             stack.pop()
         else:
-            url_path = ''.join([x.url for x in stack]) + clazz.url
-            regex = re.compile(url_path, re.UNICODE)
+            clazz.controller = self
+            # Полный путь всех паков
+            packs_path = self.url + ''.join([x.url for x in stack])
+            regex = re.compile(clazz.url, re.UNICODE)
             # Запись паттерна состоит из:
-            # полного пути, компилированного выражения пути, стека паков и экшена
-            self._patterns.append( (url_path, regex, stack[:], clazz) )
+            # компилированного выражения пути, стека паков и экшена
+            self._patterns.appendlist(packs_path, (regex, stack[:], clazz) )
     
     def rebuild_patterns(self):
         '''
@@ -224,7 +235,7 @@ class ActionController(object):
         '''
         self._rebuild_lock.acquire()
         try:
-            self._patterns = []
+            self._patterns.clear()
             stack = []
             for pack in self.packs:
                 self._build_pack_node(pack, stack)
@@ -264,13 +275,28 @@ class ActionController(object):
         '''
         Обработка входящего запроса от клиента. Обрабатывается по аналогии с UrlResolver'ом Django
         '''
-        if ControllerCache().populate():
+        if ControllerCache.populate():
             self.rebuild_patterns()
-            
+          
+        # Делим URL на часть пака и часть экшена
+        path = request.path
+        dot = path.rfind('/', 0, -1)
+        if dot == 0:
+            # URL короткий и состоит только из экшена
+            pack_url = '/' 
+            regex_url = path
+        else:
+            pack_url = path[:dot]
+            regex_url = path[dot:]
+        
         # Поиск подходящего под запрос экшена
-        key_url = request.path
-        for url, regex, stack, action in self._patterns:
-            match = regex.search(key_url)
+        pack = self._patterns.getlist(pack_url)
+        if len(pack) == 0:
+            raise Http404()
+        
+        # Поиск подходящего экшена внутри пака
+        for regex, stack, action in pack:
+            match = regex.search(regex_url)
             if not match:
                 continue
             
@@ -301,24 +327,16 @@ class ControllerCache(object):
     в приложениях прикладного проекта объектов ActionPack.
     В системе существует только один объект данного класса.
     '''
-    _instance = None
+    _loaded = False
+    _write_lock = threading.RLock()
     
-    def __new__(cls, *dt, **mp):
-        # Возвращаем единственный экземпляр
-        if cls._instance == None:
-            cls._instance = super(ControllerCache, cls).__new__(cls, *dt, **mp)
-        return cls._instance
-    
-    def __init__(self):
-        self._loaded = False
-        self._write_lock = threading.RLock()
-    
-    def populate(self):
-        if self._loaded:
+    @classmethod
+    def populate(cls):
+        if cls._loaded:
             return False
-        self._write_lock.acquire()
+        cls._write_lock.acquire()
         try:
-            if self._loaded:
+            if cls._loaded:
                 return False
             # Из инитов всех приложения пытаемся выполнить register_ui_actions
             for app_name in settings.INSTALLED_APPS:
@@ -329,10 +347,10 @@ class ControllerCache(object):
                 proc = getattr(module, 'register_ui_actions', None)
                 if callable(proc):
                     proc()
+            cls._loaded = True
         finally:
-            self._write_lock.release()
+            cls._write_lock.release()
         return True
     
 #TODO: Прикрутить передачу параметров
 #TODO: Что-то сделать с контекстом
-#TODO: Переписать ресольвер на словарь, т.к. решили отказаться от параметров в паках
