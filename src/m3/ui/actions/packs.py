@@ -1,23 +1,30 @@
 #coding:utf-8
-from m3.ui.actions import ActionPack, Action
+from m3.ui.actions import ActionPack, Action, ExtUIScriptResult
+from m3.ui.ext.windows.window import ExtWindow
 
 class DictListWindowAction(Action):
     '''
     Действие, которое возвращает окно со списком элементов справочника.
     '''
     url = '/list-window$'
+    def run(self, request, context):
+        return ExtUIScriptResult(self.parent.get_list_window())
     
 class DictSelectWindowAction(Action):
     '''
     Действие, возвращающее окно с формой выбора из справочника
     '''
     url = '/select-window$'
+    def run(self, request, context):
+        return ExtUIScriptResult(self.parent.get_select_window())
     
 class DictEditWindowAction(Action):
     '''
     Редактирование элемента справочника
     '''
     url = '/edit-window$'
+    def run(self, request, context):
+        return ExtUIScriptResult(self.parent.get_edit_window())
     
 class DictRowsAction(Action):
     '''
@@ -92,7 +99,8 @@ class BaseDictionaryActions(ActionPack):
     def get_list_window(self):
         '''
         '''
-        pass
+        win = ExtWindow(title = u'Окно списка')
+        return win
     
     def get_select_window(self):
         '''
@@ -114,13 +122,12 @@ class BaseDictionaryActions(ActionPack):
         '''
         pass
 
-class BaseDictionaryModelActions(ActionPack):
+class BaseDictionaryModelActions(BaseDictionaryActions):
     '''
     Класс, который реализует действия со справочником, записи которого являются моделями.
-    '''
+    '''    
     model = None
     list_columns = []
     edit_windows = None
     filter_fields = []
 
-        

@@ -3,9 +3,9 @@ import threading
 from django.conf import settings
 from django.utils.importlib import import_module
 import re
-from django.http import Http404
 from inspect import isclass
 from django.utils.datastructures import MultiValueDict
+from django import http
 
 class ActionResult(object):
     '''
@@ -52,7 +52,7 @@ class ExtUIComponentResult(ActionResult):
     Метод get_http_response выполняет метод render у объекта в self.data.
     '''
     def get_http_response(self):
-        return self.data.render()
+        return http.HttpResponse(self.data.render())
 
 class ExtUIScriptResult(ActionResult):
     '''
@@ -61,7 +61,7 @@ class ExtUIScriptResult(ActionResult):
     готовый к отправке javascript. Т.е. должен быть вызван метод self.data.get_script()
     '''
     def get_http_response(self):
-        return self.data.get_script()
+        return http.HttpResponse(self.data.get_script())
 
 class ActionContextDeclaration(object):
     '''
@@ -228,6 +228,9 @@ class ActionController(object):
             # Запись паттерна состоит из:
             # компилированного выражения пути, стека паков и экшена
             self._patterns.appendlist(packs_path, (regex, stack[:], clazz) )
+            # Для отладки
+            if __debug__:
+                print packs_path, clazz.url
     
     def rebuild_patterns(self):
         '''
@@ -292,7 +295,7 @@ class ActionController(object):
         # Поиск подходящего под запрос экшена
         pack = self._patterns.getlist(pack_url)
         if len(pack) == 0:
-            raise Http404()
+            raise http.Http404()
         
         # Поиск подходящего экшена внутри пака
         for regex, stack, action in pack:
@@ -313,7 +316,7 @@ class ActionController(object):
                 return result.get_http_response()
             return result
         
-        raise Http404()
+        raise http.Http404()
     
     def build_context(self, request):
         '''
