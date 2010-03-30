@@ -42,7 +42,7 @@ class ExtNumberField(BaseExtField):
         self.init_component(*args, **kwargs)
     
 class ExtComboBox(BaseExtField):
-    '''Поле комбобокс'''
+    '''Поле выпадающий список - combobox'''
     def __init__(self, *args, **kwargs):
         super(ExtComboBox, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-combo.js'
@@ -53,12 +53,14 @@ class ExtComboBox(BaseExtField):
         self.init_component(*args, **kwargs)
     
     def set_store(self, store):
-        if isinstance(store, ExtDataStore):
-            self.mode = 'local'
-            self.__store = store
-        else:
-            self.mode = 'remote'
-            self.__store = store    
+#        if isinstance(store, ExtDataStore):
+#            self.mode = 'local'
+#            self.__store = store
+#        else:
+#            self.mode = 'remote'
+#            self.__store = store
+        self.mode = 'local' if isinstance(store, ExtDataStore) else 'remote' 
+        self.__store = store
         
     def t_render_store(self):
         return self.__store.render([self.display_field,])       

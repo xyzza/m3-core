@@ -7,7 +7,7 @@ Created on 11.3.2010
 
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
-from m3.ui.ext.containers import ExtGridColumn
+from m3.ui.ext.containers import ExtGridColumn, ExtGridBooleanColumn, ExtGridDateColumn, ExtGridNumberColumn
 
 from m3.helpers.datastructures import TypedList
 
@@ -46,6 +46,15 @@ class ExtTree(BaseExtPanel):
     
     def add_column(self,**kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
+        
+    def add_bool_column(self,**kwargs):
+        self.columns.append(ExtGridBooleanColumn(**kwargs))
+        
+    def add_number_column(self,**kwargs):
+        self.columns.append(ExtGridNumberColumn(**kwargs))
+        
+    def add_date_column(self,**kwargs):
+        self.columns.append(ExtGridDateColumn(**kwargs))
    
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]

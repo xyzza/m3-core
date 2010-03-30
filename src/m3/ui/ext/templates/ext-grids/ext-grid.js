@@ -10,6 +10,24 @@ function(){
 		{% endifequal %}
 	{% endfor%}
 	
+	var plugins=[];
+	{%if component.show_banded_columns%}
+		//Плагин обработки объединенных колонок
+		plugins.push( new Ext.ux.grid.ColumnHeaderGroup({
+				rows: {{ component.t_render_banded_columns|safe }}
+			})
+		);
+	{%endif%}
+	{% if component.editor %}
+		//Плагин редактирования таблицы
+		plugins.push( new Ext.ux.grid.RowEditor({
+			saveText: 'Обновить',
+			cancelText: 'Отмена'
+			})
+		);
+	{%endif%}
+	
+	
 	var grid = new Ext.grid.GridPanel({
 		id: '{{ component.client_id }}'
 		{% if component.disabled %} ,disabled: true {% endif %}
@@ -34,13 +52,8 @@ function(){
 		,stripeRows: true
 		,stateful: true
 		,viewConfig: {forceFit: true}
-		
-		{%if component.show_banded_columns%}
-			//Плагин обработки объединенных колонок
-			,plugins: new Ext.ux.grid.ColumnHeaderGroup({
-				rows: {{ component.t_render_banded_columns|safe }}
-			})
-		{%endif%}
+
+		,plugins: plugins
 		{% if component.t_render_listeners %}
 		{# Прописываются имеющиеся обработчики #}
 		,listeners:{

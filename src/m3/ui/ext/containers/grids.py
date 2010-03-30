@@ -8,13 +8,19 @@ from m3.ui.ext.base import ExtUIComponent
 from base import BaseExtPanel
 from django.utils.datastructures import SortedDict
 
+
+# В качестве значений списка TypedList атрибутов могут выступать объекты:
+from m3.ui.ext.fields.simple import ExtStringField 
+from m3.ui.ext.fields.base import BaseExtField 
+
+
 class ExtGrid(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtGrid, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-grid.js'
         self.columns = []
         self.store = None
-    
+        self.editor = False
         self.init_component(*args, **kwargs)
         
         # protected
@@ -30,7 +36,6 @@ class ExtGrid(BaseExtPanel):
         for level_list in self.banded_columns.values():       
             result.append('[%s]' % ','.join([ column.render() for column in level_list ]))
         return '[%s]' % ','.join(result) 
-
     
     def t_render_columns(self):
         return ','.join([column.render() for column in self.columns])
@@ -40,6 +45,15 @@ class ExtGrid(BaseExtPanel):
     
     def add_column(self, **kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
+    
+    def add_bool_column(self, **kwargs):
+        self.columns.append(ExtGridBooleanColumn(**kwargs))
+        
+    def add_number_column(self, **kwargs):
+        self.columns.append(ExtGridNumberColumn(**kwargs))
+        
+    def add_date_column(self, **kwargs):
+        self.columns.append(ExtGridDateColumn(**kwargs))
         
     def add_banded_column(self, column, level, colspan):
         '''
@@ -66,7 +80,7 @@ class ExtGrid(BaseExtPanel):
         self.banded_columns.clear()
         self.show_banded_columns = False
         
-    def add_store(self, store):
+    def set_store(self, store):
         self.store = store
 
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
@@ -92,29 +106,54 @@ class ExtGrid(BaseExtPanel):
     #----------------------------------------------------------------------------
     
     
-class ExtGridColumn(ExtUIComponent):
+class BaseExtGridColumn(ExtUIComponent):
     def __init__(self, *args, **kwargs):
-        super(ExtGridColumn, self).__init__(*args, **kwargs)
+        super(BaseExtGridColumn, self).__init__(*args, **kwargs)
         self.header = None
-        self.sortable = None
+        self.sortable = False
         self.data_index = None
         self.align = None
-        self.colspan = None
         self.width = 150
+        self.editor = None
+               
+    def render_editor(self):
+        return self.editor.render()
+    
+#    @property
+#    def editor(self):
+#        return self.__editor
+#    
+#    @editor.setter
+#    def editor(self, value):
+#        assert isinstance(value, BaseExtField), 'Type value "%s" isn\'t %s' % (value, BaseExtField.__name__)
+#        self.__editor = value 
+        
+    
+class ExtGridColumn(BaseExtGridColumn):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridColumn, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-grid-column.js'
+        self.init_component(*args, **kwargs)
+    
+class ExtGridBooleanColumn(BaseExtGridColumn):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridBooleanColumn, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-bool-column.js'
+        self.text_false = None
+        self.text_true = None
+        self.text_undefined = None
         self.init_component(*args, **kwargs)
         
-    def render(self):
-        js = 'id: "%s"' % self.client_id
-        if self.header:
-            js += ',header: "%s"' % self.header
-        if self.sortable:
-            js += ',sortable: "%s"' % self.sortable
-        if self.data_index:
-            js += ',dataIndex: "%s"' % self.data_index
-        if self.align:
-            js += ',align: "%s"' % self.align
-        if self.colspan:
-            js += ',colspan: %s' % self.colspan
-        if self.width:
-            js += ',width: %s' % self.width
-        return '{%s}' % js
+class ExtGridNumberColumn(BaseExtGridColumn):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridNumberColumn, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-number-column.js'
+        self.format = None
+        self.init_component(*args, **kwargs)
+        
+class ExtGridDateColumn(BaseExtGridColumn):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridDateColumn, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-date-column.js'
+        self.format = None
+        self.init_component(*args, **kwargs)
