@@ -14,7 +14,11 @@ new Ext.form.ComboBox({
 	{% if component.value %} ,value: '{{ component.value }}' {% endif %}
 	{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
 	
-	,displayField:'{{component.display_field}}'
-    ,mode: 'local'
-    ,store:{{component.t_render_store|safe}}
+	{% if component.empty_text%}, emptyText: '{{component.empty_text}}' {% endif %}
+	{% if component.mode%}, mode: '{{component.mode}}' {% endif %}
+	
+	,store:{{component.t_render_store|safe}}
+	,displayField:"{{component.display_field}}"
+	,triggerAction:'all'
+	,editable:false
 })

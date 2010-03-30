@@ -5,7 +5,8 @@ Created on 27.02.2010
 @author: akvarats
 '''
 
-from base import BaseExtField       
+from base import BaseExtField 
+from m3.ui.ext.misc import ExtDataStore      
 from m3.ui.ext import render_component
         
 class ExtStringField(BaseExtField):
@@ -46,14 +47,21 @@ class ExtComboBox(BaseExtField):
         super(ExtComboBox, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-combo.js'
         self.display_field = None
-        self.store = None
+        self.__store = None
+        self.empty_text = None
+        self.mode = None
         self.init_component(*args, **kwargs)
     
     def set_store(self, store):
-        self.store = store
+        if isinstance(store, ExtDataStore):
+            self.mode = 'local'
+            self.__store = store
+        else:
+            self.mode = 'remote'
+            self.__store = store    
         
     def t_render_store(self):
-        return self.store.render([self.display_field,])       
+        return self.__store.render([self.display_field,])       
         
 class ExtTextArea(BaseExtField):
     '''Большое :) Текстовое поле'''
