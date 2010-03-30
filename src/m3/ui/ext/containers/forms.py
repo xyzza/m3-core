@@ -5,8 +5,13 @@ Created on 25.02.2010
 @author: akvarats
 '''
 
-from m3.ui.ext.fields.base import BaseExtField
+import datetime
 
+from m3.ui.ext.fields.base import BaseExtField
+from m3.ui.ext.fields.simple import (ExtNumberField, 
+                                     ExtStringField, 
+                                     ExtDateField,
+                                     ExtCheckBox)
 from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
@@ -23,7 +28,98 @@ class ExtForm(BaseExtPanel):
         # Параметры специфичные для layout form
         self.label_width = self.label_align = self.label_pad = None
         
+        self.request = None
+        self.object = None
+        
         self.init_component(*args, **kwargs)
+        
+    #TODO необходимо добавить проверку на возникновение exception'ов
+    def from_object(self, object):
+        '''
+        Метод выполнения прямого связывания данных атрибутов объекта object и полей текущей формы
+        '''
+        
+        def _parse_obj(obj, prefix=''):
+            '''
+            Разбивает объект на словарь, ключи которого имена полей(имена вложенных 
+            объектов записываются через '.'), а значения - значения соответсвующих полей объекта
+            '''
+            attrs = {}
+            object_fields = obj if isinstance(obj, dict) else obj.__dict__
+            for key, value in object_fields.items():
+                #TODO как определить, что класс встроенный
+                if not hasattr(value, '__dict__'):
+                    attrs[prefix+str(key)] = value
+                else:
+                    pre_prefix = prefix+'.' if prefix else ''
+                    attrs.update(_parse_obj(value, pre_prefix+str(key)+'.'))
+            return attrs
+        
+        def _assign_value(value, item):
+            '''
+            Конвертирует и присваивает значение value в соответствии типу item.
+            '''
+            if isinstance(item, (ExtStringField, ExtNumberField,)):
+                item.value = str(value)
+            elif isinstance(item, ExtDateField):
+                #TODO уточнить формат дат
+                val = value.strftime('%d.%m.%Y')
+                print val
+                item.value = val
+            elif isinstance(item, ExtCheckBox):
+                item.checked = True if (value == True) or () or () else False
+            else:
+                item.value = str(value)
+
+        
+        fields = _parse_obj(object)
+        print fields
+        if fields:
+            for item in self.items:
+                new_val = fields.get(item.name, None)
+                if new_val:
+                    _assign_value(new_val, item)
+
+    #TODO необходимо добавить проверку на возникновение exception'ов
+    def to_object(self, object):
+        '''
+        Метод выполнения прямого связывания данных атрибутов объекта object и полей текущей формы
+        '''
+
+        def _set_field(obj, names, value):
+            '''
+            Ищет в объекте obj поле с именем names и присваивает значение value. Если 
+            соответствующего поля не оказалось, то оно не создается
+            
+            names задается в виде списка, т.о. если его длина больше единицы, то имеются вложенные объекты
+            '''
+            nested = getattr(obj, names[0], None)
+            if nested != None:
+                if len(names) == 1:
+                    if isinstance(obj, dict):
+                        obj[names[0]] = value
+                    else:
+                        setattr(obj, names[0], value)
+                else:
+                    _set_field(nested, names[1:], value)
+
+        def _convert_value(item):
+            '''Берет значение item.value, и конвертирует его в соответствии с типом item'a'''
+            val = item.value
+            if isinstance(item, ExtNumberField):
+                val = int(val)
+            elif isinstance(item, ExtStringField):
+                val = str(val)
+            elif isinstance(item, ExtDateField):
+                #TODO уточнить формат дат
+                val = datetime.datetime.strptime(val, '%d.%m.%Y')
+            return val
+        
+        
+        self.object = object
+        for item in self.items:
+            names = item.name.split('.')
+            _set_field(self.object, names, _convert_value(item))
     
     def t_render_items(self):
         return ','.join([item.render() for item in self.items])
