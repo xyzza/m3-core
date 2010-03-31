@@ -32,7 +32,30 @@ class ExtForm(BaseExtPanel):
         self.object = None
         
         self.init_component(*args, **kwargs)
-        
+    
+    def _get_all_fields(self, item, list = None):
+        '''
+        Возвращает список всех полей формы включая вложенные в контейнеры
+        '''
+        if list == None:
+            list = []
+        if isinstance(item, BaseExtField):
+            list.append(item)
+        elif hasattr(item, 'items'):
+            for it in item.items:
+                self._get_all_fields(it, list)
+        return list                
+    
+    def bind_to_request(self, request):
+        '''
+        Извлекает из запроса параметры и присваивает их соответствующим полям формы
+        '''
+        self.request = request or self.request
+        all_fields = self._get_all_fields(self)
+        for field in all_fields:
+            name = field.name
+            field.value = self.request.POST.get(name)
+    
     #TODO необходимо добавить проверку на возникновение exception'ов
     def from_object(self, object):
         '''
@@ -84,7 +107,7 @@ class ExtForm(BaseExtPanel):
         Метод выполнения прямого связывания данных атрибутов объекта object и полей текущей формы
         '''
 
-        def _set_field(obj, names, value):
+        def set_field(obj, names, value):
             '''
             Ищет в объекте obj поле с именем names и присваивает значение value. Если 
             соответствующего поля не оказалось, то оно не создается
@@ -99,9 +122,9 @@ class ExtForm(BaseExtPanel):
                     else:
                         setattr(obj, names[0], value)
                 else:
-                    _set_field(nested, names[1:], value)
+                    set_field(nested, names[1:], value)
 
-        def _convert_value(item):
+        def convert_value(item):
             '''Берет значение item.value, и конвертирует его в соответствии с типом item'a'''
             val = item.value
             if isinstance(item, ExtNumberField):
@@ -115,11 +138,12 @@ class ExtForm(BaseExtPanel):
                 val = item.checked
             return val
         
-        
+        # Присваиваем атрибутам связываемого объекта соответствующие поля формы
         self.object = object
-        for item in self.items:
-            names = item.name.split('.')
-            _set_field(self.object, names, _convert_value(item))
+        all_fields = self._get_all_fields(self)
+        for field in all_fields:
+            names = field.name.split('.')
+            set_field(self.object, names, convert_value(field))
     
     def t_render_items(self):
         return ','.join([item.render() for item in self.items])
