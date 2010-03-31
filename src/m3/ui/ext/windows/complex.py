@@ -84,25 +84,17 @@ class ExtDictionaryWindow(BaseExtWindow):
         top_cont.items.append(search_btn)
         
         grid = ExtGrid()
-        grid.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=True))
         
         row_menu = ExtContextMenu()
-        row_menu.add_item(text=u'Новый')
-        row_menu.add_item(text=u'Добавить')
-        row_menu.add_item(text=u'Удалить')
         grid.handler_rowcontextmenu = row_menu
         
         menu = ExtContextMenu()
-        menu.add_item(text=u'Новый')
         grid.handler_contextmenu = menu
         
-        grid_cont = ExtContainer(flex=1, height=400, layout='fit')
+        grid_cont = ExtContainer(flex=2, height=400, layout='fit')
         grid_cont.items.append(grid)
         
-        tbar = ExtToolbar(width=20, )
-        tbar.items.append(ExtButton(text=u'Новый'))
-        tbar.items.append(ExtButton(text=u'Изменить'))
-        tbar.items.append(ExtButton(text=u'Удалить'))
+        tbar = ExtToolbar(width=20)
         tbar_cont = ExtContainer(style={'padding-right':'1px'})
         tbar_cont.items.append(tbar)
         
@@ -116,17 +108,54 @@ class ExtDictionaryWindow(BaseExtWindow):
         
         self.top_container = main_cont
         
-        self.buttons.append(ExtButton(text = u'Выбрать'))
+        select_btn = ExtButton(text = u'Выбрать')
+        self.buttons.append(select_btn)
         self.buttons.append(ExtButton(text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
         
-        # Основные контролы сохраним для дальнейшего доступа к ним 
+        # Основные контролы должны быть доступны для изменения
         self.grid = grid
         self.toolbar = tbar
         self.grid_row_menu = row_menu
         self.grid_menu = menu
         self.search_text = search
         self.search_button = search_btn
+        self.select_button = select_btn
         
+        # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
+        self.mode = 0 # По умолчанию справочник открыт в режиме списка
+     
+        # Добавляются пункты в меню и на тулбар
+        self.__add_menu_item(0, text=u'Новый')
+        self.__add_menu_item(1, text=u'Добавить')
+        self.__add_menu_item(1, text=u'Удалить')
+     
         self.init_component(*args, **kwargs)
+        
+    @property
+    def mode(self):
+        return self.__mode
+    
+    @mode.setter
+    def mode(self, value):
+        assert value in (0,1), 'Mode only 1 (select mode) or 0 (list mode)'
+        self.select_button.hidden = (value == 0)
+        self.__mode = value
+        
+        
+    def __add_menu_item(self, flag, **kwargs):
+        '''
+        @param flag: Указывает как будет добавляться пункт,
+                    0 - Добавляется в тублар, в конт. меню строки, в меню всего грида
+                    1 - Добавляется в тублар, в конт. меню строки
+        '''
+        if flag==0:
+            self.toolbar.items.append(ExtButton(**kwargs))
+            self.grid_row_menu.add_item(**kwargs)
+            self.grid_menu.add_item(**kwargs)
+        elif flag==1:
+            self.toolbar.items.append(ExtButton(**kwargs))
+            self.grid_row_menu.add_item(**kwargs)
+        else:
+            assert False, 'Flag must be 1 or 0'
         

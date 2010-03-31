@@ -8,6 +8,8 @@ new Ext.FormPanel({
 	{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
 	{% if component.x %} ,x: {{ component.x }} {% endif %}
 	{% if component.y %} ,y: {{ component.y }} {% endif %}
+	{% if component.region %} ,region: '{{ component.region }}' {% endif %}
+	{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
 	
 	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
 	

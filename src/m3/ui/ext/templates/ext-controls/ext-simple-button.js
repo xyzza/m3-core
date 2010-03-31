@@ -11,6 +11,9 @@ new Ext.Button({
 	
 	{% if component.text %} ,text: '{{ component.text }}' {% endif %}
 	{% if component.icon %} ,icon: '{{ component.icon }}' {% endif %}
+	{% if component.region %} ,region: '{{ component.region }}' {% endif %}
+	{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
+	
 	{% if component.handler %}
 		,handler: {{ component.t_render_handler|safe}}
 	{% endif%}

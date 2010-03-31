@@ -9,8 +9,8 @@ new Ext.Container({
 	{% if component.x %} ,x: {{ component.x }} {% endif %}
 	{% if component.y %} ,y: {{ component.y }} {% endif %}
 	{% if component.region %} ,region: '{{ component.region }}' {% endif %}
-	{% if component.flex %} ,flex: '{{ component.flex }}' {% endif %}
-	
+	{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
+
 	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
 	,items: [{{ component.t_render_items|safe }}]
 })

@@ -39,7 +39,7 @@ function(){
 		{% if component.x %} ,x: {{ component.x }} {% endif %}
 		{% if component.y %} ,y: {{ component.y }} {% endif %}
 		{% if component.region %} ,region: '{{ component.region }}' {% endif %}
-		{% if component.flex %} ,flex: '{{ component.flex }}' {% endif %}
+		{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
 		
 		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 		
