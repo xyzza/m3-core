@@ -6,6 +6,7 @@ import re
 from inspect import isclass
 from django.utils.datastructures import MultiValueDict
 from django import http
+import jsonpickle
 
 class ActionResult(object):
     '''
@@ -28,14 +29,17 @@ class PreJsonResult(ActionResult):
     Для данного класса в self.data храниться список некоторых объектов. 
     Метод self.get_http_response выполняет сериализацию этих данных в строковый формат.
     '''
-    pass
+    def get_http_response(self):
+        result = jsonpickle.encode(self.data, unpicklable = False)
+        return http.HttpResponse(result)
 
 class JsonResult(ActionResult):
     '''
     Результат выполнения операции в виде готового JSON объекта для возврата в response.
     Для данного класса в self.data храниться строка с данными JSON объекта.
     '''
-    pass
+    def get_http_response(self):
+        return http.HttpResponse(self.data)
 
 class HttpReadyResult(ActionResult):
     '''

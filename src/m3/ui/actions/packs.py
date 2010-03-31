@@ -1,6 +1,8 @@
 #coding:utf-8
-from m3.ui.actions import ActionPack, Action, ExtUIScriptResult
-from m3.ui.ext.windows.window import ExtWindow
+from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult,\
+    ExtUIComponentResult
+from m3.ui.ext.windows.complex import ExtDictionaryWindow
+from m3.ui.ext.misc.store import ExtJsonStore
 
 class DictListWindowAction(Action):
     '''
@@ -34,31 +36,41 @@ class DictRowsAction(Action):
       a) текстовая строка с фильтром (для выполнения поиска);
       b) начальная позиция и смещение записей для пейджинга.
     '''
-    url = '/row$'
+    url = '/rows$'
+    def run(self, request, context):
+        return PreJsonResult(self.parent.get_rows(self))
     
 class DictLastUsedAction(Action):
     '''
     Действие, которое возвращает список последних использованных действий
     '''
     url = '/last-rows$'
+    def run(self, request, context):
+        return PreJsonResult(self.parent.get_last_used(self))
     
 class DictRowAction(Action):
     '''
     Действие, которое отвечает за возврат данных для одного отдельно-взятой записи справочника
     '''
     url = '/item$'
+    def run(self, request, context):
+        return PreJsonResult(self.parent.get_row(self))
 
 class DictSaveAction(Action):
     '''
     Действие выполняет сохранение записи справочника.
     '''
     url = '/save$'
+    def run(self, request, context):
+        return ExtUIComponentResult(self.parent.save_row(self))
     
 class DictDeleteAction(Action):
     '''
     Действие удаления записи из справочника
     '''
     url = '/delete$'
+    def run(self, request, context):
+        return ExtUIComponentResult(self.parent.delete_row(self))
 
 class BaseDictionaryActions(ActionPack):
     '''
@@ -82,52 +94,62 @@ class BaseDictionaryActions(ActionPack):
                         self.delete_action]
         
     def get_rows(self, start, offset, filter):
-        '''
-        '''
-        pass
+        raise NotImplementedError()
     
     def get_row(self, id):
-        '''
-        '''
-        pass
+        raise NotImplementedError()
     
     def get_last_used(self):
-        '''
-        '''
-        pass
+        raise NotImplementedError()
     
     def get_list_window(self):
-        '''
-        '''
-        win = ExtWindow(title = u'Окно списка')
-        return win
+        raise NotImplementedError()
     
     def get_select_window(self):
-        '''
-        '''
-        pass
+        raise NotImplementedError()
     
     def get_edit_window(self):
-        '''
-        '''
-        pass
+        raise NotImplementedError()
     
     def save_row(self, obj):
-        '''
-        '''
-        pass
+        raise NotImplementedError()
     
     def delete_row(self, obj):
-        '''
-        '''
-        pass
+        raise NotImplementedError()
 
 class BaseDictionaryModelActions(BaseDictionaryActions):
     '''
     Класс, который реализует действия со справочником, записи которого являются моделями.
-    '''    
+    '''
+    # Настройки вида справочника (задаются конечным разработчиком)
     model = None
+    title = ''
     list_columns = []
     edit_windows = None
     filter_fields = []
-
+    
+    def get_list_window(self):
+        '''
+        Создает и настраивает окно справочника вида "Список"
+        '''
+        #TODO: С формой тоже шляпа, ее нужно настраивать, присваивать урлы
+        win = ExtDictionaryWindow(title = self.title)
+        # Добавляем отображаемые колонки
+        for field, name in self.list_columns:
+            win.grid.add_column(header = name, data_index = field)
+        # Устанавливаем источник данных
+        store = ExtJsonStore(url = self.rows_action.get_absolute_url(), auto_load = True)
+        win.grid.set_store(store)
+        # Действия кнопок
+        
+        return win
+    
+    def get_rows(self, start = 0, offset = 0, filter = ''):
+        '''
+        Возвращает данные для грида справочника
+        '''
+        #TODO: Пока нет грида с пейджингом старт и оффсет не работают
+        items = list(self.model.objects.all())
+        return items
+    
+    
