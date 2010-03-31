@@ -8,5 +8,7 @@ new Ext.Toolbar({
 	{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
 	{% if component.x %} ,x: {{ component.x }} {% endif %}
 	{% if component.y %} ,y: {{ component.y }} {% endif %}
+	{% if component.region %} ,region: '{{ component.region }}' {% endif %}
+	
     ,items: [ {{ component.t_render_items|safe }} ]
 })
