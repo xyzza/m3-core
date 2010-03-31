@@ -157,6 +157,7 @@ class ExtPanel(BaseExtPanel):
         super(ExtPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-panel.js'
         self.padding = None
+        self.collapsible = False
         self.__items = TypedList(type=ExtUIComponent)
         self.init_component(*args, **kwargs)
     

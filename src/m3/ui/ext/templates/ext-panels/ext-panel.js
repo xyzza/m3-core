@@ -15,6 +15,7 @@ new Ext.Panel({
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
 	
+	{% if component.collapsible %} ,collapsible: true {% endif %} 
 	{% if component.padding %} ,padding: '{{ component.padding }}' {% endif %}
 	,items: [{{ component.render_items|safe }}]
 })

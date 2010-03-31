@@ -113,7 +113,7 @@ class BaseExtGridColumn(ExtUIComponent):
         self.sortable = False
         self.data_index = None
         self.align = None
-        self.width = 150
+        self.width = None
         self.editor = None
                
     def render_editor(self):
