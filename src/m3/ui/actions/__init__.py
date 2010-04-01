@@ -348,7 +348,7 @@ class ControllerCache(object):
             # Из инитов всех приложения пытаемся выполнить register_ui_actions
             for app_name in settings.INSTALLED_APPS:
                 try:
-                    module = import_module('.__init__', app_name)
+                    module = import_module('.app_meta', app_name)
                 except ImportError:
                     continue
                 proc = getattr(module, 'register_ui_actions', None)
