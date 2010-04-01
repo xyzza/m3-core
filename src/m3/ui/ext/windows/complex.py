@@ -12,7 +12,7 @@ from m3.ui.ext.containers import ExtGrid, ExtGridColumn
 
 from m3.ui.ext.fields import ExtStringField
 from m3.ui.ext.controls import ExtButton
-from m3.ui.ext.containers import ExtContainer, ExtToolbar, ExtContextMenu
+from m3.ui.ext.containers import ExtContainer, ExtToolbar, ExtContextMenu, ExtPanel, ExtListView
 from m3.ui.ext.misc import ExtJsonStore
 
 class ExtDictSelectWindow(BaseExtWindow):
@@ -39,12 +39,12 @@ class ExtDictSelectWindow(BaseExtWindow):
          
     @property
     def grid(self):
-        '''Свойство, отображающее grid на top_container для правильного рендеринга'''
+        '''Свойство, отображающее grid на items для правильного рендеринга'''
         return self.__grid
     
     @grid.setter
     def grid(self, value):
-        self.top_container = value
+        self.items.append(value)
         self.__grid = value
    
     @property
@@ -79,11 +79,11 @@ class ExtDictionaryWindow(BaseExtWindow):
         text_cont.items.append(search)
         
         search_btn = ExtButton(text = u'Найти', style={'padding':'5px'})
-        top_cont = ExtContainer(layout='column', region='north')
+        top_cont = ExtContainer(region='north',layout='column', min_height=35)
         top_cont.items.append(text_cont)
         top_cont.items.append(search_btn)
         
-        grid = ExtGrid()
+        grid = ExtGrid(region='center')
         
         row_menu = ExtContextMenu()
         grid.handler_rowcontextmenu = row_menu
@@ -91,22 +91,17 @@ class ExtDictionaryWindow(BaseExtWindow):
         menu = ExtContextMenu()
         grid.handler_contextmenu = menu
         
-        grid_cont = ExtContainer(flex=2, height=400, layout='fit')
-        grid_cont.items.append(grid)
+        tbar = ExtToolbar(region='west', min_width=20)
+
+        buttom_panel = ExtPanel(title='Последние выбранные значения',
+                                region='south',min_height=100, collapsible=True, split=True)
+        list_view = ExtListView() 
+        buttom_panel.items.append(list_view)
         
-        tbar = ExtToolbar(width=20)
-        tbar_cont = ExtContainer(style={'padding-right':'1px'})
-        tbar_cont.items.append(tbar)
-        
-        middle_cont = ExtContainer(layout='hbox')
-        middle_cont.items.append(tbar_cont)
-        middle_cont.items.append(grid_cont)
-        
-        main_cont = ExtContainer(region='center')
-        main_cont.items.append(top_cont)
-        main_cont.items.append(middle_cont)
-        
-        self.top_container = main_cont
+        self.items.append(top_cont)
+        self.items.append(grid)
+        self.items.append(buttom_panel)
+        self.items.append(tbar)
         
         select_btn = ExtButton(text = u'Выбрать')
         self.buttons.append(select_btn)
@@ -118,9 +113,11 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.toolbar = tbar
         self.grid_row_menu = row_menu
         self.grid_menu = menu
+        self.list_view = list_view
         self.search_text = search
         self.search_button = search_btn
         self.select_button = select_btn
+        self.__panel_list_view = buttom_panel
         
         # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
         self.mode = 0 # По умолчанию справочник открыт в режиме списка
@@ -140,6 +137,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     def mode(self, value):
         assert value in (0,1), 'Mode only 1 (select mode) or 0 (list mode)'
         self.select_button.hidden = (value == 0)
+        self.__panel_list_view.hidden = (value == 0)
         self.__mode = value
         
         

@@ -27,7 +27,7 @@ class BaseExtWindow(ExtUIComponent):
             width - Ширина
             height - Высота
             title - Заголовок
-            top_container - Контейнер для содержащихся на форме элементов
+            __items - Контейнер для содержащихся на форме элементов
             buttons - Имеющиеся кнопки
             layout - Тип расположения контейнера
             modal - Модальное окно
@@ -46,7 +46,7 @@ class BaseExtWindow(ExtUIComponent):
         self.width = 400
         self.height = 300
         self.title = None
-        self.top_container = None
+        self.__items = TypedList(type=ExtUIComponent)
         self.__buttons = TypedList(type=ExtButton)
         
         self.layout = None
@@ -58,6 +58,13 @@ class BaseExtWindow(ExtUIComponent):
     @property
     def buttons(self):
         return self.__buttons
+    
+    @property
+    def items(self):
+        return self.__items
+        
+    def t_render_items(self):
+        return ','.join([item.render() for item in self.items])    
         
     def t_render_buttons(self):
         return 'buttons:[%s]' % ','.join([button.render() for button in self.buttons])

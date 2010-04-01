@@ -8,6 +8,10 @@ new Ext.menu.Menu({
 		{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
 		{% if component.x %} ,x: {{ component.x }} {% endif %}
 		{% if component.y %} ,y: {{ component.y }} {% endif %}
+		{% if component.max_height %} ,boxMaxHeight: {{ component.max_height }} {% endif %}
+		{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
+		{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
+		{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
 		
 		,items: [{{ component.t_render_items|safe }}]
 		

@@ -23,7 +23,7 @@ class ExtEditWindow(BaseExtWindow):
  
     @form.setter
     def form(self, value):
-        self.top_container = value
+        self.items.append(value)
         self.__form = value
     #=======================================================================
     

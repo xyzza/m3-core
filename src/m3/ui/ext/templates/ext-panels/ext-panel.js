@@ -10,11 +10,16 @@ new Ext.Panel({
 	{% if component.y %} ,y: {{ component.y }} {% endif %}
 	{% if component.region %} ,region: '{{ component.region }}' {% endif %}
 	{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
+	{% if component.max_height %} ,boxMaxHeight: {{ component.max_height }} {% endif %}
+	{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
+	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
+	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
 	
 	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
 	
+	{% if component.split %} ,split: true {% endif %} 
 	{% if component.collapsible %} ,collapsible: true {% endif %} 
 	{% if component.padding %} ,padding: '{{ component.padding }}' {% endif %}
 	,items: [{{ component.render_items|safe }}]

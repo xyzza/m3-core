@@ -8,6 +8,12 @@ new Ext.Window({
 	{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
 	{% if component.x %} ,x: {{ component.x }} {% endif %}
 	{% if component.y %} ,y: {{ component.y }} {% endif %}
+	{% if component.region %} ,region: '{{ component.region }}' {% endif %}
+	{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
+	{% if component.max_height %} ,boxMaxHeight: {{ component.max_height }} {% endif %}
+	{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
+	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
+	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
     
     {% if component.title %} ,title: '{{ component.title }}' {% endif %}
 	{% if component.modal %}, modal: true {% endif %}
@@ -21,6 +27,6 @@ new Ext.Window({
 	{% if component.body_style %}, bodyStyle : '{{ component.body_style }}' {% endif %}
 	{% if component.layout %} ,layout: '{{ component.layout}}' {% endif %}
 	
-    ,items:[{% if component.top_container %}{{ component.top_container.render|safe }}{% endif %}]  
+    ,items:[{{ component.t_render_items|safe }}]  
     {% if component.buttons %},{{ component.t_render_buttons|safe }}{% endif %}	
 })

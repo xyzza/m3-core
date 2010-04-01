@@ -17,6 +17,10 @@ new Ext.Container({
 				{% if component.y %} ,y: {{ component.y }} {% endif %}
 				{% if component.region %} ,region: '{{ component.region }}' {% endif %}
 				{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
+				{% if component.max_height %} ,boxMaxHeight: {{ component.max_height }} {% endif %}
+				{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
+				{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
+				{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
 				
 				{% if component.label %} ,fieldLabel: '{{ component.label }}' {% endif %}
 				{% if component.name %} ,name: '{{ component.name }}' {% endif %}
