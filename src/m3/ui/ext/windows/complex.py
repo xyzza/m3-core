@@ -97,8 +97,6 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.items.append(grid)
         self.items.append(tbar)
         
-        
-        
         self.buttons.append(ExtButton(text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
         
@@ -113,10 +111,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.select_button = None
         self.__panel_list_view = None
         
-#        # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
-#        if kwargs.get('mode')!=None:
-#            self.mode = kwargs.pop('mode')
-#        else:
+        # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
         self.__mode = 0 # По умолчанию справочник открыт в режиме списка
      
         # Добавляются пункты в меню и на тулбар
@@ -147,9 +142,16 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.select_button = select_btn
             self.__panel_list_view = buttom_panel
             self.list_view = list_view
-        
+        elif value==0:
+            if self.__panel_list_view:
+                self.items.remove(self.__panel_list_view)
+                self.list_view = None
+                self.__panel_list_view = None
+            if self.select_button:
+                self.buttons.remove(self.select_button)
+                self.select_button = None
+
         self.__mode = value
-        
         
     def __add_menu_item(self, flag, **kwargs):
         '''

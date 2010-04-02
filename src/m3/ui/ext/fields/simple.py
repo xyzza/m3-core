@@ -53,16 +53,11 @@ class ExtComboBox(BaseExtField):
         self.init_component(*args, **kwargs)
     
     def set_store(self, store):
-#        if isinstance(store, ExtDataStore):
-#            self.mode = 'local'
-#            self.__store = store
-#        else:
-#            self.mode = 'remote'
-#            self.__store = store
         self.mode = 'local' if isinstance(store, ExtDataStore) else 'remote' 
         self.__store = store
         
     def t_render_store(self):
+        assert self.__store, 'Store is not define'
         return self.__store.render([self.display_field,])       
         
 class ExtTextArea(BaseExtField):

@@ -30,6 +30,7 @@ class ExtListView(BaseExtPanel):
         return ','.join([column.render() for column in self.columns])
     
     def t_render_store(self):
+        assert self.__store, 'Store is not define'
         return self.__store.render([column.data_index for column in self.columns])
     
     def add_column(self, **kwargs):
