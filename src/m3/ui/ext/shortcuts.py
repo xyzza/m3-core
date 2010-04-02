@@ -9,6 +9,7 @@ Created on 24.03.2010
 from m3.ui.ext.containers.forms import ExtForm
 from m3.ui.ext.windows.base import BaseExtWindow
 import json
+from django import http
 
 def js_submit_form(form, success_handler='', failure_handler='', invalid_handler='', params=None):
     '''
@@ -47,13 +48,13 @@ def js_success_response():
     '''
     Возвращает Ext Ajax ответ что операция прошла успешно
     '''
-    return '{success: true}'
+    return http.HttpResponse('{success: true}')
     
 def js_failure_response():
     '''
     Возвращает Ext Ajax ответ что операция прервана
     '''
-    return '{success: false}'
+    return http.HttpResponse('{success: false}')
 
 def js_close_window(win):
     '''
