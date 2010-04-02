@@ -54,7 +54,9 @@ class DictRowAction(Action):
     '''
     url = '/item$'
     def run(self, request, context):
-        return PreJsonResult(self.parent.get_row(self))
+        id = request.POST.get('id')
+        result = self.parent.get_row(self, id)
+        return PreJsonResult(result)
 
 class DictSaveAction(Action):
     '''
@@ -94,27 +96,49 @@ class BaseDictionaryActions(ActionPack):
                         self.delete_action]
         
     def get_rows(self, start, offset, filter):
+        '''
+        Метод который возвращает записи грида в втде обычного питоновского списка.
+        '''
         raise NotImplementedError()
     
     def get_row(self, id):
+        '''
+        Метод, который возвращает запись справочника с указанным идентификатором.  
+        '''
         raise NotImplementedError()
     
     def get_last_used(self):
+        '''
+        Метод, который возвращает список записей справочника, которые были выбраны
+        конкретным пользователем в последнее время. 
+        Записи возвращаются в виде обычного питоновского списка.
+        '''
         raise NotImplementedError()
     
     def get_list_window(self):
+        ''' Возвращает настроенное окно справочника '''
         raise NotImplementedError()
     
     def get_select_window(self):
+        ''' Возвращает настроенное окно выбора из справочника '''
         raise NotImplementedError()
     
     def get_edit_window(self):
+        ''' Возвращает настроенное окно редактирования элемента справочника '''
         raise NotImplementedError()
     
     def save_row(self, obj):
+        '''
+        Метод, который выполняет сохранение записи справочника. На момент запуска метода 
+        в параметре object находится именно та запись справочника, которую необходимо сохранить.
+        '''
         raise NotImplementedError()
     
     def delete_row(self, obj):
+        '''
+        Метод, который выполняет удаление записи справочника. На момент запуска метода в 
+        параметре object находится именно та запись справочника, которую необходимо удалить.
+        '''
         raise NotImplementedError()
 
 class BaseDictionaryModelActions(BaseDictionaryActions):
@@ -132,15 +156,21 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         '''
         Создает и настраивает окно справочника вида "Список"
         '''
-        #TODO: С формой тоже шляпа, ее нужно настраивать, присваивать урлы
-        win = ExtDictionaryWindow(title = self.title)
+        win = ExtDictionaryWindow(mode = 0, title = self.title)
+        
         # Добавляем отображаемые колонки
         for field, name in self.list_columns:
             win.grid.add_column(header = name, data_index = field)
-        # Устанавливаем источник данных
-        store = ExtJsonStore(url = self.rows_action.get_absolute_url(), auto_load = True)
-        win.grid.set_store(store)
-        # Действия кнопок
+        
+        # Устанавливаем источники данных
+        grid_store = ExtJsonStore(url = self.rows_action.get_absolute_url(), auto_load = True)
+        win.grid.set_store(grid_store)
+        
+        #TODO: Настроить урлы на форме
+        # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося
+        #win.set_new_menu_handler(self.edit_window_action.get_absolute_url())
+        #win.set_edit_menu_handler(self.edit_window_action.get_absolute_url())
+        #win.set_delete_menu_handler(self.delete_action.get_absolute_url())
         
         return win
     
@@ -152,4 +182,18 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         items = list(self.model.objects.all())
         return items
     
+    def get_row(self, id):
+        try:
+            record = self.model.objects.get(id = id)
+        except self.model.DoesNotExist:
+            return None
+        return record
     
+    def save_row(self, obj):
+        obj.save()
+        
+    def delete_row(self, obj):
+        obj.delete()
+    
+    
+        

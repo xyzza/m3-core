@@ -20,9 +20,6 @@ def js_submit_form(form, success_handler='', failure_handler='', invalid_handler
     @param params: словарь с доп. параметрами передаваемыми через POST
     '''
     assert isinstance(form, ExtForm)
-    assert isinstance(success_handler, str) and isinstance(failure_handler, str) and \
-           isinstance(invalid_handler, str)
-
     template = u'''
 function(){
     var form = Ext.getCmp('%(form_id)s').getForm();
