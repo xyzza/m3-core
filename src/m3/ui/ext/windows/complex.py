@@ -93,18 +93,12 @@ class ExtDictionaryWindow(BaseExtWindow):
         
         tbar = ExtToolbar(region='west', min_width=20)
 
-        buttom_panel = ExtPanel(title='Последние выбранные значения',
-                                region='south',min_height=100, collapsible=True, split=True)
-        list_view = ExtListView() 
-        buttom_panel.items.append(list_view)
-        
         self.items.append(top_cont)
         self.items.append(grid)
-        self.items.append(buttom_panel)
         self.items.append(tbar)
         
-        select_btn = ExtButton(text = u'Выбрать')
-        self.buttons.append(select_btn)
+        
+        
         self.buttons.append(ExtButton(text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
         
@@ -113,11 +107,11 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.toolbar = tbar
         self.grid_row_menu = row_menu
         self.grid_menu = menu
-        self.list_view = list_view
+        self.list_view = None
         self.search_text = search
         self.search_button = search_btn
-        self.select_button = select_btn
-        self.__panel_list_view = buttom_panel
+        self.select_button = None
+        self.__panel_list_view = None
         
         # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
         self.mode = 0 # По умолчанию справочник открыт в режиме списка
@@ -136,8 +130,21 @@ class ExtDictionaryWindow(BaseExtWindow):
     @mode.setter
     def mode(self, value):
         assert value in (0,1), 'Mode only 1 (select mode) or 0 (list mode)'
-        self.select_button.hidden = (value == 0)
-        self.__panel_list_view.hidden = (value == 0)
+
+        if value==1:
+            buttom_panel = ExtPanel(title='История выбора',
+                                region='south',min_height=100, collapsible=True, split=True)
+            list_view = ExtListView() 
+            buttom_panel.items.append(list_view)
+            self.items.append(buttom_panel)
+        
+            select_btn = ExtButton(text = u'Выбрать')
+            self.buttons.insert(0, select_btn)
+            
+            self.select_button = select_btn
+            self.__panel_list_view = buttom_panel
+            self.list_view = list_view
+        
         self.__mode = value
         
         
