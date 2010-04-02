@@ -84,7 +84,7 @@ class BaseExtComponent(object):
             Заполняет атрибуты экземпляра значениями в kwargs
         '''
         for k, v in kwargs.items():
-            assert self.__dict__.has_key(k), 'Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__)
+            assert k in dir(self) and not callable(getattr(self,k)), 'Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__)
             self.__setattr__(k, v)
 
                   

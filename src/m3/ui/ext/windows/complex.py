@@ -113,8 +113,11 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.select_button = None
         self.__panel_list_view = None
         
-        # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
-        self.mode = 0 # По умолчанию справочник открыт в режиме списка
+#        # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
+#        if kwargs.get('mode')!=None:
+#            self.mode = kwargs.pop('mode')
+#        else:
+        self.__mode = 0 # По умолчанию справочник открыт в режиме списка
      
         # Добавляются пункты в меню и на тулбар
         self.__add_menu_item(0, text=u'Новый')
