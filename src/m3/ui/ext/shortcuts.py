@@ -32,12 +32,12 @@ function(){
         %(params)s
         %(success_handler)s
         %(failure_handler)s
-        url: '%(url)s'
+        %(url)s
     });
 }
 '''
     return template % {'form_id': form.client_id,
-                       'url': form.url, 
+                       'url': "url:'%s'" % form.url if form.url else '',
                        'success_handler': 'success:' + success_handler + ',' if success_handler else '',
                        'failure_handler': 'failure:' + failure_handler + ',' if failure_handler else '',
                        'params': 'params:'  + json.JSONEncoder().encode(params) + ',' if params else '',

@@ -1,6 +1,5 @@
 #coding:utf-8
-from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult,\
-    ExtUIComponentResult
+from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 
@@ -26,7 +25,7 @@ class DictEditWindowAction(Action):
     '''
     url = '/edit-window$'
     def run(self, request, context):
-        id = request.REQUEST.get('id')
+        id = request.POST.get('id')
         return ExtUIScriptResult(self.parent.get_edit_window(id))
     
 class DictRowsAction(Action):
@@ -65,7 +64,7 @@ class DictSaveAction(Action):
     '''
     url = '/save$'
     def run(self, request, context):
-        return ExtUIComponentResult(self.parent.save_row(self))
+        return self.parent.save_row(request)
     
 class DictDeleteAction(Action):
     '''
@@ -73,7 +72,8 @@ class DictDeleteAction(Action):
     '''
     url = '/delete$'
     def run(self, request, context):
-        return ExtUIComponentResult(self.parent.delete_row(self))
+        id = request.POST.get('id')
+        return self.parent.delete_row(self, id)
 
 class BaseDictionaryActions(ActionPack):
     '''
@@ -181,11 +181,10 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         grid_store = ExtJsonStore(url = self.rows_action.get_absolute_url(), auto_load = True)
         win.grid.set_store(grid_store)
         
-        #TODO: Настроить урлы на форме
-        # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося
-        #win.set_new_menu_handler(self.edit_window_action.get_absolute_url())
-        #win.set_edit_menu_handler(self.edit_window_action.get_absolute_url())
-        #win.set_delete_menu_handler(self.delete_action.get_absolute_url())
+        # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося 
+        win.url_new = self.edit_window_action.get_absolute_url()
+        win.url_edit = self.edit_window_action.get_absolute_url()
+        win.url_delete = self.delete_action.get_absolute_url()
         
         return win
     
@@ -198,22 +197,34 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         return items
     
     def get_row(self, id):
-        try:
-            record = self.model.objects.get(id = id)
-        except self.model.DoesNotExist:
-            return None
+        # Если id нет, значит нужно создать новый объект
+        if id == None:
+            record = self.model()
+        else:
+            try:
+                record = self.model.objects.get(id = id)
+            except self.model.DoesNotExist:
+                return None
         return record
     
-    def save_row(self, obj):
-        obj.save()
+    def save_row(self, request):
+        id = request.POST.get('id')
+        record = self.get_row(id)
+        win = self.edit_windows()
+        win.form.bind_to_request(request)
+        win.form.to_object(record)
+        record.save()
+        return OperationResult(success = True)
         
     def delete_row(self, obj):
         obj.delete()
+        return OperationResult(success = True)
     
     def get_edit_window(self, id):
         record = self.get_row(id)
         win = self.edit_windows()
         win.form.from_object(record)
         win.url_save = self.save_action.get_absolute_url()
+        return win
         
         

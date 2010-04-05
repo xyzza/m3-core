@@ -67,6 +67,20 @@ class ExtUIScriptResult(ActionResult):
     '''
     def get_http_response(self):
         return http.HttpResponse(self.data.get_script())
+    
+class OperationResult(ActionResult):
+    '''
+    Результат выполнения операции, описанный в виде Ajax результата ExtJS: success или failure.
+    '''
+    def __init__(self, success = True, *args, **kwargs):
+        super(OperationResult, self).__init__(*args, **kwargs)
+        self.success = success
+    
+    def get_http_response(self):
+        if self.success:
+            return http.HttpResponse('{success: true}')
+        else:
+            return http.HttpResponse('{success: false}')
 
 class ActionContextDeclaration(object):
     '''

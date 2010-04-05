@@ -14,6 +14,7 @@ new Ext.FormPanel({
 	{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
 	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
+	{% if component.url %} ,url: '{{ component.url }}' {% endif %}
 	
 	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
 	
