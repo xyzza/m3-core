@@ -41,6 +41,13 @@ class ExtNumberField(BaseExtField):
         super(ExtNumberField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-number-field.js'
         self.init_component(*args, **kwargs)
+        
+class ExtHiddenField(BaseExtField):
+    ''' Скрытое поле, которое не видно пользователю на форме, но хранит значение и передает если при submit'е '''
+    def __init__(self, *args, **kwargs):
+        super(ExtHiddenField, self).__init__(*args, **kwargs)
+        self.template = 'ext-fields/ext-hidden-field.js'
+        self.init_component(*args, **kwargs)
     
 class ExtComboBox(BaseExtField):
     '''Поле выпадающий список - combobox'''
