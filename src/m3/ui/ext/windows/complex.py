@@ -12,7 +12,7 @@ from m3.ui.ext.containers import ExtGrid, ExtGridColumn
 
 from m3.ui.ext.fields import ExtStringField
 from m3.ui.ext.controls import ExtButton
-from m3.ui.ext.containers import ExtContainer, ExtToolbar, ExtContextMenu, ExtPanel, ExtListView
+from m3.ui.ext.containers import ExtContainer, ExtButtonGroup, ExtContextMenu, ExtPanel, ExtListView
 from m3.ui.ext.misc import ExtConnection
 
 class ExtDictSelectWindow(BaseExtWindow):
@@ -92,18 +92,24 @@ class ExtDictionaryWindow(BaseExtWindow):
         menu = ExtContextMenu()
         grid.handler_contextmenu = menu
         
-        tbar = ExtToolbar(region='west', min_width=20)
+        
+        button_group = ExtButtonGroup(columns_number=1)
+        cont_west = ExtContainer(region='west', min_width=30)
+        cont_west.items.append(button_group)
+        #bgroup.add_button(handler='function(){Ext.Msg.alert("","Кнопка1");}', icon_cls='add_item')
+        #bgroup.add_button(handler='function(){Ext.Msg.alert("","Кнопка2");}', icon_cls='edit_item')
+        #bgroup.add_button(handler='function(){Ext.Msg.alert("","Кнопка3");}', icon_cls='delete_item')
 
         self.items.append(top_cont)
         self.items.append(grid)
-        self.items.append(tbar)
+        self.items.append(cont_west)
         
         self.buttons.append(ExtButton(text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
         
         # Основные контролы должны быть доступны для изменения
         self.grid = grid
-        self.toolbar = tbar
+        self.button_group = button_group
         self.grid_row_menu = row_menu
         self.grid_menu = menu
         self.list_view = None
@@ -116,9 +122,9 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__mode = 0 # По умолчанию справочник открыт в режиме списка
      
         # Добавляются пункты в меню и на тулбар
-        self.__components_new   = self.__add_menu_item(0, text=u'Новый')
-        self.__components_edit  = self.__add_menu_item(1, text=u'Редактировать')
-        self.__components_delete= self.__add_menu_item(1, text=u'Удалить')
+        self.__components_new   = self.__add_menu_item(0, text=u'Новый', icon_cls='add_item')
+        self.__components_edit  = self.__add_menu_item(1, text=u'Редактировать', icon_cls='edit_item')
+        self.__components_delete= self.__add_menu_item(1, text=u'Удалить', icon_cls='delete_item')
         
         # Вызываемые url
         self.__url_new = None
@@ -166,20 +172,21 @@ class ExtDictionaryWindow(BaseExtWindow):
                     0 - Добавляется в тублар, в конт. меню строки, в меню всего грида
                     1 - Добавляется в тублар, в конт. меню строки
         '''
+        text = None
+        if kwargs.has_key('text'):
+            text = kwargs.pop("text")
+            
+        self.button_group.add_button(**kwargs)
+        self.grid_row_menu.add_item(text=text, **kwargs)
+            
         if flag==0:
-            self.toolbar.items.append(ExtButton(**kwargs))
-            self.grid_row_menu.add_item(**kwargs)
-            self.grid_menu.add_item(**kwargs)
-            return (self.toolbar.items[len(self.toolbar.items)-1], 
+            self.grid_menu.add_item(text=text, **kwargs)
+            return (self.button_group.items[len(self.button_group.items)-1], 
                     self.grid_row_menu.items[len(self.grid_row_menu.items)-1], 
                     self.grid_menu.items[len(self.grid_menu.items)-1])
-        elif flag==1:
-            self.toolbar.items.append(ExtButton(**kwargs))
-            self.grid_row_menu.add_item(**kwargs)
-            return (self.toolbar.items[len(self.toolbar.items)-1], 
-                    self.grid_row_menu.items[len(self.grid_row_menu.items)-1])
         else:
-            assert False, 'Flag must be 1 or 0'
+            return (self.button_group.items[len(self.button_group.items)-1], 
+                self.grid_row_menu.items[len(self.grid_row_menu.items)-1])
         
     @property
     def url_new(self):

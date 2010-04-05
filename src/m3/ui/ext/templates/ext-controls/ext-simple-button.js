@@ -13,8 +13,10 @@ new Ext.Button({
 	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
 	
+	
 	{% if component.text %} ,text: '{{ component.text }}' {% endif %}
 	{% if component.icon %} ,icon: '{{ component.icon }}' {% endif %}
+	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 	{% if component.region %} ,region: '{{ component.region }}' {% endif %}
 	{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
 	

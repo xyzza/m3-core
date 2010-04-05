@@ -21,6 +21,11 @@ function new_value() {
 function edit_value(){
 	var grid = Ext.getCmp('{{ component.grid.client_id}}');
 	
+	if (!grid.getSelectionModel().hasSelection()) {
+		Ext.Msg.alert('','Выберите значение для редактирования');
+		return;
+	};
+	
 	ajax.request({
 		url: "{{ component.url_edit }}"
 		,params: {
@@ -40,6 +45,10 @@ function edit_value(){
  */
 function delete_value(){
 	var grid = Ext.getCmp('{{ component.grid.client_id}}');
+	if (!grid.getSelectionModel().hasSelection()) {
+		Ext.Msg.alert('','Выберите значение для удаления');
+		return;
+	};
 	
 	ajax.request({
 		url: "{{ component.url_delete }}"

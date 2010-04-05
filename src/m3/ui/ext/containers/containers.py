@@ -60,6 +60,26 @@ class ExtToolbar(BaseExtContainer):
     def items(self):
         return self.__items
     
+class ExtButtonGroup(BaseExtContainer):
+    def __init__(self, *args, **kwargs):
+        super(BaseExtContainer, self).__init__(*args, **kwargs)
+        self.template = 'ext-containers/ext-buttongroup.js'
+        
+        self.columns_number = None
+        self.title = None
+        self.__buttons = []
+        self.init_component(*args, **kwargs)  
+        
+    def t_render_buttons(self):
+        return ','.join([item.render() for item in self.__buttons])
+    
+    def add_button(self, **kwargs):
+        self.__buttons.append(ExtButton(**kwargs))
+    
+    @property
+    def items(self):
+        return self.__buttons
+
 # Скорей всего Viewport не понадобится и будет удален!
 #class ExtViewport(BaseExtContainer):
 #    ''' Реализует работу Viewport компонента extjs'''

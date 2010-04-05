@@ -3,6 +3,6 @@
 from forms import ExtForm, ExtPanel, ExtTabPanel
 from grids import ExtGrid, ExtGridColumn, ExtGridBooleanColumn, ExtGridDateColumn, ExtGridNumberColumn
 from trees import ExtTree, ExtTreeNode
-from containers import ExtContainer, ExtToolbar
+from containers import ExtContainer, ExtToolbar, ExtButtonGroup
 from contextmenu import ExtContextMenu
 from list_view import ExtListView

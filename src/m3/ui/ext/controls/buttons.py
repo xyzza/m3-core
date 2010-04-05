@@ -16,6 +16,7 @@ class ExtButton(BaseExtControl):
         self.text = None
         self.handler = None
         self.icon = None
+        self.icon_cls = None
         self.init_component(*args, **kwargs)
     
     def t_render_handler(self):

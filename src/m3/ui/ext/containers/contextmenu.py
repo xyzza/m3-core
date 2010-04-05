@@ -55,10 +55,13 @@ class ExtContextMenuItem(ExtUIComponent):
         super(ExtContextMenuItem, self).__init__(*args, **kwargs)
         self.text = None
         self.handler = None
+        self.icon_cls = None
         self.init_component(*args, **kwargs)
         
     def render(self, container):
         res = 'text:"%s"' % self.text
+        if self.icon_cls:
+            res += ',iconCls: "%s"' % self.icon_cls
         if self.handler:
             if isinstance(self.handler, ExtConnection):
                 res += ',handler: function(){%s} ' % self.handler.render() 
