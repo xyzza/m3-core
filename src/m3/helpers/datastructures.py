@@ -42,3 +42,33 @@ class TypedList(list):
         '''
         if value not in self.__exceptions:
             assert isinstance(value, self.__type), 'Type value "%s" isn\'t %s!' % (value, self.__type.__name__)
+            
+class MutableList(list):
+    '''
+    Список с признаком измененности "changed"
+    '''
+    def __init__(self, mutable = True, *args, **kwargs):
+        super(MutableList, self).__init__(*args, **kwargs)
+        self._mutable = mutable
+        self.changed = False
+    
+    def _assert_mutable(self):
+        if not self._mutable:
+            raise AttributeError("This MutableList instance is immutable")
+        self.changed = True
+    
+    def __setitem__(self, key, value):
+        self._assert_mutable()
+        super(MutableList, self).__setitem__(key, value)
+        
+    def append(self, value):
+        self._assert_mutable()
+        super(MutableList, self).append(value)
+    
+    def extend(self, values):
+        self._assert_mutable()
+        super(MutableList, self).extend(values)
+    
+    def insert(self, num, value):
+        self._assert_mutable()
+        super(MutableList, self).append(num, value)

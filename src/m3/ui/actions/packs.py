@@ -26,7 +26,8 @@ class DictEditWindowAction(Action):
     '''
     url = '/edit-window$'
     def run(self, request, context):
-        return ExtUIScriptResult(self.parent.get_edit_window())
+        id = request.REQUEST.get('id')
+        return ExtUIScriptResult(self.parent.get_edit_window(id))
     
 class DictRowsAction(Action):
     '''
@@ -94,7 +95,21 @@ class BaseDictionaryActions(ActionPack):
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
                         self.delete_action]
-        
+    
+    def get_list_window_url(self):
+        '''
+        Возвращает адрес формы списка элементов справочника. 
+        Используется для присвоения адресов в прикладном приложении.
+        '''
+        return self.list_window_action.get_absolute_url()
+    
+    def get_select_window_url(self):
+        '''
+        Возвращает адрес формы списка элементов справочника. 
+        Используется для присвоения адресов в прикладном приложении.
+        '''
+        return self.select_window_action.get_absolute_url()
+    
     def get_rows(self, start, offset, filter):
         '''
         Метод который возвращает записи грида в втде обычного питоновского списка.
@@ -195,5 +210,10 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     def delete_row(self, obj):
         obj.delete()
     
-    
+    def get_edit_window(self, id):
+        record = self.get_row(id)
+        win = self.edit_windows()
+        win.form.from_object(record)
+        win.url_save = self.save_action.get_absolute_url()
+        
         

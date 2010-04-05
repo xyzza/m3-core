@@ -7,6 +7,7 @@ from inspect import isclass
 from django.utils.datastructures import MultiValueDict
 from django import http
 import jsonpickle
+from m3.helpers.datastructures import MutableList
 
 class ActionResult(object):
     '''
@@ -186,10 +187,13 @@ class ActionController(object):
     '''
     
     def __init__(self, url = ''):
-        self.packs = []
+        self.packs = MutableList()
         self._patterns = MultiValueDict()
         self.url = url
         self._rebuild_lock = threading.RLock()
+        # Словари для быстрого поиска паков
+        self._find_by_name = {}
+        self._find_by_type = {}
     
     def _load_class(self, full_path):
         '''
@@ -216,6 +220,10 @@ class ActionController(object):
             clazz.parent = stack[-1]
         
         if isinstance(clazz, ActionPack):
+            # Для быстрого поиска
+            self._find_by_name[clazz.__class__.__name__] = clazz
+            self._find_by_type[clazz.__class__] = clazz
+            
             stack.append(clazz)
             # Бежим по экшенам
             for action in clazz.actions:
@@ -242,10 +250,14 @@ class ActionController(object):
         '''
         self._rebuild_lock.acquire()
         try:
-            self._patterns.clear()
-            stack = []
-            for pack in self.packs:
-                self._build_pack_node(pack, stack)
+            if self.packs.changed:
+                self._patterns.clear()
+                self._find_by_name.clear()
+                self._find_by_type.clear()
+                stack = []
+                for pack in self.packs:
+                    self._build_pack_node(pack, stack)
+                self.packs.changed = False
         finally:
             self._rebuild_lock.release()
     
@@ -282,8 +294,8 @@ class ActionController(object):
         '''
         Обработка входящего запроса от клиента. Обрабатывается по аналогии с UrlResolver'ом Django
         '''
-        if ControllerCache.populate():
-            self.rebuild_patterns()
+        ControllerCache.populate()
+        self.rebuild_patterns()
           
         # Делим URL на часть пака и часть экшена
         path = request.path
@@ -327,6 +339,21 @@ class ActionController(object):
         Выполняет построение контекста вызова операции ActionContext на основе переданного request
         '''
         return ActionContext()
+    
+    def find_pack(self, type):
+        '''
+        Ищет экшенпак внутри иерархии котроллера. Возвращает его экземпляр или None если не находит.
+        type может быть классом или строкой с названием класса
+        '''
+        ControllerCache.populate()
+        self.rebuild_patterns()
+        
+        if isinstance(type, str):
+            return self._find_by_name.get(type)
+        elif issubclass(type, ActionPack):
+            return self._find_by_type.get(type)
+        else:
+            raise ValueError('Wrong type of argument %s' % type)
     
 class ControllerCache(object):
     '''
