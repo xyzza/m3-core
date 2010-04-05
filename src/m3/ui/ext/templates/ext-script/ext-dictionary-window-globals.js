@@ -24,7 +24,7 @@ function edit_value(){
 	ajax.request({
 		url: "{{ component.url_edit }}"
 		,params: {
-			'pk': grid.getSelectionModel().getSelected().id
+			'id': grid.getSelectionModel().getSelected().id
 		}
 		,success: function(response, opts){
 		   eval(response.responseText);
@@ -44,7 +44,7 @@ function delete_value(){
 	ajax.request({
 		url: "{{ component.url_delete }}"
 		,params: {
-			'pk': grid.getSelectionModel().getSelected().id
+			'id': grid.getSelectionModel().getSelected().id
 		}
 		,success: function(response, opts){
 		   eval(response.responseText);
