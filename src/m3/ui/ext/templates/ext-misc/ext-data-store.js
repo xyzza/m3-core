@@ -1,7 +1,17 @@
-new Ext.data.Store({
-	id: '{{ component.client_id }}'
-	,reader: new Ext.data.ArrayReader({}, 
-		[{{ component.t_render_fields|safe }}]
-	)
-	,data: [{{ component.t_render_data|safe }}]
-})
+{# По умолчанию idIndex=0, то есть первая запись в массиве данных должна быть идентификатором (id) #}
+(function(){
+	var dataRecord = Ext.data.Record.create([
+		{{ component.t_render_fields|safe }}
+	]);
+	
+	var dataReader = new Ext.data.ArrayReader({
+	    idIndex: 0
+	}, dataRecord);
+	
+	var data_store = new Ext.data.Store({
+		reader: dataReader
+		,data: [{{ component.t_render_data|safe }}]
+	});
+	
+	return data_store;
+})()

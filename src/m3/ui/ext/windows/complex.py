@@ -13,7 +13,7 @@ from m3.ui.ext.containers import ExtGrid, ExtGridColumn
 from m3.ui.ext.fields import ExtStringField
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.containers import ExtContainer, ExtToolbar, ExtContextMenu, ExtPanel, ExtListView
-from m3.ui.ext.misc import ExtJsonStore
+from m3.ui.ext.misc import ExtConnection
 
 class ExtDictSelectWindow(BaseExtWindow):
     def __init__(self, request, *args, **kwargs):
@@ -72,6 +72,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     def __init__(self, *args, **kwargs):
         super(ExtDictionaryWindow, self).__init__(*args, **kwargs)
         self.template = 'ext-windows/ext-window.js'
+        self.template_globals = 'ext-script/ext-dictionary-window-globals.js'
         self.layout='border'
         
         search = ExtStringField(label = u'Поиск')
@@ -115,9 +116,15 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__mode = 0 # По умолчанию справочник открыт в режиме списка
      
         # Добавляются пункты в меню и на тулбар
-        self.__add_menu_item(0, text=u'Новый')
-        self.__add_menu_item(1, text=u'Добавить')
-        self.__add_menu_item(1, text=u'Удалить')
+        self.__components_new   = self.__add_menu_item(0, text=u'Новый')
+        self.__components_edit  = self.__add_menu_item(1, text=u'Редактировать')
+        self.__components_delete= self.__add_menu_item(1, text=u'Удалить')
+        
+        # Вызываемые url
+        self.__url_new = None
+        self.__url_edit = None
+        self.__url_delete = None
+        self.__url_select = None
      
         self.init_component(*args, **kwargs)
         
@@ -163,9 +170,53 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.toolbar.items.append(ExtButton(**kwargs))
             self.grid_row_menu.add_item(**kwargs)
             self.grid_menu.add_item(**kwargs)
+            return (self.toolbar.items[len(self.toolbar.items)-1], 
+                    self.grid_row_menu.items[len(self.grid_row_menu.items)-1], 
+                    self.grid_menu.items[len(self.grid_menu.items)-1])
         elif flag==1:
             self.toolbar.items.append(ExtButton(**kwargs))
             self.grid_row_menu.add_item(**kwargs)
+            return (self.toolbar.items[len(self.toolbar.items)-1], 
+                    self.grid_row_menu.items[len(self.grid_row_menu.items)-1])
         else:
             assert False, 'Flag must be 1 or 0'
         
+    @property
+    def url_new(self):
+        return self.__url_new
+        
+    @url_new.setter
+    def  url_new(self, value):
+        self.__set_url(self.__components_new, 'new_value')
+        self.__url_new = value
+    
+    @property
+    def url_edit(self):
+        return self.__url_edit
+    
+    @url_edit.setter
+    def url_edit(self, value):
+        self.__set_url(self.__components_edit,'edit_value')
+        self.__url_edit = value 
+    
+    @property
+    def url_delete(self):
+        return self.__url_delete
+    
+    @url_delete.setter
+    def url_delete(self, value):
+        self.__set_url(self.__components_delete, 'delete_value')
+        self.__url_delete = value 
+    
+    @property
+    def url_select(self):
+        return self.__url_select
+    
+    @url_select.setter
+    def url_select(self, value):
+        self.__set_url([self.select_button,], 'select_value')
+        self.__url_select = value 
+    
+    def __set_url(self, components, handler):
+        for component in components:
+            component.handler = handler

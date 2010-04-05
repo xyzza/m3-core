@@ -9,6 +9,7 @@ from base import BaseExtContainer
 
 # Меню может привязываться к:
 from m3.ui.ext.containers import ExtGrid, ExtTree
+from m3.ui.ext.misc import ExtConnection
 
 
 class ExtContextMenu(BaseExtContainer):
@@ -33,6 +34,10 @@ class ExtContextMenu(BaseExtContainer):
             else:
                 res.append(item)
         return ','.join(res)
+    
+    @property
+    def items(self):
+        return self.__items
    
     #----------------------------------------------------------------------------
     # Врапперы над событиями listeners[...]
@@ -55,7 +60,9 @@ class ExtContextMenuItem(ExtUIComponent):
     def render(self, container):
         res = 'text:"%s"' % self.text
         if self.handler:
-            if isinstance(container, ExtGrid):
+            if isinstance(self.handler, ExtConnection):
+                res += ',handler: function(){%s} ' % self.handler.render() 
+            elif isinstance(container, ExtGrid): # Будет работать только с templates-globals!!!
                 res += ',handler: function(){return %s(grid)}' % self.handler
             elif isinstance(container, ExtTree):
                 res += ',handler: function(){return %s(tree)}' % self.handler

@@ -23,7 +23,7 @@ class ExtDataStore(BaseExtStore):
     
     def t_render_fields(self):
         '''Прописывается в шаблоне и заполняется при рендеринге'''
-        return ','.join(['{name: "%s"}' % data_index for data_index in self.__columns]) 
+        return ','.join(['{name: "%s", mapping: %d}' % (data_index, i+1) for i, data_index in enumerate(self.__columns)])
     
     def t_render_data(self):
         '''Прописывается в шаблоне и заполняется при рендеринге'''

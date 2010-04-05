@@ -20,6 +20,7 @@ new Ext.form.TextField({
 	{% if component.value %} ,value: '{{ component.value }}' {% endif %}
 	{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
 	
+	{% if component.empty_text %} ,emptyText: '{{ component.empty_text }}' {% endif %}
 	,allowBlank: {{ component.allow_blank|lower }}
 	{% if component.input_type %} ,inputType: '{{ component.input_type }}' {% endif %}
 	{% if component.min_length %} ,minLength: {{ component.min_length }} {% endif %}
