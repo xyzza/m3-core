@@ -96,7 +96,7 @@ class ExtForm(BaseExtPanel):
         
         fields = _parse_obj(object)
         if fields:
-            for item in self.items:
+            for item in self._get_all_fields(self):
                 new_val = fields.get(item.name, None)
                 if new_val:
                     _assign_value(new_val, item)

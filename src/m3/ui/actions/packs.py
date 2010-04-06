@@ -28,7 +28,8 @@ class DictEditWindowAction(Action):
     url = '/edit-window$'
     def run(self, request, context):
         id = request.REQUEST.get('id')
-        return ExtUIScriptResult(self.parent.get_edit_window(id))
+        obj = self.parent.get_row(id)
+        return ExtUIScriptResult(self.parent.get_edit_window(obj))
     
 class DictRowsAction(Action):
     '''
@@ -40,8 +41,8 @@ class DictRowsAction(Action):
     '''
     url = '/rows$'
     def run(self, request, context):
-        start = request.REQUEST.get('start')
-        offset = request.REQUEST.get('offset')
+        start = int(request.REQUEST.get('start', 0))
+        offset = int(request.REQUEST.get('offset', 0))
         filter = request.REQUEST.get('filter')
         return PreJsonResult(self.parent.get_rows(start, offset, filter))
     
@@ -77,12 +78,19 @@ class DictDeleteAction(Action):
     '''
     url = '/delete$'
     def run(self, request, context):
-        return self.parent.delete_row(request)
+        id = request.REQUEST.get('id')
+        return self.parent.delete_row(id)
 
 class BaseDictionaryActions(ActionPack):
     '''
     Пакет с действиями, специфичными для работы со справочниками
     '''
+    # Заголовок окна справочника
+    title = ''
+    # Список колонок состоящий из кортежей (имя json поля, имя колонки в окне)
+    list_columns = []
+    # Окно для редактирования элемента справочника 
+    edit_windows = None
     
     def __init__(self):
         # В отличие от обычных паков в этом экшены создаются самостоятельно, а не контроллером
@@ -135,16 +143,41 @@ class BaseDictionaryActions(ActionPack):
         raise NotImplementedError()
     
     def get_list_window(self):
-        ''' Возвращает настроенное окно справочника '''
-        raise NotImplementedError()
+        ''' Возвращает настроенное окно типа "Список" справочника '''
+        win = ExtDictionaryWindow(mode = 0, title = u'Справочник: ' + self.title)
+        
+        # Добавляем отображаемые колонки
+        for field, name in self.list_columns:
+            win.grid.add_column(header = name, data_index = field)
+        
+        # Устанавливаем источники данных
+        grid_store = ExtJsonStore(url = self.rows_action.get_absolute_url(), auto_load = True)
+        win.grid.set_store(grid_store)
+        
+        # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося 
+        win.url_new = self.edit_window_action.get_absolute_url()
+        win.url_edit = self.edit_window_action.get_absolute_url()
+        win.url_delete = self.delete_action.get_absolute_url()
+        
+        return win
     
     def get_select_window(self):
         ''' Возвращает настроенное окно выбора из справочника '''
         raise NotImplementedError()
     
-    def get_edit_window(self):
+    def get_edit_window(self, obj):
         ''' Возвращает настроенное окно редактирования элемента справочника '''
-        raise NotImplementedError()
+        # Разница между новый и созданным объектов в том, что у нового нет id или он пустой
+        create_new = True
+        if isinstance(obj, dict) and obj.get('id') != None:
+            create_new = False
+        elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
+            create_new = False
+        # Устанавливаем параметры формы
+        win = self.edit_windows(create_new = create_new, title = u'Элемент справочника: ' + self.title)
+        win.form.from_object(obj)
+        win.form.url = self.save_action.get_absolute_url()
+        return win
     
     def save_row(self, obj):
         '''
@@ -166,33 +199,9 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     '''
     # Настройки вида справочника (задаются конечным разработчиком)
     model = None
-    title = ''
-    list_columns = []
-    edit_windows = None
     filter_fields = []
-    
-    def get_list_window(self):
-        '''
-        Создает и настраивает окно справочника вида "Список"
-        '''
-        win = ExtDictionaryWindow(mode = 0, title = self.title)
         
-        # Добавляем отображаемые колонки
-        for field, name in self.list_columns:
-            win.grid.add_column(header = name, data_index = field)
-        
-        # Устанавливаем источники данных
-        grid_store = ExtJsonStore(url = self.rows_action.get_absolute_url(), auto_load = True)
-        win.grid.set_store(grid_store)
-        
-        # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося 
-        win.url_new = self.edit_window_action.get_absolute_url()
-        win.url_edit = self.edit_window_action.get_absolute_url()
-        win.url_delete = self.delete_action.get_absolute_url()
-        
-        return win
-    
-    def get_rows(self, start = 0, offset = 0, filter = None):
+    def get_rows(self, start, offset, filter):
         '''
         Возвращает данные для грида справочника
         '''
@@ -235,19 +244,10 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         return OperationResult(success = True)
     
     @transaction.commit_on_success
-    def delete_row(self, request):
-        id = request.REQUEST.get('id')
+    def delete_row(self, id):
         if (id != None) and (len(id) > 0):
             id = int(id)
             obj = self.model.objects.get(id = id)
             obj.delete()
         return OperationResult(success = True)
-    
-    def get_edit_window(self, id):
-        record = self.get_row(id)
-        win = self.edit_windows()
-        win.form.from_object(record)
-        win.url_save = self.save_action.get_absolute_url()
-        return win
-        
         

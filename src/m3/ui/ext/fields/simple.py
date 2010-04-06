@@ -57,6 +57,7 @@ class ExtComboBox(BaseExtField):
         self.display_field = None
         self.__store = None
         self.empty_text = None
+        self.allow_blank = True
         self.mode = None
         self.init_component(*args, **kwargs)
     
