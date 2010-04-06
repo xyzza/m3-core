@@ -2,6 +2,8 @@
 from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
+from django.db import transaction
+from django.db.models.query_utils import Q
 
 class DictListWindowAction(Action):
     '''
@@ -25,7 +27,7 @@ class DictEditWindowAction(Action):
     '''
     url = '/edit-window$'
     def run(self, request, context):
-        id = request.POST.get('id')
+        id = request.REQUEST.get('id')
         return ExtUIScriptResult(self.parent.get_edit_window(id))
     
 class DictRowsAction(Action):
@@ -38,7 +40,10 @@ class DictRowsAction(Action):
     '''
     url = '/rows$'
     def run(self, request, context):
-        return PreJsonResult(self.parent.get_rows(self))
+        start = request.REQUEST.get('start')
+        offset = request.REQUEST.get('offset')
+        filter = request.REQUEST.get('filter')
+        return PreJsonResult(self.parent.get_rows(start, offset, filter))
     
 class DictLastUsedAction(Action):
     '''
@@ -54,7 +59,7 @@ class DictRowAction(Action):
     '''
     url = '/item$'
     def run(self, request, context):
-        id = request.POST.get('id')
+        id = request.REQUEST.get('id')
         result = self.parent.get_row(self, id)
         return PreJsonResult(result)
 
@@ -72,8 +77,7 @@ class DictDeleteAction(Action):
     '''
     url = '/delete$'
     def run(self, request, context):
-        id = request.POST.get('id')
-        return self.parent.delete_row(self, id)
+        return self.parent.delete_row(request)
 
 class BaseDictionaryActions(ActionPack):
     '''
@@ -188,17 +192,30 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         
         return win
     
-    def get_rows(self, start = 0, offset = 0, filter = ''):
+    def get_rows(self, start = 0, offset = 0, filter = None):
         '''
         Возвращает данные для грида справочника
         '''
         #TODO: Пока нет грида с пейджингом старт и оффсет не работают
-        items = list(self.model.objects.all())
+        query = self.model.objects
+        # Если есть фильтр, то вхождение каждого элемента фильтра ищется в заданных полях
+        if filter != None:
+            for word in filter.split(' '):
+                condition = None
+                for field in self.filter_fields:
+                    q = Q(**{field + '__icontains': word})
+                    if condition == None:
+                        condition = q
+                    else:
+                        condition = condition | q
+                if condition != None:
+                    query = query.filter(condition)
+        items = list(query.all())
         return items
     
     def get_row(self, id):
         # Если id нет, значит нужно создать новый объект
-        if id == None:
+        if (id == None) or (len(id) == 0):
             record = self.model()
         else:
             try:
@@ -207,17 +224,23 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
                 return None
         return record
     
+    @transaction.commit_on_success
     def save_row(self, request):
-        id = request.POST.get('id')
+        id = request.REQUEST.get('id')
         record = self.get_row(id)
         win = self.edit_windows()
         win.form.bind_to_request(request)
         win.form.to_object(record)
         record.save()
         return OperationResult(success = True)
-        
-    def delete_row(self, obj):
-        obj.delete()
+    
+    @transaction.commit_on_success
+    def delete_row(self, request):
+        id = request.REQUEST.get('id')
+        if (id != None) and (len(id) > 0):
+            id = int(id)
+            obj = self.model.objects.get(id = id)
+            obj.delete()
         return OperationResult(success = True)
     
     def get_edit_window(self, id):
