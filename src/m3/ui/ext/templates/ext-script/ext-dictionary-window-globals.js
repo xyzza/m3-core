@@ -13,7 +13,7 @@ function new_value() {
 		   Ext.Msg.alert('','failed');
 		}
 	});
-}
+};
 
 /**
  * Редактирование значения в справочнике по форме ExtDictionary
@@ -38,7 +38,7 @@ function edit_value(){
 		   Ext.Msg.alert('','failed');
 		}
 	});
-}
+};
 
 /**
  * Удаление значения в справочнике по форме ExtDictionary
@@ -62,7 +62,7 @@ function delete_value(){
 		   Ext.Msg.alert('','failed');
 		}
 	});
-}
+};
 
 /**
  * Выбор значения в справочнике по форме ExtDictionary
@@ -74,4 +74,22 @@ function select_value(){
 	// здесь должна быть обработка выбора значения
 
 	win.close();
-}
+};
+
+function search(){
+	var grid = Ext.getCmp('{{ component.grid.client_id}}');
+	
+	ajax.request({
+		url: grid.getStore().url
+		,params: {
+			'filter': Ext.getCmp("{{ component.search_text.client_id }}").getValue()
+		}
+		,success: function(response, opts){
+			
+		    grid.getStore().loadData( Ext.decode(response.responseText) );
+		}
+		,failure: function(response, opts){
+		   Ext.Msg.alert('','failed');
+		}
+	});
+};

@@ -79,7 +79,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         text_cont = ExtContainer(layout='form', style={'padding':'5px'})
         text_cont.items.append(search)
         
-        search_btn = ExtButton(text = u'Найти', style={'padding':'5px'})
+        search_btn = ExtButton(text = u'Найти', style={'padding':'5px'}, handler='search')
         top_cont = ExtContainer(region='north',layout='column', min_height=35)
         top_cont.items.append(text_cont)
         top_cont.items.append(search_btn)
@@ -122,9 +122,9 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__mode = 0 # По умолчанию справочник открыт в режиме списка
      
         # Добавляются пункты в меню и на тулбар
-        self.__components_new   = self.__add_menu_item(0, text=u'Новый', icon_cls='add_item')
-        self.__components_edit  = self.__add_menu_item(1, text=u'Редактировать', icon_cls='edit_item')
-        self.__components_delete= self.__add_menu_item(1, text=u'Удалить', icon_cls='delete_item')
+        self.__components_new   = self.__add_menu_item(0, text=u'Новый', icon_cls='add_item', disabled=True)
+        self.__components_edit  = self.__add_menu_item(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
+        self.__components_delete= self.__add_menu_item(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
         
         # Вызываемые url
         self.__url_new = None
@@ -149,7 +149,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             buttom_panel.items.append(list_view)
             self.items.append(buttom_panel)
         
-            select_btn = ExtButton(text = u'Выбрать')
+            select_btn = ExtButton(text = u'Выбрать', disabled=True)
             self.buttons.insert(0, select_btn)
             
             self.select_button = select_btn
@@ -169,8 +169,8 @@ class ExtDictionaryWindow(BaseExtWindow):
     def __add_menu_item(self, flag, **kwargs):
         '''
         @param flag: Указывает как будет добавляться пункт,
-                    0 - Добавляется в тублар, в конт. меню строки, в меню всего грида
-                    1 - Добавляется в тублар, в конт. меню строки
+            0 - Добавляется в тублар, в конт. меню строки, в меню всего грида
+            1 - Добавляется в тублар, в конт. меню строки
         '''
         text = None
         if kwargs.has_key('text'):
@@ -227,3 +227,4 @@ class ExtDictionaryWindow(BaseExtWindow):
     def __set_url(self, components, handler):
         for component in components:
             component.handler = handler
+            component.disabled = False

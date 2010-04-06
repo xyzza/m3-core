@@ -15,7 +15,7 @@ from m3.ui.ext.misc import ExtConnection
 class ExtContextMenu(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtContextMenu, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-contextmenu.js'
+        self.template = 'ext-containers/ext-context-menu.js'
         self.__items = []
         self.container = None
         self.init_component(*args, **kwargs)
@@ -62,6 +62,10 @@ class ExtContextMenuItem(ExtUIComponent):
         res = 'text:"%s"' % self.text
         if self.icon_cls:
             res += ',iconCls: "%s"' % self.icon_cls
+        if self.disabled:
+            res += ',disabled: true'
+        if self.hidden:
+            res += ',hidden: true'
         if self.handler:
             if isinstance(self.handler, ExtConnection):
                 res += ',handler: function(){%s} ' % self.handler.render() 
