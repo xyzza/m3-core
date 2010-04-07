@@ -3,7 +3,7 @@
     win.show();
     
     {{ renderer.window.render_globals }}
-    
+      
     return win;
 })()
 

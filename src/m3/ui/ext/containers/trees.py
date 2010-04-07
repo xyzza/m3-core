@@ -17,7 +17,7 @@ class ExtTree(BaseExtPanel):
         super(ExtTree, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree.js'
         self.nodes = TypedList(type=ExtTreeNode)
-        self.columns = []
+        self._items = []
         self.tree_loader = ExtTreeLoader(url=url)
         self.init_component(*args, **kwargs)
     
@@ -38,7 +38,7 @@ class ExtTree(BaseExtPanel):
         return ','.join([node.render() for node in self.nodes])
     
     def t_render_columns(self):
-        return ','.join([column.render() for column in self.columns])
+        return self.t_render_items()
     
     def add_nodes(self, *args):
         for node in args:
@@ -55,6 +55,10 @@ class ExtTree(BaseExtPanel):
         
     def add_date_column(self,**kwargs):
         self.columns.append(ExtGridDateColumn(**kwargs))
+        
+    @property
+    def columns(self):
+        return self._items
    
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
@@ -77,7 +81,7 @@ class ExtTree(BaseExtPanel):
         menu.container = self
         self._listeners['containercontextmenu'] = menu
     #------------------------------------------------------------------------
-            
+    
     
 class ExtTreeNode(ExtUIComponent):
     def __init__(self,*args, **kwargs):

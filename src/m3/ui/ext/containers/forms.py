@@ -24,7 +24,6 @@ class ExtForm(BaseExtPanel):
         self.layout = 'form'
         self.padding = None
         self.url = None
-        self.__items = TypedList(type=ExtUIComponent)
         # Параметры специфичные для layout form
         self.label_width = self.label_align = self.label_pad = None
         
@@ -144,13 +143,10 @@ class ExtForm(BaseExtPanel):
         for field in all_fields:
             names = field.name.split('.')
             set_field(self.object, names, convert_value(field))
-    
-    def t_render_items(self):
-        return ','.join([item.render() for item in self.items])
-    
+     
     @property
     def items(self):       
-        return self.__items
+        return self._items
 
 class ExtPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):
@@ -159,16 +155,11 @@ class ExtPanel(BaseExtPanel):
         self.padding = None
         self.collapsible = False
         self.split = False
-        self.__items = TypedList(type=ExtUIComponent)
         self.init_component(*args, **kwargs)
-    
-    def render_items(self): 
-        return ','.join([item.render() for item in self.items])    
     
     @property
     def items(self):
-        return self.__items
-
+        return self._items
     
 class ExtTabPanel(BaseExtPanel):
     '''
@@ -177,11 +168,8 @@ class ExtTabPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-tab-panel.js'
-        self.__tabs = TypedList(type=ExtPanel)
+        self._items = TypedList(type=ExtPanel)
         self.init_component(*args, **kwargs)
-    
-    def render_tabs(self): 
-        return ','.join([tab.render() for tab in self.tabs])
     
     def add_tab(self, **kwargs):
         panel = ExtPanel(**kwargs)
@@ -190,4 +178,4 @@ class ExtTabPanel(BaseExtPanel):
 
     @property
     def tabs(self):
-        return self.__tabs
+        return self._items

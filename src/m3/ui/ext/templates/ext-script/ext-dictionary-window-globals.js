@@ -1,14 +1,25 @@
 var ajax = Ext.Ajax;
 
 /**
+ * Стандартный рендеринг окна c добавлением обработчика
+ */
+function render_window(response, opts){
+	win = eval(response.responseText);
+	if (win!=undefined){
+		win.on('refresh_store',function(event, target){
+			var grid = Ext.getCmp('{{ component.grid.client_id}}');	
+			grid.getStore().reload();
+		});
+	}
+}
+
+/**
  *  Создание нового значения в справочнике по форме ExtDictionary
  */
 function new_value() {
 	ajax.request({
 		url: "{{ component.url_new }}"
-		,success: function(response, opts){
-		   eval(response.responseText);
-		}
+		,success: render_window
 		,failure: function(response, opts){
 		   Ext.Msg.alert('','failed');
 		}
@@ -31,9 +42,7 @@ function edit_value(){
 		,params: {
 			'id': grid.getSelectionModel().getSelected().id
 		}
-		,success: function(response, opts){
-		   eval(response.responseText);
-		}
+		,success: render_window
 		,failure: function(response, opts){
 		   Ext.Msg.alert('','failed');
 		}
@@ -55,9 +64,7 @@ function delete_value(){
 		,params: {
 			'id': grid.getSelectionModel().getSelected().id
 		}
-		,success: function(response, opts){
-		   eval(response.responseText);
-		}
+		,success: render_window
 		,failure: function(response, opts){
 		   Ext.Msg.alert('','failed');
 		}
@@ -68,12 +75,11 @@ function delete_value(){
  * Выбор значения в справочнике по форме ExtDictionary
  */
 function select_value(){
-	var grid = Ext.getCmp('{{ component.grid.client_id}}');
+	// var grid = Ext.getCmp('{{ component.grid.client_id}}');
 	var win = Ext.getCmp('{{ component.client_id}}');
 	
-	// здесь должна быть обработка выбора значения
-
-	win.close();
+	// здесь должна быть обработка выбора значения, например:
+	win.fireEvent('refresh_store');
 };
 
 function search(){
@@ -85,7 +91,6 @@ function search(){
 			'filter': Ext.getCmp("{{ component.search_text.client_id }}").getValue()
 		}
 		,success: function(response, opts){
-			
 		    grid.getStore().loadData( Ext.decode(response.responseText) );
 		}
 		,failure: function(response, opts){

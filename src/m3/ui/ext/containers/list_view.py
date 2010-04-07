@@ -20,14 +20,14 @@ class ExtListView(BaseExtPanel):
         self.multi_select = False
         self.empty_text = None
         self.__store = None
-        self.columns = []
+        self._items = []
         self.init_component(*args, **kwargs)
         
     def set_store(self, store):
         self.__store = store
         
     def t_render_columns(self):
-        return ','.join([column.render() for column in self.columns])
+        return self.t_render_items()
     
     def t_render_store(self):
         assert self.__store, 'Store is not define'
@@ -44,3 +44,7 @@ class ExtListView(BaseExtPanel):
         
     def add_date_column(self, **kwargs):
         self.columns.append(ExtGridDateColumn(**kwargs))
+        
+    @property
+    def columns(self):
+        return self._items

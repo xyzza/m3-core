@@ -9,29 +9,23 @@ from base import BaseExtContainer
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.fields.base import BaseExtField
 
-from m3.helpers.datastructures import TypedList
-# В качестве значений списка TypedList атрибутов могут выступать объекты:
-# ExtUIComponent - в классе контэйнер
 
 class ExtContainer(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtContainer, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-container.js'
-        self.__items = TypedList(type = ExtUIComponent)
         self.init_component(*args, **kwargs)
-    
-    def t_render_items(self):
-        return ','.join([item.render() for item in self.items])
     
     @property
     def items(self):
-        return self.__items
-
+        return self._items
+    
+    
 class ExtToolbar(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtToolbar, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-toolbar.js'
-        self.__items = []
+        self._items = []
         self.init_component(*args, **kwargs)
     
     def t_render_items(self):
@@ -58,28 +52,28 @@ class ExtToolbar(BaseExtContainer):
           
     @property
     def items(self):
-        return self.__items
+        return self._items
+    
     
 class ExtButtonGroup(BaseExtContainer):
     def __init__(self, *args, **kwargs):
-        super(BaseExtContainer, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-buttongroup.js'
-        
+        super(ExtButtonGroup, self).__init__(*args, **kwargs)
+        self.template = 'ext-containers/ext-button-group.js'
         self.columns_number = None
         self.title = None
-        self.__buttons = []
         self.init_component(*args, **kwargs)  
-        
-    def t_render_buttons(self):
-        return ','.join([item.render() for item in self.__buttons])
     
     def add_button(self, **kwargs):
-        self.__buttons.append(ExtButton(**kwargs))
+        self.buttons.append(ExtButton(**kwargs))
     
+    def t_render_buttons(self):
+        return self.t_render_items()
+   
     @property
-    def items(self):
-        return self.__buttons
-
+    def buttons(self):
+        return self._items
+    
+    
 # Скорей всего Viewport не понадобится и будет удален!
 #class ExtViewport(BaseExtContainer):
 #    ''' Реализует работу Viewport компонента extjs'''

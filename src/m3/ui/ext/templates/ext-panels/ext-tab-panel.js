@@ -19,5 +19,5 @@ new Ext.TabPanel({
 	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
 	,activeTab:0
 	,autoWidth: true
-	,items: [{{ component.render_tabs|safe }}]
+	,items: [{{ component.t_render_items|safe }}]
 })

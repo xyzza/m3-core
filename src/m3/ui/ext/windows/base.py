@@ -13,29 +13,12 @@ from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from m3.ui.ext.controls import ExtButton
 
+
 class BaseExtWindow(ExtUIComponent):
     '''
     Базовый класс для всех окон в системе
     '''
     def __init__(self, *args, **kwargs):
-        '''
-        Атрибуты экземпляров:
-            template - Шаблон для рендеринга
-            template_globals - Шаблон произвольных функций
-            renderer - Ссылка на объект ExtWindowRenderer() 
-            
-            width - Ширина
-            height - Высота
-            title - Заголовок
-            __items - Контейнер для содержащихся на форме элементов
-            buttons - Имеющиеся кнопки
-            layout - Тип расположения контейнера
-            modal - Модальное окно
-            maximizable - Возможность развернуть на весь экран
-            minimizable - Возможность свернуть
-            maximized - Развернута на весь экран
-            minimized - Свернута
-        '''
         super(BaseExtWindow, self).__init__(*args, **kwargs)
         self.template = 'ext-windows/ext-window.js'
         self.template_globals = ''
@@ -77,4 +60,15 @@ class BaseExtWindow(ExtUIComponent):
         if self.template_globals:
             return render_template(self.template_globals, {'component': self, 'window': self})
         return ''
+    
+    def find_by_name(self, name):
+        '''Осуществляет поиск экземпляра во вложенных объектах по имени экземпляра'''
+        for item in self._items:   
+            if hasattr(item, 'name') and name == getattr(item, 'name'):
+                return item
+                
+            if hasattr(item, '_items'):
+                res = item.find_by_name(name)
+                if res:
+                    return res
     

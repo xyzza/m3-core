@@ -11,7 +11,6 @@ class BaseExtField(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtField, self).__init__(*args, **kwargs)
         self.label = None
-        self.name = None
         self.value = None
         self.label_style = {}
    

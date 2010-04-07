@@ -9,16 +9,11 @@ from base import BaseExtPanel
 from django.utils.datastructures import SortedDict
 
 
-# В качестве значений списка TypedList атрибутов могут выступать объекты:
-from m3.ui.ext.fields.simple import ExtStringField 
-from m3.ui.ext.fields.base import BaseExtField 
-
-
 class ExtGrid(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtGrid, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-grid.js'
-        self.columns = []
+        self._items = []
         self.store = None
         self.editor = False
         self.init_component(*args, **kwargs)
@@ -38,7 +33,7 @@ class ExtGrid(BaseExtPanel):
         return '[%s]' % ','.join(result) 
     
     def t_render_columns(self):
-        return ','.join([column.render() for column in self.columns])
+        return self.t_render_items()
     
     def t_render_store(self):
         assert self.store, 'Store is not define'
@@ -83,6 +78,10 @@ class ExtGrid(BaseExtPanel):
         
     def set_store(self, store):
         self.store = store
+
+    @property
+    def columns(self):
+        return self._items
 
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]

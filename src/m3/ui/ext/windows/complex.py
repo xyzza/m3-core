@@ -181,11 +181,11 @@ class ExtDictionaryWindow(BaseExtWindow):
             
         if flag==0:
             self.grid_menu.add_item(text=text, **kwargs)
-            return (self.button_group.items[len(self.button_group.items)-1], 
+            return (self.button_group.buttons[len(self.button_group.buttons)-1], 
                     self.grid_row_menu.items[len(self.grid_row_menu.items)-1], 
                     self.grid_menu.items[len(self.grid_menu.items)-1])
         else:
-            return (self.button_group.items[len(self.button_group.items)-1], 
+            return (self.button_group.buttons[len(self.button_group.buttons)-1], 
                 self.grid_row_menu.items[len(self.grid_row_menu.items)-1])
         
     @property

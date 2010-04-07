@@ -22,5 +22,5 @@ new Ext.Panel({
 	{% if component.split %} ,split: true {% endif %} 
 	{% if component.collapsible %} ,collapsible: true {% endif %} 
 	{% if component.padding %} ,padding: '{{ component.padding }}' {% endif %}
-	,items: [{{ component.render_items|safe }}]
+	,items: [{{ component.t_render_items|safe }}]
 })
