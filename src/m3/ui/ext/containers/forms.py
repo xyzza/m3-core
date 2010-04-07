@@ -113,14 +113,14 @@ class ExtForm(BaseExtPanel):
             
             names задается в виде списка, т.о. если его длина больше единицы, то имеются вложенные объекты
             '''
-            nested = getattr(obj, names[0], None)
-            if nested != None:
+            if hasattr(obj, names[0]):
                 if len(names) == 1:
                     if isinstance(obj, dict):
                         obj[names[0]] = value
                     else:
                         setattr(obj, names[0], value)
                 else:
+                    nested = getattr(obj, names[0], None)
                     set_field(nested, names[1:], value)
 
         def convert_value(item):
@@ -134,7 +134,7 @@ class ExtForm(BaseExtPanel):
                 #TODO уточнить формат дат
                 val = datetime.datetime.strptime(val, '%d.%m.%Y')
             elif isinstance(item, ExtCheckBox):
-                val = item.checked
+                val = True if val == 'on' else False
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
