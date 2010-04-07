@@ -35,6 +35,14 @@ class Validator:
         rule.callback_on_fail = on_fail
         self.rules.append(rule)
         
+    def addrule_equal(self, value, fail_msg, on_success=None, on_fail=None):
+        rule = NotEqualValidationRule()
+        rule.value = value
+        rule.fail_msg = fail_msg
+        rule.callback_on_success = on_success
+        rule.callback_on_fail = on_fail
+        self.rules.append(rule)
+        
 #------------------------------------------------------------------------------
 # методы добавления правил валидации 
 #------------------------------------------------------------------------------ 
@@ -76,6 +84,21 @@ class NotEmptyValidationRule(BaseValidationRule):
     '''
     def check(self):
         return True if self.value else False
+    
+class NotEqualValidationRule(BaseValidationRule):
+    '''
+    Правило проверяет равны ли значения из списка между собой
+    Проще говоря 
+    '''
+    def check(self):
+        assert isinstance(self.value, (list, tuple))
+        assert len(self.value) >= 2
+        last_value = self.value[0]
+        for value in self.value[1:]:
+            if last_value != value:
+                return False
+            last_value = value
+        return True
     
 class FailedValidationRule(BaseValidationRule):
     '''
