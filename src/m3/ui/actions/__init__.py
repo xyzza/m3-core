@@ -8,6 +8,7 @@ from django.utils.datastructures import MultiValueDict
 from django import http
 import jsonpickle
 from m3.helpers.datastructures import MutableList
+from m3.core.json import M3JSONEncoder
 
 class ActionResult(object):
     '''
@@ -31,7 +32,8 @@ class PreJsonResult(ActionResult):
     Метод self.get_http_response выполняет сериализацию этих данных в строковый формат.
     '''
     def get_http_response(self):
-        result = jsonpickle.encode(self.data, unpicklable = False)
+        encoder = M3JSONEncoder()
+        result = encoder.encode(self.data)
         return http.HttpResponse(result)
 
 class JsonResult(ActionResult):

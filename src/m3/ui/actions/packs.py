@@ -11,7 +11,23 @@ class DictListWindowAction(Action):
     '''
     url = '/list-window$'
     def run(self, request, context):
-        return ExtUIScriptResult(self.parent.get_list_window())
+        base = self.parent
+        win = base.list_form(mode = 0, title = u'Справочник: ' + base.title)
+        
+        # Добавляем отображаемые колонки
+        for field, name in base.list_columns:
+            win.grid.add_column(header = name, data_index = field)
+        
+        # Устанавливаем источники данных
+        grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
+        win.grid.set_store(grid_store)
+        
+        # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося 
+        win.url_new    = base.edit_window_action.get_absolute_url()
+        win.url_edit   = base.edit_window_action.get_absolute_url()
+        win.url_delete = base.delete_action.get_absolute_url()
+        
+        return ExtUIScriptResult(self.parent.get_list_window(win))
     
 class DictSelectWindowAction(Action):
     '''
@@ -27,9 +43,24 @@ class DictEditWindowAction(Action):
     '''
     url = '/edit-window$'
     def run(self, request, context):
+        base = self.parent
+        # Получаем объект по id
         id = request.REQUEST.get('id')
         obj = self.parent.get_row(id)
-        return ExtUIScriptResult(self.parent.get_edit_window(obj))
+        # Разница между новый и созданным объектов в том, что у нового нет id или он пустой
+        create_new = True
+        if isinstance(obj, dict) and obj.get('id') != None:
+            create_new = False
+        elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
+            create_new = False
+        # Устанавливаем параметры формы
+        win = self.parent.edit_window(create_new = create_new,
+                                      title = u'Элемент справочника: ' + base.title)
+        # Биндим объект к форме
+        win.form.from_object(obj)
+        win.form.url = base.save_action.get_absolute_url()
+        
+        return ExtUIScriptResult(base.get_edit_window(win))
     
 class DictRowsAction(Action):
     '''
@@ -70,7 +101,15 @@ class DictSaveAction(Action):
     '''
     url = '/save$'
     def run(self, request, context):
-        return self.parent.save_row(request)
+        # Создаем форму для биндинга к ней
+        win = self.parent.edit_window()
+        win.form.bind_to_request(request)
+        # Получаем наш объект по id
+        id = request.REQUEST.get('id')
+        obj = self.parent.get_row(id)
+        # Биндим форму к объекту
+        win.form.to_object(obj)
+        return self.parent.save_row(obj)
     
 class DictDeleteAction(Action):
     '''
@@ -79,7 +118,8 @@ class DictDeleteAction(Action):
     url = '/delete$'
     def run(self, request, context):
         id = request.REQUEST.get('id')
-        return self.parent.delete_row(id)
+        obj = self.parent.get_row(id)
+        return self.parent.delete_row(obj)
 
 class BaseDictionaryActions(ActionPack):
     '''
@@ -90,7 +130,9 @@ class BaseDictionaryActions(ActionPack):
     # Список колонок состоящий из кортежей (имя json поля, имя колонки в окне)
     list_columns = []
     # Окно для редактирования элемента справочника 
-    edit_windows = None
+    edit_window = None
+    list_form    = ExtDictionaryWindow
+    select_form  = ExtDictionaryWindow
     
     def __init__(self):
         # В отличие от обычных паков в этом экшены создаются самостоятельно, а не контроллером
@@ -142,41 +184,16 @@ class BaseDictionaryActions(ActionPack):
         '''
         raise NotImplementedError()
     
-    def get_list_window(self):
-        ''' Возвращает настроенное окно типа "Список" справочника '''
-        win = ExtDictionaryWindow(mode = 0, title = u'Справочник: ' + self.title)
-        
-        # Добавляем отображаемые колонки
-        for field, name in self.list_columns:
-            win.grid.add_column(header = name, data_index = field)
-        
-        # Устанавливаем источники данных
-        grid_store = ExtJsonStore(url = self.rows_action.get_absolute_url(), auto_load = True)
-        win.grid.set_store(grid_store)
-        
-        # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося 
-        win.url_new = self.edit_window_action.get_absolute_url()
-        win.url_edit = self.edit_window_action.get_absolute_url()
-        win.url_delete = self.delete_action.get_absolute_url()
-        
+    def get_list_window(self, win):
+        ''' Возвращает настроенное окно типа "Список" справочника '''        
         return win
     
     def get_select_window(self):
         ''' Возвращает настроенное окно выбора из справочника '''
         raise NotImplementedError()
     
-    def get_edit_window(self, obj):
+    def get_edit_window(self, win):
         ''' Возвращает настроенное окно редактирования элемента справочника '''
-        # Разница между новый и созданным объектов в том, что у нового нет id или он пустой
-        create_new = True
-        if isinstance(obj, dict) and obj.get('id') != None:
-            create_new = False
-        elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
-            create_new = False
-        # Устанавливаем параметры формы
-        win = self.edit_windows(create_new = create_new, title = u'Элемент справочника: ' + self.title)
-        win.form.from_object(obj)
-        win.form.url = self.save_action.get_absolute_url()
         return win
     
     def save_row(self, obj):
@@ -234,20 +251,12 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         return record
     
     @transaction.commit_on_success
-    def save_row(self, request):
-        id = request.REQUEST.get('id')
-        record = self.get_row(id)
-        win = self.edit_windows()
-        win.form.bind_to_request(request)
-        win.form.to_object(record)
-        record.save()
+    def save_row(self, obj):
+        obj.save()
         return OperationResult(success = True)
     
     @transaction.commit_on_success
-    def delete_row(self, id):
-        if (id != None) and (len(id) > 0):
-            id = int(id)
-            obj = self.model.objects.get(id = id)
-            obj.delete()
+    def delete_row(self, obj):
+        obj.delete()
         return OperationResult(success = True)
         
