@@ -4,14 +4,13 @@ var ajax = Ext.Ajax;
  * Стандартный рендеринг окна c добавлением обработчика
  */
 function render_window(response, opts){
-	win = eval(response.responseText);
+	win = m3_eval(response.responseText);
 	if (win!=undefined){
 		win.on('refresh_store',function(event, target){
-			var grid = Ext.getCmp('{{ component.grid.client_id}}');	
-			grid.getStore().reload();
+			refresh_store();
 		});
-	}
-}
+	};
+};
 
 /**
  *  Создание нового значения в справочнике по форме ExtDictionary
@@ -81,7 +80,9 @@ function select_value(){
 	// здесь должна быть обработка выбора значения, например:
 	win.fireEvent('refresh_store');
 };
-
+/**
+ * Осуществляет поиск по введенному значению. Организует запрос на сервер.
+ */
 function search(){
 	var grid = Ext.getCmp('{{ component.grid.client_id}}');
 	
@@ -98,3 +99,19 @@ function search(){
 		}
 	});
 };
+
+/**
+ * Перезагружает хранилище данных
+ */
+function refresh_store(){
+	var grid = Ext.getCmp('{{ component.grid.client_id}}');	
+	grid.getStore().reload();
+}
+/**
+ * Очищает введенный текст в поле поиска
+ */
+function clear_text(){
+	var text_field = Ext.getCmp('{{ component.search_text.client_id}}');
+	text_field.setValue('');
+	refresh_store();
+}

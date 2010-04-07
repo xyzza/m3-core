@@ -79,10 +79,12 @@ class ExtDictionaryWindow(BaseExtWindow):
         text_cont = ExtContainer(layout='form', style={'padding':'5px'})
         text_cont.items.append(search)
         
-        search_btn = ExtButton(text = u'Найти', style={'padding':'5px'}, handler='search')
+        search_btn = ExtButton(text = u'Найти', style={'padding':'5px'}, handler='search', width=80)
+        search_clear = ExtButton(text = u'Сбросить', style={'padding':'5px'}, handler='clear_text', width=80)
         top_cont = ExtContainer(region='north',layout='column', min_height=35)
         top_cont.items.append(text_cont)
         top_cont.items.append(search_btn)
+        top_cont.items.append(search_clear)
         
         grid = ExtGrid(region='center')
         
@@ -115,6 +117,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.list_view = None
         self.search_text = search
         self.search_button = search_btn
+        self.search_clear = search_clear
         self.select_button = None
         self.__panel_list_view = None
         
@@ -125,6 +128,8 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__components_new   = self.__add_menu_item(0, text=u'Новый', icon_cls='add_item', disabled=True)
         self.__components_edit  = self.__add_menu_item(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
         self.__components_delete= self.__add_menu_item(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
+        self.__add_spacer(0)
+        self.__components_refresh= self.__add_menu_item(0, text=u'Обновить', icon_cls='table_refresh', handler='search')
         
         # Вызываемые url
         self.__url_new = None
@@ -187,6 +192,11 @@ class ExtDictionaryWindow(BaseExtWindow):
         else:
             return (self.button_group.buttons[len(self.button_group.buttons)-1], 
                 self.grid_row_menu.items[len(self.grid_row_menu.items)-1])
+        
+    def __add_spacer(self, flag):
+        self.grid_row_menu.add_spacer()   
+        if flag==0:
+            self.grid_menu.add_spacer()
         
     @property
     def url_new(self):
