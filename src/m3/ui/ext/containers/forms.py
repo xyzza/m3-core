@@ -142,6 +142,8 @@ class ExtForm(BaseExtPanel):
         self.object = object
         all_fields = self._get_all_fields(self)
         for field in all_fields:
+            assert isinstance(field.name, str) and len(field.name) > 0,\
+                  'The names of all fields must be set for a successful assignment. Check the definition of the form.'
             names = field.name.split('.')
             set_field(self.object, names, convert_value(field))
      

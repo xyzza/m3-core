@@ -12,7 +12,7 @@ class DictListWindowAction(Action):
     url = '/list-window$'
     def run(self, request, context):
         base = self.parent
-        win = base.list_form(mode = 0, title = u'Справочник: ' + base.title)
+        win = base.list_form(mode = 0, title = base.title)
         
         # Добавляем отображаемые колонки
         for field, name in base.list_columns:
@@ -35,7 +35,26 @@ class DictSelectWindowAction(Action):
     '''
     url = '/select-window$'
     def run(self, request, context):
-        return ExtUIScriptResult(self.parent.get_select_window())
+        # Создаем окно выбора
+        base = self.parent
+        win = base.select_form(request, title = base.title)
+        win.mode = 1
+        
+        # Добавляем отображаемые колонки
+        for field, name in base.list_columns:
+            win.grid.add_column(header = name, data_index = field)
+            
+        # Устанавливаем источник данных
+        grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
+        win.grid.set_store(grid_store)
+        list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
+        win.list_view.set_store(list_store)
+        
+        # Доступно 1 событие: выбор с присвоением значения вызвавшему контролу
+        #win.set_attr(self, id = 'id', text = 'name')
+        #win.url_select = '/ui/simple-window3'
+        
+        return ExtUIScriptResult(self.parent.get_select_window(win))
     
 class DictEditWindowAction(Action):
     '''
@@ -54,8 +73,7 @@ class DictEditWindowAction(Action):
         elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
             create_new = False
         # Устанавливаем параметры формы
-        win = self.parent.edit_window(create_new = create_new,
-                                      title = u'Элемент справочника: ' + base.title)
+        win = self.parent.edit_window(create_new = create_new, title = base.title)
         # Биндим объект к форме
         win.form.from_object(obj)
         win.form.url = base.save_action.get_absolute_url()
@@ -188,9 +206,9 @@ class BaseDictionaryActions(ActionPack):
         ''' Возвращает настроенное окно типа "Список" справочника '''        
         return win
     
-    def get_select_window(self):
+    def get_select_window(self, win):
         ''' Возвращает настроенное окно выбора из справочника '''
-        raise NotImplementedError()
+        return win
     
     def get_edit_window(self, win):
         ''' Возвращает настроенное окно редактирования элемента справочника '''
