@@ -17,6 +17,7 @@ from m3.helpers.datastructures import TypedList
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent
 
+
 class ExtForm(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtForm, self).__init__(*args, **kwargs)
@@ -148,6 +149,7 @@ class ExtForm(BaseExtPanel):
     def items(self):       
         return self._items
 
+
 class ExtPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)
@@ -160,6 +162,7 @@ class ExtPanel(BaseExtPanel):
     @property
     def items(self):
         return self._items
+    
     
 class ExtTabPanel(BaseExtPanel):
     '''

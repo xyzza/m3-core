@@ -16,19 +16,19 @@ class ExtContextMenu(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtContextMenu, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-context-menu.js'
-        self.__items = []
+        self._items = []
         self.container = None
         self.init_component(*args, **kwargs)
 
     def add_item(self, **kwargs):
-        self.__items.append(ExtContextMenuItem(**kwargs))
+        self.items.append(ExtContextMenuItem(**kwargs))
         
     def add_spacer(self):
-        self.__items.append('"-"')
+        self.items.append('"-"')
     
     def t_render_items(self):
         res = []
-        for item in self.__items:
+        for item in self.items:
             if isinstance(item, ExtContextMenuItem):
                 res.append(item.render(self.container))
             else:
@@ -37,7 +37,7 @@ class ExtContextMenu(BaseExtContainer):
     
     @property
     def items(self):
-        return self.__items
+        return self._items
    
     #----------------------------------------------------------------------------
     # Врапперы над событиями listeners[...]
