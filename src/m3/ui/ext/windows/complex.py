@@ -181,7 +181,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         if kwargs.has_key('text'):
             text = kwargs.pop("text")
             
-        self.button_group.add_button(**kwargs)
+        self.button_group.add_button(tooltip_text=text, **kwargs)
         self.grid_row_menu.add_item(text=text, **kwargs)
             
         if flag==0:

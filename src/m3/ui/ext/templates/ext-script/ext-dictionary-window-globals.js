@@ -32,7 +32,12 @@ function edit_value(){
 	var grid = Ext.getCmp('{{ component.grid.client_id}}');
 	
 	if (!grid.getSelectionModel().hasSelection()) {
-		Ext.Msg.alert('','Выберите значение для редактирования');
+		Ext.Msg.show({
+		   title:'Редактирование',
+		   msg: 'Элемент не выбран!',
+		   buttons: Ext.Msg.OK,
+		   icon: Ext.MessageBox.INFO
+		});
 		return;
 	};
 	
@@ -54,9 +59,26 @@ function edit_value(){
 function delete_value(){
 	var grid = Ext.getCmp('{{ component.grid.client_id}}');
 	if (!grid.getSelectionModel().hasSelection()) {
-		Ext.Msg.alert('','Выберите значение для удаления');
+		Ext.Msg.show({
+		   title:'Удаление',
+		   msg: 'Элемент не выбран!',
+		   buttons: Ext.Msg.OK,
+		   icon: Ext.MessageBox.INFO
+		});
 		return;
 	};
+	
+	Ext.Msg.show({
+	   title:'Удаление',
+	   msg: 'Вы действительно хотите удалить элемент?',
+	   buttons: Ext.Msg.YESNO,
+	   icon: Ext.MessageBox.QUESTION,
+	   fn:function(btn,text,opt){ 
+	    	if (btn == 'no') {
+	    		return;
+	    	};
+	   } 
+	});
 	
 	ajax.request({
 		url: "{{ component.url_delete }}"
@@ -106,7 +128,7 @@ function search(){
 function refresh_store(){
 	var grid = Ext.getCmp('{{ component.grid.client_id}}');	
 	grid.getStore().reload();
-}
+};
 /**
  * Очищает введенный текст в поле поиска
  */
@@ -114,4 +136,4 @@ function clear_text(){
 	var text_field = Ext.getCmp('{{ component.search_text.client_id}}');
 	text_field.setValue('');
 	refresh_store();
-}
+};

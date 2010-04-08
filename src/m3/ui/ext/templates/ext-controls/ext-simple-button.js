@@ -19,6 +19,7 @@ new Ext.Button({
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 	{% if component.region %} ,region: '{{ component.region }}' {% endif %}
 	{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
+	{% if component.tooltip_text %} ,tooltip: {{ component.t_render_tooltip|safe }} {% endif %}
 	
 	{% if component.handler %}
 		,handler: {{ component.t_render_handler|safe}}

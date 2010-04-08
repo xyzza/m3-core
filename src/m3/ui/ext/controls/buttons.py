@@ -17,6 +17,10 @@ class ExtButton(BaseExtControl):
         self.handler = None
         self.icon = None
         self.icon_cls = None
+        
+        self.tooltip_title = None
+        self.tooltip_text = None
+        
         self.init_component(*args, **kwargs)
     
     def t_render_handler(self):
@@ -24,3 +28,11 @@ class ExtButton(BaseExtControl):
             return 'function(){%s}'% self.handler.render()
         else:
             return self.handler
+        
+    def t_render_tooltip(self):
+        res = ''
+        if self.tooltip_text:
+            res += 'text: "%s"' % self.tooltip_text 
+        if self.tooltip_title:
+            res += ',title: "%s"' % self.tooltip_title 
+        return '{%s}' % res
