@@ -108,7 +108,7 @@ function select_value(){
 	};
 	
 	id = grid.getSelectionModel().getSelected().id
-	displayText = grid.getSelectionModel().getSelected().get("{{ component.text_on_select }}")
+	displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}")
 	
 	if (id!=undefined && displayText!=undefined){
 		win.fireEvent('select_value', id, displayText);

@@ -132,7 +132,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__url_new = None
         self.__url_edit = None
         self.__url_delete = None
-        self.__text_on_select = None
+        self.__column_name_on_select = None
         
         self.init_component(*args, **kwargs)
         
@@ -223,11 +223,11 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__url_delete = value 
     
     @property
-    def text_on_select(self):
+    def column_name_on_select(self):
         return self.__text_on_select
     
-    @text_on_select.setter
-    def text_on_select(self, value):
+    @column_name_on_select.setter
+    def column_name_on_select(self, value):
         self.__set_handler([self.select_button,],'select_value')
         self.__text_on_select = value
     
