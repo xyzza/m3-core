@@ -98,9 +98,6 @@ class ExtDictionaryWindow(BaseExtWindow):
         button_group = ExtButtonGroup(columns_number=1)
         cont_west = ExtContainer(region='west', min_width=30)
         cont_west.items.append(button_group)
-        #bgroup.add_button(handler='function(){Ext.Msg.alert("","Кнопка1");}', icon_cls='add_item')
-        #bgroup.add_button(handler='function(){Ext.Msg.alert("","Кнопка2");}', icon_cls='edit_item')
-        #bgroup.add_button(handler='function(){Ext.Msg.alert("","Кнопка3");}', icon_cls='delete_item')
 
         self.items.append(top_cont)
         self.items.append(grid)
@@ -135,8 +132,8 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__url_new = None
         self.__url_edit = None
         self.__url_delete = None
-        self.__url_select = None
-     
+        self.__text_on_select = None
+        
         self.init_component(*args, **kwargs)
         
     @property
@@ -204,7 +201,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         
     @url_new.setter
     def  url_new(self, value):
-        self.__set_url(self.__components_new, 'new_value')
+        self.__set_handler(self.__components_new, 'new_value')
         self.__url_new = value
     
     @property
@@ -213,7 +210,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     
     @url_edit.setter
     def url_edit(self, value):
-        self.__set_url(self.__components_edit,'edit_value')
+        self.__set_handler(self.__components_edit,'edit_value')
         self.__url_edit = value 
     
     @property
@@ -222,19 +219,19 @@ class ExtDictionaryWindow(BaseExtWindow):
     
     @url_delete.setter
     def url_delete(self, value):
-        self.__set_url(self.__components_delete, 'delete_value')
+        self.__set_handler(self.__components_delete, 'delete_value')
         self.__url_delete = value 
     
     @property
-    def url_select(self):
-        return self.__url_select
+    def text_on_select(self):
+        return self.__text_on_select
     
-    @url_select.setter
-    def url_select(self, value):
-        self.__set_url([self.select_button,], 'select_value')
-        self.__url_select = value 
+    @text_on_select.setter
+    def text_on_select(self, value):
+        self.__set_handler([self.select_button,],'select_value')
+        self.__text_on_select = value
     
-    def __set_url(self, components, handler):
+    def __set_handler(self, components, handler):
         for component in components:
             component.handler = handler
             component.disabled = False

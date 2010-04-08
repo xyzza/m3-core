@@ -13,4 +13,6 @@ class ExtConnection(ExtUIComponent):
         self.url = ''
         self.method = None
         self.parameters = {}
+        self.function_success = None
+        self.function_failure = None
         self.init_component(*args, **kwargs)

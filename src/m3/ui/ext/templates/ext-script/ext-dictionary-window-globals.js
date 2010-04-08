@@ -69,7 +69,7 @@ function delete_value(){
 	};
 	
 	Ext.Msg.show({
-	   title:'Удаление',
+	   title:'Подтверждение',
 	   msg: 'Вы действительно хотите удалить элемент?',
 	   buttons: Ext.Msg.YESNO,
 	   icon: Ext.MessageBox.QUESTION,
@@ -96,11 +96,24 @@ function delete_value(){
  * Выбор значения в справочнике по форме ExtDictionary
  */
 function select_value(){
-	// var grid = Ext.getCmp('{{ component.grid.client_id}}');
-	var win = Ext.getCmp('{{ component.client_id}}');
+	var grid = Ext.getCmp('{{ component.grid.client_id}}');
+	if (!grid.getSelectionModel().hasSelection()) {
+		Ext.Msg.show({
+		   title:'Выбор',
+		   msg: 'Элемент не выбран!',
+		   buttons: Ext.Msg.OK,
+		   icon: Ext.MessageBox.INFO
+		});
+		return;
+	};
 	
-	// здесь должна быть обработка выбора значения, например:
-	win.fireEvent('refresh_store');
+	id = grid.getSelectionModel().getSelected().id
+	displayText = grid.getSelectionModel().getSelected().get("{{ component.text_on_select }}")
+	
+	if (id!=undefined && displayText!=undefined){
+		win.fireEvent('select_value', id, displayText);
+	};
+	win.close();
 };
 /**
  * Осуществляет поиск по введенному значению. Организует запрос на сервер.
