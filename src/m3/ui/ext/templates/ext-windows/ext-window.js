@@ -20,9 +20,16 @@
 		{% if component.modal %}, modal: true {% endif %}
 		{% if component.maximized %}, maximized: true {% endif %}
 		{% if component.minimized %}, minimized: true {% endif %}
-		,minimizable: {{ component.minimizable|lower }}
-		,maximizable: {{ component.maximizable|lower  }}
-		,closable: {{ component.closable|lower }}
+		
+		{% ifnotequal component.t_get_minimizable "None" %}
+		,minimizable: {{component.t_get_minimizable|lower }}
+		{% endifnotequal %}
+		{% ifnotequal component.t_get_maximizable "None" %}
+		,maximizable: {{component.t_get_maximizable|lower }}
+		{% endifnotequal %}
+		{% ifnotequal component.t_get_closable "None" %}
+		,closable: {{component.t_get_closable|lower }}
+		{% endifnotequal %}	
 	
 		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 		{% if component.body_style %}, bodyStyle : '{{ component.body_style }}' {% endif %}

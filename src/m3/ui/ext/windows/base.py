@@ -33,8 +33,8 @@ class BaseExtWindow(ExtUIComponent):
         self.__buttons = TypedList(type=ExtButton)
         
         self.layout = None
-        self.modal = self.maximizable = self.minimizable = self.maximized = self.minimized = False
-        self.closable = True
+        self.modal = self.maximized = self.minimized = False
+        self.closable = self.maximizable = self.minimizable = None
         self.body_style = 'padding:5px;'
         self.icon_cls = None
         self.top_bar = None
@@ -71,4 +71,21 @@ class BaseExtWindow(ExtUIComponent):
                 res = item.find_by_name(name)
                 if res:
                     return res
+    
+    # A prefer 9.04.10
+    # Следующие магические методы, которые вызываются из шаблона, нужны для:
+    # Кнопки по-умолчанию в эксте: (maximizable=False, minimizable=False, closable=True)
+    # Т.к. в различных проектах могут быть определены начальная конфигурация, например, для всех окон определены maximizable=True, minimizable=True
+    # то возникает проблема: как в некоторых окнах принудительно убрать эти кнопки, при  этом не менять код m3
+    # Соответсвенно булевые типы возвращать нельзя, возвращаем строки и в шаблоне проверяем строки с значение None.
+    # По-умолчанию у таких атрибутов значение None.
+    # ps: Надеемся, что этот прицедент последний
+    def t_get_maximizable(self):
+        return str(self.maximizable)
+    
+    def t_get_minimizable(self):
+        return str(self.minimizable)
+    
+    def t_get_closable(self):
+        return str(self.closable)
     

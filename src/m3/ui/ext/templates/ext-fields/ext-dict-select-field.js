@@ -28,7 +28,7 @@
 					var client_id = '{{ component.combo_box.client_id }}'; 
 	                Ext.getCmp(client_id).setValue(''); 
 					Ext.getCmp(client_id).hiddenValue='';
-	            }
+	            };
 	        }
 	    });
 		{% else %}
@@ -53,6 +53,8 @@
 						combo = Ext.getCmp('{{ component.combo_box.client_id }}');
 						combo.setValue(displayText);
 						combo.hiddenValue = id;
+						combo.hiddenName = combo.name;
+						combo.submitValue = true;
 					});
 				};
 			}
