@@ -59,11 +59,16 @@ class ExtComboBox(BaseExtField):
         self.empty_text = None
         self.allow_blank = True
         self.mode = None
+        self.editable = True
+        self.trigger_action_all = True
         self.init_component(*args, **kwargs)
     
     def set_store(self, store):
         self.mode = 'local' if isinstance(store, ExtDataStore) else 'remote' 
         self.__store = store
+        
+    def get_store(self):
+        return self.__store
         
     def t_render_store(self):
         assert self.__store, 'Store is not define'
@@ -73,7 +78,7 @@ class ExtTextArea(BaseExtField):
     '''Большое :) Текстовое поле'''
     def __init__(self, *args, **kwargs):
         super(ExtTextArea, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-textarea.js'
+        self.template = 'ext-fields/ext-text-area.js'
         self.init_component(*args, **kwargs)
 
 class ExtCheckBox(BaseExtField):

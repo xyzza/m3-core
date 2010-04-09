@@ -20,12 +20,19 @@ new Ext.form.ComboBox({
 	{% if component.name %} ,name: '{{ component.name }}' {% endif %}
 	{% if component.value %} ,value: '{{ component.value }}' {% endif %}
 	{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
+	{% if component.read_only %} ,readOnly: true {% endif %}
 	
 	{% if component.empty_text%}, emptyText: '{{component.empty_text}}' {% endif %}
 	{% if component.mode%}, mode: '{{component.mode}}' {% endif %}
 	
+
 	,store:{{component.t_render_store|safe}}
-	,displayField:"{{component.display_field}}"
-	,triggerAction:'all'
-	,editable:false
+	{% if not component.editable%} ,editable: false {% endif %}
+	{% if component.display_field %} ,displayField:'{{component.display_field}}' {% endif %}
+	{% if component.trigger_action_all %} 
+		,triggerAction: 'all'
+	{%else%}
+		,triggerAction: 'query'
+	{%endif%}
+	
 })

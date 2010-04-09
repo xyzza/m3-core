@@ -1,34 +1,12 @@
 (function(){
 	var conteiner = new Ext.Container({
-		layout: 'column',
-		items:
+		layout: 'column'
+		,id: "{{ component.client_id }}"
+		,items:
 			[{
-				xtype: 'container',
-				layout: 'form',
-				items: {
-					xtype: 'textfield'
-					,id: "{{ component.client_id }}"
-					{% if component.disabled %} ,disabled: true {% endif %}
-					{% if component.hidden %} ,hidden: true {% endif %}
-					{% if component.width %} ,width: {{ component.width }} {% endif %}
-					{% if component.height %} ,height: {{ component.height }} {% endif %}
-					{% if component.html  %} ,html: '{{ component.html|safe }}' {% endif %}
-					{% if component.style %} ,style: {{ component.t_render_style|safe }} {% endif %}
-					{% if component.x %} ,x: {{ component.x }} {% endif %}
-					{% if component.y %} ,y: {{ component.y }} {% endif %}
-					{% if component.region %} ,region: '{{ component.region }}' {% endif %}
-					{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
-					{% if component.max_height %} ,boxMaxHeight: {{ component.max_height }} {% endif %}
-					{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
-					{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
-					{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
-					
-					{% if component.label %} ,fieldLabel: '{{ component.label }}' {% endif %}
-					{% if component.name %} ,name: '{{ component.name }}' {% endif %}
-					{% if component.value %} ,value: '{{ component.value }}' {% endif %}
-					{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
-					,readOnly: true
-				}
+				xtype: 'container'
+				,layout: 'form'
+				,items: [ {{ component.combo_box.render|safe }} ]
 			},
 			{{ component.select_button.render|safe }},
 			{{ component.clean_button.render|safe }}
@@ -47,16 +25,16 @@
 	        buttons: Ext.Msg.YESNO,
 	        fn:function(btn,text,opt){ 
 	            if (btn == 'yes') {
-					var client_id = '{{ component.client_id }}'; 
+					var client_id = '{{ component.combo_box.client_id }}'; 
 	                Ext.getCmp(client_id).setValue(''); 
-					Ext.getCmp(client_id).reference_id='';
+					Ext.getCmp(client_id).hiddenValue='';
 	            }
 	        }
 	    });
 		{% else %}
-			var client_id = '{{ component.client_id }}'; 
+			var client_id = '{{ component.combo_box.client_id }}'; 
 	        Ext.getCmp(client_id).setValue(''); 
-			Ext.getCmp(client_id).reference_id='';
+			Ext.getCmp(client_id).hiddenValue ='';
 		{% endif%}
 	};
 	
@@ -72,8 +50,9 @@
 			    var win = m3_eval(response.responseText);
 		    	if (win!=undefined){
 					win.on('select_value',function(id, displayText){
-						var field = Ext.getCmp('{{ component.client_id}}');
-						field.setValue(displayText);
+						combo = Ext.getCmp('{{ component.combo_box.client_id }}');
+						combo.setValue(displayText);
+						combo.hiddenValue = id;
 					});
 				};
 			}

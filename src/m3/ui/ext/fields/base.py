@@ -13,6 +13,7 @@ class BaseExtField(ExtUIComponent):
         self.label = None
         self.value = None
         self.label_style = {}
+        self.read_only = False
    
     def t_render_label_style(self):
         return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
