@@ -119,6 +119,10 @@ class ExtForm(BaseExtPanel):
                     if isinstance(obj, dict):
                         obj[names[0]] = value
                     else:
+                        # Для id нельзя присваивать пустое значение! Иначе модели не будет сохраняться
+                        if names[0] == 'id' and value == '':
+                            return
+                        
                         setattr(obj, names[0], value)
                 else:
                     nested = getattr(obj, names[0], None)

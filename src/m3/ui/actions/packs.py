@@ -37,7 +37,7 @@ class DictSelectWindowAction(Action):
     def run(self, request, context):
         # Создаем окно выбора
         base = self.parent
-        win = base.select_form(request, title = base.title)
+        win = base.select_form(title = base.title)
         win.mode = 1
         
         # Добавляем отображаемые колонки
@@ -49,10 +49,6 @@ class DictSelectWindowAction(Action):
         win.grid.set_store(grid_store)
         list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
         win.list_view.set_store(list_store)
-        
-        # Доступно 1 событие: выбор с присвоением значения вызвавшему контролу
-        #win.set_attr(self, id = 'id', text = 'name')
-        #win.url_select = '/ui/simple-window3'
         
         return ExtUIScriptResult(self.parent.get_select_window(win))
     
