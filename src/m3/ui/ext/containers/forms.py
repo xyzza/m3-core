@@ -83,7 +83,7 @@ class ExtForm(BaseExtPanel):
             Конвертирует и присваивает значение value в соответствии типу item.
             '''
             if isinstance(item, (ExtStringField, ExtNumberField,)):
-                item.value = str(value)
+                item.value = unicode(value)
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
                 val = value.strftime('%d.%m.%Y')
@@ -91,7 +91,7 @@ class ExtForm(BaseExtPanel):
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if (value == 'true') or (value == 'True') or (value == True) else False
             else:
-                item.value = str(value)
+                item.value = unicode(value)
 
         
         fields = _parse_obj(object)
@@ -134,7 +134,7 @@ class ExtForm(BaseExtPanel):
             if isinstance(item, ExtNumberField):
                 val = int(val)
             elif isinstance(item, ExtStringField):
-                val = str(val)
+                val = unicode(val)
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
                 val = datetime.datetime.strptime(val, '%d.%m.%Y')
