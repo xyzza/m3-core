@@ -19,11 +19,12 @@ class ExtDataStore(BaseExtStore):
         
     def render(self, columns):
         self.__columns = columns
+        self.__columns.insert(0, 'id') # Для того, чтобы submit работал корректно
         return super(ExtDataStore, self).render()
     
     def t_render_fields(self):
         '''Прописывается в шаблоне и заполняется при рендеринге'''
-        return ','.join(['{name: "%s", mapping: %d}' % (data_index, i+1) for i, data_index in enumerate(self.__columns)])
+        return ','.join(['{name: "%s", mapping: %d}' % (data_index, i) for i, data_index in enumerate(self.__columns)])
     
     def t_render_data(self):
         '''Прописывается в шаблоне и заполняется при рендеринге'''
@@ -44,6 +45,7 @@ class ExtJsonStore(BaseExtStore):
         
     def render(self, columns):
         self.__columns = columns
+        self.__columns.insert(0, 'id') # Для того, чтобы submit работал корректно
         return super(ExtJsonStore, self).render()
         
     def t_render_fields(self):

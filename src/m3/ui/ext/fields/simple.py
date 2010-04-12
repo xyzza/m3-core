@@ -55,6 +55,9 @@ class ExtComboBox(BaseExtField):
         super(ExtComboBox, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-combo.js'
         self.display_field = None
+        self.value_field = None
+        self.hidden_name = None
+        self.hidden_value = None
         self.__store = None
         self.empty_text = None
         self.allow_blank = True

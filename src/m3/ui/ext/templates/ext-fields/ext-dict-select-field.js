@@ -50,11 +50,9 @@
 			    var win = m3_eval(response.responseText);
 		    	if (win!=undefined){
 					win.on('select_value',function(id, displayText){
-						combo = Ext.getCmp('{{ component.combo_box.client_id }}');
+						var combo = Ext.getCmp('{{ component.combo_box.client_id }}');
 						combo.setValue(displayText);
-						combo.hiddenValue = id;
-						combo.hiddenName = combo.name;
-						combo.submitValue = true;
+						// combo.hiddenValue = id;
 					});
 				};
 			}

@@ -29,10 +29,11 @@ new Ext.form.ComboBox({
 	,store:{{component.t_render_store|safe}}
 	{% if not component.editable%} ,editable: false {% endif %}
 	{% if component.display_field %} ,displayField:'{{component.display_field}}' {% endif %}
+	{% if component.value_field %} ,valueField:'{{component.value_field}}' {% endif %}
+	{% if component.hidden_name %} ,hiddenName:'{{component.hidden_name}}' {% endif %}
 	{% if component.trigger_action_all %} 
 		,triggerAction: 'all'
 	{%else%}
 		,triggerAction: 'query'
 	{%endif%}
-	
 })
