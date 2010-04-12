@@ -11,7 +11,7 @@ from m3.ui.ext.fields.base import BaseExtField
 from m3.ui.ext.fields.simple import (ExtNumberField, 
                                      ExtStringField, 
                                      ExtDateField,
-                                     ExtCheckBox)
+                                     ExtCheckBox, ExtComboBox)
 from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
@@ -98,7 +98,7 @@ class ExtForm(BaseExtPanel):
         if fields:
             for item in self._get_all_fields(self):
                 new_val = fields.get(item.name, None)
-                if new_val:
+                if new_val != None:
                     _assign_value(new_val, item)
 
     #TODO необходимо добавить проверку на возникновение exception'ов
@@ -140,6 +140,18 @@ class ExtForm(BaseExtPanel):
                 val = datetime.datetime.strptime(val, '%d.%m.%Y')
             elif isinstance(item, ExtCheckBox):
                 val = True if val == 'on' else False
+            elif isinstance(item, ExtComboBox):
+                # Комбобокс как правило передает id выбранного значения. Его не так просто 
+                # преобразовать в тип объекта, т.к. мы ничего не знаем о структуре объекта.
+                # Поэтому нужно использовать либо трансляцию значений, либо вызывать специальную
+                # функцию внутри экземпляра комбобокса.
+                if hasattr(item, 'bind_rule'):
+                    if callable(item.bind_rule):
+                        val = item.bind_rule(val)
+                    elif isinstance(item.bind_rule, dict):
+                        val = item.bind_rule.get(val)
+                    else:
+                        raise ValueError('Invalid attribute type bind_rule. Must be a function or a dict.')
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
