@@ -31,9 +31,26 @@ new Ext.form.ComboBox({
 	{% if component.display_field %} ,displayField:'{{component.display_field}}' {% endif %}
 	{% if component.value_field %} ,valueField:'{{component.value_field}}' {% endif %}
 	{% if component.hidden_name %} ,hiddenName:'{{component.hidden_name}}' {% endif %}
+	{% if component.hide_trigger %} ,hideTrigger: true {% endif %}
+	{% if component.type_ahead %} ,typeAhead: true {% endif %}
 	{% if component.trigger_action_all %} 
 		,triggerAction: 'all'
 	{%else%}
 		,triggerAction: 'query'
 	{%endif%}
+	,loadingText: 'Загрузка...'
+	{% if component.query_param %} ,queryParam: '{{component.query_param}}' {% endif %}
+	{% if component.page_size %} ,pageSize: {{component.page_size}} {% endif %}
+	{% if component.max_heigth_dropdown_list %} ,maxHeight: {{component.max_heigth_dropdown_list}} {% endif %}
+	{% if component.min_chars %} ,minChars: {{component.min_chars}} {% endif %}
+	
+	{% if component.t_render_listeners %}
+		{# Прописываются имеющиеся обработчики #}
+		,listeners:{
+			{% for k, v in component.t_render_listeners.items %}
+				'{{k}}': {{v}}
+				{% if not forloop.last %},{% endif %}
+			{% endfor%}
+		}
+	{% endif %}
 })

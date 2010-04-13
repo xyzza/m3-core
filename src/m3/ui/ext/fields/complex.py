@@ -7,7 +7,7 @@ Created on 27.02.2010
 
 from base import BaseExtField
 from m3.ui.ext.controls import ExtButton
-from m3.ui.ext.misc import ExtJsonStore
+from m3.ui.ext.misc import ExtDataStore, ExtJsonStore
 from m3.ui.ext.fields import ExtComboBox
 
 
@@ -15,28 +15,28 @@ class ExtDictSelectField(BaseExtField):
     '''Поле с выбором из справочника'''
     def __init__(self, width=None, *args, **kwargs):
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-dict-select-field.js' 
-        self.ask_before_deleting = True
-        self.__url = None
-        self.__autocomplete_url = None
+        self.template = 'ext-fields/ext-dict-select-field.js'
+
+        # Т.к. используется возможность передачи комбобоксовских значений в контруктор
+        url = kwargs.pop('url', None)
+        ask_before_deleting = kwargs.pop('ask_before_deleting', None)
+        autocomplete_url = kwargs.pop('autocomplete_url', None)
         
-        # Передадим копию kwargs в конструктор комбобокса, все же не зря наследовались
-        # и удалим не нужные ключи 
-        dict_combo = kwargs.copy()
-        if dict_combo.has_key('url'): del dict_combo['url']
-        if dict_combo.has_key('ask_before_deleting'): del dict_combo['ask_before_deleting']
-        if dict_combo.has_key('autocomplete_url'): del dict_combo['autocomplete_url']
+        self.combo_box = ExtComboBox(hide_trigger=True, type_ahead=True, **kwargs)
+        self.combo_box.set_store(ExtDataStore())
+        self.combo_box.handler_change = 'onChange'
         
-        self.combo_box = ExtComboBox(read_only = True, **dict_combo)
-        self.combo_box.set_store(ExtJsonStore(url='', auto_load=False))
         if width:
             # По умолчанию 40 - ширина двух кнопок
             # Чтобы компонент умещался в передоваемую ширину
             self.combo_box.width = (width - 40) if width > 40 else width
         
         self.select_button = ExtButton(handler='onSelect', icon_cls='select', disabled=True)
-        self.clean_button = ExtButton(handler='onClearField', icon_cls='clear')                                  
-        self.init_component(*args, **kwargs)
+        self.clear_button = ExtButton(handler='onClearField', icon_cls='clear', hidden=True)                                  
+        
+        self.ask_before_deleting = ask_before_deleting
+        self.url = url
+        self.autocomplete_url = autocomplete_url
         
     @property
     def url(self):

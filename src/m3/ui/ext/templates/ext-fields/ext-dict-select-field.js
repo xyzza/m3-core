@@ -9,7 +9,7 @@
 				,items: [ {{ component.combo_box.render|safe }} ]
 			},
 			{{ component.select_button.render|safe }},
-			{{ component.clean_button.render|safe }}
+			{{ component.clear_button.render|safe }}
 		]
 	});
 
@@ -25,16 +25,16 @@
 	        buttons: Ext.Msg.YESNO,
 	        fn:function(btn,text,opt){ 
 	            if (btn == 'yes') {
-					var client_id = '{{ component.combo_box.client_id }}'; 
-	                Ext.getCmp(client_id).setValue(''); 
-					Ext.getCmp(client_id).hiddenValue='';
+	                var combo = Ext.getCmp('{{ component.combo_box.client_id }}');
+	                combo.clearValue(); 
+	                combo.fireEvent('change','','');
 	            };
 	        }
 	    });
 		{% else %}
-			var client_id = '{{ component.combo_box.client_id }}'; 
-	        Ext.getCmp(client_id).setValue(''); 
-			Ext.getCmp(client_id).hiddenValue ='';
+            var combo = Ext.getCmp('{{ component.combo_box.client_id }}');
+            combo.clearValue(); 
+            combo.fireEvent('change','','');
 		{% endif%}
 	};
 	
@@ -61,6 +61,22 @@
 			}
 		});
 	};	
+	
+	/**
+	 * Обработчик на изменение значения
+	 * @param {} sender "this" комбобокс
+	 * @param {} newValue Новое значение
+	 * @param {} oldValue Старое значение 
+	 */
+	function onChange(sender, newValue, oldValue){
+		var clear_btn = Ext.getCmp('{{ component.clear_button.client_id }}');
+		if (!newValue){
+			clear_btn.setVisible(false);
+		} else {
+			clear_btn.setVisible(true);	
+		};
+		console.log(newValue);
+	};
 	
 	return conteiner;
 })()
