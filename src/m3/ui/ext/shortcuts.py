@@ -82,4 +82,38 @@ function(){
                        'failure_handler': 'failure:' + failure_handler + ',' if failure_handler else '',
                        'params': json.JSONEncoder().encode(params) if params else ''}
 
+def js_fire_event_window(event_name, close_after_fire=True, *args):
+    '''
+    Генерирует вызов события для окна
+    @param event_name: Название события
+    @param close_after_fire: Закрывать ли окно после вызова события?
+    @param *args: Параметры, которые будут переданы при генерации события
+    '''
+    template = u'''
+function(){
+    win.fireEvent("%(event_name)s" %(params)s);
+    %(win_close)s
+}
+    '''
+    return template % {'event_name': event_name, 
+                       'params': (',"%s"' % '","'.join(args)) if args else '',
+                       'win_close' : 'win.close();' if close_after_fire else ''
+                       }
     
+def js_fire_event(component, event_name, *args):
+    '''
+    Генерирует вызов события для любого компонента
+    @param component: Компонент, от чьего лица генерируется событие
+    @param event_name: Название события
+    @param *args: Параметры, которые будут переданы при генерации события
+    '''
+    template = u'''
+function(){
+    var component = Ext.getCmp("%(client_id)s");
+    component.fireEvent("%(event_name)s" %(params)s);
+}
+    '''
+    return template % {'client_id':component.client_id,
+                       'event_name': event_name, 
+                       'params': (',"%s"' % '","'.join(args)) if args else '',
+                       }
