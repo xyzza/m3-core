@@ -6,9 +6,9 @@ import re
 from inspect import isclass
 from django.utils.datastructures import MultiValueDict
 from django import http
-import jsonpickle
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
+import json
 
 class ActionResult(object):
     '''
@@ -77,12 +77,30 @@ class OperationResult(ActionResult):
     def __init__(self, success = True, *args, **kwargs):
         super(OperationResult, self).__init__(*args, **kwargs)
         self.success = success
+        self.error_message = ''
+    
+    @staticmethod
+    def by_message(message):
+        '''
+        Возвращает экземпляр OperationResult построенный исходя из сообщения message.
+        Если операция завершилась успешно, то сообщение должно быть пустым.
+        '''
+        result = OperationResult(success = True)
+        if message:
+            result.success = False
+            result.error_message = message
+        return result
     
     def get_http_response(self):
+        result = {}
         if self.success:
-            return http.HttpResponse('{success: true}')
+            result['success'] = True
         else:
-            return http.HttpResponse('{success: false}')
+            result['success'] = False
+            result['errors'] = {'reason': self.error_message}
+
+        result = json.JSONEncoder().encode(result)
+        return http.HttpResponse(result)
 
 class ActionContextDeclaration(object):
     '''

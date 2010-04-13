@@ -5,6 +5,7 @@ Created on 20.01.2010
 
 @author: akvarats
 '''
+from django.db import models
 
 class Validator:
     '''
@@ -87,8 +88,8 @@ class NotEmptyValidationRule(BaseValidationRule):
     
 class NotEqualValidationRule(BaseValidationRule):
     '''
-    Правило проверяет равны ли значения из списка между собой
-    Проще говоря 
+    Правило проверяет равны ли значения из списка value между собой.
+    Например может пригодиться для сравнения пароля и подтверждения 
     '''
     def check(self):
         assert isinstance(self.value, (list, tuple))
@@ -99,7 +100,27 @@ class NotEqualValidationRule(BaseValidationRule):
                 return False
             last_value = value
         return True
+
+class ModelUniqueField(BaseValidationRule):
+    '''
+    Проверяет что value нет ни у одной записи в модели.
+    Например у нас есть пользователь с мылом и мы ходит убедиться что такого же мыла 
+    нет ни у кого больше. Причем проверяемая запись не исключается. 
+    '''
+    def __init__(self, value, model, field_name):
+        super(ModelUniqueField, self).__init__()
+        self.value = value
+        self.model = model
+        self.field_name = field_name
     
+    def check(self):
+        assert isinstance(self.model, models.Model)
+        assert isinstance(self.field_name, str)
+        query = self.model.object.filter(**{self.field_name: self.value})
+        if self.value.id != None:
+            query = query.exclude(id = self.value.id)
+        return query.count() == 0
+
 class FailedValidationRule(BaseValidationRule):
     '''
     Правило валидации, которое заведомо является неправильным

@@ -86,10 +86,10 @@ class DictRowsAction(Action):
     '''
     url = '/rows$'
     def run(self, request, context):
-        start = int(request.REQUEST.get('start', 0))
         offset = int(request.REQUEST.get('offset', 0))
+        limit = int(request.REQUEST.get('limit', 0))
         filter = request.REQUEST.get('filter')
-        return PreJsonResult(self.parent.get_rows(start, offset, filter))
+        return PreJsonResult(self.parent.get_rows(offset, limit, filter))
     
 class DictLastUsedAction(Action):
     '''
@@ -178,7 +178,7 @@ class BaseDictionaryActions(ActionPack):
         '''
         return self.select_window_action.get_absolute_url()
     
-    def get_rows(self, start, offset, filter):
+    def get_rows(self, offset, limit, filter):
         '''
         Метод который возвращает записи грида в втде обычного питоновского списка.
         '''
@@ -232,7 +232,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     model = None
     filter_fields = []
         
-    def get_rows(self, start, offset, filter):
+    def get_rows(self, offset, limit, filter):
         '''
         Возвращает данные для грида справочника
         '''
