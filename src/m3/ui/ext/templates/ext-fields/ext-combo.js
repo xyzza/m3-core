@@ -43,6 +43,7 @@ new Ext.form.ComboBox({
 	{% if component.page_size %} ,pageSize: {{component.page_size}} {% endif %}
 	{% if component.max_heigth_dropdown_list %} ,maxHeight: {{component.max_heigth_dropdown_list}} {% endif %}
 	{% if component.min_chars %} ,minChars: {{component.min_chars}} {% endif %}
+	,valueNotFoundText: 'Ничего не найдено'
 	
 	{% if component.t_render_listeners %}
 		{# Прописываются имеющиеся обработчики #}

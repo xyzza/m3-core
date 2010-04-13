@@ -82,6 +82,15 @@ class ExtComboBox(BaseExtField):
         assert self.__store, 'Store is not define'
         return self.__store.render([self.display_field,])       
     
+    @property
+    def name(self):
+        return self.hidden_name
+    
+    @name.setter
+    def name(self, value):
+        self.hidden_name = value
+    
+    
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------
