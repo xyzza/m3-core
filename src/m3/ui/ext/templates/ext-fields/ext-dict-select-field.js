@@ -43,11 +43,7 @@
 						{% if component.hidden_name %} ,hiddenName:'{{component.hidden_name}}' {% endif %}
 						{% if component.hide_trigger %} ,hideTrigger: true {% endif %}
 						{% if component.type_ahead %} ,typeAhead: true {% endif %}
-						{% if component.trigger_action_all %} 
-							,triggerAction: 'all'
-						{%else%}
-							,triggerAction: 'query'
-						{%endif%}
+						{% if component.trigger_action_all %} ,triggerAction: 'all' {%endif%}
 						,loadingText: 'Загрузка...'
 						{% if component.query_param %} ,queryParam: '{{component.query_param}}' {% endif %}
 						{% if component.page_size %} ,pageSize: {{component.page_size}} {% endif %}

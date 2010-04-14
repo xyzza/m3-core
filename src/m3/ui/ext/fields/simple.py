@@ -3,11 +3,13 @@
 Created on 27.02.2010
 
 @author: akvarats
+@author: prefer
 '''
 
 from base import BaseExtField 
 from m3.ui.ext.misc import ExtDataStore      
 from m3.ui.ext import render_component
+        
         
 class ExtStringField(BaseExtField):
     '''
@@ -35,6 +37,7 @@ class ExtDateField(BaseExtField):
         self.template = 'ext-fields/ext-date-field.js'
         self.init_component(*args, **kwargs)
     
+    
 class ExtNumberField(BaseExtField):
     '''Поле ввода числового значения'''
     def __init__(self, *args, **kwargs):
@@ -42,12 +45,14 @@ class ExtNumberField(BaseExtField):
         self.template = 'ext-fields/ext-number-field.js'
         self.init_component(*args, **kwargs)
         
+        
 class ExtHiddenField(BaseExtField):
     ''' Скрытое поле, которое не видно пользователю на форме, но хранит значение и передает его при submit'е '''
     def __init__(self, *args, **kwargs):
         super(ExtHiddenField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-hidden-field.js'
         self.init_component(*args, **kwargs)
+    
     
 class ExtComboBox(BaseExtField):
     '''Поле выпадающий список - combobox'''
@@ -68,7 +73,8 @@ class ExtComboBox(BaseExtField):
         self.allow_blank = True
         self.mode = None
         self.editable = True
-        self.trigger_action_all = True
+        self.trigger_action_all = False
+        self.read_only = False
         self.init_component(*args, **kwargs)
     
     def set_store(self, store):
@@ -90,7 +96,6 @@ class ExtComboBox(BaseExtField):
     def name(self, value):
         self.hidden_name = value
     
-    
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------
@@ -110,12 +115,14 @@ class ExtComboBox(BaseExtField):
     def handler_select(self, function):
         self._listeners['select'] = function
         
+        
 class ExtTextArea(BaseExtField):
     '''Большое :) Текстовое поле'''
     def __init__(self, *args, **kwargs):
         super(ExtTextArea, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-text-area.js'
         self.init_component(*args, **kwargs)
+
 
 class ExtCheckBox(BaseExtField):
     '''Галочка выбора значения'''

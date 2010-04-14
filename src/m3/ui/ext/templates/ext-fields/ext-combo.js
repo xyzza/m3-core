@@ -25,7 +25,6 @@ new Ext.form.ComboBox({
 	{% if component.empty_text%}, emptyText: '{{component.empty_text}}' {% endif %}
 	{% if component.mode%}, mode: '{{component.mode}}' {% endif %}
 	
-
 	,store:{{component.t_render_store|safe}}
 	{% if not component.editable%} ,editable: false {% endif %}
 	{% if component.display_field %} ,displayField:'{{component.display_field}}' {% endif %}
@@ -33,11 +32,7 @@ new Ext.form.ComboBox({
 	{% if component.hidden_name %} ,hiddenName:'{{component.hidden_name}}' {% endif %}
 	{% if component.hide_trigger %} ,hideTrigger: true {% endif %}
 	{% if component.type_ahead %} ,typeAhead: true {% endif %}
-	{% if component.trigger_action_all %} 
-		,triggerAction: 'all'
-	{%else%}
-		,triggerAction: 'query'
-	{%endif%}
+	{% if component.trigger_action_all %} ,triggerAction: 'all' {%endif%}
 	,loadingText: 'Загрузка...'
 	{% if component.query_param %} ,queryParam: '{{component.query_param}}' {% endif %}
 	{% if component.page_size %} ,pageSize: {{component.page_size}} {% endif %}
