@@ -15,7 +15,8 @@ from m3.ui.ext.fields.simple import (ExtNumberField,
 from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
-from m3.ui.ext.base import ExtUIComponent
+from m3.ui.ext.fields.complex import ExtDictSelectField
+#from m3.ui.actions.packs import BaseDictionaryActions
 
 
 class ExtForm(BaseExtPanel):
@@ -44,7 +45,7 @@ class ExtForm(BaseExtPanel):
         elif hasattr(item, 'items'):
             for it in item.items:
                 self._get_all_fields(it, list)
-        return list                
+        return list
     
     def bind_to_request(self, request):
         '''
@@ -89,7 +90,19 @@ class ExtForm(BaseExtPanel):
                 val = value.strftime('%d.%m.%Y')
                 item.value = val
             elif isinstance(item, ExtCheckBox):
-                item.checked = True if (value == 'true') or (value == 'True') or (value == True) else False
+                item.checked = True if value else False
+            elif isinstance(item, ExtDictSelectField):
+                # У поля выбора может быть взязанный с ним пак
+                if hasattr(item, 'bind_pack'):
+                    # Нельзя импортировать, будет циклический импорт
+                    #assert isinstance(item.bind_pack, BaseDictionaryActions)
+                    row = item.bind_pack.get_row(value)
+                    # Может случиться что в источнике данных bind_pack не окажется записи с ключом id
+                    # Потому что источник имеет заведомо неизвестное происхождение
+                    if row != None:
+                        default_text = getattr(row, item.display_field)
+                        item.default_text = default_text
+                item.value = value
             else:
                 item.value = unicode(value)
 
