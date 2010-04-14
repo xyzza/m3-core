@@ -96,6 +96,21 @@
 	var ajax = Ext.Ajax;
 	
 	/**
+	 * Создает запись и загружает ее в комбобокс 
+	 * @param {Object} id Уникальный идентицикатор записи
+	 * @param {Object} value Текстовое представление записи для показа пользователю
+	 */
+	function addRecordToStore(id, value){
+		var combo = Ext.getCmp('{{ component.client_id }}');
+		var store = combo.getStore();					
+		var record = new Ext.data.Record();
+		record.id = id;
+		record.{{ component.display_field }} = value;
+		store.loadData(record);
+		return combo;
+	}
+	
+	/**
 	 * Реакция на нажатие кнопки выбора из справочника
 	 */
 	function onSelect(){
@@ -105,15 +120,7 @@
 			    var win = m3_eval(response.responseText);
 		    	if (win!=undefined){
 					win.on('select_value',function(id, displayText){
-						var combo = Ext.getCmp('{{ component.client_id }}');
-						var store = combo.getStore();
-						
-						var record = new Ext.data.Record();
-						record.id = id;
-
-						{# Пока оставим так, в противном случае нужно создавать отдельный объект record.create([...]) и получать его экземпляр#}
-						record.{{ component.display_field }} = displayText
-						store.loadData(record);
+						combo = addRecordToStore(id, displayText);
 						combo.setValue(id);
 						onChange(combo, id);
 					});
@@ -144,6 +151,11 @@
 
 		};
 	};
+	
+	// Если начальное значение было присвоено, его нужно добавить запись
+	comboValue = Ext.getCmp('{{ component.client_id }}').getValue();
+	if (comboValue)
+		addRecordToStore(comboValue, '{{ component.default_text }}');
 	
 	return conteiner;
 })()

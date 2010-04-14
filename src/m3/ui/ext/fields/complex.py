@@ -18,6 +18,7 @@ class ExtDictSelectField(ExtComboBox):
         url = kwargs.pop('url', None)
         ask_before_deleting = kwargs.pop('ask_before_deleting', None)
         autocomplete_url = kwargs.pop('autocomplete_url', None)
+        self.default_text = kwargs.pop('default_text', '')
         
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-dict-select-field.js'
