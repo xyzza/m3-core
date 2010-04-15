@@ -20,6 +20,9 @@ class ExtDictSelectField(ExtComboBox):
         autocomplete_url = kwargs.pop('autocomplete_url', None)
         self.default_text = kwargs.pop('default_text', '')
         
+        self.select_button = ExtButton(handler='onSelect', icon_cls='select')
+        self.clear_button = ExtButton(handler='onClearField', icon_cls='clear', hidden=True) 
+        
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-dict-select-field.js'
 
@@ -30,10 +33,7 @@ class ExtDictSelectField(ExtComboBox):
         self.set_store(ExtJsonStore())
         self.handler_change = 'onChange'
         self.width = 150
-        
-        self.select_button = ExtButton(handler='onSelect', icon_cls='select', disabled=True)
-        self.clear_button = ExtButton(handler='onClearField', icon_cls='clear', hidden=True)                                  
-        
+        self.value = None
         self.ask_before_deleting = ask_before_deleting
         self.url = url
         self.autocomplete_url = autocomplete_url
@@ -63,4 +63,12 @@ class ExtDictSelectField(ExtComboBox):
             self.read_only = False
             self.set_store(ExtJsonStore(url=value))
         self.__autocomplete_url = value
+        
+    @property
+    def value(self):
+        return self.__value
     
+    @value.setter
+    def value(self, val):
+        self.clear_button.hidden = False if val else True
+        self.__value = val

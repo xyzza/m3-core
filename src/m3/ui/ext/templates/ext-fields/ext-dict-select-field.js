@@ -100,15 +100,17 @@
 	 * @param {Object} id Уникальный идентицикатор записи
 	 * @param {Object} value Текстовое представление записи для показа пользователю
 	 */
-	function addRecordToStore(id, value){
+	function addRecordToStore(id, value){	
 		var combo = Ext.getCmp('{{ component.client_id }}');
-		var store = combo.getStore();					
+		var store = combo.getStore();
+		
 		var record = new Ext.data.Record();
 		record.id = id;
 		record.{{ component.display_field }} = value;
 		store.loadData(record);
-		return combo;
-	}
+		combo.setValue(id);
+		onChange(combo, id);
+	};
 	
 	/**
 	 * Реакция на нажатие кнопки выбора из справочника
@@ -120,9 +122,7 @@
 			    var win = m3_eval(response.responseText);
 		    	if (win!=undefined){
 					win.on('select_value',function(id, displayText){
-						combo = addRecordToStore(id, displayText);
-						combo.setValue(id);
-						onChange(combo, id);
+						addRecordToStore(id, displayText);
 					});
 				};
 			}
@@ -148,14 +148,15 @@
 		} else {
 			clear_btn.setVisible(true);	
 			sender.setWidth({{ component.width }} - 25);
-
 		};
 	};
 	
-	// Если начальное значение было присвоено, его нужно добавить запись
-	comboValue = Ext.getCmp('{{ component.client_id }}').getValue();
-	if (comboValue)
-		addRecordToStore(comboValue, '{{ component.default_text }}');
+	{%if component.value%}
+		// Если начальное значение было присвоено, его нужно добавить запись
+		(function(){
+			addRecordToStore('{{ component.value }}', '{{ component.default_text }}');
+		})()
+	{%endif%}
 	
 	return conteiner;
 })()

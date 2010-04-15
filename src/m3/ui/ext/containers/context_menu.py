@@ -23,7 +23,7 @@ class ExtContextMenu(BaseExtContainer):
     def add_item(self, **kwargs):
         self.items.append(ExtContextMenuItem(**kwargs))
         
-    def add_spacer(self):
+    def add_separator(self):
         self.items.append('"-"')
     
     def t_render_items(self):

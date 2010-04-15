@@ -29,13 +29,15 @@ function(){
 	    ,autoScroll: true
 	    ,animate: true
 	    ,enableDD: true
-	    ,containerScroll: true
-	    ,border: false
+	    //,containerScroll: true
+	    //,border: false
 		,split: true
 		,columns:[{{ component.t_render_columns|safe }}]
 		,loader: {{ component.t_render_tree_loader|safe }}	
+		,rootVisible: false
 		,root: new Ext.tree.AsyncTreeNode({
-			children: [ {{ component.t_render_nodes|safe }} ]
+			id: '-1'
+			{%if self.nodes %},children: [ {{ component.t_render_nodes|safe }} ] {%endif%}
         })
         {% if component.t_render_listeners %}
 			{# Прописываются имеющиеся обработчики #}
