@@ -13,12 +13,13 @@ from m3.helpers.datastructures import TypedList
 
 
 class ExtTree(BaseExtPanel):
-    def __init__(self, url='', *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(ExtTree, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree.js'
         self.nodes = TypedList(type=ExtTreeNode)
         self._items = []
-        self.tree_loader = ExtTreeLoader(url=url)
+        self.tree_loader = ExtTreeLoader()
+        self.url = None
         self.init_component(*args, **kwargs)
     
     @staticmethod    
@@ -59,6 +60,15 @@ class ExtTree(BaseExtPanel):
     @property
     def columns(self):
         return self._items
+    
+    @property
+    def url(self):
+        return self.__url
+    
+    @url.setter
+    def url(self, value):
+        self.tree_loader.url = value
+        self.__url = value
    
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
@@ -76,7 +86,7 @@ class ExtTree(BaseExtPanel):
     def handler_containercontextmenu(self):
         return self._listeners.get('containercontextmenu')
     
-    @handler_contextmenu.setter
+    @handler_containercontextmenu.setter
     def handler_containercontextmenu(self, menu):
         menu.container = self
         self._listeners['containercontextmenu'] = menu

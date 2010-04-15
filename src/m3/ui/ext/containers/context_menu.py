@@ -13,6 +13,7 @@ from m3.ui.ext.misc import ExtConnection
 
 
 class ExtContextMenu(BaseExtContainer):
+    __SEPARATOR = '"-"'
     def __init__(self, *args, **kwargs):
         super(ExtContextMenu, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-context-menu.js'
@@ -24,15 +25,15 @@ class ExtContextMenu(BaseExtContainer):
         self.items.append(ExtContextMenuItem(**kwargs))
         
     def add_separator(self):
-        self.items.append('"-"')
+        self.items.append(ExtContextMenu.__SEPARATOR)
     
     def t_render_items(self):
         res = []
         for item in self.items:
-            if isinstance(item, ExtContextMenuItem):
-                res.append(item.render(self.container))
-            else:
+            if item == ExtContextMenu.__SEPARATOR:
                 res.append(item)
+            else:
+                res.append(item.render(self.container))
         return ','.join(res)
     
     @property

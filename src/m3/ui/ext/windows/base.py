@@ -38,6 +38,8 @@ class BaseExtWindow(ExtUIComponent):
         self.body_style = 'padding:5px;'
         self.icon_cls = None
         self.top_bar = None
+        self.buttom_bar = None
+        self.footer_bar = None
         
     @property
     def buttons(self):
@@ -55,6 +57,12 @@ class BaseExtWindow(ExtUIComponent):
     
     def t_render_top_bar(self):
         return self.top_bar.render()
+    
+    def t_render_buttom_bar(self):
+        return self.buttom_bar.render()
+    
+    def t_render_footer_bar(self):
+        return self.footer_bar.render()
     
     def render_globals(self):
         if self.template_globals:

@@ -34,3 +34,15 @@ class BaseExtPanel(BaseExtContainer):
         super(BaseExtPanel, self).__init__(*args, **kwargs)
         self.title = None
         self.icon_cls = None
+        self.top_bar = None
+        self.buttom_bar = None
+        self.footer_bar = None
+
+    def t_render_top_bar(self):
+        return self.top_bar.render()
+    
+    def t_render_buttom_bar(self):
+        return self.buttom_bar.render()
+    
+    def t_render_footer_bar(self):
+        return self.footer_bar.render()
