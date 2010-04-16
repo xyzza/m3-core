@@ -4,6 +4,7 @@ from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from django.db import transaction
 from django.db.models.query_utils import Q
+from m3.ui.actions.utils import apply_search_filter
 
 class DictListWindowAction(Action):
     '''
@@ -160,27 +161,27 @@ class BaseDictionaryActions(ActionPack):
         self.save_action          = DictSaveAction()
         self.delete_action        = DictDeleteAction()
         # Но привязать их все равно нужно
-        self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
+        self.actions = [self.list_window_action, self.list_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
                         self.delete_action]
     
-    def get_list_window_url(self):
+    def get_list_url(self):
         '''
         Возвращает адрес формы списка элементов справочника. 
         Используется для присвоения адресов в прикладном приложении.
         '''
         return self.list_window_action.get_absolute_url()
     
-    def get_select_window_url(self):
+    def get_select_url(self):
         '''
         Возвращает адрес формы списка элементов справочника. 
         Используется для присвоения адресов в прикладном приложении.
         '''
-        return self.select_window_action.get_absolute_url()
+        return self.list_window_action.get_absolute_url()
     
     def get_rows(self, offset, limit, filter):
         '''
-        Метод который возвращает записи грида в втде обычного питоновского списка.
+        Метод который возвращает записи грида в виде обычного питоновского списка.
         '''
         raise NotImplementedError()
     
@@ -237,19 +238,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         Возвращает данные для грида справочника
         '''
         #TODO: Пока нет грида с пейджингом старт и оффсет не работают
-        query = self.model.objects
-        # Если есть фильтр, то вхождение каждого элемента фильтра ищется в заданных полях
-        if filter != None:
-            for word in filter.split(' '):
-                condition = None
-                for field in self.filter_fields:
-                    q = Q(**{field + '__icontains': word})
-                    if condition == None:
-                        condition = q
-                    else:
-                        condition = condition | q
-                if condition != None:
-                    query = query.filter(condition)
+        query = apply_search_filter(self.model.objects, filter, self.filter_fields)
         items = list(query.all())
         return items
     
@@ -273,4 +262,3 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     def delete_row(self, obj):
         obj.delete()
         return OperationResult(success = True)
-        
