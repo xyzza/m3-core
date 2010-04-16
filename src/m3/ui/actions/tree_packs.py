@@ -13,9 +13,12 @@ class TreeGetNodesAction(Action):
     '''
     url = '/nodes$'
     def run(self, request, context):
-        parent_id = request.REQUEST.get('id')
+        parent_id = int(request.REQUEST.get('node', 0))
+        if parent_id < 1:
+            parent_id = None
         filter = request.REQUEST.get('filter')
-        return self.parent.get_nodes(parent_id, filter)
+        result = self.parent.get_nodes(parent_id, filter)
+        return PreJsonResult(result)
 
 class TreeGetNodeAction(Action):
     '''
@@ -24,7 +27,8 @@ class TreeGetNodeAction(Action):
     url = '/node$'
     def run(self, request, context):
         id = request.REQUEST.get('id')
-        return self.parent.get_node(id)
+        result = self.parent.get_node(id)
+        return PreJsonResult(result)
 
 class TreeSaveNodeAction(Action):
     '''
@@ -109,7 +113,12 @@ class SelectWindowAction(Action):
     url = '/get_select_window$'
     def run(self, request, context):
         pass
-
+        win.column_name_on_select = 'fname'
+        win.list_view.add_column(header=u'Имя', data_index = 'fname')
+        win.list_view.add_column(header=u'Фамилия', data_index = 'lname')
+        win.list_view.add_column(header=u'Адрес', data_index = 'adress')
+        win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
+        
 class ListWindowAction(Action):
     '''
     Экшен создает и настраивает окно справочника в режиме редактирования записей
@@ -118,16 +127,18 @@ class ListWindowAction(Action):
     def run(self, request, context):
         # Создаем окно
         base = self.parent
-        win = self.parent.list_window(title = base.title)
-        win.mode = 1
+        win = self.parent.list_window(title = base.title, mode = 0)
         
         # Добавляем отображаемые колонки
         for field, name in base.list_columns:
             win.grid.add_column(header = name, data_index = field)
+        for field, name in base.tree_columns:
+            win.tree.add_column(header = name, data_index = field)
         
         # Устанавливаем источники данных
         grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
         win.grid.set_store(grid_store)
+        win.tree.url = base.get_nodes_action.get_absolute_url()
         
         # Доступны 3 события для грида: создание нового элемента, редактирование или удаление имеющегося 
         win.url_new_grid    = base.edit_grid_window_action.get_absolute_url()
@@ -135,15 +146,12 @@ class ListWindowAction(Action):
         win.url_delete_grid = base.delete_row_action.get_absolute_url()
         
         # Доступны 3 события для дерева: создание нового узла, редактирование или удаление имеющегося
-        #TODO: Прикрутить как появятся 
+        win.url_new_tree    = base.edit_node_window_action.get_absolute_url()
+        win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
+        win.url_delete_tree = base.delete_node_action.get_absolute_url()
         
         # Копипаст из примера
-        win.column_name_on_select = 'fname'
-        win.list_view.add_column(header=u'Имя', data_index = 'fname')
-        win.list_view.add_column(header=u'Фамилия', data_index = 'lname')
-        win.list_view.add_column(header=u'Адрес', data_index = 'adress')
-        win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False)) 
-        win.tree.add_column(header=u'Имя', data_index = 'fname', width=100) 
+        #win.tree.add_column(header=u'Имя', data_index = 'fname', width=100)
         
         win = self.parent.get_list_window(win)
         return ExtUIScriptResult(win)
@@ -220,7 +228,7 @@ class BaseTreeDictionaryActions(ActionPack):
         return win
     
     def get_select_url(self):
-        return self.get_s
+        return self.select_window_action.get_absolute_url()
     
     def get_list_window(self, win):
         return win
@@ -238,11 +246,15 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     list_model = None
     # Поля по которым производится поиск
     filter_fields = []
+    # Список из кортежей с параметрами выводимых в грид колонок
+    list_columns = []
+    # Список из кортежей с параметрами выводимых в дерево колонок
+    tree_columns = []
     
     def get_nodes(self, parent_id, filter):
         # Хитрость при получении узлов в том, что корень отдает сразу 2 уровня???
         query = self.tree_model.objects.filter(parent = parent_id)
-        apply_search_filter(query)
+        apply_search_filter(query, filter, self.filter_fields)
         nodes = list(query.all())
         return nodes
     
