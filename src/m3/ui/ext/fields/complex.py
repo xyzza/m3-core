@@ -8,35 +8,28 @@ Created on 27.02.2010
 from base import BaseExtField
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.misc import ExtJsonStore
-from m3.ui.ext.fields import ExtComboBox
+from m3.ui.ext.fields.base import BaseExtTriggerField
 
 
-class ExtDictSelectField(ExtComboBox):
+class ExtDictSelectField(BaseExtTriggerField):
     '''Поле с выбором из справочника'''
     def __init__(self, *args, **kwargs):
-        # Т.к. используется возможность передачи комбобоксовских значений в контруктор
-        url = kwargs.pop('url', None)
-        ask_before_deleting = kwargs.pop('ask_before_deleting', None)
-        autocomplete_url = kwargs.pop('autocomplete_url', None)
-        self.default_text = kwargs.pop('default_text', '')
-        
-        self.select_button = ExtButton(handler='onSelect', icon_cls='select')
-        self.clear_button = ExtButton(handler='onClearField', icon_cls='clear', hidden=True) 
-        
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-dict-select-field.js'
-
-        self.hide_trigger=True 
-        self.type_ahead=True 
+        self.hide_trigger = True 
+        self.type_ahead = True 
         self.min_chars = 2
         self.read_only = True
         self.set_store(ExtJsonStore())
         self.handler_change = 'onChange'
         self.width = 150
         self.value = None
-        self.ask_before_deleting = ask_before_deleting
-        self.url = url
-        self.autocomplete_url = autocomplete_url
+        self.ask_before_deleting = None
+        self.url = None
+        self.autocomplete_url = None
+        
+        self.select_button = ExtButton(handler='onSelect', icon_cls='select', disabled=True)
+        self.clear_button = ExtButton(handler='onClearField', icon_cls='clear', hidden=True) 
         
         self.init_component(*args, **kwargs)
         # По умолчанию 20 - ширина двух кнопок
@@ -61,7 +54,7 @@ class ExtDictSelectField(ExtComboBox):
     def autocomplete_url(self, value):
         if value:
             self.read_only = False
-            self.set_store(ExtJsonStore(url=value))
+            self.get_store().url = value
         self.__autocomplete_url = value
         
     @property
@@ -70,5 +63,18 @@ class ExtDictSelectField(ExtComboBox):
     
     @value.setter
     def value(self, val):
-        self.clear_button.hidden = False if val else True
+        if val:
+            self.clear_button.hidden = False if val else True
         self.__value = val
+        
+        
+class ExtSearchField(BaseExtField):
+    '''Поле поиска'''
+    def __init__(self, *args, **kwargs):
+        super(ExtSearchField, self).__init__(*args, **kwargs)
+        self.template = 'ext-fields/ext-search-field.js'
+        self.query_param = None
+        self.empty_text =None
+        self.component_for_search = None
+        self.init_component(*args, **kwargs)
+    

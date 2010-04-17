@@ -6,4 +6,4 @@ from simple import (ExtDateField,
                     ExtComboBox,
                     ExtTextArea,
                     ExtCheckBox)
-from complex import ExtDictSelectField
+from complex import ExtDictSelectField, ExtSearchField

@@ -14,7 +14,7 @@ class ExtGrid(BaseExtPanel):
         super(ExtGrid, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-grid.js'
         self._items = []
-        self.store = None
+        self.__store = None
         self.editor = False
         self.init_component(*args, **kwargs)
         
@@ -36,8 +36,8 @@ class ExtGrid(BaseExtPanel):
         return self.t_render_items()
     
     def t_render_store(self):
-        assert self.store, 'Store is not define'
-        return self.store.render([column.data_index for column in self.columns])
+        assert self.__store, 'Store is not define'
+        return self.__store.render([column.data_index for column in self.columns])
     
     def add_column(self, **kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
@@ -77,7 +77,10 @@ class ExtGrid(BaseExtPanel):
         self.show_banded_columns = False
         
     def set_store(self, store):
-        self.store = store
+        self.__store = store
+        
+    def get_store(self):
+        return self.__store
 
     @property
     def columns(self):

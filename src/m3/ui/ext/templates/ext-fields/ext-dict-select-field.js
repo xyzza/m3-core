@@ -139,7 +139,6 @@
 	 * @param {string} oldValue Старое значение 
 	 */
 	function onChange(sender, newValue, oldValue){
-		console.log(sender);
 		var clear_btn = Ext.getCmp('{{ component.clear_button.client_id }}');
 		var combo = Ext.getCmp('{{ component.client_id }}');
 		if (!newValue){

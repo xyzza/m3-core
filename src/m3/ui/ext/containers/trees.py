@@ -90,6 +90,14 @@ class ExtTree(BaseExtPanel):
     def handler_containercontextmenu(self, menu):
         menu.container = self
         self._listeners['containercontextmenu'] = menu
+        
+    @property
+    def handler_click(self):
+        return self._listeners.get('click')
+    
+    @handler_click.setter
+    def handler_click(self, function):
+        self._listeners['click'] = function
     #------------------------------------------------------------------------
     
     

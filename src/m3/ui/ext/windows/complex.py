@@ -10,7 +10,7 @@ from base import BaseExtWindow
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.containers import ExtGrid
 
-from m3.ui.ext.fields import ExtStringField
+from m3.ui.ext.fields import ExtStringField, ExtSearchField
 from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.containers import ExtContainer,  \
                                 ExtButtonGroup, \
@@ -29,17 +29,6 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.template_globals = 'ext-script/ext-dictionary-window-globals.js'
         self.layout='border'
         
-        search = ExtStringField(label = u'Поиск')
-#        text_cont = ExtContainer(layout='form', style={'padding':'5px'})
-#        text_cont.items.append(search)
-        
-        search_btn = ExtButton(text = u'Найти', handler='search')
-        search_clear = ExtButton(text = u'Сбросить', handler='clear_text')
-#        top_cont = ExtContainer(region='north',layout='column', min_height=35)
-#        top_cont.items.append(text_cont)
-#        top_cont.items.append(search_btn)
-#        top_cont.items.append(search_clear)
-        
         grid = ExtGrid(region='center')
         
         row_menu = ExtContextMenu()
@@ -48,6 +37,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         menu = ExtContextMenu()
         grid.handler_contextmenu = menu
         
+        search = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = grid)
         
         button_group = ExtButtonGroup(columns_number=1)
         cont_west = ExtContainer(region='west', min_width=30)
@@ -55,10 +45,7 @@ class ExtDictionaryWindow(BaseExtWindow):
 
         toolbar = ExtToolbar()
         grid.top_bar = toolbar
-        #self.items.append(top_cont)
         self.items.append(grid)
-        #self.items.append(toolbar)
-        #self.items.append(cont_west)
         
         self.buttons.append(ExtButton(text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
@@ -72,8 +59,6 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.grid_menu = menu
         self.list_view = None
         self.search_text = search
-        self.search_button = search_btn
-        self.search_clear = search_clear
         self.select_button = None
         self.__panel_list_view = None
         
@@ -85,12 +70,10 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__components_edit  = self.__add_menu_item(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
         self.__components_delete= self.__add_menu_item(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
         self.__add_separator(0)
-        self.__components_refresh= self.__add_menu_item(0, text=u'Обновить', icon_cls='table_refresh', handler='search')
+        self.__components_refresh= self.__add_menu_item(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshStore')
         
         toolbar.add_fill()
         toolbar.items.append(search)
-        toolbar.items.append(search_btn)
-        toolbar.items.append(search_clear)
         
         # Вызываемые url
         self.__url_new = None
@@ -167,7 +150,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     @url_new.setter
     def  url_new(self, value):
         if value:
-            self.__set_handler(self.__components_new, 'new_value')
+            self.__set_handler(self.__components_new, 'newValue')
         else:
             self.__clear_handler(self.__components_new)
         self.__url_new = value
@@ -179,7 +162,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     @url_edit.setter
     def url_edit(self, value):
         if value:
-            self.__set_handler(self.__components_edit,'edit_value')
+            self.__set_handler(self.__components_edit,'editValue')
         else:
             self.__clear_handler(self.__components_edit)
         self.__url_edit = value 
@@ -191,7 +174,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     @url_delete.setter
     def url_delete(self, value):
         if value:
-            self.__set_handler(self.__components_delete, 'delete_value')
+            self.__set_handler(self.__components_delete, 'deleteValue')
         else:
             self.__clear_handler(self.__components_delete)
         self.__url_delete = value 
@@ -203,7 +186,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     @column_name_on_select.setter
     def column_name_on_select(self, value):
         if value:
-            self.__set_handler([self.select_button,],'select_value')
+            self.__set_handler([self.select_button,],'selectValue')
         else:
             self.__clear_handler([self.select_button,])
         self.__text_on_select = value
@@ -226,20 +209,18 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         self.template = 'ext-windows/ext-window.js'
         self.template_globals = 'ext-script/ext-tree-dictionary-window-globals.js'
         self.layout='border'
-        
-        search_grid = ExtStringField(empty_text = u'Поиск', width=200)
-        search_btn_grid = ExtButton(text = u'Найти', handler='searchGrid')
-        search_clear_grid = ExtButton(text = u'Сбросить', handler='clearSearchGrid')
 
         grid = ExtGrid(region='center')
         grid.handler_rowcontextmenu = ExtContextMenu()
         grid.handler_contextmenu = ExtContextMenu()
         grid.top_bar = ExtToolbar()
         
+        search_grid = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = grid)
+        
         tree = ExtTree(region='west', width=180)
         tree.handler_contextmenu = ExtContextMenu()
-        
         tree.handler_containercontextmenu = ExtContextMenu()
+        tree.handler_click = 'onClickNode'
         tree.top_bar = ExtToolbar()
         
         self.items.extend([grid, tree])
@@ -253,8 +234,6 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
        
         self.list_view = None
         self.search_text_grid = search_grid
-        self.search_button = search_btn_grid
-        self.search_clear = search_clear_grid
         self.select_button = None
         self.__panel_list_view = None
         
@@ -266,19 +245,17 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         self.__components_edit_grid      = self.__add_menu_item_grid(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
         self.__components_delete_grid    = self.__add_menu_item_grid(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
         self.__add_separator_grid(0)
-        self.__components_refresh_grid   = self.__add_menu_item_grid(0, text=u'Обновить', icon_cls='table_refresh', handler='searchGrid')
+        self.__components_refresh_grid   = self.__add_menu_item_grid(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshGridStore')
         
         grid.top_bar.add_fill()
         grid.top_bar.items.append(search_grid)
-        grid.top_bar.items.append(search_btn_grid)
-        grid.top_bar.items.append(search_clear_grid)
         
         # Добавляются пункты в меню дерева и на тулбар дерева
         self.__components_new_tree   = self.__add_menu_item_tree(0, text=u'Новый', icon_cls='add_item', disabled=True)
         self.__components_edit_tree  = self.__add_menu_item_tree(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
         self.__components_delete_tree = self.__add_menu_item_tree(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
         self.__add_separator_tree(0)
-        self.__components_refresh_tree = self.__add_menu_item_tree(0, text=u'Обновить', icon_cls='table_refresh', handler='searchTree')
+        self.__components_refresh_tree = self.__add_menu_item_tree(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshTreeLoader')
         
 #        search_menu = ExtContextMenu()
 #        search_tree = ExtStringField(empty_text = u'Поиск')

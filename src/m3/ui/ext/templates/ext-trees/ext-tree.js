@@ -46,6 +46,8 @@ function(){
 			{# Прописываются имеющиеся обработчики #}
 			,listeners:{
 				{% for k, v in component.t_render_listeners.items %}
+					{% if not forloop.first%},{%endif%}
+				
 					{# Здесь рендерится контекстное меню #}
 					{% ifequal k "contextmenu" %}
 						contextmenu:
@@ -62,7 +64,9 @@ function(){
 					            container_contmenu.showAt(e.getXY());
 		                    }
 					{% endifequal %}  
-					{% if not forloop.last %},{% endif %}
+					{% ifequal k "click" %}
+						'{{k}}': {{v}}
+					{% endifequal %}  
 			{% endfor%}
 		}
 		{% endif %}

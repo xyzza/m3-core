@@ -115,39 +115,13 @@ function selectValueGrid(){
 	};
 	win.close();
 };
-/**
- * Осуществляет поиск по введенному значению. Организует запрос на сервер.
- */
-function searchGrid(){
-	var grid = Ext.getCmp('{{ component.grid.client_id}}');
-	
-	ajax.request({
-		url: grid.getStore().url
-		,params: {
-			'filter': Ext.getCmp("{{ component.search_text.client_id }}").getValue()
-		}
-		,success: function(response, opts){
-		    grid.getStore().loadData( Ext.decode(response.responseText) );
-		}
-		,failure: function(response, opts){
-		   Ext.Msg.alert('','failed');
-		}
-	});
-};
 
 /**
  * Перезагружает хранилище данных
  */
 function refreshGridStore(){
-	searchGrid();
-};
-/**
- * Очищает введенный текст в поле поиска
- */
-function clearSearchGrid(){
-	var text_field = Ext.getCmp('{{ component.search_text_grid.client_id}}');
-	text_field.setValue('');
-	refreshGridStore();
+	var search_field_grid = Ext.getCmp("{{ component.search_text_grid.client_id }}");
+	search_field_grid.search();
 };
 
 /*========================================== Работаем с деревом ===========================================*/
@@ -160,7 +134,7 @@ function renderWindowTree(response, opts){
 	win = m3_eval(response.responseText);
 	if (win!=undefined){
 		win.on('refresh_store',function(event, target){
-			refreshTreeStore();
+			refreshTreeLoader();
 		});
 	};
 };
@@ -246,39 +220,37 @@ function deleteValueTree(){
 };
 
 /**
- * Осуществляет поиск по введенному значению в дереве
+ * 
+ * Перезагружает хранилище данных для дерева
  */
-function searchTree(){
-	console.log("Don't work, becouse search is undefined");
-	return;
-	
+function refreshTreeLoader(){
+	filterTree();
+};
+
+/**
+ * Осуществляет фильтр узлов в дереве
+ */
+function filterTree(){
 	var tree = Ext.getCmp('{{ component.tree.client_id}}');
 	
 	ajax.request({
-		url: tree.getLoader().url
+		url: grid.getStore().url
 		,params: {
 			'filter': Ext.getCmp("{{ component.search_text_tree.client_id }}").getValue()
 		}
 		,success: function(response, opts){
-		    tree.getLoader().load( Ext.decode(response.responseText) );
+		 	grid.getStore().loadData( Ext.decode(response.responseText) );
 		}
 		,failure: function(response, opts){
-		   Ext.Msg.alert('','failed');
+		 	Ext.Msg.alert('','failed');
 		}
 	});
 };
-/**
- * 
- * Перезагружает хранилище данных для дерева
+/*
+ * Обработчик выделение узла в дереве
  */
-function refresTreeStore(){
-	searchTree();
-};
-/**
- * Очищает введенный текст в поле поиска дерева
- */
-function clearSearchTree(){
-	var text_field = Ext.getCmp('{{ component.search_text_tree.client_id}}');
-	text_field.setValue('');
-	refresTreeStore();
-};
+function onClickNode(node, e){
+	var search_field_grid = Ext.getCmp("{{ component.search_text_grid.client_id }}");
+	search_field_grid.nodeId = node.id;
+	search_field_grid.search();
+}
