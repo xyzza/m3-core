@@ -20,9 +20,20 @@ class BaseExtField(ExtUIComponent):
     def t_render_label_style(self):
         return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
     
+    #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+    # Врапперы над событиями listeners[...]
+    #------------------------------------------------------------------------
+    @property
+    def handler_specialkey(self):
+        return self._listeners.get('specialkey')
+    
+    @handler_specialkey.setter
+    def handler_specialkey(self, function):
+        self._listeners['specialkey'] = function
+    
     
 class BaseExtTriggerField(BaseExtField):
-    '''Базовый класс для комбобокса, поля выбра справочника'''
+    '''Базовый класс для комбобокса, поля выбора справочника'''
     def __init__(self, *args, **kwargs):
         super(BaseExtTriggerField, self).__init__(*args, **kwargs)
         self.display_field = None

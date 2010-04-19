@@ -40,6 +40,7 @@ class BaseExtWindow(ExtUIComponent):
         self.top_bar = None
         self.buttom_bar = None
         self.footer_bar = None
+        self.resizable = True
         
     @property
     def buttons(self):

@@ -117,3 +117,14 @@ function(){
                        'event_name': event_name, 
                        'params': (',"%s"' % '","'.join(args)) if args else '',
                        }
+    
+def js_on_key_enter(function, *args):
+    return '''
+function(field, e){
+    if (e.getKey()== e.ENTER){
+        return (%(function)s)(%(params)s);
+    };
+}
+''' % {'function':function,
+       'params': '"%s"' % '","'.join(args)
+      }

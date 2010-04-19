@@ -40,6 +40,7 @@
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
 	    ,items:[{{ component.t_render_items|safe }}]  
 	    {% if component.buttons %},{{ component.t_render_buttons|safe }}{% endif %}	
+	    {% if not component.resizable %} ,resizable: false {% endif %}
 	});
 	
 	return win;
