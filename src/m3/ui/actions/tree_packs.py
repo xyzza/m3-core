@@ -2,8 +2,9 @@
 '''
 Паки для иерархических справочников
 '''
-from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult
-from m3.ui.actions.utils import apply_search_filter
+from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
+from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
+    bind_request_form_to_object, safe_delete_record
 from m3.ui.ext.windows.complex import ExtTreeDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 
@@ -37,7 +38,7 @@ class TreeSaveNodeAction(Action):
     url = '/save_node$'
     def run(self, request, context):
         # Создаем форму для биндинга к ней
-        win = self.parent.node_edit_window()
+        win = self.parent.edit_node_window()
         win.form.bind_to_request(request)
         # Получаем наш объект по id
         id = request.REQUEST.get('id')
@@ -62,7 +63,7 @@ class ListGetRowsAction(Action):
     '''
     url = '/rows$'
     def run(self, request, context):
-        parent_id = request.REQUEST.get('parent_id')
+        parent_id = request.REQUEST.get('id')
         offset = int(request.REQUEST.get('offset', 0))
         limit = int(request.REQUEST.get('limit', 0))
         filter = request.REQUEST.get('filter')
@@ -79,7 +80,8 @@ class ListGetRowAction(Action):
 class ListSaveRowAction(Action):
     url = '/row$'
     def run(self, request, context):
-        pass
+        obj = bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        return self.parent.save_row(obj)
 
 class ListDeleteRowAction(Action):
     url = '/delete_row$'
@@ -94,17 +96,30 @@ class ListLastUsedAction(Action):
         return PreJsonResult(self.parent.get_last_used(self))
 
 class EditGridWindowAction(Action):
-    url = '/get_grid_edit$'
+    '''
+    Экшен создает окно для редактирования элемента справочника (списка)
+    '''
+    url = '/grid_edit_window$'
     def run(self, request, context):
-        pass
+        base = self.parent
+        win = bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+        win.title = base.title
+        win.form.url = base.save_row_action.get_absolute_url()
+        
+        return ExtUIScriptResult(base.get_edit_window(win))
 
 class EditNodeWindowAction(Action):
     '''
     Экшен создает окно для редактирования узла дерева
     '''
-    url = '/get_node_edit$'
+    url = '/node_edit_window$'
     def run(self, request, context):
-        pass
+        base = self.parent
+        win = bind_object_from_request_to_form(request, base.get_node, base.edit_node_window)
+        win.title = base.title
+        win.form.url = base.save_node_action.get_absolute_url()
+        
+        return ExtUIScriptResult(base.get_node_edit_window(win))
 
 class SelectWindowAction(Action):
     '''
@@ -112,12 +127,27 @@ class SelectWindowAction(Action):
     '''
     url = '/get_select_window$'
     def run(self, request, context):
-        pass
-        win.column_name_on_select = 'fname'
-        win.list_view.add_column(header=u'Имя', data_index = 'fname')
-        win.list_view.add_column(header=u'Фамилия', data_index = 'lname')
-        win.list_view.add_column(header=u'Адрес', data_index = 'adress')
-        win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
+        # Создаем окно выбора
+        base = self.parent
+        win = self.parent.list_window(title = base.title, mode = 1)
+        
+        # Добавляем отображаемые колонки
+        for field, name in base.list_columns:
+            win.grid.add_column(header = name, data_index = field)
+            
+        # Устанавливаем источники данных
+        grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
+        win.grid.set_store(grid_store)
+        win.tree.url = base.get_nodes_action.get_absolute_url()
+        
+        #win.column_name_on_select = 'fname'
+        #win.list_view.add_column(header=u'Имя', data_index = 'fname')
+        #win.list_view.add_column(header=u'Фамилия', data_index = 'lname')
+        #win.list_view.add_column(header=u'Адрес', data_index = 'adress')
+        #win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
+        
+        win = self.parent.get_select_window(win)
+        return ExtUIScriptResult(win)
         
 class ListWindowAction(Action):
     '''
@@ -167,7 +197,7 @@ class BaseTreeDictionaryActions(ActionPack):
     # Окно редактирования узла дерева
     edit_node_window = None
     # Окно редактирования элемента списка
-    edit_item_window = None
+    edit_window = None
     # Окно самого справочника
     list_window = ExtTreeDictionaryWindow
     
@@ -235,6 +265,14 @@ class BaseTreeDictionaryActions(ActionPack):
     
     def get_list_url(self):
         return self.list_window_action.get_absolute_url()
+    
+    #============ ДЛЯ ИЗМЕНЕНИЯ ОКОН РЕДАКТИРОВАНИЯ НА ХОДУ ======
+    
+    def get_edit_window(self, win):
+        return win
+    
+    def get_node_edit_window(self, win):
+        return win 
 
 class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     '''
@@ -244,8 +282,10 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     tree_model = None
     # Не обязательная модель списка связанного с деревом
     list_model = None
-    # Поля по которым производится поиск
+    # Поля по которым производится поиск в списке
     filter_fields = []
+    # Поля по которым производится поиск в дереве
+    tree_filter_fields = []
     # Список из кортежей с параметрами выводимых в грид колонок
     list_columns = []
     # Список из кортежей с параметрами выводимых в дерево колонок
@@ -254,13 +294,13 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     def get_nodes(self, parent_id, filter):
         # Хитрость при получении узлов в том, что корень отдает сразу 2 уровня???
         query = self.tree_model.objects.filter(parent = parent_id)
-        apply_search_filter(query, filter, self.filter_fields)
+        query = apply_search_filter(query, filter, self.tree_filter_fields)
         nodes = list(query.all())
         return nodes
     
     def get_rows(self, parent_id, offset, limit, filter):
         query = self.list_model.objects.filter(group = parent_id)
-        apply_search_filter(query, filter, self.filter_fields)
+        query = apply_search_filter(query, filter, self.filter_fields)
         items = list(query.all())
         return items
     
@@ -270,11 +310,11 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         Если id нет, значит нужно создать новый объект
         '''
         if (id == None) or (len(id) == 0):
-            obj = self.model()
+            obj = model()
         else:
             try:
-                obj = self.model.objects.get(id = id)
-            except self.model.DoesNotExist:
+                obj = model.objects.get(id = id)
+            except model.DoesNotExist:
                 return None
         return obj
     
@@ -283,3 +323,24 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     
     def get_row(self, id):
         return self._get_obj(self.list_model, id)
+    
+    def save_row(self, obj):
+        obj.save()
+        return OperationResult(success = True)
+    
+    def save_node(self, obj):
+        obj.save()
+        return OperationResult(success = True)
+    
+    def delete_row(self, obj):
+        message = ''
+        if not safe_delete_record(self.list_model, obj.id):
+            message = u'Не удалось удалить элемент'
+        return OperationResult.by_message(message)
+        
+    def delete_node(self, obj):
+        message = ''
+        if not safe_delete_record(self.tree_model, obj.id):
+            message = u'Не удалось удалить группу'
+        return OperationResult.by_message(message)
+        

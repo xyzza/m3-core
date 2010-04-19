@@ -16,6 +16,7 @@ from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
 from m3.ui.ext.fields.complex import ExtDictSelectField
+from django.db import models
 #from m3.ui.actions.packs import BaseDictionaryActions
 
 
@@ -135,7 +136,7 @@ class ExtForm(BaseExtPanel):
                         # Для id нельзя присваивать пустое значение! Иначе модели не будет сохраняться
                         if names[0] == 'id' and value == '':
                             return
-                        
+
                         setattr(obj, names[0], value)
                 else:
                     nested = getattr(obj, names[0], None)
