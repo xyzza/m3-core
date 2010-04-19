@@ -69,16 +69,9 @@ class ExtForm(BaseExtPanel):
             Разбивает объект на словарь, ключи которого имена полей(имена вложенных 
             объектов записываются через '.'), а значения - значения соответсвующих полей объекта
             '''
-            # Если мы имеем дело с моделями, то суффикс _id из полей нужно убирать
-            is_model = isinstance(obj, models.Model)
-            
             attrs = {}
             object_fields = obj if isinstance(obj, dict) else obj.__dict__
             for key, value in object_fields.items():
-                
-                if is_model and key.endswith('_id'):
-                    key = key[:-3]
-                
                 #TODO как определить, что класс встроенный
                 if not hasattr(value, '__dict__'):
                     attrs[prefix+str(key)] = value
@@ -143,7 +136,7 @@ class ExtForm(BaseExtPanel):
                         # Для id нельзя присваивать пустое значение! Иначе модели не будет сохраняться
                         if names[0] == 'id' and value == '':
                             return
-                        
+
                         setattr(obj, names[0], value)
                 else:
                     nested = getattr(obj, names[0], None)

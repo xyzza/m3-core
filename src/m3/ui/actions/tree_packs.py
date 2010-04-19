@@ -2,9 +2,9 @@
 '''
 Паки для иерархических справочников
 '''
-from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult
+from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
 from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
-    bind_request_form_to_object
+    bind_request_form_to_object, safe_delete_record
 from m3.ui.ext.windows.complex import ExtTreeDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 
@@ -38,7 +38,7 @@ class TreeSaveNodeAction(Action):
     url = '/save_node$'
     def run(self, request, context):
         # Создаем форму для биндинга к ней
-        win = self.parent.node_edit_window()
+        win = self.parent.edit_node_window()
         win.form.bind_to_request(request)
         # Получаем наш объект по id
         id = request.REQUEST.get('id')
@@ -326,6 +326,21 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     
     def save_row(self, obj):
         obj.save()
+        return OperationResult(success = True)
     
     def save_node(self, obj):
         obj.save()
+        return OperationResult(success = True)
+    
+    def delete_row(self, obj):
+        message = ''
+        if not safe_delete_record(self.list_model, obj.id):
+            message = u'Не удалось удалить элемент'
+        return OperationResult.by_message(message)
+        
+    def delete_node(self, obj):
+        message = ''
+        if not safe_delete_record(self.tree_model, obj.id):
+            message = u'Не удалось удалить группу'
+        return OperationResult.by_message(message)
+        

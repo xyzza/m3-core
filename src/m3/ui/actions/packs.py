@@ -5,7 +5,7 @@ from m3.ui.ext.misc.store import ExtJsonStore
 from django.db import transaction
 from django.db.models.query_utils import Q
 from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
-    bind_request_form_to_object
+    bind_request_form_to_object, safe_delete_record
 
 class DictListWindowAction(Action):
     '''
@@ -244,5 +244,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     
     @transaction.commit_on_success
     def delete_row(self, obj):
-        obj.delete()
-        return OperationResult(success = True)
+        message = ''
+        if not safe_delete_record(self.list_model, obj.id):
+            message = u'Не удалось удалить элемент'
+        return OperationResult.by_message(message)

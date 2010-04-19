@@ -3,6 +3,7 @@
 Вспомогательные функции используемые в паках
 '''
 from django.db.models.query_utils import Q
+from django.db import models, connection, transaction, IntegrityError
 
 def apply_search_filter(query, filter, fields):
     '''
@@ -64,3 +65,20 @@ def bind_request_form_to_object(request, obj_factory, form):
     # Биндим форму к объекту
     win.form.to_object(obj)
     return obj
+
+def safe_delete_record(model, id):
+    '''
+    Безопасное удаление записи в базе. В отличие от джанговского ORM не удаляет каскадно.
+    Возвращает True в случае успеха, иначе False 
+    '''
+    assert issubclass(model, models.Model)
+    assert isinstance(id, int)
+    try:
+        cursor = connection.cursor()
+        sql = "DELETE FROM %s WHERE id = %s" % (model._meta.db_table, id)
+        cursor.execute(sql)
+        transaction.commit_unless_managed()
+    except IntegrityError:
+        return False
+    
+    return True
