@@ -4,7 +4,8 @@ from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from django.db import transaction
 from django.db.models.query_utils import Q
-from m3.ui.actions.utils import apply_search_filter
+from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
+    bind_request_form_to_object
 
 class DictListWindowAction(Action):
     '''
@@ -52,7 +53,8 @@ class DictSelectWindowAction(Action):
         win.list_view.set_store(list_store)
         
         return ExtUIScriptResult(self.parent.get_select_window(win))
-    
+
+
 class DictEditWindowAction(Action):
     '''
     Редактирование элемента справочника
@@ -60,19 +62,8 @@ class DictEditWindowAction(Action):
     url = '/edit-window$'
     def run(self, request, context):
         base = self.parent
-        # Получаем объект по id
-        id = request.REQUEST.get('id')
-        obj = self.parent.get_row(id)
-        # Разница между новый и созданным объектов в том, что у нового нет id или он пустой
-        create_new = True
-        if isinstance(obj, dict) and obj.get('id') != None:
-            create_new = False
-        elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
-            create_new = False
-        # Устанавливаем параметры формы
-        win = self.parent.edit_window(create_new = create_new, title = base.title)
-        # Биндим объект к форме
-        win.form.from_object(obj)
+        win = bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+        win.title = base.title
         win.form.url = base.save_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_edit_window(win))
@@ -116,14 +107,7 @@ class DictSaveAction(Action):
     '''
     url = '/save$'
     def run(self, request, context):
-        # Создаем форму для биндинга к ней
-        win = self.parent.edit_window()
-        win.form.bind_to_request(request)
-        # Получаем наш объект по id
-        id = request.REQUEST.get('id')
-        obj = self.parent.get_row(id)
-        # Биндим форму к объекту
-        win.form.to_object(obj)
+        obj = bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
         return self.parent.save_row(obj)
     
 class DictDeleteAction(Action):

@@ -24,3 +24,43 @@ def apply_search_filter(query, filter, fields):
             if condition != None:
                 query = query.filter(condition)
     return query
+
+
+def bind_object_from_request_to_form(request, obj_factory, form):
+    '''
+    Функция извлекает объект из запроса по id, создает его экземпляр и биндит к форме
+    @param request:     Запрос от клиента содержащий id объекта
+    @param obj_factory: Функция возвращающая объект по его id
+    @param form:        Класс формы к которому привязывается объект
+    '''
+    # Получаем объект по id
+    id = request.REQUEST.get('id')
+    obj = obj_factory(id)
+    # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
+    create_new = True
+    if isinstance(obj, dict) and obj.get('id') != None:
+        create_new = False
+    elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
+        create_new = False
+    # Устанавливаем параметры формы
+    win = form(create_new = create_new)
+    # Биндим объект к форме
+    win.form.from_object(obj)
+    return win
+
+def bind_request_form_to_object(request, obj_factory, form):
+    '''
+    Функция создает объект по id в запросе и заполняет его атрибуты из данных пришедшей формы
+    @param request:     Запрос от клиента содержащий id объекта
+    @param obj_factory: Функция возвращающая объект по его id
+    @param form:        Класс формы к которому привязывается объект
+    '''
+    # Создаем форму для биндинга к ней
+    win = form()
+    win.form.bind_to_request(request)
+    # Получаем наш объект по id
+    id = request.REQUEST.get('id')
+    obj = obj_factory(id)
+    # Биндим форму к объекту
+    win.form.to_object(obj)
+    return obj

@@ -16,6 +16,7 @@ from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
 from m3.ui.ext.fields.complex import ExtDictSelectField
+from django.db import models
 #from m3.ui.actions.packs import BaseDictionaryActions
 
 
@@ -68,9 +69,16 @@ class ExtForm(BaseExtPanel):
             Разбивает объект на словарь, ключи которого имена полей(имена вложенных 
             объектов записываются через '.'), а значения - значения соответсвующих полей объекта
             '''
+            # Если мы имеем дело с моделями, то суффикс _id из полей нужно убирать
+            is_model = isinstance(obj, models.Model)
+            
             attrs = {}
             object_fields = obj if isinstance(obj, dict) else obj.__dict__
             for key, value in object_fields.items():
+                
+                if is_model and key.endswith('_id'):
+                    key = key[:-3]
+                
                 #TODO как определить, что класс встроенный
                 if not hasattr(value, '__dict__'):
                     attrs[prefix+str(key)] = value
