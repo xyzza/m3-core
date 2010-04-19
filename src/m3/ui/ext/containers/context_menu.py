@@ -32,8 +32,10 @@ class ExtContextMenu(BaseExtContainer):
         for item in self.items:
             if item == ExtContextMenu.__SEPARATOR:
                 res.append(item)
-            else:
+            elif self.container:
                 res.append(item.render(self.container))
+            else:
+                res.append(item.render())
         return ','.join(res)
     
     @property

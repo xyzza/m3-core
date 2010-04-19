@@ -14,7 +14,6 @@ new Ext.menu.Menu({
 		{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
 		
 		,items: [{{ component.t_render_items|safe }}]
-		
 		{# Прописываются имеющиеся обработчики #}
 		{% if component.t_render_listeners %}
 			{# Прописываются имеющиеся обработчики #}

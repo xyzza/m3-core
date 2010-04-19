@@ -122,5 +122,6 @@ function selectValue(){
  */
 function refreshStore(){
 	var search_field = Ext.getCmp("{{ component.search_text.client_id }}");
-	search_field.search();
+	if (search_field)
+		search_field.search();
 };

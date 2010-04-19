@@ -223,6 +223,8 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         tree.handler_click = 'onClickNode'
         tree.top_bar = ExtToolbar()
         
+        search_tree = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = tree)
+        
         self.items.extend([grid, tree])
         
         self.buttons.append(ExtButton(text = u'Закрыть',
@@ -234,6 +236,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
        
         self.list_view = None
         self.search_text_grid = search_grid
+        self.search_text_tree = search_tree
         self.select_button = None
         self.__panel_list_view = None
         
@@ -260,7 +263,11 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
 #        search_menu = ExtContextMenu()
 #        search_tree = ExtStringField(empty_text = u'Поиск')
 #        search_menu.items.append(search_tree)
-#        tree.top_bar.items.append(search_menu)
+       
+        menu = ExtContextMenu(style = dict(overflow='visible')) # overflow='visible' -- для того, чтобы комбобокс отображался
+        menu.items.append(search_tree)
+        tree.top_bar.add_fill()
+        tree.top_bar.add_menu(icon_cls="search", menu=menu)
         
         # Вызываемые url для грида
         self.__url_new_grid = None

@@ -49,6 +49,9 @@ class ExtToolbar(BaseExtContainer):
                 
     def add_text_item(self, text_item):
         self.items.append('"%s"' % text_item)
+        
+    def add_menu(self, menu, text="", icon_cls=""):
+        self.items.append("{text: '%s', iconCls: '%s', menu: %s}" % (text, icon_cls, menu.render()) )
           
     @property
     def items(self):

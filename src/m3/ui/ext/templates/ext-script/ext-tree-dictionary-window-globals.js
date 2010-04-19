@@ -121,7 +121,8 @@ function selectValueGrid(){
  */
 function refreshGridStore(){
 	var search_field_grid = Ext.getCmp("{{ component.search_text_grid.client_id }}");
-	search_field_grid.search();
+	if (search_field_grid)
+		search_field_grid.search();
 };
 
 /*========================================== Работаем с деревом ===========================================*/
@@ -224,33 +225,18 @@ function deleteValueTree(){
  * Перезагружает хранилище данных для дерева
  */
 function refreshTreeLoader(){
-	filterTree();
+	var search_field_tree = Ext.getCmp("{{ component.search_text_tree.client_id }}");
+	if (search_field_tree)
+		search_field_tree.search();
 };
 
-/**
- * Осуществляет фильтр узлов в дереве
- */
-function filterTree(){
-	var tree = Ext.getCmp('{{ component.tree.client_id}}');
-	
-	ajax.request({
-		url: grid.getStore().url
-		,params: {
-			'filter': Ext.getCmp("{{ component.search_text_tree.client_id }}").getValue()
-		}
-		,success: function(response, opts){
-		 	grid.getStore().loadData( Ext.decode(response.responseText) );
-		}
-		,failure: function(response, opts){
-		 	Ext.Msg.alert('','failed');
-		}
-	});
-};
 /*
  * Обработчик выделение узла в дереве
  */
 function onClickNode(node, e){
 	var search_field_grid = Ext.getCmp("{{ component.search_text_grid.client_id }}");
-	search_field_grid.nodeId = node.id;
-	search_field_grid.search();
+	if (search_field_grid) {
+		search_field_grid.nodeId = node.id;
+		search_field_grid.search();
+	}
 }
