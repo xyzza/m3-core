@@ -4,7 +4,7 @@
 '''
 from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
 from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
-    bind_request_form_to_object, safe_delete_record
+    bind_request_form_to_object, safe_delete_record, fetch_search_tree
 from m3.ui.ext.windows.complex import ExtTreeDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 
@@ -290,19 +290,28 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     list_columns = []
     # Список из кортежей с параметрами выводимых в дерево колонок
     tree_columns = []
-    
+        
     def get_nodes(self, parent_id, filter):
-        # Хитрость при получении узлов в том, что корень отдает сразу 2 уровня???
-        query = self.tree_model.objects.filter(parent = parent_id)
-        query = apply_search_filter(query, filter, self.tree_filter_fields)
-        nodes = list(query.all())
-        #TODO: Есть отдаем результат поиска, то нужно указывать expanded = true
-        
-        
-        # Если имеем дело с листом, нужно передавать параметр leaf = true
-        for node in nodes:
-            if self.tree_model.objects.filter(parent = node.id).count() == 0:
-                node.leaf = 'true'
+        if filter != None:
+            # Если задана строка поиска, то нужно искать по всем узлам и листьям дерева
+            # Причем нужно передавать полный путь найденного узла до корня
+            # Не знаю как это написать на ORM :( Попробуем пока в лоб.
+            
+            filter = {'name__icontains': filter}
+            nodes = fetch_search_tree(self.tree_model, filter)
+            
+            #nodes = [{'id':1, 'name':'Группа1', 'expanded': True, 'children':[{'id':4, 'name':'Подгруппа1', 'leaf': True}]},
+            #         {'id':2, 'name':'Группа2', 'expanded': True}, {'id':3, 'name':'Группа3'}]
+            
+            #TODO: Есть отдаем результат поиска, то нужно указывать expanded = true
+        else:
+            query = self.tree_model.objects.filter(parent = parent_id)
+            nodes = list(query.all())        
+            # Если имеем дело с листом, нужно передавать параметр leaf = true
+            for node in nodes:
+                if self.tree_model.objects.filter(parent = node.id).count() == 0:
+                    node.leaf = 'true'
+                    
         return nodes
     
     def get_rows(self, parent_id, offset, limit, filter):

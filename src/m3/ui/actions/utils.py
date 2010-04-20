@@ -82,3 +82,55 @@ def safe_delete_record(model, id):
         return False
     
     return True
+
+def fetch_search_tree(model, filter):
+    '''
+    Задолбался честно говоря писать комментарии!
+    '''
+    # Сначала тупо получаем все узлы подходящие по фильтру
+    nodes = model.objects.filter(**filter).select_related('parent')
+    
+    # Из каждого узла создаем полный путь до корня
+    paths = []
+    processed_nodes = set()
+    for node in nodes:
+        # Проверяем не входит ли наш узел в один из просчитанных путей
+        if node in processed_nodes:
+            continue
+
+        path = [node]
+        while node.parent:
+            node = node.parent
+            path.append(node)
+            processed_nodes.add(node)
+        path.reverse()
+        paths.append(path)
+
+    for path in paths:
+        for p in path:
+            print p.name
+        print '========='
+    
+    if len(paths) == 0:
+        return []
+    
+    # Начальное дерево удобоваримом для грида формате
+    zero_path = paths[0]
+    tree = [zero_path[0]]
+    for i in range(1, len(zero_path)):
+        zero_path[i - 1].children = [zero_path[i]]
+    
+    # Свойством нашего дерева является уникальность узлов => если пути отличаются корнем, то и все
+    # узлы внутри него отличаются.
+    
+    
+    # Теперь нужно пробедаться по всему дереву и установить атрибуты expanded и leaf
+    
+    return tree
+    
+    
+    
+    
+            
+            
+    
