@@ -17,7 +17,6 @@ class ExtDictSelectField(BaseExtTriggerField):
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-dict-select-field.js'
         self.hide_trigger = True 
-        self.type_ahead = True 
         self.min_chars = 2
         self.read_only = True
         self.set_store(ExtJsonStore())
