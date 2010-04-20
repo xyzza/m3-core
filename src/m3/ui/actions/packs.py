@@ -145,7 +145,7 @@ class BaseDictionaryActions(ActionPack):
         self.save_action          = DictSaveAction()
         self.delete_action        = DictDeleteAction()
         # Но привязать их все равно нужно
-        self.actions = [self.list_window_action, self.list_window_action, self.edit_window_action,\
+        self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
                         self.delete_action]
     
@@ -161,7 +161,7 @@ class BaseDictionaryActions(ActionPack):
         Возвращает адрес формы списка элементов справочника. 
         Используется для присвоения адресов в прикладном приложении.
         '''
-        return self.list_window_action.get_absolute_url()
+        return self.select_window_action.get_absolute_url()
     
     def get_rows(self, offset, limit, filter):
         '''
@@ -245,6 +245,6 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     @transaction.commit_on_success
     def delete_row(self, obj):
         message = ''
-        if not safe_delete_record(self.list_model, obj.id):
+        if not safe_delete_record(self.model, obj.id):
             message = u'Не удалось удалить элемент'
         return OperationResult.by_message(message)

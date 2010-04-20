@@ -296,6 +296,13 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         query = self.tree_model.objects.filter(parent = parent_id)
         query = apply_search_filter(query, filter, self.tree_filter_fields)
         nodes = list(query.all())
+        #TODO: Есть отдаем результат поиска, то нужно указывать expanded = true
+        
+        
+        # Если имеем дело с листом, нужно передавать параметр leaf = true
+        for node in nodes:
+            if self.tree_model.objects.filter(parent = node.id).count() == 0:
+                node.leaf = 'true'
         return nodes
     
     def get_rows(self, parent_id, offset, limit, filter):
