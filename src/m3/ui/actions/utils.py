@@ -5,6 +5,18 @@
 from django.db.models.query_utils import Q
 from django.db import models, connection, transaction, IntegrityError
 
+def create_search_filter(filter, fields):
+    if filter != None:
+        condition = None  
+        for word in filter.split(' '):
+            for field in fields:
+                q = Q(**{field + '__icontains': word})
+                if condition == None:
+                    condition = q
+                else:
+                    condition = condition | q
+        return condition
+
 def apply_search_filter(query, filter, fields):
     '''
     Накладывает фильтр поиска на запрос. Вхождение каждого элемента фильтра ищется в заданных полях.
@@ -13,19 +25,10 @@ def apply_search_filter(query, filter, fields):
     @param fields: Список полей модели по которым будет поиск
     '''
     assert isinstance(fields, (list, tuple))
-    if filter != None:
-        for word in filter.split(' '):
-            condition = None
-            for field in fields:
-                q = Q(**{field + '__icontains': word})
-                if condition == None:
-                    condition = q
-                else:
-                    condition = condition | q
-            if condition != None:
-                query = query.filter(condition)
+    condition = create_search_filter(filter, fields)
+    if condition != None:
+        query = query.filter(condition)
     return query
-
 
 def bind_object_from_request_to_form(request, obj_factory, form):
     '''
@@ -88,7 +91,7 @@ def fetch_search_tree(model, filter):
     Задолбался честно говоря писать комментарии!
     '''
     # Сначала тупо получаем все узлы подходящие по фильтру
-    nodes = model.objects.filter(**filter).select_related('parent')
+    nodes = model.objects.filter(filter).select_related('parent')
     
     # Из каждого узла создаем полный путь до корня
     paths = []
@@ -103,28 +106,47 @@ def fetch_search_tree(model, filter):
             node = node.parent
             path.append(node)
             processed_nodes.add(node)
+        # Первый элемент пути всегда корень
         path.reverse()
         paths.append(path)
 
-    for path in paths:
-        for p in path:
-            print p.name
-        print '========='
-    
     if len(paths) == 0:
         return []
     
-    # Начальное дерево удобоваримом для грида формате
-    zero_path = paths[0]
-    tree = [zero_path[0]]
-    for i in range(1, len(zero_path)):
-        zero_path[i - 1].children = [zero_path[i]]
+    def create_one_tree(path):
+        ''' Превращает путь в дерево с понимаемое ExtJS гридом '''
+        tree = path[0]
+        for i in range(1, len(path)):
+            path[i - 1].children = [path[i]]
+        return tree
     
-    # Свойством нашего дерева является уникальность узлов => если пути отличаются корнем, то и все
-    # узлы внутри него отличаются.
+    # Начальное дерево в удобоваримом для грида формате 
+    tree = [create_one_tree(paths[0])]
     
+    # Слияние путей в одно дерево
+    def merge(sub_tree, path_slice):
+        try:
+            print path_slice
+            index = sub_tree.index(path_slice[0])
+        except ValueError:
+            sub_tree.append( create_one_tree(path_slice) )
+        else:
+            merge(sub_tree[index].children, path_slice[1:])
+
+    for path in paths[1:]:
+        merge(tree, path)
     
-    # Теперь нужно пробедаться по всему дереву и установить атрибуты expanded и leaf
+    def set_grid_attributes(sub_tree):
+        '''  Пробегает дерево и устанавливает узлам атрибуты expanded и leaf '''
+        if not hasattr(sub_tree, 'children') or len(sub_tree.children) == 0:
+            sub_tree.leaf = True
+        else:
+            sub_tree.expanded = True
+            for st in sub_tree.children:
+                set_grid_attributes(st)
+    
+    for sub_tree in tree:
+        set_grid_attributes(sub_tree)
     
     return tree
     

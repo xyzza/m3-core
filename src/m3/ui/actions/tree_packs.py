@@ -4,7 +4,7 @@
 '''
 from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
 from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
-    bind_request_form_to_object, safe_delete_record, fetch_search_tree
+    bind_request_form_to_object, safe_delete_record, fetch_search_tree, create_search_filter
 from m3.ui.ext.windows.complex import ExtTreeDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 
@@ -292,18 +292,9 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     tree_columns = []
         
     def get_nodes(self, parent_id, filter):
-        if filter != None:
-            # Если задана строка поиска, то нужно искать по всем узлам и листьям дерева
-            # Причем нужно передавать полный путь найденного узла до корня
-            # Не знаю как это написать на ORM :( Попробуем пока в лоб.
-            
-            filter = {'name__icontains': filter}
-            nodes = fetch_search_tree(self.tree_model, filter)
-            
-            #nodes = [{'id':1, 'name':'Группа1', 'expanded': True, 'children':[{'id':4, 'name':'Подгруппа1', 'leaf': True}]},
-            #         {'id':2, 'name':'Группа2', 'expanded': True}, {'id':3, 'name':'Группа3'}]
-            
-            #TODO: Есть отдаем результат поиска, то нужно указывать expanded = true
+        if filter:
+            filter_dict = create_search_filter(filter, self.tree_filter_fields)
+            nodes = fetch_search_tree(self.tree_model, filter_dict)
         else:
             query = self.tree_model.objects.filter(parent = parent_id)
             nodes = list(query.all())        
