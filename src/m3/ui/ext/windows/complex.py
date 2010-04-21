@@ -254,15 +254,15 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         grid.top_bar.items.append(search_grid)
         
         # Добавляются пункты в меню дерева и на тулбар дерева
-        self.__components_new_tree   = self.__add_menu_item_tree(0, text=u'Новый', icon_cls='add_item', disabled=True)
-        self.__components_edit_tree  = self.__add_menu_item_tree(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
-        self.__components_delete_tree = self.__add_menu_item_tree(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
-        self.__add_separator_tree(0)
-        self.__components_refresh_tree = self.__add_menu_item_tree(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshTreeLoader')
+        menu = ExtContextMenu() # overflow='visible' -- для того, чтобы комбобокс отображался
+        self.tree.top_bar.add_menu(icon_cls="add_item", menu=menu, tooltip_text = u'Добавить')
         
-#        search_menu = ExtContextMenu()
-#        search_tree = ExtStringField(empty_text = u'Поиск')
-#        search_menu.items.append(search_tree)
+        self.__components_new_tree      = self.__add_menu_item_tree(0, menu,  text=u'Новый в корне', icon_cls='add_item', disabled=True)
+        self.__components_new_tree_child= self.__add_menu_item_tree(1, menu,  text=u'Новый дочерний', icon_cls='add_item', disabled=True)
+        self.__components_edit_tree     = self.__add_menu_item_tree(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
+        self.__components_delete_tree   = self.__add_menu_item_tree(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
+        self.__add_separator_tree(0)
+        self.__components_refresh_tree  = self.__add_menu_item_tree(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshTreeLoader')
        
         menu = ExtContextMenu(style = dict(overflow='visible')) # overflow='visible' -- для того, чтобы комбобокс отображался
         menu.items.append(search_tree)
@@ -321,12 +321,13 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
             0 - Добавляется в тублар, в конт. меню строки, в меню всего грида
             1 - Добавляется в тублар, в конт. меню строки
         '''
+
         text = None
         if kwargs.has_key('text'):
             text = kwargs.pop("text")
             
-        self.grid.top_bar.items.append(ExtButton(tooltip_text=text, **kwargs))
         self.grid.handler_rowcontextmenu.add_item(text=text, **kwargs)
+        self.grid.top_bar.items.append(ExtButton(tooltip_text=text, **kwargs))
             
         if flag==0:
             self.grid.handler_contextmenu.add_item(text=text, **kwargs)
@@ -344,7 +345,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         if flag==0:
             self.grid.handler_contextmenu.add_separator()
             
-    def __add_menu_item_tree(self, flag, **kwargs):
+    def __add_menu_item_tree(self, flag, menu=None, **kwargs):
         '''
         Добавление контролов управления в дерево
         @param flag: Указывает как будет добавляться пункт,
@@ -355,21 +356,28 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         if kwargs.has_key('text'):
             text = kwargs.pop("text")
             
-        self.tree.top_bar.items.append(ExtButton(tooltip_text=text, **kwargs))
+        return_item = None
+        if menu:
+            menu.add_item(text=text,**kwargs)
+            return_top_bar_item = menu.items[len(menu.items)-1]
+        else:
+            self.tree.top_bar.items.append(ExtButton(tooltip_text=text, **kwargs))
+            return_top_bar_item = self.tree.top_bar.items[len(self.tree.top_bar.items)-1]
+        
         self.tree.handler_contextmenu.add_item(text=text, **kwargs)
             
         if flag==0:
             self.tree.handler_containercontextmenu.add_item(text=text, **kwargs)
-            return (self.tree.top_bar.items[len(self.tree.top_bar.items)-1], 
+            return (return_top_bar_item, 
                     self.tree.handler_contextmenu.items[len(self.tree.handler_contextmenu.items)-1], 
                     self.tree.handler_containercontextmenu.items[len(self.tree.handler_containercontextmenu.items)-1]
                     )
         else:
-            return (self.tree.top_bar.items[len(self.tree.top_bar.items)-1], 
+            return (return_top_bar_item, 
                 self.tree.handler_contextmenu.items[len(self.tree.handler_contextmenu.items)-1])
         
     def __add_separator_tree(self, flag):
-        '''Добавление разделителя в контролы дерево'''
+        '''Добавление разделителя в контролы дерева'''
         self.tree.handler_contextmenu.add_separator()   
         self.tree.top_bar.add_separator()
         if flag==0:
@@ -420,9 +428,11 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
     @url_new_tree.setter
     def  url_new_tree(self, value):
         if value:
-            self.__set_handler(self.__components_new_tree, 'newValueTree')
+            self.__set_handler(self.__components_new_tree, 'newValueTreeRoot')
+            self.__set_handler(self.__components_new_tree_child, 'newValueTreeChild')
         else:
             self.__clear_handler(self.__components_new_tree)
+            self.__clear_handler(self.__components_new_tree_child)
         self.__url_new_tree = value
     
     @property

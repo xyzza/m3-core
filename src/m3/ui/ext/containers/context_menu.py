@@ -61,7 +61,7 @@ class ExtContextMenuItem(ExtUIComponent):
         self.icon_cls = None
         self.init_component(*args, **kwargs)
         
-    def render(self, container):
+    def render(self, container=None):
         res = 'text:"%s"' % self.text
         if self.icon_cls:
             res += ',iconCls: "%s"' % self.icon_cls

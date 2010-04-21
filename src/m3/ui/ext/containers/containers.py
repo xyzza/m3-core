@@ -50,12 +50,35 @@ class ExtToolbar(BaseExtContainer):
     def add_text_item(self, text_item):
         self.items.append('"%s"' % text_item)
         
-    def add_menu(self, menu, text="", icon_cls=""):
-        self.items.append("{text: '%s', iconCls: '%s', menu: %s}" % (text, icon_cls, menu.render()) )
+    def add_menu(self, **kwargs):
+        self.items.append(ExtToolbarMenu(**kwargs))
           
     @property
     def items(self):
         return self._items
+    
+    
+class ExtToolbarMenu(BaseExtContainer):
+    def __init__(self, *args, **kwargs):
+        super(ExtToolbarMenu, self).__init__(*args, **kwargs)
+        self.text = None
+        self.icon_cls = None
+        self.tooltip_text = None
+        self.menu = None
+        self.init_component(*args, **kwargs)
+        
+    def render(self):
+        res = 'id:"%s"' % self.client_id
+        if self.text:
+            res = 'text: "%s"' % self.text
+        if self.icon_cls:
+            res += ',iconCls: "%s"' % self.icon_cls
+        if self.tooltip_text:
+            res += ',tooltip: "%s"' % self.tooltip_text
+        if self.menu:
+            res += ',menu: %s' % self.menu.render()
+            
+        return '{%s}' % res
     
     
 class ExtButtonGroup(BaseExtContainer):
