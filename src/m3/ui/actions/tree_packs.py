@@ -120,6 +120,26 @@ class EditNodeWindowAction(Action):
         win.form.url = base.save_node_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
+    
+class NewNodeWindowAction(Action):
+    '''
+    Экшен создает окно для создания нового узла дерева
+    '''
+    url = '/node_new_window$'
+    def run(self, request, context):
+        base = self.parent
+        # Получаем id родительской группы. Если приходит не валидное значение, то создаем узел в корне
+        parent_id = int(request.REQUEST.get('id', 0))
+        if parent_id < 1:
+            parent_id = None
+        # Создаем новую группу и биндим ее к форме
+        obj = base.get_node(None)
+        obj.parent_id = parent_id
+        win = base.edit_node_window(create_new = True)
+        win.form.from_object(obj)
+        
+        return ExtUIScriptResult(base.get_node_edit_window(win))
+    
 
 class SelectWindowAction(Action):
     '''
@@ -176,7 +196,7 @@ class ListWindowAction(Action):
         win.url_delete_grid = base.delete_row_action.get_absolute_url()
         
         # Доступны 3 события для дерева: создание нового узла, редактирование или удаление имеющегося
-        win.url_new_tree    = base.edit_node_window_action.get_absolute_url()
+        win.url_new_tree    = base.new_node_window_action.get_absolute_url()
         win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
         win.url_delete_tree = base.delete_node_action.get_absolute_url()
         
@@ -217,12 +237,14 @@ class BaseTreeDictionaryActions(ActionPack):
         self.list_window_action = ListWindowAction()
         self.select_window_action = SelectWindowAction()
         self.edit_grid_window_action = EditGridWindowAction()
+        self.new_node_window_action  = NewNodeWindowAction()
         self.edit_node_window_action = EditNodeWindowAction()
         # Привязываем всех их к паку
         self.actions = [self.get_nodes_action, self.get_node_action, self.save_node_action,
                         self.delete_node_action, self.get_rows_action, self.get_row_action,
                         self.save_row_action, self.delete_row_action, self.list_window_action,
-                        self.select_window_action, self.edit_grid_window_action, self.edit_node_window_action]
+                        self.select_window_action, self.edit_grid_window_action, self.edit_node_window_action,
+                        self.new_node_window_action]
     
     #========================== ДЕРЕВО ===========================
     
