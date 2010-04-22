@@ -449,7 +449,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
     
     @property
     def url_delete_tree(self):
-        return self.__url_delete_grid
+        return self.__url_delete_tree
     
     @url_delete_tree.setter
     def url_delete_tree(self, value):

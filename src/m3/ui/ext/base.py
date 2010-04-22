@@ -108,6 +108,7 @@ class ExtUIComponent(BaseExtComponent):
         self.flex = None # Для *box layout
         self.max_height = self.min_height = self.max_width = self.min_width = None
         self.name = None
+        self.anchor = None
         
     def t_render_style(self):
         return '{%s}' % ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])

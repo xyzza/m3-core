@@ -21,6 +21,7 @@ function(){
 		{% if component.y %} ,y: {{ component.y }} {% endif %}
 		{% if component.region %} ,region: '{{ component.region }}' {% endif %}
 		{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
+		{% if component.anchor %} ,anchor: {{ component.anchor|safe }} {% endif %}
 		
 		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 		{% if component.title %} ,title: '{{ component.title }}' {% endif %}

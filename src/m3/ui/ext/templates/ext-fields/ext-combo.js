@@ -14,6 +14,7 @@ new Ext.form.ComboBox({
 	{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
 	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
+	{% if component.anchor %} ,anchor: {{ component.anchor|safe }} {% endif %}
 	,allowBlank: {{ component.allow_blank|lower }}
 	
 	{% if component.label %} ,fieldLabel: '{{ component.label }}' {% endif %}

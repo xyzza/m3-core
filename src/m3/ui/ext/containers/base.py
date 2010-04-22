@@ -12,6 +12,7 @@ class BaseExtContainer(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtContainer, self).__init__(*args, **kwargs)
         self.layout = None
+        self.layout_config = {}
         self._items = TypedList(type = ExtUIComponent)
         
     def t_render_items(self):
@@ -28,6 +29,10 @@ class BaseExtContainer(ExtUIComponent):
                 res = item.find_by_name(name)
                 if res:
                     return res
+                
+    def t_render_layout_config(self):
+        '''Рендерит конфиг, если указан layout'''
+        return '{%s}' % ','.join(['%s:"%s"' % (k, v) for k, v in self.layout_config.items()])
         
 class BaseExtPanel(BaseExtContainer):
     def __init__(self, *args, **kwargs):

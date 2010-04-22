@@ -15,6 +15,7 @@ new Ext.form.TextArea({
 	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
 	{% if component.read_only %} ,readOnly: true {% endif %}
+	{% if component.anchor %} ,anchor: {{ component.anchor|safe }} {% endif %}
 	
 	{% if component.label %} ,fieldLabel: '{{ component.label }}' {% endif %}
 	{% if component.name %} ,name: '{{ component.name }}' {% endif %}

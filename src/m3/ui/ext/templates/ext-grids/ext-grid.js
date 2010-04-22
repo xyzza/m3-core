@@ -44,6 +44,7 @@ function(){
 		{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
 		{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 		{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
+		{% if component.anchor %} ,anchor: {{ component.anchor|safe }} {% endif %}
 		
 		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 	    {% if component.title %} 
@@ -61,7 +62,6 @@ function(){
 		,stripeRows: true
 		,stateful: true
 		,viewConfig: {forceFit: true}
-
 		,plugins: plugins
 		{% if component.t_render_listeners %}
 		{# Прописываются имеющиеся обработчики #}

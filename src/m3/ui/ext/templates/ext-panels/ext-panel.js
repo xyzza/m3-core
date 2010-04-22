@@ -14,8 +14,10 @@ new Ext.Panel({
 	{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
 	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
+	{% if component.anchor %} ,anchor: {{ component.anchor|safe }} {% endif %}
 	
 	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
+	{% if component.layout_config %} ,layoutConfig: '{{ component.t_render_layout_config|safe }}' {% endif %}
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
 	{% if component.top_bar %} ,tbar: {{ component.t_render_top_bar|safe }} {% endif %}
