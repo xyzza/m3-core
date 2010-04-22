@@ -126,13 +126,16 @@ def fetch_search_tree(model, filter):
     # Слияние путей в одно дерево
     def merge(sub_tree, path_slice):
         try:
-            print path_slice
             index = sub_tree.index(path_slice[0])
         except ValueError:
             sub_tree.append( create_one_tree(path_slice) )
         else:
-            merge(sub_tree[index].children, path_slice[1:])
-
+            if hasattr(sub_tree[index], 'children'):
+                merge(sub_tree[index].children, path_slice[1:])
+            else:
+                # Значит сливаемый путь оказался длиннее чем высота поддерева
+                sub_tree[index].children = [create_one_tree(path_slice[1:])]
+                
     for path in paths[1:]:
         merge(tree, path)
     
