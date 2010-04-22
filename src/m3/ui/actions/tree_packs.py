@@ -95,7 +95,7 @@ class ListLastUsedAction(Action):
     def run(self, request, context):
         return PreJsonResult(self.parent.get_last_used(self))
 
-class EditGridWindowAction(Action):
+class ListEditRowWindowAction(Action):
     '''
     Экшен создает окно для редактирования элемента справочника (списка)
     '''
@@ -107,8 +107,30 @@ class EditGridWindowAction(Action):
         win.form.url = base.save_row_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_edit_window(win))
+    
+class ListNewRowWindowAction(Action):
+    '''
+    Экшен для создания нового элемента списка
+    '''
+    url = '/grid_new_window$'
+    def run(self, request, context):
+        base = self.parent
+        # Получаем id родительской группы. Если приходит не валидное значение, то создаем узел в корне
+        group_id = int(request.REQUEST.get('id', 0))
+        assert group_id > 0, 'The request must contain the "id" of the selected group is greater than 0.'
+        # Создаем новую группу и биндим ее к форме
+        obj = base.get_row(None)
+        obj.group_id = group_id
+        win = base.edit_window(create_new = True)
+        win.form.from_object(obj)
+        # Донастраиваем форму
+        win.title = base.title
+        win.form.url = base.save_row_action.get_absolute_url()
+        
+        return ExtUIScriptResult(base.get_edit_window(win))
+        
 
-class EditNodeWindowAction(Action):
+class TreeEditNodeWindowAction(Action):
     '''
     Экшен создает окно для редактирования узла дерева
     '''
@@ -121,7 +143,7 @@ class EditNodeWindowAction(Action):
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
     
-class NewNodeWindowAction(Action):
+class TreeNewNodeWindowAction(Action):
     '''
     Экшен создает окно для создания нового узла дерева
     '''
@@ -137,6 +159,9 @@ class NewNodeWindowAction(Action):
         obj.parent_id = parent_id
         win = base.edit_node_window(create_new = True)
         win.form.from_object(obj)
+        # Донастраиваем форму
+        win.title = base.title
+        win.form.url = base.save_node_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
     
@@ -191,7 +216,7 @@ class ListWindowAction(Action):
         win.tree.url = base.get_nodes_action.get_absolute_url()
         
         # Доступны 3 события для грида: создание нового элемента, редактирование или удаление имеющегося 
-        win.url_new_grid    = base.edit_grid_window_action.get_absolute_url()
+        win.url_new_grid    = base.new_grid_window_action.get_absolute_url()
         win.url_edit_grid   = base.edit_grid_window_action.get_absolute_url()
         win.url_delete_grid = base.delete_row_action.get_absolute_url()
         
@@ -199,9 +224,6 @@ class ListWindowAction(Action):
         win.url_new_tree    = base.new_node_window_action.get_absolute_url()
         win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
         win.url_delete_tree = base.delete_node_action.get_absolute_url()
-        
-        # Копипаст из примера
-        #win.tree.add_column(header=u'Имя', data_index = 'fname', width=100)
         
         win = self.parent.get_list_window(win)
         return ExtUIScriptResult(win)
@@ -222,29 +244,37 @@ class BaseTreeDictionaryActions(ActionPack):
     list_window = ExtTreeDictionaryWindow
     
     def __init__(self):
-        # Экшены специфичные для дерева
+        self.actions = []
+        
+        # Экшены отдающие данные
         self.get_nodes_action = TreeGetNodesAction()
-        self.get_node_action = TreeGetNodeAction()
-        self.save_node_action = TreeSaveNodeAction()
-        self.delete_node_action = TreeDeleteNodeAction()
-        # Экшены специфичные для списка
-        self.get_rows_action = ListGetRowsAction()
-        self.get_row_action = ListGetRowAction()
-        self.save_row_action = ListSaveRowAction()
-        self.delete_row_action = ListDeleteRowAction()
+        self.get_node_action  = TreeGetNodeAction()
+        self.get_rows_action  = ListGetRowsAction()
+        self.get_row_action   = ListGetRowAction()
         self.last_used_action = ListLastUsedAction()
-        # Само окно справочника
-        self.list_window_action = ListWindowAction()
+        self.actions.extend([self.get_nodes_action, self.get_node_action, self.get_rows_action,
+                             self.get_row_action, self.last_used_action])
+        
+        # Окна самого справочника
+        self.list_window_action   = ListWindowAction()
         self.select_window_action = SelectWindowAction()
-        self.edit_grid_window_action = EditGridWindowAction()
-        self.new_node_window_action  = NewNodeWindowAction()
-        self.edit_node_window_action = EditNodeWindowAction()
-        # Привязываем всех их к паку
-        self.actions = [self.get_nodes_action, self.get_node_action, self.save_node_action,
-                        self.delete_node_action, self.get_rows_action, self.get_row_action,
-                        self.save_row_action, self.delete_row_action, self.list_window_action,
-                        self.select_window_action, self.edit_grid_window_action, self.edit_node_window_action,
-                        self.new_node_window_action]
+        self.actions.extend([self.list_window_action, self.select_window_action])
+        
+        # Адреса экшенов списка
+        self.new_grid_window_action  = ListNewRowWindowAction()
+        self.edit_grid_window_action = ListEditRowWindowAction()
+        self.save_row_action         = ListSaveRowAction()
+        self.delete_row_action       = ListDeleteRowAction()
+        self.actions.extend([self.new_grid_window_action, self.edit_grid_window_action,
+                             self.save_row_action, self.delete_row_action])
+        
+        # Адреса экшенов дерева
+        self.new_node_window_action  = TreeNewNodeWindowAction()
+        self.edit_node_window_action = TreeEditNodeWindowAction()
+        self.save_node_action        = TreeSaveNodeAction()
+        self.delete_node_action      = TreeDeleteNodeAction()
+        self.actions.extend([self.new_node_window_action, self.edit_node_window_action,
+                             self.save_node_action, self.delete_node_action])
     
     #========================== ДЕРЕВО ===========================
     
@@ -373,3 +403,4 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             message = u'Не удалось удалить группу'
         return OperationResult.by_message(message)
         
+#TODO: Избавиться от копипаста в экшенах.
