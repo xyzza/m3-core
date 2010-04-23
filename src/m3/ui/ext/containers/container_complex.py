@@ -17,10 +17,6 @@ class ExtContainerTable(BaseExtContainer):
         self.__columns_count = 0
         self.__rows_count = 0
         self.__table = []
-        #self.layout_config['align'] = 'stretch'
-        #self.layout = 'hbox'
-        #self.height = 50
-        #self.width = None
         self.init_component(*args, **kwargs)
   
     def render(self):
@@ -75,7 +71,7 @@ class ExtContainerTable(BaseExtContainer):
         assert isinstance(colspan, int)
         
         cont = ExtContainer(layout = 'form', flex=colspan, style=dict(padding="5px"))
-        cmp.anchor = '"100%"'
+        cmp.anchor = '100%'
         cont.items.append(cmp)
         
         self.__table[row][col] = cont

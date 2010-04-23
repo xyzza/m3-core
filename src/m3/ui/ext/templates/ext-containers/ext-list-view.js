@@ -14,7 +14,7 @@ new Ext.list.ListView({
 	{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
 	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
-	{% if component.anchor %} ,anchor: {{ component.anchor|safe }} {% endif %}
+	{% if component.anchor %} ,anchor: '{{ component.anchor|safe }}' {% endif %}
 	
 	{%if component.multi_select %} ,multiSelect: true {%endif%}
 	{%if component.empty_text %} ,emptyText:'{{component.empty_text}}' {%endif%}

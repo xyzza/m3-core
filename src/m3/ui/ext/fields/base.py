@@ -51,7 +51,6 @@ class BaseExtTriggerField(BaseExtField):
         self.mode = None
         self.editable = True
         self.trigger_action_all = False
-        self.read_only = False
         self.force_selection = False
     
     def set_store(self, store):

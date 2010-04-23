@@ -14,7 +14,7 @@ new Ext.Panel({
 	{% if component.min_height %} ,boxMinHeight: {{ component.min_height }} {% endif %}
 	{% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 	{% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
-	{% if component.anchor %} ,anchor: {{ component.anchor|safe }} {% endif %}
+	{% if component.anchor %} ,anchor: '{{ component.anchor|safe }}' {% endif %}
 	
 	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
 	{% if component.layout_config %} ,layoutConfig: '{{ component.t_render_layout_config|safe }}' {% endif %}

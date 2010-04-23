@@ -58,7 +58,7 @@ class ExtToolbar(BaseExtContainer):
         return self._items
     
     
-class ExtToolbarMenu(BaseExtContainer):
+class ExtToolbarMenu(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(ExtToolbarMenu, self).__init__(*args, **kwargs)
         self.text = None

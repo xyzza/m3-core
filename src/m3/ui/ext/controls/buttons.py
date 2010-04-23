@@ -17,10 +17,8 @@ class ExtButton(BaseExtControl):
         self.handler = None
         self.icon = None
         self.icon_cls = None
-        
         self.tooltip_title = None
         self.tooltip_text = None
-        
         self.init_component(*args, **kwargs)
     
     def t_render_handler(self):
@@ -36,3 +34,33 @@ class ExtButton(BaseExtControl):
         if self.tooltip_title:
             res += ',title: "%s"' % self.tooltip_title 
         return '{%s}' % res
+    
+#class ExtSplitButton(BaseExtControl):
+#    '''Раскрывающаяся кнопка'''
+#    def __init__(self, *args, **kwargs):
+#        super(ExtSplitButton, self).__init__(self, *args, **kwargs)
+#        self.template = 'ext-controls/ext-split-button.js'
+#        self.text = None
+#        self.handler = None
+#        self.icon = None
+#        self.icon_cls = None
+#        
+#        self.tooltip_title = None
+#        self.tooltip_text = None
+#        self.menu = None
+#        
+#        self.init_component(*args, **kwargs)
+#
+#    def t_render_handler(self):
+#        if isinstance(self.handler, ExtConnection):
+#            return 'function(){%s}'% self.handler.render()
+#        else:
+#            return self.handler
+#        
+#    def t_render_tooltip(self):
+#        res = ''
+#        if self.tooltip_text:
+#            res += 'text: "%s"' % self.tooltip_text 
+#        if self.tooltip_title:
+#            res += ',title: "%s"' % self.tooltip_title 
+#        return '{%s}' % res

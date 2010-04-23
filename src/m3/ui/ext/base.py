@@ -91,6 +91,8 @@ class BaseExtComponent(object):
     def t_render_listeners(self):
        ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
        return self._listeners
+   
+   
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):
     '''

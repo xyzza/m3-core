@@ -50,13 +50,9 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.buttons.append(ExtButton(text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
         
-        
-        
         # Основные контролы должны быть доступны для изменения
         self.grid = grid
         self.toolbar = toolbar
-        self.grid_row_menu = row_menu
-        self.grid_menu = menu
         self.list_view = None
         self.search_text = search
         self.select_button = None
@@ -125,23 +121,23 @@ class ExtDictionaryWindow(BaseExtWindow):
         if kwargs.has_key('text'):
             text = kwargs.pop("text")
             
-        self.toolbar.items.append(ExtButton(tooltip_text=text, **kwargs))
-        self.grid_row_menu.add_item(text=text, **kwargs)
+        self.grid.top_bar.items.append(ExtButton(tooltip_text=text, **kwargs))
+        self.grid.handler_rowcontextmenu.add_item(text=text, **kwargs)
             
         if flag==0:
-            self.grid_menu.add_item(text=text, **kwargs)
-            return (self.toolbar.items[len(self.toolbar.items)-1], 
-                    self.grid_row_menu.items[len(self.grid_row_menu.items)-1], 
-                    self.grid_menu.items[len(self.grid_menu.items)-1])
+            self.grid.handler_rowcontextmenu.add_item(text=text, **kwargs)
+            return (self.grid.top_bar.items[len(self.grid.top_bar.items)-1], 
+                    self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1], 
+                    self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1])
         else:
-            return (self.toolbar.items[len(self.toolbar.items)-1], 
-                self.grid_row_menu.items[len(self.grid_row_menu.items)-1])
+            return (self.grid.top_bar.items[len(self.grid.top_bar.items)-1], 
+                self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1])
         
     def __add_separator(self, flag):
-        self.grid_row_menu.add_separator()   
-        self.toolbar.add_separator()   
+        self.grid.handler_rowcontextmenu.add_separator()   
+        self.grid.top_bar.add_separator()   
         if flag==0:
-            self.grid_menu.add_separator()
+            self.grid.handler_rowcontextmenu.add_separator()
         
     @property
     def url_new(self):
