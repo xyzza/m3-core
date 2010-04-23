@@ -360,6 +360,8 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     def get_rows(self, parent_id, offset, limit, filter):
         query = self.list_model.objects.filter(group = parent_id)
         query = apply_search_filter(query, filter, self.filter_fields)
+        if offset > 0 and limit > 0:
+            query = query[offset: offset + limit]
         items = list(query.all())
         return items
     
@@ -394,13 +396,15 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     def delete_row(self, obj):
         message = ''
         if not safe_delete_record(self.list_model, obj.id):
-            message = u'Не удалось удалить элемент'
+            message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
+            
+        
         return OperationResult.by_message(message)
         
     def delete_node(self, obj):
         message = ''
         if not safe_delete_record(self.tree_model, obj.id):
-            message = u'Не удалось удалить группу'
+            message = u'Не удалось удалить группу. Возможно на неё есть ссылки.'
         return OperationResult.by_message(message)
         
 #TODO: Избавиться от копипаста в экшенах.

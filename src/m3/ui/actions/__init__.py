@@ -9,6 +9,7 @@ from django import http
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
 import json
+from m3.ui.ext.base import BaseExtComponent
 
 class ActionResult(object):
     '''
@@ -74,10 +75,16 @@ class OperationResult(ActionResult):
     '''
     Результат выполнения операции, описанный в виде Ajax результата ExtJS: success или failure.
     '''
-    def __init__(self, success = True, *args, **kwargs):
+    def __init__(self, success = True, code = '', window = '', *args, **kwargs):
         super(OperationResult, self).__init__(*args, **kwargs)
+        # Результат выполнения операции: успех/неудача
         self.success = success
+        # Сообщение об ошибке выводимое при неудаче
         self.error_message = ''
+        # Произвольный JS код, который выполняется в любом случае если задан
+        self.code = code
+        # Окно которое может появиться в результате операции
+        self.window = window
     
     @staticmethod
     def by_message(message):
@@ -98,8 +105,16 @@ class OperationResult(ActionResult):
         else:
             result['success'] = False
             result['errors'] = {'reason': self.error_message}
+            
+        if self.window:
+            assert isinstance(self.window, BaseExtComponent)
+            self.code = self.window.get_script()
 
         result = json.JSONEncoder().encode(result)
+        # Вставляем функцию прямо в JSON без кодирования
+        if self.code:
+            code = ' ,"code": function(){return %s;}' % self.code
+            result = result[:-1] + code + result[-1]
         return http.HttpResponse(result)
 
 class ActionContextDeclaration(object):

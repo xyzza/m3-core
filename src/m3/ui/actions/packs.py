@@ -221,8 +221,9 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         '''
         Возвращает данные для грида справочника
         '''
-        #TODO: Пока нет грида с пейджингом старт и оффсет не работают
         query = apply_search_filter(self.model.objects, filter, self.filter_fields)
+        if (offset > 0) and (limit > 0):
+            query = query[offset:offset + limit]
         items = list(query.all())
         return items
     
