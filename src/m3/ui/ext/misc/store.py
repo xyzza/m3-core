@@ -30,7 +30,7 @@ class ExtDataStore(BaseExtStore):
         '''Прописывается в шаблоне и заполняется при рендеринге'''
         res = []
         for item in self.data:    
-            res.append('[%s]' % ','.join(['"%s"' % subitem for subitem in item]))   
+            res.append('[%s]' % ','.join(['"%s"' % subitem for subitem in item]))
         return ','.join(res)
             
     

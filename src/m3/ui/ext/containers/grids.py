@@ -16,6 +16,11 @@ class ExtGrid(BaseExtPanel):
         self._items = []
         self.__store = None
         self.editor = False
+        # selection model
+        self.__sm = None
+        # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен
+        # чтобы знать когда нужен дополнительный column
+        self.__checkbox = False
         self.init_component(*args, **kwargs)
         
         # protected
@@ -86,6 +91,16 @@ class ExtGrid(BaseExtPanel):
     def columns(self):
         return self._items
 
+    @property
+    def sm(self):
+        return self.__sm
+    
+    @sm.setter
+    def sm(self, value):
+        self.__sm = value
+        self.checkbox_model = isinstance(self.__sm, ExtGridCheckBoxSelModel)
+            
+
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------
@@ -153,10 +168,35 @@ class ExtGridNumberColumn(BaseExtGridColumn):
         self.template = 'ext-grids/ext-number-column.js'
         self.format = None
         self.init_component(*args, **kwargs)
-        
+
 class ExtGridDateColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridDateColumn, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-date-column.js'
         self.format = None
+        self.init_component(*args, **kwargs)
+
+class ExtGridBaseSelModel(ExtUIComponent):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridBaseSelModel, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-date-column.js'
+        self.singleSelect = False
+        self.init_component(*args, **kwargs)
+
+class ExtGridCheckBoxSelModel(ExtGridBaseSelModel):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridCheckBoxSelModel, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-checkbox-selmodel.js'
+        self.init_component(*args, **kwargs)
+
+class ExtGridRowSelModel(ExtGridBaseSelModel):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridRowSelModel, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-row-selmodel.js'
+        self.init_component(*args, **kwargs)
+
+class ExtGridCellSelModel(ExtGridBaseSelModel):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridCellSelModel, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-cell-selmodel.js'
         self.init_component(*args, **kwargs)

@@ -27,6 +27,11 @@ function(){
 		);
 	{%endif%}
 	
+	{% if component.sm %} var sel_model = {{ component.sm.render|safe }}; {% endif %}
+	var grid_columns = [
+		{% if component.checkbox_model %} sel_model, {% endif %}
+		{{ component.t_render_columns|safe }}
+	];
 	
 	var grid = new Ext.grid.GridPanel({
 		id: '{{ component.client_id }}'
@@ -56,9 +61,9 @@ function(){
 	    {% if component.top_bar %} ,tbar: {{ component.t_render_top_bar|safe }} {% endif %}
 		{% if component.buttom_bar %} ,bbar: {{ component.t_render_buttom_bar|safe }} {% endif %}
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
-	    
+	    {% if component.sm %} ,sm: sel_model {% endif %}
 		,store: {{ component.t_render_store|safe }}
-		,columns: [{{ component.t_render_columns|safe }}]
+		,columns: grid_columns
 		,stripeRows: true
 		,stateful: true
 		,viewConfig: {forceFit: true}
