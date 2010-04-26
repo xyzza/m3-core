@@ -58,10 +58,10 @@ class ExtToolbar(BaseExtContainer):
         return self._items
     
     
-class ExtPaggingbar(BaseExtContainer):   
+class ExtPagingbar(BaseExtContainer):   
     def __init__(self, *args, **kwargs):
-        super(ExtPaggingbar, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-paggingbar.js'
+        super(ExtPagingbar, self).__init__(*args, **kwargs)
+        self.template = 'ext-containers/ext-pagingbar.js'
         self.page_size = 25
         self.init_component(*args, **kwargs)
         
