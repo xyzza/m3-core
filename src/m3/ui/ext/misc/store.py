@@ -42,6 +42,8 @@ class ExtJsonStore(BaseExtStore):
         self.url = ''
         self.start = 0
         self.limit = -1
+        self.total_property = None
+        self.root = None
         self.auto_load = False
         self.init_component(*args, **kwargs)
         
