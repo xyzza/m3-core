@@ -109,9 +109,14 @@ function selectValueGrid(){
  * Перезагружает хранилище данных
  */
 function refreshGridStore(){
-	var search_field_grid = Ext.getCmp("{{ component.search_text_grid.client_id }}");
-	if (search_field_grid)
-		search_field_grid.search();
+	var bbar = Ext.getCmp("{{ component.grid.client_id }}").getBottomToolbar();
+	if (bbar && bbar.isXType('paging')) {
+		bbar.doRefresh();
+	} else {
+		var search_field = Ext.getCmp("{{ component.search_text.client_id }}");
+		if (search_field)
+			search_field.search();
+	}
 };
 
 /*========================================== Работаем с деревом ===========================================*/

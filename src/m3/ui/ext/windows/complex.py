@@ -125,10 +125,10 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.grid.handler_rowcontextmenu.add_item(text=text, **kwargs)
             
         if flag==0:
-            self.grid.handler_rowcontextmenu.add_item(text=text, **kwargs)
+            self.grid.handler_contextmenu.add_item(text=text, **kwargs)
             return (self.grid.top_bar.items[len(self.grid.top_bar.items)-1], 
                     self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1], 
-                    self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1])
+                    self.grid.handler_contextmenu.items[len(self.grid.handler_contextmenu.items)-1])
         else:
             return (self.grid.top_bar.items[len(self.grid.top_bar.items)-1], 
                 self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1])
@@ -137,7 +137,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.grid.handler_rowcontextmenu.add_separator()   
         self.grid.top_bar.add_separator()   
         if flag==0:
-            self.grid.handler_rowcontextmenu.add_separator()
+            self.grid.handler_contextmenu.add_separator()
         
     @property
     def url_new(self):

@@ -121,7 +121,12 @@ function selectValue(){
  * Перезагружает хранилище данных
  */
 function refreshStore(){
-	var search_field = Ext.getCmp("{{ component.search_text.client_id }}");
-	if (search_field)
-		search_field.search();
+	var bbar = Ext.getCmp("{{ component.grid.client_id }}").getBottomToolbar();
+	if (bbar && bbar.isXType('paging')) {
+		bbar.doRefresh();
+	} else {
+		var search_field = Ext.getCmp("{{ component.search_text.client_id }}");
+		if (search_field)
+			search_field.search();
+	}
 };

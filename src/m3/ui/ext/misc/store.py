@@ -40,6 +40,8 @@ class ExtJsonStore(BaseExtStore):
         self.template = 'ext-misc/ext-json-store.js'
         self.__columns = [] # Для заполнения полей в шаблоне
         self.url = ''
+        self.start = 0
+        self.limit = -1
         self.auto_load = False
         self.init_component(*args, **kwargs)
         

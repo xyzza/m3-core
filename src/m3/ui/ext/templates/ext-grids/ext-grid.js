@@ -59,7 +59,7 @@ function(){
 	    	,header: false
 	    {% endif %}
 	    {% if component.top_bar %} ,tbar: {{ component.t_render_top_bar|safe }} {% endif %}
-		{% if component.buttom_bar %} ,bbar: {{ component.t_render_buttom_bar|safe }} {% endif %}
+		{% if component.bottom_bar %} ,bbar: {{ component.t_render_bottom_bar|safe }} {% endif %}
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
 	    {% if component.sm %} ,sm: sel_model {% endif %}
 		,store: {{ component.t_render_store|safe }}
@@ -93,7 +93,17 @@ function(){
 			{% endfor%}
 		}
 		{% endif %}
-})
+	})
+
+	{% if component.bottom_bar %} 
+	var bbar = grid.getBottomToolbar();
+	if (bbar && bbar.isXType('paging')){
+		var store = grid.getStore();
+		store.setBaseParam('start',0);
+		store.setBaseParam('limit',bbar.pageSize);
+		bbar.bind(store);
+	}
+	{% endif %}	
 
 return grid;
 }()

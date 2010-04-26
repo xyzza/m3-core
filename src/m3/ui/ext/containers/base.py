@@ -33,6 +33,7 @@ class BaseExtContainer(ExtUIComponent):
     def t_render_layout_config(self):
         '''Рендерит конфиг, если указан layout'''
         return '{%s}' % ','.join(['%s:"%s"' % (k, v) for k, v in self.layout_config.items()])
+    
         
 class BaseExtPanel(BaseExtContainer):
     def __init__(self, *args, **kwargs):
@@ -40,14 +41,14 @@ class BaseExtPanel(BaseExtContainer):
         self.title = None
         self.icon_cls = None
         self.top_bar = None
-        self.buttom_bar = None
+        self.bottom_bar = None
         self.footer_bar = None
 
     def t_render_top_bar(self):
         return self.top_bar.render()
     
-    def t_render_buttom_bar(self):
-        return self.buttom_bar.render()
+    def t_render_bottom_bar(self):
+        return self.bottom_bar.render()
     
     def t_render_footer_bar(self):
         return self.footer_bar.render()

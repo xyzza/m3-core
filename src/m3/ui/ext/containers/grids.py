@@ -100,7 +100,6 @@ class ExtGrid(BaseExtPanel):
         self.__sm = value
         self.checkbox_model = isinstance(self.__sm, ExtGridCheckBoxSelModel)
             
-
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------
