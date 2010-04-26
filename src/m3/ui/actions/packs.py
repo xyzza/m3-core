@@ -22,6 +22,8 @@ class DictListWindowAction(Action):
         
         # Устанавливаем источники данных
         grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
+        grid_store.total_property = 'total'
+        grid_store.root = 'rows'
         win.grid.set_store(grid_store)
         
         # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося 
@@ -78,7 +80,7 @@ class DictRowsAction(Action):
     '''
     url = '/rows$'
     def run(self, request, context):
-        offset = int(request.REQUEST.get('offset', 0))
+        offset = int(request.REQUEST.get('start', 0))
         limit = int(request.REQUEST.get('limit', 0))
         filter = request.REQUEST.get('filter')
         return PreJsonResult(self.parent.get_rows(offset, limit, filter))
@@ -222,10 +224,11 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         Возвращает данные для грида справочника
         '''
         query = apply_search_filter(self.model.objects, filter, self.filter_fields)
-        if (offset > 0) and (limit > 0):
+        total = query.count()
+        if limit > 0:
             query = query[offset:offset + limit]
-        items = list(query.all())
-        return items
+        result = {'rows': list(query.all()), 'total': total}
+        return result
     
     def get_row(self, id):
         # Если id нет, значит нужно создать новый объект

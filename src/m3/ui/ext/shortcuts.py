@@ -128,3 +128,50 @@ function(field, e){
 ''' % {'function':function,
        'params': '"%s"' % '","'.join(args)
       }
+
+# Временно лежит тут. Не знаю пока куда засунуть.
+class MessageBox(object):
+    '''
+    Обёртка над стандартным MessageBox ExtJS
+    '''
+    # Константы определяющие значек формы
+    ICON_INFO     = 'Ext.MessageBox.INFO'
+    ICON_ERROR    = 'Ext.MessageBox.ERROR'
+    ICON_QUESTION = 'Ext.MessageBox.QUESTION'
+    ICON_WARNING  = 'Ext.MessageBox.WARNING'
+    
+    # Константы определяющие доступные кнопки
+    BTN_OK          = 'Ext.Msg.OK'
+    BTN_CANCEL      = 'Ext.Msg.CANCEL'
+    BTN_OKCANCEL    = 'Ext.Msg.OKCANCEL'
+    BTN_YESNO       = 'Ext.Msg.YESNO'
+    BTN_YESNOCANCEL = 'Ext.Msg.YESNOCANCEL'
+    
+    def __init__(self, title = '', msg = '', icon = ICON_INFO, buttons = BTN_OK):
+        self.title = title
+        self.msg = msg
+        self.icon = icon
+        self.buttons = buttons
+    
+    def get_script(self):
+        template = '''
+Ext.Msg.show({
+   title: "%(title)s",
+   msg: "%(msg)s",
+   buttons: %(buttons)s,
+   fn: %(handler)s,
+   animEl: 'elId',
+   icon: %(icon)s
+});
+        '''
+        template = template.replace('\n', ' ')
+        handler = '''
+function() {}
+        '''
+        result = template % {'title': self.title,
+                             'msg': self.msg,
+                             'buttons': self.buttons,
+                             'icon': self.icon,
+                             'handler': handler}
+        return result
+    

@@ -7,6 +7,7 @@ from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to
     bind_request_form_to_object, safe_delete_record, fetch_search_tree, create_search_filter
 from m3.ui.ext.windows.complex import ExtTreeDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
+from m3.ui.ext.shortcuts import MessageBox
 
 class TreeGetNodesAction(Action):
     '''
@@ -64,7 +65,7 @@ class ListGetRowsAction(Action):
     url = '/rows$'
     def run(self, request, context):
         parent_id = request.REQUEST.get('id')
-        offset = int(request.REQUEST.get('offset', 0))
+        offset = int(request.REQUEST.get('start', 0))
         limit = int(request.REQUEST.get('limit', 0))
         filter = request.REQUEST.get('filter')
         result = self.parent.get_rows(parent_id, offset, limit, filter)
@@ -212,6 +213,8 @@ class ListWindowAction(Action):
         
         # Устанавливаем источники данных
         grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
+        grid_store.total_property = 'total'
+        grid_store.root = 'rows'
         win.grid.set_store(grid_store)
         win.tree.url = base.get_nodes_action.get_absolute_url()
         
@@ -360,10 +363,14 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     def get_rows(self, parent_id, offset, limit, filter):
         query = self.list_model.objects.filter(group = parent_id)
         query = apply_search_filter(query, filter, self.filter_fields)
-        if offset > 0 and limit > 0:
+        # Для работы пейджинга нужно передавать общее количество записей
+        total = query.count()
+        # Срез данных для страницы
+        if limit > 0:
             query = query[offset: offset + limit]
-        items = list(query.all())
-        return items
+        
+        result = {'rows': list(query.all()), 'total': total}
+        return result
     
     def _get_obj(self, model, id):
         '''
@@ -397,9 +404,14 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         message = ''
         if not safe_delete_record(self.list_model, obj.id):
             message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
-            
         
-        return OperationResult.by_message(message)
+        message = u'опа!'
+        
+        result = OperationResult()
+        if message:
+            mbox = MessageBox('БАРС МИС', message, MessageBox.ICON_ERROR)
+            result.code = mbox.get_script()
+        return result
         
     def delete_node(self, obj):
         message = ''
