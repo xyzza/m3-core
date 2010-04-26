@@ -1,4 +1,4 @@
 #coding:utf-8
 
-from buttons import ExtButton #, ExtSplitButton
+from buttons import ExtButton
 

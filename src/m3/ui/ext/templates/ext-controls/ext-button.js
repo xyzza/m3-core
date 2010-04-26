@@ -1,4 +1,9 @@
+{%if component.menu %}
 new Ext.SplitButton({
+{%else%}
+new Ext.Button({
+{%endif%}
+
 	id: '{{ component.client_id }}'
 	{% if component.disabled %} ,disabled: true {% endif %}
 	{% if component.hidden %} ,hidden: true {% endif %}
@@ -21,8 +26,8 @@ new Ext.SplitButton({
 	{% if component.flex %} ,flex: {{ component.flex }} {% endif %}
 	{% if component.tooltip_text %} ,tooltip: {{ component.t_render_tooltip|safe }} {% endif %}
 	
-	{% if component.handler %},handler: {{ component.t_render_handler|safe}} {% endif%}
-	{% if component.menu %},menu: {{ component.menu.render|safe}} {% endif%}
+	{% if component.handler %} ,handler: {{ component.t_render_handler|safe}}{% endif%}
+	{% if component.menu %} ,menu: {{ component.menu.render|safe}} {% endif%}
 })
 
 
