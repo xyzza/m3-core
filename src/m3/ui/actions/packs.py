@@ -15,6 +15,7 @@ class DictListWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         win = base.list_form(mode = 0, title = base.title)
+        win.init_grid_components()
         
         # Добавляем отображаемые колонки
         for field, name in base.list_columns:
@@ -42,6 +43,7 @@ class DictSelectWindowAction(Action):
         # Создаем окно выбора
         base = self.parent
         win = base.select_form(title = base.title)
+        win.init_grid_components()
         win.mode = 1
         
         # Добавляем отображаемые колонки

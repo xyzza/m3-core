@@ -5,9 +5,9 @@
 from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
 from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
     bind_request_form_to_object, safe_delete_record, fetch_search_tree, create_search_filter
-from m3.ui.ext.windows.complex import ExtTreeDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.shortcuts import MessageBox
+from m3.ui.ext.windows.complex import ExtDictionaryWindow
 
 class TreeGetNodesAction(Action):
     '''
@@ -176,6 +176,8 @@ class SelectWindowAction(Action):
         # Создаем окно выбора
         base = self.parent
         win = self.parent.list_window(title = base.title, mode = 1)
+        win.init_grid_components()
+        win.init_tree_components()
         
         # Добавляем отображаемые колонки
         for field, name in base.list_columns:
@@ -204,6 +206,8 @@ class ListWindowAction(Action):
         # Создаем окно
         base = self.parent
         win = self.parent.list_window(title = base.title, mode = 0)
+        win.init_grid_components()
+        win.init_tree_components()
         
         # Добавляем отображаемые колонки
         for field, name in base.list_columns:
@@ -244,7 +248,7 @@ class BaseTreeDictionaryActions(ActionPack):
     # Окно редактирования элемента списка
     edit_window = None
     # Окно самого справочника
-    list_window = ExtTreeDictionaryWindow
+    list_window = ExtDictionaryWindow
     
     def __init__(self):
         self.actions = []
