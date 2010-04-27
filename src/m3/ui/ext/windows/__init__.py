@@ -2,5 +2,5 @@
 
 from window import ExtWindow
 from edit_window import ExtEditWindow
-from complex import ExtDictionaryWindow, ExtTreeDictionaryWindow
+from complex import ExtDictionaryWindow
 

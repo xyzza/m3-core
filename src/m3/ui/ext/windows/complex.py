@@ -7,274 +7,64 @@ Created on 9.03.10
 '''
 
 from base import BaseExtWindow
+from m3.ui.ext.fields import ExtSearchField
 from m3.ui.ext.controls import ExtButton
-from m3.ui.ext.containers import ExtGrid
-
-from m3.ui.ext.fields import ExtStringField, ExtSearchField
-from m3.ui.ext.controls import ExtButton
-from m3.ui.ext.containers import ExtContainer,  \
-                                ExtButtonGroup, \
-                                ExtContextMenu, \
-                                ExtPanel,       \
-                                ExtListView,    \
-                                ExtToolbar,     \
-                                ExtTree
+from m3.ui.ext.containers import (ExtContextMenu,
+                                ExtPanel,
+                                ExtListView, 
+                                ExtToolbar, 
+                                ExtTree,
+                                ExtGrid)
         
-        
+                
 class ExtDictionaryWindow(BaseExtWindow):
-    ''' Базовое окно для простого линейного справочника '''
+    ''' Базовое окно для линейного, иерархичесого и совмещенного справочника справочника '''
     def __init__(self, *args, **kwargs):
         super(ExtDictionaryWindow, self).__init__(*args, **kwargs)
         self.template = 'ext-windows/ext-window.js'
         self.template_globals = 'ext-script/ext-dictionary-window-globals.js'
         self.layout='border'
         
-        grid = ExtGrid(region='center')
-        
-        row_menu = ExtContextMenu()
-        grid.handler_rowcontextmenu = row_menu
-        
-        menu = ExtContextMenu()
-        grid.handler_contextmenu = menu
-        
-        search = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = grid)
-        
-        button_group = ExtButtonGroup(columns_number=1)
-        cont_west = ExtContainer(region='west', min_width=30)
-        cont_west.items.append(button_group)
-
-        toolbar = ExtToolbar()
-        grid.top_bar = toolbar
-        self.items.append(grid)
-        
         self.buttons.append(ExtButton(text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
-        
+
         # Основные контролы должны быть доступны для изменения
-        self.grid = grid
-        self.toolbar = toolbar
+        self.grid = None
+        self.tree = None
+       
         self.list_view = None
-        self.search_text = search
+        self.search_text_grid = None
+        self.search_text_tree = None
         self.select_button = None
         self.__panel_list_view = None
         
         # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
         self.__mode = 0 # По умолчанию справочник открыт в режиме списка
      
-        # Добавляются пункты в меню и на тулбар
-        self.__components_new   = self.__add_menu_item(0, text=u'Новый', icon_cls='add_item', disabled=True)
-        self.__components_edit  = self.__add_menu_item(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
-        self.__components_delete= self.__add_menu_item(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
-        self.__add_separator(0)
-        self.__components_refresh= self.__add_menu_item(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshStore')
+        # Компоненты для различных действий для грида
+        self.__components_new_grid = None
+        self.__components_edit_grid = None
+        self.__components_delete_grid = None
+        self.__components_refresh_grid = None
         
-        toolbar.add_fill()
-        toolbar.items.append(search)
-        
-        # Вызываемые url
-        self.__url_new = None
-        self.__url_edit = None
-        self.__url_delete = None
-        self.__column_name_on_select = None
-        
-        self.init_component(*args, **kwargs)
-        
-    @property
-    def mode(self):
-        return self.__mode
-    
-    @mode.setter
-    def mode(self, value):
-        assert value in (0,1), 'Mode only 1 (select mode) or 0 (list mode)'
-
-        if value==1:
-            buttom_panel = ExtPanel(title='История выбора',
-                                region='south',min_height=100, collapsible=True, split=True)
-            list_view = ExtListView() 
-            buttom_panel.items.append(list_view)
-            self.items.append(buttom_panel)
-        
-            select_btn = ExtButton(text = u'Выбрать', disabled=True)
-            self.buttons.insert(0, select_btn)
-            
-            self.select_button = select_btn
-            self.__panel_list_view = buttom_panel
-            self.list_view = list_view
-        elif value==0:
-            if self.__panel_list_view:
-                self.items.remove(self.__panel_list_view)
-                self.list_view = None
-                self.__panel_list_view = None
-            if self.select_button:
-                self.buttons.remove(self.select_button)
-                self.select_button = None
-
-        self.__mode = value
-        
-    def __add_menu_item(self, flag, **kwargs):
-        '''
-        @param flag: Указывает как будет добавляться пункт,
-            0 - Добавляется в тублар, в конт. меню строки, в меню всего грида
-            1 - Добавляется в тублар, в конт. меню строки
-        '''
-        text = None
-        if kwargs.has_key('text'):
-            text = kwargs.pop("text")
-            
-        self.grid.top_bar.items.append(ExtButton(tooltip_text=text, **kwargs))
-        self.grid.handler_rowcontextmenu.add_item(text=text, **kwargs)
-            
-        if flag==0:
-            self.grid.handler_contextmenu.add_item(text=text, **kwargs)
-            return (self.grid.top_bar.items[len(self.grid.top_bar.items)-1], 
-                    self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1], 
-                    self.grid.handler_contextmenu.items[len(self.grid.handler_contextmenu.items)-1])
-        else:
-            return (self.grid.top_bar.items[len(self.grid.top_bar.items)-1], 
-                self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1])
-        
-    def __add_separator(self, flag):
-        self.grid.handler_rowcontextmenu.add_separator()   
-        self.grid.top_bar.add_separator()   
-        if flag==0:
-            self.grid.handler_contextmenu.add_separator()
-        
-    @property
-    def url_new(self):
-        return self.__url_new
-        
-    @url_new.setter
-    def  url_new(self, value):
-        if value:
-            self.__set_handler(self.__components_new, 'newValue')
-        else:
-            self.__clear_handler(self.__components_new)
-        self.__url_new = value
-    
-    @property
-    def url_edit(self):
-        return self.__url_edit
-    
-    @url_edit.setter
-    def url_edit(self, value):
-        if value:
-            self.__set_handler(self.__components_edit,'editValue')
-        else:
-            self.__clear_handler(self.__components_edit)
-        self.__url_edit = value 
-    
-    @property
-    def url_delete(self):
-        return self.__url_delete
-    
-    @url_delete.setter
-    def url_delete(self, value):
-        if value:
-            self.__set_handler(self.__components_delete, 'deleteValue')
-        else:
-            self.__clear_handler(self.__components_delete)
-        self.__url_delete = value 
-    
-    @property
-    def column_name_on_select(self):
-        return self.__text_on_select
-    
-    @column_name_on_select.setter
-    def column_name_on_select(self, value):
-        if value:
-            self.__set_handler([self.select_button,],'selectValue')
-        else:
-            self.__clear_handler([self.select_button,])
-        self.__text_on_select = value
-    
-    def __set_handler(self, components, handler):
-        for component in components:
-            component.handler = handler
-            component.disabled = False
-            
-    def __clear_handler(self, components):
-        for component in components:
-            component.handler = None
-            component.disabled = True
-            
-            
-class ExtTreeDictionaryWindow(BaseExtWindow):
-    ''' Базовое окно для иерархичесого справочника '''
-    def __init__(self, *args, **kwargs):
-        super(ExtTreeDictionaryWindow, self).__init__(*args, **kwargs)
-        self.template = 'ext-windows/ext-window.js'
-        self.template_globals = 'ext-script/ext-tree-dictionary-window-globals.js'
-        self.layout='border'
-
-        grid = ExtGrid(region='center')
-        grid.handler_rowcontextmenu = ExtContextMenu()
-        grid.handler_contextmenu = ExtContextMenu()
-        grid.top_bar = ExtToolbar()
-        
-        search_grid = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = grid)
-        
-        tree = ExtTree(region='west', width=180)
-        tree.handler_contextmenu = ExtContextMenu()
-        tree.handler_containercontextmenu = ExtContextMenu()
-        tree.handler_click = 'onClickNode'
-        tree.top_bar = ExtToolbar()
-        
-        search_tree = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = tree)
-        
-        self.items.extend([grid, tree])
-        
-        self.buttons.append(ExtButton(text = u'Закрыть',
-                                      handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
-
-        # Основные контролы должны быть доступны для изменения
-        self.grid = grid
-        self.tree = tree
-       
-        self.list_view = None
-        self.search_text_grid = search_grid
-        self.search_text_tree = search_tree
-        self.select_button = None
-        self.__panel_list_view = None
-        
-        # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
-        self.__mode = 0 # По умолчанию справочник открыт в режиме списка
-     
-        # Добавляются пункты в меню грида и на тулбар грида 
-        self.__components_new_grid  = self.__add_menu_item_grid(0, text=u'Новый', icon_cls='add_item', disabled=True)
-        self.__components_edit_grid      = self.__add_menu_item_grid(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
-        self.__components_delete_grid    = self.__add_menu_item_grid(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
-        self.__add_separator_grid(0)
-        self.__components_refresh_grid   = self.__add_menu_item_grid(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshGridStore')
-        
-        grid.top_bar.add_fill()
-        grid.top_bar.items.append(search_grid)
-        
-        # Добавляются пункты в меню дерева и на тулбар дерева
-        menu = ExtContextMenu() # overflow='visible' -- для того, чтобы комбобокс отображался
-        self.tree.top_bar.add_menu(icon_cls="add_item", menu=menu, tooltip_text = u'Добавить')
-        
-        self.__components_new_tree      = self.__add_menu_item_tree(0, menu,  text=u'Новый в корне', icon_cls='add_item', disabled=True)
-        self.__components_new_tree_child= self.__add_menu_item_tree(1, menu,  text=u'Новый дочерний', icon_cls='add_item', disabled=True)
-        self.__components_edit_tree     = self.__add_menu_item_tree(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
-        self.__components_delete_tree   = self.__add_menu_item_tree(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
-        self.__add_separator_tree(0)
-        self.__components_refresh_tree  = self.__add_menu_item_tree(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshTreeLoader')
-       
-        menu = ExtContextMenu(style = dict(overflow='visible')) # overflow='visible' -- для того, чтобы комбобокс отображался
-        menu.items.append(search_tree)
-        tree.top_bar.add_fill()
-        tree.top_bar.add_menu(icon_cls="search", menu=menu)
+        # Компоненты для различных действий для дерева
+        self.__components_new_tree = None
+        self.__components_new_tree_child = None
+        self.__components_edit_tree = None
+        self.__components_delete_tree = None
+        self.__components_refresh_tree = None
         
         # Вызываемые url для грида
         self.__url_new_grid = None
         self.__url_edit_grid = None
         self.__url_delete_grid = None
-        self.__column_name_on_select = None
         
         # Вызываемые url для дерева
         self.__url_new_tree = None
         self.__url_edit_tree = None
         self.__url_delete_tree = None
+        
+        self.__column_name_on_select = None
         
         self.init_component(*args, **kwargs)
         
@@ -386,6 +176,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         
     @url_new_grid.setter
     def  url_new_grid(self, value):
+        self.init_grid_components()
         if value:
             self.__set_handler(self.__components_new_grid, 'newValueGrid')
         else:
@@ -398,6 +189,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
     
     @url_edit_grid.setter
     def url_edit_grid(self, value):
+        self.init_grid_components()
         if value:
             self.__set_handler(self.__components_edit_grid,'editValueGrid')
         else:
@@ -410,6 +202,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
     
     @url_delete_grid.setter
     def url_delete_grid(self, value):
+        self.init_grid_components()
         if value:
             self.__set_handler(self.__components_delete_grid, 'deleteValueGrid')
         else:
@@ -423,6 +216,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         
     @url_new_tree.setter
     def  url_new_tree(self, value):
+        self.init_tree_components()
         if value:
             self.__set_handler(self.__components_new_tree, 'newValueTreeRoot')
             self.__set_handler(self.__components_new_tree_child, 'newValueTreeChild')
@@ -437,6 +231,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
     
     @url_edit_tree.setter
     def url_edit_tree(self, value):
+        self.init_tree_components()
         if value:
             self.__set_handler(self.__components_edit_tree,'editValueTree')
         else:
@@ -449,12 +244,14 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
     
     @url_delete_tree.setter
     def url_delete_tree(self, value):
+        self.init_tree_components()
         if value:
             self.__set_handler(self.__components_delete_tree, 'deleteValueTree')
         else:
             self.__clear_handler(self.__components_delete_tree)
         self.__url_delete_tree = value 
     
+    # Выбор из справочника
     @property
     def column_name_on_select(self):
         return self.__text_on_select
@@ -462,7 +259,7 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
     @column_name_on_select.setter
     def column_name_on_select(self, value):
         if value:
-            self.__set_handler([self.select_button,],'selectValueGrid')
+            self.__set_handler([self.select_button,],'selectValue')
         else:
             self.__clear_handler([self.select_button,])
         self.__text_on_select = value
@@ -476,3 +273,65 @@ class ExtTreeDictionaryWindow(BaseExtWindow):
         for component in components:
             component.handler = None
             component.disabled = True
+            
+    def init_grid_components(self):
+        if not self.grid:
+            grid = ExtGrid(region='center')
+            grid.handler_rowcontextmenu = ExtContextMenu()
+            grid.handler_contextmenu = ExtContextMenu()
+            grid.top_bar = ExtToolbar()
+            
+            search_grid = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = grid)
+            
+            self.grid = grid
+            self.search_text_grid = search_grid
+            self.items.append(grid)
+            
+            # Добавляются пункты в меню грида и на тулбар грида 
+            self.__components_new_grid  = self.__add_menu_item_grid(0, text=u'Новый', icon_cls='add_item', disabled=True)
+            self.__components_edit_grid      = self.__add_menu_item_grid(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
+            self.__components_delete_grid    = self.__add_menu_item_grid(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
+            self.__add_separator_grid(0)
+            self.__components_refresh_grid   = self.__add_menu_item_grid(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshGridStore')
+            
+            grid.top_bar.add_fill()
+            grid.top_bar.items.append(search_grid)
+            
+    def init_tree_components(self):
+        if not self.tree:
+            tree = ExtTree(width=180)
+            tree.handler_contextmenu = ExtContextMenu()
+            tree.handler_containercontextmenu = ExtContextMenu()
+            tree.handler_click = 'onClickNode'
+            tree.top_bar = ExtToolbar()
+            
+            search_tree = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = tree)
+            
+            self.tree = tree
+            self.search_text_tree = search_tree
+            self.items.append(tree)
+            
+            menu=ExtContextMenu()
+            self.tree.top_bar.add_menu(icon_cls="add_item", menu=menu, tooltip_text = u'Добавить')
+        
+            self.__components_new_tree      = self.__add_menu_item_tree(0, menu,  text=u'Новый в корне', icon_cls='add_item', disabled=True)
+            self.__components_new_tree_child= self.__add_menu_item_tree(1, menu,  text=u'Новый дочерний', icon_cls='add_item', disabled=True)
+            self.__components_edit_tree     = self.__add_menu_item_tree(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
+            self.__components_delete_tree   = self.__add_menu_item_tree(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
+            self.__add_separator_tree(0)
+            self.__components_refresh_tree  = self.__add_menu_item_tree(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshTreeLoader')
+            
+    def render(self):
+        assert (self.grid or self.tree), 'Grid or tree is not initialized'
+        if not self.grid and self.tree:
+            self.tree.region = 'center'
+            self.tree.top_bar.add_fill()
+            self.tree.top_bar.items.append(self.search_text_tree)
+        elif self.tree:
+            self.tree.region = 'west'
+            menu = ExtContextMenu(style = dict(overflow='visible')) # overflow='visible' -- для того, чтобы комбобокс отображался
+            menu.items.append(self.search_text_tree)
+            self.tree.top_bar.add_fill()
+            self.tree.top_bar.add_menu(icon_cls="search", menu=menu)
+            
+        return super(ExtDictionaryWindow, self).render()
