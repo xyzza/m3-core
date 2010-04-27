@@ -361,7 +361,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         return nodes
     
     def get_rows(self, parent_id, offset, limit, filter):
-        query = self.list_model.objects.filter(group = parent_id)
+        query = self.list_model.objects.filter(parent = parent_id)
         query = apply_search_filter(query, filter, self.filter_fields)
         # Для работы пейджинга нужно передавать общее количество записей
         total = query.count()
@@ -405,12 +405,13 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         if not safe_delete_record(self.list_model, obj.id):
             message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
         
-        message = u'опа!'
+        message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
         
         result = OperationResult()
         if message:
             mbox = MessageBox('БАРС МИС', message, MessageBox.ICON_ERROR)
             result.code = mbox.get_script()
+            result.success = False
         return result
         
     def delete_node(self, obj):

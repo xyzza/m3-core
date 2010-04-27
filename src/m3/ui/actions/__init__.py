@@ -95,7 +95,7 @@ class OperationResult(ActionResult):
         result = OperationResult(success = True)
         if message:
             result.success = False
-            result.error_message = message
+            result.error_msg = message
         return result
     
     def get_http_response(self):
@@ -104,7 +104,7 @@ class OperationResult(ActionResult):
             result['success'] = True
         else:
             result['success'] = False
-            result['errors'] = {'reason': self.error_message}
+            result['error_msg'] = self.error_msg
             
         if self.window:
             assert isinstance(self.window, BaseExtComponent)
