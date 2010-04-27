@@ -29,7 +29,7 @@ function(){
 	
 	{% if component.sm %} var sel_model = {{ component.sm.render|safe }}; {% endif %}
 	var grid_columns = [
-		{% if component.checkbox_model %} sel_model, {% endif %}
+		{% if component.checkbox_model %} sel_model {% if component.columns %} , {% endif %} {% endif %}
 		{{ component.t_render_columns|safe }}
 	];
 	
@@ -62,6 +62,7 @@ function(){
 		{% if component.bottom_bar %} ,bbar: {{ component.t_render_bottom_bar|safe }} {% endif %}
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
 	    {% if component.sm %} ,sm: sel_model {% endif %}
+		{% if component.loadMask %} ,loadMask: true {% endif %}
 		,store: {{ component.t_render_store|safe }}
 		,columns: grid_columns
 		,stripeRows: true
@@ -104,6 +105,5 @@ function(){
 		bbar.bind(store);
 	}
 	{% endif %}	
-
 return grid;
 }()

@@ -11,6 +11,7 @@ import datetime
 import re
 import codecs
 import uuid
+import string
 
 from django.utils.encoding import smart_unicode
 from django.db import models, transaction
@@ -33,6 +34,7 @@ class DictLoadException(Exception):
     '''
     def __init__(self, model, reason, orig_exc_info=None):
         # указывает на модель записи справочника, при загрузки которой возникла ошибка
+        # в некоторых случаях(при считывании данных из файла) может быть == None
         self.model = model
         # текстовое описание причины исключения
         self.reason = reason
@@ -61,7 +63,7 @@ def read_simple_dict_file(filename):
             if first_string.startswith('#'):
                 first_string = first_string[1:].strip()
             else:
-                raise Exception(u'Первая строка скрипта загрузки линейного справочника должна содержать название аттрибутов и начинаться с символа #')
+                raise DictLoadException(None, u'Первая строка скрипта загрузки линейного справочника должна содержать название аттрибутов и начинаться с символа #')
             
             attrs = [item.strip() for item in smart_unicode(first_string).split('\t')]
             for num, line in enumerate(f, 1):
@@ -69,7 +71,7 @@ def read_simple_dict_file(filename):
                 if len(row_values) == len(attrs):
                     values.append(row_values)
                 else:
-                    raise Exception(u'Количество полей не совпадает: строка %s' % num)
+                    raise DictLoadException(None, u'Количество полей не совпадает: строка %s' % num)
     except IOError:
         raise
     
@@ -100,7 +102,7 @@ def read_tree_dict_file(filename):
         
         def __init__(self, row_string):
             if row_string == '':
-                raise Exception(u'Пустая строка')
+                raise DictLoadException(None ,u'Пустая строка')
             
             s = row_string.split('\t')
             # Делаем для каждой записи уникальный id'шник
@@ -114,7 +116,9 @@ def read_tree_dict_file(filename):
                 if item == '':
                     self.level += 1
                 else:
-                    if item == '-':
+                    # знак '-' - это обозначение пустого значения, чтобы отличать начало строки от уровней вложенности ветки 
+                    # (может использоваться только для первого элемента в строке)
+                    if item == '-': 
                         s[self.level] = ''
                     break
             self.attrs = [ item.strip() for item in s[self.level:]]
@@ -128,26 +132,23 @@ def read_tree_dict_file(filename):
                 # листьям разрешено не иметь полей 
                 self.is_leaf = True
                 
-        def __repr__(self):
-            return unicode(self.__dict__)
-
     try:
         with open(filename, 'rb') as f:
             lines = f.readlines()
             if len(lines) < 3:
-                raise Exception(u'В файле должно быть, как минимум, три строки')
+                raise DictLoadException(None, u'В файле должно быть, как минимум, три строки')
             
             first_string = strip_bom(lines[0])
             if first_string.startswith('#'):
                 first_string = first_string[1:].strip()
             else:
-                raise Exception(u'Первая строка скрипта загрузки иерархического справочника должна содержать название модели групп и начинаться с символа #')
+                raise DictLoadException(None, u'Первая строка скрипта загрузки иерархического справочника должна содержать название модели групп и начинаться с символа #')
             
             second_string = lines[1]
             if second_string.startswith('#'):
                 second_string = second_string[1:].strip()
             else:
-                raise Exception(u'Вторая строка скрипта загрузки иерархического справочника должна содержать название аттрибутов модели линейного справочника и начинаться с символа #')
+                raise DictLoadException(None, u'Вторая строка скрипта загрузки иерархического справочника должна содержать название аттрибутов модели линейного справочника и начинаться с символа #')
             
             tree_attrs = [item.strip() for item in smart_unicode(first_string).split('\t')]
             dict_attrs = [item.strip() for item in smart_unicode(second_string).split('\t')]
@@ -161,29 +162,24 @@ def read_tree_dict_file(filename):
                 if line == '': 
                     continue
                 struct = StringStruct(line)
-                if struct.level == level:
-                    struct.parent_uid = cur_parent
-                    if not struct.is_leaf:
-                        parents.append(cur_parent)
-                        cur_parent = struct.uid
-                        level += 1
-                elif struct.level-1 == level:
-                    struct.parent_uid = cur_parent
-                    if not struct.is_leaf:
-                        parents.append(cur_parent)
-                        cur_parent = struct.uid
-                        level += 1
+                if (struct.level == level) or (struct.level-1 == level):
+                    # все нормально, тут ничего не делаем
+                    pass
                 elif struct.level < level:
                     d = level - struct.level
                     for i in range(d):
                         cur_parent = parents.pop()
                     level -= d
-                    struct.parent_uid = cur_parent
                 else:
-                    raise Exception(u'Уровень вложенности задан неверно: строка %s' % num)
+                    raise DictLoadException(None, u'Уровень вложенности задан неверно: строка %s' % num)
+                
+                struct.parent_uid = cur_parent
                 if struct.is_leaf:
                     dict_rows[struct.uid] = struct
                 else:
+                    parents.append(cur_parent)
+                    cur_parent = struct.uid
+                    level += 1
                     tree_rows[struct.uid] = struct
             
     except IOError:
@@ -210,14 +206,15 @@ def fill_simple_dict(model, data):
         obj = model()
         for attr, val in zip(attrs, value):
             try:
-                val = _convert_value(fields[attr], val)
+                if fields.has_key(attr):
+                    converted = _convert_value(fields[attr], val)
+                    setattr(obj, attr, converted)
             except:
                 raise DictLoadException(model.__name__, u'Не удалось преобразовать значение: %s' % val)
-            setattr(obj, attr, val)
         try:
             obj.save()
         except:
-            raise DictLoadException(model.__name__, u'Не удалось сохранить запись справочника: %s' % value)
+            raise DictLoadException(model.__name__, u'Не удалось сохранить запись справочника: %s' % string.join(value))
 
 @transaction.commit_on_success
 def fill_tree_dict(group_model, list_model, group_link, list_link, data):
@@ -249,7 +246,7 @@ def fill_tree_dict(group_model, list_model, group_link, list_link, data):
         try:
             obj.save()
         except:
-            raise DictLoadException(group_model.__name__, u'Не удалось сохранить запись справочника: %s' % v.attrs)
+            raise DictLoadException(group_model.__name__, u'Не удалось сохранить запись справочника: %s' % string.join(v.attrs))
         tree_values[k] = (obj, v.parent_uid,)
     
     for k,v in tree_values.items():
@@ -258,7 +255,7 @@ def fill_tree_dict(group_model, list_model, group_link, list_link, data):
             try:
                 v[0].save()
             except:
-                raise DictLoadException(group_model.__name__, u'Не удалось сохранить запись справочника: %s' % v[0])
+                raise DictLoadException(group_model.__name__, u'Не удалось сохранить запись справочника: %s' % string.join(v[0]))
     
     dict_fields = dict( (field.name, field,) for field in list_model._meta.fields)
     for k,v in dict_rows.items():
@@ -270,11 +267,12 @@ def fill_tree_dict(group_model, list_model, group_link, list_link, data):
                 raise DictLoadException(list_model.__name__, u'Не удалось преобразовать значение: %s' % v.attrs[i])
             setattr(obj, str(dict_attrs[i]), val)
 
-        setattr(obj, list_link, tree_values[v.parent_uid][0])
+        parent = None if v.parent_uid == -1 else tree_values[v.parent_uid][0] 
+        setattr(obj, list_link, parent)
         try:
             obj.save()
         except:
-            raise DictLoadException(list_model.__name__, u'Не удалось сохранить запись справочника: %s' % v.attrs[i])
+            raise DictLoadException(list_model.__name__, u'Не удалось сохранить запись справочника: %s' % string.join(v.attrs, ','))
 
 def strip_bom(s):
     '''

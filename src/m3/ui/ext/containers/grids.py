@@ -4,7 +4,7 @@ Created on 3.3.2010
 
 @author: prefer
 '''
-from m3.ui.ext.base import ExtUIComponent
+from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
 from django.utils.datastructures import SortedDict
 
@@ -16,6 +16,7 @@ class ExtGrid(BaseExtPanel):
         self._items = []
         self.__store = None
         self.editor = False
+        self.loadMask = False
         # selection model
         self.__sm = None
         # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен
@@ -175,27 +176,34 @@ class ExtGridDateColumn(BaseExtGridColumn):
         self.format = None
         self.init_component(*args, **kwargs)
 
-class ExtGridBaseSelModel(ExtUIComponent):
+class BaseExtGridSelModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
-        super(ExtGridBaseSelModel, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-date-column.js'
+        super(BaseExtGridSelModel, self).__init__(*args, **kwargs)
         self.singleSelect = False
-        self.init_component(*args, **kwargs)
 
-class ExtGridCheckBoxSelModel(ExtGridBaseSelModel):
+class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridCheckBoxSelModel, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-checkbox-selmodel.js'
         self.init_component(*args, **kwargs)
+        
+    def render(self):
+        single_sel = 'singleSelect: true' if self.singleSelect else ''
+        return 'new Ext.grid.CheckboxSelectionModel({ %s })' % single_sel
 
-class ExtGridRowSelModel(ExtGridBaseSelModel):
+class ExtGridRowSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridRowSelModel, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-row-selmodel.js'
         self.init_component(*args, **kwargs)
 
-class ExtGridCellSelModel(ExtGridBaseSelModel):
+    def render(self):
+        single_sel = 'singleSelect: true' if self.singleSelect else ''
+        return 'new Ext.grid.RowSelectionModel({ %s })' % single_sel
+
+class ExtGridCellSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridCellSelModel, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-cell-selmodel.js'
         self.init_component(*args, **kwargs)
+
+    def render(self):
+        single_sel = 'singleSelect: true' if self.singleSelect else ''
+        return 'new Ext.grid.CellSelectionModel({ %s })' % single_sel
