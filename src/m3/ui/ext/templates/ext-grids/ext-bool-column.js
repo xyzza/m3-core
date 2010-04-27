@@ -12,4 +12,5 @@
 	{%if component.text_false %} ,falseText: '{{ component.text_false }}' {%endif%}
 	{%if component.text_true %} ,trueText: '{{ component.text_true }}' {%endif%}
 	{%if component.text_undefined %} ,undefinedText: '{{ component.text_undefined }}' {%endif%}
+	{%if component.hidden %} ,hidden: true {%endif%}
 }

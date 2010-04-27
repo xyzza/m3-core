@@ -7,4 +7,5 @@
 	{%if component.data_index %} ,dataIndex: '{{ component.data_index }}' {%endif%}
 	{%if component.align %} ,align: '{{ component.align }}' {%endif%}
 	{%if component.editor %} ,editor: {{ component.render_editor }} {%endif%}
+	{%if component.hidden %} ,hidden: true {%endif%}
 }
