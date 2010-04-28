@@ -165,7 +165,26 @@ class TreeNewNodeWindowAction(Action):
         win.form.url = base.save_node_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
-    
+
+class TreeDragAndDropAction(Action):
+    '''
+    Экшен перетаскивает узел дерева внутри самого дерева
+    '''
+    url = '/drag_node$'
+    def run(self, request, context):
+        id = int(request.REQUEST.get('id', 0))
+        dest_id = int(request.REQUEST.get('dest_id', 0))
+        return self.parent.drag_node(id, dest_id)
+
+class ListDragAndDropAction(Action):
+    '''
+    Экшен перетаскивает запись из списка в другой узел дерева
+    '''
+    url = '/drag_item$'
+    def run(self, request, context):
+        id = int(request.REQUEST.get('id', 0))
+        dest_id = int(request.REQUEST.get('dest_id', 0))
+        return self.parent.drag_item(id, dest_id)
 
 class SelectWindowAction(Action):
     '''
@@ -232,6 +251,10 @@ class ListWindowAction(Action):
         win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
         win.url_delete_tree = base.delete_node_action.get_absolute_url()
         
+        # Драг&Дроп
+        win.url_drag_tree = base.drag_tree.get_absolute_url()
+        win.url_grid_tree = base.drag_list.get_absolute_url()
+        
         win = self.parent.get_list_window(win)
         return ExtUIScriptResult(win)
 
@@ -274,6 +297,11 @@ class BaseTreeDictionaryActions(ActionPack):
         self.delete_row_action       = ListDeleteRowAction()
         self.actions.extend([self.new_grid_window_action, self.edit_grid_window_action,
                              self.save_row_action, self.delete_row_action])
+        
+        # Драг&Дроп
+        self.drag_tree = TreeDragAndDropAction()
+        self.drag_list = ListDragAndDropAction()
+        self.actions.extend([self.drag_tree, self.drag_list])
         
         # Адреса экшенов дерева
         self.new_node_window_action  = TreeNewNodeWindowAction()
@@ -324,6 +352,14 @@ class BaseTreeDictionaryActions(ActionPack):
     
     def get_list_url(self):
         return self.list_window_action.get_absolute_url()
+    
+    #======================= Drag&Drop ===========================
+    
+    def drag_node(self, id, dest_id):
+        raise NotImplementedError()
+    
+    def drag_item(self, id, dest_id):
+        raise NotImplementedError()
     
     #============ ДЛЯ ИЗМЕНЕНИЯ ОКОН РЕДАКТИРОВАНИЯ НА ХОДУ ======
     
@@ -406,22 +442,32 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     
     def delete_row(self, obj):
         message = ''
-        if not safe_delete_record(self.list_model, obj.id):
+        if obj == None:
+            message = u'Элемент не существует в базе данных.'
+        elif not safe_delete_record(self.list_model, obj.id):
             message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
         
-        message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
-        
-        result = OperationResult()
-        if message:
-            mbox = MessageBox('БАРС МИС', message, MessageBox.ICON_ERROR)
-            result.code = mbox.get_script()
-            result.success = False
-        return result
+        return OperationResult.by_message(message)
         
     def delete_node(self, obj):
         message = ''
-        if not safe_delete_record(self.tree_model, obj.id):
+        if obj == None:
+            message = u'Группа не существует в базе данных'
+        elif not safe_delete_record(self.tree_model, obj.id):
             message = u'Не удалось удалить группу. Возможно на неё есть ссылки.'
+            
         return OperationResult.by_message(message)
         
+    def drag_node(self, id, dest_id):
+        node = self.get_node(id)
+        node.parent_id = dest_id
+        node.save()
+        return OperationResult()
+    
+    def drag_item(self, id, dest_id):
+        row = self.get_row(id)
+        row.parent_id = id
+        row.save()
+        return OperationResult()
+    
 #TODO: Избавиться от копипаста в экшенах.
