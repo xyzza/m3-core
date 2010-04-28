@@ -117,11 +117,11 @@ class ListNewRowWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         # Получаем id родительской группы. Если приходит не валидное значение, то создаем узел в корне
-        group_id = int(request.REQUEST.get('id', 0))
-        assert group_id > 0, 'The request must contain the "id" of the selected group is greater than 0.'
+        parent_id = int(request.REQUEST.get('id', 0))
+        assert parent_id > 0, 'The request must contain the "id" of the selected group is greater than 0.'
         # Создаем новую группу и биндим ее к форме
         obj = base.get_row(None)
-        obj.group_id = group_id
+        obj.parent_id = parent_id
         win = base.edit_window(create_new = True)
         win.form.from_object(obj)
         # Донастраиваем форму
