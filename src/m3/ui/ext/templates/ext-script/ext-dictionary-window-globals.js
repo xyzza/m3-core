@@ -287,37 +287,6 @@ var ajax = Ext.Ajax;
 		};
 		return res;
 	}
-{%endif%}
-
-{% if component.mode %}
-	/**
-	 * Выбор значения в справочнике по форме ExtDictionary
-	 */
-	function selectValue(){
-		var id, displayText;
-		{%if component.grid %}
-			var grid = Ext.getCmp('{{ component.grid.client_id}}');
-			if (!isGridSelected(grid, 'Выбор элемента', 'Элемент не выбран') ) {
-				return;
-			}
-			
-			id = grid.getSelectionModel().getSelected().id;
-			displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}");
-		{% else %}
-			var tree = Ext.getCmp('{{ component.tree.client_id}}');
-			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
-				return;
-			}
-			
-			id = tree.getSelectionModel().getSelectedNode().id;
-			displayText = tree.getSelectionModel().getSelectedNode().attributes.{{ component.column_name_on_select }};
-		{% endif %}
-		
-		if (id!=undefined && displayText!=undefined){
-			win.fireEvent('select_value', id, displayText);
-		};
-		win.close();
-	}
 	
 	/**
 	 * Функция-обработчик d&d
@@ -361,6 +330,37 @@ var ajax = Ext.Ajax;
 				}
 			});
 		}	
+	}
+{%endif%}
+
+{% if component.mode %}
+	/**
+	 * Выбор значения в справочнике по форме ExtDictionary
+	 */
+	function selectValue(){
+		var id, displayText;
+		{%if component.grid %}
+			var grid = Ext.getCmp('{{ component.grid.client_id}}');
+			if (!isGridSelected(grid, 'Выбор элемента', 'Элемент не выбран') ) {
+				return;
+			}
+			
+			id = grid.getSelectionModel().getSelected().id;
+			displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}");
+		{% else %}
+			var tree = Ext.getCmp('{{ component.tree.client_id}}');
+			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
+				return;
+			}
+			
+			id = tree.getSelectionModel().getSelectedNode().id;
+			displayText = tree.getSelectionModel().getSelectedNode().attributes.{{ component.column_name_on_select }};
+		{% endif %}
+		
+		if (id!=undefined && displayText!=undefined){
+			win.fireEvent('select_value', id, displayText);
+		};
+		win.close();
 	}
 	
 {%endif%}
