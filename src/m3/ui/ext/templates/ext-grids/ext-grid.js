@@ -47,7 +47,7 @@ function(){
 		{% if component.bottom_bar %} ,bbar: {{ component.t_render_bottom_bar|safe }} {% endif %}
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
 	    {% if component.sm %} ,sm: sel_model {% endif %}
-		{% if component.loadMask %} ,loadMask: true {% endif %}
+		{% if component.load_mask %} ,loadMask: true {% endif %}
 		,store: {{ component.t_render_store|safe }}
 		,columns: grid_columns
 		,stripeRows: true

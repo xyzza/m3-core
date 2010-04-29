@@ -16,7 +16,7 @@ class ExtGrid(BaseExtPanel):
         self._items = []
         self.__store = None
         self.editor = False
-        self.loadMask = False
+        self.load_mask = False
         # selection model
         self.__sm = None
         # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен
@@ -153,6 +153,7 @@ class ExtGridColumn(BaseExtGridColumn):
         self.template = 'ext-grids/ext-grid-column.js'
         self.init_component(*args, **kwargs)
     
+    
 class ExtGridBooleanColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridBooleanColumn, self).__init__(*args, **kwargs)
@@ -162,12 +163,14 @@ class ExtGridBooleanColumn(BaseExtGridColumn):
         self.text_undefined = None
         self.init_component(*args, **kwargs)
         
+        
 class ExtGridNumberColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridNumberColumn, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-number-column.js'
         self.format = None
         self.init_component(*args, **kwargs)
+
 
 class ExtGridDateColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
@@ -176,28 +179,34 @@ class ExtGridDateColumn(BaseExtGridColumn):
         self.format = None
         self.init_component(*args, **kwargs)
 
+
 class BaseExtGridSelModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtGridSelModel, self).__init__(*args, **kwargs)
-        self.singleSelect = False
+        
+
 
 class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridCheckBoxSelModel, self).__init__(*args, **kwargs)
+        self.single_select = False
         self.init_component(*args, **kwargs)
         
     def render(self):
-        single_sel = 'singleSelect: true' if self.singleSelect else ''
+        single_sel = 'singleSelect: true' if self.single_select else ''
         return 'new Ext.grid.CheckboxSelectionModel({ %s })' % single_sel
+
 
 class ExtGridRowSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridRowSelModel, self).__init__(*args, **kwargs)
+        self.single_select = False
         self.init_component(*args, **kwargs)
 
     def render(self):
-        single_sel = 'singleSelect: true' if self.singleSelect else ''
+        single_sel = 'singleSelect: true' if self.single_select else ''
         return 'new Ext.grid.RowSelectionModel({ %s })' % single_sel
+
 
 class ExtGridCellSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
@@ -205,5 +214,5 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
         self.init_component(*args, **kwargs)
 
     def render(self):
-        single_sel = 'singleSelect: true' if self.singleSelect else ''
+        single_sel = 'singleSelect: true' if self.single_select else ''
         return 'new Ext.grid.CellSelectionModel({ %s })' % single_sel
