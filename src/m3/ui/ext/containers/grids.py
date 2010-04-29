@@ -17,6 +17,8 @@ class ExtGrid(BaseExtPanel):
         self.__store = None
         self.editor = False
         self.load_mask = False
+        self.drag_drop = False
+        self.drag_drop_group = None
         # selection model
         self.__sm = None
         # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен

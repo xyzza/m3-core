@@ -19,18 +19,19 @@ function(){
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
 		
 	    ,useArrows: true
-	    ,autoScroll: true
+	    ,autoScroll: false
 	    ,animate: true
-	    ,enableDD: true
-	    //,containerScroll: true
-	    //,border: false
+	    {% if component.drag_drop %} ,enableDD: true {% endif %}
+	    ,containerScroll: true
+	    ,border: false
 		,split: true
 		,columns:[{{ component.t_render_columns|safe }}]
 		,loader: {{ component.t_render_tree_loader|safe }}	
-		,rootVisible: false
+		{%if component.root_text %} ,rootVisible: true {%endif%}
 		,root: new Ext.tree.AsyncTreeNode({
 			id: '-1'
-			{%if self.nodes %},children: [ {{ component.t_render_nodes|safe }} ] {%endif%}
+			{%if component.root_text %} ,text:'{{ component.root_text }}' {%endif%}
+			{%if component.nodes %},children: [ {{ component.t_render_nodes|safe }} ] {%endif%}
         })
         {% if component.t_render_listeners %}
 			{# Прописываются имеющиеся обработчики #}
@@ -46,16 +47,16 @@ function(){
 					            contmenu.contextNode = node;
 					            contmenu.showAt(e.getXY());
 		                    }
-					{% endifequal %}  
-					{% ifequal k "containercontextmenu" %}
-						containercontextmenu:
-		                    function(tree, e){
-								e.stopEvent();
-					            container_contmenu.showAt(e.getXY());
-		                    }
-					{% endifequal %}  
-					{% ifequal k "click" %}
-						'{{k}}': {{v}}
+					{%else%}
+						{% ifequal k "containercontextmenu" %}
+							containercontextmenu:
+			                    function(tree, e){
+									e.stopEvent();
+						            container_contmenu.showAt(e.getXY());
+			                    }
+						{%else%}
+							'{{k}}': {{v|safe}}
+						{% endifequal %}  
 					{% endifequal %}  
 			{% endfor%}
 		}

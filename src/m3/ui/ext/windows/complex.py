@@ -18,7 +18,7 @@ from m3.ui.ext.containers import (ExtContextMenu,
         
                 
 class ExtDictionaryWindow(BaseExtWindow):
-    ''' Базовое окно для линейного, иерархичесого и совмещенного справочника справочника '''
+    ''' Базовое окно для линейного, иерархичесого и совмещенного справочника'''
     def __init__(self, *args, **kwargs):
         super(ExtDictionaryWindow, self).__init__(*args, **kwargs)
         self.template = 'ext-windows/ext-window.js'
@@ -58,14 +58,15 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__url_new_grid = None
         self.__url_edit_grid = None
         self.__url_delete_grid = None
+        self.__url_drag_grid = None
         
         # Вызываемые url для дерева
         self.__url_new_tree = None
         self.__url_edit_tree = None
         self.__url_delete_tree = None
+        self.__url_drag_tree = None
         
         self.__column_name_on_select = None
-        
         self.init_component(*args, **kwargs)
         
     @property
@@ -335,3 +336,32 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.tree.top_bar.add_menu(icon_cls="search", menu=menu)
             
         return super(ExtDictionaryWindow, self).render()
+    
+    @property
+    def url_drag_grid(self):
+        return self.__url_drag_grid
+    
+    @url_drag_grid.setter
+    def url_drag_grid(self, value):
+        assert self.tree, 'Tree is not initialized'
+        if value:
+            self.grid.drag_drop = True
+            self.grid.drag_drop_group = 'TreeDD'
+            self.tree.handler_beforedrop = 'onBeforeDrop'
+        else:
+            self.grid.drag_drop = False
+            self.grid.drag_drop_group = None
+        self.__url_drag_grid = value
+        
+    @property
+    def url_drag_tree(self):
+        return self.__url_drag_tree
+    
+    @url_drag_tree.setter
+    def url_drag_tree(self, value):
+        if value:
+            self.tree.drag_drop = True
+            self.tree.handler_beforedrop = 'onBeforeDrop'
+        else:
+            self.tree.drag_drop = False
+        self.__url_drag_tree = value

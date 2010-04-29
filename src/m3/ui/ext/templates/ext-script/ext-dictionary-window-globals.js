@@ -69,9 +69,21 @@ var ajax = Ext.Ajax;
 			return;
 		};
 		
+		var selectedId = new Array();
+		var selRecords = grid.getSelectionModel().getSelections();
+		for (var i=0; i < selRecords.length; i++){
+			selectedId[i] = selRecords[i].id;
+		};
+		
+		var message;
+		if (selectedId.length > 1)
+			message = 'Вы действительно хотите удалить элементы?'
+		else
+			message = 'Вы действительно хотите удалить элемент?'
+		
 		Ext.Msg.show({
 		   title:'Подтверждение',
-		   msg: 'Вы действительно хотите удалить элемент?',
+		   msg: message,
 		   buttons: Ext.Msg.YESNO,
 		   icon: Ext.MessageBox.QUESTION,
 		   fn:function(btn,text,opt){ 
@@ -79,9 +91,11 @@ var ajax = Ext.Ajax;
 		    		ajax.request({
 						url: "{{ component.url_delete_grid }}"
 						,params: {
-							'id': grid.getSelectionModel().getSelected().id
+							'id': selectedId.join(',')
 						}
-						,success: renderWindowGrid
+						,success: function(){
+							grid.getStore().remove(selRecords);
+						}
 						,failure: function(response, opts){
 						   Ext.Msg.alert('','failed');
 						}
@@ -126,6 +140,8 @@ var ajax = Ext.Ajax;
 		};
 		return res;
 	}
+	
+	
 {%endif%}
 	
 {% if component.tree %}
@@ -220,7 +236,9 @@ var ajax = Ext.Ajax;
 						,params: {
 							'id': tree.getSelectionModel().getSelectedNode().id
 						}
-						,success: renderWindowTree
+						,success: function() {
+							tree.getSelectionModel().getSelectedNode().remove();
+						}
 						,failure: function(response, opts){
 						   Ext.Msg.alert('','failed');
 						}
@@ -300,4 +318,49 @@ var ajax = Ext.Ajax;
 		};
 		win.close();
 	}
+	
+	/**
+	 * Функция-обработчик d&d
+	 * @param {Object} dropObj
+	 */
+	function onBeforeDrop(dropObj){
+		if (dropObj.source.grid){
+			var grid = dropObj.source.grid;
+			var selectedId = new Array();
+			var selRecords = grid.getSelectionModel().getSelections();
+			for (var i=0; i < selRecords.length; i++){
+				selectedId[i] = selRecords[i].id;
+			};
+			
+			ajax.request({
+				url: "{{ component.url_drag_grid }}"
+				,params: {
+					'id': selectedId.join(','),
+					'dest_id': dropObj.target.id
+				}
+				,success: function(){ 
+					grid.getStore().remove(selRecords);
+				}
+				,failure: function(response, opts){
+					dropObj.cancel = false;
+				    Ext.Msg.alert('','failed');
+				}
+			});
+		} else if (dropObj.source.tree){
+			var selModel = dropObj.source.tree.getSelectionModel();
+			ajax.request({
+				url: "{{ component.url_drag_tree }}"
+				,params: {
+					'id': selModel.getSelectedNode().id,
+					'dest_id': dropObj.target.id
+				}
+				,success: Ext.emptyFn
+				,failure: function(response, opts){
+					dropObj.cancel = false;
+				    Ext.Msg.alert('','failed');
+				}
+			});
+		}	
+	}
+	
 {%endif%}

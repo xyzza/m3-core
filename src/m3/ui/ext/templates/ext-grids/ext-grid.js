@@ -53,6 +53,8 @@ function(){
 		,stripeRows: true
 		,stateful: true
 		,viewConfig: {forceFit: true}
+		{% if component.drag_drop %} ,enableDragDrop: true {% endif %}
+		{% if component.drag_drop_group %} ,ddGroup:'{{ component.drag_drop_group }}' {% endif %}
 		,plugins: plugins
 		{% if component.t_render_listeners %}
 		{# Прописываются имеющиеся обработчики #}

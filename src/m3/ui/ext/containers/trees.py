@@ -20,6 +20,8 @@ class ExtTree(BaseExtPanel):
         self._items = []
         self.tree_loader = ExtTreeLoader()
         self.url = None
+        self.root_text = None
+        self.drag_drop = False
         self.init_component(*args, **kwargs)
     
     @staticmethod    
@@ -98,6 +100,57 @@ class ExtTree(BaseExtPanel):
     @handler_click.setter
     def handler_click(self, function):
         self._listeners['click'] = function
+        
+    @property
+    def handler_dragdrop(self):
+        return self._listeners.get('dragdrop')
+    
+    @handler_dragdrop.setter
+    def handler_dragdrop(self, function):
+        self._listeners['dragdrop'] = function
+        
+        
+    @property
+    def handler_dragover(self):
+        return self._listeners.get('nodedragover')
+    
+    @handler_dragover.setter
+    def handler_dragover(self, function):
+        self._listeners['nodedragover'] = function
+        
+        
+    @property
+    def handler_startdrag(self):
+        return self._listeners.get('startdrag')
+    
+    @handler_startdrag.setter
+    def handler_startdrag(self, function):
+        self._listeners['startdrag'] = function
+        
+        
+    @property
+    def handler_enddrag(self):
+        return self._listeners.get('enddrag')
+    
+    @handler_enddrag.setter
+    def handler_enddrag(self, function):
+        self._listeners['enddrag'] = function
+        
+    @property
+    def handler_drop(self):
+        return self._listeners.get('nodedrop')
+    
+    @handler_drop.setter
+    def handler_drop(self, function):
+        self._listeners['nodedrop'] = function    
+        
+    @property
+    def handler_beforedrop(self):
+        return self._listeners.get('beforenodedrop')
+    
+    @handler_beforedrop.setter
+    def handler_beforedrop(self, function):
+        self._listeners['beforenodedrop'] = function    
     #------------------------------------------------------------------------
     
     
