@@ -63,7 +63,7 @@ def bind_request_form_to_object(request, obj_factory, form):
     win = form()
     win.form.bind_to_request(request)
     # Получаем наш объект по id
-    id = request.REQUEST.get('id')
+    id = extract_int(request, 'id')
     obj = obj_factory(id)
     # Биндим форму к объекту
     win.form.to_object(obj)

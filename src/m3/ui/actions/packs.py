@@ -4,8 +4,7 @@ from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from django.db import transaction
 from django.db.models.query_utils import Q
-from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
-    bind_request_form_to_object, safe_delete_record
+from m3.ui.actions import utils
 
 class DictListWindowAction(Action):
     '''
@@ -66,7 +65,7 @@ class DictEditWindowAction(Action):
     url = '/edit-window$'
     def run(self, request, context):
         base = self.parent
-        win = bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+        win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
         win.title = base.title
         win.form.url = base.save_action.get_absolute_url()
         
@@ -101,7 +100,7 @@ class DictRowAction(Action):
     '''
     url = '/item$'
     def run(self, request, context):
-        id = request.REQUEST.get('id')
+        id = utils.extract_int(request, 'id')
         result = self.parent.get_row(self, id)
         return PreJsonResult(result)
 
@@ -111,7 +110,7 @@ class DictSaveAction(Action):
     '''
     url = '/save$'
     def run(self, request, context):
-        obj = bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
         return self.parent.save_row(obj)
     
 class DictDeleteAction(Action):
@@ -120,7 +119,7 @@ class DictDeleteAction(Action):
     '''
     url = '/delete$'
     def run(self, request, context):
-        id = request.REQUEST.get('id')
+        id = utils.extract_int(request, 'id')
         obj = self.parent.get_row(id)
         return self.parent.delete_row(obj)
 
@@ -225,7 +224,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         '''
         Возвращает данные для грида справочника
         '''
-        query = apply_search_filter(self.model.objects, filter, self.filter_fields)
+        query = utils.apply_search_filter(self.model.objects, filter, self.filter_fields)
         total = query.count()
         if limit > 0:
             query = query[offset:offset + limit]
@@ -233,8 +232,9 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         return result
     
     def get_row(self, id):
+        assert isinstance(id, int)
         # Если id нет, значит нужно создать новый объект
-        if (id == None) or (len(id) == 0):
+        if id == 0:
             record = self.model()
         else:
             try:
@@ -251,6 +251,6 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     @transaction.commit_on_success
     def delete_row(self, obj):
         message = ''
-        if not safe_delete_record(self.model, obj.id):
+        if not utils.safe_delete_record(self.model, obj.id):
             message = u'Не удалось удалить элемент'
         return OperationResult.by_message(message)
