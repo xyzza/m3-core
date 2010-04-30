@@ -130,7 +130,7 @@ function(field, e){
       }
 
 # Временно лежит тут. Не знаю пока куда засунуть.
-class MessageBox(object):
+class MessageBox:
     '''
     Обёртка над стандартным MessageBox ExtJS
     '''
@@ -152,7 +152,12 @@ class MessageBox(object):
         self.msg = msg
         self.icon = icon
         self.buttons = buttons
-    
+        # Обработчики для каждой кнопки
+        self.handler_ok = ''
+        self.handler_cancel = ''
+        self.handler_yes = ''
+        self.handler_no = ''
+        
     def get_script(self):
         template = '''
 Ext.Msg.show({
@@ -165,9 +170,29 @@ Ext.Msg.show({
 });
         '''
         template = template.replace('\n', ' ')
+        # Для каждой кнопки можно задавать свой обработчик
         handler = '''
-function() {}
+function(buttonId, text, opt){
+    switch (buttonId){
+        case 'yes':
+            %(handler_yes)s
+            break;
+        case 'no':
+            %(handler_no)s
+            break;
+        case 'cancel':
+            %(handler_cancel)s
+            break;
+        case 'ok':
+            %(handler_ok)s
+            break;
+    }
+}
         '''
+        handler = handler % {'handler_yes': self.handler_yes,
+                             'handler_no': self.handler_no,
+                             'handler_cancel': self.handler_cancel,
+                             'handler_ok': self.handler_ok}
         result = template % {'title': self.title,
                              'msg': self.msg,
                              'buttons': self.buttons,

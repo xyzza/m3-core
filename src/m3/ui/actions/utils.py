@@ -88,7 +88,7 @@ def safe_delete_record(model, id):
 
 def fetch_search_tree(model, filter):
     '''
-    Задолбался честно говоря писать комментарии!
+    По заданному фильтру filter и модели model формирует развернутое дерево с результатами поиска.
     '''
     # Сначала тупо получаем все узлы подходящие по фильтру
     nodes = model.objects.filter(filter).select_related('parent')
@@ -166,6 +166,3 @@ def extract_int_list(request, key):
     value = request.REQUEST.get(key, '')
     values = map(int, value.split(','))
     return values
-            
-            
-    
