@@ -28,9 +28,9 @@ class DictListWindowAction(Action):
         win.grid.set_store(grid_store)
         
         # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося 
-        win.url_new    = base.edit_window_action.get_absolute_url()
-        win.url_edit   = base.edit_window_action.get_absolute_url()
-        win.url_delete = base.delete_action.get_absolute_url()
+        win.url_new_grid    = base.edit_window_action.get_absolute_url()
+        win.url_edit_grid   = base.edit_window_action.get_absolute_url()
+        win.url_delete_grid = base.delete_action.get_absolute_url()
         
         return ExtUIScriptResult(self.parent.get_list_window(win))
     
