@@ -80,7 +80,7 @@ class OperationResult(ActionResult):
         # Результат выполнения операции: успех/неудача
         self.success = success
         # Сообщение об ошибке выводимое при неудаче
-        self.error_message = ''
+        self.error_msg = ''
         # Произвольный JS код, который выполняется в любом случае если задан
         self.code = code
         # Окно которое может появиться в результате операции

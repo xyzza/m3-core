@@ -3,8 +3,7 @@
 Паки для иерархических справочников
 '''
 from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
-from m3.ui.actions.utils import apply_search_filter, bind_object_from_request_to_form,\
-    bind_request_form_to_object, safe_delete_record, fetch_search_tree, create_search_filter
+from m3.ui.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.shortcuts import MessageBox
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
@@ -15,7 +14,7 @@ class TreeGetNodesAction(Action):
     '''
     url = '/nodes$'
     def run(self, request, context):
-        parent_id = int(request.REQUEST.get('node', 0))
+        parent_id = utils.extract_int(request, 'node')
         if parent_id < 1:
             parent_id = None
         filter = request.REQUEST.get('filter')
@@ -28,7 +27,7 @@ class TreeGetNodeAction(Action):
     '''
     url = '/node$'
     def run(self, request, context):
-        id = request.REQUEST.get('id')
+        id = utils.extract_int(request, 'id')
         result = self.parent.get_node(id)
         return PreJsonResult(result)
 
@@ -42,7 +41,7 @@ class TreeSaveNodeAction(Action):
         win = self.parent.edit_node_window()
         win.form.bind_to_request(request)
         # Получаем наш объект по id
-        id = request.REQUEST.get('id')
+        id = utils.extract_int(request, 'id')
         obj = self.parent.get_node(id)
         # Биндим форму к объекту
         win.form.to_object(obj)
@@ -54,7 +53,7 @@ class TreeDeleteNodeAction(Action):
     '''
     url = '/delete_node$'
     def run(self, request, context):
-        id = request.REQUEST.get('id')
+        id = utils.extract_int(request, 'id')
         obj = self.parent.get_node(id)
         return self.parent.delete_node(obj)
 
@@ -64,9 +63,9 @@ class ListGetRowsAction(Action):
     '''
     url = '/rows$'
     def run(self, request, context):
-        parent_id = request.REQUEST.get('id')
-        offset = int(request.REQUEST.get('start', 0))
-        limit = int(request.REQUEST.get('limit', 0))
+        parent_id = utils.extract_int(request, 'id')
+        offset = utils.extract_int(request, 'start')
+        limit = utils.extract_int(request, 'limit')
         filter = request.REQUEST.get('filter')
         result = self.parent.get_rows(parent_id, offset, limit, filter)
         return PreJsonResult(result)
@@ -74,20 +73,20 @@ class ListGetRowsAction(Action):
 class ListGetRowAction(Action):
     url = '/item$'
     def run(self, request, context):
-        id = request.REQUEST.get('id')
+        id = utils.extract_int(request, 'id')
         result = self.parent.get_row(id)
         return PreJsonResult(result)
 
 class ListSaveRowAction(Action):
     url = '/row$'
     def run(self, request, context):
-        obj = bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
         return self.parent.save_row(obj)
 
 class ListDeleteRowAction(Action):
     url = '/delete_row$'
     def run(self, request, context):
-        id = request.REQUEST.get('id')
+        id = utils.extract_int(request, 'id')
         obj = self.parent.get_row(id)
         return self.parent.delete_row(obj)
 
@@ -103,7 +102,7 @@ class ListEditRowWindowAction(Action):
     url = '/grid_edit_window$'
     def run(self, request, context):
         base = self.parent
-        win = bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+        win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
         win.title = base.title
         win.form.url = base.save_row_action.get_absolute_url()
         
@@ -117,10 +116,10 @@ class ListNewRowWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         # Получаем id родительской группы. Если приходит не валидное значение, то создаем узел в корне
-        parent_id = int(request.REQUEST.get('id', 0))
+        parent_id = utils.extract_int(request, 'id')
         assert parent_id > 0, 'The request must contain the "id" of the selected group is greater than 0.'
         # Создаем новую группу и биндим ее к форме
-        obj = base.get_row(None)
+        obj = base.get_row()
         obj.parent_id = parent_id
         win = base.edit_window(create_new = True)
         win.form.from_object(obj)
@@ -138,7 +137,7 @@ class TreeEditNodeWindowAction(Action):
     url = '/node_edit_window$'
     def run(self, request, context):
         base = self.parent
-        win = bind_object_from_request_to_form(request, base.get_node, base.edit_node_window)
+        win = utils.bind_object_from_request_to_form(request, base.get_node, base.edit_node_window)
         win.title = base.title
         win.form.url = base.save_node_action.get_absolute_url()
         
@@ -152,7 +151,7 @@ class TreeNewNodeWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         # Получаем id родительской группы. Если приходит не валидное значение, то создаем узел в корне
-        parent_id = int(request.REQUEST.get('id', 0))
+        parent_id = utils.extract_int(request, 'id')
         if parent_id < 1:
             parent_id = None
         # Создаем новую группу и биндим ее к форме
@@ -172,8 +171,8 @@ class TreeDragAndDropAction(Action):
     '''
     url = '/drag_node$'
     def run(self, request, context):
-        id = int(request.REQUEST.get('id', 0))
-        dest_id = int(request.REQUEST.get('dest_id', 0))
+        id = utils.extract_int(request, 'id')
+        dest_id = utils.extract_int(request, 'dest_id')
         return self.parent.drag_node(id, dest_id)
 
 class ListDragAndDropAction(Action):
@@ -182,9 +181,9 @@ class ListDragAndDropAction(Action):
     '''
     url = '/drag_item$'
     def run(self, request, context):
-        id = int(request.REQUEST.get('id', 0))
-        dest_id = int(request.REQUEST.get('dest_id', 0))
-        return self.parent.drag_item(id, dest_id)
+        ids = utils.extract_int_list(request, 'id')
+        dest_id = utils.extract_int(request, 'dest_id')
+        return self.parent.drag_item(ids, dest_id)
 
 class SelectWindowAction(Action):
     '''
@@ -227,6 +226,7 @@ class ListWindowAction(Action):
         win = self.parent.list_window(title = base.title, mode = 0)
         win.init_grid_components()
         win.init_tree_components()
+        win.tree.root_text = base.title
         
         # Добавляем отображаемые колонки
         for field, name in base.list_columns:
@@ -253,7 +253,7 @@ class ListWindowAction(Action):
         
         # Драг&Дроп
         win.url_drag_tree = base.drag_tree.get_absolute_url()
-        win.url_grid_tree = base.drag_list.get_absolute_url()
+        win.url_drag_grid = base.drag_list.get_absolute_url()
         
         win = self.parent.get_list_window(win)
         return ExtUIScriptResult(win)
@@ -388,8 +388,8 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         
     def get_nodes(self, parent_id, filter):
         if filter:
-            filter_dict = create_search_filter(filter, self.tree_filter_fields)
-            nodes = fetch_search_tree(self.tree_model, filter_dict)
+            filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)
+            nodes = utils.fetch_search_tree(self.tree_model, filter_dict)
         else:
             query = self.tree_model.objects.filter(parent = parent_id)
             nodes = list(query.all())        
@@ -402,7 +402,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     
     def get_rows(self, parent_id, offset, limit, filter):
         query = self.list_model.objects.filter(parent = parent_id)
-        query = apply_search_filter(query, filter, self.filter_fields)
+        query = utils.apply_search_filter(query, filter, self.filter_fields)
         # Для работы пейджинга нужно передавать общее количество записей
         total = query.count()
         # Срез данных для страницы
@@ -417,7 +417,8 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         Возвращает запись заданной модели model по id
         Если id нет, значит нужно создать новый объект
         '''
-        if (id == None) or (len(id) == 0):
+        assert isinstance(id, int)
+        if id == 0:
             obj = model()
         else:
             try:
@@ -444,7 +445,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         message = ''
         if obj == None:
             message = u'Элемент не существует в базе данных.'
-        elif not safe_delete_record(self.list_model, obj.id):
+        elif not utils.safe_delete_record(self.list_model, obj.id):
             message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
         
         return OperationResult.by_message(message)
@@ -453,21 +454,32 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         message = ''
         if obj == None:
             message = u'Группа не существует в базе данных'
-        elif not safe_delete_record(self.tree_model, obj.id):
+        elif not utils.safe_delete_record(self.tree_model, obj.id):
             message = u'Не удалось удалить группу. Возможно на неё есть ссылки.'
             
         return OperationResult.by_message(message)
         
     def drag_node(self, id, dest_id):
         node = self.get_node(id)
-        node.parent_id = dest_id
+        # Если id узла на который кидаем <1, значит это корень справочника
+        if dest_id < 1:
+            node.parent_id = None
+        else:
+            node.parent_id = dest_id
         node.save()
         return OperationResult()
     
-    def drag_item(self, id, dest_id):
-        row = self.get_row(id)
-        row.parent_id = id
-        row.save()
+    def drag_item(self, ids, dest_id):
+        # В корень нельзя кидать простые элементы
+        if dest_id < 1:
+            return OperationResult.by_message(u'Нельзя перемещать элементы в корень справочника!')
+        
+        # Из грида в дерево одновременно могут быть перенесены несколько элементов
+        # Их id разделены запятыми
+        for id in ids:
+            row = self.get_row(id)
+            row.parent_id = dest_id
+            row.save()
         return OperationResult()
     
 #TODO: Избавиться от копипаста в экшенах.

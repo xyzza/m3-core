@@ -29,7 +29,9 @@ function(){
 		,loader: {{ component.t_render_tree_loader|safe }}	
 		{%if component.root_text %} ,rootVisible: true {%endif%}
 		,root: new Ext.tree.AsyncTreeNode({
-			id: '-1'
+			id: '-1',
+			expanded: true,
+			allowDrag: false
 			{%if component.root_text %} ,text:'{{ component.root_text }}' {%endif%}
 			{%if component.nodes %},children: [ {{ component.t_render_nodes|safe }} ] {%endif%}
         })

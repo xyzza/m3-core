@@ -38,7 +38,7 @@ def bind_object_from_request_to_form(request, obj_factory, form):
     @param form:        Класс формы к которому привязывается объект
     '''
     # Получаем объект по id
-    id = request.REQUEST.get('id')
+    id = extract_int(request, 'id')
     obj = obj_factory(id)
     # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
     create_new = True
@@ -153,9 +153,19 @@ def fetch_search_tree(model, filter):
     
     return tree
     
+def extract_int(request, key):
+    ''' Извлекает целое число из запроса '''
+    value = request.REQUEST.get(key, None)
+    if value:
+        return int(value)
+    else:
+        return 0
     
-    
-    
+def extract_int_list(request, key):
+    ''' Извлекает список целых чисел из запроса '''
+    value = request.REQUEST.get(key, '')
+    values = map(int, value.split(','))
+    return values
             
             
     
