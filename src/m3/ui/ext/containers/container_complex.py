@@ -31,13 +31,14 @@ class ExtContainerTable(BaseExtContainer):
         
             row_cont = ExtContainer(layout_config = dict(align="stretch"), layout = 'hbox', height = 50)
             row_cont.items.extend(col_cont_list)
-            self.items.append(row_cont)
+            self._items.append(row_cont)
         
         return super(ExtContainerTable, self).render()
   
     @property
     def items(self):       
-        return self._items
+        return [col for row in self.__table for col in row if isinstance(col, ExtContainer)]
+
     
     @property
     def columns_count(self):
@@ -78,3 +79,4 @@ class ExtContainerTable(BaseExtContainer):
         if colspan>1:
             self.__table[row][col+1:col+colspan] = [None,]*colspan
         
+
