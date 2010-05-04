@@ -1,9 +1,7 @@
 #coding:utf-8
 '''
-Модуль с метаклассами подсистемы рабочиъх процессов
-
+Модуль с метаклассами подсистемы рабочих процессов
 Created on 10.03.2010
-
 @author: akvarats
 '''
 
@@ -115,88 +113,3 @@ class WorkflowDocModelBase(ModelBase):
         
         # created - серверные дата/время создания документа рабочего потока
         models.DateTimeField(auto_now_add = True).contribute_to_class(klass, 'created')
-
-#===============================================================================
-# Создание классов для моделей рабочих процессов
-#===============================================================================
-
-def create_workflow_models(workflow_class):
-    '''
-    Генерация текста исходного кода для экземпляров моделей рабочего процесса и его шагов 
-    '''
-    
-    FINAL_TEMPLATE = '''
-from m3 import workflow as m3_workflow
-import %(workflow_module)s
-%(workflow_model)s
-%(workflow_step_model)s
-%(workflow_child_model)s
-%(workflow_wso_model)s
-'''
-    WORKFLOW_MODEL_TEMPLATE = '''
-class %(class_name)sModel(m3_workflow.WorkflowModel):
-    __metaclass__ = m3_workflow.WorkflowModelBase
-    class Meta:
-        db_table = '%(db_table)s'
-    class WorkflowMeta:
-        workflow = %(class_name)s
-'''
-    WORKFLOW_STEP_MODEL_TEMPLATE = '''
-class %(class_name)sStateModel(m3_workflow.WorkflowStepModel):
-    __metaclass__ = m3_workflow.WorkflowStateModelBase
-    class Meta:
-        db_table = '%(db_table)sState'
-    class WorkflowMeta:
-        workflow = %(class_name)s
-'''
-    WORKFLOW_CHILD_MODEL_TEMPLATE = '''
-class %(class_name)sChildModel(m3_workflow.WorkflowStepModel):
-    __metaclass__ = m3_workflow.WorkflowChildModelBase
-    class Meta:
-        db_table = '%(db_table)sChild'
-    class WorkflowMeta:
-        workflow = %(class_name)s
-'''
-    WORKFLOW_WSO_MODEL_TEMPLATE = '''
-class %(class_name)sWSOModel(m3_workflow.WorkflowWSOModel):
-    __metaclass__ = m3_workflow.WorkflowWSOModelBase
-    class Meta:
-        db_table = '%(db_table)sWSO'
-    class WorkflowMeta:
-        workflow = %(class_name)s
-'''
-    WORKFLOW_DOC_MODEL_TEMPLATE = '''
-class MyWorkflow_MyDocument_DocModel(m3_workflow.WorkflowDocModel):
-    __metaclass__ = m3_workflow.WorkflowDocModelBase
-    document = models.ForeignKey(%(DocModel)s)
-    class Meta:
-        db_table = '%(db_table)s'
-    class WorkflowMeta:
-        workflow = %(class_name)s
-'''
-
-    params = {'class_name': workflow_class.__name__,
-              'db_table': workflow_class.meta_dbtable()}
-
-    model_text       = WORKFLOW_MODEL_TEMPLATE % params
-    step_model_text  = WORKFLOW_STEP_MODEL_TEMPLATE % params
-    child_model_text = WORKFLOW_CHILD_MODEL_TEMPLATE % params
-    wso_model_text   = WORKFLOW_WSO_MODEL_TEMPLATE % params
-    
-    # Модели процесса которые есть всегда
-    result = FINAL_TEMPLATE % {'workflow_module': workflow_class.__module__,
-                               'workflow_model': model_text,
-                               'workflow_step_model': step_model_text,
-                               'workflow_child_model': child_model_text,
-                               'workflow_wso_model': wso_model_text}
-    
-    # Модели которых может быть сколько угодно много
-    result += '\n'
-    documents = getattr(workflow_class.Meta, 'documents', [])
-    for doc in documents:
-        assert isinstance(doc, WorkflowDocument)
-        result += WORKFLOW_DOC_MODEL_TEMPLATE % {'class_name': workflow_class.__name__,
-                                                 'db_table': workflow_class.meta_dbtable() + doc.document_class.document_class,
-                                                 'DocModel': doc.document_class.__name__}
-    
-    return result

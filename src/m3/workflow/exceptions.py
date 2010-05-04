@@ -6,5 +6,7 @@ Created on 11.03.2010
 '''
 
 class ImproperlyConfigured(Exception):
-    def __init__(self, reason=''):
-        self.reason = reason
+    '''
+    Исключение рабочего процесса говорящее о неверной конфигурации класса
+    '''
+    pass
