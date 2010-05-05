@@ -185,7 +185,6 @@ class ExtGridDateColumn(BaseExtGridColumn):
 class BaseExtGridSelModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtGridSelModel, self).__init__(*args, **kwargs)
-        
 
 
 class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
@@ -216,5 +215,4 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
         self.init_component(*args, **kwargs)
 
     def render(self):
-        single_sel = 'singleSelect: true' if self.single_select else ''
-        return 'new Ext.grid.CellSelectionModel({ %s })' % single_sel
+        return 'new Ext.grid.CellSelectionModel()'
