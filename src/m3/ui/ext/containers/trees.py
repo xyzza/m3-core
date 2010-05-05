@@ -22,6 +22,7 @@ class ExtTree(BaseExtPanel):
         self.url = None
         self.root_text = None
         self.drag_drop = False
+        self.custom_load = False
         self.init_component(*args, **kwargs)
     
     @staticmethod    
