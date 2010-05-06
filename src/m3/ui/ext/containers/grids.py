@@ -186,7 +186,6 @@ class BaseExtGridSelModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtGridSelModel, self).__init__(*args, **kwargs)
 
-
 class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridCheckBoxSelModel, self).__init__(*args, **kwargs)

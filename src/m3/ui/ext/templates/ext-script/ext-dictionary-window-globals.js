@@ -249,7 +249,6 @@ var ajax = Ext.Ajax;
 	}
 	
 	/**
-	 * 
 	 * Перезагружает хранилище данных для дерева
 	 */
 	function refreshTreeLoader(){

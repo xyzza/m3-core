@@ -34,6 +34,7 @@ class ExtDateField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtDateField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-date-field.js'
+        self.format = None
         self.init_component(*args, **kwargs)
     
     
