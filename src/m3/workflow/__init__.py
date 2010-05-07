@@ -9,11 +9,10 @@ from loading import get_workflow
 from django.db import models
 
 # Эти импорты нужны для работы сгенерированного через exec кода
-from meta import WorkflowModelBase, WorkflowStateModelBase,\
-                 WorkflowChildModelBase, WorkflowWSOModelBase, WorkflowDocModelBase
+from meta import MetaWorkflowModel, MetaWorkflowStateModel, MetaWorkflowChildModel, \
+                 MetaWorkflowWSOModel, MetaWorkflowDocModel
 
-
-from core import Workflow, WorkflowStep, WorkflowModel, WorkflowStepModel, WorkflowWSOModel,\
-                 WorkflowDocModel
+from core import Workflow, WorkflowStep, BaseWorkflowChildModel, BaseWorkflowModel, BaseWorkflowStepModel, \
+                 BaseWorkflowWSOModel, BaseWorkflowDocModel
                  
-from relations import WorkflowNamedDocsModelBase
+from relations import MetaNamedDocsModel, MetaRelationModel
