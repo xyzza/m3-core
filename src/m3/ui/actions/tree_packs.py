@@ -155,7 +155,7 @@ class TreeNewNodeWindowAction(Action):
         if parent_id < 1:
             parent_id = None
         # Создаем новую группу и биндим ее к форме
-        obj = base.get_node(None)
+        obj = base.get_node()
         obj.parent_id = parent_id
         win = base.edit_node_window(create_new = True)
         win.form.from_object(obj)
@@ -430,10 +430,10 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
                 return None
         return obj
     
-    def get_node(self, id):
+    def get_node(self, id = 0):
         return self._get_obj(self.tree_model, id)
     
-    def get_row(self, id):
+    def get_row(self, id = 0):
         return self._get_obj(self.list_model, id)
     
     def save_row(self, obj):
