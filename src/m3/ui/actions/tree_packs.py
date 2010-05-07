@@ -224,36 +224,39 @@ class ListWindowAction(Action):
         # Создаем окно
         base = self.parent
         win = self.parent.list_window(title = base.title, mode = 0)
-        win.init_grid_components()
+        if base.list_model:
+            win.init_grid_components()
         win.init_tree_components()
         win.tree.root_text = base.title
         
         # Добавляем отображаемые колонки
-        for field, name in base.list_columns:
-            win.grid.add_column(header = name, data_index = field)
+        if base.list_model:
+            for field, name in base.list_columns:
+                win.grid.add_column(header = name, data_index = field)
         for field, name in base.tree_columns:
             win.tree.add_column(header = name, data_index = field)
         
         # Устанавливаем источники данных
-        grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
-        grid_store.total_property = 'total'
-        grid_store.root = 'rows'
-        win.grid.set_store(grid_store)
         win.tree.url = base.get_nodes_action.get_absolute_url()
+        if base.list_model: 
+            grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
+            grid_store.total_property = 'total'
+            grid_store.root = 'rows'
+            win.grid.set_store(grid_store)
         
-        # Доступны 3 события для грида: создание нового элемента, редактирование или удаление имеющегося 
-        win.url_new_grid    = base.new_grid_window_action.get_absolute_url()
-        win.url_edit_grid   = base.edit_grid_window_action.get_absolute_url()
-        win.url_delete_grid = base.delete_row_action.get_absolute_url()
+        # Доступны 3 события для грида: создание нового элемента, редактирование или удаление имеющегося
+        if base.list_model: 
+            win.url_new_grid    = base.new_grid_window_action.get_absolute_url()
+            win.url_edit_grid   = base.edit_grid_window_action.get_absolute_url()
+            win.url_delete_grid = base.delete_row_action.get_absolute_url()
+            # Драг&Дроп
+            win.url_drag_tree = base.drag_tree.get_absolute_url()
+            win.url_drag_grid = base.drag_list.get_absolute_url()
         
         # Доступны 3 события для дерева: создание нового узла, редактирование или удаление имеющегося
         win.url_new_tree    = base.new_node_window_action.get_absolute_url()
         win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
         win.url_delete_tree = base.delete_node_action.get_absolute_url()
-        
-        # Драг&Дроп
-        win.url_drag_tree = base.drag_tree.get_absolute_url()
-        win.url_drag_grid = base.drag_list.get_absolute_url()
         
         win = self.parent.get_list_window(win)
         return ExtUIScriptResult(win)
