@@ -5,7 +5,7 @@ new Ext.data.JsonStore({
 		start: {{ component.start }},
 		limit: {{ component.limit }}
 	}
-	,idProperty: 'id'
+	,idProperty: '{{ component.id_property }}'
 	{% if component.root %} ,root: '{{ component.root }}' {% endif %}
 	{% if component.total_property %} ,totalProperty: '{{ component.total_property }}' {% endif %}
 	{% if component.auto_load %} ,autoLoad: true {% endif %}

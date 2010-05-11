@@ -25,7 +25,7 @@ new Ext.form.ComboBox({
 	{% if component.max_heigth_dropdown_list %} ,maxHeight: {{component.max_heigth_dropdown_list}} {% endif %}
 	{% if component.min_chars %} ,minChars: {{component.min_chars}} {% endif %}
 	{% if component.force_selection %} ,forceSelection:true {% endif %}
-	,valueNotFoundText: 'Ничего не найдено'
+	{% if component.not_found_text %}  ,valueNotFoundText: '{{ component.not_found_text }}' {% endif %}
 	
 	{% if component.t_render_listeners %}
 		{# Прописываются имеющиеся обработчики #}

@@ -52,6 +52,7 @@ class BaseExtTriggerField(BaseExtField):
         self.editable = True
         self.trigger_action_all = False
         self.force_selection = False
+        self.not_found_text = None
     
     def set_store(self, store):
         self.mode = 'local' if isinstance(store, ExtDataStore) else 'remote' 

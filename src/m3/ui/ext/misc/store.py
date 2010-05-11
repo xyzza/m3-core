@@ -45,6 +45,7 @@ class ExtJsonStore(BaseExtStore):
         self.total_property = None
         self.root = None
         self.auto_load = False
+        self.id_property = 'id'
         self.init_component(*args, **kwargs)
         
     def render(self, columns):
