@@ -75,7 +75,10 @@ class %(classname)s(%(baseclass)s):
         ''' Регистрирует класс модели в  '''
         if self.attribute:
             # Строка типа: MyWorkflow.models.wf_model = MyWorkflowModel
-            return self.workflow.__class__.__name__ + '.models.' + self.attribute + ' = ' + self.get_class_name()
+            script = self.workflow.__class__.__name__ + '.models.' + self.attribute + ' = ' + self.get_class_name()
+            script += '\n'
+            script += 'print ' + self.get_class_name() + '\n'
+            return script
         return '' 
         
     
@@ -190,6 +193,7 @@ import %(workflow_module)s
         wf = cls()
         
         # Зная имя класса каждой модели можно сразу присвоить их models
+        # Получится строка типа: MyWorkflow.models.step = MyWorkflowStateModel
         register_script = '# Assessors \n'
         
         for gen_class in wf._model_generators:

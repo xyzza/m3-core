@@ -1,14 +1,16 @@
 #coding:utf-8
 import threading
+import re
+import json
+from inspect import isclass
+
 from django.conf import settings
 from django.utils.importlib import import_module
-import re
-from inspect import isclass
 from django.utils.datastructures import MultiValueDict
 from django import http
+
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
-import json
 from m3.ui.ext.base import BaseExtComponent
 
 class ActionResult(object):

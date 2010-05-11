@@ -51,7 +51,10 @@ class DictSelectWindowAction(Action):
             
         # Устанавливаем источник данных
         grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
+        grid_store.total_property = 'total'
+        grid_store.root = 'rows'
         win.grid.set_store(grid_store)
+        
         list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
         win.list_view.set_store(list_store)
         
