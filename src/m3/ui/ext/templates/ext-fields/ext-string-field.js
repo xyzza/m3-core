@@ -17,6 +17,8 @@ new Ext.form.TextField({
 	{% if component.max_length_text %} ,maxLengthText: '{{ component.max_length_text }}' {% endif %}
 	{% if component.regex_text %} ,regexText: '{{ component.regex_text }}' {% endif %}
 	{% if component.vtype %} ,vtype: '{{ component.vtype }}' {% endif %}	
+	{% if component.mask_re %} ,maskRe: {{ component.mask_re }} {% endif %}
+	
 	{% if component.t_render_listeners %}
 		{# Прописываются имеющиеся обработчики #}
 		,listeners:{
