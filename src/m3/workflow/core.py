@@ -10,22 +10,18 @@ from m3.workflow.exceptions import ImproperlyConfigured
 #====================== Шаги рабочего процесса ==============================
 #============================================================================
 class WorkflowStep(object):
-    def __init__(self, id='', name='', *args, **kwargs):
-        self.id = id # уникальный в пределах одного рабочего процесса идентификатор шага
-        self.__name = name if name.strip() else self.id
-
-    def __get_name(self):
-        return self._name;
-    
-    name = property(__get_name)
+    id = ''
+    name = ''
+    def __init__(self):
+        assert id != '', 'id must be defined!'
     
 class WorkflowStartStep(WorkflowStep):
-    def __init__(self,):
-        super(WorkflowStartStep, self).__init__(id='new', name='Новый')
+    id = 'new'
+    name = 'Новый'
         
 class WorkflowEndStep(WorkflowStep):
-    def __init__(self):
-        super(WorkflowEndStep, self).__init__(id='closed', name='Закрыто')
+    id = 'closed'
+    name = 'Закрыто'
 
 class Empty:
     pass
@@ -77,7 +73,7 @@ class %(classname)s(%(baseclass)s):
             # Строка типа: MyWorkflow.models.wf_model = MyWorkflowModel
             script = self.workflow.__class__.__name__ + '.models.' + self.attribute + ' = ' + self.get_class_name()
             script += '\n'
-            script += 'print ' + self.get_class_name() + '\n'
+            script += 'assert ' + self.get_class_name() + '!= None \n'
             return script
         return '' 
         
@@ -94,7 +90,7 @@ class GeneratorStep(BaseModelGenerator):
     baseclass = 'm3_workflow.BaseWorkflowStepModel'
     class_suffix = 'StateModel'
     table_suffix = 'State'
-    attribute = 'step'
+    attribute = 'state'
     
 class GeneratorChild(BaseModelGenerator):
     metaclass = 'm3_workflow.MetaWorkflowChildModel'
@@ -104,15 +100,16 @@ class GeneratorChild(BaseModelGenerator):
     attribute = 'child'
     
 class GeneratorWSO(BaseModelGenerator):
-    metaclass = 'm3_workflow.MetaWorkflowModel'
-    baseclass = 'm3_workflow.BaseWorkflowModel'
+    metaclass = 'm3_workflow.MetaWorkflowWSOModel'
+    baseclass = 'm3_workflow.BaseWorkflowWSOModel'
     class_suffix = 'WSOModel'
     table_suffix = 'WSO'
     attribute = 'wso'
     
 class GeneratorDoc(BaseModelGenerator):
-    metaclass = 'm3_workflow.MetaWorkflowModel'
-    baseclass = 'm3_workflow.BaseWorkflowModel'
+    metaclass = 'm3_workflow.MetaWorkflowDocModel'
+    baseclass = 'm3_workflow.BaseWorkflowDocModel'
+    attribute = 'doc_models'
     def get_class_name(self):
         return self.workflow.meta_dbtable() + 'DocModel'
     
@@ -121,7 +118,7 @@ class GeneratorDoc(BaseModelGenerator):
         result = ''
         documents = getattr(self.workflow.Meta, 'documents', [])
         for doc in documents:
-            # Не знаю пока что с этим делать. Пока нет реальных процессов путь отваливается.
+            #TODO: Не знаю пока что с этим делать. Пока нет реальных процессов путь отваливается.
             raise NotImplementedError()
             assert isinstance(doc, BaseWorkflowModel)
             result += self.TEMPLATE % \
@@ -132,22 +129,53 @@ class GeneratorDoc(BaseModelGenerator):
         
     def get_register_script(self):
         # Тут написать для доков
-        return ''
+        script = 'doc_models = {}\n'
+        documents = getattr(self.workflow.Meta, 'documents', [])
+        for doc in documents: 
+            raise NotImplementedError()
+            script += 'doc_models["%s"] = %s\n' % ()
+        script += self.workflow.__class__.__name__ + '.models.' + self.attribute + ' = doc_models\n'
+        return script
+
+class WorkflowQueryManager(object):
+    '''
+    Менеджер запросов предоставляющий функции для работы с процессами
+    '''
+    def __init__(self, workflow):
+        self.workflow = workflow
+        self.models = workflow.models
 
 #============================================================================
 #=================== БАЗОВЫЙ КЛАСС РАБОЧЕГО ПРОЦЕССА ========================
 #============================================================================
+
+class _WorkflowMetaConstructor(type):
+    '''
+    Метакласс предназначен для инициализации менеджера запросов внутри статического
+    атрибута класса рабочего процесса 
+    '''
+    def __new__(cls, name, bases, attrs):
+        klass = super(_WorkflowMetaConstructor, cls).__new__(cls, name, bases, attrs)
+        klass.objects = klass._objects_class(klass)
+        return klass
+
 class Workflow(object):
+    # Хитрый способ создания менеджера запросов
+    _objects_class = WorkflowQueryManager
+    __metaclass__  = _WorkflowMetaConstructor
+    
     # Ассессор для моделей рабочего процесса
     models = Empty()
     
     def __init__(self, *args, **kwargs):
         self.start_step = WorkflowStartStep()
         self.end_step = WorkflowEndStep()
-        self.steps=[]
+        self.steps = []
         
         # Уникальный по системе идентификатор рабочего процесса.
         self.id = ''
+        
+        self.objects = WorkflowQueryManager(self)
         
         # Список классов генерирующих код для общего скрипта моделей процесса
         # Так было сделано для возможности перекрыть скрипт каждой отдельной таблицы в потомках

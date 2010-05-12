@@ -4,9 +4,9 @@
 Created on 10.03.2010
 @author: akvarats
 '''
-
 from django.db import models
 from django.db.models.base import ModelBase
+
 from m3.workflow.exceptions import ImproperlyConfigured
 from m3.workflow.core import WorkflowWSObject
 
@@ -30,10 +30,10 @@ class MetaWorkflowModel(ModelBase):
         models.OneToOneField(wf.meta_class_name() + 'StateModel').contribute_to_class(klass, 'state')
         
         # parent_workflow_code - код родительского рабочего потока
-        models.CharField(max_length = 100).contribute_to_class(klass, 'parent_workflow_code')
+        models.CharField(max_length = 100, blank = True, null = True).contribute_to_class(klass, 'parent_workflow_code')
         
         # parent_workflow_id - идентификатор экземпляра родительского рабочего потока
-        models.PositiveIntegerField().contribute_to_class(klass, 'parent_workflow_id')
+        models.PositiveIntegerField(blank = True, null = True).contribute_to_class(klass, 'parent_workflow_id')
         
         return klass
 
@@ -55,7 +55,6 @@ class MetaWorkflowStateModel(ModelBase):
         # prev_step - предыдущий шаг рабочего процесса.
         # Может быть пустым, так как начальный шаг не имеет предыдущего шага
         models.CharField(max_length = 100, null = True, blank = True).contribute_to_class(klass, 'from_step')
-        
         return klass
     
 
@@ -75,7 +74,7 @@ class MetaWorkflowChildModel(ModelBase):
         
         # child_workflow_id - идентификатор экземпляра порожденного рабочего потока
         models.PositiveIntegerField().contribute_to_class(klass, 'child_workflow_id')
-        
+        return klass
         
 class MetaWorkflowWSOModel(ModelBase):
     '''
@@ -88,18 +87,20 @@ class MetaWorkflowWSOModel(ModelBase):
         models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model').contribute_to_class(klass, 'workflow')
         
         # Создаем ссылки на все объекты указанные в Meta нашего процесса
-        ws_objects = getattr(klass.WorkflowMeta.workflow.Meta, 'ws_objects', [])
-        if not isinstance(ws_objects, (list, tuple)):
-            raise ImproperlyConfigured('Attribute "ws_objects" in workflow Meta must be a list or tuple')
-        for obj in ws_objects:
+        objects = getattr(klass.WorkflowMeta.workflow.Meta, 'objects', [])
+        if not isinstance(objects, (list, tuple)):
+            raise ImproperlyConfigured('Attribute "objects" in workflow Meta must be a list or tuple')
+        for obj in objects:
             if isinstance(obj, WorkflowWSObject):
                 model_type, field_name = obj.wso_class, obj.wso_field
             elif isinstance(obj, tuple):
-                model_type, field_name = obj
+                field_name, model_type = obj
             else:
-                raise ImproperlyConfigured('Item of "ws_objects" must be a instance of WorkflowWSObject or tuple')
+                raise ImproperlyConfigured('Item of "objects" must be a instance of WorkflowWSObject or tuple')
 
             models.ForeignKey(model_type).contribute_to_class(klass, field_name)
+        
+        return klass
         
 class MetaWorkflowDocModel(ModelBase):
     def __new__(cls, name, bases, attrs):
@@ -117,3 +118,4 @@ class MetaWorkflowDocModel(ModelBase):
         
         # Таблица с дополнительными атрибутами процесса
         models.ForeignKey(wf.Meta.model_class_obj).contribute_to_class(klass, 'model_class_obj')
+        return klass
