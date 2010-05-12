@@ -73,7 +73,7 @@ class ExtForm(BaseExtPanel):
             object_fields = obj if isinstance(obj, dict) else obj.__dict__
             for key, value in object_fields.items():
                 #TODO как определить, что класс встроенный
-                if not hasattr(value, '__dict__'):
+                if not hasattr(value, '__dict__') and not isinstance(value, dict):
                     attrs[prefix+str(key)] = value
                 else:
                     pre_prefix = prefix+'.' if prefix else ''
