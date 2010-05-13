@@ -104,6 +104,18 @@ class ExtForm(BaseExtPanel):
                         default_text = getattr(row, item.display_field)
                         item.default_text = default_text
                 item.value = value
+            elif isinstance(item, ExtComboBox):
+                # Комбобокс как правило передает id выбранного значения. Его не так просто 
+                # преобразовать в тип объекта, т.к. мы ничего не знаем о структуре объекта.
+                # Поэтому нужно использовать либо трансляцию значений, либо вызывать специальную
+                # функцию внутри экземпляра комбобокса.
+                if hasattr(item, 'bind_rule_reverse'):
+                    if callable(item.bind_rule_reverse):
+                        item.value = str(item.bind_rule_reverse(value))
+                    elif isinstance(item.bind_rule_reverse, dict):
+                        item.value = str(item.bind_rule_reverse.get(value))
+                    else:
+                        raise ValueError('Invalid attribute type bind_rule_reverse. Must be a function or a dict.')
             else:
                 item.value = unicode(value)
 
