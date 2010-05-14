@@ -45,9 +45,10 @@ class MetaWorkflowStateModel(ModelBase):
     def __new__(cls, name, bases, attrs):
         klass = super(MetaWorkflowStateModel, cls).__new__(cls, name, bases, attrs)
         
-        # workflow - ссылка на соответствующий WorkflowModel - 
-        # ссылка на экземпляр соответствующего рабочего потока
-        #models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model').contribute_to_class(klass, 'workflow')
+        # workflow - ссылка на соответствующий WorkflowModel - ссылка на экземпляр соответствующего рабочего потока
+        # null = True только для того, чтобы процесс и состояние можно было сохранять раздельно
+        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model', blank = True, null = True).\
+               contribute_to_class(klass, 'workflow')
         
         # step - текущий шаг рабочего процесса
         models.CharField(max_length = 100).contribute_to_class(klass, 'step')

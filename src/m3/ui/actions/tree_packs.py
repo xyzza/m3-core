@@ -5,7 +5,6 @@
 from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
 from m3.ui.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
-from m3.ui.ext.shortcuts import MessageBox
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 
 class TreeGetNodesAction(Action):

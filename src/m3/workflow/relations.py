@@ -79,6 +79,8 @@ class RelationQueryManager(WorkflowQueryManager):
         # Создаем запись связи
         relation = self.models.wf(state = state)
         relation.save()
+        state.workflow = relation
+        state.save()
         # Создаем запись рабочего набора
         working_set = self.models.wso(workflow = relation)
         for field_name, obj in objects.items():
@@ -96,22 +98,62 @@ class RelationQueryManager(WorkflowQueryManager):
         #TODO: Пока не знаю нужно ли делать записи в док-модели (модели созданных процессом документов), т.к.
         # они не используются в запросах
         
+        workflow.id = relation.id
+        return workflow
     
     def filter(self, objects, **kwargs):
         '''
-        Выполняет запрос к связям
+        Выполняет запрос к связям по бизнес ключу заданному объектами рабочего набора objects
+        В качестве аргументов kwargs могут идти следующие ключи:
+          1. opened: bool default True - отбирать только открытые связи
+          2. start_soft - мягкое начало периода
+          3. start_hard - жесткое начало периода
+          4. end_soft - мягкий конец периода
+          5. end_hard - жесткий конец период
+        Мягкие отличаются от жестких тем, что они включают связи которые частично попадают в период.
         '''
         query = self.models.wso.objects
+        # Накладываем фильтр по бизнес-ключу
         for field_name, obj in objects:
-            query = query.filter({field_name: obj})
+            wso_class_name = self.models.wso.__name__.lower()
+            filter_key = wso_class_name + '__' + field_name
+            query = query.filter({filter_key: obj})
+        # Накладываем фильтр по состоянию
+        state_class_name = self.models.state.__name__.lower()
+        opened = kwargs.pop('opened', True)
+        step_id = self.workflow.state_opened.id if opened else self.workflow.state_closed.id
+        query = query.filter({state_class_name + '__step': step_id})
+        # Накладываем фильтр по периодам действия
+        start_date = start_mode = None
+        if kwargs.haskey('start_hard'):
+            start_date = kwargs.pop('start_hard')
+            start_mode = 'hard'
+        elif kwargs.haskey('start_soft'):
+            start_date = kwargs.pop('start_soft')
+            start_mode = 'soft'
+        else:
+            raise Exception('Start date must be defined!')
         
-        return query
+        end_date = end_mode = None
+        if kwargs.haskey('end_hard'):
+            end_date = kwargs.pop('end_hard')
+            end_mode = 'hard'
+        elif kwargs.haskey('end_soft'):
+            end_date = kwargs.pop('end_soft')
+            end_mode = 'soft'
+        else:
+            raise Exception('End date must be defined!')
+        
+        raise NotImplementedError()
     
     def get(self, id):
         '''
         Возвращает экземпляр связи с заданным id
         '''
-        raise NotImplementedError()
+        wf = self.workflow()
+        wf.id = id
+        return wf
+    
 
 class RelationOpenedStep(WorkflowStep):
     id = 'opened'
@@ -135,7 +177,33 @@ class Relation(Workflow):
         # Состояния
         self.state_opened = RelationOpenedStep()
         self.state_closed = RelationClosedStep()
+        # Ключ текущей связи
+        self.id = None
+    
+    @transaction.commit_on_success
+    def close(self, date):
+        '''
+        Закрывает текущую связь на заданную дату date
+        '''
+        # Проверяем не закрыта ли уже текущая связь?
+        current_wf = self.models.wf.objects.get(id = self.id)
+        current_state = current_wf.state
+        if current_state.step == self.state_closed.id:
+            raise Exception(u'Relation with id=%s already closed!' % self.id)
+        # Создаем новое состояние
+        params = {'step'     : self.state_closed.id,
+                  'workflow' : current_wf,
+                  'from_step': current_state.step}
+        closed_state = self.models.state.objects.create(**params)
+        # Указываем наш WF на новый степ
+        current_wf.state = closed_state
+        current_wf.end_date = date
+        current_wf.save()
         
+    @transaction.commit_on_success
+    def delete(self):
+        raise NotImplementedError()
+    
     class Meta:
         # Списоки кортежей состоящих из имени поля и класс документа
         open_docs = []  # Способных открыть новый процесс
