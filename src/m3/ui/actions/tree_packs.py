@@ -192,24 +192,33 @@ class SelectWindowAction(Action):
     def run(self, request, context):
         # Создаем окно выбора
         base = self.parent
-        win = self.parent.list_window(title = base.title, mode = 1)
-        win.init_grid_components()
+        win = self.parent.list_window(title = base.title)
+        if base.list_model:
+            win.init_grid_components()
         win.init_tree_components()
+        win.mode = 1
         
         # Добавляем отображаемые колонки
-        for field, name in base.list_columns:
-            win.grid.add_column(header = name, data_index = field)
+        if base.list_model:
+            for field, name in base.list_columns:
+                win.grid.add_column(header = name, data_index = field)
+        for field, name in base.tree_columns:
+            win.tree.add_column(header = name, data_index = field)
             
         # Устанавливаем источники данных
-        grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
-        win.grid.set_store(grid_store)
         win.tree.url = base.get_nodes_action.get_absolute_url()
+        if base.list_model: 
+            grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
+            grid_store.total_property = 'total'
+            grid_store.root = 'rows'
+            win.grid.set_store(grid_store)
         
         #win.column_name_on_select = 'fname'
         #win.list_view.add_column(header=u'Имя', data_index = 'fname')
         #win.list_view.add_column(header=u'Фамилия', data_index = 'lname')
         #win.list_view.add_column(header=u'Адрес', data_index = 'adress')
-        #win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
+        # Заглушка, иначе ругается что нет стора
+        win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
         
         win = self.parent.get_select_window(win)
         return ExtUIScriptResult(win)

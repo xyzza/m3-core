@@ -1,9 +1,10 @@
 #coding:utf-8
+
+from django.db import transaction
+
 from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
-from django.db import transaction
-from django.db.models.query_utils import Q
 from m3.ui.actions import utils
 
 class DictListWindowAction(Action):
