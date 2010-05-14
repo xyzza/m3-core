@@ -71,22 +71,28 @@ class RelationQueryManager(WorkflowQueryManager):
         @param open_docs: словарь, где ключи имена полей, а значения экземпляры документов
         @param date: дата с которой включительно начинает действовать связь
         '''
-        assert isinstance(objects, dict) and isinstance(open_docs, dict) and isinstance(date, datetime)
+        assert isinstance(objects, dict) and isinstance(open_docs, dict)
         # Создаем новое состояние процесса
         workflow = self.workflow()
         state = self.models.state(step = workflow.state_opened.id)
         state.save()
+        
         # Создаем запись связи
         relation = self.models.wf(state = state)
         relation.save()
         state.workflow = relation
         state.save()
+        
         # Создаем запись рабочего набора
         working_set = self.models.wso(workflow = relation)
         for field_name, obj in objects.items():
             #assert hasattr(working_set, field_name), 'The working set models does not contain a field with the name %s' % field_name
+            # В качестве значения могут передаваться как сами записи, так и их id
+            if isinstance(obj, int):
+                field_name += '_id'
             setattr(working_set, field_name, obj)
         working_set.save()
+        
         # Таблица именованных документов
         open_types = tuple([x[1] for x in self.workflow.Meta.open_docs])
         named_docs = self.models.nameddocs(workflow = relation)
@@ -99,6 +105,7 @@ class RelationQueryManager(WorkflowQueryManager):
         # они не используются в запросах
         
         workflow.id = relation.id
+        workflow.record = relation
         return workflow
     
     def filter(self, objects, **kwargs):
@@ -152,6 +159,7 @@ class RelationQueryManager(WorkflowQueryManager):
         '''
         wf = self.workflow()
         wf.id = id
+        wf.record = self.models.wf.objects.get(id = id)
         return wf
     
 
@@ -177,8 +185,6 @@ class Relation(Workflow):
         # Состояния
         self.state_opened = RelationOpenedStep()
         self.state_closed = RelationClosedStep()
-        # Ключ текущей связи
-        self.id = None
     
     @transaction.commit_on_success
     def close(self, date):
@@ -202,7 +208,12 @@ class Relation(Workflow):
         
     @transaction.commit_on_success
     def delete(self):
-        raise NotImplementedError()
+        '''
+        Физическое удаление записей связи
+        '''
+        # Каскадное удаление процесса
+        current_wf = self.models.wf.objects.get(id = self.id)
+        current_wf.delete()
     
     class Meta:
         # Списоки кортежей состоящих из имени поля и класс документа

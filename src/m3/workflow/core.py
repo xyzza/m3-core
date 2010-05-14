@@ -172,10 +172,9 @@ class Workflow(object):
         self.end_step = WorkflowEndStep()
         self.steps = []
         
-        # Уникальный по системе идентификатор рабочего процесса.
-        self.id = ''
-        
-        self.objects = WorkflowQueryManager(self)
+        # Ключ текущего процесса и запись
+        self.id = None
+        self.record = None
         
         # Список классов генерирующих код для общего скрипта моделей процесса
         # Так было сделано для возможности перекрыть скрипт каждой отдельной таблицы в потомках
