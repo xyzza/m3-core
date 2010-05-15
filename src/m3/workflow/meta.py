@@ -27,7 +27,7 @@ class MetaWorkflowModel(ModelBase):
         models.DateTimeField(auto_now = True).contribute_to_class(klass, 'modified')
         
         # state - шаг, на котором находится текущий экземпляр рабочего процесса.
-        models.OneToOneField(wf.meta_class_name() + 'StateModel').contribute_to_class(klass, 'state')
+        models.OneToOneField(wf.meta_class_name() + 'StateModel', related_name = 'state').contribute_to_class(klass, 'state')
         
         # parent_workflow_code - код родительского рабочего потока
         models.CharField(max_length = 100, blank = True, null = True).contribute_to_class(klass, 'parent_workflow_code')
@@ -47,7 +47,7 @@ class MetaWorkflowStateModel(ModelBase):
         
         # workflow - ссылка на соответствующий WorkflowModel - ссылка на экземпляр соответствующего рабочего потока
         # null = True только для того, чтобы процесс и состояние можно было сохранять раздельно
-        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model', blank = True, null = True).\
+        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model', related_name = 'states', blank = True, null = True).\
                contribute_to_class(klass, 'workflow')
         
         # step - текущий шаг рабочего процесса
@@ -68,7 +68,8 @@ class MetaWorkflowChildModel(ModelBase):
         klass = super(MetaWorkflowChildModel, cls).__new__(cls, name, bases, attrs)
         
         # workflow - ссылка на соответствующий рабочий процесс
-        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model').contribute_to_class(klass, 'workflow')
+        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model', related_name = 'children').\
+               contribute_to_class(klass, 'workflow')
         
         # child_workflow_code - код дочернего рабочего потока
         models.CharField(max_length = 100).contribute_to_class(klass, 'child_workflow_code')
@@ -85,7 +86,8 @@ class MetaWorkflowWSOModel(ModelBase):
         klass = super(MetaWorkflowWSOModel, cls).__new__(cls, name, bases, attrs)
         
         # workflow - ссылка на соответствующий рабочий процесс
-        models.ForeignKey(klass.WorkflowMeta.workflow.meta_class_name() + 'Model').contribute_to_class(klass, 'workflow')
+        models.OneToOneField(klass.WorkflowMeta.workflow.meta_class_name() + 'Model', related_name = 'wso').\
+               contribute_to_class(klass, 'workflow')
         
         # Создаем ссылки на все объекты указанные в Meta нашего процесса
         objects = getattr(klass.WorkflowMeta.workflow.Meta, 'objects', [])
@@ -109,10 +111,10 @@ class MetaWorkflowDocModel(ModelBase):
         wf = klass.WorkflowMeta.workflow
         
         # workflow - ссылка на соответствующий рабочий процесс
-        models.ForeignKey(wf.meta_class_name() + 'Model').contribute_to_class(klass, 'workflow')
+        models.ForeignKey(wf.meta_class_name() + 'Model', related_name = 'docs').contribute_to_class(klass, 'workflow')
         
         #+workflow_state : ForeignKey(MyWorkflowStateModel)
-        models.ForeignKey(wf.meta_class_name() + 'StateModel').contribute_to_class(klass, 'workflow_state')
+        models.ForeignKey(wf.meta_class_name() + 'StateModel', related_name = 'states').contribute_to_class(klass, 'workflow_state')
         
         # created - серверные дата/время создания документа рабочего потока
         models.DateTimeField(auto_now_add = True).contribute_to_class(klass, 'created')
