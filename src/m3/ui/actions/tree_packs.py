@@ -119,7 +119,7 @@ class ListNewRowWindowAction(Action):
         assert parent_id > 0, 'The request must contain the "id" of the selected group is greater than 0.'
         # Создаем новую группу и биндим ее к форме
         obj = base.get_row()
-        obj.parent_id = parent_id
+        setattr(obj, base.list_parent_field + '_id', parent_id)
         win = base.edit_window(create_new = True)
         win.form.from_object(obj)
         # Донастраиваем форму
@@ -258,13 +258,15 @@ class ListWindowAction(Action):
             win.url_edit_grid   = base.edit_grid_window_action.get_absolute_url()
             win.url_delete_grid = base.delete_row_action.get_absolute_url()
             # Драг&Дроп
-            win.url_drag_tree = base.drag_tree.get_absolute_url()
-            win.url_drag_grid = base.drag_list.get_absolute_url()
+            if not base.tree_readonly:
+                win.url_drag_tree = base.drag_tree.get_absolute_url()
+                win.url_drag_grid = base.drag_list.get_absolute_url()
         
         # Доступны 3 события для дерева: создание нового узла, редактирование или удаление имеющегося
-        win.url_new_tree    = base.new_node_window_action.get_absolute_url()
-        win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
-        win.url_delete_tree = base.delete_node_action.get_absolute_url()
+        if not base.tree_readonly:
+            win.url_new_tree    = base.new_node_window_action.get_absolute_url()
+            win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
+            win.url_delete_tree = base.delete_node_action.get_absolute_url()
         
         win = self.parent.get_list_window(win)
         return ExtUIScriptResult(win)
@@ -384,19 +386,19 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     '''
     Класс реализует действия над иерархическим справочников основанным на моделях
     '''
-    # Обязательная модель дерева
-    tree_model = None
-    # Не обязательная модель списка связанного с деревом
-    list_model = None
-    # Поля по которым производится поиск в списке
-    filter_fields = []
-    # Поля по которым производится поиск в дереве
-    tree_filter_fields = []
-    # Список из кортежей с параметрами выводимых в грид колонок
-    list_columns = []
-    # Список из кортежей с параметрами выводимых в дерево колонок
-    tree_columns = []
-        
+    # Настройки для модели дерева
+    tree_model = None # Сама модель дерева
+    tree_filter_fields = [] # Поля по которым производится поиск в дереве
+    tree_columns = [] # Список из кортежей с параметрами выводимых в дерево колонок
+    tree_parent_field = 'parent' # Имя поля ссылающегося на группу
+    tree_readonly = False # Если истина, то адреса экшенов дереву не назначаются
+    
+    # Настройки модели списка
+    list_model = None # Не обязательная модель списка связанного с деревом
+    list_columns = [] # Список из кортежей с параметрами выводимых в грид колонок
+    filter_fields = [] # Поля по которым производится поиск в списке
+    list_parent_field = 'parent' # Имя поля ссылающегося на группу
+    
     def get_nodes(self, parent_id, filter):
         if filter:
             filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)
@@ -412,7 +414,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         return nodes
     
     def get_rows(self, parent_id, offset, limit, filter):
-        query = self.list_model.objects.filter(parent = parent_id)
+        query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
         query = utils.apply_search_filter(query, filter, self.filter_fields)
         # Для работы пейджинга нужно передавать общее количество записей
         total = query.count()
