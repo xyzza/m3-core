@@ -2,8 +2,9 @@
 new Ext.data.JsonStore({
 	url: '{{ component.url }}'
 	,baseParams: {
-		start: {{ component.start }},
-		limit: {{ component.limit }}
+		{% for key,value in component.base_params.items %}
+			{{ key }}: {{ value}}{% if not forloop.last %},{% endif %}			
+		{% endfor %} 		
 	}
 	,idProperty: '{{ component.id_property }}'
 	{% if component.root %} ,root: '{{ component.root }}' {% endif %}

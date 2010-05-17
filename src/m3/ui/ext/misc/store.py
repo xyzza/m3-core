@@ -40,12 +40,13 @@ class ExtJsonStore(BaseExtStore):
         self.template = 'ext-misc/ext-json-store.js'
         self.__columns = [] # Для заполнения полей в шаблоне
         self.url = ''
-        self.start = 0
-        self.limit = -1
+        self.__start = 0
+        self.__limit = -1
         self.total_property = None
         self.root = None
         self.auto_load = False
         self.id_property = 'id'
+        self.__base_params = {}
         self.init_component(*args, **kwargs)
         
     def render(self, columns):
@@ -58,4 +59,29 @@ class ExtJsonStore(BaseExtStore):
             Прописывается в шаблоне и заполняется при рендеринге
         '''
         return ','.join(['{name: "%s"}' % data_index for data_index in self.__columns]) 
+    
+    def _get_start(self):
+        return self.__start
+    
+    def _set_start(self, s):
+        self.__start = s
+        self.__base_params['start'] = self.__start
+    
+    start = property(_get_start, _set_start)
+    
+    def _get_limit(self):
+        return self.__limit
+    
+    def _set_limit(self, l):
+        self.__limit = l
+        self.__base_params['limit'] = self.__limit
+    
+    limit = property(_get_limit, _set_limit)
+
+    def _set_base_params(self, params):
+        self.__base_params.update(params)
         
+    def _get_base_params(self):
+        return self.__base_params
+
+    base_params = property(_get_base_params, _set_base_params)
