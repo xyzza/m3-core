@@ -52,7 +52,7 @@ def read_simple_dict_file(filename):
     )  
     '''
 
-    assert isinstance(filename, basestring), u'Путь к файлу справочника должен быть задан строкой'
+    assert isinstance(filename, basestring), u"filename must be 'str'"
 
     attrs = []
     values = []
@@ -87,7 +87,7 @@ def read_tree_dict_file(filename):
     )
     '''
 
-    assert isinstance(filename, basestring), u'Путь к файлу с записями справочника должен быть задан строкой'
+    assert isinstance(filename, basestring), u"filename must be 'str'"
 
     # паттерн для строки модели групп
     VALID_BRANCH = '\[\+\](\w| )+'
@@ -194,7 +194,7 @@ def fill_simple_dict(model, data):
     в формате, возвращаемом функцией read_simple_dict_file
     '''
     
-    assert issubclass(model, models.Model)
+    assert issubclass(model, models.Model), 'model must be subclass of django.db.models.Model'
     
     if model.objects.all().count() > 0:
         raise DictNotEmptyException(model.__name__, u'Таблица справочника %s не должна содержать записи' % model.__name__)
@@ -219,8 +219,8 @@ def fill_simple_dict(model, data):
 @transaction.commit_on_success
 def fill_tree_dict(group_model, list_model, group_link, list_link, data):
     
-    assert issubclass(list_model, models.Model)
-    assert issubclass(group_model, models.Model)
+    assert issubclass(list_model, models.Model), 'model must be subclass of django.db.models.Model'
+    assert issubclass(group_model, models.Model), 'model must be subclass of django.db.models.Model'
     
     if group_model.objects.all().count() > 0:
         raise DictNotEmptyException(group_model.__name__, u'Таблица справочника %s не должна содержать записи' % group_model.__name__)
