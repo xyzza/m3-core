@@ -9,7 +9,7 @@ from django.db.models.base import ModelBase
 from django.db import models, transaction
 
 from m3.workflow.core import Workflow, BaseModelGenerator, GeneratorWorkflow, WorkflowQueryManager,\
-    WorkflowStep
+    WorkflowStep, WorkflowOptions
 from m3.workflow.meta import MetaWorkflowModel
 
 class MetaNamedDocsModel(ModelBase):
@@ -171,9 +171,17 @@ class RelationClosedStep(WorkflowStep):
     id = 'closed'
     name = 'Закрыто'
 
+class RelationOptions(WorkflowOptions):
+    def __init__(self):
+        super(RelationOptions, self).__init__()
+        attrs = {'open_docs': [],   # Списоки кортежей состоящих из имени поля и класс документа cпособных открыть новый процесс
+                 'close_docs': [],  # Списоки кортежей состоящих из имени поля и класс документа способных закрыть процесс
+                 'resolutions': []} # Список причин по которым была закрыта связь
+        self.available_attributes.update(attrs)
 
 class Relation(Workflow):
     _objects_class = RelationQueryManager
+    _options_class = RelationOptions
     
     def __init__(self):
         super(Relation, self).__init__()
@@ -187,10 +195,11 @@ class Relation(Workflow):
         self.state_closed = RelationClosedStep()
     
     @transaction.commit_on_success
-    def close(self, date):
+    def close(self, date, resolution = None):
         '''
         Закрывает текущую связь на заданную дату date
         '''
+        assert resolution == None or resolution in self.Meta.resolutions, 'Resolution name "%s" not found' % resolution
         # Проверяем не закрыта ли уже текущая связь?
         current_wf = self.models.wf.objects.get(id = self.id)
         current_state = current_wf.state
@@ -204,6 +213,7 @@ class Relation(Workflow):
         # Указываем наш WF на новый степ
         current_wf.state = closed_state
         current_wf.end_date = date
+        current_wf.resolution = resolution
         current_wf.save()
         
     @transaction.commit_on_success
@@ -214,9 +224,5 @@ class Relation(Workflow):
         # Каскадное удаление процесса
         current_wf = self.models.wf.objects.get(id = self.id)
         current_wf.delete()
-    
-    class Meta:
-        # Списоки кортежей состоящих из имени поля и класс документа
-        open_docs = []  # Способных открыть новый процесс
-        close_docs = [] # Способных закрыть процесс
-        
+
+

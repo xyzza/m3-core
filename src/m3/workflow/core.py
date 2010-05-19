@@ -148,20 +148,55 @@ class WorkflowQueryManager(object):
 #============================================================================
 #=================== БАЗОВЫЙ КЛАСС РАБОЧЕГО ПРОЦЕССА ========================
 #============================================================================
+class WorkflowOptions(object):
+    ''' Класс содержащий настройки по умолчанию для рабочих процессов '''
+    def __init__(self):
+        self.available_attributes = \
+        {'db_table': None,
+         'id': None,
+         'objects': []}
+        
+    def create_default_attributes(self):
+        for key, value in self.available_attributes.items():
+            setattr(self, key, value)
+    
+    def check_required_attributes(self):
+        assert self.id != None, 'Unique process "id" must be defined in Meta class'
+        assert self.db_table != None, 'Unique table name "db_table" must be defined in Meta class'
+        
+    def merge(self, clazz):
+        ''' Перезаписывает доступные атрибуты нашего класс значениями сливаемого класса clazz '''
+        for key, value in self.available_attributes.items():
+            if hasattr(clazz, key):
+                value = getattr(clazz, key)
+                setattr(self, key, value)
+        
 
 class _WorkflowMetaConstructor(type):
     '''
-    Метакласс предназначен для инициализации менеджера запросов внутри статического
-    атрибута класса рабочего процесса 
+    Метакласс для построения класса рабочего процесса 
     '''
     def __new__(cls, name, bases, attrs):
         klass = super(_WorkflowMetaConstructor, cls).__new__(cls, name, bases, attrs)
+        # Инициализации менеджера запросов внутри статического
+        # атрибута класса рабочего процесса 
         klass.objects = klass._objects_class(klass)
+        
+        # Всякий класс сконструированный этим метаклассом будет иметь настройки Meta
+        opt_class = getattr(klass, '_options_class')
+        opt_ins = opt_class()
+        opt_ins.create_default_attributes()
+        meta = getattr(klass, 'Meta', None)
+        if meta:
+            opt_ins.merge(meta)
+        klass.Meta = opt_ins
+        
         return klass
 
 class Workflow(object):
-    # Хитрый способ создания менеджера запросов
+    # Определения для хитрого способа создания внутренних менеджеров, специально чтобы их могли переопределить 
     _objects_class = WorkflowQueryManager
+    _options_class = WorkflowOptions
     __metaclass__  = _WorkflowMetaConstructor
     
     # Ассессор для моделей рабочего процесса

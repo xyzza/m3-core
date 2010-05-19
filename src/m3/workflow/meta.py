@@ -35,6 +35,9 @@ class MetaWorkflowModel(ModelBase):
         # parent_workflow_id - идентификатор экземпляра родительского рабочего потока
         models.PositiveIntegerField(blank = True, null = True).contribute_to_class(klass, 'parent_workflow_id')
         
+        # Резолюция с которой поток закрылся
+        models.CharField(blank = True, null = True, max_length = 30).contribute_to_class(klass, 'resolution')
+        
         return klass
 
 
