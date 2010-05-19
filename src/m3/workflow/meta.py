@@ -38,6 +38,11 @@ class MetaWorkflowModel(ModelBase):
         # Резолюция с которой поток закрылся
         models.CharField(blank = True, null = True, max_length = 30).contribute_to_class(klass, 'resolution')
         
+        # Ссылка на запись с дополнительными (определенными пользователем) атрибутами процесса
+        attributes_model = getattr(wf.Meta, 'attributes_model', None)
+        if attributes_model:
+            models.OneToOneField(attributes_model).contribute_to_class(klass, 'attributes')
+        
         return klass
 
 

@@ -64,7 +64,7 @@ class RelationQueryManager(WorkflowQueryManager):
         super(RelationQueryManager, self).__init__(*args, **kwargs)
     
     @transaction.commit_on_success
-    def create(self, objects = {}, open_docs = {}, date = datetime.min):
+    def create(self, objects = {}, open_docs = {}, date = datetime.min, attr = None):
         '''
         Создает новую открытую связь для объектов objects, открытых документами open_docs на дату date
         @param objects: словарь, где ключи имена полей, а значения экземпляры объектов рабочего набора
@@ -79,6 +79,8 @@ class RelationQueryManager(WorkflowQueryManager):
         
         # Создаем запись связи
         relation = self.models.wf(state = state)
+        relation.date = date
+        relation.attributes = attr
         relation.save()
         state.workflow = relation
         state.save()

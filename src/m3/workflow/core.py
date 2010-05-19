@@ -154,7 +154,8 @@ class WorkflowOptions(object):
         self.available_attributes = \
         {'db_table': None,
          'id': None,
-         'objects': []}
+         'objects': [],
+         'attributes_model': None}
         
     def create_default_attributes(self):
         for key, value in self.available_attributes.items():
@@ -189,6 +190,8 @@ class _WorkflowMetaConstructor(type):
         meta = getattr(klass, 'Meta', None)
         if meta:
             opt_ins.merge(meta)
+        #TODO: Нужно пофиксить баг с падением проверки
+        #opt_ins.check_required_attributes
         klass.Meta = opt_ins
         
         return klass
