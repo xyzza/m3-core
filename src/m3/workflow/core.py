@@ -184,16 +184,16 @@ class _WorkflowMetaConstructor(type):
         klass.objects = klass._objects_class(klass)
         
         # Всякий класс сконструированный этим метаклассом будет иметь настройки Meta
-        opt_class = getattr(klass, '_options_class')
-        opt_ins = opt_class()
-        opt_ins.create_default_attributes()
-        meta = getattr(klass, 'Meta', None)
-        if meta:
-            opt_ins.merge(meta)
-        #TODO: Нужно пофиксить баг с падением проверки
-        #opt_ins.check_required_attributes
-        klass.Meta = opt_ins
-        
+        op_class = klass.__dict__.get('_options_class', None)
+        if op_class:
+            op_ins = op_class()
+            op_ins.create_default_attributes()
+            meta = getattr(klass, 'Meta', None)
+            if meta:
+                op_ins.merge(meta)
+                #op_ins.check_required_attributes()
+            klass.Meta = op_ins
+                     
         return klass
 
 class Workflow(object):
