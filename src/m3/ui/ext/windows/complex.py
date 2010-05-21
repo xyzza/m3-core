@@ -127,7 +127,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         
     def __add_separator_grid(self, flag):
         '''Добавление разделителя в контролы грида'''
-        self.grid.handler_rowcontextmenu.add_separator()   
+        self.grid.handler_rowcontextmenu.add_separator()
         self.grid.top_bar.add_separator()
         if flag==0:
             self.grid.handler_contextmenu.add_separator()
@@ -179,9 +179,9 @@ class ExtDictionaryWindow(BaseExtWindow):
     def  url_new_grid(self, value):
         self.init_grid_components()
         if value:
-            self.__set_handler(self.__components_new_grid, 'newValueGrid')
+            self._set_handler(self.__components_new_grid, 'newValueGrid')
         else:
-            self.__clear_handler(self.__components_new_grid)
+            self._clear_handler(self.__components_new_grid)
         self.__url_new_grid = value
     
     @property
@@ -192,9 +192,9 @@ class ExtDictionaryWindow(BaseExtWindow):
     def url_edit_grid(self, value):
         self.init_grid_components()
         if value:
-            self.__set_handler(self.__components_edit_grid,'editValueGrid')
+            self._set_handler(self.__components_edit_grid,'editValueGrid')
         else:
-            self.__clear_handler(self.__components_edit_grid)
+            self._clear_handler(self.__components_edit_grid)
         self.__url_edit_grid = value 
     
     @property
@@ -205,9 +205,9 @@ class ExtDictionaryWindow(BaseExtWindow):
     def url_delete_grid(self, value):
         self.init_grid_components()
         if value:
-            self.__set_handler(self.__components_delete_grid, 'deleteValueGrid')
+            self._set_handler(self.__components_delete_grid, 'deleteValueGrid')
         else:
-            self.__clear_handler(self.__components_delete_grid)
+            self._clear_handler(self.__components_delete_grid)
         self.__url_delete_grid = value 
     
     #Урлы для дерева
@@ -219,11 +219,11 @@ class ExtDictionaryWindow(BaseExtWindow):
     def  url_new_tree(self, value):
         self.init_tree_components()
         if value:
-            self.__set_handler(self.__components_new_tree, 'newValueTreeRoot')
-            self.__set_handler(self.__components_new_tree_child, 'newValueTreeChild')
+            self._set_handler(self.__components_new_tree, 'newValueTreeRoot')
+            self._set_handler(self.__components_new_tree_child, 'newValueTreeChild')
         else:
-            self.__clear_handler(self.__components_new_tree)
-            self.__clear_handler(self.__components_new_tree_child)
+            self._clear_handler(self.__components_new_tree)
+            self._clear_handler(self.__components_new_tree_child)
         self.__url_new_tree = value
     
     @property
@@ -234,9 +234,9 @@ class ExtDictionaryWindow(BaseExtWindow):
     def url_edit_tree(self, value):
         self.init_tree_components()
         if value:
-            self.__set_handler(self.__components_edit_tree,'editValueTree')
+            self._set_handler(self.__components_edit_tree,'editValueTree')
         else:
-            self.__clear_handler(self.__components_edit_tree)
+            self._clear_handler(self.__components_edit_tree)
         self.__url_edit_tree = value 
     
     @property
@@ -247,9 +247,9 @@ class ExtDictionaryWindow(BaseExtWindow):
     def url_delete_tree(self, value):
         self.init_tree_components()
         if value:
-            self.__set_handler(self.__components_delete_tree, 'deleteValueTree')
+            self._set_handler(self.__components_delete_tree, 'deleteValueTree')
         else:
-            self.__clear_handler(self.__components_delete_tree)
+            self._clear_handler(self.__components_delete_tree)
         self.__url_delete_tree = value 
     
     # Выбор из справочника
@@ -260,17 +260,21 @@ class ExtDictionaryWindow(BaseExtWindow):
     @column_name_on_select.setter
     def column_name_on_select(self, value):
         if value:
-            self.__set_handler([self.select_button,],'selectValue')
+            self._set_handler([self.select_button,],'selectValue')
         else:
-            self.__clear_handler([self.select_button,])
+            self._clear_handler([self.select_button,])
         self.__text_on_select = value
     
-    def __set_handler(self, components, handler):
+    def _set_handler(self, components, handler):
+        if not isinstance(components, (list, tuple)):
+            components = [components]
         for component in components:
             component.handler = handler
             component.disabled = False
             
-    def __clear_handler(self, components):
+    def _clear_handler(self, components):
+        if not isinstance(components, (list, tuple)):
+            components = [components]
         for component in components:
             component.handler = None
             component.disabled = True
