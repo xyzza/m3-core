@@ -26,6 +26,8 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.ask_before_deleting = None
         self.url = None
         self.autocomplete_url = None
+        self.value_field = 'id'     # это взято из магического метода configure_edit_field из mis.users.forms 
+        self.query_param = 'filter' # и это тоже взято оттуда же
         
         self.select_button = ExtButton(handler='onSelect', icon_cls='select', disabled=True)
         self.clear_button = ExtButton(handler='onClearField', icon_cls='clear', hidden=True) 
@@ -65,6 +67,16 @@ class ExtDictSelectField(BaseExtTriggerField):
         if val:
             self.clear_button.hidden = False if val else True
         self.__value = val
+        
+    def configure_by_dictpack(self, pack, controller):
+        '''
+        Метод настройки поля выбора из справочника на основе 
+        переданного ActionPack работы со справочниками
+        '''
+        registered_pack = controller.find_pack(pack)
+        self.url = registered_pack.get_select_url()
+        self.autocomplete_url = registered_pack.rows_action.get_absolute_url()
+        self.bind_pack = registered_pack # TODO: можно ли обойтись без bind_back?
         
         
 class ExtSearchField(BaseExtField):
