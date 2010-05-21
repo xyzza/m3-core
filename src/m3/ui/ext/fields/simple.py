@@ -69,3 +69,13 @@ class ExtComboBox(BaseExtTriggerField):
         super(ExtComboBox, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-combo.js'
         self.init_component(*args, **kwargs)
+        
+        
+class ExtTimeField(BaseExtField):
+    '''Поле ввода времени'''
+    def __init__(self, *args, **kwargs):
+        super(ExtTimeField, self).__init__(*args, **kwargs)
+        self.template = 'ext-fields/ext-time-field.js'
+        self.format = None
+        self.increment = None
+        self.init_component(*args, **kwargs)
