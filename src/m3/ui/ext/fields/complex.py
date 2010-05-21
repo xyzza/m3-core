@@ -78,6 +78,22 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.autocomplete_url = registered_pack.rows_action.get_absolute_url()
         self.bind_pack = registered_pack # TODO: можно ли обойтись без bind_back?
         
+    @property
+    def total(self):
+        return self.get_store().total_property
+    
+    @total.setter
+    def total(self, value):
+        self.get_store().total_property = value
+        
+    @property
+    def root(self):
+        return self.get_store().root
+    
+    @root.setter
+    def root(self, value):
+        self.get_store().root = value   
+        
         
 class ExtSearchField(BaseExtField):
     '''Поле поиска'''
