@@ -32,6 +32,9 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.select_button = ExtButton(handler='onSelect', icon_cls='select', disabled=True)
         self.clear_button = ExtButton(handler='onClearField', icon_cls='clear', hidden=True) 
         
+        self.total = 'total'
+        self.root = 'rows'
+        
         self.init_component(*args, **kwargs)
         # По умолчанию 20 - ширина двух кнопок
         # Чтобы компонент умещался в передоваемую ширину
