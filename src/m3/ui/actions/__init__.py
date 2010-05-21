@@ -429,9 +429,15 @@ class ControllerCache(object):
                     module = import_module('.app_meta', app_name)
                 except ImportError:
                     continue
-                proc = getattr(module, 'register_ui_actions', None)
+                proc = getattr(module, 'register_actions', None)
                 if callable(proc):
                     proc()
+                else:
+                    # совместивость с уже написанными исходными кодами.
+                    # а вообще, в дальнейшем будем писать именно register_actions
+                    proc = getattr(module, 'register_ui_actions', None)
+                    if callable(proc):
+                        proc()
             cls._loaded = True
         finally:
             cls._write_lock.release()
