@@ -79,7 +79,7 @@ class RelationQueryManager(WorkflowQueryManager):
         
         # Создаем запись связи
         relation = self.models.wf(state = state)
-        relation.date = date
+        relation.start_date = date
         relation.attributes = attr
         relation.save()
         state.workflow = relation
@@ -197,7 +197,7 @@ class Relation(Workflow):
         self.state_closed = RelationClosedStep()
     
     @transaction.commit_on_success
-    def close(self, date, resolution = None):
+    def close(self, date, close_docs = {}, resolution = None):
         '''
         Закрывает текущую связь на заданную дату date
         '''
@@ -207,6 +207,14 @@ class Relation(Workflow):
         current_state = current_wf.state
         if current_state.step == self.state_closed.id:
             raise Exception(u'Relation with id=%s already closed!' % self.id)
+        # Записываем закрывающий документ в связь
+        close_types = tuple([x[1] for x in self.Meta.open_docs])
+        named_docs = self.models.nameddocs(workflow = current_wf)
+        for field_name, obj in close_docs.items():
+            assert hasattr(named_docs, field_name), 'The named docs models does not contain a field with the name %s' % field_name
+            assert isinstance(obj, close_types), 'Document type is not included in the types of opening documents. Look attribute open_docs in Meta.'
+            setattr(named_docs, field_name, obj)
+        named_docs.save()
         # Создаем новое состояние
         params = {'step'     : self.state_closed.id,
                   'workflow' : current_wf,
