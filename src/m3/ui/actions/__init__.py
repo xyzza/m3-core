@@ -291,9 +291,6 @@ class ActionController(object):
             # Запись паттерна состоит из:
             # компилированного выражения пути, стека паков и экшена
             self._patterns.appendlist(packs_path, (regex, stack[:], clazz) )
-            # Для отладки
-            if __debug__:
-                print packs_path, clazz.url
     
     def rebuild_patterns(self):
         '''
@@ -427,7 +424,9 @@ class ControllerCache(object):
             for app_name in settings.INSTALLED_APPS:
                 try:
                     module = import_module('.app_meta', app_name)
-                except ImportError:
+                except ImportError, err:
+                    if err.args[0].find('No module named') == -1:
+                        raise
                     continue
                 proc = getattr(module, 'register_actions', None)
                 if callable(proc):

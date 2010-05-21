@@ -228,46 +228,64 @@ class ListWindowAction(Action):
     Экшен создает и настраивает окно справочника в режиме редактирования записей
     '''
     url = '/get_list_window$'
-    def run(self, request, context):
-        # Создаем окно
+    
+    def create_window(self, request, context):
+        ''' Создаем и настраиваем окно ''' 
         base = self.parent
         win = self.parent.list_window(title = base.title, mode = 0)
         if base.list_model:
             win.init_grid_components()
         win.init_tree_components()
         win.tree.root_text = base.title
-        
+        return win
+    
+    def configure_list(self, win, request, context):
+        ''' Настраивает грид (список элементов) '''
+        base = self.parent
         # Добавляем отображаемые колонки
         if base.list_model:
             for field, name in base.list_columns:
                 win.grid.add_column(header = name, data_index = field)
-        for field, name in base.tree_columns:
-            win.tree.add_column(header = name, data_index = field)
-        
         # Устанавливаем источники данных
-        win.tree.url = base.get_nodes_action.get_absolute_url()
         if base.list_model: 
             grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
             grid_store.total_property = 'total'
             grid_store.root = 'rows'
             win.grid.set_store(grid_store)
-        
         # Доступны 3 события для грида: создание нового элемента, редактирование или удаление имеющегося
-        if base.list_model: 
+        if base.list_model and not base.list_readonly:
             win.url_new_grid    = base.new_grid_window_action.get_absolute_url()
             win.url_edit_grid   = base.edit_grid_window_action.get_absolute_url()
             win.url_delete_grid = base.delete_row_action.get_absolute_url()
             # Драг&Дроп
             if not base.tree_readonly:
-                win.url_drag_tree = base.drag_tree.get_absolute_url()
                 win.url_drag_grid = base.drag_list.get_absolute_url()
-        
-        # Доступны 3 события для дерева: создание нового узла, редактирование или удаление имеющегося
+    
+    def configure_tree(self, win, request, context):
+        ''' Настраивает дерево групп '''
+        base = self.parent
+        # Добавляем отображаемые колонки
+        for field, name in base.tree_columns:
+            win.tree.add_column(header = name, data_index = field)
+        # Устанавливаем источники данных
+        win.tree.url = base.get_nodes_action.get_absolute_url()
+        # События для дерева
         if not base.tree_readonly:
+            # Доступны 3 события для дерева: создание нового узла, редактирование или удаление имеющегося
             win.url_new_tree    = base.new_node_window_action.get_absolute_url()
             win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
             win.url_delete_tree = base.delete_node_action.get_absolute_url()
-        
+            # Драг&Дроп
+            win.url_drag_tree = base.drag_tree.get_absolute_url()
+    
+    def configure_other(self, win, request, context):
+        pass
+    
+    def run(self, request, context):
+        win = self.create_window(request, context)
+        self.configure_tree(win, request, context)
+        self.configure_list(win, request, context)
+        self.configure_other(win, request, context)        
         win = self.parent.get_list_window(win)
         return ExtUIScriptResult(win)
 
@@ -398,6 +416,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     list_columns = [] # Список из кортежей с параметрами выводимых в грид колонок
     filter_fields = [] # Поля по которым производится поиск в списке
     list_parent_field = 'parent' # Имя поля ссылающегося на группу
+    list_readonly = False # Если истина, то адреса экшенов гриду не назначаются
     
     def get_nodes(self, parent_id, filter):
         if filter:
