@@ -206,9 +206,9 @@ class SelectWindowAction(Action):
             win.tree.add_column(header = name, data_index = field)
             
         # Устанавливаем источники данных
-        win.tree.url = base.get_nodes_action.get_absolute_url()
+        win.tree.url = base.nodes_action.get_absolute_url()
         if base.list_model: 
-            grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
+            grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
             grid_store.total_property = 'total'
             grid_store.root = 'rows'
             win.grid.set_store(grid_store)
@@ -248,7 +248,7 @@ class ListWindowAction(Action):
                 win.grid.add_column(header = name, data_index = field)
         # Устанавливаем источники данных
         if base.list_model: 
-            grid_store = ExtJsonStore(url = base.get_rows_action.get_absolute_url(), auto_load = True)
+            grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
             grid_store.total_property = 'total'
             grid_store.root = 'rows'
             win.grid.set_store(grid_store)
@@ -268,7 +268,7 @@ class ListWindowAction(Action):
         for field, name in base.tree_columns:
             win.tree.add_column(header = name, data_index = field)
         # Устанавливаем источники данных
-        win.tree.url = base.get_nodes_action.get_absolute_url()
+        win.tree.url = base.nodes_action.get_absolute_url()
         # События для дерева
         if not base.tree_readonly:
             # Доступны 3 события для дерева: создание нового узла, редактирование или удаление имеющегося
@@ -308,13 +308,13 @@ class BaseTreeDictionaryActions(ActionPack):
         self.actions = []
         
         # Экшены отдающие данные
-        self.get_nodes_action = TreeGetNodesAction()
-        self.get_node_action  = TreeGetNodeAction()
-        self.get_rows_action  = ListGetRowsAction()
-        self.get_row_action   = ListGetRowAction()
+        self.nodes_action = TreeGetNodesAction()
+        self.node_action  = TreeGetNodeAction()
+        self.rows_action  = ListGetRowsAction()
+        self.row_action   = ListGetRowAction()
         self.last_used_action = ListLastUsedAction()
-        self.actions.extend([self.get_nodes_action, self.get_node_action, self.get_rows_action,
-                             self.get_row_action, self.last_used_action])
+        self.actions.extend([self.nodes_action, self.node_action, self.rows_action,
+                             self.row_action, self.last_used_action])
         
         # Окна самого справочника
         self.list_window_action   = ListWindowAction()
