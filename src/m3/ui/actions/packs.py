@@ -59,6 +59,7 @@ class DictSelectWindowAction(Action):
         list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
         win.list_view.set_store(list_store)
         
+        win.column_name_on_select = 'name'
         return ExtUIScriptResult(self.parent.get_select_window(win))
 
 
