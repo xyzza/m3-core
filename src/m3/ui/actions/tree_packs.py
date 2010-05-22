@@ -226,7 +226,7 @@ class ListWindowAction(Action):
     def create_window(self, request, context):
         ''' Создаем и настраиваем окно ''' 
         base = self.parent
-        win = self.parent.list_window(title = base.title, mode = 0)
+        win = self.parent.list_window(title = base.title, mode = 0, height = base.height, width = base.width)
         if base.list_model:
             win.init_grid_components()
         win.init_tree_components()
@@ -297,6 +297,9 @@ class BaseTreeDictionaryActions(ActionPack):
     edit_window = None
     # Окно самого справочника
     list_window = ExtDictionaryWindow
+    # Ширина и высота окна
+    width = 600
+    height = 400
     
     def __init__(self):
         self.actions = []

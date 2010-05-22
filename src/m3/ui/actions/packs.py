@@ -14,7 +14,7 @@ class DictListWindowAction(Action):
     url = '/list-window$'
     def run(self, request, context):
         base = self.parent
-        win = base.list_form(mode = 0, title = base.title)
+        win = base.list_form(mode = 0, title = base.title, height = base.height, width = base.width)
         win.init_grid_components()
         
         # Добавляем отображаемые колонки
@@ -86,8 +86,8 @@ class DictRowsAction(Action):
     '''
     url = '/rows$'
     def run(self, request, context):
-        offset = int(request.REQUEST.get('start', 0))
-        limit = int(request.REQUEST.get('limit', 0))
+        offset = utils.extract_int(request, 'start')
+        limit = utils.extract_int(request, 'limit')
         filter = request.REQUEST.get('filter')
         return PreJsonResult(self.parent.get_rows(offset, limit, filter))
     
@@ -98,15 +98,15 @@ class DictLastUsedAction(Action):
     url = '/last-rows$'
     def run(self, request, context):
         return PreJsonResult(self.parent.get_last_used(self))
-    
-class DictRowAction(Action):
+
+class ListGetRowAction(Action):
     '''
     Действие, которое отвечает за возврат данных для одного отдельно-взятой записи справочника
     '''
     url = '/item$'
     def run(self, request, context):
         id = utils.extract_int(request, 'id')
-        result = self.parent.get_row(self, id)
+        result = self.parent.get_row(id)
         return PreJsonResult(result)
 
 class DictSaveAction(Action):
@@ -138,8 +138,11 @@ class BaseDictionaryActions(ActionPack):
     list_columns = []
     # Окно для редактирования элемента справочника 
     edit_window = None
-    list_form    = ExtDictionaryWindow
-    select_form  = ExtDictionaryWindow
+    list_form   = ExtDictionaryWindow
+    select_form = ExtDictionaryWindow
+    # Ширина и высота окна
+    width = 400
+    height = 300
     
     def __init__(self):
         # В отличие от обычных паков в этом экшены создаются самостоятельно, а не контроллером
@@ -149,7 +152,7 @@ class BaseDictionaryActions(ActionPack):
         self.edit_window_action   = DictEditWindowAction()
         self.rows_action          = DictRowsAction()
         self.last_used_action     = DictLastUsedAction()
-        self.row_action           = DictRowAction()
+        self.row_action           = ListGetRowAction()
         self.save_action          = DictSaveAction()
         self.delete_action        = ListDeleteRowAction()
         # Но привязать их все равно нужно
