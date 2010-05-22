@@ -6,6 +6,7 @@ from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, 
 from m3.ui.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
+from m3.ui.actions.packs import ListDeleteRowAction
 
 class TreeGetNodesAction(Action):
     '''
@@ -81,16 +82,6 @@ class ListSaveRowAction(Action):
     def run(self, request, context):
         obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
         return self.parent.save_row(obj)
-
-class ListDeleteRowAction(Action):
-    url = '/delete_row$'
-    def run(self, request, context):
-        '''
-        Удаляться одновременно могут несколько объектов. Их ключи приходят разделенные запятыми.
-        '''
-        ids = utils.extract_int_list(request, 'id')
-        objs = [self.parent.get_row(id) for id in ids]
-        return self.parent.delete_row(objs)
 
 class ListLastUsedAction(Action):
     url = '/last-rows$'

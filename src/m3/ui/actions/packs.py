@@ -118,15 +118,15 @@ class DictSaveAction(Action):
         obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
         return self.parent.save_row(obj)
     
-class DictDeleteAction(Action):
-    '''
-    Действие удаления записи из справочника
-    '''
-    url = '/delete$'
+class ListDeleteRowAction(Action):
+    url = '/delete_row$'
     def run(self, request, context):
-        id = utils.extract_int(request, 'id')
-        obj = self.parent.get_row(id)
-        return self.parent.delete_row(obj)
+        '''
+        Удаляться одновременно могут несколько объектов. Их ключи приходят разделенные запятыми.
+        '''
+        ids = utils.extract_int_list(request, 'id')
+        objs = [self.parent.get_row(id) for id in ids]
+        return self.parent.delete_row(objs)
 
 class BaseDictionaryActions(ActionPack):
     '''
@@ -151,7 +151,7 @@ class BaseDictionaryActions(ActionPack):
         self.last_used_action     = DictLastUsedAction()
         self.row_action           = DictRowAction()
         self.save_action          = DictSaveAction()
-        self.delete_action        = DictDeleteAction()
+        self.delete_action        = ListDeleteRowAction()
         # Но привязать их все равно нужно
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
@@ -252,10 +252,15 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     def save_row(self, obj):
         obj.save()
         return OperationResult(success = True)
-    
-    @transaction.commit_on_success
-    def delete_row(self, obj):
+
+    def delete_row(self, objs):
         message = ''
-        if not utils.safe_delete_record(self.model, obj.id):
-            message = u'Не удалось удалить элемент'
+        if len(objs) == 0:
+            message = u'Элемент не существует в базе данных.'
+        else:
+            for obj in objs:
+                if not utils.safe_delete_record(self.model, obj.id):
+                    message = u'Не удалось удалить элемент %s. Возможно на него есть ссылки.' % obj.id
+                    break
+        
         return OperationResult.by_message(message)

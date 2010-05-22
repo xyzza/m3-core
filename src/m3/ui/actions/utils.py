@@ -5,16 +5,26 @@
 from django.db.models.query_utils import Q
 from django.db import models, connection, transaction, IntegrityError
 
-def create_search_filter(filter, fields):
-    if filter != None:
-        condition = None  
-        for word in filter.split(' '):
-            for field in fields:
-                q = Q(**{field + '__icontains': word})
-                if condition == None:
-                    condition = q
-                else:
-                    condition = condition | q
+def create_search_filter(filter_text, fields):
+    '''
+    Фильтрация производится по полям списку полей fields и введеному пользователем тексту filter_text.
+    Пример:
+        fields = ['name', 'family']
+        filter_text = 'Вася Пупкин'
+    Получится условие WHERE:
+        (name like 'Вася' AND name like 'Пупкин') OR (family like 'Вася' AND family like 'Пупкин') 
+    '''
+    if filter:
+        words = filter_text.strip().split(' ')
+        condition = None
+        for field_name in fields:
+            field_condition = None
+            for word in words:
+                q = Q(**{field_name + '__icontains': word})
+                field_condition = field_condition & q if field_condition else q
+            
+            condition = condition | field_condition if condition else field_condition
+
         return condition
 
 def apply_search_filter(query, filter, fields):
