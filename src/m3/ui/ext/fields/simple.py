@@ -36,6 +36,14 @@ class ExtNumberField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtNumberField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-number-field.js'
+        # Свойства валидации специфичные для чисел
+        self.allow_decimals = True
+        self.allow_negative = True
+        self.decimal_precision = None
+        self.max_value = None
+        self.max_text = None
+        self.min_value = None
+        self.min_text = None
         self.init_component(*args, **kwargs)
         
         
