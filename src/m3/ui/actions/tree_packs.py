@@ -85,9 +85,12 @@ class ListSaveRowAction(Action):
 class ListDeleteRowAction(Action):
     url = '/delete_row$'
     def run(self, request, context):
-        id = utils.extract_int(request, 'id')
-        obj = self.parent.get_row(id)
-        return self.parent.delete_row(obj)
+        '''
+        Удаляться одновременно могут несколько объектов. Их ключи приходят разделенные запятыми.
+        '''
+        ids = utils.extract_int_list(request, 'id')
+        objs = [self.parent.get_row(id) for id in ids]
+        return self.parent.delete_row(objs)
 
 class ListLastUsedAction(Action):
     url = '/last-rows$'
@@ -473,19 +476,32 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         obj.save()
         return OperationResult(success = True)
     
-    def delete_row(self, obj):
+    def delete_row(self, objs):
         message = ''
-        if obj == None:
+        if len(objs) == 0:
             message = u'Элемент не существует в базе данных.'
-        elif not utils.safe_delete_record(self.list_model, obj.id):
-            message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
+        else:
+            for obj in objs:
+                if not utils.safe_delete_record(self.list_model, obj.id):
+                    message = u'Не удалось удалить элемент %s. Возможно на него есть ссылки.' % obj.id
+                    break
         
         return OperationResult.by_message(message)
         
     def delete_node(self, obj):
+        '''
+        Удаление группы справочника.
+        Нельзя удалять группу если у нее есть подгруппы или если в ней есть элементы.
+        Но даже после этого удалять группу можно только прямым запросом, т.к. 
+        мы не знаем заранее кто на нее может ссылаться и кого зацепит каскадное удаление джанги.
+        '''
         message = ''
         if obj == None:
-            message = u'Группа не существует в базе данных'
+            message = u'Группа не существует в базе данных.'
+        elif self.tree_model.objects.filter(**{self.tree_parent_field: obj}).count() > 0:
+            message = u'Нельзя удалить группу содержащую в себе другие группы.'
+        elif self.list_model.objects.filter(**{self.list_parent_field: obj}).count() > 0:
+            message = u'Нельзя удалить группу содержащую в себе элементы.'
         elif not utils.safe_delete_record(self.tree_model, obj.id):
             message = u'Не удалось удалить группу. Возможно на неё есть ссылки.'
             
