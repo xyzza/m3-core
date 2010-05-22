@@ -103,6 +103,14 @@ class ExtTree(BaseExtPanel):
         self._listeners['click'] = function
         
     @property
+    def handler_dblclick(self):
+        return self._listeners.get('dblclick')
+    
+    @handler_dblclick.setter
+    def handler_dblclick(self, function):
+        self._listeners['dblclick'] = function
+        
+    @property
     def handler_dragdrop(self):
         return self._listeners.get('dragdrop')
     

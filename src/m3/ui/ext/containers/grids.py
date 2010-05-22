@@ -107,6 +107,22 @@ class ExtGrid(BaseExtPanel):
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------
     @property
+    def handler_click(self):
+        return self._listeners.get('click')
+    
+    @handler_click.setter
+    def handler_click(self, function):
+        self._listeners['click'] = function
+    
+    @property
+    def handler_dblclick(self):
+        return self._listeners.get('dblclick')
+    
+    @handler_dblclick.setter
+    def handler_dblclick(self, function):
+        self._listeners['dblclick'] = function
+    
+    @property
     def handler_contextmenu(self):
         return self._listeners.get('contextmenu')
     

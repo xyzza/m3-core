@@ -192,9 +192,11 @@ class ExtDictionaryWindow(BaseExtWindow):
     def url_edit_grid(self, value):
         self.init_grid_components()
         if value:
-            self._set_handler(self.__components_edit_grid,'editValueGrid')
+            self._set_handler(self.__components_edit_grid, 'editValueGrid')
+            self.grid.handler_dblclick = 'editValueGrid'
         else:
             self._clear_handler(self.__components_edit_grid)
+            self.grid.handler_dblclick = None
         self.__url_edit_grid = value 
     
     @property
@@ -234,7 +236,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     def url_edit_tree(self, value):
         self.init_tree_components()
         if value:
-            self._set_handler(self.__components_edit_tree,'editValueTree')
+            self._set_handler(self.__components_edit_tree, 'editValueTree')
         else:
             self._clear_handler(self.__components_edit_tree)
         self.__url_edit_tree = value 

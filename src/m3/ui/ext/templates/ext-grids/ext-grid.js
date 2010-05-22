@@ -67,14 +67,17 @@ function(){
 	                    e.stopEvent();
 	                    contmenu.showAt(e.getXY())
 	                    }
-				{% endifequal %}
-				{% ifequal k "rowcontextmenu" %}
-					rowcontextmenu:
-	                    function(grid, index, e){
-	                    e.stopEvent();
-	                    this.getSelectionModel().selectRow(index);
-	                    rowcontmenu.showAt(e.getXY())
-	                    }
+				{%else%}
+						{% ifequal k "rowcontextmenu" %}
+							rowcontextmenu:
+			                    function(grid, index, e){
+			                    e.stopEvent();
+			                    this.getSelectionModel().selectRow(index);
+			                    rowcontmenu.showAt(e.getXY())
+			                    }
+						{%else%}
+								'{{k}}': {{v|safe}}
+						{% endifequal %}
 				{% endifequal %}
 				  
 				{% if not forloop.last %},{% endif %}
