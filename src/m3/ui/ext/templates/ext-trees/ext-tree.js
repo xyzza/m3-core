@@ -27,7 +27,7 @@ function(){
 		,split: true
 		,columns:[{{ component.t_render_columns|safe }}]
 		,loader: {{ component.t_render_tree_loader|safe }}	
-		{%if component.root_text %} ,rootVisible: true {%endif%}
+		
 		,root: new Ext.tree.AsyncTreeNode({
 			id: '-1'
 			,expanded: true
