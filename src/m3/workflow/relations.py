@@ -18,7 +18,7 @@ class MetaNamedDocsModel(ModelBase):
         klass = super(MetaNamedDocsModel, cls).__new__(cls, name, bases, attrs)
         wf = klass.WorkflowMeta.workflow
         # Ссылка на сам экземпляр процесса
-        models.ForeignKey(wf.meta_class_name() + 'Model').contribute_to_class(klass, 'workflow')
+        models.OneToOneField(wf.meta_class_name() + 'Model', related_name = 'nameddocs').contribute_to_class(klass, 'workflow')
 
         # Ссылки на открывающие документы и закрывающие документы
         open_docs = getattr(wf.Meta, 'open_docs', [])
@@ -208,7 +208,7 @@ class Relation(Workflow):
         if current_state.step == self.state_closed.id:
             raise Exception(u'Relation with id=%s already closed!' % self.id)
         # Записываем закрывающий документ в связь
-        close_types = tuple([x[1] for x in self.Meta.open_docs])
+        close_types = tuple([x[1] for x in self.Meta.close_docs])
         named_docs = self.models.nameddocs(workflow = current_wf)
         for field_name, obj in close_docs.items():
             assert hasattr(named_docs, field_name), 'The named docs models does not contain a field with the name %s' % field_name
