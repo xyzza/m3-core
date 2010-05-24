@@ -214,6 +214,7 @@ class SelectWindowAction(Action):
         # Заглушка, иначе ругается что нет стора
         win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
         
+        win.column_name_on_select = 'name'
         win = self.parent.get_select_window(win)
         return ExtUIScriptResult(win)
         

@@ -361,5 +361,6 @@ var ajax = Ext.Ajax;
 		};
 		win.close();
 	}
-	
 {%endif%}
+
+{% block content %}{% endblock %}
