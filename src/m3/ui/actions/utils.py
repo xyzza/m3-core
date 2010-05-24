@@ -14,7 +14,7 @@ def create_search_filter(filter_text, fields):
     Получится условие WHERE:
         (name like 'Вася' AND name like 'Пупкин') OR (family like 'Вася' AND family like 'Пупкин') 
     '''
-    if filter:
+    if filter_text:
         words = filter_text.strip().split(' ')
         condition = None
         for field_name in fields:
