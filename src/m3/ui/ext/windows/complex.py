@@ -237,8 +237,10 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.init_tree_components()
         if value:
             self._set_handler(self.__components_edit_tree, 'editValueTree')
+            self.tree.handler_dblclick = 'editValueTree'
         else:
             self._clear_handler(self.__components_edit_tree)
+            self.tree.handler_dblclick = None
         self.__url_edit_tree = value 
     
     @property
