@@ -34,7 +34,7 @@ var ajax = Ext.Ajax;
 			,success: renderWindowGrid
 			,params: params
 			,failure: function(response, opts){
-			   Ext.Msg.alert('','failed');
+				uiAjaxFailMessage();
 			}
 		});
 	}
@@ -55,7 +55,7 @@ var ajax = Ext.Ajax;
 			}
 			,success: renderWindowGrid
 			,failure: function(response, opts){
-			   Ext.Msg.alert('','failed');
+				uiAjaxFailMessage();
 			}
 		});
 	}
@@ -97,7 +97,7 @@ var ajax = Ext.Ajax;
 							grid.getStore().remove(selRecords);
 						}
 						,failure: function(response, opts){
-						   Ext.Msg.alert('','failed');
+							uiAjaxFailMessage();
 						}
 					});
 		    	};
@@ -168,7 +168,7 @@ var ajax = Ext.Ajax;
 			url: "{{ component.url_new_tree }}"
 			,success: renderWindowTree
 			,failure: function(response, opts){
-			   Ext.Msg.alert('','failed');
+				uiAjaxFailMessage();
 			}
 		});
 	}

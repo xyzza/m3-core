@@ -408,6 +408,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     tree_columns = [] # Список из кортежей с параметрами выводимых в дерево колонок
     tree_parent_field = 'parent' # Имя поля ссылающегося на группу
     tree_readonly = False # Если истина, то адреса экшенов дереву не назначаются
+    tree_order_field = ''
     
     # Настройки модели списка
     list_model = None # Не обязательная модель списка связанного с деревом
@@ -415,6 +416,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     filter_fields = [] # Поля по которым производится поиск в списке
     list_parent_field = 'parent' # Имя поля ссылающегося на группу
     list_readonly = False # Если истина, то адреса экшенов гриду не назначаются
+    list_order_field = ''
     
     def get_nodes(self, parent_id, filter):
         if filter:
@@ -422,7 +424,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             nodes = utils.fetch_search_tree(self.tree_model, filter_dict)
         else:
             query = self.tree_model.objects.filter(parent = parent_id)
-            nodes = list(query.all())        
+            nodes = list(query.all())       
             # Если имеем дело с листом, нужно передавать параметр leaf = true
             for node in nodes:
                 if self.tree_model.objects.filter(parent = node.id).count() == 0:

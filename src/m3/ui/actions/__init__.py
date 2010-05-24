@@ -207,7 +207,7 @@ class ActionPack(object):
     '''
     Базовый класс управления набором схожих по смыслу действий
     '''
-    
+    url = ''
     # Список действий зарегистрированных на исполнение в данном пакете
     actions = []
     
@@ -431,12 +431,6 @@ class ControllerCache(object):
                 proc = getattr(module, 'register_actions', None)
                 if callable(proc):
                     proc()
-                else:
-                    # совместивость с уже написанными исходными кодами.
-                    # а вообще, в дальнейшем будем писать именно register_actions
-                    proc = getattr(module, 'register_ui_actions', None)
-                    if callable(proc):
-                        proc()
             cls._loaded = True
         finally:
             cls._write_lock.release()
