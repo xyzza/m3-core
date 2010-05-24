@@ -21,7 +21,10 @@ function(){
 	    ,useArrows: true
 	    ,autoScroll: false
 	    ,animate: true
-	    {% if component.drag_drop %} ,enableDD: true {% endif %}
+	    {% if component.drag_drop %} 
+		,enableDD: true 
+		,dropConfig: {allowContainerDrop: true }
+		{% endif %}
 	    ,containerScroll: true
 	    ,border: false
 		,split: true
