@@ -95,7 +95,7 @@ var ajax = Ext.Ajax;
 						}
 						,success: function(response, opts){
 							// Удаляем из стора только если пришел success=true
-							if (!uiShowErrorMessage(response))
+							if (uiShowErrorMessage(response))
 								grid.getStore().remove(selRecords);
 						}
 						,failure: function(response, opts){
@@ -240,7 +240,8 @@ var ajax = Ext.Ajax;
 						}
 						,success: function(response, opts) {
 							// Удаляем из стора только если пришел success=true
-							if (!uiShowErrorMessage(response))
+							console.log(uiShowErrorMessage(response));
+							if (uiShowErrorMessage(response))
 								tree.getSelectionModel().getSelectedNode().remove();
 						}
 						,failure: function(response, opts){
