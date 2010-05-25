@@ -90,6 +90,9 @@ class BaseExtComponent(object):
                   
     def t_render_listeners(self):
         ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
+        for k, v in self._listeners.items():
+            if v == None:
+                del self._listeners[k]
         return self._listeners
    
    

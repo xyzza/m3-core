@@ -10,6 +10,8 @@ from containers import ExtContainer
 from m3.ui.ext.base import ExtUIComponent
 
 class ExtContainerTable(BaseExtContainer):
+    _HEIGHT = 36
+    
     def __init__(self, *args, **kwargs):
         super(ExtContainerTable, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-container.js'
@@ -29,7 +31,7 @@ class ExtContainerTable(BaseExtContainer):
                     elif isinstance(col, ExtContainer):
                         col_cont_list.append(col)
         
-            row_cont = ExtContainer(layout_config = dict(align="stretch"), layout = 'hbox', height = 50)
+            row_cont = ExtContainer(layout_config = dict(align="stretch"), layout = 'hbox', height = ExtContainerTable._HEIGHT)
             row_cont.items.extend(col_cont_list)
             self._items.append(row_cont)
         
