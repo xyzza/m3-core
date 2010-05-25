@@ -93,8 +93,10 @@ var ajax = Ext.Ajax;
 						,params: {
 							'id': selectedId.join(',')
 						}
-						,success: function(){
-							grid.getStore().remove(selRecords);
+						,success: function(response, opts){
+							// Удаляем из стора только если пришел success=true
+							if (!uiShowErrorMessage(response))
+								grid.getStore().remove(selRecords);
 						}
 						,failure: function(response, opts){
 							uiAjaxFailMessage();
@@ -236,8 +238,10 @@ var ajax = Ext.Ajax;
 						,params: {
 							'id': tree.getSelectionModel().getSelectedNode().id
 						}
-						,success: function() {
-							tree.getSelectionModel().getSelectedNode().remove();
+						,success: function(response, opts) {
+							// Удаляем из стора только если пришел success=true
+							if (!uiShowErrorMessage(response))
+								tree.getSelectionModel().getSelectedNode().remove();
 						}
 						,failure: function(response, opts){
 						   Ext.Msg.alert('','failed');

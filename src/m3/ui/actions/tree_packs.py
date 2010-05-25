@@ -7,6 +7,7 @@ from m3.ui.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.actions.packs import ListDeleteRowAction
+from django.db import transaction
 
 class TreeGetNodesAction(Action):
     '''
@@ -473,6 +474,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         obj.save()
         return OperationResult(success = True)
     
+    @transaction.commit_on_success
     def delete_row(self, objs):
         message = ''
         if len(objs) == 0:

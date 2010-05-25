@@ -256,6 +256,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         obj.save()
         return OperationResult(success = True)
 
+    @transaction.commit_on_success
     def delete_row(self, objs):
         message = ''
         if len(objs) == 0:
