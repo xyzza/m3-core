@@ -10,7 +10,7 @@ from containers import ExtContainer
 from m3.ui.ext.base import ExtUIComponent
 
 class ExtContainerTable(BaseExtContainer):
-    _HEIGHT = 36
+    _DEFAULT_HEIGHT = 36
     
     def __init__(self, *args, **kwargs):
         super(ExtContainerTable, self).__init__(*args, **kwargs)
@@ -19,10 +19,11 @@ class ExtContainerTable(BaseExtContainer):
         self.__columns_count = 0
         self.__rows_count = 0
         self.__table = []
+        self.__rows_height = {}
         self.init_component(*args, **kwargs)
   
     def render(self):
-        for row in self.__table:
+        for i, row in enumerate(self.__table):
             col_cont_list = []
             for col in row:
                 if col!=None:
@@ -31,7 +32,8 @@ class ExtContainerTable(BaseExtContainer):
                     elif isinstance(col, ExtContainer):
                         col_cont_list.append(col)
         
-            row_cont = ExtContainer(layout_config = dict(align="stretch"), layout = 'hbox', height = ExtContainerTable._HEIGHT)
+            height = self.__rows_height.get(i) or ExtContainerTable._DEFAULT_HEIGHT
+            row_cont = ExtContainer(layout_config = dict(align="stretch"), layout = 'hbox', height = height)
             row_cont.items.extend(col_cont_list)
             self._items.append(row_cont)
         
@@ -81,4 +83,21 @@ class ExtContainerTable(BaseExtContainer):
         if colspan>1:
             self.__table[row][col+1:col+colspan] = [None,]*colspan
         
-
+    def set_row_height(self, row, height):
+        assert isinstance(height, int), 'Height must be INT'
+        assert isinstance(row, int), 'Row num must be INT'
+        assert 0 <= row <= self.rows_count, 'Row num %d must be in range 0 to %d' % (row, self.rows_count)
+        self.__rows_height[row] = height
+        
+    def set_default_row_height(self, row):
+        assert isinstance(row, int), 'Row num must be INT'
+        assert 0 <= row <= self.rows_count, 'Row num must be in range 0 to %d' % self.rows_count
+        self.__rows_height[row] = ExtContainerTable._DEFAULT_HEIGHT
+        
+    def set_rows_height(self, height):
+        assert isinstance(height, int), 'Height must be INT'
+        for row in range(self.rows_count): 
+            self.__rows_height[row] = height
+            
+    def set_default_rows_height(self):
+        self.set_rows_height(ExtContainerTable._DEFAULT_HEIGHT)
