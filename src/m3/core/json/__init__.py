@@ -25,6 +25,8 @@ class M3JSONEncoder(json.JSONEncoder):
                 cleaned_dict[attribute] = dict[attribute].strftime('%d.%m.%Y %H:%M:%S')
             elif isinstance(dict[attribute], datetime.date):
                 cleaned_dict[attribute] = dict[attribute].strftime('%d.%m.%Y')
+            elif isinstance(dict[attribute], datetime.time):
+                cleaned_dict[attribute] = dict[attribute].strftime('%H:%M')
             elif isinstance(dict[attribute], decimal.Decimal):
                 cleaned_dict[attribute] = str(dict[attribute])
             else:
