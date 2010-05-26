@@ -32,7 +32,7 @@
 	return win;
 })()
 
-var store;
+var filter_store = false;
 
 
 //--------------------
@@ -633,7 +633,7 @@ Ext.reg('filterpanel', Ext.ux.FilterPanel);
 Ext.ux.TextFilter = Ext.extend(Ext.form.TextField,
 {
     // Overridable Properties
-    filterTpl: '{filterTitle} contains <b>{text}</b>',
+    filterTpl: '{filterTitle} : <b>{text}</b>',
     width: 200,
 
     constructor: function(config)
@@ -726,13 +726,13 @@ Ext.ux.DateFilter = Ext.extend(Ext.form.DateField,
 });
 
 //panel
-
-var store = Ext.getCmp('{{ component.grid.client_id}}').getStore();
-console.log(store);
+{% if component.grid %} 
+var filter_store = Ext.getCmp('{{ component.grid.client_id}}').getStore();
+{% endif %}
 
 var filterPanel = new Ext.ux.FilterPanel({
 	id : 'pnlFilters',
-    store : store,
+    store : filter_store,
 	wndWidth: 450,
     filters : [{
         filterID : 'Date',
