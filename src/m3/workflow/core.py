@@ -137,6 +137,14 @@ class GeneratorDoc(BaseModelGenerator):
         script += self.workflow.__class__.__name__ + '.models.' + self.attribute + ' = doc_models\n'
         return script
 
+class GeneratorNamedDoc(BaseModelGenerator):
+    ''' Генератор скрипта для таблицы именованных документов '''
+    metaclass = 'm3_workflow.MetaNamedDocsModel'
+    baseclass = 'models.Model'
+    class_suffix = 'DocModel'
+    table_suffix = 'Doc'
+    attribute = 'nameddocs'
+
 class WorkflowQueryManager(object):
     '''
     Менеджер запросов предоставляющий функции для работы с процессами
@@ -144,6 +152,10 @@ class WorkflowQueryManager(object):
     def __init__(self, workflow):
         self.workflow = workflow
         self.models = workflow.models
+        
+    def create(self):
+        raise NotImplementedError()
+        
 
 #============================================================================
 #=================== БАЗОВЫЙ КЛАСС РАБОЧЕГО ПРОЦЕССА ========================
@@ -152,10 +164,19 @@ class WorkflowOptions(object):
     ''' Класс содержащий настройки по умолчанию для рабочих процессов '''
     def __init__(self):
         self.available_attributes = \
-        {'db_table': None,
-         'id': None,
-         'objects': [],
-         'attributes_model': None}
+        {'db_table': None,  # Имя таблицы процесса
+         # Уникальный идентификатор процесса
+         'id': None, 
+         # Объекты рабочего набора
+         'objects': [], 
+         # Ссылка на пользовательские атрибуты
+         'attributes_model': None,
+         # Список причин по которым была закрыта связь
+         'resolutions': [],
+         # Списоки кортежей состоящих из имени поля и класс документа cпособных открыть новый процесс
+         'open_docs': [],   
+         # Списоки кортежей состоящих из имени поля и класс документа cпособных открыть новый процесс
+         'close_docs': []} 
         
     def create_default_attributes(self):
         for key, value in self.available_attributes.items():
@@ -179,6 +200,10 @@ class _WorkflowMetaConstructor(type):
     '''
     def __new__(cls, name, bases, attrs):
         klass = super(_WorkflowMetaConstructor, cls).__new__(cls, name, bases, attrs)
+        
+        # Для каждого экземпляра процесса нужен класс для прямого доспупа к моделям
+        klass.models = Empty()
+        
         # Инициализации менеджера запросов внутри статического
         # атрибута класса рабочего процесса 
         klass.objects = klass._objects_class(klass)
@@ -193,18 +218,16 @@ class _WorkflowMetaConstructor(type):
                 op_ins.merge(meta)
                 #op_ins.check_required_attributes()
             klass.Meta = op_ins
-                     
+
         return klass
+
 
 class Workflow(object):
     # Определения для хитрого способа создания внутренних менеджеров, специально чтобы их могли переопределить 
     _objects_class = WorkflowQueryManager
     _options_class = WorkflowOptions
     __metaclass__  = _WorkflowMetaConstructor
-    
-    # Ассессор для моделей рабочего процесса
-    models = Empty()
-    
+        
     def __init__(self, *args, **kwargs):
         self.start_step = WorkflowStartStep()
         self.end_step = WorkflowEndStep()
@@ -220,7 +243,8 @@ class Workflow(object):
                                   GeneratorStep,
                                   GeneratorChild,
                                   GeneratorWSO,
-                                  GeneratorDoc]
+                                  GeneratorDoc,
+                                  GeneratorNamedDoc]
     
     @classmethod
     def meta_class_name(cls):

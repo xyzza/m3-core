@@ -2,37 +2,14 @@
 '''
 Модуль содержит описание процессов связей
 '''
-import itertools
 from datetime import datetime
 
-from django.db.models.base import ModelBase
 from django.db import models, transaction
 
-from m3.workflow.core import Workflow, BaseModelGenerator, GeneratorWorkflow, WorkflowQueryManager,\
+from m3.workflow.core import Workflow, GeneratorWorkflow, WorkflowQueryManager,\
     WorkflowStep, WorkflowOptions
 from m3.workflow.meta import MetaWorkflowModel
 
-class MetaNamedDocsModel(ModelBase):
-    ''' Базовый метакласс для модели хранящей именованные документы '''
-    def __new__(cls, name, bases, attrs):
-        klass = super(MetaNamedDocsModel, cls).__new__(cls, name, bases, attrs)
-        wf = klass.WorkflowMeta.workflow
-        # Ссылка на сам экземпляр процесса
-        models.OneToOneField(wf.meta_class_name() + 'Model', related_name = 'nameddocs').contribute_to_class(klass, 'workflow')
-
-        # Ссылки на открывающие документы и закрывающие документы
-        open_docs = getattr(wf.Meta, 'open_docs', [])
-        close_docs = getattr(wf.Meta, 'close_docs', [])
-        assert len(open_docs) > 0, 'Must be specified at least one the opening document'
-        assert len(close_docs) > 0, 'Must be specified at least one the closing document'
-        existed_fields = []
-        for field_name, field_class in itertools.chain(open_docs, close_docs):
-            if field_name not in existed_fields:
-                models.ForeignKey(field_class, blank = True, null = True).contribute_to_class(klass, field_name)
-            existed_fields.append(field_name)
-        assert len(existed_fields) > 0, 'No fields defined'
-        
-        return klass
         
 class MetaRelationModel(MetaWorkflowModel):
     ''' Метакласс модели связи. Добавляет поля связи в модель рабочего процесса '''
@@ -43,14 +20,6 @@ class MetaRelationModel(MetaWorkflowModel):
         # Конец действия связи
         models.DateTimeField(default = datetime.max).contribute_to_class(klass, 'end_date')
         return klass
-
-class GeneratorNamedDoc(BaseModelGenerator):
-    ''' Генератор скрипта для таблицы именованных документов '''
-    metaclass = 'm3_workflow.MetaNamedDocsModel'
-    baseclass = 'models.Model'
-    class_suffix = 'DocModel'
-    table_suffix = 'Doc'
-    attribute = 'nameddocs'
     
 class GeneratorRelation(GeneratorWorkflow):
     metaclass = 'm3_workflow.MetaRelationModel'
@@ -96,7 +65,7 @@ class RelationQueryManager(WorkflowQueryManager):
         working_set.save()
         
         # Таблица именованных документов
-        open_types = tuple([x[1] for x in self.workflow.Meta.open_docs])
+        open_types = tuple(self.workflow.Meta.open_docs.values())
         named_docs = self.models.nameddocs(workflow = relation)
         for field_name, obj in open_docs.items():
             assert hasattr(named_docs, field_name), 'The named docs models does not contain a field with the name %s' % field_name
@@ -176,9 +145,8 @@ class RelationClosedStep(WorkflowStep):
 class RelationOptions(WorkflowOptions):
     def __init__(self):
         super(RelationOptions, self).__init__()
-        attrs = {'open_docs': [],   # Списоки кортежей состоящих из имени поля и класс документа cпособных открыть новый процесс
-                 'close_docs': [],  # Списоки кортежей состоящих из имени поля и класс документа способных закрыть процесс
-                 'resolutions': []} # Список причин по которым была закрыта связь
+        # Пришлось все перенести в процесс. Теперь тут пусто ;)
+        attrs = {}
         self.available_attributes.update(attrs)
 
 class Relation(Workflow):
@@ -187,8 +155,6 @@ class Relation(Workflow):
     
     def __init__(self):
         super(Relation, self).__init__()
-        # Добавляем свой класс генератор описывающий таблицу "именованных документов"
-        self._model_generators.append(GeneratorNamedDoc)
         # Заменяем класс workflow генератора на relation генератор
         self._model_generators.remove(GeneratorWorkflow)
         self._model_generators.insert(0, GeneratorRelation)

@@ -4,6 +4,8 @@
 Created on 10.03.2010
 @author: akvarats
 '''
+import itertools
+
 from django.db import models
 from django.db.models.base import ModelBase
 
@@ -98,16 +100,18 @@ class MetaWorkflowWSOModel(ModelBase):
                contribute_to_class(klass, 'workflow')
         
         # Создаем ссылки на все объекты указанные в Meta нашего процесса
-        objects = getattr(klass.WorkflowMeta.workflow.Meta, 'objects', [])
-        if not isinstance(objects, (list, tuple)):
+        objects = getattr(klass.WorkflowMeta.workflow.Meta, 'objects', {})
+        if not isinstance(objects, dict):
             raise ImproperlyConfigured('Attribute "objects" in workflow Meta must be a list or tuple')
-        for obj in objects:
-            if isinstance(obj, WorkflowWSObject):
-                model_type, field_name = obj.wso_class, obj.wso_field
-            elif isinstance(obj, tuple):
-                field_name, model_type = obj
-            else:
-                raise ImproperlyConfigured('Item of "objects" must be a instance of WorkflowWSObject or tuple')
+        for wso_field, wso_class in objects.items():
+            #if isinstance(obj, WorkflowWSObject):
+            #    model_type, field_name = obj.wso_class, obj.wso_field
+            #elif isinstance(obj, tuple):
+            #    field_name, model_type = obj
+            #else:
+            #    raise ImproperlyConfigured('Item of "objects" must be a instance of WorkflowWSObject or tuple')
+            field_name = wso_field
+            model_type = wso_class
 
             models.ForeignKey(model_type).contribute_to_class(klass, field_name)
         
@@ -129,4 +133,25 @@ class MetaWorkflowDocModel(ModelBase):
         
         # Таблица с дополнительными атрибутами процесса
         models.ForeignKey(wf.Meta.model_class_obj).contribute_to_class(klass, 'model_class_obj')
+        return klass
+    
+class MetaNamedDocsModel(ModelBase):
+    ''' Базовый метакласс для модели хранящей именованные документы '''
+    def __new__(cls, name, bases, attrs):
+        klass = super(MetaNamedDocsModel, cls).__new__(cls, name, bases, attrs)
+        wf = klass.WorkflowMeta.workflow
+        # Ссылка на сам экземпляр процесса
+        models.OneToOneField(wf.meta_class_name() + 'Model', related_name = 'nameddocs').contribute_to_class(klass, 'workflow')
+
+        # Ссылки на открывающие документы и закрывающие документы
+        open_docs = getattr(wf.Meta, 'open_docs', {})
+        close_docs = getattr(wf.Meta, 'close_docs', {})
+        named_docs = getattr(wf.Meta, 'named_docs', {})
+        all_docs = {}
+        map(all_docs.update, [open_docs, close_docs, named_docs])
+        #assert len(open_docs) > 0, 'Must be specified at least one the opening document'
+        #assert len(close_docs) > 0, 'Must be specified at least one the closing document'
+        for field_name, field_class in all_docs.items():
+            models.ForeignKey(field_class, blank = True, null = True).contribute_to_class(klass, field_name)
+
         return klass
