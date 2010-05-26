@@ -6,6 +6,8 @@ Created on 27.02.2010
 @author: prefer
 '''
 
+from m3.helpers import normalize
+
 from base import BaseExtField, BaseExtTriggerField   
 from m3.ui.ext import render_component
         
@@ -61,6 +63,10 @@ class ExtTextArea(BaseExtField):
         self.template = 'ext-fields/ext-text-area.js'
         self.init_component(*args, **kwargs)
 
+    def render(self):
+        if self.value:
+            self.value = normalize(self.value)
+        return super(ExtTextArea, self).render()
 
 class ExtCheckBox(BaseExtField):
     '''Галочка выбора значения'''
