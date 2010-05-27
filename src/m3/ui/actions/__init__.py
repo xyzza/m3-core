@@ -216,7 +216,17 @@ class ActionContext(object):
         '''
         Рендеринг контекста в виде javascript объекта
         '''
-        return M3JSONEncoder().encode(self).replace('"','')
+        result = ''
+        for k,v in self.__dict__.items():
+            if isinstance(v,int):
+                result += '%s: %s,' % (k,v)
+        if result:
+            result = result[:-1]
+        
+        print result
+        return '{' + result + '}'
+                
+        
    
     
 class Action(object):
