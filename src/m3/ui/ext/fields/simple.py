@@ -6,6 +6,8 @@ Created on 27.02.2010
 @author: prefer
 '''
 
+from django.conf import settings
+
 from m3.helpers import normalize
 
 from base import BaseExtField, BaseExtTriggerField   
@@ -29,7 +31,10 @@ class ExtDateField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtDateField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-date-field.js'
-        self.format = None
+        try:
+            self.format = settings.DATE_FORMAT.replace('%', '')
+        except:
+            self.format = 'd.m.Y'
         self.init_component(*args, **kwargs)
     
     
