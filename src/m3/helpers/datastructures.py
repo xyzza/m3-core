@@ -34,6 +34,13 @@ class TypedList(list):
     def extend(self, values):
         map(self.append, values)
         
+    def clear(self):
+        '''
+        Очищает список
+        '''
+        while len(self) > 0:
+            self.pop()
+        
     def __check(self, value):
         '''
             Функция проверки типа и значения
