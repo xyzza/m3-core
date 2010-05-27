@@ -11,7 +11,7 @@ from m3.ui.ext.fields.base import BaseExtField
 from m3.ui.ext.fields.simple import (ExtNumberField, 
                                      ExtStringField, 
                                      ExtDateField,
-                                     ExtCheckBox, ExtComboBox)
+                                     ExtCheckBox, ExtComboBox, ExtTimeField)
 from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
@@ -90,6 +90,8 @@ class ExtForm(BaseExtPanel):
                 #TODO уточнить формат дат
                 val = value.strftime('%d.%m.%Y')
                 item.value = val
+            elif isinstance(item, ExtTimeField):
+                item.value = value.strftime('%H:%M')
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
             elif isinstance(item, ExtDictSelectField):
