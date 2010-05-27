@@ -13,12 +13,23 @@ from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
 from m3.ui.ext.base import BaseExtComponent
 
+#===============================================================================
+# Внутренняя таблица урлов
+#===============================================================================
+__urltable = {}
+
 class ActionResult(object):
     '''
     Класс описывает результат выполнения Action'а
+    
+    Данный класс является абстрактным.
     '''
     
     def __init__(self, data = None):
+        '''
+        @param data: данные, на основе которых будет сформирован результат выполнения действия. 
+                     Тип объекта, передаваемого через data зависит от дочернего результата
+        '''
         self.data = data
         
     def get_http_response(self):
@@ -55,67 +66,105 @@ class HttpReadyResult(ActionResult):
     def get_http_response(self):
         return self.data
 
-class ExtUIComponentResult(ActionResult):
+#===============================================================================
+# Результаты выполнения операции с заданным контекстом 
+#===============================================================================
+
+class BaseContextedResult(ActionResult):
+    '''
+    Абстрактный базовый класс, который оперирует понятием результата 
+    выполнения операции, 'отягощенного некоторым контектом'
+    '''
+    def __init__(self, data = None, context = None):
+        super(BaseContextedResult, self).__init__(data)
+        self.set_context(context)
+            
+    def set_context(self, context):
+        if isinstance(context, ActionContext):
+            # в случае если задан реальный результат выполнения операции, то его и регистрируем
+            self.context = context
+        else:
+            # иначе пытаемся построить ActionContext на основе переданного объекта context
+            self.context = ActionContext(context)
+    
+
+class ExtUIComponentResult(BaseContextedResult):
     '''
     Результат выполнения операции, описанный в виде отдельного компонента пользовательского интерфейса.
     В self.data хранится некоторый наследник класса m3.ui.ext.ExtUiComponent.
     Метод get_http_response выполняет метод render у объекта в self.data.
     '''
     def get_http_response(self):
+        self.data.action_context = self.context
         return http.HttpResponse(self.data.render())
 
-class ExtUIScriptResult(ActionResult):
+class ExtUIScriptResult(BaseContextedResult):
     '''
     По аналогии с ExtUiComponentResult, представляет собой некоторого наследника класса ExtUiComponent.
     Единственное отличие заключается в том, что get_http_response должен сформировать
     готовый к отправке javascript. Т.е. должен быть вызван метод self.data.get_script()
     '''
     def get_http_response(self):
+        self.data.action_context = self.context
         return http.HttpResponse(self.data.get_script())
     
 class OperationResult(ActionResult):
     '''
     Результат выполнения операции, описанный в виде Ajax результата ExtJS: success или failure.
+    
+    @param success: True в случае успешного завершения операции, False - в противном случае
+    @param message: сообщение, поясняющее результат выполнения операции
+    @param code: текст javascript, который будет выполнен на клиенте в результате обработки результата операции
     '''
-    def __init__(self, success = True, code = '', window = '', *args, **kwargs):
+    def __init__(self, success = True, code = '', message = '', *args, **kwargs):
         super(OperationResult, self).__init__(*args, **kwargs)
         # Результат выполнения операции: успех/неудача
         self.success = success
         # Сообщение об ошибке выводимое при неудаче
-        self.error_msg = ''
+        self.message = message
         # Произвольный JS код, который выполняется в любом случае если задан
         self.code = code
-        # Окно которое может появиться в результате операции
-        self.window = window
     
     @staticmethod
     def by_message(message):
         '''
         Возвращает экземпляр OperationResult построенный исходя из сообщения message.
         Если операция завершилась успешно, то сообщение должно быть пустым.
+        
+        @deprecated: Непонятно что это такое..
         '''
         result = OperationResult(success = True)
         if message:
             result.success = False
-            result.error_msg = message
+            result.message = message
         return result
     
     def get_http_response(self):
+        '''
+        Возвращает объект HttpResponse, соответствующий данному результату выполнения операции
+        '''
         result = {}
+        result['message'] = self.message
         if self.success:
             result['success'] = True
+            
         else:
             result['success'] = False
-            result['error_msg'] = self.error_msg
+            # TODO после рефактора кода необходимо строку кода ниже убрать. у нас будет просто message
+            result['error_msg'] = self.message
             
-        if self.window:
-            assert isinstance(self.window, BaseExtComponent)
-            self.code = self.window.get_script()
+        #if self.window:
+        #    assert isinstance(self.window, BaseExtComponent)
+        #    self.code = self.window.get_script()
 
         result = json.JSONEncoder().encode(result)
         # Вставляем функцию прямо в JSON без кодирования
         if self.code:
-            code = ' ,"code": function(){return %s;}' % self.code
+            self.code = self.code.strip()
+            if self.code[len(self.code)-2:len(self.code)] == '()':
+                code = ' ,"code": %s' % self.code[:-2]
+            else:
+                code = ' ,"code": %s' % self.code
             result = result[:-1] + code + result[-1]
         return http.HttpResponse(result)
 
@@ -123,21 +172,52 @@ class ActionContextDeclaration(object):
     '''
     Класс, который декларирует необходимость наличия определенного параметра в объекте контекста
     '''
-    name = ''
-    default = None
-    required = False
-    type = None
+    def __init__(self, name='', default=None, type=None, required=True, *args, **kwargs):
+        self.name = name
+        self.default = default
+        self.required = required
+        self.type = type
 
 class ActionContext(object):
     '''
     Контекст выполнения операции, восстанавливаемый из запроса.
     '''
     
+    def __init__(self, obj=None):
+        '''
+        В зависимости от типа obj выполняем построение объекта контекста действия
+        '''
+        pass
+        
     def build(self, request, rules):
         '''
         Выполняет заполнение собственных атрибутов согласно переданному request
         '''
-        pass
+        types = {}
+        if rules:
+            for rule in rules:
+                types[rule.name] = [rule.type, False] # (тип параметра; признак того, что параметр включен в context
+        
+        # переносим параметры в контекст из запроса
+        for key in request.REQUEST:
+            value = request.REQUEST[key]
+            if types.has_key(key):
+                if types[key][0] == int:
+                    value = int(value)
+                types[key][1] = True
+            setattr(self, key, value)
+        
+        # переносим обязательные параметры, которые не встретились в запросе
+        for rule in rules if rules else []:
+            if rule.required and not types[rule.name][1]:
+                setattr(self, rule.name, rule.default)
+    
+    def json(self):
+        '''
+        Рендеринг контекста в виде javascript объекта
+        '''
+        return M3JSONEncoder().encode(self).replace('"','')
+   
     
 class Action(object):
     '''
@@ -179,6 +259,19 @@ class Action(object):
         Обязательно должен быть перекрыт наследником
         '''
         raise NotImplementedError()
+    
+    @classmethod
+    def absolute_url(cls):
+        '''
+        Возвращает полный путь до действия
+        '''
+        if ActionController._urltable.has_key(cls):
+            url = ActionController._urltable[cls]
+            ignored_chars = ['^', '&', '$']
+            for char in ignored_chars:
+                url = url.replace(char, '')
+            return url
+        return ''
     
     def get_packs_url(self):
         '''
@@ -237,6 +330,11 @@ class ActionController(object):
     их на исполнение соответствущим Action'ам
     '''
     
+    #===============================================================================
+    # Внутренняя таблица урлов
+    #===============================================================================
+    _urltable = {}
+    
     def __init__(self, url = ''):
         self.packs = MutableList()
         self._patterns = MultiValueDict()
@@ -291,6 +389,8 @@ class ActionController(object):
             # Запись паттерна состоит из:
             # компилированного выражения пути, стека паков и экшена
             self._patterns.appendlist(packs_path, (regex, stack[:], clazz) )
+            # добавляем полный урл до экшена
+            self.__class__._urltable[clazz.__class__] = packs_path + clazz.url 
     
     def rebuild_patterns(self):
         '''
@@ -336,6 +436,9 @@ class ActionController(object):
             result = pack.post_run(request, context, response)
             if result != None:
                 return result
+        # по возможности запихиваем текущий контекст в response
+        if isinstance(response, BaseContextedResult):
+            response.set_context(context)
         return response
     
     def process_request(self, request):
