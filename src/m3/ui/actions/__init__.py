@@ -222,8 +222,6 @@ class ActionContext(object):
                 result += '%s: %s,' % (k,v)
         if result:
             result = result[:-1]
-        
-        print result
         return '{' + result + '}'
                 
         
