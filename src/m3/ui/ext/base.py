@@ -10,8 +10,12 @@ Created on 01.03.2010
 '''
 
 from uuid import uuid4
+
 from django import template as django_template
+from django.conf import settings
+
 from m3.ui.ext import render_template, render_component
+from m3.helpers import js
 
 #===============================================================================
 class ExtUIScriptRenderer(object):
@@ -43,9 +47,15 @@ class ExtUIScriptRenderer(object):
         return result 
         
     def get_script(self):
+        '''
+        Генерация скрипта для отправки на клиентское рабочее место.
+        '''
         context = django_template.Context({'renderer': self})
         template = django_template.loader.get_template(self.template)
-        return template.render(context) 
+        script = template.render(context)
+        if settings.DEBUG:
+            script = js.JSNormalizer().normalize(script)
+        return script
 
 #===============================================================================
 class BaseExtComponent(object):
@@ -56,6 +66,11 @@ class BaseExtComponent(object):
         self.template = ''
         self.template_globals = ''
         self.client_id = 'cmp_' + str(uuid4())[0:8]
+        
+        # action context of the component (normally, this is
+        # an instance of m3.ui.actions.ActionContext class
+        self.action_context = None 
+        
         # рендерер, используемый для вывода соответствующего компонента
         self.renderer = ExtUIScriptRenderer()
         self._listeners = {}
@@ -66,15 +81,29 @@ class BaseExtComponent(object):
         отображения самого компонента. За рендер полного javascript
         отвечает метод get_script()
         '''
+        self.pre_render()
         return render_component(self)
     
     def render_globals(self):
         '''
             Рендерит и возвращает js-код, который помещен в template_globals
         '''
+        self.pre_render_globals()
         if self.template_globals:
             return render_template(self.template_globals, {'component': self})
         return ''
+    
+    def pre_render(self):
+        '''
+        Вызывается перед началом работы метода render
+        '''
+        pass
+    
+    def pre_render_globals(self):
+        '''
+        Вызывается перед началом работы метода render_globals
+        '''
+        pass
     
     def get_script(self):
         return self.renderer.get_script()
@@ -114,3 +143,34 @@ class ExtUIComponent(BaseExtComponent):
         
     def t_render_style(self):
         return '{%s}' % ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])
+    
+# TODO: закомментированный код ниже необходим для дальнейшей оптимизации
+# рендеринга шаблонов. Все мелкие шаблоны (поля, столбцы грида, элементы меню и т.д.
+# необходимо вынести напрямую в питоновский код
+    
+#def base_component_config(component):
+#    '''
+#    Возвращает часть скрипта конфигурации компонента
+#    '''
+#    def put_config_value(component, name, value):
+#        if getattr(component, name, ''):
+#            return '%s\n' % value
+#        return ''
+#    
+#    result  = '%s\n' % component.client_id
+#    result += put_config_value(component, 'disabled',   ',disabled: true')
+#    result += put_config_value(component, 'hidden',     ',hidden: true')
+#    result += put_config_value(component, 'width',      ',width: %s' % getattr(component, 'width', ''))
+#    result += put_config_value(component, 'height',     ',height: %s' % getattr(component, 'height', ''))
+#    result += put_config_value(component, 'html',       ',html: %s' % getattr(component, 'html', ''))
+#    result += put_config_value(component, 'style',      ',style: {{ component.t_render_style|safe }} {% endif %}
+#    result += put_config_value(component, 'x',          ',x: {{ component.x }} {% endif %}
+#    result += put_config_value(component, 'y',          ',y: {{ component.y }} {% endif %}
+#    result += put_config_value(component, 'region',     ',region: '{{ component.region }}' {% endif %}
+#    result += put_config_value(component, 'flex',       ',flex: {{ component.flex }} {% endif %}
+#    result += put_config_value(component, 'max_height', ',boxMaxHeight: {{ component.max_height }} {% endif %}
+#    result += put_config_value(component, 'min_height', ',boxMinHeight: {{ component.min_height }} {% endif %}
+#    result += put_config_value(component, 'max_width',  ',boxMaxWidth: {{ component.max_width }} {% endif %}
+#    result += put_config_value(component, 'min_width',  ',boxMinWidth: {{ component.min_width }} {% endif %}
+#    result += put_config_value(component, 'anchor',     ',anchor: '{{ component.anchor|safe }}' {% endif %}
+    

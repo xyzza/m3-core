@@ -2,6 +2,8 @@
 '''
 Пакет для классов, отвечающих за отрисовку конечных клиентских javascript'ов
 '''
+from django.conf import settings
+from m3.helpers import js
 
 from m3.ui.ext.base import ExtUIScriptRenderer
 from m3.ui.ext import render_template
@@ -15,4 +17,7 @@ class ExtWindowRenderer(ExtUIScriptRenderer):
         self.window = None
         
     def get_script(self):
-        return render_template(self.template, {'renderer': self, 'window': self.window})
+        script = render_template(self.template, {'renderer': self, 'window': self.window})
+        if settings.DEBUG:
+            script = js.JSNormalizer().normalize(script)
+        return script
