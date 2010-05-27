@@ -1,6 +1,6 @@
 (function(){
-	var win = new Ext.Window({
-		{% include 'base-ext-ui.js'%}
+    var win = new Ext.Window({
+        {% include 'base-ext-ui.js'%}
 	    
 	    {% if component.title %} ,title: '{{ component.title }}' {% endif %}
 		{% if component.modal %}, modal: true {% endif %}
@@ -27,7 +27,8 @@
 	    ,items:[{{ component.t_render_items|safe }}]  
 	    {% if component.buttons %},{{ component.t_render_buttons|safe }}{% endif %}	
 	    {% if not component.resizable %} ,resizable: false {% endif %}
+	    {% block window_extenders %}{# здесь помещяется код, расширяющий описание экземпляра окна #}{% endblock %}
 	});
-	
+	{% block code_extenders %}{# здесь помещяется код, расширяющий функциональность окна #}{% endblock %}
 	return win;
 })()
