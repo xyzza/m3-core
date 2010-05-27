@@ -12,7 +12,7 @@ from m3.ui.ext.base import ExtUIComponent
 class ExtContainerTable(BaseExtContainer):
     _DEFAULT_HEIGHT = 36
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, columns = 0, rows = 0, *args, **kwargs):
         super(ExtContainerTable, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-container.js'
         self.title = None
@@ -20,6 +20,8 @@ class ExtContainerTable(BaseExtContainer):
         self.__rows_count = 0
         self.__table = []
         self.__rows_height = {}
+        self.columns_count = columns
+        self.rows_count = rows
         self.init_component(*args, **kwargs)
   
     def render(self):
