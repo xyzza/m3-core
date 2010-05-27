@@ -65,6 +65,17 @@ class BaseExtWindow(ExtUIComponent):
     def t_render_footer_bar(self):
         return self.footer_bar.render()
     
+    def pre_render(self):
+        super(BaseExtWindow, self).pre_render()
+        children = [] 
+        children.extend(self.items)
+        children.extend(self.buttons)
+        children.append(self.top_bar)
+        children.append(self.footer_bar)
+        for child in children:
+            if child:
+                child.action_context = self.action_context
+    
     def render_globals(self):
         if self.template_globals:
             return render_template(self.template_globals, {'component': self, 'window': self})

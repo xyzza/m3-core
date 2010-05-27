@@ -4,6 +4,8 @@ Created on 3.3.2010
 
 @author: prefer
 '''
+from django.conf import settings
+
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
 from django.utils.datastructures import SortedDict
@@ -19,6 +21,7 @@ class ExtGrid(BaseExtPanel):
         self.load_mask = False
         self.drag_drop = False
         self.drag_drop_group = None
+        self.force_fit = True
         # selection model
         self.__sm = None
         # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен
@@ -89,6 +92,8 @@ class ExtGrid(BaseExtPanel):
         
     def get_store(self):
         return self.__store
+    
+    store = property(get_store, set_store)
 
     @property
     def columns(self):
@@ -102,6 +107,11 @@ class ExtGrid(BaseExtPanel):
     def sm(self, value):
         self.__sm = value
         self.checkbox_model = isinstance(self.__sm, ExtGridCheckBoxSelModel)
+    
+    def pre_render(self):
+        super(ExtGrid, self).pre_render()
+        if self.store:
+            self.store.action_context = self.action_context
             
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
@@ -194,7 +204,10 @@ class ExtGridDateColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridDateColumn, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-date-column.js'
-        self.format = None
+        try:
+            self.format = settings.DATE_FORMAT.replace('%', '')
+        except:
+            self.format = 'd.m.Y'
         self.init_component(*args, **kwargs)
 
 

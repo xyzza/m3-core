@@ -34,6 +34,14 @@ class BaseExtContainer(ExtUIComponent):
         '''Рендерит конфиг, если указан layout'''
         return '{%s}' % ','.join(['%s:"%s"' % (k, v) for k, v in self.layout_config.items()])
     
+    def pre_render(self):
+        super(BaseExtContainer, self).pre_render()
+        
+        # выставляем action_context у дочерних элементов
+        for item in self._items:
+            if item:
+                item.action_context = self.action_context
+    
         
 class BaseExtPanel(BaseExtContainer):
     def __init__(self, *args, **kwargs):
