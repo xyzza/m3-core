@@ -1,4 +1,3 @@
-{# По умолчанию idIndex=0, то есть первая запись в массиве данных должна быть идентификатором (id) #}
 (function(){
 	var dataRecord = Ext.data.Record.create([
 		{{ component.t_render_fields|safe }}
