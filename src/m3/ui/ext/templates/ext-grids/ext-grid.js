@@ -52,7 +52,7 @@ function(){
 		,columns: grid_columns
 		,stripeRows: true
 		,stateful: true
-		,viewConfig: {forceFit: true}
+		,viewConfig: {forceFit: {% if component.force_fit %}true{% else %}false{% endif %}}
 		{% if component.drag_drop %} ,enableDragDrop: true {% endif %}
 		{% if component.drag_drop_group %} ,ddGroup:'{{ component.drag_drop_group }}' {% endif %}
 		,plugins: plugins
@@ -95,5 +95,7 @@ function(){
 		bbar.bind(store);
 	}
 	{% endif %}	
+	
+	{% block code_extenders %}{% endblock %}
 return grid;
 }()
