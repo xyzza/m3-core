@@ -33,6 +33,9 @@ class ExtForm(BaseExtPanel):
         self.request = None
         self.object = None
         
+        # поле, которое будет под фокусом ввода после рендеринга формы
+        self.focused_field = None 
+        
         self.init_component(*args, **kwargs)
     
     def _get_all_fields(self, item, list = None):
