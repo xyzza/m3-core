@@ -9,6 +9,6 @@
 	{%if component.align %} ,align: '{{ component.align }}' {%endif%}
 	{%if component.editor %} ,editor: {{ component.render_editor }} {%endif%}
 	
-	{% if component.format %}, format: {{ component.format|safe }} {%endif%}
+	{% if component.format %}, format: '{{ component.format|safe }}' {%endif%}
 	{%if component.hidden %} ,hidden: true {%endif%}
 }
