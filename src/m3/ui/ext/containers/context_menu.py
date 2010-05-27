@@ -25,7 +25,7 @@ class ExtContextMenu(BaseExtContainer):
         self.items.append(ExtContextMenuItem(**kwargs))
         
     def add_separator(self):
-        self.items.append(ExtContextMenu.__SEPARATOR)
+        self.items.append(ExtContextMenuSeparator())
     
     def t_render_items(self):
         res = []
@@ -33,7 +33,7 @@ class ExtContextMenu(BaseExtContainer):
             if item == ExtContextMenu.__SEPARATOR:
                 res.append(item)
             elif self.container:
-                res.append(item.render(self.container))
+                res.append(item.render(container=self.container))
             else:
                 res.append(item.render())
         return ','.join(res)
@@ -79,3 +79,11 @@ class ExtContextMenuItem(ExtUIComponent):
             else:
                 res += ',handler: %s' % self.handler
         return '{%s}' % res
+    
+class ExtContextMenuSeparator(ExtUIComponent):
+    def __init__(self, *args, **kwargs):
+        super(ExtContextMenuSeparator, self).__init__(*args, **kwargs)
+        self.init_component(*args, **kwargs)
+    
+    def render(self, *args, **kwargs):
+        return '"-"'

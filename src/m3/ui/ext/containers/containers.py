@@ -21,9 +21,9 @@ class ExtContainer(BaseExtContainer):
         return self._items
     
     
-class ExtToolbar(BaseExtContainer):
+class ExtToolBar(BaseExtContainer):
     def __init__(self, *args, **kwargs):
-        super(ExtToolbar, self).__init__(*args, **kwargs)
+        super(ExtToolBar, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-toolbar.js'
         self._items = []
         self.init_component(*args, **kwargs)
@@ -39,16 +39,16 @@ class ExtToolbar(BaseExtContainer):
         return ','.join(res)
         
     def add_fill(self):
-        self.items.append('"->"')
+        self.items.append(ExtStaticToolBarItem('"->"'))
                 
     def add_separator(self):
-        self.items.append('"-"')
+        self.items.append(ExtStaticToolBarItem('"-"'))
                 
     def add_spacer(self, width=2):
-        self.items.append("{xtype: 'tbspacer', width: %d}" % width)
+        self.items.append(ExtStaticToolBarItem("{xtype: 'tbspacer', width: %d}" % width))
                 
     def add_text_item(self, text_item):
-        self.items.append('"%s"' % text_item)
+        self.items.append(ExtStaticToolBarItem('"%s"' % text_item))
         
     def add_menu(self, **kwargs):
         self.items.append(ExtToolbarMenu(**kwargs))
@@ -57,12 +57,41 @@ class ExtToolbar(BaseExtContainer):
     def items(self):
         return self._items
     
-    
-class ExtPagingbar(BaseExtContainer):   
+#===============================================================================
+# Преднастроенные элементы в тулбаре
+class ExtStaticToolBarItem(ExtUIComponent):
+    def __init__(self, static_value = '', *args, **kwargs):
+        super(ExtStaticToolBarItem, self).__init__(*args, **kwargs)
+        self.static_value = static_value
+        self.init_component(*args, **kwargs)
+    def render(self):
+        return self.static_value
+#===============================================================================
+
+class ExtToolbar(ExtToolBar):
+    '''
+    Класс с ошибочным названием
+    @deprecated: использовать базовый класс
+    '''   
     def __init__(self, *args, **kwargs):
-        super(ExtPagingbar, self).__init__(*args, **kwargs)
+        super(ExtToolbar, self).__init__(*args, **kwargs)
+        self.init_component(*args, **kwargs)    
+        
+    
+class ExtPagingBar(BaseExtContainer):   
+    def __init__(self, *args, **kwargs):
+        super(ExtPagingBar, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-pagingbar.js'
         self.page_size = 25
+        self.init_component(*args, **kwargs)
+        
+class ExtPagingbar(ExtPagingBar):
+    '''
+    Класс с ошибочным названием
+    @deprecated: использовать базовый класс
+    '''   
+    def __init__(self, *args, **kwargs):
+        super(ExtPagingbar, self).__init__(*args, **kwargs)
         self.init_component(*args, **kwargs)
         
          
