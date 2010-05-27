@@ -83,7 +83,7 @@ class ExtContainerTable(BaseExtContainer):
         
         self.__table[row][col] = cont
         if colspan>1:
-            self.__table[row][col+1:col+colspan] = [None,]*colspan
+            self.__table[row][col+1:col+colspan] = [None,]*(colspan-1)
         
     def set_row_height(self, row, height):
         assert isinstance(height, int), 'Height must be INT'
