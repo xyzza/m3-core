@@ -91,8 +91,7 @@ class ExtForm(BaseExtPanel):
                 item.value = unicode(value)
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
-                val = value.strftime('%d.%m.%Y')
-                item.value = val
+                item.value = value.strftime('%d.%m.%Y')
             elif isinstance(item, ExtTimeField):
                 item.value = value.strftime('%H:%M')
             elif isinstance(item, ExtCheckBox):
