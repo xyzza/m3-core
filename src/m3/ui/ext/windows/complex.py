@@ -18,6 +18,8 @@ from m3.ui.ext.containers import (ExtContextMenu,
         
                 
 class ExtDictionaryWindow(BaseExtWindow):
+    LIST_MODE = 0
+    SELECT_MODE = 1
     ''' Базовое окно для линейного, иерархичесого и совмещенного справочника'''
     def __init__(self, *args, **kwargs):
         super(ExtDictionaryWindow, self).__init__(*args, **kwargs)
@@ -75,22 +77,27 @@ class ExtDictionaryWindow(BaseExtWindow):
     
     @mode.setter
     def mode(self, value):
-        assert value in (0,1), 'Mode only 1 (select mode) or 0 (list mode)'
+        assert value in (ExtDictionaryWindow.LIST_MODE, ExtDictionaryWindow.SELECT_MODE), 'Mode only 1 (select mode) or 0 (list mode)'
 
-        if value==1:
-            buttom_panel = ExtPanel(title='История выбора',
+        if value == ExtDictionaryWindow.SELECT_MODE:
+            
+            # панель с историей выбора пока отключена
+            button_panel = ExtPanel(title='История выбора',
                                 region='south',min_height=100, collapsible=True, split=True)
             list_view = ExtListView() 
-            buttom_panel.items.append(list_view)
-            self.items.append(buttom_panel)
+            button_panel.items.append(list_view)
+#            self.items.append(button_panel)
+
+            self.__panel_list_view = button_panel
+            self.list_view = list_view
         
             select_btn = ExtButton(text = u'Выбрать', disabled=True)
             self.buttons.insert(0, select_btn)
             
             self.select_button = select_btn
-            self.__panel_list_view = buttom_panel
-            self.list_view = list_view
-        elif value==0:
+            
+        elif value == ExtDictionaryWindow.SELECT_MODE:
+            
             if self.__panel_list_view:
                 self.items.remove(self.__panel_list_view)
                 self.list_view = None

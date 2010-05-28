@@ -345,7 +345,7 @@ var ajax = Ext.Ajax;
 		var id, displayText;
 		{%if component.grid %}
 			var grid = Ext.getCmp('{{ component.grid.client_id}}');
-			if (!isGridSelected(grid, 'Выбор элемента', 'Элемент не выбран') ) {
+			if (!isGridSelected(grid, 'Выбор элемента', 'Выберите элемент из списка') ) {
 				return;
 			}
 			
@@ -362,7 +362,8 @@ var ajax = Ext.Ajax;
 		{% endif %}
 		
 		if (id!=undefined && displayText!=undefined){
-			win.fireEvent('select_value', id, displayText);
+			win.fireEvent('select_value', id, displayText); // deprecated
+			win.fireEvent('closed_ok', id, displayText); 
 		};
 		win.close();
 	}

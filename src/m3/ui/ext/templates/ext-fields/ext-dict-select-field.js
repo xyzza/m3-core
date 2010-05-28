@@ -100,19 +100,19 @@
      * Реакция на нажатие кнопки выбора из справочника
      */
     function onSelect(){
-    	ajax.request({
-    		url: '{{ component.url }}'
-    		,success: function(response, opts){
-    		    var win = m3_eval(response.responseText);
-    	    	if (win!=undefined){
-    				win.on('select_value',function(id, displayText){
-    					addRecordToStore(id, displayText);
-    				});
-    			};
-    		}
-    		,failure: function(response, opts){
-    		   Ext.Msg.alert('','failed');
-    		}
+        ajax.request({
+            url: '{{ component.url }}'
+            ,success: function(response, opts){
+                var win = smart_eval(response.responseText);
+                if (win != undefined){
+                    win.on('closed_ok',function(id, displayText){
+                        addRecordToStore(id, displayText);
+                    });
+                };
+            }
+            ,failure: function(response, opts){
+                Ext.Msg.show({title: '', msg: 'Не удалось выполнить выбор из справочника',buttons: Ext.Msg.OK});
+            }
     	});
     };	
     
@@ -127,19 +127,19 @@
     	var combo = Ext.getCmp('{{ component.client_id }}');
     	if (!newValue){
     		clear_btn.setVisible(false);
-    		sender.setWidth({{ component.width }});
+    		//sender.setWidth({{ component.width }});
     	} else {
     		clear_btn.setVisible(true);	
-    		sender.setWidth({{ component.width }} - 25);
+    		//sender.setWidth({{ component.width }} - 25);
     	};
     };
     
-    {%if component.value%}
+    {% if self.value %}
     	// Если начальное значение было присвоено, его нужно добавить запись
     	(function(){
-    		addRecordToStore('{{ component.value }}', '{{ component.default_text }}');
+    		addRecordToStore('{{ self.value }}', '{{ self.default_text }}');
     	})()
-    {%endif%}
+    {% endif %}
     
     return container;
 })()
