@@ -37,7 +37,9 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.query_param = 'filter' # и это тоже взято оттуда же
         
         self.select_button = ExtButton(handler='onSelect', icon_cls='select', width=30, disabled=True)
-        self.clear_button = ExtButton(handler='onClearField', icon_cls='clear', width=30, hidden=True) 
+        self.clear_button  = ExtButton(handler='onClearField', icon_cls='clear', width=30, hidden=True) 
+        
+        self.display_field = 'name' # по умолчанию отображаем значение поля name
         
         # Из-за ошибки убраны свойства по умолчанию
         #self.total = 'total'
