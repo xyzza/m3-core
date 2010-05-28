@@ -2,7 +2,7 @@ new Ext.Panel({
 	{% include 'base-ext-ui.js'%}
 	
 	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
-	{% if component.layout_config %} ,layoutConfig: '{{ component.t_render_layout_config|safe }}' {% endif %}
+	{% if component.layout_config %} ,layoutConfig: {{ component.t_render_layout_config|safe }} {% endif %}
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
 	{% if component.top_bar %} ,tbar: {{ component.t_render_top_bar|safe }} {% endif %}

@@ -5,7 +5,7 @@
     	{% if component.url %} ,url: '{{ component.url }}' {% endif %}
     	
     	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
-    	{% if component.layout_config %} ,layoutConfig: '{{ component.t_render_layout_config|safe }}' {% endif %}
+    	{% if component.layout_config %} ,layoutConfig: {{ component.t_render_layout_config|safe }} {% endif %}
     	
     	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
     	{% if component.title %} 
