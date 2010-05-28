@@ -90,7 +90,7 @@ class BaseExtComponent(object):
         '''
         self.pre_render_globals()
         if self.template_globals:
-            return render_template(self.template_globals, {'component': self})
+            return render_template(self.template_globals, {'component': self, 'self' : self})
         return ''
     
     def pre_render(self):

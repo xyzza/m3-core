@@ -6,7 +6,7 @@ from django.template import Context
 from django.template.loader import get_template
     
 def render_component(component):
-    context = Context({'component': component})
+    context = Context({'component': component, 'self': component})
     template = get_template(component.template)
     return template.render(context)
 
