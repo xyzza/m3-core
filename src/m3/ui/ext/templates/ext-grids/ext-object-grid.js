@@ -10,7 +10,11 @@ function childWindowOpenHandler(response, opts){
 }
 
 function refreshStore(){
-	// TODO: (akvarats) сделать рефреш стора у грида
+	var pagingBar = Ext.getCmp('{{self.paging_bar.client_id}}'); 
+	if(pagingBar != undefined ){
+	    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
+        pagingBar.changePage(active_page);
+	}
 }
 
 function getLoadMask(){
