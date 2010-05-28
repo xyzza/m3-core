@@ -27,12 +27,12 @@
     	{% endif %}
     	Ext.getCmp('{{window.client_id}}').fireEvent('closed_ok');
     	Ext.getCmp('{{window.client_id}}').close();
-    	eval_response(action.response.responseText)
+    	smart_eval(action.response.responseText)
     }
     function defaultSubmitFailureHandler(form, action)
     {
     	{# ------ обработчик сообщения об ошибке субмита по умолчанию ----------- #}
-    	eval_response(action.response.responseText)
+    	smart_eval(action.response.responseText)
     	/*if(action.failureType == 'server'){
             obj = Ext.util.JSON.decode(action.response.responseText);
             Ext.Msg.show({title: '',
