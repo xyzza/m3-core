@@ -42,7 +42,7 @@ class DictSelectWindowAction(Action):
     def run(self, request, context):
         # Создаем окно выбора
         base = self.parent
-        win = base.select_form(title = base.title)
+        win = base.select_form(title = base.title, height = base.height, width = base.width)
         win.init_grid_components()
         win.mode = 1
         
