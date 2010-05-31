@@ -91,7 +91,7 @@
     	var record = new Ext.data.Record();
     	record.id = id;
     	record.{{ component.display_field }} = value;
-    	store.loadData(record);
+    	store.loadData({total:1, rows:[record]});
     	combo.setValue(id);
     	onChange(combo, id);
     };
