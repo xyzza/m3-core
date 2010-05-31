@@ -1,6 +1,7 @@
 (function(){
     var result = new Ext.data.JsonStore({
     	url: '{{ component.url }}'
+    	,storeId: '{{ component.client_id }}'
     	,baseParams: Ext.applyIf({
     		{% for key,value in component.base_params.items %}
     			{{ key }}: {{ value}}{% if not forloop.last %},{% endif %}			
