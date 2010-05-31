@@ -9,6 +9,11 @@ function childWindowOpenHandler(response, opts){
     }
 }
 
+function deleteOkHandler(response, opts){
+	smart_eval(response, response.responseText);
+	refreshStore();
+}
+
 function refreshStore(){
 	var pagingBar = Ext.getCmp('{{self.paging_bar.client_id}}'); 
 	if(pagingBar != undefined ){
@@ -43,7 +48,23 @@ function onEditRecord(){
 }
 
 function onDeleteRecord(){
-	// TODO: (akvarats) сделать удаление записей
+    Ext.Msg.show({
+        title: 'Удаление записи',
+	    msg: 'Вы действительно хотите удалить выбранную запись?',
+	    icon: Ext.Msg.QUESTION,
+        buttons: Ext.Msg.YESNO,
+        fn:function(btn,text,opt){ 
+            if (btn == 'yes') {
+                var grid = Ext.getCmp('{{component.client_id}}');
+                Ext.Ajax.request({
+                   url: '{{component.action_delete.absolute_url}}',
+                   params: Ext.applyIf({ {{component.row_id_name}}: grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %}),
+                   success: deleteOkHandler,
+                   failure: function(){}
+                });                
+            }
+        }
+    });
 }
 
 function contextMenuNew(){ onNewRecord(); }

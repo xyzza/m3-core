@@ -28,7 +28,7 @@ class ExtObjectGrid(ExtGrid):
             super(ExtObjectGrid.GridContextMenu, self).__init__(*args, **kwargs)
             self.menuitem_new = menus.ExtContextMenuItem(text = u'Добавить', icon_cls = 'add_item', handler='contextMenuNew')
             self.menuitem_edit = menus.ExtContextMenuItem(text = u'Изменить', icon_cls = 'edit_item', handler='contextMenuEdit')
-            self.menuitem_delete = menus.ExtContextMenuItem(text = u'Удалить', icon_cls = 'add_item')
+            self.menuitem_delete = menus.ExtContextMenuItem(text = u'Удалить', icon_cls = 'delete_item', handler='contextMenuDelete')
             self.menuitem_separator = menus.ExtContextMenuSeparator()            
             
             # self.items.extend([self.menuitem_add, self.menuitem_edit, self.menuitem_delete, self.menuitem_separator])
@@ -88,6 +88,9 @@ class ExtObjectGrid(ExtGrid):
         if self.action_edit:
             self.context_menu_row.items.append(self.context_menu_row.menuitem_edit)
             self.handler_dblclick = 'onEditRecord'
+            
+        if self.action_delete:
+            self.context_menu_row.items.append(self.context_menu_row.menuitem_delete)
                     
         # контекстное меню прицепляется к гриду только в том случае, если 
         # в нем есть хотя бы один пункт
