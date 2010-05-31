@@ -187,7 +187,7 @@ class SelectWindowAction(Action):
     def run(self, request, context):
         # Создаем окно выбора
         base = self.parent
-        win = self.parent.list_window(title = base.title)
+        win = self.parent.list_window(title = base.title, height = base.height, width = base.width)
         if base.list_model:
             win.init_grid_components()
         win.init_tree_components()
