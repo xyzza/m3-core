@@ -45,6 +45,8 @@ class DictSelectWindowAction(Action):
         win = base.select_form(title = base.title, height = base.height, width = base.width)
         win.init_grid_components()
         win.mode = 1
+        win.width=500
+        win.height=400
         
         # Добавляем отображаемые колонки
         for field, name in base.list_columns:
@@ -144,8 +146,8 @@ class BaseDictionaryActions(ActionPack):
     secret_json = False
     secret_form = False
     # Ширина и высота окна
-    width = 400
-    height = 300
+    width = 500
+    height = 400
     
     def __init__(self):
         # В отличие от обычных паков в этом экшены создаются самостоятельно, а не контроллером
