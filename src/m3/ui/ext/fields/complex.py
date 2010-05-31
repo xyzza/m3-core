@@ -42,8 +42,8 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.display_field = 'name' # по умолчанию отображаем значение поля name
         
         # Из-за ошибки убраны свойства по умолчанию
-        #self.total = 'total'
-        #self.root = 'rows'
+        self.total = 'total'
+        self.root = 'rows'
         
         self.init_component(*args, **kwargs)
         # По умолчанию 20 - ширина двух кнопок
