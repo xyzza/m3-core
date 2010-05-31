@@ -20,11 +20,11 @@ class BaseExtListWindow(BaseExtWindow):
         
         self.template = 'ext-windows/ext-list-window.js'
         
-        self.layout = 'fit'
+        self.layout = 'border'
         self.width = 800
         self.height = 600
         self.maximized = True
         
         # грид, который будем все для нас делать
-        self.grid = panels.ExtObjectGrid()
+        self.grid = panels.ExtObjectGrid(region='center')
         self.items.append(self.grid)
