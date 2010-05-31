@@ -170,6 +170,12 @@ class ExtForm(BaseExtPanel):
                     val = datetime.datetime.strptime(val, '%d.%m.%Y')
                 else:
                     val = None
+            elif isinstance(item, ExtTimeField):
+                if val.strip():
+                    d = datetime.datetime.strptime(val, '%H:%M')
+                    val = datetime.time(d.hour, d.minute, 0)
+                else:
+                    val = None
             elif isinstance(item, ExtCheckBox):
                 val = True if val == 'on' else False
             elif isinstance(item, ExtComboBox):

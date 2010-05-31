@@ -187,7 +187,7 @@ class SelectWindowAction(Action):
     def run(self, request, context):
         # Создаем окно выбора
         base = self.parent
-        win = self.parent.list_window(title = base.title)
+        win = self.parent.list_window(title = base.title, height = base.height, width = base.width)
         if base.list_model:
             win.init_grid_components()
         win.init_tree_components()
@@ -499,7 +499,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             message = u'Группа не существует в базе данных.'
         elif self.tree_model.objects.filter(**{self.tree_parent_field: obj}).count() > 0:
             message = u'Нельзя удалить группу содержащую в себе другие группы.'
-        elif self.list_model.objects.filter(**{self.list_parent_field: obj}).count() > 0:
+        elif self.list_model and self.list_model.objects.filter(**{self.list_parent_field: obj}).count() > 0:
             message = u'Нельзя удалить группу содержащую в себе элементы.'
         elif not utils.safe_delete_record(self.tree_model, obj.id):
             message = u'Не удалось удалить группу. Возможно на неё есть ссылки.'

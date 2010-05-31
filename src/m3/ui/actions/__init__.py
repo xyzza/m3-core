@@ -45,10 +45,17 @@ class PreJsonResult(ActionResult):
     Для данного класса в self.data храниться список некоторых объектов. 
     Метод self.get_http_response выполняет сериализацию этих данных в строковый формат.
     '''
+    def __init__(self, data = None, secret_values = False):
+        super(PreJsonResult, self).__init__(data)
+        self.secret_values = secret_values
+    
     def get_http_response(self):
         encoder = M3JSONEncoder()
         result = encoder.encode(self.data)
-        return http.HttpResponse(result)
+        response = http.HttpResponse(result)
+        if self.secret_values:
+            response['secret_values'] = True
+        return response
 
 class JsonResult(ActionResult):
     '''
@@ -97,6 +104,8 @@ class ExtUIComponentResult(BaseContextedResult):
     def get_http_response(self):
         self.data.action_context = self.context
         return http.HttpResponse(self.data.render())
+    
+        
 
 class ExtUIScriptResult(BaseContextedResult):
     '''
@@ -104,9 +113,17 @@ class ExtUIScriptResult(BaseContextedResult):
     Единственное отличие заключается в том, что get_http_response должен сформировать
     готовый к отправке javascript. Т.е. должен быть вызван метод self.data.get_script()
     '''
+    def __init__(self, data = None, context = None, secret_values = False):
+        super(ExtUIScriptResult, self).__init__(data, context)
+        self.secret_values = secret_values
+    
     def get_http_response(self):
         self.data.action_context = self.context
-        return http.HttpResponse(self.data.get_script())
+        response = http.HttpResponse(self.data.get_script())
+
+        if self.secret_values:
+            response['secret_values'] = True
+        return response
     
 class OperationResult(ActionResult):
     '''
