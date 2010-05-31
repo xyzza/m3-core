@@ -172,17 +172,32 @@ class ActionContextDeclaration(object):
     '''
     Класс, который декларирует необходимость наличия определенного параметра в объекте контекста
     '''
-    def __init__(self, name='', default=None, type=None, required=True, *args, **kwargs):
+    def __init__(self, name='', default=None, type=None, required=False, verbose_name = '', *args, **kwargs):
+        '''
+        Создает экземпляр
+        '''
         self.name = name
         self.default = default
         self.required = required
         self.type = type
+        self.verbose_name = verbose_name
+        
+    def human_name(self):
+        return self.verbose_name if self.verbose_name else self.name
 
 class ActionContext(object):
     '''
     Контекст выполнения операции, восстанавливаемый из запроса.
     '''
-    
+    class RequiredFailed(Exception):
+        '''
+        Исключительная ситуация, которая выбрасывается в случае
+        если фактическое наполнение контекста действия не соответствует
+        описанным правилам
+        '''
+        def __init__(self, reason):
+            self.reason = reason
+                    
     def __init__(self, obj=None):
         '''
         В зависимости от типа obj выполняем построение объекта контекста действия
@@ -193,24 +208,37 @@ class ActionContext(object):
         '''
         Выполняет заполнение собственных атрибутов согласно переданному request
         '''
-        types = {}
+        params = {}
         if rules:
             for rule in rules:
-                types[rule.name] = [rule.type, False] # (тип параметра; признак того, что параметр включен в context
+                params[rule.name] = [rule.type, False] # [тип параметра; признак того, что параметр включен в context]
         
         # переносим параметры в контекст из запроса
         for key in request.REQUEST:
             value = request.REQUEST[key]
-            if types.has_key(key):
-                if types[key][0] == int:
+            if params.has_key(key):
+                if params[key][0] == int:
                     value = int(value)
-                types[key][1] = True
+                params[key][1] = True
             setattr(self, key, value)
         
         # переносим обязательные параметры, которые не встретились в запросе
         for rule in rules if rules else []:
-            if rule.required and not types[rule.name][1]:
+            if rule.required and rule.default != None and not params[rule.name][1]:
+                # если параметр не передан в запросе, но
+                # он является обязательным и задано значение по умолчанию,
+                # то помещаем этот параметр в контекст
                 setattr(self, rule.name, rule.default)
+                
+    def check_required(self, rules):
+        '''
+        Проверяет наличие обязательных параметров
+        '''
+        if not rules:
+            return
+        for rule in rules:
+            if rule.required and getattr(self, rule.name, None) == None:
+                raise ActionContext.RequiredFailed(rule.human_name())
     
     def json(self):
         '''
@@ -223,8 +251,6 @@ class ActionContext(object):
         if result:
             result = result[:-1]
         return '{' + result + '}'
-                
-        
    
     
 class Action(object):
@@ -425,6 +451,15 @@ class ActionController(object):
         rules = action.context_declaration()
         context = self.build_context(request)
         context.build(request, rules)
+        
+        # проверяем контекст
+        try:
+            context.check_required(rules)
+        except ActionContext.RequiredFailed, e:
+            # если контекст неправильный, то возвращаем 
+            # фейльный результат операции
+            return OperationResult(success = False, message = u'Не удалось выполнить операцию. Не задан обязательный<br>параметр: ' + e.reason)
+            
         
         # Все ПРЕ обработчики
         for pack in stack:
