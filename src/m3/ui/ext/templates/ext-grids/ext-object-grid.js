@@ -10,7 +10,7 @@ function childWindowOpenHandler(response, opts){
 }
 
 function deleteOkHandler(response, opts){
-	smart_eval(response, response.responseText);
+	smart_eval(response.responseText);
 	refreshStore();
 }
 
