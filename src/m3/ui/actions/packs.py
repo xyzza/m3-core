@@ -89,7 +89,7 @@ class DictRowsAction(Action):
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
         filter = request.REQUEST.get('filter')
-        return PreJsonResult(self.parent.get_rows(offset, limit, filter))
+        return PreJsonResult(self.parent.get_rows(offset, limit, filter), self.parent.secret_json)
     
 class DictLastUsedAction(Action):
     '''
@@ -140,6 +140,9 @@ class BaseDictionaryActions(ActionPack):
     edit_window = None
     list_form   = ExtDictionaryWindow
     select_form = ExtDictionaryWindow
+    # Настройки секретности. Если стоит истина, то в результат добавляется флаг секретности
+    secret_json = False
+    secret_form = False
     # Ширина и высота окна
     width = 400
     height = 300
