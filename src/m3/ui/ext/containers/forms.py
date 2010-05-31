@@ -166,7 +166,10 @@ class ExtForm(BaseExtPanel):
                 val = unicode(val)
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
-                val = datetime.datetime.strptime(val, '%d.%m.%Y')
+                if val.strip():
+                    val = datetime.datetime.strptime(val, '%d.%m.%Y')
+                else:
+                    val = None
             elif isinstance(item, ExtCheckBox):
                 val = True if val == 'on' else False
             elif isinstance(item, ExtComboBox):
