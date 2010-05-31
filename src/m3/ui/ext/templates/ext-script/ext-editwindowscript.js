@@ -15,7 +15,7 @@
     	}
     	form.submit({
     	   url: '{{ window.form.url }}',
-    	   {% if window.action_context %}baseParams: {{window.action_context.json|safe}},{% endif %}
+    	   {% if window.action_context %}params: {{window.action_context.json|safe}},{% endif %}
            success: formSubmitSuccessHandler,
     	   failure: {% if form.failure_handler %}{{form.failure_handler}}{% else %}defaultSubmitFailureHandler{% endif %}
     	});
