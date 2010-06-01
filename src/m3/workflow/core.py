@@ -152,7 +152,16 @@ class WorkflowQueryManager(object):
     def __init__(self, workflow):
         self.workflow = workflow
         self.models = workflow.models
-        
+    
+    def get(self, id):
+        '''
+        Возвращает экземпляр связи с заданным id
+        '''
+        wf = self.workflow()
+        wf.id = id
+        wf.record = self.models.wf.objects.get(id = id)
+        return wf
+    
     def create(self):
         raise NotImplementedError()
         

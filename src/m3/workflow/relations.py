@@ -124,15 +124,6 @@ class RelationQueryManager(WorkflowQueryManager):
         
         raise NotImplementedError()
     
-    def get(self, id):
-        '''
-        Возвращает экземпляр связи с заданным id
-        '''
-        wf = self.workflow()
-        wf.id = id
-        wf.record = self.models.wf.objects.get(id = id)
-        return wf
-    
 
 class RelationOpenedStep(WorkflowStep):
     id = 'opened'
