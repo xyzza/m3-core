@@ -2,7 +2,7 @@
 import threading
 import re
 import json
-from inspect import isclass
+import inspect
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -25,18 +25,26 @@ class ActionResult(object):
     Данный класс является абстрактным.
     '''
     
-    def __init__(self, data = None):
+    def __init__(self, data = None, http_params = {}):
         '''
         @param data: данные, на основе которых будет сформирован результат выполнения действия. 
                      Тип объекта, передаваемого через data зависит от дочернего результата
         '''
         self.data = data
+        self.http_params = http_params
         
     def get_http_response(self):
         '''
         Переопределяемый в дочерних классах метод.
         '''
         raise NotImplementedError()
+    
+    def process_http_params(self, response):
+        for k, v in self.http_params.items():
+            response[k] = v
+        return response
+              
+        
     
 class PreJsonResult(ActionResult):
     '''
@@ -82,8 +90,8 @@ class BaseContextedResult(ActionResult):
     Абстрактный базовый класс, который оперирует понятием результата 
     выполнения операции, 'отягощенного некоторым контектом'
     '''
-    def __init__(self, data = None, context = None):
-        super(BaseContextedResult, self).__init__(data)
+    def __init__(self, data = None, context = None, http_params = {}):
+        super(BaseContextedResult, self).__init__(data, http_params)
         self.set_context(context)
             
     def set_context(self, context):
@@ -113,14 +121,16 @@ class ExtUIScriptResult(BaseContextedResult):
     Единственное отличие заключается в том, что get_http_response должен сформировать
     готовый к отправке javascript. Т.е. должен быть вызван метод self.data.get_script()
     '''
-    def __init__(self, data = None, context = None, secret_values = False):
-        super(ExtUIScriptResult, self).__init__(data, context)
+    def __init__(self, data = None, context = None, http_params = {}, secret_values = False):
+        super(ExtUIScriptResult, self).__init__(data, context, http_params)
         self.secret_values = secret_values
     
     def get_http_response(self):
         self.data.action_context = self.context
         response = http.HttpResponse(self.data.get_script())
-
+        
+        response = self.process_http_params(response)
+        
         if self.secret_values:
             response['secret_values'] = True
         return response
@@ -200,6 +210,9 @@ class ActionContextDeclaration(object):
         self.verbose_name = verbose_name
         
     def human_name(self):
+        '''
+        Выводит человеческое название параметра
+        '''
         return self.verbose_name if self.verbose_name else self.name
 
 class ActionContext(object):
@@ -412,7 +425,7 @@ class ActionController(object):
         # Что-бы нам не передали, нужно создать экземпляр
         if isinstance(clazz, str):
             clazz = self._load_class(clazz)()
-        elif isclass(clazz):
+        elif inspect.isclass(clazz):
             clazz = clazz()
         
         # Присваиваем родителя
