@@ -241,7 +241,7 @@ class ListWindowAction(Action):
         # Добавляем отображаемые колонки
         if base.list_model:
             for field, name in base.list_columns:
-                win.grid.add_column(header = name, data_index = field)
+                win.grid.add_column(header = name, data_index = field, width = 10)
         # Устанавливаем источники данных
         if base.list_model: 
             grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
@@ -262,7 +262,7 @@ class ListWindowAction(Action):
         base = self.parent
         # Добавляем отображаемые колонки
         for field, name in base.tree_columns:
-            win.tree.add_column(header = name, data_index = field)
+            win.tree.add_column(header = name, data_index = field, width = 10)
         # Устанавливаем источники данных
         win.tree.url = base.nodes_action.get_absolute_url()
         # События для дерева
