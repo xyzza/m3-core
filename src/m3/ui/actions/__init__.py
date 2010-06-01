@@ -179,10 +179,6 @@ class OperationResult(ActionResult):
             result['success'] = False
             # TODO после рефактора кода необходимо строку кода ниже убрать. у нас будет просто message
             result['error_msg'] = self.message
-            
-        #if self.window:
-        #    assert isinstance(self.window, BaseExtComponent)
-        #    self.code = self.window.get_script()
 
         result = json.JSONEncoder().encode(result)
         # Вставляем функцию прямо в JSON без кодирования
@@ -193,7 +189,10 @@ class OperationResult(ActionResult):
             else:
                 code = ' ,"code": %s' % self.code
             result = result[:-1] + code + result[-1]
-        return http.HttpResponse(result)
+        
+        repsonse = http.HttpResponse(result)
+        repsonse = self.process_http_params(repsonse)
+        return repsonse
 
 class ActionContextDeclaration(object):
     '''
