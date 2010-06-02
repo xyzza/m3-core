@@ -139,7 +139,11 @@ class BaseInformationRegistry(models.Model):
         check_obj(obj)
         date = date or datetime.datetime.now()
         result = cls.objects.order_by('-history_time_stamp')
-        return result.filter(history_time_stamp__lte = date, history_object_id = obj.id)[0]
+        res = result.filter(history_time_stamp__lte = date, history_object_id = obj.id)
+        if res:
+            return res[0]
+        else:
+            return None
     
     @classmethod
     def get_history(cls, obj, reverse = False):

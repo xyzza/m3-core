@@ -76,8 +76,10 @@ class ExtContainerTable(BaseExtContainer):
     def set_item(self, row, col, cmp, colspan=1):
         assert isinstance(cmp, ExtUIComponent)
         assert isinstance(colspan, int)
-        
-        cont = ExtContainer(layout = 'form', flex=colspan, style=dict(padding="5px"))
+        cont = ExtContainer(layout = 'form', flex=colspan, style=dict(padding="0px"))
+        # добавляем отступ слева, если это уже не первая колонка
+        if col != 0:
+            cont.style = dict(padding="0px 0px 0px 5px")
         cmp.anchor = '100%'
         cont.items.append(cmp)
         
