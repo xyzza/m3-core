@@ -196,9 +196,9 @@ class SelectWindowAction(Action):
         # Добавляем отображаемые колонки
         if base.list_model:
             for field, name in base.list_columns:
-                win.grid.add_column(header = name, data_index = field)
+                win.grid.add_column(header = name, data_index = field, width = 10)
         for field, name in base.tree_columns:
-            win.tree.add_column(header = name, data_index = field)
+            win.tree.add_column(header = name, data_index = field, width = 10)
             
         # Устанавливаем источники данных
         win.tree.url = base.nodes_action.get_absolute_url()
@@ -434,16 +434,21 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         return nodes
     
     def get_rows(self, parent_id, offset, limit, filter):
-        query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
-        query = utils.apply_search_filter(query, filter, self.filter_fields)
-        # Для работы пейджинга нужно передавать общее количество записей
-        total = query.count()
-        # Срез данных для страницы
-        if limit > 0:
-            query = query[offset: offset + limit]
-        
-        result = {'rows': list(query.all()), 'total': total}
-        return result
+        # если справочник состоит только из дерева и у него просят запись, то надо брать из модели дерева
+        #TODO: возможно это не надо было делать - раз не туда обратились, значит сами виноваты
+        if self.list_model:
+            query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
+            query = utils.apply_search_filter(query, filter, self.filter_fields)
+            # Для работы пейджинга нужно передавать общее количество записей
+            total = query.count()
+            # Срез данных для страницы
+            if limit > 0:
+                query = query[offset: offset + limit]
+            
+            result = {'rows': list(query.all()), 'total': total}
+            return result
+        else:
+            return self.get_nodes(parent_id, filter)
     
     def _get_obj(self, model, id):
         '''
@@ -464,7 +469,12 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         return self._get_obj(self.tree_model, id)
     
     def get_row(self, id = 0):
-        return self._get_obj(self.list_model, id)
+        # если справочник состоит только из дерева и у него просят запись, то надо брать из модели дерева
+        #TODO: это надо было для элемента выбора из справочника - он не знает откуда ему взять запись и всегда вызывает get_row. может надо было как-то по-другому это решить
+        if self.list_model:
+            return self._get_obj(self.list_model, id)
+        else:
+            return self.get_node(id)
     
     def save_row(self, obj):
         obj.save()

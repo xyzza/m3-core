@@ -62,7 +62,7 @@ class ExtForm(BaseExtPanel):
             field.value = self.request.POST.get(name)
     
     #TODO необходимо добавить проверку на возникновение exception'ов
-    def from_object(self, object):
+    def from_object(self, object, exclusion = []):
         '''
         Метод выполнения прямого связывания данных атрибутов объекта object и полей текущей формы
         '''
@@ -126,12 +126,14 @@ class ExtForm(BaseExtPanel):
         fields = _parse_obj(object)
         if fields:
             for item in self._get_all_fields(self):
-                new_val = fields.get(item.name, None)
-                if new_val != None:
-                    _assign_value(new_val, item)
+                # заполним атрибуты только те, которые не в списке исключаемых
+                if not item.name in exclusion:
+                    new_val = fields.get(item.name, None)
+                    if new_val != None:
+                        _assign_value(new_val, item)
 
     #TODO необходимо добавить проверку на возникновение exception'ов
-    def to_object(self, object):
+    def to_object(self, object, exclusion = []):
         '''
         Метод выполнения прямого связывания данных атрибутов объекта object и полей текущей формы
         '''
@@ -198,8 +200,10 @@ class ExtForm(BaseExtPanel):
         for field in all_fields:
             assert isinstance(field.name, str) and len(field.name) > 0,\
                   'The names of all fields must be set for a successful assignment. Check the definition of the form.'
-            names = field.name.split('.')
-            set_field(self.object, names, convert_value(field))
+            # заполним атрибуты только те, которые не в списке исключаемых
+            if not field.name in exclusion:
+                names = field.name.split('.')            
+                set_field(self.object, names, convert_value(field))
      
     @property
     def items(self):       

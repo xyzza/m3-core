@@ -117,7 +117,8 @@ class BaseInformationRegistry(models.Model):
         for name, value in kwargs.items():
             if not hasattr(self, name):
                 raise AttributeError(u'Регистр не содержит атрибут с именем %s' % name)
-            self.__setattr__(name, value)
+            if name != 'id':
+                self.__setattr__(name, value)
         
         # Откуда-то нужно достать id
         if not self.history_object_id:
@@ -133,9 +134,13 @@ class BaseInformationRegistry(models.Model):
         new_record = cls()
         new_record.history_time_stamp = kwargs.pop('date', datetime.datetime.now())
         cls.mapping(new_record, *args, **kwargs)
+        return new_record
     
     @classmethod
     def get_object(cls, obj, date = None):
+        '''
+        Получение записи регистра по дате и объекту
+        '''
         check_obj(obj)
         date = date or datetime.datetime.now()
         result = cls.objects.order_by('-history_time_stamp')
@@ -144,6 +149,14 @@ class BaseInformationRegistry(models.Model):
             return res[0]
         else:
             return None
+    
+    @classmethod
+    def get_reg_object(cls, id):
+        '''
+        Получение записи регистра по id
+        '''
+        result = cls.objects.get(id = id)        
+        return result
     
     @classmethod
     def get_history(cls, obj, reverse = False):
