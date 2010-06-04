@@ -165,11 +165,11 @@ class Relation(Workflow):
         if current_state.step == self.state_closed.id:
             raise Exception(u'Relation with id=%s already closed!' % self.id)
         # Записываем закрывающий документ в связь
-        close_types = tuple([x[1] for x in self.Meta.close_docs])
-        named_docs = self.models.nameddocs(workflow = current_wf)
+        close_types = tuple(self.Meta.close_docs.values())
+        named_docs = current_wf.nameddocs
         for field_name, obj in close_docs.items():
             assert hasattr(named_docs, field_name), 'The named docs models does not contain a field with the name %s' % field_name
-            assert isinstance(obj, close_types), 'Document type is not included in the types of opening documents. Look attribute open_docs in Meta.'
+            assert isinstance(obj, close_types), 'Document type is not included in the types of closed documents. Look attribute close_docs in Meta.'
             setattr(named_docs, field_name, obj)
         named_docs.save()
         # Создаем новое состояние
