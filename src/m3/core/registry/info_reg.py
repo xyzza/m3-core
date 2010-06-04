@@ -151,14 +151,6 @@ class BaseInformationRegistry(models.Model):
             return None
     
     @classmethod
-    def get_reg_object(cls, id):
-        '''
-        Получение записи регистра по id
-        '''
-        result = cls.objects.get(id = id)        
-        return result
-    
-    @classmethod
     def get_history(cls, obj, reverse = False):
         check_obj(obj)
         result = cls.objects.filter(history_object_id = obj.id)

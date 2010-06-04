@@ -277,6 +277,12 @@ class ActionContext(object):
         for k,v in self.__dict__.items():
             if isinstance(v,int):
                 result += '%s: %s,' % (k,v)
+            else:
+                try:
+                    result += '%s: "%s",' % (k,str(v))
+                except:
+                    # TODO: обрабатывать все типы параметров
+                    pass
         if result:
             result = result[:-1]
         return '{' + result + '}'

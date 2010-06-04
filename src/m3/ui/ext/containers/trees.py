@@ -73,6 +73,9 @@ class ExtTree(BaseExtPanel):
         self.tree_loader.url = value
         self.__url = value
    
+    def pre_render(self):
+        self.tree_loader.action_context = self.action_context
+        super(ExtTree, self).pre_render()
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------

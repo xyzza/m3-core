@@ -336,7 +336,14 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.__components_delete_tree   = self.__add_menu_item_tree(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
             self.__add_separator_tree(0)
             self.__components_refresh_tree  = self.__add_menu_item_tree(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshTreeLoader')
-            
+    
+    def pre_render(self):
+        if self.grid:
+            self.grid.action_context = self.action_context
+        if self.tree:
+            self.tree.action_context = self.action_context
+        super(ExtDictionaryWindow, self).pre_render()
+    
     def render(self):
         assert (self.grid or self.tree), 'Grid or tree is not initialized'
         if not self.grid and self.tree:

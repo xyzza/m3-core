@@ -139,6 +139,9 @@ class ExtDictSelectField(BaseExtTriggerField):
     def root(self, value):
         self.get_store().root = value   
         
+    def render(self):
+        return super(ExtDictSelectField, self).render()
+        
         
 class ExtSearchField(BaseExtField):
     '''Поле поиска'''

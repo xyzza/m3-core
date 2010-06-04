@@ -102,6 +102,7 @@
     function onSelect(){
         ajax.request({
             url: '{{ component.url }}'
+			,params: Ext.applyIf({},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
             ,success: function(response, opts){
                 var win = smart_eval(response.responseText);
                 if (win != undefined){
@@ -109,7 +110,7 @@
                         addRecordToStore(id, displayText);
                     });
                 };
-            }
+            }			
             ,failure: function(response, opts){
                 Ext.Msg.show({title: '', msg: 'Не удалось выполнить выбор из справочника',buttons: Ext.Msg.OK});
             }
