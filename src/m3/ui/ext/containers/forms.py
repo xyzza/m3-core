@@ -218,6 +218,7 @@ class ExtPanel(BaseExtPanel):
         self.collapsible = False
         self.split = False
         self.base_cls = ''
+        self.body_cls = ''
         self.init_component(*args, **kwargs)
     
     @property
