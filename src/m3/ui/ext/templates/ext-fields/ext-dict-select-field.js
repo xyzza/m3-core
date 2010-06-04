@@ -6,11 +6,11 @@
     			xtype: 'container'
     			,columnWidth:1
     			,layout: 'form'
+    			{% if component.label_width %} ,labelWidth: {{ component.label_width }} {% endif %}
     			,items: {
     					xtype: 'combo'
     					,{% include 'base-ext-ui.js'%}
-    					,allowBlank: {{ component.allow_blank|lower }}
-    					
+    					,allowBlank: {{ component.allow_blank|lower }}	
     					{% if component.label %} ,fieldLabel: '{{ component.label }}' {% endif %}
     					{% if component.name %} ,name: '{{ component.name }}' {% endif %}
     					{% if component.value %} ,value: '{{ component.value }}' {% endif %}

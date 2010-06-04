@@ -35,6 +35,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.autocomplete_url = None
         self.value_field = 'id'     # это взято из магического метода configure_edit_field из mis.users.forms 
         self.query_param = 'filter' # и это тоже взято оттуда же
+        self.label_width = None     # Ширина надписи выбора
         
         self.select_button = ExtButton(handler='onSelect', icon_cls='select', width=30, disabled=True)
         self.clear_button  = ExtButton(handler='onClearField', icon_cls='clear', width=30, hidden=True) 
