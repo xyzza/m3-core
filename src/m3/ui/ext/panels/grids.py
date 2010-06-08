@@ -74,6 +74,8 @@ class ExtObjectGrid(ExtGrid):
         self.paging_bar = containers.ExtPagingBar()
         self.bottom_bar = self.paging_bar
         
+        self.dblclick_handler = 'onEditRecord'
+        
         self.init_component()
         
     def render(self):
@@ -87,7 +89,7 @@ class ExtObjectGrid(ExtGrid):
             
         if self.action_edit:
             self.context_menu_row.items.append(self.context_menu_row.menuitem_edit)
-            self.handler_dblclick = 'onEditRecord'
+            self.handler_dblclick = self.dblclick_handler
             
         if self.action_delete:
             self.context_menu_row.items.append(self.context_menu_row.menuitem_delete)
