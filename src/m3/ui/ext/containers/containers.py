@@ -20,7 +20,6 @@ class ExtContainer(BaseExtContainer):
     def items(self):
         return self._items
     
-    
 class ExtToolBar(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtToolBar, self).__init__(*args, **kwargs)
@@ -66,7 +65,16 @@ class ExtStaticToolBarItem(ExtUIComponent):
         self.init_component(*args, **kwargs)
     def render(self):
         return self.static_value
+
 #===============================================================================
+
+class ExtTextToolBarItem(ExtUIComponent):
+    def __init__(self, static_value = '', *args, **kwargs):
+        super(ExtTextToolBarItem, self).__init__(*args, **kwargs)
+        self.text = None
+        self.init_component(*args, **kwargs)
+    def render(self):
+        return "{xtype: 'tbtext', text: '%s'}" % self.text
 
 class ExtToolbar(ExtToolBar):
     '''

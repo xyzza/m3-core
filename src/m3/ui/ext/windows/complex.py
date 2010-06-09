@@ -69,6 +69,8 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__url_drag_tree = None
         
         self.__column_name_on_select = None
+        self.maximizable = True
+        self.minimizable = True
         self.init_component(*args, **kwargs)
         
     @property

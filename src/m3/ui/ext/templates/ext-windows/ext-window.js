@@ -28,6 +28,7 @@
 	    ,items:[{{ component.t_render_items|safe }}]  
 	    {% if component.buttons %},{{ component.t_render_buttons|safe }}{% endif %}	
 	    {% if not component.resizable %} ,resizable: false {% endif %}
+		{% if component.parent_window_id %} ,parentWindowID: '{{ component.parent_window_id }}' {% endif %}
 	    {% block window_extenders %}{# здесь помещяется код, расширяющий описание экземпляра окна #}{% endblock %}
 	});
 	{% block code_extenders %}{# здесь помещяется код, расширяющий функциональность окна #}{% endblock %}

@@ -20,13 +20,13 @@ var ajax = Ext.Ajax;
 	 *  Создание нового значения в справочнике по форме ExtDictionary
 	 */
 	function newValueGrid() {
-		var params;
+		var params = Ext.applyIf({},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		{% if component.tree %}
 			var tree = Ext.getCmp('{{ component.tree.client_id}}');
 			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
 				return;
 			};
-			params = { 'id': tree.getSelectionModel().getSelectedNode().id };
+			params = Ext.applyIf({ 'id': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		{%endif%}
 			
 		ajax.request({
@@ -50,9 +50,7 @@ var ajax = Ext.Ajax;
 		
 		ajax.request({
 			url: "{{ component.url_edit_grid }}"
-			,params: {
-				'id': grid.getSelectionModel().getSelected().id
-			}
+			,params: Ext.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,success: renderWindowGrid
 			,failure: function(response, opts){
 				uiAjaxFailMessage();
@@ -169,6 +167,7 @@ var ajax = Ext.Ajax;
 		ajax.request({
 			url: "{{ component.url_new_tree }}"
 			,success: renderWindowTree
+			,params: Ext.applyIf({},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,failure: function(response, opts){
 				uiAjaxFailMessage();
 			}
@@ -187,9 +186,7 @@ var ajax = Ext.Ajax;
 		ajax.request({
 			url: "{{ component.url_new_tree }}"
 			,success: renderWindowTree
-			,params: {
-				'id': tree.getSelectionModel().getSelectedNode().id
-			}
+			,params: Ext.applyIf({ 'id': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,failure: function(response, opts){
 			   Ext.Msg.alert('','failed');
 			}
@@ -207,9 +204,7 @@ var ajax = Ext.Ajax;
 		
 		ajax.request({
 			url: "{{ component.url_edit_tree }}"
-			,params: {
-				'id': tree.getSelectionModel().getSelectedNode().id
-			}
+			,params: Ext.applyIf({ 'id': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,success: renderWindowTree
 			,failure: function(response, opts){
 			   Ext.Msg.alert('','failed');
@@ -235,9 +230,7 @@ var ajax = Ext.Ajax;
 		    	if (btn == 'yes') {
 	    			ajax.request({
 						url: "{{ component.url_delete_tree }}"
-						,params: {
-							'id': tree.getSelectionModel().getSelectedNode().id
-						}
+						,params: Ext.applyIf({ 'id': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 						,success: function(response, opts) {
 							// Удаляем из стора только если пришел success=true
 							console.log(uiShowErrorMessage(response));

@@ -6,6 +6,7 @@ Created on 25.02.2010
 '''
 
 from m3.ui.ext.base import ExtUIComponent
+from m3.ui.actions import ActionContext
 from m3.ui.ext.renderers import ExtWindowRenderer
 from m3.ui.ext import render_template
 
@@ -41,6 +42,7 @@ class BaseExtWindow(ExtUIComponent):
         self.buttom_bar = None
         self.footer_bar = None
         self.resizable = True
+        self.parent_window_id = ''
         
     @property
     def buttons(self):
@@ -67,14 +69,21 @@ class BaseExtWindow(ExtUIComponent):
     
     def pre_render(self):
         super(BaseExtWindow, self).pre_render()
+        if hasattr(self.action_context,'m3_window_id'):
+            self.parent_window_id = self.action_context.m3_window_id
         children = [] 
         children.extend(self.items)
         children.extend(self.buttons)
         children.append(self.top_bar)
         children.append(self.footer_bar)
         for child in children:
-            if child:
+            if child:                
                 child.action_context = self.action_context
+                if child.action_context:
+                    child.action_context.m3_window_id = self.client_id
+                else:
+                    child.action_context = ActionContext()
+                    child.action_context.m3_window_id = self.client_id
     
     def render_globals(self):
         if self.template_globals:
