@@ -133,6 +133,7 @@
     		clear_btn.setVisible(true);	
     		//sender.setWidth({{ component.width }} - 25);
     	};
+    	combo.fireEvent('select');
     };
     
     {% if self.value %}
