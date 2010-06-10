@@ -52,6 +52,8 @@
     	]
     });
     
+	var dict_combo = Ext.getCmp('{{ component.client_id }}');
+	
     /**
      * Очищает значение контрола
      */
@@ -76,6 +78,7 @@
             combo.fireEvent('change',combo,'');
     	{% endif%}
     };
+    dict_combo.onClearField = onClearField;
     
     var ajax = Ext.Ajax;
     
@@ -95,11 +98,14 @@
     	combo.setValue(id);
     	onChange(combo, id);
     };
-    
+    dict_combo.addRecordToStore = addRecordToStore;
+	
     /**
      * Реакция на нажатие кнопки выбора из справочника
      */
     function onSelect(){
+		dict_combo.fireEvent('dict_beforeSelect');
+		
         ajax.request({
             url: '{{ component.url }}'
 			,params: Ext.applyIf({},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
@@ -107,15 +113,22 @@
                 var win = smart_eval(response.responseText);
                 if (win != undefined){
                     win.on('closed_ok',function(id, displayText){
-                        addRecordToStore(id, displayText);
+						var result = dict_combo.fireEvent('dict_onSelect', id, displayText, dict_combo);
+						if (result){
+							// Действие по умолчанию
+							addRecordToStore(id, displayText);
+						}
                     });
                 };
-            }			
+            }
             ,failure: function(response, opts){
-                Ext.Msg.show({title: '', msg: 'Не удалось выполнить выбор из справочника',buttons: Ext.Msg.OK});
+				uiAjaxFailMessage();
             }
     	});
-    };	
+		
+		dict_combo.fireEvent('dict_afterSelect');
+    };
+    dict_combo.onSelect = onSelect
     
     /**
      * Обработчик на изменение значения
@@ -126,14 +139,7 @@
     function onChange(sender, newValue, oldValue){
     	var clear_btn = Ext.getCmp('{{ component.clear_button.client_id }}');
     	var combo = Ext.getCmp('{{ component.client_id }}');
-    	if (!newValue){
-    		clear_btn.setVisible(false);
-    		//sender.setWidth({{ component.width }});
-    	} else {
-    		clear_btn.setVisible(true);	
-    		//sender.setWidth({{ component.width }} - 25);
-    	};
-    	combo.fireEvent('select');
+		clear_btn.setVisible(newValue);
     };
     
     {% if self.value %}
@@ -143,5 +149,8 @@
     	})()
     {% endif %}
     
+	// События поля выбора из справочника. Префикс dict_ чтобы не было пересечений.
+    dict_combo.addEvents('dict_beforeSelect', 'dict_afterSelect', 'dict_onSelect');
+	
     return container;
 })()
