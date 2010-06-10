@@ -74,7 +74,7 @@ def debug(msg, *args, **kwargs):
     msg = get_session_info(kwargs.get('request', None)) + msg
     log.debug(msg)
 
-def exception(msg, *args, **kwargs):
+def exception(msg='', *args, **kwargs):
     log = logging.getLogger('error_logger')
     msg = get_session_info(kwargs.get('request', None)) + msg
     log.error(msg)
