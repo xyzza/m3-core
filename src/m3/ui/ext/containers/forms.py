@@ -87,7 +87,9 @@ class ExtForm(BaseExtPanel):
             '''
             Конвертирует и присваивает значение value в соответствии типу item.
             '''
-            if isinstance(item, (ExtStringField, ExtNumberField,)):
+            if str(value)[:2]=='##':
+                item.value = unicode(value)
+            elif isinstance(item, (ExtStringField, ExtNumberField,)):
                 item.value = unicode(value)
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
@@ -243,4 +245,8 @@ class ExtTabPanel(BaseExtPanel):
 
     @property
     def tabs(self):
+        return self._items
+
+    @property
+    def items(self):
         return self._items
