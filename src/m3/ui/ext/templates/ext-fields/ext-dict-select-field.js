@@ -128,7 +128,6 @@
 		
 		dict_combo.fireEvent('dict_afterSelect');
     };
-    dict_combo.onSelect = onSelect
     
     /**
      * Обработчик на изменение значения
