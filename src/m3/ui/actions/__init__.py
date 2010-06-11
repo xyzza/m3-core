@@ -282,7 +282,6 @@ class ActionContext(object):
         '''
         result = ''
         for k,v in self.__dict__.items():
-            print k,v
             if isinstance(v, int):
                 result += '%s: %s,' % (k,v)
             elif isinstance(v, datetime.datetime):
@@ -297,7 +296,6 @@ class ActionContext(object):
                     pass
         if result:
             result = result[:-1]
-        print '!!!', result
         return '{' + result + '}'
    
     
