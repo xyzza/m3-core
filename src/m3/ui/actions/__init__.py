@@ -12,6 +12,7 @@ from django import http
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
 from m3.ui.ext.base import BaseExtComponent
+import datetime
 
 #===============================================================================
 # Внутренняя таблица урлов
@@ -246,8 +247,14 @@ class ActionContext(object):
         for key in request.REQUEST:
             value = request.REQUEST[key]
             if params.has_key(key):
-                if params[key][0] == int:
+                arg_type = params[key][0]
+                if arg_type == int:
                     value = int(value)
+                elif arg_type == datetime.datetime:
+                    value = datetime.datetime.strptime(value, '%d.%m.%Y')
+                elif arg_type == datetime.time:
+                    d = datetime.datetime.strptime(value, '%H:%M')
+                    value = datetime.time(d.hour, d.minute, 0)
                 params[key][1] = True
             setattr(self, key, value)
         
@@ -275,8 +282,13 @@ class ActionContext(object):
         '''
         result = ''
         for k,v in self.__dict__.items():
-            if isinstance(v,int):
+            print k,v
+            if isinstance(v, int):
                 result += '%s: %s,' % (k,v)
+            elif isinstance(v, datetime.datetime):
+                result += '%s: "%s",' % (k, v.strftime('%d.%m.%Y'))
+            elif isinstance(v, datetime.time):
+                result += '%s: "%s",' % (k, v.strftime('%H:%M'))
             else:
                 try:
                     result += '%s: "%s",' % (k,str(v))
@@ -285,6 +297,7 @@ class ActionContext(object):
                     pass
         if result:
             result = result[:-1]
+        print '!!!', result
         return '{' + result + '}'
    
     
