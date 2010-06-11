@@ -12,6 +12,7 @@
     	{% if component.total_property %} ,totalProperty: '{{ component.total_property }}' {% endif %}
     	{% if component.auto_load %} ,autoLoad: true {% endif %}
     	,fields: [{{ component.t_render_fields|safe }}]
+		{% if component.writer %} ,writer: {{ component.writer.render }} {% endif %}
     });
     return result;
 })()

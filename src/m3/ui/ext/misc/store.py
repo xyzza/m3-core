@@ -39,14 +39,11 @@ class ExtJsonStore(BaseExtStore):
         super(ExtJsonStore, self).__init__(*args, **kwargs)
         self.template = 'ext-misc/ext-json-store.js'
         self.__columns = [] # Для заполнения полей в шаблоне
-        self.url = ''
         self.__start = 0
         self.__limit = -1
         self.total_property = None
         self.root = None
-        self.auto_load = False
         self.id_property = 'id'
-        self.__base_params = {}
         self.init_component(*args, **kwargs)
         
     def render(self, columns):
@@ -65,7 +62,7 @@ class ExtJsonStore(BaseExtStore):
     
     def _set_start(self, s):
         self.__start = s
-        self.__base_params['start'] = self.__start
+        self._base_params['start'] = self.__start
     
     start = property(_get_start, _set_start)
     
@@ -74,14 +71,32 @@ class ExtJsonStore(BaseExtStore):
     
     def _set_limit(self, l):
         self.__limit = l
-        self.__base_params['limit'] = self.__limit
+        self._base_params['limit'] = self.__limit
     
     limit = property(_get_limit, _set_limit)
 
-    def _set_base_params(self, params):
-        self.__base_params.update(params)
-        
-    def _get_base_params(self):
-        return self.__base_params
 
-    base_params = property(_get_base_params, _set_base_params)
+class ExtJsonWriter(BaseExtStore):
+    '''
+    Предназначен для отправки и преобразования новых и измененных записей Store на сервер
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtJsonWriter, self).__init__(*args, **kwargs)
+        self.encode = True
+        self.encode_delete = False
+        self.write_all_fields = False
+        self.init_component(*args, **kwargs)
+    
+    def render(self):
+        result = '''
+new Ext.data.JsonWriter({
+    %(writeAllFields)s
+    %(encode)s
+    %(encodeDelete)s
+})        
+        ''' % {'writeAllFields': 'writeAllFields: true' if self.write_all_fields else '',
+               'encode': 'encode: false' if not self.encode else '',
+               'encodeDelete': 'encodeDelete: true' if self.encode_delete else ''}
+        
+        return result
+        
