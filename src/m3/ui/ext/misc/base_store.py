@@ -12,6 +12,7 @@ class BaseExtStore(ExtUIComponent):
         super(BaseExtStore, self).__init__(*args, **kwargs)
         self._base_params = {}
         self.auto_load = False
+        self.auto_save = True
         self.url = ''
         self.writer = None
         

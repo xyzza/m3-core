@@ -13,6 +13,7 @@
     	{% if component.auto_load %} ,autoLoad: true {% endif %}
     	,fields: [{{ component.t_render_fields|safe }}]
 		{% if component.writer %} ,writer: {{ component.writer.render }} {% endif %}
+		{% if not component.auto_save %} ,autoSave: false {% endif %}
     });
     return result;
 })()
