@@ -13,4 +13,5 @@
 	{%if component.text_true %} ,trueText: '{{ component.text_true }}' {%endif%}
 	{%if component.text_undefined %} ,undefinedText: '{{ component.text_undefined }}' {%endif%}
 	{%if component.hidden %} ,hidden: true {%endif%}
+	{%if component.column_renderer %} ,renderer: {{ component.column_renderer }}{%endif%}
 }

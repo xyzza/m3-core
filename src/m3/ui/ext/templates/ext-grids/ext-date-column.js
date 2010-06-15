@@ -11,4 +11,5 @@
 	
 	{% if component.format %}, format: '{{ component.format|safe }}' {%endif%}
 	{%if component.hidden %} ,hidden: true {%endif%}
+	{%if component.column_renderer %} ,renderer: {{ component.column_renderer }}{%endif%}
 }
