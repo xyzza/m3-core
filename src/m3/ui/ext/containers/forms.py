@@ -83,19 +83,23 @@ class ExtForm(BaseExtPanel):
                     attrs.update(_parse_obj(value, pre_prefix+str(key)+'.'))
             return attrs
         
+        def isSecretToken(value):
+            ''' 
+            Возвращает истину если значение поля содержит секретный ключ с персональной информацией.
+            Он не должен биндится, т.к. предназначен для обработки в personal.middleware 
+            '''
+            return unicode(value)[:2] == u'##'
+        
         def _assign_value(value, item):
             '''
             Конвертирует и присваивает значение value в соответствии типу item.
             '''
-            if str(value)[:2]=='##':
-                item.value = unicode(value)
-            elif isinstance(item, (ExtStringField, ExtNumberField,)):
+            if isinstance(item, (ExtStringField, ExtNumberField,)):
                 item.value = unicode(value)
             elif isinstance(item, ExtDateField):
-                #TODO уточнить формат дат
-                item.value = value.strftime('%d.%m.%Y')
+                item.value = value.strftime('%d.%m.%Y') if not isSecretToken(value) else unicode(value)     
             elif isinstance(item, ExtTimeField):
-                item.value = value.strftime('%H:%M')
+                item.value = value.strftime('%H:%M') if not isSecretToken(value) else unicode(value)
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
             elif isinstance(item, ExtDictSelectField):
@@ -170,12 +174,12 @@ class ExtForm(BaseExtPanel):
                 val = unicode(val)
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
-                if val.strip():
+                if val and val.strip():
                     val = datetime.datetime.strptime(val, '%d.%m.%Y')
                 else:
                     val = None
             elif isinstance(item, ExtTimeField):
-                if val.strip():
+                if val and val.strip():
                     d = datetime.datetime.strptime(val, '%H:%M')
                     val = datetime.time(d.hour, d.minute, 0)
                 else:

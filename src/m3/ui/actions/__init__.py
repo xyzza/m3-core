@@ -287,14 +287,14 @@ class ActionContext(object):
         result = ''
         for k,v in self.__dict__.items():
             if isinstance(v, int):
-                result += '%s: %s,' % (k,v)
+                result += '"%s": %s,' % (k,v)
             elif isinstance(v, datetime.datetime):
-                result += '%s: "%s",' % (k, v.strftime('%d.%m.%Y'))
+                result += '"%s": "%s",' % (k, v.strftime('%d.%m.%Y'))
             elif isinstance(v, datetime.time):
-                result += '%s: "%s",' % (k, v.strftime('%H:%M'))
+                result += '"%s": "%s",' % (k, v.strftime('%H:%M'))
             else:
                 try:
-                    result += '%s: "%s",' % (k,str(v))
+                    result += '"%s": "%s",' % (k,str(v))
                 except:
                     # TODO: обрабатывать все типы параметров
                     pass
