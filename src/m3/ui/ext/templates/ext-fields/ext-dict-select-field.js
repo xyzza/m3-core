@@ -69,6 +69,7 @@
                     var combo = Ext.getCmp('{{ component.client_id }}');
                     combo.clearValue(); 
                     combo.fireEvent('change','','');
+                    combo.fireEvent('dict_onClear',combo);
                 };
             }
         });
@@ -76,6 +77,7 @@
             var combo = Ext.getCmp('{{ component.client_id }}');
             combo.clearValue(); 
             combo.fireEvent('change',combo,'');
+            combo.fireEvent('dict_onClear',combo);
     	{% endif%}
     };
     dict_combo.onClearField = onClearField;
@@ -149,7 +151,7 @@
     {% endif %}
     
 	// События поля выбора из справочника. Префикс dict_ чтобы не было пересечений.
-    dict_combo.addEvents('dict_beforeSelect', 'dict_afterSelect', 'dict_onSelect');
+    dict_combo.addEvents('dict_beforeSelect', 'dict_afterSelect', 'dict_onSelect', 'dict_onClear');
 	
     return container;
 })()

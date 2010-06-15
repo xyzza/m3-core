@@ -3,6 +3,8 @@ import threading
 import re
 import json
 import inspect
+import time
+import datetime
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -12,7 +14,6 @@ from django import http
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
 from m3.ui.ext.base import BaseExtComponent
-import datetime
 
 #===============================================================================
 # Внутренняя таблица урлов
@@ -252,6 +253,9 @@ class ActionContext(object):
                     value = int(value)
                 elif arg_type == datetime.datetime:
                     value = datetime.datetime.strptime(value, '%d.%m.%Y')
+                elif arg_type == datetime.date:
+                    time_struct = time.strptime(value, '%d.%m.%Y')
+                    value = datetime.date(*(time_struct)[0:3])
                 elif arg_type == datetime.time:
                     d = datetime.datetime.strptime(value, '%H:%M')
                     value = datetime.time(d.hour, d.minute, 0)
