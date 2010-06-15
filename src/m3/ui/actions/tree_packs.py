@@ -2,12 +2,16 @@
 '''
 Паки для иерархических справочников
 '''
+
+from django.db import transaction
+
 from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
 from m3.ui.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.actions.packs import ListDeleteRowAction
-from django.db import transaction
+from m3.ui.ext.containers import ExtPagingbar
+
 
 class TreeGetNodesAction(Action):
     '''
@@ -178,70 +182,45 @@ class ListDragAndDropAction(Action):
         ids = utils.extract_int_list(request, 'id')
         dest_id = utils.extract_int(request, 'dest_id')
         return self.parent.drag_item(ids, dest_id)
-
-class SelectWindowAction(Action):
-    '''
-    Экшен создает и настраивает окно справочника в режиме выбора
-    '''
-    url = '/get_select_window$'
-    def run(self, request, context):
-        # Создаем окно выбора
-        base = self.parent
-        win = self.parent.list_window(title = base.title, height = base.height, width = base.width)
-        if base.list_model:
-            win.init_grid_components()
-        win.init_tree_components()
-        win.mode = 1
-        
-        # Добавляем отображаемые колонки
-        if base.list_model:
-            for field, name in base.list_columns:
-                win.grid.add_column(header = name, data_index = field, width = 10)
-        for field, name in base.tree_columns:
-            win.tree.add_column(header = name, data_index = field, width = 10)
-            
-        # Устанавливаем источники данных
-        win.tree.url = base.nodes_action.get_absolute_url()
-        if base.list_model: 
-            grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
-            grid_store.total_property = 'total'
-            grid_store.root = 'rows'
-            win.grid.set_store(grid_store)
-        
-        #win.column_name_on_select = 'fname'
-        #win.list_view.add_column(header=u'Имя', data_index = 'fname')
-        #win.list_view.add_column(header=u'Фамилия', data_index = 'lname')
-        #win.list_view.add_column(header=u'Адрес', data_index = 'adress')
-        # Заглушка, иначе ругается что нет стора
-        win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
-        
-        win.column_name_on_select = 'name'
-        win = self.parent.get_select_window(win)
-        return ExtUIScriptResult(win)
-        
+    
 class ListWindowAction(Action):
     '''
     Экшен создает и настраивает окно справочника в режиме редактирования записей
     '''
     url = '/get_list_window$'
     
-    def create_window(self, request, context):
+    def create_window(self, request, context, mode):
         ''' Создаем и настраиваем окно ''' 
         base = self.parent
-        win = self.parent.list_window(title = base.title, mode = 0, height = base.height, width = base.width)
+        win = self.parent.list_window(title=base.title, mode=mode, height=base.height, width=base.width)
         if base.list_model:
             win.init_grid_components()
+            if base.list_paging:
+                win.grid.bottom_bar = ExtPagingbar(page_size = 25)
         win.init_tree_components()
+        win.tree.width = base.tree_width
         win.tree.root_text = base.title
         return win
+    
+    def create_columns(self, control, columns):
+        ''' Добавляем отображаемые колонки. См. описание в базовом классе! '''
+        for column in columns:
+            if isinstance(column, tuple):
+                column_params = { 'data_index': column[0], 'header': column[1]}
+                if len(column)>2:
+                    column_params['width'] = column[2]
+            elif isinstance(column, dict):
+                 column_params = column
+            else:
+                raise Exception('Incorrect parameter column.')
+            control.add_column(**column_params)
     
     def configure_list(self, win, request, context):
         ''' Настраивает грид (список элементов) '''
         base = self.parent
-        # Добавляем отображаемые колонки
         if base.list_model:
-            for field, name in base.list_columns:
-                win.grid.add_column(header = name, data_index = field, width = 10)
+            self.create_columns(win.grid, base.list_columns)
+                
         # Устанавливаем источники данных
         if base.list_model: 
             grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
@@ -278,19 +257,54 @@ class ListWindowAction(Action):
         pass
     
     def run(self, request, context):
-        win = self.create_window(request, context)
+        win = self.create_window(request, context, 0)
         self.configure_tree(win, request, context)
         self.configure_list(win, request, context)
         self.configure_other(win, request, context)        
         win = self.parent.get_list_window(win)
         return ExtUIScriptResult(win)
 
+class SelectWindowAction(ListWindowAction):
+    '''
+    Экшен создает и настраивает окно справочника в режиме выбора
+    '''
+    url = '/get_select_window$'
+    def run(self, request, context):
+        # Создаем окно выбора
+        win = self.create_window(request, context, 1)
+        
+        # Добавляем отображаемые колонки
+        base = self.parent
+        base.list_readonly = True
+        self.configure_list(win, request, context)
+        base.tree_readonly = True
+        self.configure_tree(win, request, context)
+        
+        # Ожидается в далеком будущем ;)
+        #win.column_name_on_select = 'fname'
+        #win.list_view.add_column(header=u'Имя', data_index = 'fname')
+        #win.list_view.add_column(header=u'Фамилия', data_index = 'lname')
+        #win.list_view.add_column(header=u'Адрес', data_index = 'adress')
+        # Заглушка, иначе ругается что нет стора
+        win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
+        
+        win.column_name_on_select = 'name'
+        win = self.parent.get_select_window(win)
+        return ExtUIScriptResult(win)
+
 class BaseTreeDictionaryActions(ActionPack):
     '''
     Пакет с действиями, специфичными для работы с иерархическими справочниками
     '''
-    # Список колонок состоящий из кортежей (имя json поля, имя колонки в окне)
+    # Список колонок состоящий из:
+    # 1. вариант (классический)
+    #    list_actions = [('code', u'Код'), ('name', u'Наименование')]
+    # 2. вариант (классический расширенный) - третьим элементом в кортеже идет ширина
+    #    list_actions = [('code', u'Код', 100), ('name', u'Наименование')]
+    # 3. вариант (универсальный)
+    #    list_actions = [{'name': 'code','header':u'Код', 'width': 100}, (...)]
     list_columns = []
+    
     # Заголовок окна справочника
     title = ''
     # Окно редактирования узла дерева
@@ -302,6 +316,7 @@ class BaseTreeDictionaryActions(ActionPack):
     # Ширина и высота окна
     width = 600
     height = 400
+    tree_width = 200
     
     def __init__(self):
         self.actions = []
@@ -418,6 +433,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     list_parent_field = 'parent' # Имя поля ссылающегося на группу
     list_readonly = False # Если истина, то адреса экшенов гриду не назначаются
     list_order_field = ''
+    list_paging = True
     
     def get_nodes(self, parent_id, filter):
         if filter:

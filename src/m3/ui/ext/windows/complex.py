@@ -352,6 +352,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.tree.region = 'center'
             self.tree.top_bar.add_fill()
             self.tree.top_bar.items.append(self.search_text_tree)
+
         elif self.tree:
             self.tree.region = 'west'
             menu = ExtContextMenu(style = dict(overflow='visible')) # overflow='visible' -- для того, чтобы комбобокс отображался
@@ -359,6 +360,10 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.tree.top_bar.add_fill()
             self.tree.top_bar.add_menu(icon_cls="search", menu=menu)
             
+        # В режиме выбора даблклик работает на выбор
+        if self.grid and self.mode == self.SELECT_MODE:
+            self.grid.handler_dblclick = 'selectValue'
+
         return super(ExtDictionaryWindow, self).render()
     
     @property

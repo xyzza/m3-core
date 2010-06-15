@@ -6,64 +6,74 @@ from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, 
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.actions import utils
+from m3.ui.ext.containers import ExtPagingbar
 
 class DictListWindowAction(Action):
     '''
     Действие, которое возвращает окно со списком элементов справочника.
     '''
     url = '/list-window$'
-    def run(self, request, context):
+    
+    def create_window(self, request, context, mode):
+        ''' Создаем и настраиваем окно '''
         base = self.parent
-        win = base.list_form(mode = 0, title = base.title, height = base.height, width = base.width)
+        win = base.list_form(mode=mode, title = base.title, height = base.height, width = base.width)
         win.init_grid_components()
-        
-        # Добавляем отображаемые колонки
-        for field, name in base.list_columns:
-            win.grid.add_column(header = name, data_index = field)
-        
+        if base.list_paging:
+            win.grid.bottom_bar = ExtPagingbar(page_size = 25)
+        return win
+            
+    def create_columns(self, control, columns):
+        ''' Добавляем отображаемые колонки. См. описание в базовом классе! '''
+        for column in columns:
+            if isinstance(column, tuple):
+                column_params = { 'data_index': column[0], 'header': column[1]}
+                if len(column)>2:
+                    column_params['width'] = column[2]
+            elif isinstance(column, dict):
+                 column_params = column
+            else:
+                raise Exception('Incorrect parameter column.')
+            control.add_column(**column_params)
+    
+    def configure_list(self, win):
+        base = self.parent
         # Устанавливаем источники данных
-        grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
+        grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True)
         grid_store.total_property = 'total'
         grid_store.root = 'rows'
         win.grid.set_store(grid_store)
         
-        # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося 
-        win.url_new_grid    = base.edit_window_action.get_absolute_url()
-        win.url_edit_grid   = base.edit_window_action.get_absolute_url()
-        win.url_delete_grid = base.delete_action.get_absolute_url()
+        if not base.list_readonly:
+            # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося
+            win.url_new_grid    = base.edit_window_action.get_absolute_url()
+            win.url_edit_grid   = base.edit_window_action.get_absolute_url()
+            win.url_delete_grid = base.delete_action.get_absolute_url()
+    
+    def run(self, request, context):
+        win = self.create_window(request, context, mode=0)
+        self.create_columns(win.grid, self.parent.list_columns)
+        self.configure_list(win)
         
         return ExtUIScriptResult(self.parent.get_list_window(win))
     
-class DictSelectWindowAction(Action):
+class DictSelectWindowAction(DictListWindowAction):
     '''
     Действие, возвращающее окно с формой выбора из справочника
     '''
     url = '/select-window$'
+    
     def run(self, request, context):
-        # Создаем окно выбора
         base = self.parent
-        win = base.select_form(title = base.title, height = base.height, width = base.width)
-        win.init_grid_components()
-        win.mode = 1
-        win.width=500
-        win.height=400
-        
-        # Добавляем отображаемые колонки
-        for field, name in base.list_columns:
-            win.grid.add_column(header = name, data_index = field)
-            
-        # Устанавливаем источник данных
-        grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load = True)
-        grid_store.total_property = 'total'
-        grid_store.root = 'rows'
-        win.grid.set_store(grid_store)
+        win = self.create_window(request, context, mode=1)
+        self.create_columns(win.grid, self.parent.list_columns)
+        self.configure_list(win)
         
         list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
         win.list_view.set_store(list_store)
         
         win.column_name_on_select = 'name'
         return ExtUIScriptResult(self.parent.get_select_window(win))
-
 
 class DictEditWindowAction(Action):
     '''
@@ -148,6 +158,9 @@ class BaseDictionaryActions(ActionPack):
     # Ширина и высота окна
     width = 500
     height = 400
+    
+    list_paging = True
+    list_readonly = False
     
     def __init__(self):
         # В отличие от обычных паков в этом экшены создаются самостоятельно, а не контроллером
@@ -237,10 +250,10 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         '''
         Возвращает данные для грида справочника
         '''
-        query = utils.apply_search_filter(self.model.objects, filter, self.filter_fields)
+        query = utils.apply_search_filter(self.model.objects.all(), filter, self.filter_fields)
         total = query.count()
         if limit > 0:
-            query = query[offset:offset + limit]
+            query = query[offset: offset + limit]
         result = {'rows': list(query.all()), 'total': total}
         return result
     
