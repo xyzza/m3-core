@@ -169,7 +169,10 @@ class ExtForm(BaseExtPanel):
             '''Берет значение item.value, и конвертирует его в соответствии с типом item'a'''
             val = item.value
             if isinstance(item, ExtNumberField):
-                val = int(val)
+                if val:
+                    val = int(val)
+                else:
+                    val = None
             elif isinstance(item, ExtStringField):
                 val = unicode(val)
             elif isinstance(item, ExtDateField):
