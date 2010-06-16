@@ -4,11 +4,21 @@ import copy
 import datetime
 import json
 import decimal
+import string
 
 class M3JSONEncoder(json.JSONEncoder):
     def default(self, obj):
         cleaned_dict = {}
-        dict = obj.__dict__
+        dict = copy.copy(obj.__dict__)
+        # прошерстим методы и свойства, найдем те, которые могут передаваться на клиента
+        for attr in dir(obj):
+            if not attr.startswith('_'):
+                try:
+                    if hasattr(getattr(obj, attr), 'json_encode'):
+                        if getattr(obj, attr).json_encode:
+                            dict[attr] = getattr(obj, attr)()
+                except:
+                    pass
         for attribute in dict.keys():
             if len(attribute) > 3 and attribute[len(attribute)-3:len(attribute)] == '_id':
                 try:

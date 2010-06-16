@@ -48,7 +48,7 @@ class ExtJsonStore(BaseExtStore):
         
     def render(self, columns):
         self.__columns = columns
-        self.__columns.insert(0, 'id') # Для того, чтобы submit работал корректно
+        self.__columns.insert(0, self.id_property)
         return super(ExtJsonStore, self).render()
         
     def t_render_fields(self):

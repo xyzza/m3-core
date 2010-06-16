@@ -99,3 +99,7 @@ class BaseExtTriggerField(BaseExtField):
     @handler_select.setter
     def handler_select(self, function):
         self._listeners['select'] = function
+    
+    def pre_render(self):
+        self.__store.action_context = self.action_context
+        super(BaseExtTriggerField, self).pre_render()
