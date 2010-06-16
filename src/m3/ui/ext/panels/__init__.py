@@ -2,4 +2,4 @@
 
 from m3.ui.ext.containers import ExtPanel, ExtForm
 
-from grids import ExtGrid, ExtGridColumn, ExtGridDateColumn, ExtGridNumberColumn, ExtObjectGrid
+from grids import ExtGrid, ExtGridColumn, ExtGridDateColumn, ExtGridNumberColumn, ExtObjectGrid, ExtGridCheckBoxSelModel
