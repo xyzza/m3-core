@@ -13,6 +13,7 @@ from django import http
 
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
+from m3.helpers import ui as ui_helpers
 from m3.ui.ext.base import BaseExtComponent
 
 #===============================================================================
@@ -75,6 +76,19 @@ class JsonResult(ActionResult):
     def get_http_response(self):
         return http.HttpResponse(self.data, mimetype='application/json')
 
+class ExtGridDataQueryResult(ActionResult):
+    '''
+    Результат выполнения операции, который выдает данные в формате, пригодном для 
+    отображения в гриде
+    '''
+    def __init__(self, data=None, start = -1, limit = -1):
+        super(ExtGridDataQueryResult, self).__init__(data)
+        self.start = start
+        self.limit = limit
+        
+    def get_http_response(self):
+        return http.HttpResponse(ui_helpers.paginated_json_data(self.data, self.start, self.limit))
+
 class HttpReadyResult(ActionResult):
     '''
     Результат выполнения операции в виде готового HttpResponse. 
@@ -82,6 +96,13 @@ class HttpReadyResult(ActionResult):
     '''
     def get_http_response(self):
         return self.data
+    
+class TextResult(ActionResult):
+    '''
+    Результат, данные которого напрямую передаются в HttpResponse
+    '''
+    def get_http_response(self):
+        return http.HttpResponse(self.data)
 
 #===============================================================================
 # Результаты выполнения операции с заданным контекстом 
