@@ -36,6 +36,8 @@ function(){
     });
 }
 '''
+    # Эти функции смотри в static/js/common.js
+    failure_handler = failure_handler or 'uiAjaxFailMessage'
     return template % {'form_id': form.client_id,
                        'url': "url:'%s'" % form.url if form.url else '',
                        'success_handler': 'success:' + success_handler + ',' if success_handler else '',

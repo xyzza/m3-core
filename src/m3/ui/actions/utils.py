@@ -5,6 +5,33 @@
 from django.db.models.query_utils import Q
 from django.db import models, connection, transaction, IntegrityError
 
+def apply_sort_order(query, columns, sort_order):
+    '''
+    Закладывает на запрос порядок сортировки. Сначала если в описании колонок columns есть code, 
+    то сортируем по нему, иначе если есть по name. Если задан sort_order, то он главнее всех.
+    '''
+    if isinstance(sort_order, list):
+        query = query.order_by(*sort_order)
+    else:
+        order = None
+        for column in columns:
+            if isinstance(column, tuple):
+                if column[0] == 'name':
+                    order = 'name'
+                elif column[0] == 'code':
+                    order = 'code'
+                    break
+            elif isinstance(column, dict):
+                name = dict.get('data_index')
+                if name == 'name':
+                    order = 'name'
+                elif name == 'code':
+                    order = 'code'
+                    break 
+                
+        query = query.order_by(order) if order else query.all()
+    return query
+
 def create_search_filter(filter_text, fields):
     '''
     Фильтрация производится по полям списку полей fields и введеному пользователем тексту filter_text.

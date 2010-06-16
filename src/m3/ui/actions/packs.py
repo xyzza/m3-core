@@ -244,13 +244,21 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     '''
     # Настройки вида справочника (задаются конечным разработчиком)
     model = None
+    # Список полей модели по которым будет идти поиск
     filter_fields = []
-        
+    
+    # Порядок сортировки элементов списка. Работает следующим образом:
+    # 1. Если в list_columns модели списка есть поле code, то устанавливается сортировка по возрастанию этого поля;
+    # 2. Если в list_columns модели списка нет поля code, но есть поле name, то устанавливается сортировка по возрастанию поля name;
+    # Пример list_sort_order = ['code', '-name']
+    list_sort_order = None
+    
     def get_rows(self, offset, limit, filter):
         '''
         Возвращает данные для грида справочника
         '''
-        query = utils.apply_search_filter(self.model.objects.all(), filter, self.filter_fields)
+        query = utils.apply_sort_order(self.model.objects, self.list_columns, self.list_sort_order)
+        query = utils.apply_search_filter(query, filter, self.filter_fields)
         total = query.count()
         if limit > 0:
             query = query[offset: offset + limit]

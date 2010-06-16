@@ -210,7 +210,7 @@ class ListWindowAction(Action):
                 if len(column)>2:
                     column_params['width'] = column[2]
             elif isinstance(column, dict):
-                 column_params = column
+                column_params = column
             else:
                 raise Exception('Incorrect parameter column.')
             control.add_column(**column_params)
@@ -435,13 +435,21 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     list_order_field = ''
     list_paging = True
     
+    # Порядок сортировки элементов списка. Работает следующим образом:
+    # 1. Если в list_columns модели списка есть поле code, то устанавливается сортировка по возрастанию этого поля;
+    # 2. Если в list_columns модели списка нет поля code, но есть поле name, то устанавливается сортировка по возрастанию поля name;
+    # Пример list_sort_order = ['code', '-name']
+    list_sort_order = None
+    tree_sort_order = None
+    
     def get_nodes(self, parent_id, filter):
         if filter:
             filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)
             nodes = utils.fetch_search_tree(self.tree_model, filter_dict)
         else:
             query = self.tree_model.objects.filter(parent = parent_id)
-            nodes = list(query.all())       
+            query = utils.apply_sort_order(query, self.tree_columns, self.tree_sort_order)
+            nodes = list(query)       
             # Если имеем дело с листом, нужно передавать параметр leaf = true
             for node in nodes:
                 if self.tree_model.objects.filter(parent = node.id).count() == 0:
@@ -454,6 +462,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         #TODO: возможно это не надо было делать - раз не туда обратились, значит сами виноваты
         if self.list_model:
             query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
+            query = utils.apply_sort_order(query, self.list_columns, self.list_sort_order)
             query = utils.apply_search_filter(query, filter, self.filter_fields)
             # Для работы пейджинга нужно передавать общее количество записей
             total = query.count()
@@ -556,3 +565,4 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         return OperationResult()
     
 #TODO: Избавиться от копипаста в экшенах.
+#TODO: Написать о себе статью в википедии ;)
