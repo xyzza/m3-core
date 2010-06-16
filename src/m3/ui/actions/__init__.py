@@ -62,7 +62,7 @@ class PreJsonResult(ActionResult):
     def get_http_response(self):
         encoder = M3JSONEncoder()
         result = encoder.encode(self.data)
-        response = http.HttpResponse(result)
+        response = http.HttpResponse(result, mimetype='application/json')
         if self.secret_values:
             response['secret_values'] = True
         return response
@@ -73,7 +73,7 @@ class JsonResult(ActionResult):
     Для данного класса в self.data храниться строка с данными JSON объекта.
     '''
     def get_http_response(self):
-        return http.HttpResponse(self.data)
+        return http.HttpResponse(self.data, mimetype='application/json')
 
 class HttpReadyResult(ActionResult):
     '''
