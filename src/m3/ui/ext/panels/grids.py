@@ -8,6 +8,7 @@ Created on 26.05.2010
 '''
 
 from m3.ui.ext.containers import ExtGrid, ExtGridColumn, ExtGridDateColumn, ExtGridNumberColumn
+from m3.ui.ext.containers.grids import ExtGridCheckBoxSelModel
 from m3.ui.ext import containers
 from m3.ui.ext import controls
 from m3.ui.ext import menus
@@ -61,9 +62,10 @@ class ExtObjectGrid(ExtGrid):
         #=======================================================================
         # Источник данных для грида
         #=======================================================================
-        self.store = misc.ExtJsonStore(auto_load=True, start=0, limit=25, root='rows', id_property='id')
+        self.store = misc.ExtJsonStore(auto_load=True, root='rows', id_property='id')
         self.load_mask = True
         self.row_id_name = 'row_id'
+        self.allow_paging = True
 
         #=======================================================================
         # Контекстное меню и бары грида
@@ -72,7 +74,6 @@ class ExtObjectGrid(ExtGrid):
         self.context_menu_grid = ExtObjectGrid.GridContextMenu()
         self.top_bar = ExtObjectGrid.GridTopBar()
         self.paging_bar = containers.ExtPagingBar()
-        self.bottom_bar = self.paging_bar
         
         self.dblclick_handler = 'onEditRecord'
         
@@ -110,6 +111,11 @@ class ExtObjectGrid(ExtGrid):
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
             self.store.url = self.action_data.absolute_url()
+        
+        if self.allow_paging:
+            self.store.start = 0
+            self.store.limit = 25
+            self.bottom_bar = self.paging_bar
         
         return super(ExtObjectGrid, self).render()
 

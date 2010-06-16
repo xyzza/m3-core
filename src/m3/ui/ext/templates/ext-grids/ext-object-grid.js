@@ -15,11 +15,15 @@ function deleteOkHandler(response, opts){
 }
 
 function refreshStore(){
+	{% if component.allow_paging %}
 	var pagingBar = Ext.getCmp('{{self.paging_bar.client_id}}'); 
 	if(pagingBar != undefined ){
 	    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
         pagingBar.changePage(active_page);
 	}
+	{% else %}
+	Ext.StoreMgr.get('{{self.store.client_id}}').load(); 
+	{% endif %}
 }
 
 function getLoadMask(){
