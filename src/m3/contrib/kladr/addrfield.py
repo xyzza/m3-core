@@ -273,7 +273,7 @@ class KLADRGetAddrAction(Action):
             delim = ', '
         else:
             delim = ','
-        while curr_item != None:
+        while curr_item:
             if addr_type != 0 and curr_item.parent == None:
                 break
             if curr_index == '' and curr_item.zipcode:
