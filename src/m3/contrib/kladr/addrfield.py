@@ -2,7 +2,7 @@
 
 #from m3.ui.ext.containers.forms import ExtPanel
 from m3.ui.ext.containers.container_complex import ExtContainerTable
-from m3.ui.ext.fields.simple import ExtStringField
+from m3.ui.ext.fields.simple import ExtStringField, ExtTextArea
 from m3.ui.ext.fields.base import BaseExtTriggerField
 from m3.ui.ext.misc import ExtJsonStore
 from m3.ui.actions import utils, Action, PreJsonResult, OperationResult
@@ -335,7 +335,6 @@ class ExtAddrComponent(ExtContainerTable):
         self.action_getaddr = KLADRGetAddrAction
         super(ExtAddrComponent, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-addr-field.js'
-        
                 
         if self.level == ExtAddrComponent.PLACE:
             self.rows_count = 1
@@ -351,10 +350,10 @@ class ExtAddrComponent(ExtContainerTable):
             self.height = 75
         if self.addr_visible:
             self.rows_count = self.rows_count+1
-            self.height = self.height+25
+            self.height = self.height+43
         self.set_rows_height(25)
         if self.addr_visible:
-            self.addr = ExtStringField(label = self.addr_label, name = self.addr_field_name, anchor='100%', read_only = True)
+            self.addr = ExtTextArea(label = self.addr_label, name = self.addr_field_name, anchor='100%', read_only = True, height = 40)
         self.place = ExtPlaceField(label = self.place_label, name = self.place_field_name, anchor='100%')
         if self.addr_visible:
             self.place.handler_change = 'getNewAddr'
@@ -376,4 +375,5 @@ class ExtAddrComponent(ExtContainerTable):
             self.set_item(2, 1, self.flat)
         if self.addr_visible:
             self.set_item(self.rows_count-1, 0, self.addr, colspan = 2)
+            self.set_row_height(self.rows_count-1, 43)
         self.init_component(*args, **kwargs)

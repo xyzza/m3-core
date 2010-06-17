@@ -1,18 +1,19 @@
 (function(){
+	{% if component.addr %}
 	function getNewAddr(){
-    	var place = Ext.getCmp('{{ component.place.client_id }}');
+    	var place = Ext.getCmp({% if component.place %}'{{ component.place.client_id }}'{% else %}''{% endif %});
 		if (place != undefined) {
 			place = place.getValue();
 		}
-		var street = Ext.getCmp('{{ component.street.client_id }}');
+		var street = Ext.getCmp({% if component.street %}'{{ component.street.client_id }}'{% else %}''{% endif %});
 		if (street != undefined) {
 			street = street.getValue();
 		}
-		var house = Ext.getCmp('{{ component.house.client_id }}');
+		var house = Ext.getCmp({% if component.house %}'{{ component.house.client_id }}'{% else %}''{% endif %});
 		if (house != undefined) {
 			house = house.getValue();
 		}
-		var flat = Ext.getCmp('{{ component.flat.client_id }}');
+		var flat = Ext.getCmp({% if component.flat %}'{{ component.flat.client_id }}'{% else %}''{% endif %});
 		if (flat != undefined) {
 			flat = flat.getValue();
 		}		
@@ -29,6 +30,7 @@
 			addr.value = addr;
 		}
 	};
+	{% endif %}
 	var container = new Ext.Container({
 		{% include 'base-ext-ui.js'%}
 	
