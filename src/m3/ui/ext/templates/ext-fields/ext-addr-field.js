@@ -38,6 +38,8 @@
 		{% if component.layout_config %} ,layoutConfig: {{ component.t_render_layout_config|safe }} {% endif %}
 		,items: [{{ component.t_render_items|safe }}]
 	});
-	
+	{% if component.addr %}
+	getNewAddr();
+	{% endif %}
 	return container;
 })()
