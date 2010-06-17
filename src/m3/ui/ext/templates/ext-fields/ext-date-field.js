@@ -8,4 +8,15 @@ new Ext.form.DateField({
 	{% if component.read_only %} ,readOnly: true {% endif %}
 	{% if component.format %} ,format: "{{ component.format }}" {% endif %}
 	,allowBlank: {{ component.allow_blank|lower }}
+	
+	{% if component.t_render_listeners %}
+		{# Прописываются имеющиеся обработчики #}
+		,listeners:{
+			{% for k, v in component.t_render_listeners.items %}
+				'{{k}}': {{v}}
+				{% if not forloop.last %},{% endif %}
+			{% endfor%}
+		}
+	{% endif %}
+
 })
