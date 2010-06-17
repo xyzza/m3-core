@@ -42,6 +42,9 @@ class ExtObjectGrid(ExtGrid):
         def __init__(self, *args, **kwargs):
             super(ExtObjectGrid.GridTopBar, self).__init__(*args, **kwargs)
             self.button_new = controls.ExtButton(text = u'Добавить', icon_cls = 'add_item', handler='topBarNew')
+            self.button_edit = controls.ExtButton(text = u'Изменить', icon_cls = 'edit_item', handler='topBarEdit')
+            self.button_delete = controls.ExtButton(text = u'Удалить', icon_cls = 'delete_item', handler='topBarDelete')
+            self.button_refresh = controls.ExtButton(text = u'Обновить', icon_cls = 'refresh_item', handler='topBarRefresh')
             self.init_component()
             
     #===========================================================================
@@ -107,6 +110,15 @@ class ExtObjectGrid(ExtGrid):
         #=======================================================================
         if self.action_new:
             self.top_bar.items.insert(0, self.top_bar.button_new) 
+        
+        if self.action_edit:
+            self.top_bar.items.append(self.top_bar.button_edit)
+        
+        if self.action_delete:
+            self.top_bar.items.append(self.top_bar.button_delete)
+        
+        if self.action_data:
+            self.top_bar.items.append(self.top_bar.button_refresh)
         
         # тонкая настройка self.store
         if not self.store.url and self.action_data:

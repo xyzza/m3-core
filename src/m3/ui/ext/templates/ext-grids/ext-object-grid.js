@@ -43,12 +43,14 @@ function onNewRecord(){
 
 function onEditRecord(){
     var grid = Ext.getCmp('{{component.client_id}}');
-    Ext.Ajax.request({
-       url: '{{component.action_edit.absolute_url}}',
-       params: Ext.applyIf({ {{component.row_id_name}}: grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %}),
-       success: childWindowOpenHandler,
-       failure: function(){}
-    });
+    if (grid.getSelectionModel().hasSelection()) {
+	    Ext.Ajax.request({
+	       url: '{{component.action_edit.absolute_url}}',
+	       params: Ext.applyIf({ {{component.row_id_name}}: grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %}),
+	       success: childWindowOpenHandler,
+	       failure: function(){}
+	    });
+    }
 }
 
 function onDeleteRecord(){
@@ -60,12 +62,14 @@ function onDeleteRecord(){
         fn:function(btn,text,opt){ 
             if (btn == 'yes') {
                 var grid = Ext.getCmp('{{component.client_id}}');
-                Ext.Ajax.request({
-                   url: '{{component.action_delete.absolute_url}}',
-                   params: Ext.applyIf({ {{component.row_id_name}}: grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %}),
-                   success: deleteOkHandler,
-                   failure: function(){}
-                });                
+                if (grid.getSelectionModel().hasSelection()) {
+	                Ext.Ajax.request({
+	                   url: '{{component.action_delete.absolute_url}}',
+	                   params: Ext.applyIf({ {{component.row_id_name}}: grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %}),
+	                   success: deleteOkHandler,
+	                   failure: function(){}
+	                });
+                }
             }
         }
     });
