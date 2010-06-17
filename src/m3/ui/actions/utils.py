@@ -125,12 +125,12 @@ def safe_delete_record(model, id):
     
     return True
 
-def fetch_search_tree(model, filter):
+def fetch_search_tree(model, filter, **kwargs):
     '''
     По заданному фильтру filter и модели model формирует развернутое дерево с результатами поиска.
     '''
     # Сначала тупо получаем все узлы подходящие по фильтру
-    nodes = model.objects.filter(filter).select_related('parent')
+    nodes = model.objects.filter(filter, **kwargs).select_related('parent')
     
     # Из каждого узла создаем полный путь до корня
     paths = []

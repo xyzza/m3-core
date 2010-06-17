@@ -445,7 +445,10 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     def get_nodes(self, parent_id, filter):
         if filter:
             filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)
-            nodes = utils.fetch_search_tree(self.tree_model, filter_dict)
+            if parent_id:
+                nodes = utils.fetch_search_tree(self.tree_model, filter_dict, parent = parent_id)
+            else:
+                nodes = utils.fetch_search_tree(self.tree_model, filter_dict)
         else:
             query = self.tree_model.objects.filter(parent = parent_id)
             query = utils.apply_sort_order(query, self.tree_columns, self.tree_sort_order)
@@ -474,6 +477,23 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             return result
         else:
             return self.get_nodes(parent_id, filter)
+    
+    def get_nodes_like_rows(self, parent_id, filter):
+        '''
+        Возвращаются узлы дерева, предствленные в виде общего списка
+        '''
+        if filter:
+            filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)
+            nodes = self.tree_model.objects.filter(filter_dict).select_related('parent')
+        else:
+            nodes = self.tree_model.objects.all()            
+        if parent_id:
+            #TODO: нужно проверить родителей найденных записей и исключить лишние
+            pass
+        # Для работы пейджинга нужно передавать общее количество записей
+        total = len(nodes)  
+        result = {'rows': list(nodes), 'total': total}
+        return result 
     
     def _get_obj(self, model, id):
         '''
