@@ -9,9 +9,10 @@ from m3.contrib.kladr import models
 
 
 @transaction.commit_on_success
-def fill_kladr():
+def fill_kladr(region=None):
     '''
-    Заполнение справочника КЛАДР 
+    Заполнение справочника КЛАДР
+    region - первые два символа региона, для ограничения загрузки только этого региона 
     ''' 
     def fill_record(result_list, rec, type):
         temp_dict = {}
@@ -26,14 +27,19 @@ def fill_kladr():
         # признак добавления в БД
         temp_dict['flag'] = False
         temp_dict['id'] = 0
+        temp_dict['level'] = -1
         if type == 'subject':
             code = temp_dict['code'][:2]
+            temp_dict['level'] = 0
         if type == 'region':
             code = temp_dict['code'][:5]
+            temp_dict['level'] = 1
         if type == 'city':
             code = temp_dict['code'][:8]
+            temp_dict['level'] = 2
         if type == 'place':
-            code = temp_dict['code'][:11]       
+            code = temp_dict['code'][:11]
+            temp_dict['level'] = 3       
             
         result_list[code] = temp_dict   
     
@@ -58,7 +64,10 @@ def fill_kladr():
     error_code_streets_list = []
     not_actual_places_list = []
     
-    for rec in db_geo: 
+    for rec in db_geo:
+        if region:
+            if str(rec[2])[:2] != region:
+                continue
         if str(rec[2])[2:] == '00000000000':
             fill_record(sub_list,rec, 'subject')
         if (str(rec[2])[5:] == '00000000') and (str(rec[2])[2:5] != '000'):
@@ -73,8 +82,13 @@ def fill_kladr():
     # Список улиц
     street_list = []
     for rec in db_street:
+        if region:
+            if str(rec[2].decode('866'))[:2] != region:
+                continue
         street_list.append(rec)
     
+    list_count = len(sub_list)
+    i = 1
     for sub_value in sub_list.itervalues():
         new_kladr_geo_sub = models.KladrGeo()
         new_kladr_geo_sub.parent = None
@@ -86,12 +100,16 @@ def fill_kladr():
         new_kladr_geo_sub.uno = sub_value['uno']
         new_kladr_geo_sub.okato = sub_value['okato']
         new_kladr_geo_sub.status = sub_value['status']
+        new_kladr_geo_sub.level = sub_value['level']
         new_kladr_geo_sub.save()
         
         sub_value['id'] = new_kladr_geo_sub.id
         sub_value['flag'] = True
-        print (new_kladr_geo_sub.name)
+        print (str(i)+'/'+str(list_count)+' '+new_kladr_geo_sub.name)
+        i=i+1
     
+    i = 1
+    list_count = len(region_list)
     for region_key in region_list.itervalues():
         code = region_key['code'][:2]
         if not(region_key['flag']):
@@ -106,12 +124,16 @@ def fill_kladr():
             new_kladr_geo_region.uno = region_key['uno']
             new_kladr_geo_region.okato = region_key['okato']
             new_kladr_geo_region.status = region_key['status']
+            new_kladr_geo_region.level = region_key['level']
             new_kladr_geo_region.save()
             
             region_key['id'] = new_kladr_geo_region.id
             region_key['flag'] = True
-            print (' '*5+new_kladr_geo_region.name)
-    
+            print (' '*5+str(i)+'/'+str(list_count)+' '+new_kladr_geo_region.name)
+            i=i+1
+
+    i = 1
+    list_count = len(city_list)
     for city_key in city_list.itervalues():
         code = city_key['code'][:5]
         if code[2:] == '000':
@@ -129,11 +151,13 @@ def fill_kladr():
                 new_kladr_geo_city.uno = city_key['uno']
                 new_kladr_geo_city.okato = city_key['okato']
                 new_kladr_geo_city.status = city_key['status']
+                new_kladr_geo_city.level = city_key['level']
                 new_kladr_geo_city.save()
             
                 city_key['id'] = new_kladr_geo_city.id
                 city_key['flag'] = True
-                print (' '*8+new_kladr_geo_city.name)
+                print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
+                i=i+1
                 
         elif code[2:] != '000':
             # ищем родителя в регионах
@@ -149,12 +173,16 @@ def fill_kladr():
                 new_kladr_geo_city.uno = city_key['uno']
                 new_kladr_geo_city.okato = city_key['okato']
                 new_kladr_geo_city.status = city_key['status']
+                new_kladr_geo_city.level = city_key['level']
                 new_kladr_geo_city.save()
             
                 city_key['id'] = new_kladr_geo_city.id
                 city_key['flag'] = True
-                print (' '*8+new_kladr_geo_city.name)
+                print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
+                i=i+1
     
+    i = 1
+    list_count = len(geo_places_list)
     for place_value in geo_places_list.itervalues():
         code = place_value['code'][:8]
         if (code[2:5] == '000') and (code[5:8] != '000') or ((code[2:5] != '000') and (code[5:8] != '000')):
@@ -176,11 +204,14 @@ def fill_kladr():
                     new_kladr_geo_place.uno = place_value['uno']
                     new_kladr_geo_place.okato = place_value['okato']
                     new_kladr_geo_place.status = place_value['status']
+                    new_kladr_geo_place.level = place_value['level']
                     new_kladr_geo_place.save()
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
-                    print (' '*13+new_kladr_geo_place.name)
+                    if i % 100 == 1:
+                        print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
+                    i=i+1
                 
         elif (code[5:8] == '000') and not (code[2:5] == '000'):
             #поиск родителя в районах   
@@ -201,11 +232,14 @@ def fill_kladr():
                     new_kladr_geo_place.uno = place_value['uno']
                     new_kladr_geo_place.okato = place_value['okato']
                     new_kladr_geo_place.status = place_value['status']
+                    new_kladr_geo_place.level = place_value['level']
                     new_kladr_geo_place.save()
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
-                    print (' '*13+new_kladr_geo_place.name)
+                    if i % 100 == 1:
+                        print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
+                    i=i+1
                 
         elif (code[5:8] == '000') and (code[2:5] == '000'):
             #поиск родителя в субъектах   
@@ -226,12 +260,17 @@ def fill_kladr():
                     new_kladr_geo_place.uno = place_value['uno']
                     new_kladr_geo_place.okato = place_value['okato']
                     new_kladr_geo_place.status = place_value['status']
+                    new_kladr_geo_place.level = place_value['level']
                     new_kladr_geo_place.save()
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
-                    print (' '*13+new_kladr_geo_place.name)
+                    if i % 100 == 1:
+                        print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
+                    i=i+1
     
+    i = 1
+    list_count = len(street_list)
     # Загрузка улиц. (порядка 3х часов)
     for street in iter(street_list):
         code = street[2].decode('866')
@@ -253,8 +292,9 @@ def fill_kladr():
                     street_sub.gni = street[4].decode('866')
                     street_sub.okato = street[5].decode('866')
                     street_sub.save()
-                    
-                    print (' '*20 + street_sub.name)
+                    if i % 100 == 1:
+                        print (' '*20+str(i)+'/'+str(list_count)+' '+street_sub.name)
+                    i=i+1
                     
             elif (code[8:11] == '000') and (code[5:8] != '000'):
                 # поиск родителя в городах
@@ -273,8 +313,9 @@ def fill_kladr():
                     street_city.gni = street[4].decode('866')
                     street_city.okato = street[5].decode('866')
                     street_city.save()
-                    
-                    print (' '*20 + street_city.name) 
+                    if i % 100 == 1:
+                        print (' '*20+str(i)+'/'+str(list_count)+' '+street_city.name)
+                    i=i+1 
                     
             else:
                 # поиск родителя в селах\деревнях
@@ -293,8 +334,9 @@ def fill_kladr():
                     street_place.gni = street[4].decode('866')
                     street_place.okato = street[5].decode('866')
                     street_place.save()
-                    
-                    print (' '*20 + street_place.name)                   
+                    if i % 100 == 1:
+                        print (' '*20+str(i)+'/'+str(list_count)+' '+street_place.name)
+                    i=i+1                   
                         
     print ('Take a bottle of champagne.Tables have been filled succesfully')     
     

@@ -37,7 +37,7 @@
     					,valueNotFoundText: ''
     					
     					{% if component.t_render_listeners %}
-    						{# Прописываются имеющиеся обработчики #}
+    						// Прописываются имеющиеся обработчики 
     						,listeners:{
     							{% for k, v in component.t_render_listeners.items %}
     								'{{k}}': {{v}}
@@ -96,7 +96,7 @@
     	var record = new Ext.data.Record();
     	record.id = id;
     	record.{{ component.display_field }} = value;
-    	store.loadData({total:1, rows:[record]});
+	store.loadData({total:1, rows:[record]});    	
     	combo.setValue(id);
     	onChange(combo, id);
     };

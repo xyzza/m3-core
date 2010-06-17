@@ -39,6 +39,13 @@ class BaseExtField(ExtUIComponent):
     def handler_specialkey(self, function):
         self._listeners['specialkey'] = function
     
+    @property
+    def handler_change(self):
+        return self._listeners.get('change')
+    
+    @handler_change.setter
+    def handler_change(self, function):
+        self._listeners['change'] = function
     
 class BaseExtTriggerField(BaseExtField):
     '''Базовый класс для комбобокса, поля выбора справочника'''

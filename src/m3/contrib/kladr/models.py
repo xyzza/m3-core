@@ -15,6 +15,14 @@ class KladrGeo(models.Model):
     uno = models.CharField(max_length=4)
     okato = models.CharField(max_length=11)
     status = models.CharField(max_length=1)
+    level = models.IntegerField(null=True, blank=True)
+    
+    def display_name(self):
+        if self.parent:
+            return self.socr+" "+self.name+" / "+self.parent.display_name()
+        else:
+            return self.socr+" "+self.name
+    display_name.json_encode = True
     
 class KladrStreet(models.Model):
     '''
@@ -28,3 +36,10 @@ class KladrStreet(models.Model):
     gni = models.CharField(max_length=4)
     uno = models.CharField(max_length=4)
     okato = models.CharField(max_length=11)
+    
+    def display_name(self):
+        if self.parent:
+            return self.socr+" "+self.name+" / "+self.parent.name
+        else:
+            return self.socr+" "+self.name
+    display_name.json_encode = True

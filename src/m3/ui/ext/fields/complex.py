@@ -137,7 +137,7 @@ class ExtDictSelectField(BaseExtTriggerField):
     
     @root.setter
     def root(self, value):
-        self.get_store().root = value   
+        self.get_store().root = value
         
     def render(self):
         return super(ExtDictSelectField, self).render()
