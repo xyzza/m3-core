@@ -2,6 +2,8 @@
 '''
 Вспомогательные функции используемые в паках
 '''
+import json
+
 from django.db.models.query_utils import Q
 from django.db import models, connection, transaction, IntegrityError
 
@@ -203,3 +205,12 @@ def extract_int_list(request, key):
     value = request.REQUEST.get(key, '')
     values = map(int, value.split(','))
     return values
+
+def extract_list(request, key):
+    data = request.POST.get(key)
+    if data:
+        obj = json.loads(data)
+        if not isinstance(obj, list):
+            obj = [obj]
+        return obj
+    return []

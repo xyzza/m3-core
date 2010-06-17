@@ -116,9 +116,10 @@ class ExtDictSelectField(BaseExtTriggerField):
         '''
         Метод настройки поля выбора из справочника на основе 
         переданного ActionPack работы со справочниками
-        '''
-        
+        '''   
         registered_pack = controller.find_pack(pack)
+        if not registered_pack:
+            raise Exception('Pack %s not found in controller %s' % (controller, pack))
         self.url = registered_pack.get_select_url()
         self.autocomplete_url = registered_pack.rows_action.get_absolute_url()
         self.bind_pack = registered_pack # TODO: можно ли обойтись без bind_back?
