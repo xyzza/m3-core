@@ -1,4 +1,11 @@
 (function(){
+	
+	var select_button = {{ component.select_button.render|safe }};
+	var clear_button = {{ component.clear_button.render|safe }};
+	
+	select_button.tabIndex = -1;
+	clear_button.tabIndex = -1;
+	
     var container = new Ext.Container({
     	layout: 'column'
     	,items:
@@ -47,8 +54,8 @@
     					{% endif %}
     			}
     		},
-    		{ xtype: 'container', layout:'form',layoutConfig: {pack:'end',align:'center'}, width:30, items: {{ component.select_button.render|safe }} },
-    		{ xtype: 'container', layout:'form',layoutConfig: {pack:'end',align:'center'}, width:30, items: {{ component.clear_button.render|safe }} }
+    		{ xtype: 'container', layout:'form',layoutConfig: {pack:'end',align:'center'}, width:30, items: select_button },
+    		{ xtype: 'container', layout:'form',layoutConfig: {pack:'end',align:'center'}, width:30, items: clear_button }
     	]
     });
     
