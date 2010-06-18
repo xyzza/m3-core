@@ -56,9 +56,12 @@ class ExtNumberField(BaseExtField):
         
 class ExtHiddenField(BaseExtField):
     ''' Скрытое поле, которое не видно пользователю на форме, но хранит значение и передает его при submit'е '''
+    INT = 0
+    STRING = 1
     def __init__(self, *args, **kwargs):
         super(ExtHiddenField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-hidden-field.js'
+        self.type = ExtHiddenField.INT 
         self.init_component(*args, **kwargs)
        
 class ExtTextArea(BaseExtField):

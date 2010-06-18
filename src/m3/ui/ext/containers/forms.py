@@ -11,7 +11,8 @@ from m3.ui.ext.fields.base import BaseExtField
 from m3.ui.ext.fields.simple import (ExtNumberField, 
                                      ExtStringField, 
                                      ExtDateField,
-                                     ExtCheckBox, ExtComboBox, ExtTimeField)
+                                     ExtCheckBox, ExtComboBox, ExtTimeField,
+                                     ExtHiddenField)
 from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
@@ -212,6 +213,17 @@ class ExtForm(BaseExtPanel):
                         val = None
                 else:
                     val = None
+            elif isinstance(item, ExtHiddenField):
+                if item.type == ExtHiddenField.INT:
+                    if val:
+                        try:
+                            val = int(val)
+                        except:
+                            val = None
+                    else:
+                        val = None
+                elif item.type == ExtHiddenField.STRING:
+                    val = unicode(val)
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
