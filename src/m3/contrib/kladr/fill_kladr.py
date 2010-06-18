@@ -9,7 +9,7 @@ from m3.contrib.kladr import models
 
 
 @transaction.commit_on_success
-def fill_kladr(region=None):
+def fill_kladr(region = None, dbf_path = ''):
     '''
     Заполнение справочника КЛАДР
     region - первые два символа региона, для ограничения загрузки только этого региона 
@@ -43,9 +43,13 @@ def fill_kladr(region=None):
             
         result_list[code] = temp_dict   
     
-    MOD_PATH = os.path.dirname(__file__)
-    db_file_geo = os.path.normpath(os.path.join(MOD_PATH, "../../externals/KLADR.dbf"))
-    db_file_street = os.path.normpath(os.path.join(MOD_PATH, "../../externals/STREET.dbf"))
+    if dbf_path:
+        db_file_geo = os.path.normpath(os.path.join(dbf_path, 'KLADR.dbf'))
+        db_file_street = os.path.normpath(os.path.join(dbf_path, 'STREET.dbf'))
+    else:
+        MOD_PATH = os.path.dirname(__file__)
+        db_file_geo = os.path.normpath(os.path.join(MOD_PATH, "../../externals/KLADR.dbf"))
+        db_file_street = os.path.normpath(os.path.join(MOD_PATH, "../../externals/STREET.dbf"))
     
     # открываем .dbf для чтения
     db_geo = dbf.Dbf(db_file_geo, readOnly=True, new=False)
@@ -105,7 +109,8 @@ def fill_kladr(region=None):
         
         sub_value['id'] = new_kladr_geo_sub.id
         sub_value['flag'] = True
-        print (str(i)+'/'+str(list_count)+' '+new_kladr_geo_sub.name)
+        if i % 1000 == 1:
+            print (str(i)+'/'+str(list_count)+' '+new_kladr_geo_sub.name)
         i=i+1
     
     i = 1
@@ -129,7 +134,8 @@ def fill_kladr(region=None):
             
             region_key['id'] = new_kladr_geo_region.id
             region_key['flag'] = True
-            print (' '*5+str(i)+'/'+str(list_count)+' '+new_kladr_geo_region.name)
+            if i % 1000 == 1:
+                print (' '*5+str(i)+'/'+str(list_count)+' '+new_kladr_geo_region.name)
             i=i+1
 
     i = 1
@@ -156,7 +162,8 @@ def fill_kladr(region=None):
             
                 city_key['id'] = new_kladr_geo_city.id
                 city_key['flag'] = True
-                print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
+                if i % 1000 == 1:
+                    print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
                 i=i+1
                 
         elif code[2:] != '000':
@@ -178,7 +185,8 @@ def fill_kladr(region=None):
             
                 city_key['id'] = new_kladr_geo_city.id
                 city_key['flag'] = True
-                print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
+                if i % 1000 == 1:
+                    print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
                 i=i+1
     
     i = 1
@@ -209,7 +217,7 @@ def fill_kladr(region=None):
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
-                    if i % 100 == 1:
+                    if i % 1000 == 1:
                         print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
                     i=i+1
                 
@@ -237,7 +245,7 @@ def fill_kladr(region=None):
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
-                    if i % 100 == 1:
+                    if i % 1000 == 1:
                         print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
                     i=i+1
                 
@@ -265,7 +273,7 @@ def fill_kladr(region=None):
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
-                    if i % 100 == 1:
+                    if i % 1000 == 1:
                         print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
                     i=i+1
     
@@ -292,7 +300,7 @@ def fill_kladr(region=None):
                     street_sub.gni = street[4].decode('866')
                     street_sub.okato = street[5].decode('866')
                     street_sub.save()
-                    if i % 100 == 1:
+                    if i % 1000 == 1:
                         print (' '*20+str(i)+'/'+str(list_count)+' '+street_sub.name)
                     i=i+1
                     
@@ -313,7 +321,7 @@ def fill_kladr(region=None):
                     street_city.gni = street[4].decode('866')
                     street_city.okato = street[5].decode('866')
                     street_city.save()
-                    if i % 100 == 1:
+                    if i % 1000 == 1:
                         print (' '*20+str(i)+'/'+str(list_count)+' '+street_city.name)
                     i=i+1 
                     
@@ -334,9 +342,9 @@ def fill_kladr(region=None):
                     street_place.gni = street[4].decode('866')
                     street_place.okato = street[5].decode('866')
                     street_place.save()
-                    if i % 100 == 1:
+                    if i % 1000 == 1:
                         print (' '*20+str(i)+'/'+str(list_count)+' '+street_place.name)
                     i=i+1                   
                         
-    print ('Take a bottle of champagne.Tables have been filled succesfully')     
+    print (u'Загрузка КЛАДР в систему завершена')     
     
