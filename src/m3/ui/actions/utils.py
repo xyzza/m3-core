@@ -125,12 +125,17 @@ def safe_delete_record(model, id):
     
     return True
 
-def fetch_search_tree(model, filter, **kwargs):
+def fetch_search_tree(model, filter, branch_id = None):
     '''
     По заданному фильтру filter и модели model формирует развернутое дерево с результатами поиска.
     '''
+    #branch_id - это элемент ограничивающий дерево, т.е. должны возвращаться только дочерние ему элементы
     # Сначала тупо получаем все узлы подходящие по фильтру
-    nodes = model.objects.filter(filter, **kwargs).select_related('parent')
+    if branch_id and hasattr(model,'get_descendants'):
+        branch_node = model.objects.get(id = branch_id)
+        nodes = branch_node.get_descendants().filter(filter).select_related('parent')
+    else:
+        nodes = model.objects.filter(filter).select_related('parent')
     
     # Из каждого узла создаем полный путь до корня
     paths = []
@@ -142,6 +147,8 @@ def fetch_search_tree(model, filter, **kwargs):
 
         path = [node]
         while node.parent:
+            if branch_id and node.parent == branch_node:
+                break
             node = node.parent
             path.append(node)
             processed_nodes.add(node)
@@ -178,17 +185,23 @@ def fetch_search_tree(model, filter, **kwargs):
     for path in paths[1:]:
         merge(tree, path)
     
-    def set_grid_attributes(sub_tree):
+    def set_tree_attributes(sub_tree):
         '''  Пробегает дерево и устанавливает узлам атрибуты expanded и leaf '''
         if not hasattr(sub_tree, 'children') or len(sub_tree.children) == 0:
-            sub_tree.leaf = True
+            # не факт, что это лист, т.к. мы лишь фильтровали дерево - нужно проверить
+            if hasattr(sub_tree,'is_leaf_node'):
+                sub_tree.leaf = sub_tree.is_leaf_node()
+            else:
+                child_nodes = model.objects.filter(parent=sub_tree.id)
+                if len(child_nodes) == 0:
+                    sub_tree.leaf = True
         else:
             sub_tree.expanded = True
             for st in sub_tree.children:
-                set_grid_attributes(st)
+                set_tree_attributes(st)
     
     for sub_tree in tree:
-        set_grid_attributes(sub_tree)
+        set_tree_attributes(sub_tree)
     
     return tree
     

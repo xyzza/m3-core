@@ -442,15 +442,18 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     list_sort_order = None
     tree_sort_order = None
     
-    def get_nodes(self, parent_id, filter):
-        if filter:
-            filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)
-            if parent_id:
-                nodes = utils.fetch_search_tree(self.tree_model, filter_dict, parent = parent_id)
-            else:
-                nodes = utils.fetch_search_tree(self.tree_model, filter_dict)
+    def get_nodes(self, parent_id, filter, branch_id = None):
+        # parent_id - это элемент, который раскрывается, поэтому для него фильтр ставить не надо, иначе фильтруем
+        # branch_id - это элемент ограничивающий дерево, т.е. должны возвращаться только дочерние ему элементы
+        if filter and not parent_id:
+            filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)            
+            nodes = utils.fetch_search_tree(self.tree_model, filter_dict, branch_id)
         else:
-            query = self.tree_model.objects.filter(parent = parent_id)
+            if branch_id and hasattr(self.tree_model,'get_descendants'):
+                branch_node = self.tree_model.objects.get(id = branch_id)
+                query = branch_node.get_descendants().objects.filter(parent = parent_id)
+            else:
+                query = self.tree_model.objects.filter(parent = parent_id)
             query = utils.apply_sort_order(query, self.tree_columns, self.tree_sort_order)
             nodes = list(query)       
             # Если имеем дело с листом, нужно передавать параметр leaf = true
@@ -478,18 +481,24 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         else:
             return self.get_nodes(parent_id, filter)
     
-    def get_nodes_like_rows(self, parent_id, filter):
+    def get_nodes_like_rows(self, filter, branch_id = None):
         '''
         Возвращаются узлы дерева, предствленные в виде общего списка
         '''
+        # branch_id - это элемент ограничивающий дерево, т.е. должны возвращаться только дочерние ему элементы
         if filter:
             filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)
-            nodes = self.tree_model.objects.filter(filter_dict).select_related('parent')
+            if branch_id and hasattr(self.tree_model,'get_descendants'):
+                branch_node = self.tree_model.objects.get(id = branch_id)
+                nodes = branch_node.get_descendants().filter(filter_dict).select_related('parent')
+            else:
+                nodes = self.tree_model.objects.filter(filter_dict).select_related('parent')
         else:
-            nodes = self.tree_model.objects.all()            
-        if parent_id:
-            #TODO: нужно проверить родителей найденных записей и исключить лишние
-            pass
+            if branch_id and hasattr(self.tree_model,'get_descendants'):
+                branch_node = self.tree_model.objects.get(id = branch_id)
+                nodes = branch_node.get_descendants()
+            else:
+                nodes = self.tree_model.objects.all()            
         # Для работы пейджинга нужно передавать общее количество записей
         total = len(nodes)  
         result = {'rows': list(nodes), 'total': total}
