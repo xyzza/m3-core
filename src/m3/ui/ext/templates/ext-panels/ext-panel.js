@@ -14,5 +14,7 @@ new Ext.Panel({
 	{% if component.split %} ,split: true {% endif %} 
 	{% if component.collapsible %} ,collapsible: true {% endif %} 
 	{% if component.padding %} ,padding: '{{ component.padding }}' {% endif %}
+	{% if component.anchor %}, anchor: '{{component.anchor}}' {% endif %}
+	,autoScroll: true
 	,items: [{{ component.t_render_items|safe }}]
 })
