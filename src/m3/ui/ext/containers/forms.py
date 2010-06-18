@@ -95,7 +95,10 @@ class ExtForm(BaseExtPanel):
             Конвертирует и присваивает значение value в соответствии типу item.
             '''
             if isinstance(item, (ExtStringField, ExtNumberField,)):
-                item.value = unicode(value)
+                if value:
+                    item.value = unicode(value)
+                else:
+                    item.value = u''
             elif isinstance(item, ExtDateField):
                 item.value = value.strftime('%d.%m.%Y') if not isSecretToken(value) else unicode(value)     
             elif isinstance(item, ExtTimeField):
@@ -201,6 +204,14 @@ class ExtForm(BaseExtPanel):
                         val = item.bind_rule.get(val)
                     else:
                         raise ValueError('Invalid attribute type bind_rule. Must be a function or a dict.')
+            elif isinstance(item, ExtDictSelectField):
+                if val:
+                    try:
+                        val = int(val)
+                    except:
+                        val = None
+                else:
+                    val = None
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
@@ -228,6 +239,7 @@ class ExtPanel(BaseExtPanel):
         self.split = False
         self.base_cls = ''
         self.body_cls = ''
+        self.anchor = ''
         self.init_component(*args, **kwargs)
     
     @property
