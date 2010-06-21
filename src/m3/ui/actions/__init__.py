@@ -255,7 +255,40 @@ class ActionContext(object):
         В зависимости от типа obj выполняем построение объекта контекста действия
         '''
         pass
+    
+    def convert_value(self, raw_value, arg_type):
+        ''' Возвращает значение преобразованное в заданный формат '''
+        value = None
+        if arg_type == int:
+            value = int(raw_value)
+            
+        elif arg_type in [str, unicode]:
+            value = unicode(raw_value)
+            
+        elif arg_type == datetime.datetime:
+            # Дата может прийти либо в Немецком формате, 
+            # либо в дефолтном ExtJS формате 2010-06-21T00:00:00
+            if 'T' in raw_value:
+                value = datetime.datetime.strptime(raw_value[:10], '%Y-%m-%d')
+            else:
+                value = datetime.datetime.strptime(raw_value, '%d.%m.%Y')
+            
+        elif arg_type == datetime.date:
+            if 'T' in raw_value:
+                value = datetime.datetime.strptime(raw_value[:10], '%Y-%m-%d')
+            else:
+                value = datetime.datetime.strptime(raw_value, '%d.%m.%Y')
+            value = value.date()
+            
+        elif arg_type == datetime.time:
+            d = datetime.datetime.strptime(raw_value, '%H:%M')
+            value = datetime.time(d.hour, d.minute, 0)
+            
+        else:
+            raise Exception('Can not convert value of "%s" in a given type "%s"' % (raw_value, arg_type))
         
+        return value
+    
     def build(self, request, rules):
         '''
         Выполняет заполнение собственных атрибутов согласно переданному request
@@ -268,30 +301,13 @@ class ActionContext(object):
         # переносим параметры в контекст из запроса
         for key in request.REQUEST:
             value = request.REQUEST[key]
+            # Пустые параметры не конвертируем, т.к. они могут вызвать ошибку
+            if not value:
+                continue
+            # 
             if params.has_key(key):
-                arg_type = params[key][0]
-                if arg_type == int:
-                    value = int(value)
-                    
-                elif arg_type == datetime.datetime:
-                    # Дата может прийти либо в Немецком формате, 
-
-                    # либо в дефолтном ExtJS формате 2010-06-21T00:00:00
-                    if 'T' in value:
-                        value = datetime.datetime.strptime(value[:10], '%Y-%m-%d')
-                    else:
-                        value = datetime.datetime.strptime(value, '%d.%m.%Y')
-                    
-                elif arg_type == datetime.date:
-                    if 'T' in value:
-                        value = datetime.datetime.strptime(value[:10], '%Y-%m-%d')
-                    else:
-                        value = datetime.datetime.strptime(value, '%d.%m.%Y')
-                    value = value.date()
-                    
-                elif arg_type == datetime.time:
-                    d = datetime.datetime.strptime(value, '%H:%M')
-                    value = datetime.time(d.hour, d.minute, 0)
+                value = self.convert_value(value, params[key][0])    
+                # Флаг того, что параметр успешно расшифрован и добавлен в контекст
                 params[key][1] = True
             setattr(self, key, value)
         
