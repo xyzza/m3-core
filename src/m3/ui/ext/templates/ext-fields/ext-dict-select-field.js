@@ -147,7 +147,7 @@
     function onChange(sender, newValue, oldValue){
     	var clear_btn = Ext.getCmp('{{ component.clear_button.client_id }}');
     	var combo = Ext.getCmp('{{ component.client_id }}');
-		clear_btn.setVisible(newValue);
+		clear_btn.setDisabled((newValue==''));
     };
     
     {% if self.value %}

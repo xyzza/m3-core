@@ -38,7 +38,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.label_width = None     # Ширина надписи выбора
         
         self.select_button = ExtButton(handler='onSelect', icon_cls='select', width=30, disabled=True)
-        self.clear_button  = ExtButton(handler='onClearField', icon_cls='clear', width=30, hidden=True) 
+        self.clear_button  = ExtButton(handler='onClearField', icon_cls='clear', width=30, disabled=True) 
         
         self.display_field = 'name' # по умолчанию отображаем значение поля name
         
@@ -109,7 +109,7 @@ class ExtDictSelectField(BaseExtTriggerField):
     @value.setter
     def value(self, val):
         if val:
-            self.clear_button.hidden = False if val else True
+            self.clear_button.disabled = True if val else False
         self.__value = val
         
     def configure_by_dictpack(self, pack, controller):
