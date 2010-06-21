@@ -205,4 +205,13 @@ class ExtTreeLoader(BaseExtComponent):
         super(ExtTreeLoader, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree-loader.js'
         self.url = None
+        self._base_params = {}
         self.init_component(*args, **kwargs)
+        
+    def _set_base_params(self, params):
+        self._base_params.update(params)
+        
+    def _get_base_params(self):
+        return self._base_params
+
+    base_params = property(_get_base_params, _set_base_params)        

@@ -4,7 +4,7 @@
     	,storeId: '{{ component.client_id }}'
     	,baseParams: Ext.applyIf({
     		{% for key,value in component.base_params.items %}
-    			{{ key }}: {{ value}}{% if not forloop.last %},{% endif %}			
+    			'{{ key }}': '{{ value}}'{% if not forloop.last %},{% endif %}			
     		{% endfor %} 		
     	},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
     	,idProperty: '{{ component.id_property }}'
