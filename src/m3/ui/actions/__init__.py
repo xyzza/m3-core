@@ -272,11 +272,23 @@ class ActionContext(object):
                 arg_type = params[key][0]
                 if arg_type == int:
                     value = int(value)
+                    
                 elif arg_type == datetime.datetime:
-                    value = datetime.datetime.strptime(value, '%d.%m.%Y')
+                    # Дата может прийти либо в Немецком формате, 
+
+                    # либо в дефолтном ExtJS формате 2010-06-21T00:00:00
+                    if 'T' in value:
+                        value = datetime.datetime.strptime(value[:10], '%Y-%m-%d')
+                    else:
+                        value = datetime.datetime.strptime(value, '%d.%m.%Y')
+                    
                 elif arg_type == datetime.date:
-                    time_struct = time.strptime(value, '%d.%m.%Y')
-                    value = datetime.date(*(time_struct)[0:3])
+                    if 'T' in value:
+                        value = datetime.datetime.strptime(value[:10], '%Y-%m-%d')
+                    else:
+                        value = datetime.datetime.strptime(value, '%d.%m.%Y')
+                    value = value.date()
+                    
                 elif arg_type == datetime.time:
                     d = datetime.datetime.strptime(value, '%H:%M')
                     value = datetime.time(d.hour, d.minute, 0)
