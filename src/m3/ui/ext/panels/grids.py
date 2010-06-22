@@ -44,7 +44,7 @@ class ExtObjectGrid(ExtGrid):
             self.button_new = controls.ExtButton(text = u'Добавить', icon_cls = 'add_item', handler='topBarNew')
             self.button_edit = controls.ExtButton(text = u'Изменить', icon_cls = 'edit_item', handler='topBarEdit')
             self.button_delete = controls.ExtButton(text = u'Удалить', icon_cls = 'delete_item', handler='topBarDelete')
-            self.button_refresh = controls.ExtButton(text = u'Обновить', icon_cls = 'refresh_item', handler='topBarRefresh')
+            self.button_refresh = controls.ExtButton(text = u'Обновить', icon_cls = 'refresh-icon-16', handler='topBarRefresh')
             self.init_component()
             
     #===========================================================================
