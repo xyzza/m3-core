@@ -1,4 +1,4 @@
-#coding:utf-8
+﻿#coding:utf-8
 '''
 Created on 25.02.2010
 
@@ -16,6 +16,8 @@ from m3.ui.ext.fields.simple import (ExtNumberField,
 from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
+from m3.helpers.datastructures import TypedList
+from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.fields.complex import ExtDictSelectField
 from django.db import models
 #from m3.ui.actions.packs import BaseDictionaryActions
@@ -257,8 +259,51 @@ class ExtPanel(BaseExtPanel):
     @property
     def items(self):
         return self._items
+
+
+class ExtTitlePanel(ExtPanel):
+    """Расширенная панель с возможностью добавления контролов в заголовок."""
+    def __init__(self, *args, **kwargs):
+        super(ExtTitlePanel, self).__init__(*args, **kwargs)
+        self.template = "ext-panels/ext-title-panel.js"
+        self.__title_items = TypedList(type=ExtUIComponent)
+        self.init_component(*args, **kwargs)
+
+    def t_render_title_items(self):
+        """Дефолтный рендеринг вложенных объектов заголовка."""
+        return ",".join([item.render() for item in self.__title_items])
     
+    def _find_component_in_title_items(self, name):
+        # Осуществляет поиск вложенных объектов в заголовке
+        for item in self.__title_items:
+            if hasattr(item, "name") and item.name == name:
+                return item
+                
+            if hasattr(item, "find_by_name"):
+                res = item.find_by_name(name)
+                if res:
+                    return res
+
+    def find_by_name(self, name):
+        """Осуществляет поиск экземпляра во вложенных объектах по имени
+        экземпляра в итемсах и в заголовке."""
+        component = super(ExtTitlePanel, self).find_by_name(name)
+        if component is None:
+            return self._find_component_in_title_items(name)
     
+    def pre_render(self):
+        super(ExtTitlePanel, self).pre_render()
+        
+        # выставляем action_context у дочерних элементов
+        for item in self.__title_items:
+            if item:
+                item.action_context = self.action_context
+
+    @property
+    def title_items(self):
+        return self.__title_items
+
+
 class ExtTabPanel(BaseExtPanel):
     '''
         Класс, отвечающий за работу TabPanel
