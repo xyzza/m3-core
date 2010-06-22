@@ -8,11 +8,24 @@ Created on 10.06.2010
 from django.db import models
 from django.contrib.auth.models import User
 
+from metaroles import get_metarole
+
 class UserRole(models.Model):
     '''
     Модель хранения роли пользователя в прикладной подсистеме
     '''
-    name = models.CharField(max_length=200)
+    # наименование роли пользователя
+    name     = models.CharField(max_length = 200)
+    
+    # ассоциированная с ролью метароль (определяет интерфейс пользователя) 
+    # может быть пустой
+    metarole = models.CharField(max_length = 100, null = True, blank = True)
+    
+    def metarole_name(self):
+        mr = get_metarole(self.metarole)
+        return mr.name if mr else ''
+    
+    metarole_name.json_encode = True
     
     class Meta:
         db_table = 'm3_users_role'

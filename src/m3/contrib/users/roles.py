@@ -19,12 +19,14 @@ from m3.db import safe_delete
 from m3.helpers import logger
 from m3.ui.actions import ActionContextDeclaration
 
-import helpers
-import models
 from users import SelectUsersListWindow
 from m3.ui.ext.panels.grids import ExtObjectGrid
 from m3.contrib.users.models import UserRole
 
+import helpers
+import models
+import metaroles
+import app_meta
 
 class RolesActions(actions.ActionPack):
     '''
@@ -332,7 +334,8 @@ class RolesListWindow(windows.ExtWindow):
         # Настройка грида со списком ролей
         #=======================================================================
         self.grid = panels.ExtObjectGrid()
-        self.grid.add_column(header=u'Наименование роли', data_index='name', width=500)
+        self.grid.add_column(header=u'Наименование роли', data_index='name', width=300)
+        self.grid.add_column(header=u'Метароль', data_index='metarole_name', width=200)
         self.items.append(self.grid)
         
         self.grid.action_data = RolesDataAction
@@ -345,9 +348,7 @@ class RolesListWindow(windows.ExtWindow):
         # дополнительные действия формы
         self.grid.action_show_assigned_users = ShowAssignedUsersAction
         
-        self.grid.context_menu_row.add_item(text = u'Показать пользователей', icon_cls = 'edit_item', handler='contextMenu_ShowAssignedUsers')
-        self.grid.top_bar.items.append(controls.ExtButton(text = u'Показать пользователей', icon_cls = 'edit_item', handler='contextMenu_ShowAssignedUsers'))
-        
+        self.grid.context_menu_row.add_item(text = u'Показать пользователей', icon_cls = 'user-icon-16', handler='contextMenu_ShowAssignedUsers')
         #self.grid.context_menu_row.add_item(text = u'Показать разрешения роли', icon_cls = 'edit_item', handler='contextMenu_ShowPermissions')
         self.grid.context_menu_row.add_separator()
         
@@ -363,7 +364,7 @@ class RolesEditWindow(windows.ExtEditWindow):
         super(RolesEditWindow, self).__init__(*args, **kwargs)
         
         self.width=400
-        self.height=100
+        self.height=125
         self.modal = True
         
         self.title = u'Роль пользователя'
@@ -371,9 +372,11 @@ class RolesEditWindow(windows.ExtEditWindow):
         self.form.label_width = 100
         self.form.url = SaveRoleAction.absolute_url()
         
-        field_name = fields.ExtStringField(name='name', label = u'Наименование', allow_blank=True, anchor='100%')
+        field_name = fields.ExtStringField(name='name', label = u'Наименование', allow_blank=False, anchor='100%')
+        field_metarole = fields.ExtDictSelectField(name='metarole', label='Метароль', anchor='100%')
+        field_metarole.configure_by_dictpack(metaroles.Metaroles_DictPack, app_meta.users_controller)
         
-        self.form.items.append(field_name)
+        self.form.items.extend([field_name, field_metarole])
         
         #if not new_role:
         #    self.grid_users = ExtObjectGrid()
