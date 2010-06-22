@@ -210,7 +210,7 @@ class ExtForm(BaseExtPanel):
                     try:
                         val = int(val)
                     except:
-                        val = None
+                        pass
                 else:
                     val = None
             elif isinstance(item, ExtHiddenField):
