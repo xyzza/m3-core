@@ -15,11 +15,14 @@ new (Ext.TitlePanel = Ext.extend(Ext.Panel, {
 			} else {
 				this.addTitleItems(this.titleItems);
 			}
+			
+			if (this.header)
+				this.header.removeClass('x-unselectable');
 		};
     }
 }))({
 		{% include 'base-ext-ui.js'%}
-		{% if component.title %} , title: '{{ component.title }}' {% endif %}
+		{% if component.title %} ,title: '{{ component.title }}' {% endif %}
 		{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
 		{% if component.layout_config %} ,layoutConfig: {{ component.t_render_layout_config|safe }} {% endif %}
 		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
