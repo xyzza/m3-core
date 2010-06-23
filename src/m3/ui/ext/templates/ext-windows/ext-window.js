@@ -75,6 +75,12 @@
 					setFieldOnChange(it);
 				});
 			};
+			// оказывается есть еще и заголовочные элементы редактирования
+			if (item.titleItems) {
+				for (var i = 0; i < item.titleItems.length; i++) {
+					setFieldOnChange(item.titleItems[i]);
+				};
+			};
 		};
 	};
 	win.items.each(function(item){
