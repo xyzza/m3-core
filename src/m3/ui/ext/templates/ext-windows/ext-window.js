@@ -46,6 +46,7 @@
 				this.setTitle(this.originalTitle);
 			}
 		}
+		,forceClose: false
 	});
 	{% block code_extenders %}{# здесь помещяется код, расширяющий функциональность окна #}{% endblock %}
 	
@@ -86,5 +87,33 @@
 	win.items.each(function(item){
 		setFieldOnChange(item);
 	})
+	// подтверждение при закрытии окна
+	function onBeforeClose(win) {
+		if (win.forceClose) {return true;}
+		if (win.changesCount !== 0) {
+			Ext.Msg.show({
+				title: "Не сохранять изменения",
+				msg: "Внимание! Данные были изменены! Желаете закрыть окно без сохранения изменений?",
+				buttons: Ext.Msg.OKCANCEL,
+				fn: function(buttonId, text, opt){
+					switch (buttonId){
+						case 'cancel':
+							break;
+						case 'ok':
+							var win = Ext.getCmp('{{ component.client_id }}');
+							// выставляем признак принудительного выхода и закрываем - а иначе никак!
+							win.forceClose = true;
+							win.close();
+            				break;
+					}
+				},
+				animEl: 'elId',
+				icon: Ext.MessageBox.QUESTION
+			});
+			// возвращаем ложь, пока не ответят на диалог
+			return false;
+		} else {return true;}
+	};
+	win.on('beforeclose', onBeforeClose);
 	return win;
 })()
