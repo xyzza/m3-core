@@ -30,7 +30,55 @@
 	    {% if not component.resizable %} ,resizable: false {% endif %}
 		{% if component.parent_window_id %} ,parentWindowID: '{{ component.parent_window_id }}' {% endif %}
 	    {% block window_extenders %}{# здесь помещяется код, расширяющий описание экземпляра окна #}{% endblock %}
+		
+		// счетчик изменений и заголовок для хранения первоначального значения
+		,changesCount: 0
+		,originalTitle: ''
+		,updateTitle: function(){
+			// сохраним оригинальное значение заголовка
+			if (this.title !== this.originalTitle && this.originalTitle == '') {
+				this.originalTitle = this.title;
+			};
+			// изменим заголовок в связи с изменением полей в окне
+			if (this.changesCount !== 0) {
+				this.setTitle('*'+this.originalTitle);
+			} else {
+				this.setTitle(this.originalTitle);
+			}
+		}
 	});
 	{% block code_extenders %}{# здесь помещяется код, расширяющий функциональность окна #}{% endblock %}
+	
+	// пройдемся по всем элементам окна и назначим обработчик 'change' всем полям редактирования
+	function onChangeFieldValue(sender, newValue, oldValue) {
+        var win = Ext.getCmp('{{ component.client_id }}');
+		if (this.originalValue !== newValue) {
+        	//alert(this.fieldLabel+' изменен!');
+			if (!this.isModified)
+				win.changesCount++;
+			this.isModified = true;
+		} else {
+			if (this.isModified)
+				win.changesCount--;
+			this.isModified = false;
+		};
+		win.updateTitle();
+		this.updateLabel();
+    };
+	function setFieldOnChange(item){
+		if (item) {
+			if (item instanceof Ext.form.Field) {
+				item.on('change', onChangeFieldValue);
+			};
+			if (item.items) {
+				item.items.each(function(it){
+					setFieldOnChange(it);
+				});
+			};
+		};
+	};
+	win.items.each(function(item){
+		setFieldOnChange(item);
+	})
 	return win;
 })()
