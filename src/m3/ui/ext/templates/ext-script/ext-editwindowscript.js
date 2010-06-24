@@ -25,8 +25,10 @@
     	{% if form.success_handler %}
     	{{ form.success_handler}}();
     	{% endif %}
-    	Ext.getCmp('{{window.client_id}}').fireEvent('closed_ok');
-    	Ext.getCmp('{{window.client_id}}').close();
+		var win = Ext.getCmp('{{window.client_id}}');
+    	win.fireEvent('closed_ok');
+		win.forceClose = true;
+    	win.close();
     	smart_eval(action.response.responseText)
     }
     function defaultSubmitFailureHandler(form, action)
@@ -53,7 +55,71 @@
     {
         Ext.getCmp('{{window.client_id}}').close();
     }
-    
+    // пройдемся по всем элементам окна и назначим обработчик 'change' всем полям редактирования
+	function onChangeFieldValue(sender, newValue, oldValue) {
+        var win = Ext.getCmp('{{window.client_id}}');
+		if (this.originalValue !== newValue) {
+        	//alert(this.fieldLabel+' изменен!');
+			if (!this.isModified)
+				win.changesCount++;
+			this.isModified = true;
+		} else {
+			if (this.isModified)
+				win.changesCount--;
+			this.isModified = false;
+		};
+		win.updateTitle();
+		this.updateLabel();
+    };
+	function setFieldOnChange(item){
+		if (item) {
+			if (item instanceof Ext.form.Field && item.isEdit) {
+				item.on('change', onChangeFieldValue);
+			};
+			if (item.items) {
+				item.items.each(function(it){
+					setFieldOnChange(it);
+				});
+			};
+			// оказывается есть еще и заголовочные элементы редактирования
+			if (item.titleItems) {
+				for (var i = 0; i < item.titleItems.length; i++) {
+					setFieldOnChange(item.titleItems[i]);
+				};
+			};
+		};
+	};
+	win.items.each(function(item){
+		setFieldOnChange(item);
+	})
+	// подтверждение при закрытии окна
+	function onBeforeClose(win) {
+		if (win.forceClose) {return true;}
+		if (win.changesCount !== 0) {
+			Ext.Msg.show({
+				title: "Не сохранять изменения",
+				msg: "Внимание! Данные были изменены! Желаете закрыть окно без сохранения изменений?",
+				buttons: Ext.Msg.OKCANCEL,
+				fn: function(buttonId, text, opt){
+					switch (buttonId){
+						case 'cancel':
+							break;
+						case 'ok':
+							var win = Ext.getCmp('{{window.client_id}}');
+							// выставляем признак принудительного выхода и закрываем - а иначе никак!
+							win.forceClose = true;
+							win.close();
+            				break;
+					}
+				},
+				animEl: 'elId',
+				icon: Ext.MessageBox.QUESTION
+			});
+			// возвращаем ложь, пока не ответят на диалог
+			return false;
+		} else {return true;}
+	};
+	win.on('beforeclose', onBeforeClose);
     {# показываем окно #}
     win.show();
     
