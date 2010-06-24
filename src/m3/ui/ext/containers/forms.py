@@ -262,15 +262,33 @@ class ExtPanel(BaseExtPanel):
 
 
 class ExtTitlePanel(ExtPanel):
-    """Расширенная панель с возможностью добавления контролов в заголовок.""" 
+    """Расширенная панель с возможностью добавления контролов в заголовок."""
     def __init__(self, *args, **kwargs):
         super(ExtTitlePanel, self).__init__(*args, **kwargs)
         self.template = "ext-panels/ext-title-panel.js"
-        self.__title_items = TypedList(type=ExtUIComponent, on_addition=
-                                       lambda x: self.items.append(x),
-                                       on_deletion=lambda x: self.items
-                                       .remove(x))
+        self.__title_items = TypedList(type=ExtUIComponent, on_after_addition=
+            self._on_title_after_addition, on_before_deletion=
+            self._on_title_before_deletion, on_after_deletion=
+            self._on_title_after_deletion)
         self.init_component(*args, **kwargs)
+
+    def _update_header_state(self):
+        # Заголовок может быть только в том случае, если есть текстовое значени,
+        # либо имеются компоненты
+        self.header = self.title or (not self.title and len(self.__title_items))
+
+    def _on_title_after_addition(self, component):
+        # Событие вызываемое после добавления элемента в заголовок
+        self.items.append(component)
+        self._update_header_state() 
+
+    def _on_title_before_deletion(self, component):
+        # Событие вызываемое перед удалением элемента из заголовка
+        self.items.remove(component)
+
+    def _on_title_after_deletion(self, success):
+        # Событие вызываемое после удаления элемента из заголовка
+        self._update_header_state()
 
     def t_render_items(self):
         """Дефолтный рендеринг вложенных объектов."""

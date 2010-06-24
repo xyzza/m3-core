@@ -11,42 +11,50 @@ class TypedList(list):
         переданному в *aprgs - иначе выводится assert
         Если значение входит в список исключений exceptions, то проверка не производится
     '''
-    def __init__(self, type, exceptions=[], on_addition=None, on_deletion=None):
+    def __init__(self, type, exceptions=[], on_before_addition=None,
+                 on_after_addition=None, on_before_deletion=None,
+                 on_after_deletion=None):
         ''' 
         @param type: Тип значений, которые должны находится в списке
         '''
         super(TypedList, self).__init__()
         self.__type = type
         self.__exceptions = exceptions
-        self.on_addition = on_addition
-        self.on_deletion = on_deletion
-        
+        self.on_before_addition = on_before_addition
+        self.on_after_addition = on_after_addition
+        self.on_before_deletion = on_before_deletion
+        self.on_after_deletion = on_after_deletion
+
     def __setitem__(self, key, value):
         self.__check(value)
         super(TypedList, self).__setitem__(key, value)
  
     def append(self, value):
         self.__check(value)
-        self.__do_addition(value)
+        self.__do_before_addition(value)
         super(TypedList, self).append(value)
+        self.__do_after_addition(value)
 
     def insert(self, num, value):
         self.__check(value)
-        self.__do_addition(value)
+        self.__do_before_addition(value)
         super(TypedList, self).insert(num, value)
+        self.__do_after_addition(value)
         
     def extend(self, values):
         map(self.append, values)
 
     def remove(self, value):
         if value in self:
-            self.__do_deletion(value)
+            self.__do_before_deletion(value)
         super(TypedList, self).remove(value)
+        self.__do_after_deletion(success=True)
 
     def pop(self, index=-1):
         if 0 <= index < len(self) or -len(self) <= index <= -1:
-            self.__do_deletion(self[index])
+            self.__do_before_deletion(self[index])
         super(TypedList, self).pop(index)
+        self.__do_after_deletion(success=True)
 
     def clear(self):
         '''
@@ -64,29 +72,53 @@ class TypedList(list):
         if value not in self.__exceptions:
             assert isinstance(value, self.__type), 'Type value "%s" isn\'t %s!' % (value, self.__type.__name__)
 
-    def __do_addition(self, *arg, **kwargs):
-        if self.__on_addition is not None:
-            self.__on_addition(*arg, **kwargs)
+    def __do_before_addition(self, *arg, **kwargs):
+        if self.__on_before_addition is not None:
+            self.__on_before_addition(*arg, **kwargs)
 
-    def __do_deletion(self, *arg, **kwargs):
-        if self.__on_deletion is not None:
-            self.__on_deletion(*arg, **kwargs)
+    def __do_after_addition(self, *arg, **kwargs):
+        if self.__on_after_addition is not None:
+            self.__on_after_addition(*arg, **kwargs)
+
+    def __do_before_deletion(self, *arg, **kwargs):
+        if self.__on_before_deletion is not None:
+            self.__on_before_deletion(*arg, **kwargs)
+
+    def __do_after_deletion(self, *arg, **kwargs):
+        if self.__on_after_deletion is not None:
+            self.__on_after_deletion(*arg, **kwargs)
 
     @property
-    def on_addition(self):
-        return self.__on_addition
+    def on_before_addition(self):
+        return self.__on_before_addition
 
-    @on_addition.setter
-    def on_addition(self, handler):
-        self.__on_addition = handler
+    @on_before_addition.setter
+    def on_before_addition(self, handler):
+        self.__on_before_addition = handler
 
     @property
-    def on_deletion(self):
-        return self.__on_deletion
+    def on_after_addition(self):
+        return self.__on_after_addition
 
-    @on_deletion.setter
-    def on_deletion(self, handler):
-        self.__on_deletion = handler
+    @on_after_addition.setter
+    def on_after_addition(self, handler):
+        self.__on_after_addition = handler
+
+    @property
+    def on_before_deletion(self):
+        return self.__on_before_deletion
+
+    @on_before_deletion.setter
+    def on_before_deletion(self, handler):
+        self.__on_before_deletion = handler
+
+    @property
+    def on_after_deletion(self):
+        return self.__on_after_deletion
+
+    @on_after_deletion.setter
+    def on_after_deletion(self, handler):
+        self.__on_after_deletion = handler
 
 
 class MutableList(list):

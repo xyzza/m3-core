@@ -47,6 +47,7 @@ class BaseExtPanel(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(BaseExtPanel, self).__init__(*args, **kwargs)
         self.title = None
+        self.header = False
         self.icon_cls = None
         self.top_bar = None
         self.bottom_bar = None
