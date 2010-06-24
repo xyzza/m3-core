@@ -89,6 +89,8 @@
 	})
 	// подтверждение при закрытии окна
 	function onBeforeClose(win) {
+		return true;
+		/* временно отключил нах проверку
 		if (win.forceClose) {return true;}
 		if (win.changesCount !== 0) {
 			Ext.Msg.show({
@@ -113,6 +115,7 @@
 			// возвращаем ложь, пока не ответят на диалог
 			return false;
 		} else {return true;}
+		*/
 	};
 	win.on('beforeclose', onBeforeClose);
 	return win;
