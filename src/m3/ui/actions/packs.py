@@ -31,7 +31,7 @@ class DictListWindowAction(Action):
                 if len(column)>2:
                     column_params['width'] = column[2]
             elif isinstance(column, dict):
-                 column_params = column
+                column_params = column
             else:
                 raise Exception('Incorrect parameter column.')
             control.add_column(**column_params)
@@ -294,3 +294,37 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
                     break
         
         return OperationResult.by_message(message)
+
+
+class BaseEnumerateDictionary(BaseDictionaryActions):
+    '''
+    Базовый экшен пак для построения справочников основанных на перечислениях, т.е.
+    предопределенных неизменяемых наборах значений. 
+    '''
+    # Класс перечисление с которым работает справочник
+    enumerate_class = None
+    
+    list_paging = False # Значений как правило мало и они влезают в одну страницу грида
+    list_readonly = True
+    list_columns = [('code', 'Код', 15),
+                    ('name', 'Наименование')]
+    
+    def get_rows(self, offset, limit, filter):
+        ''' Возвращает данные для грида справочника '''
+        assert self.enumerate_class != None, 'Attribute enumerate_class is not defined.'
+        data = []
+        for k, v in self.enumerate_class.values.items():
+            if filter and v.upper().find(filter.upper())<0:
+                continue
+            else:
+                data.append({'code': k, 'name': v} )
+
+        result = {'rows': data, 'total': len(data)}
+        return result
+    
+    def get_row(self, id):
+        ''' Заглушка для работы биндинга. В случае с перечислениями сам id хранится в БД '''
+        assert isinstance(id, int)
+        assert id in self.enumerate_class.keys(), 'Enumarate key "%s" is not defined in %s' % (id, self.enumerate_class)
+        return id
+    
