@@ -15,7 +15,7 @@ class UserRole(models.Model):
     Модель хранения роли пользователя в прикладной подсистеме
     '''
     # наименование роли пользователя
-    name     = models.CharField(max_length = 200)
+    name     = models.CharField(max_length = 200, db_index = True)
     
     # ассоциированная с ролью метароль (определяет интерфейс пользователя) 
     # может быть пустой
@@ -40,7 +40,7 @@ class RolePermission(models.Model):
     ''' 
     role = models.ForeignKey(UserRole)
     # здесь указывается код разрешения в формате 'модуль1.подмодуль.подмодуль.подмодуль...код разрешения'
-    permission_code = models.CharField(max_length=200)
+    permission_code = models.CharField(max_length=200, db_index = True)
     
     # человеческое наименование разрешения с наименованиями модулей, разделенных
     # через запятые
