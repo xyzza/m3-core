@@ -16,8 +16,8 @@ from django.conf import settings
 from django.utils.importlib import import_module
 
 from m3.helpers import logger
-
 from m3.ui.actions.packs import BaseDictionaryActions
+
 
 class UserMetarole(object):
     '''

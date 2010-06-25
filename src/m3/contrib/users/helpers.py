@@ -64,3 +64,10 @@ def get_unassigned_users(role, filter):
             result.append(user)
             
     return result
+
+def get_assigned_metaroles_query(user):
+    '''
+    Возвращает список метаролей у пользователя
+    '''
+    return [ metarole['role__metarole'] for metarole in AssignedRole.objects.filter(user=user). \
+                select_related('role'). values('role__metarole').distinct()]

@@ -9,10 +9,14 @@ from django.conf import urls
 
 from m3.ui.actions import ActionController
 
-
 from roles import RolesActions
 from users import UsersActions
 from metaroles import metarole_manager, UserMetarole, Metaroles_DictPack
+
+# Константы:
+GENERIC_USER = 'generic-user'
+ADMIN = 'admin'
+SUPER_ADMIN = 'super-admin'
 
 # контроллер
 users_controller = ActionController(url='/m3-users')
@@ -45,14 +49,14 @@ def register_metaroles(manager):
     @param manager: объект, отвечающий за управление метаролями.
     '''
     # метароль обычного пользователя системы
-    manager.GENERIC_USER_METAROLE = UserMetarole('generic-user', u'Обобщенный пользователь')
+    manager.GENERIC_USER_METAROLE = UserMetarole(GENERIC_USER, u'Обобщенный пользователь')
     
     # метароль администратора системы
-    manager.ADMIN_METAROLE = UserMetarole('admin', u'Администратор')
+    manager.ADMIN_METAROLE = UserMetarole(ADMIN, u'Администратор')
     manager.ADMIN_METAROLE.included_metaroles.extend([manager.GENERIC_USER_METAROLE])
     
     # метароль супер-администратора системы
-    manager.SUPER_ADMIN_METAROLE = UserMetarole('super-admin', u'Супер-администратор')
+    manager.SUPER_ADMIN_METAROLE = UserMetarole(SUPER_ADMIN, u'Супер-администратор')
     manager.SUPER_ADMIN_METAROLE.included_metaroles.extend([manager.GENERIC_USER_METAROLE, manager.ADMIN_METAROLE])
     
     return [manager.GENERIC_USER_METAROLE, manager.ADMIN_METAROLE, manager.SUPER_ADMIN_METAROLE]

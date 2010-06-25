@@ -4,3 +4,4 @@
 операций
 '''
 
+from app_meta import GENERIC_USER, ADMIN, SUPER_ADMIN
