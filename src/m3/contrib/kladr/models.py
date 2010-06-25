@@ -7,9 +7,9 @@ class KladrGeo(models.Model):
     Справочник КЛАДР
     '''
     parent = models.ForeignKey('KladrGeo', null=True, blank=True)
-    name = models.CharField(max_length=40)
-    socr = models.CharField(max_length=10)
-    code = models.CharField(max_length=13)
+    name = models.CharField(max_length=40, db_index = True)
+    socr = models.CharField(max_length=10, db_index = True)
+    code = models.CharField(max_length=13, db_index = True)
     zipcode = models.CharField(max_length=6)
     gni = models.CharField(max_length=4)
     uno = models.CharField(max_length=4)
@@ -29,9 +29,9 @@ class KladrStreet(models.Model):
     Справочник КЛАДР (улицы)
     ''' 
     parent = models.ForeignKey('KladrGeo', null=True, blank=True)
-    name = models.CharField(max_length=40)
-    socr = models.CharField(max_length=10)
-    code = models.CharField(max_length=17)
+    name = models.CharField(max_length=40, db_index = True)
+    socr = models.CharField(max_length=10, db_index = True)
+    code = models.CharField(max_length=17, db_index = True)
     zipcode = models.CharField(max_length=6)
     gni = models.CharField(max_length=4)
     uno = models.CharField(max_length=4)
