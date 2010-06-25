@@ -59,6 +59,7 @@ class ExtContextMenuItem(ExtUIComponent):
         self.text = None
         self.handler = None
         self.icon_cls = None
+        self.custom_handler = False
         self.init_component(*args, **kwargs)
         
     def render(self, container=None):
@@ -70,14 +71,17 @@ class ExtContextMenuItem(ExtUIComponent):
         if self.hidden:
             res += ',hidden: true'
         if self.handler:
-            if isinstance(self.handler, ExtConnection):
-                res += ',handler: function(){%s} ' % self.handler.render() 
-            elif isinstance(container, ExtGrid): # Будет работать только с templates-globals!!!
-                res += ',handler: function(){return %s(grid)}' % self.handler
-            elif isinstance(container, ExtTree):
-                res += ',handler: function(){return %s(tree)}' % self.handler
-            else:
+            if self.custom_handler:
                 res += ',handler: %s' % self.handler
+            else:
+                if isinstance(self.handler, ExtConnection):
+                    res += ',handler: function(){%s} ' % self.handler.render() 
+                elif isinstance(container, ExtGrid): # Будет работать только с templates-globals!!!
+                    res += ',handler: function(){return %s(grid)}' % self.handler
+                elif isinstance(container, ExtTree):
+                    res += ',handler: function(){return %s(tree)}' % self.handler
+                else:
+                    res += ',handler: %s' % self.handler
         return '{%s}' % res
     
 class ExtContextMenuSeparator(ExtUIComponent):
