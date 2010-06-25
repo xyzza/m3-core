@@ -9,8 +9,6 @@ from django.template.loader import render_to_string
 
 __all__ = ['init_logging', 'catch_error_500', 'info', 'error', 'debug', 'warning']
 
-DEFAULT_LOGGING_PATH = 'd:\\_temp\\'
-
 def init_logging(logs_path):
     '''
     Инициализация питоновского логирования. Срабатывает только один раз.
