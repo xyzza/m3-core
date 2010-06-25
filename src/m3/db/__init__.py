@@ -18,3 +18,23 @@ def safe_delete(model):
         return False
     
     return True
+
+
+class BaseEnumerate(object):
+    '''
+    Базовый класс для создания перечислений.
+    '''
+    # В словаре values описываются перечисляемые константы и их человеческое название
+    # Например: {STATE1: u'Состояние 1', CLOSED: u'Закрыто'}
+    values = {}
+    
+    @classmethod
+    def get_choices(cls):
+        ''' Используется для ограничения полей ORM. '''
+        return cls.values.items()
+    
+    @classmethod
+    def get_items(cls):
+        ''' Используется как источник данных в ArrayStore и DataStore ExtJS '''
+        return cls.values.items()
+    
