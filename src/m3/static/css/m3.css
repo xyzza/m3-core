@@ -1,0 +1,49 @@
+.add_item {
+    background-image:url(../images/add_item.png) !important;
+}
+.edit_item {
+    background-image:url(../images/edit_item.png) !important;
+}
+.delete_item {
+    background-image:url(../images/delete_item.png) !important;
+}
+
+.table_refresh {
+    background-image:url(../images/table_refresh.png) !important;
+}
+
+.refresh-icon-16 {
+    background-image:url(../images/table_refresh.png) !important;
+}
+
+.user-icon-16 {
+    background-image:url(../images/user-16.png) !important;
+}
+
+.select{
+    background-image:url(../images/select_value.gif) !important;
+}
+.clear{
+    background-image:url(../images/clear_field.gif) !important;
+}
+.search{
+    background-image:url(../images/search.png) !important;
+}
+q:before,q:after{content:'';}.m3-el-mask {
+	position: absolute;	
+	z-index: 100;
+    -moz-opacity: 0.5;
+    opacity: .50;
+    filter: alpha(opacity=50);
+    zoom: 1;
+}
+.ext-gecko2 .ext-mb-fix-cursor {
+    overflow:auto;
+}.m3-el-mask {
+    background-color: #ccc;
+}
+
+.red-row{ background-color: #E01600 !important; }
+.grey-row{ background-color: #CCCCCC !important; } 
+.green-row{ background-color: #239000 !important; }
+.yellow-row{ background-color: #FFF200 !important; }
