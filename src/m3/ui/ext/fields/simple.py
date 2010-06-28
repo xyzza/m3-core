@@ -10,9 +10,8 @@ from django.conf import settings
 
 from m3.helpers import normalize
 
-from base import BaseExtField, BaseExtTriggerField   
-from m3.ui.ext import render_component
-        
+from base import BaseExtField, BaseExtTriggerField
+
         
 class ExtStringField(BaseExtField):
     '''

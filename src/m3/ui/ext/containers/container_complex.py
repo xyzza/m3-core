@@ -22,29 +22,59 @@ class ExtContainerTable(BaseExtContainer):
         self.__rows_height = {}
         self.columns_count = columns
         self.rows_count = rows
+        
+        # Сложенный словарь с произвольными свойствами колонки, 
+        # например {1: {2: {'width': 100}}}, где 1-номер колонки, 2-номер строки.
+        # Первоначальное заполнение матрицы пустыми словарями.
+        self._properties = {}
+        for col_num in range(columns):
+            d = dict([(row_num, {}) for row_num in range(rows)])
+            self._properties[col_num] = d
+        
         self.init_component(*args, **kwargs)
   
     def render(self):
-        for i, row in enumerate(self.__table):
+        for row_num, row in enumerate(self.__table):
             col_cont_list = []
-            for col in row:
+            for col_num, col in enumerate(row):
                 if col!=None:
                     if isinstance(col, int):
                         col_cont_list.append(ExtContainer(layout = 'form', flex=1))
                     elif isinstance(col, ExtContainer):
                         col_cont_list.append(col)
         
-            height = self.__rows_height.get(i) or ExtContainerTable._DEFAULT_HEIGHT
+                    # Устанавливаем произвольные свойства для колонки, если они есть
+                    props = self._properties[col_num][row_num]
+                    for key, value in props.items():
+                        setattr(col, key, value)
+        
+            height = self.__rows_height.get(row_num) or ExtContainerTable._DEFAULT_HEIGHT
             row_cont = ExtContainer(layout_config = dict(align="stretch"), layout = 'hbox', height = height)
             row_cont.items.extend(col_cont_list)
             self._items.append(row_cont)
         
         return super(ExtContainerTable, self).render()
   
+    def set_column_properties(self, col_num=None, row_num=None, **kwargs):
+        '''
+        Устанавливает свойство контейнера в заданной колонке и строке 
+        @param col_num: Номер колонки. Если не задано, то вся колонка.
+        @param row_num: Номер строки. Если не задано, то вся строка.
+        '''
+        assert col_num==None or col_num <= self.columns_count, 'Number %s more than the number of columns %s' % (col_num, self.columns_count)
+        assert row_num==None or row_num <= self.rows_count, 'Number %s more than the number of rows %s' % (row_num, self.rows_count)
+        if col_num and row_num:
+            self._properties[col_num][row_num].update(kwargs)
+        elif col_num!=None:
+            for d in self._properties[col_num].values():
+                d.update(kwargs)
+        elif row_num!=None:
+            for d in self._properties.values():
+                d[row_num].update(kwargs)
+  
     @property
     def items(self):       
         return [col for row in self.__table for col in row if isinstance(col, ExtContainer)]
-
     
     @property
     def columns_count(self):
