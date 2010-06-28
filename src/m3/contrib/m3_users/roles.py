@@ -21,7 +21,6 @@ from m3.ui.actions import ActionContextDeclaration
 
 from users import SelectUsersListWindow
 from m3.ui.ext.panels.grids import ExtObjectGrid
-from m3.contrib.users.models import UserRole
 
 import helpers
 import models
@@ -106,7 +105,7 @@ class ShowAssignedUsersAction(actions.Action):
         
     def run(self, request, context):
         window = AssignedUsersWindow()
-        role = UserRole.objects.get(id=context.userrole_id)
+        role = models.UserRole.objects.get(id=context.userrole_id)
         window.field_role_name.value = role.name
         
         return actions.ExtUIScriptResult(window)
@@ -123,7 +122,7 @@ class SelectUsersToAssignWindowAction(actions.Action):
         ]
         
     def run(self, request, context):
-        role = UserRole.objects.get(id=context.userrole_id)
+        role = models.UserRole.objects.get(id=context.userrole_id)
         window = SelectUsersListWindow()
         window.grid.action_data = UsersForRoleAssignmentData
         window.grid.title = u'Выберите пользователей для роли "' + role.name + '"'
