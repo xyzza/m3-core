@@ -1,6 +1,7 @@
 #coding:utf-8
 
 from django.db import models, connection, transaction, IntegrityError
+from django.db.models.query import QuerySet
 
 def safe_delete(model):
     '''
@@ -19,6 +20,23 @@ def safe_delete(model):
     
     return True
 
+def queryset_limiter(queryset, start=0, limit=0):
+    '''
+    Извлекает из QuerySet'a список записей начиная с позиции start до записи start+limit.
+    Возвращает (rows, total, ), где
+    rows - список отобранных записей
+    total - общее кол-во записей в queryset'e
+    '''
+    
+    assert(queryset, QuerySet), 'queryset must be instance of django.db.models.query.QuerySet' 
+    
+    if start < 0:
+        start = 0
+    if limit < 0:
+        limit = 0
+    total = queryset.count()
+    rows = queryset[start:start+limit]
+    return (list(rows), total,)
 
 class BaseEnumerate(object):
     '''
