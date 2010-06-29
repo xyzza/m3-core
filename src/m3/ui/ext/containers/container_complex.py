@@ -22,16 +22,16 @@ class ExtContainerTable(BaseExtContainer):
         self.__rows_height = {}
         self.columns_count = columns
         self.rows_count = rows
+        self.init_component(*args, **kwargs)
         
-        # Сложенный словарь с произвольными свойствами колонки, 
+    def _init_properties(self):
+        # Вложенный словарь с произвольными свойствами для каждой ячейки, 
         # например {1: {2: {'width': 100}}}, где 1-номер колонки, 2-номер строки.
         # Первоначальное заполнение матрицы пустыми словарями.
         self._properties = {}
-        for col_num in range(columns):
-            d = dict([(row_num, {}) for row_num in range(rows)])
+        for col_num in range(self.__columns_count):
+            d = dict([(row_num, {}) for row_num in range(self.__rows_count)])
             self._properties[col_num] = d
-        
-        self.init_component(*args, **kwargs)
   
     def render(self):
         for row_num, row in enumerate(self.__table):
@@ -86,7 +86,7 @@ class ExtContainerTable(BaseExtContainer):
     def columns_count(self, value):
         assert isinstance(value, int), 'Value must be INT'
         self.__columns_count = value
-        
+        self._init_properties()
         if self.__rows_count:
             self.__init_table()
 
@@ -98,7 +98,7 @@ class ExtContainerTable(BaseExtContainer):
     def rows_count(self, value):
         assert isinstance(value, int), 'Value must be INT'
         self.__rows_count = value
-        
+        self._init_properties()
         if self.__columns_count:
             self.__init_table()
 
