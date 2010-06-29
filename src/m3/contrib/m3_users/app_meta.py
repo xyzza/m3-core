@@ -35,7 +35,7 @@ def register_urlpatterns():
     Регистрация конфигурации урлов для приложения m3.contrib.users
     '''
     return urls.defaults.patterns('',
-        (r'^m3-users', 'm3.contrib.users.app_meta.users_view'),
+        (r'^m3-users', 'm3.contrib.m3_users.app_meta.users_view'),
     )
 
 #===============================================================================
@@ -48,6 +48,7 @@ def register_metaroles(manager):
     
     @param manager: объект, отвечающий за управление метаролями.
     '''
+    
     # метароль обычного пользователя системы
     manager.GENERIC_USER_METAROLE = UserMetarole(GENERIC_USER, u'Обобщенный пользователь')
     
