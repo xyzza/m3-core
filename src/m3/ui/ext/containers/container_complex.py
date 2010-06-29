@@ -55,20 +55,22 @@ class ExtContainerTable(BaseExtContainer):
         
         return super(ExtContainerTable, self).render()
   
-    def set_column_properties(self, col_num=None, row_num=None, **kwargs):
+    def set_properties(self, col_num=None, row_num=None, **kwargs):
         '''
-        Устанавливает свойство контейнера в заданной колонке и строке 
+        Устанавливает свойство контейнера в заданной колонке и(или) строке.
         @param col_num: Номер колонки. Если не задано, то вся колонка.
         @param row_num: Номер строки. Если не задано, то вся строка.
         '''
-        assert col_num==None or col_num <= self.columns_count, 'Number %s more than the number of columns %s' % (col_num, self.columns_count)
-        assert row_num==None or row_num <= self.rows_count, 'Number %s more than the number of rows %s' % (row_num, self.rows_count)
-        if col_num and row_num:
+        assert col_num==None or 0 <= col_num <= self.columns_count, 'Number %s more than the number of columns %s' % (col_num, self.columns_count)
+        assert row_num==None or 0 <= row_num <= self.rows_count, 'Number %s more than the number of rows %s' % (row_num, self.rows_count)
+        if col_num != None and row_num != None:
             self._properties[col_num][row_num].update(kwargs)
-        elif col_num!=None:
+        # Задана только колонка
+        elif col_num != None:
             for d in self._properties[col_num].values():
                 d.update(kwargs)
-        elif row_num!=None:
+        # Задана только строка
+        elif row_num != None:
             for d in self._properties.values():
                 d[row_num].update(kwargs)
   
