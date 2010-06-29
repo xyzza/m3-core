@@ -22,16 +22,16 @@ class ExtContainerTable(BaseExtContainer):
         self.__rows_height = {}
         self.columns_count = columns
         self.rows_count = rows
+        self.init_component(*args, **kwargs)
         
-        # Сложенный словарь с произвольными свойствами колонки, 
+    def _init_properties(self):
+        # Вложенный словарь с произвольными свойствами для каждой ячейки, 
         # например {1: {2: {'width': 100}}}, где 1-номер колонки, 2-номер строки.
         # Первоначальное заполнение матрицы пустыми словарями.
         self._properties = {}
-        for col_num in range(columns):
-            d = dict([(row_num, {}) for row_num in range(rows)])
+        for col_num in range(self.__columns_count):
+            d = dict([(row_num, {}) for row_num in range(self.__rows_count)])
             self._properties[col_num] = d
-        
-        self.init_component(*args, **kwargs)
   
     def render(self):
         for row_num, row in enumerate(self.__table):
@@ -55,20 +55,22 @@ class ExtContainerTable(BaseExtContainer):
         
         return super(ExtContainerTable, self).render()
   
-    def set_column_properties(self, col_num=None, row_num=None, **kwargs):
+    def set_properties(self, row_num=None, col_num=None, **kwargs):
         '''
-        Устанавливает свойство контейнера в заданной колонке и строке 
+        Устанавливает свойство контейнера в заданной колонке и(или) строке.
         @param col_num: Номер колонки. Если не задано, то вся колонка.
         @param row_num: Номер строки. Если не задано, то вся строка.
         '''
-        assert col_num==None or col_num <= self.columns_count, 'Number %s more than the number of columns %s' % (col_num, self.columns_count)
-        assert row_num==None or row_num <= self.rows_count, 'Number %s more than the number of rows %s' % (row_num, self.rows_count)
-        if col_num and row_num:
+        assert col_num==None or 0 <= col_num <= self.columns_count, 'Number %s more than the number of columns %s' % (col_num, self.columns_count)
+        assert row_num==None or 0 <= row_num <= self.rows_count, 'Number %s more than the number of rows %s' % (row_num, self.rows_count)
+        if col_num != None and row_num != None:
             self._properties[col_num][row_num].update(kwargs)
-        elif col_num!=None:
+        # Задана только колонка
+        elif col_num != None:
             for d in self._properties[col_num].values():
                 d.update(kwargs)
-        elif row_num!=None:
+        # Задана только строка
+        elif row_num != None:
             for d in self._properties.values():
                 d[row_num].update(kwargs)
   
@@ -84,7 +86,7 @@ class ExtContainerTable(BaseExtContainer):
     def columns_count(self, value):
         assert isinstance(value, int), 'Value must be INT'
         self.__columns_count = value
-        
+        self._init_properties()
         if self.__rows_count:
             self.__init_table()
 
@@ -96,7 +98,7 @@ class ExtContainerTable(BaseExtContainer):
     def rows_count(self, value):
         assert isinstance(value, int), 'Value must be INT'
         self.__rows_count = value
-        
+        self._init_properties()
         if self.__columns_count:
             self.__init_table()
 

@@ -4,10 +4,9 @@ Created on 27.02.2010
 
 @author: akvarats
 '''
-from m3.ui.ext.base import ExtUIComponent
 from base import BaseExtContainer
+from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.controls import ExtButton
-from m3.ui.ext.fields.base import BaseExtField
 
 
 class ExtContainer(BaseExtContainer):
