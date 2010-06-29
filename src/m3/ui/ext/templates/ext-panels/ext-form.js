@@ -19,9 +19,6 @@
     	{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
     	
      	,baseCls: 'x-plain'
-    	{% if component.label_width  %} ,labelWidth: {{ component.label_width }} {% endif %}
-    	{% if component.label_align  %} ,labelAlign: '{{ component.label_align }}' {% endif %}
-    	{% if component.label_pad  %} ,labelPad: {{ component.label_pad }} {% endif %}
         ,items: [{{ component.t_render_items|safe }}]
     });
     {% if component.focused_field %}Ext.getCmp('{{ component.focused_field.client_id}}').focus(false, 1000);{% endif %}

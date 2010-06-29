@@ -13,13 +13,11 @@ from m3.ui.ext.fields.simple import (ExtNumberField,
                                      ExtDateField,
                                      ExtCheckBox, ExtComboBox, ExtTimeField,
                                      ExtHiddenField)
-from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
-from m3.helpers.datastructures import TypedList
 from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.fields.complex import ExtDictSelectField
-from django.db import models
+from m3.helpers.datastructures import TypedList
 #from m3.ui.actions.packs import BaseDictionaryActions
 
 
@@ -30,8 +28,6 @@ class ExtForm(BaseExtPanel):
         self.layout = 'form'
         self.padding = None
         self.url = None
-        # Параметры специфичные для layout form
-        self.label_width = self.label_align = self.label_pad = None
         
         self.request = None
         self.object = None

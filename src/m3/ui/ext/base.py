@@ -140,6 +140,8 @@ class ExtUIComponent(BaseExtComponent):
         self.max_height = self.min_height = self.max_width = self.min_width = None
         self.name = None
         self.anchor = None
+        # Атрибуты специфичные для form layout
+        self.label_width = self.label_align = self.label_pad = None
         
     def t_render_style(self):
         return '{%s}' % ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])
