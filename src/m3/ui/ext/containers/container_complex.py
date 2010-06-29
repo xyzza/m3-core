@@ -55,7 +55,7 @@ class ExtContainerTable(BaseExtContainer):
         
         return super(ExtContainerTable, self).render()
   
-    def set_properties(self, col_num=None, row_num=None, **kwargs):
+    def set_properties(self, row_num=None, col_num=None, **kwargs):
         '''
         Устанавливает свойство контейнера в заданной колонке и(или) строке.
         @param col_num: Номер колонки. Если не задано, то вся колонка.
