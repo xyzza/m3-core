@@ -96,6 +96,7 @@ class MetaroleManager(object):
                         for metarole in metaroles:
                             if isinstance(metarole, UserMetarole):
                                 self.register_metarole(metarole)
+            self._loaded = True
         except:
             logger.exception(u'Не удалось выполнить метод _populate у MetaroleManager')
         finally:

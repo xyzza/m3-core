@@ -8,49 +8,35 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Adding model 'UserProfile'
-        db.create_table('users_userprofile', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], unique=True)),
-            ('fname', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('iname', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('oname', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
-            ('metarole', self.gf('django.db.models.fields.CharField')(default='generic-user', max_length=100)),
-        ))
-        db.send_create_signal('users', ['UserProfile'])
-
         # Adding model 'UserRole'
         db.create_table('m3_users_role', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=200, db_index=True)),
             ('metarole', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
         ))
-        db.send_create_signal('users', ['UserRole'])
+        db.send_create_signal('m3_users', ['UserRole'])
 
         # Adding model 'RolePermission'
         db.create_table('m3_users_rolepermissions', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('role', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.UserRole'])),
+            ('role', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['m3_users.UserRole'])),
             ('permission_code', self.gf('django.db.models.fields.CharField')(max_length=200, db_index=True)),
             ('verbose_permission_name', self.gf('django.db.models.fields.TextField')()),
             ('disabled', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
         ))
-        db.send_create_signal('users', ['RolePermission'])
+        db.send_create_signal('m3_users', ['RolePermission'])
 
         # Adding model 'AssignedRole'
         db.create_table('m3_users_assignedrole', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('role', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.UserRole'])),
+            ('role', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['m3_users.UserRole'])),
         ))
-        db.send_create_signal('users', ['AssignedRole'])
+        db.send_create_signal('m3_users', ['AssignedRole'])
 
 
     def backwards(self, orm):
         
-        # Deleting model 'UserProfile'
-        db.delete_table('users_userprofile')
-
         # Deleting model 'UserRole'
         db.delete_table('m3_users_role')
 
@@ -98,30 +84,21 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'users.assignedrole': {
-            'Meta': {'object_name': 'AssignedRole', 'db_table': "'m3_users_assignedrole'"},
+        'm3_users.assignedrole': {
+            'Meta': {'object_name': 'AssignedRole'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'role': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserRole']"}),
+            'role': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['m3_users.UserRole']"}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
-        'users.rolepermission': {
+        'm3_users.rolepermission': {
             'Meta': {'object_name': 'RolePermission', 'db_table': "'m3_users_rolepermissions'"},
             'disabled': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'permission_code': ('django.db.models.fields.CharField', [], {'max_length': '200', 'db_index': 'True'}),
-            'role': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserRole']"}),
+            'role': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['m3_users.UserRole']"}),
             'verbose_permission_name': ('django.db.models.fields.TextField', [], {})
         },
-        'users.userprofile': {
-            'Meta': {'object_name': 'UserProfile'},
-            'fname': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iname': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'metarole': ('django.db.models.fields.CharField', [], {'default': "'generic-user'", 'max_length': '100'}),
-            'oname': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'unique': 'True'})
-        },
-        'users.userrole': {
+        'm3_users.userrole': {
             'Meta': {'object_name': 'UserRole', 'db_table': "'m3_users_role'"},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'metarole': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
@@ -129,4 +106,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['users']
+    complete_apps = ['m3_users']
