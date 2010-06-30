@@ -5,6 +5,7 @@ import json
 import inspect
 import time
 import datetime
+import uuid # для генерации уникальных идентификаторов
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -398,6 +399,14 @@ class Action(object):
         '''
         Возвращает полный путь до действия
         '''
+#        строки ниже не убирать! это кусок будущего тела метода
+#        if not cls.controller:
+#            ControllerCache.rebuild_patterns_in_controllers()
+#            if not cls.controller:
+#                raise Exception(u'Судя по всему, действие ' + str(cls) + ' не включено ни в один контроллер (не удалось получить absolute_url)')
+#        
+#        return cls.controller.url + self.get_packs_url() + cls.url
+            
         if ActionController._urltable.has_key(cls):
             url = ActionController._urltable[cls]
             ignored_chars = ['^', '&', '$']
@@ -406,6 +415,7 @@ class Action(object):
             return url
         return ''
     
+  
     def get_packs_url(self):
         '''
         Возвращает путь всех паков на пути к экшену
@@ -476,6 +486,11 @@ class ActionController(object):
         # Словари для быстрого поиска паков
         self._find_by_name = {}
         self._find_by_type = {}
+        
+        # --------------------------------------------------------------
+        # внутренние параметры, которые контролируют работу контроллера в системе
+        self._controller_id = str(uuid.uuid4())[-12:] # уникальный внутренний по системе идентификатор контроллера
+        self._registered = False # признак того, что контроллер зарегистрирован во внутреннем кеше
     
     def _load_class(self, full_path):
         '''
@@ -647,15 +662,71 @@ class ActionController(object):
             return self._find_by_type.get(type)
         else:
             raise ValueError('Wrong type of argument %s' % type)
+
+    #=======================================================================
+    # Методы, предназначенные для добавления пакетов действий в контроллер
+    #=======================================================================
+    def append_pack(self, pack):
+        '''
+        Добавляет ActionPack в контроллер.
+        
+        @param pack: объект типа ActionPack, который необходимо добавить в контроллер
+        '''
+        if not pack:
+            return
+        assert isinstance(pack, ActionPack)
+        ControllerCache.register_controller(self)
+        self.packs.append(pack)
+        self._registered = True
+        
+        
+    def extend_packs(self, packs):
+        '''
+        Производит массовое добавление экшенпаков в контроллер.
+        
+        @param packs: список объектов типа ActionPack, которые необходимо зарегистрировать в контроллере
+        '''
+        if not packs:
+            return
+        ControllerCache.register_controller(self)
+        self.packs.extend(packs)
+        self._registered = True
     
 class ControllerCache(object):
     '''
-    Внутренний класс подсистемы m3.ui.actions, который отвечает за прогрузку объявленных
-    в приложениях прикладного проекта объектов ActionPack.
-    В системе существует только один объект данного класса.
+    Внутренний класс платформы, который отвечает за хранение кеша контроллеров и связанных
+    с ним экшенов и паков.
     '''
     _loaded = False
     _write_lock = threading.RLock()
+    
+    # словарь зарегистрированных контроллеров в прикладном приложении
+    _controllers = {}
+    _actions = {}
+    
+    @classmethod
+    def register_controller(cls, controller):
+        '''
+        Выполняет регистрацию контроллера во внутреннем кеше.
+        '''
+        cls._write_lock.acquire()
+        try:
+            if not cls._controllers.has_key(controller._controller_id):
+                cls._controllers[controller._controller_id] = controller
+        finally:
+            cls._write_lock.acquire()
+            
+    @classmethod
+    def rebuild_patterns_in_controllers(cls):
+        '''
+        Выполняет метод rebuild_patterns внутри зарегистрированных контроллеров
+        '''
+        cls._write_lock.acquire()
+        try:
+            for controller in cls._controllers.values():
+                controller.rebuild_patterns()
+        finally:
+            cls._write_lock.acquire()
     
     @classmethod
     def populate(cls):
