@@ -454,7 +454,10 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         else:
             if branch_id and hasattr(self.tree_model,'get_descendants'):
                 branch_node = self.tree_model.objects.get(id = branch_id)
-                query = branch_node.get_descendants().objects.filter(parent = parent_id)
+                if parent_id:
+                    query = branch_node.get_descendants().filter(parent = parent_id)
+                else:
+                    query = branch_node.get_children()
             else:
                 query = self.tree_model.objects.filter(parent = parent_id)
             query = utils.apply_sort_order(query, self.tree_columns, self.tree_sort_order)
