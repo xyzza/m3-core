@@ -16,6 +16,9 @@ Ext.override(Ext.Window, {
 	,parentWindowID: ''
 	,listeners: {
 		'show': function (){
+			if ( Ext.get('x-desktop').getHeight() < this.getHeight() ) {
+				this.setHeight( Ext.get('x-desktop').getHeight() );
+			}
 			if (this.modal){
 				var parent_wind = Ext.getCmp(this.parentWindowID);
 				if (parent_wind != undefined) {
