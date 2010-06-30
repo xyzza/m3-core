@@ -241,8 +241,18 @@ class ListWindowAction(Action):
         ''' Настраивает дерево групп '''
         base = self.parent
         # Добавляем отображаемые колонки
-        for field, name in base.tree_columns:
-            win.tree.add_column(header = name, data_index = field, width = 10)
+        for column in base.tree_columns:
+            if isinstance(column, tuple):
+                column_params = { 'data_index': column[0], 'header': column[1]}
+                if len(column)>2:
+                    column_params['width'] = column[2]
+                else:
+                    column_params['width'] = 10
+            elif isinstance(column, dict):
+                column_params = column
+            else:
+                raise Exception('Incorrect parameter column.')
+            win.tree.add_column(**column_params)
         # Устанавливаем источники данных
         win.tree.url = base.nodes_action.get_absolute_url()
         # События для дерева
