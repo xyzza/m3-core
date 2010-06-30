@@ -213,7 +213,7 @@ var ajax = Ext.Ajax;
 			,success: function (response, opts) {
 				renderWindowTree(response, opts, node);
 			}
-			,params: Ext.applyIf({ 'id': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+			,params: Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,failure: function(response, opts){
 			   Ext.Msg.alert('','failed');
 			}
@@ -231,7 +231,7 @@ var ajax = Ext.Ajax;
 		node = tree.getSelectionModel().getSelectedNode();
 		ajax.request({
 			url: "{{ component.url_edit_tree }}"
-			,params: Ext.applyIf({ 'id': node.id}, {% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+			,params: Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id}, {% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,success: function (response, opts) {
 				renderWindowTree(response, opts, node.parentNode);
 			}

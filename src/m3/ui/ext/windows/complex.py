@@ -71,6 +71,8 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.__column_name_on_select = None
         self.maximizable = True
         self.minimizable = True
+        
+        self.contextTreeIdName = 'id'
         self.init_component(*args, **kwargs)
         
     @property

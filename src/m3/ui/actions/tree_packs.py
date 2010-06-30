@@ -149,7 +149,7 @@ class TreeNewNodeWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         # Получаем id родительской группы. Если приходит не валидное значение, то создаем узел в корне
-        parent_id = utils.extract_int(request, 'id')
+        parent_id = utils.extract_int(request, base.contextTreeIdName)
         if parent_id < 1:
             parent_id = None
         # Создаем новую группу и биндим ее к форме
@@ -200,6 +200,7 @@ class ListWindowAction(Action):
         win.init_tree_components()
         win.tree.width = base.tree_width
         win.tree.root_text = base.title
+        win.contextTreeIdName = base.contextTreeIdName
         return win
     
     def create_columns(self, control, columns):
@@ -317,6 +318,8 @@ class BaseTreeDictionaryActions(ActionPack):
     width = 600
     height = 400
     tree_width = 200
+    
+    contextTreeIdName = 'id'
     
     def __init__(self):
         self.actions = []
