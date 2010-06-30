@@ -8,12 +8,14 @@ from dbfpy import dbf
 from m3.contrib.kladr import models
 
 
-@transaction.commit_on_success
-def fill_kladr(region = None, dbf_path = ''):
+@transaction.commit_manually
+def fill_kladr(region_only = None, dbf_path = ''):
     '''
     Заполнение справочника КЛАДР
-    region - первые два символа региона, для ограничения загрузки только этого региона 
-    ''' 
+    region_only - первые два символа региона, для ограничения загрузки только этого региона 
+    '''
+    COMMIT_PER = 10000       
+     
     def fill_record(result_list, rec, type):
         temp_dict = {}
         temp_dict['name'] = rec[0].decode('866')
@@ -69,8 +71,8 @@ def fill_kladr(region = None, dbf_path = ''):
     not_actual_places_list = []
     
     for rec in db_geo:
-        if region:
-            if str(rec[2])[:2] != region:
+        if region_only:
+            if str(rec[2])[:2] != region_only:
                 continue
         if str(rec[2])[2:] == '00000000000':
             fill_record(sub_list,rec, 'subject')
@@ -82,16 +84,9 @@ def fill_kladr(region = None, dbf_path = ''):
             fill_record(geo_places_list,rec, 'place')
         else:
             not_actual_places_list.append(rec[2])                 
-    
-    # Список улиц
-    street_list = []
-    for rec in db_street:
-        if region:
-            if str(rec[2].decode('866'))[:2] != region:
-                continue
-        street_list.append(rec)
-    
+      
     list_count = len(sub_list)
+    transaction_commit_counter = 0   
     i = 1
     for sub_value in sub_list.itervalues():
         new_kladr_geo_sub = models.KladrGeo()
@@ -109,6 +104,10 @@ def fill_kladr(region = None, dbf_path = ''):
         
         sub_value['id'] = new_kladr_geo_sub.id
         sub_value['flag'] = True
+        
+        transaction_commit_counter += 1
+        if transaction_commit_counter % COMMIT_PER == 0:
+            transaction.commit()           
         if i % 1000 == 1:
             print (str(i)+'/'+str(list_count)+' '+new_kladr_geo_sub.name)
         i=i+1
@@ -134,6 +133,10 @@ def fill_kladr(region = None, dbf_path = ''):
             
             region_key['id'] = new_kladr_geo_region.id
             region_key['flag'] = True
+            
+            transaction_commit_counter += 1
+            if transaction_commit_counter % COMMIT_PER == 0:
+                transaction.commit()                  
             if i % 1000 == 1:
                 print (' '*5+str(i)+'/'+str(list_count)+' '+new_kladr_geo_region.name)
             i=i+1
@@ -162,6 +165,10 @@ def fill_kladr(region = None, dbf_path = ''):
             
                 city_key['id'] = new_kladr_geo_city.id
                 city_key['flag'] = True
+                
+                transaction_commit_counter += 1
+                if transaction_commit_counter % COMMIT_PER == 0:
+                    transaction.commit() 
                 if i % 1000 == 1:
                     print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
                 i=i+1
@@ -185,6 +192,10 @@ def fill_kladr(region = None, dbf_path = ''):
             
                 city_key['id'] = new_kladr_geo_city.id
                 city_key['flag'] = True
+                
+                transaction_commit_counter += 1
+                if transaction_commit_counter % COMMIT_PER == 0:
+                    transaction.commit()
                 if i % 1000 == 1:
                     print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
                 i=i+1
@@ -217,6 +228,10 @@ def fill_kladr(region = None, dbf_path = ''):
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
+                    
+                    transaction_commit_counter += 1
+                    if transaction_commit_counter % COMMIT_PER == 0:
+                        transaction.commit()
                     if i % 1000 == 1:
                         print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
                     i=i+1
@@ -245,6 +260,9 @@ def fill_kladr(region = None, dbf_path = ''):
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
+                    transaction_commit_counter += 1
+                    if transaction_commit_counter % COMMIT_PER == 0:
+                        transaction.commit()
                     if i % 1000 == 1:
                         print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
                     i=i+1
@@ -273,14 +291,20 @@ def fill_kladr(region = None, dbf_path = ''):
                 
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
+                    transaction_commit_counter += 1
+                    if transaction_commit_counter % COMMIT_PER == 0:
+                        transaction.commit()
                     if i % 1000 == 1:
                         print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
                     i=i+1
     
     i = 1
-    list_count = len(street_list)
-    # Загрузка улиц. (порядка 3х часов)
-    for street in iter(street_list):
+    #list_count = len(street_list)
+    # Загрузка улиц. 
+    for street in db_street:
+        if region_only:
+            if str(street[2].decode('866'))[:2] != region_only:
+                continue
         code = street[2].decode('866')
         if code[15:] == '00':
             if code[2:11] == '000000000':
@@ -300,6 +324,9 @@ def fill_kladr(region = None, dbf_path = ''):
                     street_sub.gni = street[4].decode('866')
                     street_sub.okato = street[5].decode('866')
                     street_sub.save()
+                    transaction_commit_counter += 1 
+                    if transaction_commit_counter % COMMIT_PER == 0:
+                        transaction.commit()
                     if i % 1000 == 1:
                         print (' '*20+str(i)+'/'+str(list_count)+' '+street_sub.name)
                     i=i+1
@@ -321,6 +348,9 @@ def fill_kladr(region = None, dbf_path = ''):
                     street_city.gni = street[4].decode('866')
                     street_city.okato = street[5].decode('866')
                     street_city.save()
+                    transaction_commit_counter += 1
+                    if transaction_commit_counter % COMMIT_PER == 0:
+                        transaction.commit()
                     if i % 1000 == 1:
                         print (' '*20+str(i)+'/'+str(list_count)+' '+street_city.name)
                     i=i+1 
@@ -342,9 +372,12 @@ def fill_kladr(region = None, dbf_path = ''):
                     street_place.gni = street[4].decode('866')
                     street_place.okato = street[5].decode('866')
                     street_place.save()
+                    transaction_commit_counter += 1
+                    if transaction_commit_counter % COMMIT_PER == 0:
+                        transaction.commit()
                     if i % 1000 == 1:
                         print (' '*20+str(i)+'/'+str(list_count)+' '+street_place.name)
                     i=i+1                   
-                        
+    transaction.commit()               
     print (u'Загрузка КЛАДР в систему завершена')     
     

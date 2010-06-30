@@ -160,3 +160,44 @@ Ext.override(Ext.form.Field, {
         }
     },
 });
+
+/**
+ * Создаётся новый компонент: Панель с возможностью включения в заголовок
+ * визуальных компонентов.
+ */
+Ext.app.TitlePanel = Ext.extend(Ext.Panel, {
+   titleItems: null,
+   addTitleItem: function (itemConfig) { 
+       var item = Ext.ComponentMgr.create(itemConfig);
+       var itemsDiv = Ext.DomHelper.insertFirst(this.header, {tag:"div", style:"height:15px;float:right;margin-top:-3px;margin-left:3px;"}, true);
+       item.render(itemsDiv);
+   },
+   onRender: function (ct, position) {
+       Ext.app.TitlePanel.superclass.onRender.apply(this, arguments);
+       if (this.titleItems != null) {
+           if(Ext.isArray(this.titleItems)){
+               for (var i = 0; i < this.titleItems.length; i++) {
+                   this.addTitleItem(this.titleItems[i]);
+               }
+           } else {
+               this.addTitleItems(this.titleItems);
+           }
+           
+           if (this.header)
+               this.header.removeClass('x-unselectable');
+       };
+   },
+   getChildByName: function (name) {
+       if (this.items)
+           for (var i = 0;  i < this.items.length; i++)
+               if (this.items.items[i].name == name)
+                   return this.items.items[i];
+
+       if (this.titleItems)
+           for (var i = 0; i < this.titleItems.length; i++)
+               if (this.titleItems[i].name == name)
+                   return this.titleItems[i];
+
+       return null;
+    }
+});
