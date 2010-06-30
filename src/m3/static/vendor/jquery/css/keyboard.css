@@ -1,0 +1,196 @@
+#master-searchbar {
+    overflow:hidden;
+}
+
+#master-searchbar-panel{
+    top:5px;
+    background-image:url(/static/images/search-panel.png);
+    background-position:center;
+    background-repeat:no-repeat;
+    overflow:hidden;
+}
+
+/*
+#master-searchbar-button {
+
+	cursor:pointer;
+    width:13%;
+    height:38px;
+    vertical-align: bottom;
+	font: 12pt sans-serif;
+}
+*/
+#hide-keyboard-num-button,
+#hide-keyboard-button {
+	background: url('/static/jquery/images/keyboard/close_key.png') no-repeat;
+	position: absolute;
+	cursor: pointer;
+	right: 1px;
+	top: -32px;
+	z-index:11;
+	width: 37px;
+	height: 37px;
+	overflow: visible;
+}
+
+#keyboard-container {
+    position:fixed;
+    background: url('/static/jquery/images/keyboard/back_keyboard.png') no-repeat;
+    height:0px;
+    overflow: hidden;
+    z-index:10;
+    font-size:17px;
+	width: 670px;
+}
+#keyboard {
+    margin: 0;
+    padding: 10px 5px 5px 5px;
+    list-style: none;
+}
+#keyboard li {
+    float: left;
+    margin: 0 5px 5px 0;
+    width: 55px;
+    height: 65px;
+    line-height: 60px;
+    text-align: center;
+    background: url('/static/jquery/images/keyboard/standart_bot.png') no-repeat;
+	font-size:18pt;
+	cursor: pointer;
+}
+
+.capslock, .tab, .left-shift, .first-item {
+    clear: left;
+}
+.first-letter {
+	margin-left: 20px;
+}
+/*
+#keyboard .tab {
+    width: 75px;
+}
+*/
+#keyboard .left-shift {
+	
+}
+#keyboard .delete {
+	float: right;
+}
+
+/*
+#keyboard .capslock {
+    width: 85px;
+}
+*/
+#keyboard .return {
+	background: url('/static/jquery/images/keyboard/input_bot.png') no-repeat;
+    width: 117px;
+}
+#keyboard .return:active {
+	background: url('/static/jquery/images/keyboard/input_bot_01.png') no-repeat;
+}
+
+#keyboard .rus-eng, 
+#keyboard .swich-keyboard,
+#keyboard .input-for-email {
+	background: url('/static/jquery/images/keyboard/caps_lock_bot.png') no-repeat;
+    width: 89px;
+}
+#keyboard .rus-eng:active, 
+#keyboard .swich-keyboard:active,
+#keyboard .input-for-email:active {
+	background: url('/static/jquery/images/keyboard/caps_lock_bot_01.png') no-repeat;
+}
+
+.lastitem {
+margin-right: 0;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+#keyboard .space {
+	background: url('/static/jquery/images/keyboard/space_bot.png') no-repeat;
+    width: 344px;
+}
+#keyboard .space:active {
+	background: url('/static/jquery/images/keyboard/space_bot_01.png') no-repeat;
+}
+
+.on {
+    display:none;
+}
+.en{
+    display:none;
+}
+.smb{
+    display:none;
+}
+.input-for-email {
+	display:none;
+}
+#keyboard li:active {
+	position: relative;
+	top: 2px;
+	background: url('/static/jquery/images/keyboard/standart_bot_01.png') no-repeat;
+	cursor: pointer;
+}
+
+#hide-keyboard-container:hover {
+    position: relative;
+    top: 2px;
+    left: 2px;
+    border-color: #e5e5e5;
+    cursor: pointer;
+}
+
+/* цифровая клавиатура */
+#keyboard-num-container {
+    position:absolute;
+	background: url('/static/jquery/images/keyboard/back_num_keyboard.png') no-repeat;
+    right:50px;
+    bottom:10px;
+    height:0px;
+    width:220px;
+    overflow:hidden;
+    z-index:5;
+    font-size:18pt;
+}
+
+#keyboard-num {
+    margin: 0;
+    padding: 10px 5px 5px 5px;
+    list-style: none;
+}
+
+#keyboard-num li {
+    float: left;
+    margin: 0 5px 5px 0;
+    width: 65px;
+    height: 65px;
+    line-height: 60px;
+    text-align: center;
+ 	background: url('/static/jquery/images/keyboard/standart_num_bot.png') no-repeat;
+	cursor: pointer;
+}
+
+#keyboard-num li:active {
+    position: relative;
+    top: 2px;
+    left: 2px;
+    background: url('/static/jquery/images/keyboard/standart_num_bot_01.png') no-repeat;
+    cursor: pointer;
+}
+
+#hide-keyboard-num-container:hover {
+    position: relative;
+    top: 2px;
+    left: 2px;
+    border-color: #e5e5e5;
+    cursor: pointer;
+}
+
+
+#keyboard-num .return{
+}
