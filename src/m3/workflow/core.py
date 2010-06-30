@@ -89,21 +89,21 @@ class GeneratorStep(BaseModelGenerator):
     metaclass = 'm3_workflow.MetaWorkflowStateModel'
     baseclass = 'm3_workflow.BaseWorkflowStepModel'
     class_suffix = 'StateModel'
-    table_suffix = 'State'
+    table_suffix = 'state'
     attribute = 'state'
     
 class GeneratorChild(BaseModelGenerator):
     metaclass = 'm3_workflow.MetaWorkflowChildModel'
     baseclass = 'm3_workflow.BaseWorkflowChildModel'
     class_suffix = 'ChildModel'
-    table_suffix = 'Child'
+    table_suffix = 'child'
     attribute = 'child'
     
 class GeneratorWSO(BaseModelGenerator):
     metaclass = 'm3_workflow.MetaWorkflowWSOModel'
     baseclass = 'm3_workflow.BaseWorkflowWSOModel'
     class_suffix = 'WSOModel'
-    table_suffix = 'WSO'
+    table_suffix = 'wso'
     attribute = 'wso'
     
 class GeneratorDoc(BaseModelGenerator):
@@ -142,7 +142,7 @@ class GeneratorNamedDoc(BaseModelGenerator):
     metaclass = 'm3_workflow.MetaNamedDocsModel'
     baseclass = 'models.Model'
     class_suffix = 'DocModel'
-    table_suffix = 'Doc'
+    table_suffix = 'doc'
     attribute = 'nameddocs'
 
 class WorkflowQueryManager(object):
