@@ -1,8 +1,7 @@
 (function (){
     var win = {{ window.render }};
     
-    function submitForm()
-    {
+    function submitForm(baseParams){
     	var form = Ext.getCmp('{{window.form.client_id}}').getForm();
     	if(!form.isValid())
     	{
@@ -15,7 +14,12 @@
     	}
     	form.submit({
     	   url: '{{ window.form.url }}',
-    	   {% if window.action_context %}params: {{window.action_context.json|safe}},{% endif %}
+		   params: Ext.applyIf(baseParams || {}, 
+		   		{% if window.action_context %} 
+					{{window.action_context.json|safe}} 
+				{%else%} 
+					{} 
+				{% endif %}),
            success: formSubmitSuccessHandler,
     	   failure: {% if form.failure_handler %}{{form.failure_handler}}{% else %}defaultSubmitFailureHandler{% endif %}
     	});
