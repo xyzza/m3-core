@@ -1,7 +1,7 @@
 (function (){
     var win = {{ window.render }};
     
-    function submitForm(baseParams){
+    function submitForm(btn, e, baseParams){
     	var form = Ext.getCmp('{{window.form.client_id}}').getForm();
     	if(!form.isValid())
     	{

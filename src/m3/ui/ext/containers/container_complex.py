@@ -39,9 +39,11 @@ class ExtContainerTable(BaseExtContainer):
             for col_num, col in enumerate(row):
                 if col!=None:
                     if isinstance(col, int):
-                        col_cont_list.append(ExtContainer(layout = 'form', flex=1))
-                    elif isinstance(col, ExtContainer):
-                        col_cont_list.append(col)
+                        col = ExtContainer(layout = 'form', flex=1)
+                    elif not isinstance(col, ExtContainer):
+                        raise Exception('Unknown type of column "%s"' % col)
+                    
+                    col_cont_list.append(col)
         
                     # Устанавливаем произвольные свойства для колонки, если они есть
                     props = self._properties[col_num][row_num]
