@@ -7,6 +7,10 @@ new Ext.form.NumberField({
 	{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
 	{% if component.read_only %} ,readOnly: true {% endif %}
 	
+	,allowBlank: {{ component.allow_blank|lower }}
+	{% if component.vtype %} ,vtype: '{{ component.vtype }}' {% endif %}	
+	{% if component.mask_re %} ,maskRe: {{ component.mask_re }} {% endif %}
+	
 	{% if not component.allow_decimals %} ,allowDecimals: false {% endif %}
 	{% if not component.allow_negative %} ,allowNegative: false {% endif %}
 	{% if decimal_precision %} ,decimalPrecision: {{ component.decimal_precision }} {% endif %}
