@@ -11,8 +11,7 @@ var ajax = Ext.Ajax;
 		win = m3_eval(response.responseText);
 		if (win!=undefined){
 			
-			// deprecated
-			win.on('refresh_store',function(event, target){
+			win.on('refresh_store',function(event, target){ // deprecated
 				refreshGridStore();
 			});
 			win.on('closed_ok',function(event, target){

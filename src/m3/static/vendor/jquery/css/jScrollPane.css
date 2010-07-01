@@ -7,7 +7,7 @@
 
 .jScrollPaneTrack 		{ 
 	position: absolute; 
-	background: url(/static/jquery/images/scroll_back.png) center center no-repeat;
+	background: url(../images/scroll_back.png) center center no-repeat;
 	cursor: pointer; 
 	right: 0; 
 	top: 0; 
@@ -17,7 +17,7 @@
 
 .jScrollPaneDrag	{ 
 	position: absolute; 
-	background: url(/static/jquery/images/scroll_slider.png) center top no-repeat;
+	background: url(../images/scroll_slider.png) center top no-repeat;
 	cursor: pointer; 
 	overflow: hidden; 
 	height:100px
@@ -43,7 +43,7 @@ a.jScrollArrowUp {
 	right: 0;
 	text-indent: -2000px;
 	overflow: hidden;
-	background:url(/static/jquery/images/scroll_top.png) no-repeat center top;
+	background:url(../images/scroll_top.png) no-repeat center top;
 	height:47px;
 }
 a.jScrollArrowDown {
@@ -54,7 +54,7 @@ a.jScrollArrowDown {
 	right: 0;
 	text-indent: -2000px;
 	overflow: hidden;
-	background:url(/static/jquery/images/scroll_bott.png) no-repeat center top;
+	background:url(../images/scroll_bott.png) no-repeat center top;
 	height:47px;
 }
 a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
