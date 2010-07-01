@@ -108,17 +108,23 @@ class ExtObjectGrid(ExtGrid):
         #=======================================================================
         # Настройка top bar
         #=======================================================================
+        if self.action_data:
+            self.top_bar.items.insert(0, self.top_bar.button_refresh)
+        
+        if self.action_delete:
+            self.top_bar.items.insert(0, self.top_bar.button_delete)
+        
+        if self.action_edit:
+            self.top_bar.items.insert(0, self.top_bar.button_edit)
+        
         if self.action_new:
             self.top_bar.items.insert(0, self.top_bar.button_new) 
         
-        if self.action_edit:
-            self.top_bar.items.append(self.top_bar.button_edit)
         
-        if self.action_delete:
-            self.top_bar.items.append(self.top_bar.button_delete)
         
-        if self.action_data:
-            self.top_bar.items.append(self.top_bar.button_refresh)
+        
+        
+        
         
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
