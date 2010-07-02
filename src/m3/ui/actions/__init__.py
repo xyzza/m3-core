@@ -196,15 +196,9 @@ class OperationResult(ActionResult):
         '''
         result = {}
         result['message'] = self.message
-        if self.success:
-            result['success'] = True
-            
-        else:
-            result['success'] = False
-            # TODO после рефактора кода необходимо строку кода ниже убрать. у нас будет просто message
-            result['error_msg'] = self.message
-
+        result['success'] = True if self.success else False
         result = json.JSONEncoder().encode(result)
+        
         # Вставляем функцию прямо в JSON без кодирования
         if self.code:
             self.code = self.code.strip()
