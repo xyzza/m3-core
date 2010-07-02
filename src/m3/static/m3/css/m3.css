@@ -43,7 +43,3 @@ q:before,q:after{content:'';}.m3-el-mask {
     background-color: #ccc;
 }
 
-.red-row{ background-color: #E01600 !important; }
-.grey-row{ background-color: #CCCCCC !important; } 
-.green-row{ background-color: #239000 !important; }
-.yellow-row{ background-color: #FFF200 !important; }
