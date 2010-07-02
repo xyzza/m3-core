@@ -24,6 +24,8 @@ class BaseExtField(ExtUIComponent):
         self.min_length = self.min_length_text = None
         self.max_length = self.max_length_text = None
         self.regex      = self.regex_text      = None
+        
+        self.tab_index = None
    
     def t_render_label_style(self):
         return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])

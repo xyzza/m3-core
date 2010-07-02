@@ -1,13 +1,9 @@
 new Ext.form.ComboBox({
 	{% include 'base-ext-ui.js'%}
+	{% include 'base-ext-field-ui.js'%}
+	
 	,allowBlank: {{ component.allow_blank|lower }}
-	
-	{% if component.label %} ,fieldLabel: '{{ component.label }}' {% endif %}
-	{% if component.name %} ,name: '{{ component.name }}' {% endif %}
-	{% if component.value %} ,value: '{{ component.value }}' {% endif %}
-	{% if component.label_style %} ,labelStyle: "{{ component.t_render_label_style|safe }}" {% endif %}
-	{% if component.read_only %} ,readOnly: true {% endif %}
-	
+
 	{% if component.empty_text%}, emptyText: '{{component.empty_text}}' {% endif %}
 	{% if component.mode%}, mode: '{{component.mode}}' {% endif %}
 	

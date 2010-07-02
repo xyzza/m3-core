@@ -20,6 +20,7 @@ class ExtButton(BaseExtControl):
         self.tooltip_title = None
         self.tooltip_text = None
         self.menu = None
+        self.tab_index = None
         self.init_component(*args, **kwargs)
     
     def t_render_handler(self):
