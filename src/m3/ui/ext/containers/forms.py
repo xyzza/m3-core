@@ -172,7 +172,13 @@ class ExtForm(BaseExtPanel):
             val = item.value
             if isinstance(item, ExtNumberField):
                 if val:
-                    val = int(val)
+                    try:
+                        val = int(val)
+                    except ValueError:
+                        try:
+                            val = float(val)
+                        except ValueError:
+                            val = None
                 else:
                     val = None
             elif isinstance(item, ExtStringField):
