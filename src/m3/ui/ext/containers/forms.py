@@ -6,6 +6,7 @@ Created on 25.02.2010
 '''
 
 import datetime
+import decimal
 
 from m3.ui.ext.fields.base import BaseExtField
 from m3.ui.ext.fields.simple import (ExtNumberField, 
@@ -176,8 +177,8 @@ class ExtForm(BaseExtPanel):
                         val = int(val)
                     except ValueError:
                         try:
-                            val = float(val)
-                        except ValueError:
+                            val = decimal.Decimal(val)
+                        except decimal.InvalidOperation:
                             val = None
                 else:
                     val = None
