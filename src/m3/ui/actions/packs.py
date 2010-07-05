@@ -17,7 +17,10 @@ class DictListWindowAction(Action):
     def create_window(self, request, context, mode):
         ''' Создаем и настраиваем окно '''
         base = self.parent
-        win = base.list_form(mode=mode, title = base.title, height = base.height, width = base.width)
+        win = base.list_form(mode=mode, title=base.title)
+        win.height, win.width = base.height, base.width
+        win.min_height, win.min_width = base.height, base.width
+        
         win.init_grid_components()
         if base.list_paging:
             win.grid.bottom_bar = ExtPagingbar(page_size = 25)

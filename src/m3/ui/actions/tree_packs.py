@@ -192,7 +192,10 @@ class ListWindowAction(Action):
     def create_window(self, request, context, mode):
         ''' Создаем и настраиваем окно ''' 
         base = self.parent
-        win = self.parent.list_window(title=base.title, mode=mode, height=base.height, width=base.width)
+        win = self.parent.list_window(title=base.title, mode=mode)
+        win.height, win.width = base.height, base.width
+        win.min_height, win.min_width = base.height, base.width
+        
         if base.list_model:
             win.init_grid_components()
             if base.list_paging:
