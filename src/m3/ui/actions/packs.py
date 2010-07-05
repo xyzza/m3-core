@@ -67,6 +67,9 @@ class DictSelectWindowAction(DictListWindowAction):
         base = self.parent
         win = self.create_window(request, context, mode=1)
         self.create_columns(win.grid, self.parent.list_columns)
+        
+        # В режиме выбора справочник нельзя менять
+        base.list_readonly = True
         self.configure_list(win)
         
         list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
