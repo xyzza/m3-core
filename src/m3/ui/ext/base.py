@@ -113,14 +113,22 @@ class BaseExtComponent(object):
             Заполняет атрибуты экземпляра значениями в kwargs
         '''
         for k, v in kwargs.items():
-            assert k in dir(self) and not callable(getattr(self,k)), 'Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__)
+            assert k in dir(self) and not callable(getattr(self,k)), \
+                'Instance attribute "%s" should be defined in class "%s"!' \
+                % (k, self.__class__.__name__)
             self.__setattr__(k, v)
 
-                  
+    #deprecated:              
     def t_render_listeners(self):
         ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
         return dict([(k,v) for k, v in self._listeners.items() if v!=None])
-   
+    
+    def t_render_simple_listeners(self):
+        return '{%s}' % ','.join(['%s:%s' % (k,v) for k, v in self._listeners.items() 
+               if not isinstance(v, BaseExtComponent) and v!=None])
+
+    def render_base_config(self):
+        return 'client_id:"%s"' % self.client_id
    
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):
@@ -145,6 +153,29 @@ class ExtUIComponent(BaseExtComponent):
         
     def t_render_style(self):
         return '{%s}' % ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])
+    
+    def render_base_config(self):
+        res = super(ExtUIComponent, self).render_base_config() or ''
+        res += ',style:%s' % self.style if self.t_render_style() else ''
+        res += ',hidden:%s' % str(self.hidden).lower() if self.hidden else ''
+        res += ',disabled:%s' % str(self.disabled).lower() if self.disabled else ''
+        res += ',height:%s' % self.height if self.height else ''
+        res += ',width:%s' % self.width if self.width else ''
+        res += ',x:%s' % self.x if self.x else ''
+        res += ',y:%s' % self.y if self.y else ''
+        res += ',html:%s' % self.html if self.html else ''
+        res += ',region:"%s"' % self.region if self.region else ''
+        res += ',flex:%s' % self.flex if self.flex else ''
+        res += ',maxHeight:%s' % self.max_height if self.max_height else ''
+        res += ',minHeight:%s' % self.min_height if self.min_height else ''
+        res += ',maxWidth:%s' % self.max_width if self.max_width else ''
+        res += ',minWidth:%s' % self.min_width if self.min_width else ''
+        res += ',name:"%s"' % self.name if self.name else ''
+        res += ',anchor:"%s"' % self.anchor if self.anchor else ''
+        res += ',labelWidth:%s' % self.label_width if self.label_width else ''
+        res += ',labelAlign:%s' % self.label_align if self.label_align else ''
+        res += ',labelPad:"%s"' % self.label_pad if self.label_pad else ''
+        return res
     
 # TODO: закомментированный код ниже необходим для дальнейшей оптимизации
 # рендеринга шаблонов. Все мелкие шаблоны (поля, столбцы грида, элементы меню и т.д.

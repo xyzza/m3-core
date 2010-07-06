@@ -3,6 +3,9 @@
  */
 Ext.QuickTips.init();
 
+Ext.namespace('Ext.m3');
+
+
 var SOFTWARE_NAME = 'Платформа М3';
 
 /**
@@ -18,6 +21,22 @@ function m3_eval(args){
 	return win;
 };
 
+/**
+ *  Реализация стандартного assert
+ * @param {Boolean} condition
+ * @param {Str} errorMsg
+ */
+function assert(condition, errorMsg) {
+  if (!condition) {
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+  }
+}
+
+/**
+ * 
+ * @param {Object} text
+ */
 function smart_eval(text){
 	if( text == undefined ){
 	    // на случай, когда в процессе получения ответа сервера произошел аборт

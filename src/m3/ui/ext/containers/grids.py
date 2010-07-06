@@ -5,10 +5,10 @@ Created on 3.3.2010
 @author: prefer
 '''
 from django.conf import settings
+from django.utils.datastructures import SortedDict
 
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
-from django.utils.datastructures import SortedDict
 
 
 class ExtGrid(BaseExtPanel):
@@ -24,6 +24,8 @@ class ExtGrid(BaseExtPanel):
         self.force_fit = True
         # selection model
         self.__sm = None
+        # Колонка для авторасширения
+        self.auto_expand_column = None
         # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен
         # чтобы знать когда нужен дополнительный column
         self.__checkbox = False
@@ -41,7 +43,7 @@ class ExtGrid(BaseExtPanel):
         result = []
         for level_list in self.banded_columns.values():       
             result.append('[%s]' % ','.join([ column.render() for column in level_list ]))
-        return '[%s]' % ','.join(result) 
+        return ','.join(result) 
     
     def t_render_columns(self):
         return self.t_render_items()
@@ -151,6 +153,41 @@ class ExtGrid(BaseExtPanel):
         self._listeners['rowcontextmenu'] = menu
     #----------------------------------------------------------------------------
     
+    def render(self):
+        base_config = self.render_base_config()
+        base_config += ',store: %s' % self.t_render_store()
+
+        params = self.render_params()
+        return 'createGridPanel({%s},{%s})' %(base_config, params)
+    
+    def render_base_config(self):
+        res = super(ExtGrid, self).render_base_config()
+        # Значения по-умолчанию:
+        res += ',stripeRows: true'
+        res += ',stateful: true'
+        res += ',store: %s' % self.t_render_store()
+        res += ',viewConfig: {%s}' % (
+            'forceFit:%s' % str(self.force_fit).lower()
+                                      )
+        res += ',loadMask:%s' % str(self.load_mask).lower() if self.load_mask else ''
+        res +=',autoExpandColumn: "%s"' % \
+            self.auto_expand_column if self.auto_expand_column else ''
+        res += ',enableDragDrop: %s' % str(self.drag_drop).lower() if self.drag_drop else ''
+        res += ',ddGroup:"%s"' % self.drag_drop_group if self.drag_drop_group else ''
+        res += ',listeners: %s' % \
+            self.t_render_simple_listeners() if self._listeners else ''
+        return res
+    
+    def render_params(self):
+        res = 'menus: {contextMenu:%s, rowContextMenu: %s}' % \
+            (self.handler_contextmenu.render() if self.handler_contextmenu else '""',
+             self.handler_rowcontextmenu.render() if self.handler_rowcontextmenu else '""',)
+        res += ',selModel:%s' % self.sm.render() if self.sm else ''
+        res += ',columns: [%s]' % self.t_render_columns() if self.t_render_columns() else '' 
+        res += ',plugins: {%s}' %  \
+            ('bundedColumns:[%s]' % self.t_render_banded_columns() 
+            if self.show_banded_columns else '')
+        return res
     
 class BaseExtGridColumn(ExtUIComponent):
     def __init__(self, *args, **kwargs):
@@ -245,3 +282,50 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
 
     def render(self):
         return 'new Ext.grid.CellSelectionModel()'
+    
+    
+class ExtAdvancedTreeGrid(ExtGrid):
+    def __init__(self, *args, **kwargs):
+        super(ExtAdvancedTreeGrid, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-advanced-treegrid.js'
+        self.url = None
+        self.master_column_id = None
+        
+        # Свойства для внутреннего store:
+        self.store_root = 'rows'
+        
+        # Свойства для внутеннего bottom bara:
+        self.use_bbar = False
+        self.bbar_page_size = 10
+        
+        self.init_component(*args, **kwargs)
+    
+    def t_render_columns_to_record(self):
+        return ','.join(['{name:"%s"}'  % col.data_index for col in self.columns])
+    
+    def add_column(self, **kwargs):
+        # FIXME: Хак, с сгенерированным client_id компонент отказывается работать
+        if kwargs.get('data_index'):
+            kwargs['client_id'] = kwargs.get('data_index')
+        super(ExtAdvancedTreeGrid, self).add_column(**kwargs)
+        
+    def render_base_config(self):
+        res = super(ExtAdvancedTreeGrid, self).render_base_config()
+        res += ',master_column_id:"%s"' % self.master_column_id \
+            if self.master_column_id else ''
+        return res
+        
+    def render_params(self):
+        res = super(ExtAdvancedTreeGrid, self).render_params()
+        res += ',storeParams:{url:"%s", root:"%s"}' % (
+                self.url if self.url else '',
+                self.store_root if self.store_root else '',
+                )
+        res += ',columnsToRecord:[%s]' % self.t_render_columns_to_record()
+        res += ',bbar:{pageSize:%s}' % self.bbar_page_size if self.use_bbar else ''
+        return res
+    
+    def render(self):
+        base_config = self.render_base_config()
+        params = self.render_params()
+        return 'createAdvancedTreeGrid({%s},{%s})' %(base_config, params)

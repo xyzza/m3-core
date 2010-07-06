@@ -1643,7 +1643,7 @@ Ext.ux.maximgb.tg.GridView = Ext.extend(Ext.grid.GridView,
     }
 });
 
-Ext.ux.maximgb.tg.GridPanel = Ext.extend(Ext.grid.GridPanel, 
+Ext.ux.maximgb.tg.GridPanel = Ext.extend(Ext.m3.GridPanel, 
 {
     /**
      * @cfg {String|Integer} master_column_id Master column id. Master column cells are nested.
@@ -1655,7 +1655,7 @@ Ext.ux.maximgb.tg.GridPanel = Ext.extend(Ext.grid.GridPanel,
      * @cfg {Stirng} TreeGrid panel custom class.
      */
     tg_cls : 'ux-maximgb-tg-panel',
-
+	
     // Private
     initComponent : function()
     {

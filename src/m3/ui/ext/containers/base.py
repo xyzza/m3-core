@@ -8,6 +8,7 @@ Created on 25.02.2010
 from m3.ui.ext.base import ExtUIComponent
 from m3.helpers.datastructures import TypedList
 
+
 class BaseExtContainer(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtContainer, self).__init__(*args, **kwargs)
@@ -42,6 +43,13 @@ class BaseExtContainer(ExtUIComponent):
             if item:
                 item.action_context = self.action_context
     
+    def render_base_config(self):
+        res = super(BaseExtContainer, self).render_base_config()
+        res += ',layoutConfig: %s' \
+            % self.t_render_layout_config() if self.layout_config else ''
+        res += ',layout: "%s"' % self.layout if self.layout else ''
+        return res
+    
         
 class BaseExtPanel(BaseExtContainer):
     def __init__(self, *args, **kwargs):
@@ -61,3 +69,13 @@ class BaseExtPanel(BaseExtContainer):
     
     def t_render_footer_bar(self):
         return self.footer_bar.render()
+    
+    def render_base_config(self):
+        res = super(BaseExtPanel, self).render_base_config()
+        res += ',title:"%s"' % self.title if self.title else ''
+        res += ',header:"%s"' % self.header if self.header else ''
+        res += ',iconCls:"%s"' % self.icon_cls if self.icon_cls else ''
+        res += ',tbar:%s' % self.t_render_top_bar() if self.top_bar else ''
+        res += ',bbar:%s' % self.t_render_bottom_bar() if self.bottom_bar else ''
+        res += ',fbar:%s' % self.t_render_footer_bar() if self.footer_bar else ''
+        return res
