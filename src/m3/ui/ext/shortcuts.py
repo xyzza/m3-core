@@ -72,17 +72,17 @@ def js_submit_ajax(url, params = {}, success_handler = None, failure_handler = N
     template = u'''
 function(){
     Ext.Ajax.request({
-        url: '%(url)s',
+        url: '%(url)s'
         %(success_handler)s
         %(failure_handler)s
-        params: %(params)s
+        %(params)s
     });
 }
     '''
     return template % {'url': url, 
-                       'success_handler': 'success:' + success_handler + ',' if success_handler else '',
-                       'failure_handler': 'failure:' + failure_handler + ',' if failure_handler else '',
-                       'params': json.JSONEncoder().encode(params) if params else ''}
+                       'success_handler': ', success:' + success_handler if success_handler else '',
+                       'failure_handler': ', failure:' + failure_handler if failure_handler else '',
+                       'params': ', params:' + json.JSONEncoder().encode(params) if params else ''}
 
 def js_fire_event_window(event_name, close_after_fire=True, *args):
     '''
