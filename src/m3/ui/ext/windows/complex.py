@@ -112,73 +112,62 @@ class ExtDictionaryWindow(BaseExtWindow):
 
         self.__mode = value
         
-    def _add_menu_item_grid(self, flag, **kwargs):
+    def _add_menu_item_grid(self, to_tbar = True, to_row_menu = True, to_grid_menu = True, to_menu = None, **kwargs):
         '''
         Добавление контролов управления в грид
-        @param flag: Указывает как будет добавляться пункт,
-            0 - Добавляется в тублар, в конт. меню строки, в меню всего грида
-            1 - Добавляется в тублар, в конт. меню строки
         '''
-
-        text = None
-        if kwargs.has_key('text'):
-            text = kwargs.pop("text")
-            
-        self.grid.handler_rowcontextmenu.add_item(text=text, **kwargs)
-        self.grid.top_bar.items.append(ExtButton(tooltip_text=text, **kwargs))
-            
-        if flag==0:
-            self.grid.handler_contextmenu.add_item(text=text, **kwargs)
-            return (self.grid.top_bar.items[len(self.grid.top_bar.items)-1], 
-                    self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1], 
-                    self.grid.handler_contextmenu.items[len(self.grid.handler_contextmenu.items)-1])
-        else:
-            return (self.grid.top_bar.items[len(self.grid.top_bar.items)-1], 
-                self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1])
+        ret = []
+        if to_menu:
+            to_menu.add_item(**kwargs)
+        if to_tbar:
+            self.grid.top_bar.items.append(ExtButton(**kwargs))
+            ret.append(self.grid.top_bar.items[len(self.grid.top_bar.items)-1])
+        if to_row_menu:
+            self.grid.handler_rowcontextmenu.add_item(**kwargs)
+            ret.append(self.grid.handler_rowcontextmenu.items[len(self.grid.handler_rowcontextmenu.items)-1])
+        if to_grid_menu:
+            self.grid.handler_contextmenu.add_item(**kwargs)
+            ret.append(self.grid.handler_contextmenu.items[len(self.grid.handler_contextmenu.items)-1])
+        return ret
         
-    def _add_separator_grid(self, flag):
+    def _add_separator_grid(self, to_tbar = True, to_row_menu = True, to_grid_menu = True, to_menu = None):
         '''Добавление разделителя в контролы грида'''
-        self.grid.handler_rowcontextmenu.add_separator()
-        self.grid.top_bar.add_separator()
-        if flag==0:
+        if to_menu:
+            to_menu.add_separator()
+        if to_tbar:
+            self.grid.top_bar.add_separator()
+        if to_row_menu:
+            self.grid.handler_rowcontextmenu.add_separator()
+        if to_grid_menu:
             self.grid.handler_contextmenu.add_separator()
             
-    def _add_menu_item_tree(self, flag, menu=None, **kwargs):
+    def _add_menu_item_tree(self, to_tbar = True, to_node_menu = True, to_tree_menu = True, to_menu = None, **kwargs):
         '''
-        Добавление контролов управления в дерево
-        @param flag: Указывает как будет добавляться пункт,
-            0 - Добавляется в тублар, в конт. меню строки, в меню всего грида
-            1 - Добавляется в тублар, в конт. меню строки
+        Добавление контролов управления в дерево        
         '''
-        text = None
-        if kwargs.has_key('text'):
-            text = kwargs.pop("text")
-            
-        return_item = None
-        if menu:
-            menu.add_item(text=text,**kwargs)
-            return_top_bar_item = menu.items[len(menu.items)-1]
-        else:
-            self.tree.top_bar.items.append(ExtButton(tooltip_text=text, **kwargs))
-            return_top_bar_item = self.tree.top_bar.items[len(self.tree.top_bar.items)-1]
+        ret = []
+        if to_menu:
+            to_menu.add_item(**kwargs)
+        if to_tbar:
+            self.tree.top_bar.items.append(ExtButton(**kwargs))
+            ret.append(self.tree.top_bar.items[len(self.tree.top_bar.items)-1])
+        if to_node_menu:
+            self.tree.handler_contextmenu.add_item(**kwargs)
+            ret.append(self.tree.handler_contextmenu.items[len(self.tree.handler_contextmenu.items)-1])
+        if to_tree_menu:
+            self.tree.handler_containercontextmenu.add_item(**kwargs)
+            ret.append(self.tree.handler_containercontextmenu.items[len(self.tree.handler_containercontextmenu.items)-1])
+        return ret
         
-        self.tree.handler_contextmenu.add_item(text=text, **kwargs)
-            
-        if flag==0:
-            self.tree.handler_containercontextmenu.add_item(text=text, **kwargs)
-            return (return_top_bar_item, 
-                    self.tree.handler_contextmenu.items[len(self.tree.handler_contextmenu.items)-1], 
-                    self.tree.handler_containercontextmenu.items[len(self.tree.handler_containercontextmenu.items)-1]
-                    )
-        else:
-            return (return_top_bar_item, 
-                self.tree.handler_contextmenu.items[len(self.tree.handler_contextmenu.items)-1])
-        
-    def _add_separator_tree(self, flag):
+    def _add_separator_tree(self, to_tbar = True, to_node_menu = True, to_tree_menu = True, to_menu = None):
         '''Добавление разделителя в контролы дерева'''
-        self.tree.handler_contextmenu.add_separator()   
-        self.tree.top_bar.add_separator()
-        if flag==0:
+        if to_menu:
+            to_menu.add_separator()
+        if to_tbar:
+            self.tree.top_bar.add_separator()
+        if to_node_menu:
+            self.tree.handler_contextmenu.add_separator()
+        if to_tree_menu:
             self.tree.handler_containercontextmenu.add_separator()
         
     # Урлы для грида:
@@ -308,11 +297,11 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.items.append(grid)
             
             # Добавляются пункты в меню грида и на тулбар грида 
-            self.__components_new_grid  = self._add_menu_item_grid(0, text=u'Новый', icon_cls='add_item', disabled=True)
-            self.__components_edit_grid      = self._add_menu_item_grid(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
-            self.__components_delete_grid    = self._add_menu_item_grid(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
-            self._add_separator_grid(0)
-            self.__components_refresh_grid   = self._add_menu_item_grid(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshGridStore')
+            self.__components_new_grid      = self._add_menu_item_grid(text=u'Добавить', icon_cls='add_item', disabled=True)
+            self.__components_edit_grid     = self._add_menu_item_grid(to_grid_menu = False, text=u'Изменить', icon_cls='edit_item', disabled=True)
+            self.__components_delete_grid   = self._add_menu_item_grid(to_grid_menu = False, text=u'Удалить', icon_cls='delete_item', disabled=True)
+            self._add_separator_grid()
+            self.__components_refresh_grid  = self._add_menu_item_grid(text=u'Обновить', icon_cls='table_refresh', handler='refreshGridStore')
             
             grid.top_bar.add_fill()
             grid.top_bar.items.append(search_grid)
@@ -332,14 +321,14 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.items.append(tree)
             
             menu=ExtContextMenu()
-            self.tree.top_bar.add_menu(icon_cls="add_item", menu=menu, tooltip_text = u'Добавить')
+            self.tree.top_bar.add_menu(icon_cls="add_item", menu=menu, text = u'Добавить')
         
-            self.__components_new_tree      = self._add_menu_item_tree(0, menu,  text=u'Новый в корне', icon_cls='add_item', disabled=True)
-            self.__components_new_tree_child= self._add_menu_item_tree(1, menu,  text=u'Новый дочерний', icon_cls='add_item', disabled=True)
-            self.__components_edit_tree     = self._add_menu_item_tree(1, text=u'Редактировать', icon_cls='edit_item', disabled=True)
-            self.__components_delete_tree   = self._add_menu_item_tree(1, text=u'Удалить', icon_cls='delete_item', disabled=True)
-            self._add_separator_tree(0)
-            self.__components_refresh_tree  = self._add_menu_item_tree(0, text=u'Обновить', icon_cls='table_refresh', handler='refreshTreeLoader')
+            self.__components_new_tree      = self._add_menu_item_tree(to_tbar = False, to_menu = menu, text=u'Новый в корне', icon_cls='add_item', disabled=True)
+            self.__components_new_tree_child= self._add_menu_item_tree(to_tbar = False, to_tree_menu = False, to_menu = menu, text=u'Новый дочерний', icon_cls='add_item', disabled=True)
+            self.__components_edit_tree     = self._add_menu_item_tree(to_tree_menu = False, text=u'Изменить', icon_cls='edit_item', disabled=True)
+            self.__components_delete_tree   = self._add_menu_item_tree(to_tree_menu = False, text=u'Удалить', icon_cls='delete_item', disabled=True)
+            self._add_separator_tree()
+            self.__components_refresh_tree  = self._add_menu_item_tree(text=u'Обновить', icon_cls='table_refresh', handler='refreshTreeLoader')
     
     def pre_render(self):
         if self.grid:
