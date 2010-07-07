@@ -286,6 +286,11 @@ var ajax = Ext.Ajax;
 		var search_field_tree = Ext.getCmp("{{ component.search_text_tree.client_id }}");
 		if (search_field_tree)
 			search_field_tree.search();
+			//очищаем грид
+			{% if component.grid %}
+				var grid_store = Ext.getCmp("{{ component.grid.client_id }}").getStore();
+				grid_store.removeAll();
+			{% endif %}
 	}
 	
 	/*
