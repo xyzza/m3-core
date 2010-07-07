@@ -570,7 +570,7 @@ ul.x-tab-strip-bottom
 .x-grid3-row-over
 {
 	border: 1px dotted #7a7060;
-	background-color: #F3E7D3;
+	background-color: #a2ccff;
 	background-image: none !important;
 }
 
@@ -647,13 +647,13 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 }
 
 .x-grid3-row-selected {
-	background-color: #FFC87C !important;
+	background-color: #3d95ff !important;
 	background-image: none;
-	border-color:#BE873C;
+	border-color:#0058eb;
 }
 
 .x-grid3-cell-selected{
-	background-color: #FFC87C !important;
+	background-color: #3d95ff !important;
 	color:#000;
 }
 
@@ -961,11 +961,11 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 }
 
 .x-tree-node .x-tree-node-over {
-	background-color: #FFC87C;
+	background-color: #a2ccff;
 }
 
 .x-tree-node .x-tree-selected {
-	background-color: #f3e7d3;
+	background-color: #3d95ff;
 }
 
 .x-tree-drop-ok-append .x-dd-drop-icon{
@@ -1320,7 +1320,7 @@ color:#00ff00
 }
 
 #x-debug-browser .x-tree .x-tree-node .x-tree-selected a span{
-    background-color:#f3e7d3;
+    background-color:#3d95ff;
 }.x-combo-list
 {
 	border-color: #7a7060;
@@ -2442,4 +2442,22 @@ td.ux-taskButtons-edge {
 }
 #ux-taskbar .active-win .ux-startbutton-center button {
     color:#ffffff;
+}
+
+.x-window-bc .x-window-footer {
+    padding-bottom:10px;
+    padding-left:0px;
+    padding-right:0px;
+    zoom:1;
+    font-size:0;
+    line-height:0;
+}
+
+.x-panel-btns {
+    padding:5px;
+    overflow:hidden;
+}
+
+.x-panel-btns td.x-toolbar-cell{
+	padding:px;
 }
