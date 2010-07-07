@@ -76,10 +76,10 @@ class ExtContextMenuItem(ExtUIComponent):
             else:
                 if isinstance(self.handler, ExtConnection):
                     res += ',handler: function(){%s} ' % self.handler.render() 
-                elif isinstance(container, ExtGrid): # Будет работать только с templates-globals!!!
-                    res += ',handler: function(){return %s(grid)}' % self.handler
-                elif isinstance(container, ExtTree):
-                    res += ',handler: function(){return %s(tree)}' % self.handler
+#                elif isinstance(container, ExtGrid): # Будет работать только с templates-globals!!!
+#                    res += ',handler: function(){return %s(grid)}' % self.handler
+#                elif isinstance(container, ExtTree):
+#                    res += ',handler: function(){return %s(tree)}' % self.handler
                 else:
                     res += ',handler: %s' % self.handler
         return '{%s}' % res

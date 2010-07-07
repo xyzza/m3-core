@@ -128,7 +128,7 @@ class BaseExtComponent(object):
                if not isinstance(v, BaseExtComponent) and v!=None])
 
     def render_base_config(self):
-        return 'client_id:"%s"' % self.client_id
+        return 'id:"%s"' % self.client_id
    
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):

@@ -1,5 +1,5 @@
 /**
- * Функции вместо рендера компонентов-контейнеров
+ * Функции рендера компонентов-контейнеров
  * @author: prefer
  */
 /**
@@ -26,8 +26,5 @@ function createGridPanel(baseConfig, params){
  * @param {Object} params
  */
 function createObjectGrid(baseConfig, params){
-	
-	
-	
-	return new Ext.m3.GridPanel(baseConfig, params);
+	return new Ext.m3.ObjectGrid(baseConfig, params);
 }

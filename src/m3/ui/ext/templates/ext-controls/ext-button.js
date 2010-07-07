@@ -4,7 +4,6 @@ new Ext.SplitButton({
 new Ext.Button({
 {%endif%}
 	{% include 'base-ext-ui.js'%}
-	
 	{% if component.text %} ,text: '{{ component.text }}' {% endif %}
 	{% if component.icon %} ,icon: '{{ component.icon }}' {% endif %}
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}

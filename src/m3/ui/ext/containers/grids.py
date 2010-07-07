@@ -153,19 +153,11 @@ class ExtGrid(BaseExtPanel):
         self._listeners['rowcontextmenu'] = menu
     #----------------------------------------------------------------------------
     
-    def render(self):
-        base_config = self.render_base_config()
-        base_config += ',store: %s' % self.t_render_store()
-
-        params = self.render_params()
-        return 'createGridPanel({%s},{%s})' %(base_config, params)
-    
     def render_base_config(self):
         res = super(ExtGrid, self).render_base_config()
         # Значения по-умолчанию:
         res += ',stripeRows: true'
         res += ',stateful: true'
-        res += ',store: %s' % self.t_render_store()
         res += ',viewConfig: {%s}' % (
             'forceFit:%s' % str(self.force_fit).lower()
                                       )
@@ -202,15 +194,6 @@ class BaseExtGridColumn(ExtUIComponent):
                
     def render_editor(self):
         return self.editor.render()
-    
-#    @property
-#    def editor(self):
-#        return self.__editor
-#    
-#    @editor.setter
-#    def editor(self, value):
-#        assert isinstance(value, BaseExtField), 'Type value "%s" isn\'t %s' % (value, BaseExtField.__name__)
-#        self.__editor = value 
         
     
 class ExtGridColumn(BaseExtGridColumn):

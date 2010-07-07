@@ -7,14 +7,9 @@ Created on 26.05.2010
 @author: akvarats
 '''
 
-from m3.ui.ext.containers import ExtGrid, ExtGridColumn, ExtGridDateColumn, ExtGridNumberColumn
-from m3.ui.ext.containers.grids import ExtGridCheckBoxSelModel
-from m3.ui.ext import containers
-from m3.ui.ext import controls
-from m3.ui.ext import menus
-from m3.ui.ext import misc
+from m3.ui.ext import containers, controls, menus, misc
 
-class ExtObjectGrid(ExtGrid):
+class ExtObjectGrid(containers.ExtGrid):
     '''
     Панель с гридом для управления списком объектов.
     '''
@@ -120,12 +115,6 @@ class ExtObjectGrid(ExtGrid):
         if self.action_new:
             self.top_bar.items.insert(0, self.top_bar.button_new) 
         
-        
-        
-        
-        
-        
-        
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
             self.store.url = self.action_data.absolute_url()
@@ -137,3 +126,21 @@ class ExtObjectGrid(ExtGrid):
         
         return super(ExtObjectGrid, self).render()
 
+
+    def render_params(self):
+        res = super(ExtObjectGrid, self).render_params()
+        res += ',actions:{newUrl:"%(new_url)s" \
+                          ,editUrl:"%(edit_url)s" \
+                          ,deleteUrl:"%(delete_url)s" \
+                          ,dataUrl:"%(data_url)s" \
+                          ,contextJson:%(context_json)s \
+        }' % {'new_url': self.action_new.absolute_url() if self.action_new else '' ,
+              'edit_url': self.action_edit.absolute_url() if self.action_edit else '' ,
+              'delete_url': self.action_delete.absolute_url() if self.action_delete else '' ,
+              'data_url': self.action_data.absolute_url() if self.action_data else '' ,
+              'context_json': self.action_context.json() if self.action_context else '' ,}
+                
+                
+        res += ',rowIdName:"%s"' % self.row_id_name if self.row_id_name else ''            
+        res += ',allowPaging:%s' % str(self.allow_paging).lower()          
+        return res
