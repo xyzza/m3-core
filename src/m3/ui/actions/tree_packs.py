@@ -286,12 +286,12 @@ class SelectWindowAction(ListWindowAction):
     def run(self, request, context):
         # Создаем окно выбора
         win = self.create_window(request, context, 1)
-        
+        win.modal = True
         # Добавляем отображаемые колонки
         base = self.parent
-        base.list_readonly = True
+        base.list_readonly = False
         self.configure_list(win, request, context)
-        base.tree_readonly = True
+        base.tree_readonly = False
         self.configure_tree(win, request, context)
         
         # Ожидается в далеком будущем ;)
@@ -304,6 +304,7 @@ class SelectWindowAction(ListWindowAction):
         
         win.column_name_on_select = 'name'
         win = self.parent.get_select_window(win)
+        win.contextTreeIdName = base.contextTreeIdName
         return ExtUIScriptResult(win)
 
 class BaseTreeDictionaryActions(ActionPack):

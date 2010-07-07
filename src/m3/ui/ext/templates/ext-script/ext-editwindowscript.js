@@ -124,10 +124,8 @@
 		} else {return true;}
 	};
 	win.on('beforeclose', onBeforeClose);
-    {# показываем окно #}
-    win.show();
-    
     {{ renderer.window.render_globals }}
-    
+    {# показываем окно #}
+    win.show();    
     return win;
 })()
