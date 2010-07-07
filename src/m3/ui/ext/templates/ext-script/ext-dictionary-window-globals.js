@@ -24,7 +24,7 @@ var ajax = Ext.Ajax;
 	 *  Создание нового значения в справочнике по форме ExtDictionary
 	 */
 	function newValueGrid() {
-		var params = Ext.applyIf({},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
+		var params = Ext.applyIf({'id': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		{% if component.tree %}
 			var tree = Ext.getCmp('{{ component.tree.client_id}}');
 			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
@@ -196,7 +196,7 @@ var ajax = Ext.Ajax;
 			,success: function(response, opts) {
 				renderWindowTree(response, opts);
 			}
-			,params: Ext.applyIf({},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+			,params: Ext.applyIf({'{{ component.contextTreeIdName }}': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,failure: function(response, opts){
 				uiAjaxFailMessage();
 			}
@@ -386,7 +386,7 @@ var ajax = Ext.Ajax;
 			id = tree.getSelectionModel().getSelectedNode().id;
 			displayText = tree.getSelectionModel().getSelectedNode().attributes.{{ component.column_name_on_select }};
 		{% endif %}
-		
+		var win = Ext.getCmp('{{ component.client_id}}');
 		if (id!=undefined && displayText!=undefined){
 			win.fireEvent('select_value', id, displayText); // deprecated
 			win.fireEvent('closed_ok', id, displayText); 
