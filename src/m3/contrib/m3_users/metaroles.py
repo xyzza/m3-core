@@ -140,6 +140,7 @@ class Metaroles_DictPack(BaseDictionaryActions):
     url = '/metarole'
     title = u'Метароли системы'
     list_columns = [('name', 'Наименование метароли')]
+    list_readonly = True
                     
     def get_rows(self, offset, limit, filter):
         data = []

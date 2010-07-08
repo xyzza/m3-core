@@ -289,9 +289,7 @@ class SelectWindowAction(ListWindowAction):
         win.modal = True
         # Добавляем отображаемые колонки
         base = self.parent
-        base.list_readonly = False
         self.configure_list(win, request, context)
-        base.tree_readonly = False
         self.configure_tree(win, request, context)
         
         # Ожидается в далеком будущем ;)
