@@ -268,6 +268,9 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
     
     
 class ExtAdvancedTreeGrid(ExtGrid):
+    '''
+    Расширенное дерево на базе Ext.ux.maximgb.TreeGrid
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtAdvancedTreeGrid, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-advanced-treegrid.js'
@@ -308,7 +311,7 @@ class ExtAdvancedTreeGrid(ExtGrid):
         res += ',bbar:{pageSize:%s}' % self.bbar_page_size if self.use_bbar else ''
         return res
     
-    def render(self):
-        base_config = self.render_base_config()
-        params = self.render_params()
-        return 'createAdvancedTreeGrid({%s},{%s})' %(base_config, params)
+#    def render(self):
+#        base_config = self.render_base_config()
+#        params = self.render_params()
+#        return 'createAdvancedTreeGrid({%s},{%s})' %(base_config, params)

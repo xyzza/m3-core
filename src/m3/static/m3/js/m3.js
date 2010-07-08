@@ -103,7 +103,7 @@ Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
         if(this.hasSearch){
         	this.el.dom.value = '';
         	var cmp = this.getComponentForSearch();
-        	if (cmp.isXType('grid')) {
+        	if (cmp instanceof Ext.grid.GridPanel) {
 	            var o = {start: 0};
 	            var store = cmp.getStore();
 	            store.baseParams = store.baseParams || {};
@@ -111,7 +111,7 @@ Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
 				store.baseParams[this.paramId] = this.nodeId || '';	
 	            store.reload({params:o});
 
-	        } else if (cmp.isXType('treegrid')) {
+	        } else if (cmp instanceof Ext.ux.tree.TreeGrid) {
 	        	this.el.dom.value = '';
 	        	
 	        	var loader = cmp.getLoader();

@@ -7,15 +7,10 @@ Created on 25.06.2010
 @author: prefer
 '''
 
-from m3.ui.ext.containers import ExtTree, ExtGridColumn, ExtGridDateColumn, ExtGridNumberColumn
-from m3.ui.ext.containers.grids import ExtGridCheckBoxSelModel
-from m3.ui.ext import containers
-from m3.ui.ext import controls
-from m3.ui.ext import menus
-from m3.ui.ext import misc
+from m3.ui.ext import containers, controls, menus, misc
 
 
-class ExtObjectTree(ExtTree):
+class ExtObjectTree(containers.ExtTree):
     '''
     Панель с деревом для управления списком объектов.
     '''

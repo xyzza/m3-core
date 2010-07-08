@@ -125,7 +125,7 @@ class SelectUsersToAssignWindowAction(actions.Action):
         role = models.UserRole.objects.get(id=context.userrole_id)
         window = SelectUsersListWindow()
         window.grid.action_data = UsersForRoleAssignmentData
-        window.grid.title = u'Выберите пользователей для роли "' + role.name + '"'
+        window.grid.title = u"Выберите пользователей для роли '%s'" % role.name 
         window.action_submit = AssignUsers
         
         return actions.ExtUIScriptResult(window)
