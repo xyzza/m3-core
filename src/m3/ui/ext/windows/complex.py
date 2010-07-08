@@ -119,6 +119,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         ret = []
         if to_menu:
             to_menu.add_item(**kwargs)
+            ret.append(to_menu.items[len(to_menu.items)-1])
         if to_tbar:
             self.grid.top_bar.items.append(ExtButton(**kwargs))
             ret.append(self.grid.top_bar.items[len(self.grid.top_bar.items)-1])
@@ -148,6 +149,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         ret = []
         if to_menu:
             to_menu.add_item(**kwargs)
+            ret.append(to_menu.items[len(to_menu.items)-1])
         if to_tbar:
             self.tree.top_bar.items.append(ExtButton(**kwargs))
             ret.append(self.tree.top_bar.items[len(self.tree.top_bar.items)-1])
