@@ -184,7 +184,7 @@ Ext.override(Ext.form.Field, {
 			};
             this.fireEvent('specialkey', this, e);
         }
-    },
+    }
 });
 
 /**
