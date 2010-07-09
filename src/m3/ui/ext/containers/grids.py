@@ -342,7 +342,7 @@ class ExtGridGroupingView(BaseExtComponent):
             %(group_text_tpl)s
         })
     '''  % {'force_fit':'forceFit:true' if self.force_fit else 'forceFit:false',
-            'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]} {[values.rs.length > 1 ? "Объекта" : "Объект"]})'"""
+            'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]})'"""
 }
         return result
     # если требуется вывести какое-либо слово после количества, шаблон должен иметь след вид:
