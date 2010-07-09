@@ -4,6 +4,7 @@ Created on 3.3.2010
 
 @author: prefer
 '''
+from m3.ui.ext.base import BaseExtComponent
 from base_store import BaseExtStore
 
 class ExtDataStore(BaseExtStore):
@@ -99,4 +100,45 @@ new Ext.data.JsonWriter({
                'encodeDelete': 'encodeDelete: true' if self.encode_delete else ''}
         
         return result
+
+class ExtJsonReader(BaseExtComponent):
+    '''
+    Ридер для данных
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtJsonReader, self).__init__(*args, **kwargs)
+        self.template = 'ext-misc/ext-json-reader.js'
+        self.id_property = 'id'
+        self.root = None
+        self.total_property = None
+        self.__fields = []
+        self.init_component(*args, **kwargs)
         
+    def t_render_fields(self): 
+        return ','.join(['{name: "%s"}' % field for field in self.__fields])
+    
+    def set_fields(self, *args):
+        for field in args:
+            self.__fields.append(field)
+            
+    def get_fields(self):
+        return self.__fields         
+
+class ExtGroupingStore(ExtJsonStore):
+    '''
+    Хранилище используемое для группировки по определенным полям в гриде
+    '''     
+    def __init__(self, *args, **kwargs):
+        super(ExtGroupingStore, self).__init__(*args, **kwargs)
+        self.template = 'ext-misc/ext-grouping-store.js'
+        self.remote_group = False
+        self.group_field = None
+        self.sort_info = None
+        self.init_component(*args, **kwargs)
+        
+    def render(self, columns):
+        assert self.sort_info in self.reader.get_fields(), \
+        'can`t find sortfield "%s" in %s' % (self.sort_info,self.reader.get_fields(),)
+        assert self.group_field in self.reader.get_fields(), \
+        'can`t find groupfield "%s" in %s' % (self.group_field,self.reader.get_fields(),)
+        return super(ExtGroupingStore, self).render(columns)        

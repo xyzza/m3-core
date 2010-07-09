@@ -24,6 +24,8 @@ class ExtGrid(BaseExtPanel):
         self.force_fit = True
         # selection model
         self.__sm = None
+        # view
+        self.__view = None
         # Колонка для авторасширения
         self.auto_expand_column = None
         # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен
@@ -110,6 +112,14 @@ class ExtGrid(BaseExtPanel):
         self.__sm = value
         self.checkbox_model = isinstance(self.__sm, ExtGridCheckBoxSelModel)
     
+    @property
+    def view(self):
+        return self.__view
+    
+    @view.setter
+    def view(self, value):
+        self.__view = value    
+    
     def pre_render(self):
         super(ExtGrid, self).pre_render()
         if self.store:
@@ -167,7 +177,8 @@ class ExtGrid(BaseExtPanel):
         res += ',enableDragDrop: %s' % str(self.drag_drop).lower() if self.drag_drop else ''
         res += ',ddGroup:"%s"' % self.drag_drop_group if self.drag_drop_group else ''
         res += ',listeners: %s' % \
-            self.t_render_simple_listeners() if self._listeners else ''
+            self.t_render_simple_listeners() if self._listeners else '' 
+        res += ',view: %s' % self.view.render() if self.view else ''    
         return res
     
     def render_params(self):
@@ -315,3 +326,25 @@ class ExtAdvancedTreeGrid(ExtGrid):
 #        base_config = self.render_base_config()
 #        params = self.render_params()
 #        return 'createAdvancedTreeGrid({%s},{%s})' %(base_config, params)
+
+class ExtGridGroupingView(BaseExtComponent):
+    '''
+    Компонент используемый при группировке
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtGridGroupingView, self).__init__(*args, **kwargs)
+        self.force_fit = True
+        self.init_component(*args, **kwargs)
+        
+    def render(self):
+        result = '''new Ext.grid.GroupingView({
+            %(force_fit)s,
+            %(group_text_tpl)s
+        })
+    '''  % {'force_fit':'forceFit:true' if self.force_fit else 'forceFit:false',
+            'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]} {[values.rs.length > 1 ? "Объекта" : "Объект"]})'"""
+}
+        return result
+    # если требуется вывести какое-либо слово после количества, шаблон должен иметь след вид:
+    # 'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]} {[values.rs.length > 1 ? "Объекта" : "Объект"]})'"""
+    # но проблемы с обработкой двойных кавычек
