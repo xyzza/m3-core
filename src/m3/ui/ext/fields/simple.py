@@ -99,4 +99,8 @@ class ExtTimeField(BaseExtField):
         self.template = 'ext-fields/ext-time-field.js'
         self.format = None
         self.increment = None
+        # max и min допустимые значения времени. Задаются только в виде строки, 
+        # т.к. форматы времени в python'e и javascript'e разные
+        self.max_value = None
+        self.min_value = None
         self.init_component(*args, **kwargs)
