@@ -182,7 +182,7 @@ Ext.override(Ext.Window, {
             this.afterHide();
         }
         return this;
-    },
+    }
 }); 
 
 /**
