@@ -13,8 +13,8 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 	,allowPaging: true
 	
 	,constructor: function(baseConfig, params){
-		console.log(baseConfig);
-		console.log(params);
+		//console.log(baseConfig);
+		//console.log(params);
 		
 		assert(params.allowPaging !== undefined,'allowPaging is undefined');
 		assert(params.rowIdName !== undefined,'rowIdName is undefined');

@@ -44,7 +44,8 @@ def mptt_json_data(query, parent_obj='parent', start = 0, limit = 25):
         if parent_node and hasattr(parent_node, parent_obj):
             parent = getattr(parent_node, parent_obj) 
             if parent not in res_data:
-                add_node(parent, getattr(parent, parent_obj)  )
+                # Рекурсивный подъем к вершине
+                add_node(parent, getattr(parent, parent_obj))
         elif node in res_data:
             return
         
@@ -54,9 +55,10 @@ def mptt_json_data(query, parent_obj='parent', start = 0, limit = 25):
             assert hasattr(parent_node, '_parent')
             assert hasattr(parent_node, '_level')
             assert hasattr(parent_node, '_is_leaf')
+            assert hasattr(parent_node, '_id')
             
             shift_nodes_right(parent_node._rgt)
-            node._parent = parent_node.id
+            node._parent = parent_node._id
             node._level = parent_node._level + 1
             node._lft = parent_node._rgt - 2
             node._rgt = node._lft + 1
@@ -92,11 +94,18 @@ def mptt_json_data(query, parent_obj='parent', start = 0, limit = 25):
     except:
         total = 0
     
-    data = list(query)
+    if start > 0 and limit < 1:
+        data = list(query[start:])
+    elif start >= 0 and limit > 0:
+        data = list(query[start: start + limit])
+    else:
+        data = list(query)
+    
     for item in data:
         add_node(item, getattr(item, parent_obj))
              
     return json.M3JSONEncoder().encode({'rows': res_data, 'total': total})
+
 
 def _test():
     class Proxy:
@@ -113,8 +122,11 @@ def _test():
     c_second = Proxy(id = 4, fname = u'Дочерний второй', parent = root) 
     
     res_list = [root, c_first, c_c_first, c_second]
-    res = mptt_json_data(res_list, parent_obj='parent')
-    return res
+    
+    for i in range(100) :
+        res_list.append( Proxy(id = (i+10), fname = u'Дочерний %d' % i, parent = root) )
+    
+    return mptt_json_data(res_list, parent_obj='parent')
     
 # Тесты:
 if __name__ == '__main__':
