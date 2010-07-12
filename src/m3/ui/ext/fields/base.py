@@ -24,7 +24,6 @@ class BaseExtField(ExtUIComponent):
         self.min_length = self.min_length_text = None
         self.max_length = self.max_length_text = None
         self.regex      = self.regex_text      = None
-        
         self.tab_index = None
    
     def t_render_label_style(self):
@@ -48,6 +47,24 @@ class BaseExtField(ExtUIComponent):
     @handler_change.setter
     def handler_change(self, function):
         self._listeners['change'] = function
+    
+    def render_base_config(self):
+        res = super(BaseExtField, self).render_base_config()
+        res += ',fieldLabel: "%s"' % self.label if self.label else ''
+        res += ',value: "%s"' % self.value if self.value else ''
+        res += ',labelStyle: %s' % self.t_render_label_style() \
+            if self.label_style else ''
+        res += ',readOnly: %s' % str(self.read_only).lower() if self.read_only else ''
+        res += ',allowBlank: %s' % str(self.allow_blank).lower()
+        res += ',vtype: "%s"' % self.vtype if self.vtype else ''
+        res += ',minLenght: %s' % self.min_length if self.min_length else ''
+        res += ',minLengthText: %s' % self.min_length_text if self.min_length_text else ''
+        res += ',maxLength: %s' % self.max_length if self.max_length else ''
+        res += ',maxLengthText: %s' % self.max_length_text if self.max_length_text else ''
+        res += ',regex: "%s"' % self.regex if self.regex else ''
+        res += ',regexText: "%s"' % self.regex_text if self.regex_text else ''
+        res += ',tabIndex: "%s"' % self.tab_index if self.tab_index else ''
+        return res
     
 class BaseExtTriggerField(BaseExtField):
     '''Базовый класс для комбобокса, поля выбора справочника'''

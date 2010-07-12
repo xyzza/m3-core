@@ -24,6 +24,11 @@ class ExtStringField(BaseExtField):
         self.mask_re = None
         self.init_component(*args, **kwargs)
 
+    def render_base_config(self):
+        res = super(ExtStringField, self).render_base_config()
+        res += ',inputType: "%s"' % self.input_type if self.input_type else ''
+        res += ',maskRe: "%s"' % self.mask_re if self.mask_re else ''
+        return res
 
 class ExtDateField(BaseExtField):
     '''Поле ввода даты'''
