@@ -113,7 +113,8 @@ class MetaWorkflowWSOModel(ModelBase):
             field_name = wso_field
             model_type = wso_class
 
-            models.ForeignKey(model_type, null=True, blank=True).contribute_to_class(klass, field_name)
+            related_name = "_".join([klass.__name__.lower(), field_name, "set"])
+            models.ForeignKey(model_type, null=True, blank=True, related_name=related_name).contribute_to_class(klass, field_name)
         
         return klass
         

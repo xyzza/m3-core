@@ -29,21 +29,24 @@ function(){
         return;
     }
     form.submit({
-        %(params)s
-        %(success_handler)s
-        %(failure_handler)s
-        %(url)s
+        %(submit_params)s        
     });
 }
 '''
     # Эти функции смотри в static/js/common.js
     failure_handler = failure_handler or 'uiAjaxFailMessage'
+    submit_params = []
+    if form.url:
+        submit_params.append("url: '%s'" % form.url)
+    if success_handler:
+        submit_params.append("success: " + success_handler)
+    if failure_handler:
+        submit_params.append("failure: " + failure_handler)
+    if params:
+        submit_params.append("params: " + json.JSONEncoder().encode(params)) 
     return template % {'form_id': form.client_id,
-                       'url': "url:'%s'" % form.url if form.url else '',
-                       'success_handler': 'success:' + success_handler + ',' if success_handler else '',
-                       'failure_handler': 'failure:' + failure_handler + ',' if failure_handler else '',
-                       'params': 'params:'  + json.JSONEncoder().encode(params) + ',' if params else '',
-                       'invalid_handler': invalid_handler}
+                       'invalid_handler': invalid_handler,
+                       'submit_params': ",".join(submit_params)}
 
 
 def js_success_response():
