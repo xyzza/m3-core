@@ -7,10 +7,10 @@ Created on 25.06.2010
 @author: prefer
 '''
 
-from m3.ui.ext import containers, controls, menus, misc
+from m3.ui.ext import containers, controls, menus
 
 
-class ExtObjectTree(containers.ExtTree):
+class ExtObjectTree(containers.ExtAdvancedTreeGrid):
     '''
     Панель с деревом для управления списком объектов.
     '''
@@ -23,7 +23,8 @@ class ExtObjectTree(containers.ExtTree):
         '''
         def __init__(self, *args, **kwargs):
             super(ExtObjectTree.TreeContextMenu, self).__init__(*args, **kwargs)
-            self.menuitem_new = menus.ExtContextMenuItem(text = u'Добавить', icon_cls = 'add_item', handler='contextMenuNew')
+            self.menuitem_new = menus.ExtContextMenuItem(text = u'Новый в корне', icon_cls = 'add_item', handler='contextMenuNewRoot')
+            self.menuitem_new_child = menus.ExtContextMenuItem(text = u'Новый дочерний', icon_cls = 'add_item', handler='contextMenuNewChild')
             self.menuitem_edit = menus.ExtContextMenuItem(text = u'Изменить', icon_cls = 'edit_item', handler='contextMenuEdit')
             self.menuitem_delete = menus.ExtContextMenuItem(text = u'Удалить', icon_cls = 'delete_item', handler='contextMenuDelete')
             self.menuitem_separator = menus.ExtContextMenuSeparator()            
@@ -37,7 +38,10 @@ class ExtObjectTree(containers.ExtTree):
         '''
         def __init__(self, *args, **kwargs):
             super(ExtObjectTree.TreeTopBar, self).__init__(*args, **kwargs)
-            self.button_new = controls.ExtButton(text = u'Добавить', icon_cls = 'add_item', handler='topBarNew')
+
+            self.button_new = menus.ExtContextMenuItem(text=u'Новый в корне', icon_cls='add_item', handler='topBarNewRoot')
+            self.button_new_child = menus.ExtContextMenuItem(text=u'Новый дочерний', icon_cls='add_item', handler='topBarNewChild')
+            
             self.button_edit = controls.ExtButton(text = u'Изменить', icon_cls = 'edit_item', handler='topBarEdit')
             self.button_delete = controls.ExtButton(text = u'Удалить', icon_cls = 'delete_item', handler='topBarDelete')
             self.button_refresh = controls.ExtButton(text = u'Обновить', icon_cls = 'refresh-icon-16', handler='topBarRefresh')
@@ -49,10 +53,10 @@ class ExtObjectTree(containers.ExtTree):
     
     def __init__(self, *args, **kwargs):
         super(ExtObjectTree, self).__init__(*args, **kwargs)
-        self.template = 'ext-trees/ext-advanced-tree.js'
-        #===============================================================================
+        self.template = 'ext-trees/ext-object-tree.js'
+        #=======================================================================
         # Действия, выполняемые изнутри грида 
-        #===============================================================================
+        #=======================================================================
         self.action_new = None
         self.action_edit = None
         self.action_delete = None
@@ -64,7 +68,7 @@ class ExtObjectTree(containers.ExtTree):
         #self.store = misc.ExtJsonStore(auto_load=True, root='rows', id_property='id')
         self.load_mask = True
         self.row_id_name = 'row_id'
-        #self.allow_paging = True
+        self.allow_paging = False
 
         #=======================================================================
         # Контекстное меню и бары грида
@@ -85,6 +89,7 @@ class ExtObjectTree(containers.ExtTree):
         '''
         if self.action_new:
             self.context_menu_row.items.append(self.context_menu_row.menuitem_new)
+            self.context_menu_row.items.append(self.context_menu_row.menuitem_new_child)
             self.context_menu_tree.items.append(self.context_menu_tree.menuitem_new)
             
         if self.action_edit:
@@ -105,7 +110,10 @@ class ExtObjectTree(containers.ExtTree):
         # Настройка top bar
         #=======================================================================
         if self.action_new:
-            self.top_bar.items.insert(0, self.top_bar.button_new) 
+            menu = menus.ExtContextMenu()
+            menu.items.append(self.top_bar.button_new)
+            menu.items.append(self.top_bar.button_new_child)
+            self.top_bar.add_menu(icon_cls="add_item", menu=menu, text = u'Добавить')
         
         if self.action_edit:
             self.top_bar.items.append(self.top_bar.button_edit)
@@ -127,3 +135,21 @@ class ExtObjectTree(containers.ExtTree):
         
         return super(ExtObjectTree, self).render()
 
+
+    def render_params(self):
+        res = super(ExtObjectTree, self).render_params()
+        res += ',actions:{newUrl:"%(new_url)s" \
+                          ,editUrl:"%(edit_url)s" \
+                          ,deleteUrl:"%(delete_url)s" \
+                          ,dataUrl:"%(data_url)s" \
+                          ,contextJson:%(context_json)s \
+        }' % {'new_url': self.action_new.absolute_url() if self.action_new else '' ,
+              'edit_url': self.action_edit.absolute_url() if self.action_edit else '' ,
+              'delete_url': self.action_delete.absolute_url() if self.action_delete else '' ,
+              'data_url': self.action_data.absolute_url() if self.action_data else '' ,
+              'context_json': self.action_context.json() if self.action_context else '' ,}
+                
+                
+        res += ',rowIdName:"%s"' % self.row_id_name if self.row_id_name else ''            
+        res += ',allowPaging:%s' % str(self.use_bbar).lower()          
+        return res

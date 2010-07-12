@@ -105,6 +105,23 @@ class TextResult(ActionResult):
     def get_http_response(self):
         return http.HttpResponse(self.data)
 
+
+class ExtAdvancedTreeGridDataQueryResult(ActionResult):
+    '''
+    Результат выполнения операции в формате, удобным для отображения в 
+    Ext.m3.AdvancedTreeGrid
+    '''
+    def __init__(self, data=None, start = -1, limit = -1):
+        super(ExtAdvancedTreeGridDataQueryResult, self).__init__(data)
+        self.start = start
+        self.limit = limit
+    
+    def get_http_response(self):
+        return http.HttpResponse(ui_helpers.mptt_json_data(self.data, 
+                                                           self.start, 
+                                                           self.limit),
+                                 mimetype='application/json')
+
 #===============================================================================
 # Результаты выполнения операции с заданным контекстом 
 #===============================================================================

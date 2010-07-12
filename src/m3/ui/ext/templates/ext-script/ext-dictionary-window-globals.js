@@ -8,7 +8,7 @@ var ajax = Ext.Ajax;
 	 * Стандартный рендеринг окна c добавлением обработчика. 
 	 */
 	function renderWindowGrid(response, opts){
-		win = m3_eval(response.responseText);
+		var win = m3_eval(response.responseText);
 		if (win!=undefined){
 			
 			win.on('refresh_store',function(event, target){ // deprecated
@@ -156,7 +156,7 @@ var ajax = Ext.Ajax;
 	 * @param {Object} opts
 	 */
 	function renderWindowTree(response, opts, parentNode){
-		win = m3_eval(response.responseText);
+		var win = m3_eval(response.responseText);
 		if (win!=undefined){
 			win.on('refresh_store', function(event, target){
 				// Если задан родительский узел, то перезаполнянм его дочерние

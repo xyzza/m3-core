@@ -8,7 +8,7 @@ from m3.ui.ext.base import ExtUIComponent
 from base import BaseExtContainer
 
 # Меню может привязываться к:
-from m3.ui.ext.containers import ExtGrid, ExtTree
+#from m3.ui.ext.containers import ExtGrid, ExtTree
 from m3.ui.ext.misc import ExtConnection
 
 

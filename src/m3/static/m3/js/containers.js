@@ -28,3 +28,12 @@ function createGridPanel(baseConfig, params){
 function createObjectGrid(baseConfig, params){
 	return new Ext.m3.ObjectGrid(baseConfig, params);
 }
+
+/**
+ * Создание объектного дерева
+ * @param {Object} baseConfig
+ * @param {Object} params
+ */
+function createObjectTree(baseConfig, params){
+	return new Ext.m3.ObjectTree(baseConfig, params);
+}

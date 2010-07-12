@@ -21,9 +21,10 @@ Ext.m3.AdvancedTreeGrid = Ext.extend(Ext.ux.maximgb.tg.GridPanel, {
 			,{name: '_lft', type: 'int'}
 			,{name: '_rgt', type: 'int'}
 			,{name: '_is_leaf', type: 'bool'}
+			,{name: '_parent', type: 'int'}
 		);
 		
-		var store = new Ext.ux.maximgb.tg.NestedSetStore({
+		var store = new Ext.ux.maximgb.tg.AdjacencyListStore({
 			autoLoad : true,
 			url: params.storeParams.url,
 			reader: new Ext.data.JsonReader({
