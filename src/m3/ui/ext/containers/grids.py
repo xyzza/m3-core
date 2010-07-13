@@ -10,6 +10,7 @@ from django.utils.datastructures import SortedDict
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
 
+GRID_COLUMN_DEFAULT_WIDTH = 100
 
 class ExtGrid(BaseExtPanel):
     def __init__(self, *args, **kwargs):
@@ -199,7 +200,7 @@ class BaseExtGridColumn(ExtUIComponent):
         self.sortable = False
         self.data_index = None
         self.align = None
-        self.width = None
+        self.width = GRID_COLUMN_DEFAULT_WIDTH
         self.editor = None
         self.column_renderer = None
                
