@@ -2,127 +2,13 @@
 
 #from m3.ui.ext.containers.forms import ExtPanel
 from m3.ui.ext.containers.container_complex import ExtContainerTable
-from m3.ui.ext.fields.simple import ExtStringField, ExtTextArea
+from m3.ui.ext.containers.base import BaseExtContainer
+from m3.ui.ext.fields.simple import ExtStringField, ExtTextArea, ExtHiddenField
 from m3.ui.ext.fields.base import BaseExtTriggerField
 from m3.ui.ext.misc import ExtJsonStore
 from m3.ui.actions import utils, Action, PreJsonResult, OperationResult
 from m3.contrib.kladr.models import KladrGeo, KladrStreet
 from django.db.models.query_utils import Q
-
-class ExtPlaceField(BaseExtTriggerField):
-    '''
-    Поле выбора территории из КЛАДРа 
-    '''
-    def __init__(self, *args, **kwargs):
-        super(ExtPlaceField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-place-select.js'
-        self.hide_trigger = True 
-        self.min_chars = 2 # количество знаков, с которых начинаются запросы на autocomplete
-        self.read_only = False
-        self.set_store(ExtJsonStore(id_property='code'))
-        #self.value = None
-        self.__value = None
-        self.url = None
-        self.get_store().url = KLADRRowsAction.absolute_url()
-        self.value_field = 'code'
-        self.query_param = 'filter' 
-        self.display_field = 'display_name'
-        self.total = 'total'
-        self.root = 'rows'
-        
-        self.init_component(*args, **kwargs)
-
-    @property
-    def total(self):
-        return self.get_store().total_property
-    
-    @total.setter
-    def total(self, value):
-        self.get_store().total_property = value
-        
-    @property
-    def root(self):
-        return self.get_store().root
-    
-    @root.setter
-    def root(self, value):
-        self.get_store().root = value
-
-    @property
-    def value(self):
-        return self.__value
-    
-    @value.setter
-    def value(self, val):
-        if val:
-            place = KladrGeo.objects.filter(code=val).select_related('parent').select_related('parent__parent').select_related('parent__parent__parent')
-            if place and len(place) == 1:
-                self.default_text = getattr(place[0], self.display_field)
-            else:
-                self.default_text = ''
-                val = ''
-        self.__value = val
-
-    def render(self):
-        return super(ExtPlaceField, self).render()
-
-class ExtStreetField(BaseExtTriggerField):
-    '''
-    Поле выбора улицы из КЛАДРа 
-    '''
-    def __init__(self, *args, **kwargs):
-        super(ExtStreetField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-street-select.js'
-        self.hide_trigger = True 
-        self.min_chars = 2 # количество знаков, с которых начинаются запросы на autocomplete
-        self.read_only = False
-        self.set_store(ExtJsonStore(id_property='code'))
-        #self.value = None
-        self.__value = None
-        self.url = None
-        self.get_store().url = StreetRowsAction.absolute_url()
-        self.value_field = 'code'
-        self.query_param = 'filter'
-        self.display_field = 'display_name'
-        self.total = 'total'
-        self.root = 'rows'
-        self.place_client_id = None
-        
-        self.init_component(*args, **kwargs)
-
-    @property
-    def total(self):
-        return self.get_store().total_property
-    
-    @total.setter
-    def total(self, value):
-        self.get_store().total_property = value
-        
-    @property
-    def root(self):
-        return self.get_store().root
-    
-    @root.setter
-    def root(self, value):
-        self.get_store().root = value
-
-    @property
-    def value(self):
-        return self.__value
-    
-    @value.setter
-    def value(self, val):
-        if val:
-            place = KladrStreet.objects.filter(code=val).select_related('parent')
-            if place and len(place) == 1:
-                self.default_text = getattr(place[0], self.display_field)
-            else:
-                self.default_text = ''
-                val = ''
-        self.__value = val
-
-    def render(self):
-        return super(ExtStreetField, self).render()
 
 class KLADRRowsAction(Action):
     '''
@@ -310,7 +196,7 @@ class KLADRGetAddrAction(Action):
         result = u'(function(){ Ext.getCmp("'+addr_cmp+'").setValue("'+addr_text+'");})()'
         return OperationResult(success=True, code = result)
 
-class ExtAddrComponent(ExtContainerTable):
+class ExtAddrComponent(BaseExtContainer):
     '''
     Блок указания адреса 
     '''
@@ -319,9 +205,13 @@ class ExtAddrComponent(ExtContainerTable):
     HOUSE = 3 # Уровень дома
     FLAT = 4 # Уровень квартиры    
     
+    VIEW_0 = 0 # хитрый режим (пока не будем делать), когда отображается только адрес, а его редактирование отдельным окном
+    VIEW_1 = 1 # в одну строку + адрес
+    VIEW_2 = 2 # в две строки + адрес, только для level > PLACE
+    VIEW_3 = 3 # в три строки + адрес, только для level > STREET
+    
     def __init__(self, *args, **kwargs):
-        self.level = ExtAddrComponent.FLAT
-        self.addr_visible = True
+        super(ExtAddrComponent, self).__init__(*args, **kwargs)
         self.place_field_name = 'place'
         self.street_field_name = 'street'
         self.house_field_name = 'house'
@@ -333,47 +223,80 @@ class ExtAddrComponent(ExtContainerTable):
         self.flat_label = u'Квартира'
         self.addr_label = u'Адрес'
         self.action_getaddr = KLADRGetAddrAction
-        super(ExtAddrComponent, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-addr-field.js'
-                
-        if self.level == ExtAddrComponent.PLACE:
-            self.rows_count = 1
-            self.columns_count = 2 
-            self.height = 25
-        elif self.level == ExtAddrComponent.STREET:
-            self.rows_count = 2
-            self.columns_count = 2
-            self.height = 50
-        elif self.level == ExtAddrComponent.HOUSE or self.level == ExtAddrComponent.FLAT:
-            self.rows_count = 3
-            self.columns_count = 2
-            self.height = 75
-        if self.addr_visible:
-            self.rows_count = self.rows_count+1
-            self.height = self.height+43
-        self.set_rows_height(25)
-        if self.addr_visible:
-            self.addr = ExtTextArea(label = self.addr_label, name = self.addr_field_name, anchor='100%', read_only = True, height = 40)
-        self.place = ExtPlaceField(label = self.place_label, name = self.place_field_name, anchor='100%')
-        if self.addr_visible:
-            self.place.handler_change = 'getNewAddr'
-        self.set_item(0, 0, self.place, colspan = 2)
-        if self.level > ExtAddrComponent.PLACE: 
-            self.street = ExtStreetField(label = self.street_label, name = self.street_field_name, anchor='100%', place_client_id = self.place.client_id)
-            if self.addr_visible:
-                self.street.handler_change = 'getNewAddr'
-            self.set_item(1, 0, self.street, colspan = 2)
-        if self.level > ExtAddrComponent.STREET:
-            self.house = ExtStringField(label = self.house_label, name = self.house_field_name, anchor='100%')
-            if self.addr_visible:                
-                self.house.handler_change = 'getNewAddr'
-            self.set_item(2, 0, self.house)
-        if self.level > ExtAddrComponent.HOUSE:
-            self.flat = ExtStringField(label = self.flat_label, name = self.flat_field_name, anchor='100%')
-            if self.addr_visible:
-                self.flat.handler_change = 'getNewAddr'
-            self.set_item(2, 1, self.flat)
-        if self.addr_visible:
-            self.set_item(self.rows_count-1, 0, self.addr, colspan = 2)
-            self.set_row_height(self.rows_count-1, 43)
+        self.level = ExtAddrComponent.FLAT
+        self.addr_visible = True
+        self.view_mode = ExtAddrComponent.VIEW_2
         self.init_component(*args, **kwargs)
+        self.layout = 'form'
+        self.template = 'ext-fields/ext-addr-field.js'
+        self.addr = ExtHiddenField(name = self.addr_field_name, type = ExtHiddenField.STRING);
+        self.place = ExtHiddenField(name = self.place_field_name, type = ExtHiddenField.STRING);
+        self.street = ExtHiddenField(name = self.street_field_name, type = ExtHiddenField.STRING);
+        self.house = ExtHiddenField(name = self.house_field_name, type = ExtHiddenField.STRING);
+        self.flat = ExtHiddenField(name = self.flat_field_name, type = ExtHiddenField.STRING);
+        self._items.append(self.addr)
+        self._items.append(self.place)
+        self._items.append(self.street)
+        self._items.append(self.house)
+        self._items.append(self.flat)
+        if self.view_mode == ExtAddrComponent.VIEW_1:
+            self.height = 25
+        elif self.view_mode == ExtAddrComponent.VIEW_2:
+            if self.level > ExtAddrComponent.STREET:
+                self.height = 25*2
+            else:
+                self.height = 25
+        elif self.view_mode == ExtAddrComponent.VIEW_3:
+            if self.level > ExtAddrComponent.HOUSE:
+                self.height = 25*3
+            else:
+                if self.level > ExtAddrComponent.STREET:
+                    self.height = 25*2
+                else:
+                    self.height = 25
+        if self.addr_visible:
+            self.height += 36+7
+
+    def render_params(self):
+        res = ''        
+        par = []
+        par.append('place_field_name: "%s"' % (self.place_field_name if self.place_field_name else '')) 
+        par.append('street_field_name: "%s"' % (self.street_field_name if self.street_field_name else ''))
+        par.append('house_field_name: "%s"' % (self.house_field_name if self.house_field_name else ''))
+        par.append('flat_field_name: "%s"' % (self.flat_field_name if self.flat_field_name else ''))
+        par.append('addr_field_name: "%s"' % (self.addr_field_name if self.addr_field_name else ''))
+        
+        par.append('place_label: "%s"' % (self.place_label if self.place_label else '')) 
+        par.append('street_label: "%s"' % (self.street_label if self.street_label else ''))
+        par.append('house_label: "%s"' % (self.house_label if self.house_label else ''))
+        par.append('flat_label: "%s"' % (self.flat_label if self.flat_label else ''))
+        par.append('addr_label: "%s"' % (self.addr_label if self.addr_label else ''))
+        par.append('addr_visible: %s' % ('true' if self.addr_visible else 'false' ))
+        
+        par.append('level: %s' % self.level)
+        par.append('view_mode: %s' % self.view_mode)
+        
+        par.append('place_value: "%s"' % (self.place.value if self.place and self.place.value else ''))
+        place = KladrGeo.objects.filter(code=self.place.value).select_related('parent').select_related('parent__parent').select_related('parent__parent__parent')        
+        par.append('place_text: "%s"' % (place[0].display_name() if place and len(place) == 1 else ''))         
+        par.append('street_value: "%s"' % (self.street.value if self.street and self.street.value else ''))
+        street = KladrStreet.objects.filter(code=self.street.value).select_related('parent')
+        par.append('street_text: "%s"' % (street[0].display_name() if street and len(street) == 1 else ''))
+        par.append('house_value: "%s"' % (self.house.value if self.house and self.house.value else ''))
+        par.append('flat_value: "%s"' % (self.flat.value if self.flat and self.flat.value else ''))
+        par.append('addr_value: "%s"' % (self.addr.value if self.addr and self.addr.value else ''))
+        
+        par.append('get_addr_url: "%s"' % (self.action_getaddr.absolute_url() if self.action_getaddr else ''))        
+        par.append('kladr_url: "%s"' % KLADRRowsAction.absolute_url())
+        par.append('street_url: "%s"' % StreetRowsAction.absolute_url())
+        
+        res += ',\n'.join(par)                
+        return res
+    
+    def render_base_config(self):
+        res = super(ExtAddrComponent, self).render_base_config()        
+        return res
+
+    @property
+    def items(self):       
+        return self._items
