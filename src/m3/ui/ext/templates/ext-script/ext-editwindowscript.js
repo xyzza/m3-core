@@ -82,12 +82,10 @@
 			};
 			if (item.items) {
 				if (!(item.items instanceof Array)) {	
-					console.log(item);
 					item.items.each(function(it){					
             			setFieldOnChange(it);
         			});
 				} else {
-					console.log(item);
 					for (var i = 0; i < item.items.length; i++) {
 						setFieldOnChange(item.items[i]);
 					};
