@@ -17,7 +17,6 @@ from containers import (ExtContainer,
                         ExtToolBar, 
                         ExtToolbar, 
                         ExtButtonGroup, 
-                        ExtPagingbar, 
                         ExtPagingBar)
 from context_menu import ExtContextMenu, ExtContextMenuItem
 from list_view import ExtListView

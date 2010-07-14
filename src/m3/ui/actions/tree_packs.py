@@ -10,7 +10,7 @@ from m3.ui.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.actions.packs import ListDeleteRowAction
-from m3.ui.ext.containers import ExtPagingbar
+from m3.ui.ext.containers import ExtPagingBar
 
 
 class TreeGetNodesAction(Action):
@@ -199,7 +199,7 @@ class ListWindowAction(Action):
         if base.list_model:
             win.init_grid_components()
             if base.list_paging:
-                win.grid.bottom_bar = ExtPagingbar(page_size = 25)
+                win.grid.bottom_bar = ExtPagingBar(page_size = 25)
         win.init_tree_components()
         win.tree.width = base.tree_width
         win.tree.root_text = base.title

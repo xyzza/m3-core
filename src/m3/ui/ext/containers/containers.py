@@ -92,15 +92,6 @@ class ExtPagingBar(BaseExtContainer):
         self.page_size = 25
         self.init_component(*args, **kwargs)
         
-class ExtPagingbar(ExtPagingBar):
-    '''
-    Класс с ошибочным названием
-    @deprecated: использовать базовый класс
-    '''   
-    def __init__(self, *args, **kwargs):
-        super(ExtPagingbar, self).__init__(*args, **kwargs)
-        self.init_component(*args, **kwargs)
-        
          
 class ExtToolbarMenu(ExtUIComponent):
     def __init__(self, *args, **kwargs):

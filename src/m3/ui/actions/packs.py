@@ -6,7 +6,7 @@ from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, 
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.actions import utils
-from m3.ui.ext.containers import ExtPagingbar
+from m3.ui.ext.containers import ExtPagingBar
 
 class DictListWindowAction(Action):
     '''
@@ -23,7 +23,7 @@ class DictListWindowAction(Action):
         
         win.init_grid_components()
         if base.list_paging:
-            win.grid.bottom_bar = ExtPagingbar(page_size = 25)
+            win.grid.bottom_bar = ExtPagingBar(page_size = 25)
         return win
             
     def create_columns(self, control, columns):
