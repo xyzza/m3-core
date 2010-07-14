@@ -79,26 +79,18 @@
 		if (item) {
 			if (item instanceof Ext.form.Field && item.isEdit) {
 				item.on('change', onChangeFieldValue);
-			};			
+			};
 			if (item.items) {
-				if (!(item.items instanceof Array)) {	
-					console.log(item);
-					item.items.each(function(it){					
-            			setFieldOnChange(it);
-        			});
-				} else {
-					console.log(item);
-					for (var i = 0; i < item.items.length; i++) {
-						setFieldOnChange(item.items[i]);
-					};
-				}
+				item.items.each(function(it){
+					setFieldOnChange(it);
+				});
 			};
 			// оказывается есть еще и заголовочные элементы редактирования
 			if (item.titleItems) {
 				for (var i = 0; i < item.titleItems.length; i++) {
 					setFieldOnChange(item.titleItems[i]);
 				};
-			};			
+			};
 		};
 	};
 	win.items.each(function(item){
