@@ -42,7 +42,7 @@ function smart_eval(text){
 	    // на случай, когда в процессе получения ответа сервера произошел аборт
 		return;
 	}
-	if(text[0] == '{'){
+	if(text.substring(0,1) == '{'){
 		// это у нас json объект
 		var obj = Ext.util.JSON.decode(text);
 		if(!obj){
