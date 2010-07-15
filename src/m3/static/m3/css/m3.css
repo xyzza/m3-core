@@ -43,3 +43,9 @@ q:before,q:after{content:'';}.m3-el-mask {
     background-color: #ccc;
 }
 
+.x-form-select-trigger {
+	background-image:url(../images/select-dict.gif) !important;
+}
+.x-form-edit-trigger {
+	background-image:url(../images/trigger-edit-form.gif) !important;
+}

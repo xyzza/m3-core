@@ -52,7 +52,7 @@ class BaseExtField(ExtUIComponent):
         res = super(BaseExtField, self).render_base_config()
         res += ',fieldLabel: "%s"' % self.label if self.label else ''
         res += ',value: "%s"' % self.value if self.value else ''
-        res += ',labelStyle: %s' % self.t_render_label_style() \
+        res += ',labelStyle: "%s"' % self.t_render_label_style() \
             if self.label_style else ''
         res += ',readOnly: %s' % str(self.read_only).lower() if self.read_only else ''
         res += ',allowBlank: %s' % str(self.allow_blank).lower()

@@ -382,6 +382,7 @@ var ajax = Ext.Ajax;
 			
 			id = grid.getSelectionModel().getSelected().id;
 			displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}");
+			//console.log( displayText );
 		{% else %}
 			var tree = Ext.getCmp('{{ component.tree.client_id}}');
 			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {

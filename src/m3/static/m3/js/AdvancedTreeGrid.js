@@ -37,7 +37,7 @@ Ext.m3.AdvancedTreeGrid = Ext.extend(Ext.ux.maximgb.tg.GridPanel, {
 			)
 		});
 		
-		var botom_bar
+		var botom_bar;
 		if (params.bbar) {
 			botom_bar = new Ext.ux.maximgb.tg.PagingToolbar({
 				store: store

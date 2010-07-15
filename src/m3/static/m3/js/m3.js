@@ -48,16 +48,16 @@ function smart_eval(text){
 		if(!obj){
 			return;
 		}
-		if(obj.code != undefined){
+		if(obj.code){
 			var eval_result = obj.code();
-			if( eval_result != undefined && AppDesktop != undefined && eval_result instanceof Ext.Window ){
+			if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
 				AppDesktop.getDesktop().createWindow(eval_result);
 			}
 			return eval_result;
 		}
 		else
 		{
-    		if(obj.message != undefined && obj.message != ''){
+    		if(obj.message && obj.message != ''){
     			Ext.Msg.show({title:'', msg: obj.message, buttons:Ext.Msg.OK, icon: (obj.success!=undefined && !obj.success ? Ext.Msg.WARNING : Ext.Msg.Info)});
     			return;
     		}
@@ -65,7 +65,7 @@ function smart_eval(text){
 	}
 	else{
 		var eval_result = eval(text);
-		if( eval_result != undefined && AppDesktop != undefined && eval_result instanceof Ext.Window ){
+		if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
 			AppDesktop.getDesktop().createWindow(eval_result);
 		}
 		return eval_result;

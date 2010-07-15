@@ -25,20 +25,19 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.template = 'ext-fields/ext-dict-select-field.js'
         self.hide_trigger = True 
         self.min_chars = 2 # количество знаков, с которых начинаются запросы на autocomplete
-        self.read_only = True
+        
         self.set_store(ExtJsonStore())
-        self.handler_change = 'onChange'
+        #self.handler_change = 'onChange'
         self.width = 150
         self.value = None
+        
+        #self.read_only = False
+        self.editable = False
         self.ask_before_deleting = None
         self.url = None
         self.autocomplete_url = None
         self.value_field = 'id'     # это взято из магического метода configure_edit_field из mis.users.forms 
         self.query_param = 'filter' # и это тоже взято оттуда же
-        self.label_width = None     # Ширина надписи выбора
-        
-        self.select_button = ExtButton(handler='onSelect', icon_cls='select', width=30, disabled=True)
-        self.clear_button  = ExtButton(handler='onClearField', icon_cls='clear', width=30, disabled=True) 
         
         self.display_field = 'name' # по умолчанию отображаем значение поля name
         
@@ -87,8 +86,6 @@ class ExtDictSelectField(BaseExtTriggerField):
     
     @url.setter
     def url(self, value):
-        if value:
-            self.select_button.disabled = False
         self.__url = value
         
     @property
@@ -98,7 +95,7 @@ class ExtDictSelectField(BaseExtTriggerField):
     @autocomplete_url.setter
     def autocomplete_url(self, value):
         if value:
-            self.read_only = False
+            self.editable = True
             self.get_store().url = value
         self.__autocomplete_url = value
         
@@ -108,8 +105,6 @@ class ExtDictSelectField(BaseExtTriggerField):
     
     @value.setter
     def value(self, val):
-        if val:
-            self.clear_button.disabled = True if val else False
         self.__value = val
         
     def configure_by_dictpack(self, pack, controller):
@@ -123,6 +118,17 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.url = registered_pack.get_select_url()
         self.autocomplete_url = registered_pack.rows_action.get_absolute_url()
         self.bind_pack = registered_pack # TODO: можно ли обойтись без bind_back?
+    
+    
+#    @property
+#    def pack(self):
+#        return self.__pack
+#        
+#    @pack.setter
+#    def pack(self, ppack):
+#        self.__pack = ppack
+#        self.url = ppack.absolute_url()
+        
         
     @property
     def total(self):
@@ -139,9 +145,6 @@ class ExtDictSelectField(BaseExtTriggerField):
     @root.setter
     def root(self, value):
         self.get_store().root = value
-        
-    def render(self):
-        return super(ExtDictSelectField, self).render()
         
         
 class ExtSearchField(BaseExtField):
