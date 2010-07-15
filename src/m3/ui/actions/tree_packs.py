@@ -385,7 +385,25 @@ class BaseTreeDictionaryActions(ActionPack):
     def delete_node(self, obj):
         raise NotImplementedError()
     
-    #========================== СПИСОК ===========================
+    #================ ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА ===============
+    
+    def get_select_url(self):
+        ''' Возвращает адрес формы списка элементов справочника. '''
+        return self.select_window_action.get_absolute_url()
+    
+    def get_list_url(self):
+        ''' Возвращает адрес формы списка элементов справочника. '''
+        return self.list_window_action.get_absolute_url()
+    
+    def get_edit_url(self):
+        ''' Возвращает адрес формы редактирования элемента справочника. '''
+        return self.edit_grid_window_action.get_absolute_url()
+    
+    def get_edit_node_url(self):
+        ''' Возвращает адрес формы редактирования группы справочника. '''
+        return self.edit_node_window_action.get_absolute_url()
+    
+    #=================== ИЗМЕНЕНИЕ ДАННЫХ =======================
     
     def get_rows(self, offset, limit, filter, parent_id):
         raise NotImplementedError()
@@ -399,19 +417,13 @@ class BaseTreeDictionaryActions(ActionPack):
     def delete_row(self, obj):
         raise NotImplementedError()
     
-    #========================== ФОРМА ============================
+    #============ ДЛЯ ИЗМЕНЕНИЯ ОКОН ВЫБОРА НА ХОДУ ==============
     
     def get_select_window(self, win):
         return win
     
-    def get_select_url(self):
-        return self.select_window_action.get_absolute_url()
-    
     def get_list_window(self, win):
         return win
-    
-    def get_list_url(self):
-        return self.list_window_action.get_absolute_url()
     
     #======================= Drag&Drop ===========================
     
