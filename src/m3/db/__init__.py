@@ -28,7 +28,7 @@ def queryset_limiter(queryset, start=0, limit=0):
     total - общее кол-во записей в queryset'e
     '''
     
-    assert(queryset, QuerySet), 'queryset must be instance of django.db.models.query.QuerySet' 
+    assert isinstance(queryset, QuerySet), 'queryset must be instance of django.db.models.query.QuerySet' 
     
     if start < 0:
         start = 0
