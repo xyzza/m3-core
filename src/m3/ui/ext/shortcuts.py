@@ -43,7 +43,8 @@ function(){
     if failure_handler:
         submit_params.append("failure: " + failure_handler)
     if params:
-        submit_params.append("params: " + json.JSONEncoder().encode(params)) 
+        submit_params.append("params: " + json.JSONEncoder().encode(params))
+    submit_params.append("submitEmptyText: false")
     return template % {'form_id': form.client_id,
                        'invalid_handler': invalid_handler,
                        'submit_params': ",".join(submit_params)}
