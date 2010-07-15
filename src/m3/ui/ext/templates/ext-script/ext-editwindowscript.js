@@ -21,7 +21,8 @@
 					{} 
 				{% endif %}),
            success: formSubmitSuccessHandler,
-    	   failure: {% if form.failure_handler %}{{form.failure_handler}}{% else %}defaultSubmitFailureHandler{% endif %}
+    	   failure: {% if form.failure_handler %}{{form.failure_handler}}{% else %}defaultSubmitFailureHandler{% endif %},
+    	   submitEmptyText: false
     	});
     }
     
