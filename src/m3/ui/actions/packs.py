@@ -181,7 +181,7 @@ class BaseDictionaryActions(ActionPack):
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
                         self.delete_action]
-    
+        
     def get_list_url(self):
         '''
         Возвращает адрес формы списка элементов справочника. 
@@ -195,6 +195,12 @@ class BaseDictionaryActions(ActionPack):
         Используется для присвоения адресов в прикладном приложении.
         '''
         return self.select_window_action.get_absolute_url()
+    
+    def get_edit_url(self):
+        '''
+        Возвращает адрес формы редактирования элемента справочника.
+        '''
+        return self.edit_window_action.get_absolute_url()
     
     def get_rows(self, offset, limit, filter):
         '''
