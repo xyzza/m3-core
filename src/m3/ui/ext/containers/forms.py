@@ -168,6 +168,13 @@ class ExtForm(BaseExtPanel):
                     nested = getattr(obj, names[0], None)
                     set_field(nested, names[1:], value)
 
+        def try_to_int(value, default=None):
+            ''' Пробует преобразовать value в целое число, иначе возвращает default '''
+            try:
+                return int(value)
+            except:
+                return default
+
         def convert_value(item):
             '''Берет значение item.value, и конвертирует его в соответствии с типом item'a'''
             val = item.value
@@ -210,25 +217,18 @@ class ExtForm(BaseExtPanel):
                         val = item.bind_rule.get(val)
                     else:
                         raise ValueError('Invalid attribute type bind_rule. Must be a function or a dict.')
-            elif isinstance(item, ExtDictSelectField):
-                if val:
-                    try:
-                        val = int(val)
-                    except:
-                        pass
                 else:
-                    val = None
+                    val = try_to_int(val)
+                    
+            elif isinstance(item, ExtDictSelectField):
+                val = try_to_int(val)
+
             elif isinstance(item, ExtHiddenField):
                 if item.type == ExtHiddenField.INT:
-                    if val:
-                        try:
-                            val = int(val)
-                        except:
-                            val = None
-                    else:
-                        val = None
+                    val = try_to_int(val)
                 elif item.type == ExtHiddenField.STRING:
                     val = unicode(val)
+                    
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
