@@ -29,6 +29,7 @@
 	    {% if component.buttons %},{{ component.t_render_buttons|safe }}{% endif %}	
 	    {% if not component.resizable %} ,resizable: false {% endif %}
 		{% if component.parent_window_id %} ,parentWindowID: '{{ component.parent_window_id }}' {% endif %}
+		{% if component.keys %} ,keys: [{{ component.t_render_keys|safe }}] {% endif %}
 	    {% block window_extenders %}{# здесь помещяется код, расширяющий описание экземпляра окна #}{% endblock %}
 		
 		// счетчик изменений и заголовок для хранения первоначального значения

@@ -43,6 +43,7 @@ class BaseExtWindow(ExtUIComponent):
         self.footer_bar = None
         self.resizable = True
         self.parent_window_id = ''
+        self.keys = []
         
     @property
     def buttons(self):
@@ -118,3 +119,5 @@ class BaseExtWindow(ExtUIComponent):
     def t_get_closable(self):
         return str(self.closable)
     
+    def t_render_keys(self):
+        return ','.join(['{%s}' % ','.join(['%s:%s' % (k,v) for k, v in key.items()]) for key in self.keys])        

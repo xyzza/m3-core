@@ -109,7 +109,7 @@
 		if (win.changesCount !== 0) {
 			Ext.Msg.show({
 				title: "Не сохранять изменения",
-				msg: "Внимание! Данные были изменены! Желаете закрыть окно без сохранения изменений?",
+				msg: "Внимание! Данные были изменены! Закрыть без сохранения изменений?",
 				buttons: Ext.Msg.OKCANCEL,
 				fn: function(buttonId, text, opt){
 					switch (buttonId){
