@@ -129,3 +129,28 @@ class BaseExtTriggerField(BaseExtField):
     def pre_render(self):
         self.__store.action_context = self.action_context
         super(BaseExtTriggerField, self).pre_render()
+        
+    def render_base_config(self):
+        self.pre_render()
+        
+        res = super(BaseExtTriggerField, self).render_base_config()
+        res += ',displayField: "%s"' % self.display_field if self.display_field else ''
+        res += ',valueField: "%s"' % self.value_field if self.value_field else ''
+        res += ',hiddenName: "%s"' % self.hidden_name if self.hidden_name else ''
+        res += ',hideTrigger: %s' % str(self.hide_trigger).lower() 
+        res += ',typeAhead: %s' % str(self.type_ahead).lower()
+        res += ',queryParam: "%s"' % self.query_param if self.query_param else ''
+        res += ',pageSize: %s' % self.page_size if self.page_size else ''
+        res += ',maxHeight: %s' % self.max_heigth_dropdown_list \
+                 if self.max_heigth_dropdown_list else ''
+                 
+        res += ',minChars: %s' % self.min_chars if self.min_chars else ''         
+        res += ',emptyText: "%s"' % self.empty_text if self.empty_text else ''  
+        res += ',allowBlank: %s' % str(self.allow_blank).lower()
+        res += ',mode: "%s"' % self.mode if self.mode else ''
+        res += ',triggerAction: "%s"' % u'all' if self.trigger_action_all else ''
+        res += ',forceSelection: %s' % str(self.force_selection).lower()
+        res += ',valueNotFoundText: "%s"' % self.not_found_text if self.not_found_text else ''
+        res += ',loadingText:"%s"' % u'Загрузка...'
+        res += ',store: %s' % self.t_render_store()
+        return res
