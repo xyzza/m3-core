@@ -403,6 +403,15 @@ class BaseTreeDictionaryActions(ActionPack):
         ''' Возвращает адрес формы редактирования группы справочника. '''
         return self.edit_node_window_action.get_absolute_url()
     
+    def get_rows_url(self):
+        ''' Возвращает адрес по которому запрашиваются элементы грида. '''
+        return self.rows_action.get_absolute_url()
+    
+    def get_nodes_url(self):
+        ''' Возвращает адрес по которому запрашиваются группы дерева. '''
+        return self.nodes_action.get_absolute_url()
+        
+    
     #=================== ИЗМЕНЕНИЕ ДАННЫХ =======================
     
     def get_rows(self, offset, limit, filter, parent_id):

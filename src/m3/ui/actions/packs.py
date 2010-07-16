@@ -181,7 +181,8 @@ class BaseDictionaryActions(ActionPack):
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
                         self.delete_action]
-        
+    
+    #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================    
     def get_list_url(self):
         '''
         Возвращает адрес формы списка элементов справочника. 
@@ -202,6 +203,13 @@ class BaseDictionaryActions(ActionPack):
         '''
         return self.edit_window_action.get_absolute_url()
     
+    def get_rows_url(self):
+        '''
+        Возвращает адрес по которому запрашиваются элементы грида
+        '''
+        return self.rows_action.get_absolute_url()
+    
+    #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ ДАННЫЕ =====================
     def get_rows(self, offset, limit, filter):
         '''
         Метод который возвращает записи грида в виде обычного питоновского списка.
@@ -222,18 +230,6 @@ class BaseDictionaryActions(ActionPack):
         '''
         raise NotImplementedError()
     
-    def get_list_window(self, win):
-        ''' Возвращает настроенное окно типа "Список" справочника '''        
-        return win
-    
-    def get_select_window(self, win):
-        ''' Возвращает настроенное окно выбора из справочника '''
-        return win
-    
-    def get_edit_window(self, win):
-        ''' Возвращает настроенное окно редактирования элемента справочника '''
-        return win
-    
     def save_row(self, obj):
         '''
         Метод, который выполняет сохранение записи справочника. На момент запуска метода 
@@ -247,6 +243,20 @@ class BaseDictionaryActions(ActionPack):
         параметре object находится именно та запись справочника, которую необходимо удалить.
         '''
         raise NotImplementedError()
+    
+    #====================== РАБОТА С ОКНАМИ ===============================
+    def get_list_window(self, win):
+        ''' Возвращает настроенное окно типа "Список" справочника '''        
+        return win
+    
+    def get_select_window(self, win):
+        ''' Возвращает настроенное окно выбора из справочника '''
+        return win
+    
+    def get_edit_window(self, win):
+        ''' Возвращает настроенное окно редактирования элемента справочника '''
+        return win
+    
 
 class BaseDictionaryModelActions(BaseDictionaryActions):
     '''
