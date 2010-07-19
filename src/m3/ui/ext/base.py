@@ -128,7 +128,9 @@ class BaseExtComponent(object):
                if not isinstance(v, BaseExtComponent) and v!=None])
 
     def render_base_config(self):
-        return 'id:"%s"' % self.client_id
+        res = 'id:"%s"' % self.client_id
+        res += ', listeners: '+self.t_render_simple_listeners() if self._listeners else ''
+        return res
    
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):

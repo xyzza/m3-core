@@ -11,11 +11,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			idProperty: 'code',
 			root: 'rows',
 			totalProperty: 'total',
-			fields: [{
-				name: 'code'
-			}, {
-				name: 'display_name'
-			}]
+			fields: [{name: 'code'},
+				{name: 'display_name'},
+				{name: 'socr'},
+				{name: 'zipcode'},
+				{name: 'gni'},
+				{name: 'uno'},
+				{name: 'okato'}
+			]
 		});
 		var record = new Ext.data.Record();
     	record.code = params.place_value;
@@ -44,11 +47,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				idProperty: 'code',
 				root: 'rows',
 				totalProperty: 'total',
-				fields: [{
-					name: 'code'
-				}, {
-					name: 'display_name'
-				}]
+				fields: [{name: 'code'},
+					{name: 'display_name'},
+					{name: 'socr'},
+					{name: 'zipcode'},
+					{name: 'gni'},
+					{name: 'uno'},
+					{name: 'okato'}
+				]
 			});
 			var record = new Ext.data.Record();
 			record.code = params.street_value;
@@ -239,24 +245,52 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
     	this.street.setValue('');		
 	}
 	, initComponent: function(){
-		Ext.m3.AddrField.superclass.initComponent.call(this);
-		if (this.addr_visible) {
-			this.mon(this.place, 'change', this.getNewAddr, this);
-			if (this.level > 1) {
-				this.mon(this.street, 'change', this.getNewAddr, this);
-				if (this.level > 2) {
-					this.mon(this.house, 'change', this.getNewAddr, this);
-					if (this.level > 3) {
-						this.mon(this.flat, 'change', this.getNewAddr, this);
-					}
+		Ext.m3.AddrField.superclass.initComponent.call(this);		
+		this.mon(this.place, 'change', this.onChangePlace, this);
+		if (this.level > 1) {
+			this.mon(this.street, 'change', this.onChangeStreet, this);
+			if (this.level > 2) {
+				this.mon(this.house, 'change', this.onChangeHouse, this);
+				if (this.level > 3) {
+					this.mon(this.flat, 'change', this.onChangeFlat, this);
 				}
 			}
 		}
 		if (this.level > 1) {
 			this.mon(this.place, 'change', this.clearStreet, this);
 			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
-		}
-		
+		};
+		this.addEvents(
+			/**
+             * @event change_place
+             * При изменении населенного пункта 
+             * @param {AddrField} this
+             * @param {Place_code} Код нас. пункта по КЛАДР
+             * @param {Store} Строка с информацией о данных КЛАДРа по выбранному пункту
+             */
+			'change_place',
+			/**
+             * @event change_street
+             * При изменении улицы 
+             * @param {AddrField} this
+             * @param {Street_code} Код улицы по КЛАДР
+             * @param {Store} Строка с информацией о данных КЛАДРа по выбранной улице
+             */
+			'change_street',
+			/**
+             * @event change_house
+             * При изменении дома 
+             * @param {AddrField} this
+             * @param {House} Номер дома             
+             */
+			'change_house',
+			/**
+             * @event change_flat
+             * При изменении квартиры 
+             * @param {AddrField} this
+             * @param {Flat} Номер квартиры             
+             */
+			'change_flat');
 	}	
 	, getNewAddr: function (){
 		var place_id;
@@ -285,6 +319,40 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	, setNewAddr: function(newAddr){
 		if (this.addr != undefined) {
 			this.addr.value = newAddr;
+		}
+	}
+	, onChangePlace: function(){
+		var val = this.place.getValue();
+		var data =  this.place.getStore().data.get(val);
+		if (data != undefined) {
+			data = data.data;
+		}
+		this.fireEvent('change_place', this, val, data);
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeStreet: function(){
+		var val = this.street.getValue();
+		var data =  this.street.getStore().data.get(val);
+		if (data != undefined) {
+			data = data.data;
+		}
+		this.fireEvent('change_street', this, val, data);
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeHouse: function(){
+		this.fireEvent('change_house', this, this.house.getValue());
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeFlat: function(){
+		this.fireEvent('change_flat', this, this.flat.getValue());
+		if (this.addr_visible) {
+			this.getNewAddr();
 		}
 	}
 })

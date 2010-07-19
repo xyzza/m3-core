@@ -300,3 +300,35 @@ class ExtAddrComponent(BaseExtContainer):
     @property
     def items(self):       
         return self._items
+    
+    @property
+    def handler_change_place(self):
+        return self._listeners.get('change_place')
+    
+    @handler_change_place.setter
+    def handler_change_place(self, function):
+        self._listeners['change_place'] = function
+    
+    @property
+    def handler_change_street(self):
+        return self._listeners.get('change_street')
+    
+    @handler_change_street.setter
+    def handler_change_street(self, function):
+        self._listeners['change_street'] = function
+    
+    @property
+    def handler_change_house(self):
+        return self._listeners.get('change_house')
+    
+    @handler_change_house.setter
+    def handler_change_house(self, function):
+        self._listeners['change_house'] = function
+    
+    @property
+    def handler_change_flat(self):
+        return self._listeners.get('change_flat')
+    
+    @handler_change_flat.setter
+    def handler_change_flat(self, function):
+        self._listeners['change_flat'] = function
