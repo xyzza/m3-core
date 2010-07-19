@@ -42,7 +42,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.width = 150
         self.default_text = None
         
-        self.ask_before_deleting = None
+        self.ask_before_deleting = True
         
         self.url = None
         self.edit_url = None
@@ -198,7 +198,7 @@ class ExtDictSelectField(BaseExtTriggerField):
               'edit_url': self.edit_url if self.edit_url else '' ,
               'context_json': self.action_context.json() if self.action_context else '' ,}    
         
-        res += ',hideTrigger: %s' % str(self.hide_trigger).lower()  
+        #res += ',hideTrigger: %s' % str(self.hide_trigger).lower()  
         res += ',defaultText: "%s"' % self.default_text if self.default_text else ''
         res += ',defaultValue: "%s"' % self.value if self.value else ''
         res += ',customTriggers: [%s]' % self.t_render_triggers() \
