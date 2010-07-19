@@ -6,13 +6,11 @@ Created on 27.02.2010
 '''
 
 from m3.ui import actions
-
 from base import BaseExtField
 from m3.ui.ext.misc import ExtJsonStore
 from m3.ui.ext.fields.base import BaseExtTriggerField
 from m3.ui.ext.base import BaseExtComponent
 from m3.helpers.datastructures import TypedList
-
 
 class ExtDictSelectField(BaseExtTriggerField):
     '''
@@ -147,15 +145,26 @@ class ExtDictSelectField(BaseExtTriggerField):
     @pack.setter
     def pack(self, ppack):
         self.__pack = ppack
-        # url формы редактирования элемента
-        self.edit_url = ppack.get_edit_url()
+        
+        # hasattr используется вместо isinstance, иначе будет перекрестный импорт. В оригинале:
+        # if isinstance(ppack, BaseDictionaryActions) or (isinstance(ppack, BaseTreeDictionaryActions) and ppack.list_model):
+        # Для линейного справочника и иерархического спр., если задана списочная модель, значит выбирать будут из неё.
+        if hasattr(ppack, 'list_model') or (hasattr(ppack, 'tree_model') and ppack.list_model):
+            # url формы редактирования элемента
+            self.edit_url = ppack.get_edit_url()
+            # url автокомплита и данных
+            self.autocomplete_url = ppack.get_rows_url()
+        
+        # Для иерархических справочников без списочной модели
+        elif hasattr(ppack, 'tree_model') and ppack.tree_model:
+            self.edit_url = ppack.get_edit_node_url()
+            self.autocomplete_url = ppack.get_nodes_url()
+            
+        else:
+            raise Exception('Pack %s must be a dictionary pack instance.' % ppack)
         
         # url формы выбора
-        self.url = ppack.get_url()
-        
-        # url автокомплита и данных
-        self.autocomplete_url = ppack.absolute_url()
-        
+        self.url = ppack.get_select_url()
         
     @property
     def total(self):
