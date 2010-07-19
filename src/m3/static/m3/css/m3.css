@@ -49,3 +49,6 @@ q:before,q:after{content:'';}.m3-el-mask {
 .x-form-edit-trigger {
 	background-image:url(../images/trigger-edit-form.gif) !important;
 }
+.x-form-current-date-trigger {
+	background-image:url(../images/trigger-current-date.gif) !important;
+}

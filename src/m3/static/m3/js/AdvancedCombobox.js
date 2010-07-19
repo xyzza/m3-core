@@ -38,7 +38,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 	,triggerSelectClass:'x-form-select-trigger'
 	,triggerEditClass:'x-form-edit-trigger'
 	
-	// Инициализация происходит в методе initCustomTrigger
+	// Инициализация происходит в методе initBaseTrigger
 	,baseTriggers: [
 		{
 			iconCls: 'x-form-clear-trigger',
@@ -135,7 +135,31 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 			this.addRecordToStore(this.defaultValue, this.defaultText);
 		}
 
-		this.initCustomTrigger();
+		// Инициализация базовой настройки триггеров
+		this.initBaseTrigger();
+		
+		this.addEvents(
+			/**
+			 * Генерируется сообщение при нажатии на кнопку вызыва запроса на сервер
+			 * true - обработка продолжается
+			 * false - отмена обработки
+			*/
+			'beforerequest',
+		
+			/**
+			 * Генерируется сообщение после выбора значения. 
+			 * Здесь может быть валидация и прочие проверки
+			 * Возвр. значения:
+			 * true - обработка продолжается
+			 * false - отмена обработки
+			*/
+			'afterselect',
+		
+			/**
+			 * Генерируется сообщение после установки значения поля
+			*/
+			'changed'
+		);
 	}
 	// см. TwinTriggerField
 	,getTrigger : function(index){
@@ -176,7 +200,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 	/**
 	 * Инициализация первоначальной настройки триггеров 
 	 */
-	,initCustomTrigger: function(){
+	,initBaseTrigger: function(){
 		this.baseTriggers[0].handler = this.onTriggerClearClick;
 		this.baseTriggers[1].handler = this.onTriggerDropDownClick;
 		this.baseTriggers[2].handler = this.onTriggerDictSelectClick;

@@ -177,8 +177,6 @@ class ExtGrid(BaseExtPanel):
             self.auto_expand_column if self.auto_expand_column else ''
         res += ',enableDragDrop: %s' % str(self.drag_drop).lower() if self.drag_drop else ''
         res += ',ddGroup:"%s"' % self.drag_drop_group if self.drag_drop_group else ''
-        res += ',listeners: %s' % \
-            self.t_render_simple_listeners() if self._listeners else '' 
         res += ',view: %s' % self.view.render() if self.view else ''    
         return res
     

@@ -7,6 +7,7 @@ Created on 27.02.2010
 '''
 
 from django.conf import settings
+from datetime import datetime
 
 from m3.helpers import normalize
 
@@ -35,12 +36,35 @@ class ExtDateField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtDateField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-date-field.js'
+        self.hide_today_btn = False
+        
+        # ситуация следующая:
+        # При установке своего формата, необходимо устанавливать также
+        # отформатированную дату, если она нужна по умолчанию
         try:
             self.format = settings.DATE_FORMAT.replace('%', '')
+            self.value = datetime.now().strftime(settings.DATE_FORMAT)
         except:
             self.format = 'd.m.Y'
+            self.value = datetime.now().strftime('%d.%m.%Y')
+            
+            
         self.init_component(*args, **kwargs)
     
+    def render_base_config(self):
+        res = super(ExtDateField, self).render_base_config()
+        res += ',format: "%s"' % self.format if self.format else ''
+        return res
+    
+    def render_params(self):
+        res = super(ExtDateField, self).render_params()
+#        res += ',' if not res else ''
+#        res += 'hideTriggerToday: %s' % str(self.hide_today_btn).lower()
+        return res
+    
+    def render(self):
+        return 'createAdvancedDataField({%s},{%s})' \
+            % (self.render_base_config(), self.render_params() )
     
 class ExtNumberField(BaseExtField):
     '''Поле ввода числового значения'''

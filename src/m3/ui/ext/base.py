@@ -129,8 +129,11 @@ class BaseExtComponent(object):
 
     def render_base_config(self):
         res = 'id:"%s"' % self.client_id
-        res += ', listeners: '+self.t_render_simple_listeners() if self._listeners else ''
+        res += ',listeners: %s' % self.t_render_simple_listeners() if self._listeners else ''
         return res
+    
+    def render_params(self):
+        return ''
    
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):

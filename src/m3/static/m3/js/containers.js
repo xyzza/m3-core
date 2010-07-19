@@ -72,3 +72,11 @@ function createAdvancedComboBox(baseConfig, params){
 	
 	return adv_combo;
 }
+
+/**
+ * Создание своего переопределенного компонента DateField
+ * @param {Object} baseConfig
+ */
+function createAdvancedDataField(baseConfig, params){
+	return new Ext.m3.AdvancedDataField(baseConfig, params);
+}
