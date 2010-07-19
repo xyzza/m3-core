@@ -58,8 +58,8 @@ class ExtDateField(BaseExtField):
     
     def render_params(self):
         res = super(ExtDateField, self).render_params()
-#        res += ',' if not res else ''
-#        res += 'hideTriggerToday: %s' % str(self.hide_today_btn).lower()
+        res += ',' if res else ''
+        res += 'hideTriggerToday: %s' % str(self.hide_today_btn).lower()
         return res
     
     def render(self):
