@@ -26,9 +26,13 @@ Ext.override(Ext.Window, {
 				}
 				else {
 					var taskbar = Ext.get('ux-taskbar');
-					taskbar.mask();
-                	var toptoolbar = Ext.get('ux-toptoolbar');
-					toptoolbar.mask();
+					if (taskbar != undefined) {
+	 					taskbar.mask();
+					}
+ 					var toptoolbar = Ext.get('ux-toptoolbar');
+					if (toptoolbar != undefined) {
+		 				toptoolbar.mask();
+					}
 				}
 			}
 		}
@@ -40,9 +44,13 @@ Ext.override(Ext.Window, {
 				}
 				else {
 	 				var taskbar = Ext.get('ux-taskbar');
-	 				taskbar.unmask();
-	 				var toptoolbar = Ext.get('ux-toptoolbar');
-	 				toptoolbar.unmask();
+					if (taskbar != undefined) {
+	 					taskbar.unmask();
+					}
+ 					var toptoolbar = Ext.get('ux-toptoolbar');
+					if (toptoolbar != undefined) {
+		 				toptoolbar.unmask();
+					}
 				}
 			}
 		}
@@ -51,9 +59,13 @@ Ext.override(Ext.Window, {
 				var parent_wind = Ext.getCmp(this.parentWindowID);
 				if (parent_wind == undefined) {
 	 				var taskbar = Ext.get('ux-taskbar');
-	 				taskbar.unmask();
-	 				var toptoolbar = Ext.get('ux-toptoolbar');
-	 				toptoolbar.unmask();
+					if (taskbar != undefined) {
+	 					taskbar.unmask();
+					}
+ 					var toptoolbar = Ext.get('ux-toptoolbar');
+					if (toptoolbar != undefined) {
+		 				toptoolbar.unmask();
+					}
 				}
 			}
 		}
