@@ -50,20 +50,20 @@ class BaseExtField(ExtUIComponent):
     
     def render_base_config(self):
         res = super(BaseExtField, self).render_base_config()
-        res += ',fieldLabel: "%s"' % self.label if self.label else ''
-        res += ',value: "%s"' % self.value if self.value else ''
-        res += ',labelStyle: "%s"' % self.t_render_label_style() \
-            if self.label_style else ''
-        res += ',readOnly: %s' % str(self.read_only).lower() if self.read_only else ''
-        res += ',allowBlank: %s' % str(self.allow_blank).lower()
-        res += ',vtype: "%s"' % self.vtype if self.vtype else ''
-        res += ',minLenght: %s' % self.min_length if self.min_length else ''
-        res += ',minLengthText: %s' % self.min_length_text if self.min_length_text else ''
-        res += ',maxLength: %s' % self.max_length if self.max_length else ''
-        res += ',maxLengthText: %s' % self.max_length_text if self.max_length_text else ''
-        res += ',regex: "%s"' % self.regex if self.regex else ''
-        res += ',regexText: "%s"' % self.regex_text if self.regex_text else ''
-        res += ',tabIndex: "%s"' % self.tab_index if self.tab_index else ''
+        res += self._put_config_value('fieldLabel', self.label)
+        res += self._put_config_value('value', self.value)
+        res += self._put_config_value('labelStyle', self.t_render_label_style, 
+                                      condition = self.label_style)
+        res += self._put_config_value('readOnly', self.read_only)
+        res += self._put_config_value('allowBlank', self.allow_blank)
+        res += self._put_config_value('vtype', self.vtype)
+        res += self._put_config_value('minLenght', self.min_length)
+        res += self._put_config_value('minLengthText', self.min_length_text)
+        res += self._put_config_value('maxLength', self.max_length)
+        res += self._put_config_value('maxLengthText', self.max_length_text)
+        res += self._put_config_value('regex', self.regex)
+        res += self._put_config_value('regexText', self.regex_text)
+        res += self._put_config_value('tabIndex', self.tab_index)
         return res
     
 class BaseExtTriggerField(BaseExtField):
@@ -134,23 +134,24 @@ class BaseExtTriggerField(BaseExtField):
         self.pre_render()
         
         res = super(BaseExtTriggerField, self).render_base_config()
-        res += ',displayField: "%s"' % self.display_field if self.display_field else ''
-        res += ',valueField: "%s"' % self.value_field if self.value_field else ''
-        res += ',hiddenName: "%s"' % self.hidden_name if self.hidden_name else ''
-        res += ',hideTrigger: %s' % str(self.hide_trigger).lower() 
-        res += ',typeAhead: %s' % str(self.type_ahead).lower()
-        res += ',queryParam: "%s"' % self.query_param if self.query_param else ''
-        res += ',pageSize: %s' % self.page_size if self.page_size else ''
-        res += ',maxHeight: %s' % self.max_heigth_dropdown_list \
-                 if self.max_heigth_dropdown_list else ''
-                 
-        res += ',minChars: %s' % self.min_chars if self.min_chars else ''         
-        res += ',emptyText: "%s"' % self.empty_text if self.empty_text else ''  
-        res += ',allowBlank: %s' % str(self.allow_blank).lower()
-        res += ',mode: "%s"' % self.mode if self.mode else ''
-        res += ',triggerAction: "%s"' % u'all' if self.trigger_action_all else ''
-        res += ',forceSelection: %s' % str(self.force_selection).lower()
-        res += ',valueNotFoundText: "%s"' % self.not_found_text if self.not_found_text else ''
-        res += ',loadingText:"%s"' % u'Загрузка...'
-        res += ',store: %s' % self.t_render_store()
+        res += self._put_config_value('displayField', self.display_field)
+        res += self._put_config_value('valueField', self.value_field)
+        res += self._put_config_value('hiddenName', self.hidden_name)
+        res += self._put_config_value('hideTrigger', self.hide_trigger)
+        res += self._put_config_value('typeAhead', self.type_ahead)
+        res += self._put_config_value('queryParam', self.query_param)
+        res += self._put_config_value('pageSize', self.page_size)
+        res += self._put_config_value('maxHeight', self.max_heigth_dropdown_list)
+        res += self._put_config_value('minChars', self.min_chars)
+        res += self._put_config_value('emptyText', self.empty_text)
+        res += self._put_config_value('mode', self.mode)
+        if self.trigger_action_all:
+            res += self._put_config_value('triggerAction', 'all')
+            
+        res += self._put_config_value('editable', self.editable)            
+        res += self._put_config_value('forceSelection', self.force_selection)
+        res += self._put_config_value('valueNotFoundText', self.not_found_text)
+        res += self._put_config_value('loadingText', u'Загрузка...')
+        res += self._put_config_value('emptyText', self.empty_text)
+        res += self._put_config_value('store', self.t_render_store, self.get_store())
         return res

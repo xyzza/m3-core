@@ -27,8 +27,8 @@ class ExtStringField(BaseExtField):
 
     def render_base_config(self):
         res = super(ExtStringField, self).render_base_config()
-        res += ',inputType: "%s"' % self.input_type if self.input_type else ''
-        res += ',maskRe: "%s"' % self.mask_re if self.mask_re else ''
+        res += self._put_config_value('inputType', self.input_type)
+        res += self._put_config_value('maskRe', self.mask_re)
         return res
 
 class ExtDateField(BaseExtField):
@@ -53,13 +53,13 @@ class ExtDateField(BaseExtField):
     
     def render_base_config(self):
         res = super(ExtDateField, self).render_base_config()
-        res += ',format: "%s"' % self.format if self.format else ''
+        res += self._put_config_value('format', self.format)
         return res
     
     def render_params(self):
         res = super(ExtDateField, self).render_params()
-        res += ',' if res else ''
-        res += 'hideTriggerToday: %s' % str(self.hide_today_btn).lower()
+        res += self._put_config_value('hideTriggerToday', self.hide_today_btn, 
+                                      first_value = (len(res) == 0) )
         return res
     
     def render(self):

@@ -10,7 +10,7 @@ from django.utils.datastructures import SortedDict
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
 
-GRID_COLUMN_DEFAULT_WIDTH = 100
+
 
 class ExtGrid(BaseExtPanel):
     def __init__(self, *args, **kwargs):
@@ -120,6 +120,9 @@ class ExtGrid(BaseExtPanel):
     @view.setter
     def view(self, value):
         self.__view = value    
+        
+    def t_render_view(self):
+        return self.view.render()
     
     def pre_render(self):
         super(ExtGrid, self).pre_render()
@@ -167,17 +170,16 @@ class ExtGrid(BaseExtPanel):
     def render_base_config(self):
         res = super(ExtGrid, self).render_base_config()
         # Значения по-умолчанию:
-        res += ',stripeRows: true'
-        res += ',stateful: true'
-        res += ',viewConfig: {%s}' % (
-            'forceFit:%s' % str(self.force_fit).lower()
-                                      )
-        res += ',loadMask:%s' % str(self.load_mask).lower() if self.load_mask else ''
-        res +=',autoExpandColumn: "%s"' % \
-            self.auto_expand_column if self.auto_expand_column else ''
-        res += ',enableDragDrop: %s' % str(self.drag_drop).lower() if self.drag_drop else ''
-        res += ',ddGroup:"%s"' % self.drag_drop_group if self.drag_drop_group else ''
-        res += ',view: %s' % self.view.render() if self.view else ''    
+        res += self._put_config_value('stripeRows', True)
+        res += self._put_config_value('stateful', True) 
+        res += self._put_config_value('loadMask', self.load_mask)    
+        res += self._put_config_value('autoExpandColumn', self.auto_expand_column)
+        res += self._put_config_value('enableDragDrop', self.drag_drop)
+        res += self._put_config_value('ddGroup', self.drag_drop_group)
+        res += self._put_config_value('view', self.t_render_view, self.view)
+        res += self._put_config_value('autoExpandColumn', self.auto_expand_column)                     
+        res += ',viewConfig: {%s}' % \
+            self._put_config_value('forceFit', self.force_fit, first_value = True)
         return res
     
     def render_params(self):
@@ -192,13 +194,15 @@ class ExtGrid(BaseExtPanel):
         return res
     
 class BaseExtGridColumn(ExtUIComponent):
+    GRID_COLUMN_DEFAULT_WIDTH = 100
+    
     def __init__(self, *args, **kwargs):
         super(BaseExtGridColumn, self).__init__(*args, **kwargs)
         self.header = None
         self.sortable = False
         self.data_index = None
         self.align = None
-        self.width = GRID_COLUMN_DEFAULT_WIDTH
+        self.width = BaseExtGridColumn.GRID_COLUMN_DEFAULT_WIDTH
         self.editor = None
         self.column_renderer = None
                
@@ -307,8 +311,7 @@ class ExtAdvancedTreeGrid(ExtGrid):
         
     def render_base_config(self):
         res = super(ExtAdvancedTreeGrid, self).render_base_config()
-        res += ',master_column_id:"%s"' % self.master_column_id \
-            if self.master_column_id else ''
+        res += self._put_config_value('master_column_id', self.master_column_id)
         return res
         
     def render_params(self):

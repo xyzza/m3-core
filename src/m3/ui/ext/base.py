@@ -128,12 +128,49 @@ class BaseExtComponent(object):
                if not isinstance(v, BaseExtComponent) and v!=None])
 
     def render_base_config(self):
-        res = 'id:"%s"' % self.client_id
-        res += ',listeners: %s' % self.t_render_simple_listeners() if self._listeners else ''
+        '''
+        Рендерит базовый конфиг
+        '''
+        res = self._put_config_value('id', self.client_id, first_value = True)
+        res += self._put_config_value('listeners', self.t_render_simple_listeners, self._listeners)
         return res
     
     def render_params(self):
+        '''
+        Рендерит дополнительные параметры
+        '''
         return ''
+    
+    def _put_config_value(self, extjs_name, item, condition=True, 
+                          first_value=False):
+        '''
+        Управляет правильной установкой (в зависимости от типа) 
+        параметров контрола
+        '''
+        if item == None:
+            return ''
+        elif callable(item):
+            res = ('%s:%s' % (extjs_name, item() ) if condition else '')
+        elif isinstance(item, basestring):
+            # Проверка на не юникодную строку. Если есть русские символы 
+            # необходимо использовать юникод 
+            try:
+                u'' + item
+            except UnicodeDecodeError:
+                raise Exception('"%s" is not unicode' % item)
+            
+            res =  ('%s:"%s"' % (extjs_name, item) if condition and item else '')
+        elif isinstance(item, bool):
+            res = ('%s:%s' % (extjs_name, str(item).lower()) if condition else '')
+        elif isinstance(item, int):
+            res = ('%s:%s' % (extjs_name, item) if condition and item else '')      
+        else:
+            assert False, 'This is sparta!!! Madness!'
+            
+        if res:
+            return res if first_value else ',%s' % res
+        else:
+            return ''
    
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):
@@ -161,25 +198,25 @@ class ExtUIComponent(BaseExtComponent):
     
     def render_base_config(self):
         res = super(ExtUIComponent, self).render_base_config() or ''
-        res += ',style:%s' % self.style if self.t_render_style() else ''
-        res += ',hidden:%s' % str(self.hidden).lower() if self.hidden else ''
-        res += ',disabled:%s' % str(self.disabled).lower() if self.disabled else ''
-        res += ',height:%s' % self.height if self.height else ''
-        res += ',width:%s' % self.width if self.width else ''
-        res += ',x:%s' % self.x if self.x else ''
-        res += ',y:%s' % self.y if self.y else ''
-        res += ',html:%s' % self.html if self.html else ''
-        res += ',region:"%s"' % self.region if self.region else ''
-        res += ',flex:%s' % self.flex if self.flex else ''
-        res += ',maxHeight:%s' % self.max_height if self.max_height else ''
-        res += ',minHeight:%s' % self.min_height if self.min_height else ''
-        res += ',maxWidth:%s' % self.max_width if self.max_width else ''
-        res += ',minWidth:%s' % self.min_width if self.min_width else ''
-        res += ',name:"%s"' % self.name if self.name else ''
-        res += ',anchor:"%s"' % self.anchor if self.anchor else ''
-        res += ',labelWidth:%s' % self.label_width if self.label_width else ''
-        res += ',labelAlign:%s' % self.label_align if self.label_align else ''
-        res += ',labelPad:"%s"' % self.label_pad if self.label_pad else ''
+        res += self._put_config_value('style', self.t_render_style, self.style)
+        res += self._put_config_value('hidden', self.hidden)
+        res += self._put_config_value('disabled', self.disabled)
+        res += self._put_config_value('height', self.height)
+        res += self._put_config_value('width', self.width)
+        res += self._put_config_value('x', self.x)
+        res += self._put_config_value('y', self.y)
+        res += self._put_config_value('html', self.html)
+        res += self._put_config_value('region', self.region)
+        res += self._put_config_value('flex', self.flex)
+        res += self._put_config_value('maxHeight', self.max_height)
+        res += self._put_config_value('minHeight', self.min_height)
+        res += self._put_config_value('maxWidth', self.max_width)
+        res += self._put_config_value('minWidth', self.min_width)
+        res += self._put_config_value('name', self.name)
+        res += self._put_config_value('anchor', self.anchor)
+        res += self._put_config_value('labelWidth', self.label_width)
+        res += self._put_config_value('labelAlign', self.label_align)
+        res += self._put_config_value('labelPad', self.label_pad)
         return res
     
 # TODO: закомментированный код ниже необходим для дальнейшей оптимизации
