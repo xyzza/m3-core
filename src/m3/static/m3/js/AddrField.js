@@ -30,7 +30,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			fieldLabel: params.place_label,
 			hideTrigger: true,
 			minChars: 2,
-			emptyText: 'Населенный пункт...',
+			emptyText: 'Введите населенный пункт...',
 			queryParam: 'filter',
 			store: place_store,
 			resizable: true,
@@ -69,7 +69,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				fieldLabel: params.street_label,
 				hideTrigger: true,
 				minChars: 2,
-				emptyText: 'Улица...',
+				emptyText: 'Введите улицу...',
 				queryParam: 'filter',
 				store: street_store,
 				resizable: true,
@@ -85,7 +85,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					name: params.house_field_name,
 					fieldLabel: params.house_label,
 					value: params.house_value,
-					emptyText: 'Дом...',
+					emptyText: '',
 					width: 40
 				});
 				
@@ -94,7 +94,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						name: params.flat_field_name,
 						fieldLabel: params.flat_label,
 						value: params.flat_value,
-						emptyText: 'Кв-ра...',
+						emptyText: '',
 						width: 40
 					});
 				}
@@ -255,7 +255,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					this.mon(this.flat, 'change', this.onChangeFlat, this);
 				}
 			}
-		}
+		};
+		this.mon(this.place, 'beforequery', this.beforePlaceQuery, this);
 		if (this.level > 1) {
 			this.mon(this.place, 'change', this.clearStreet, this);
 			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
@@ -290,7 +291,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
              * @param {AddrField} this
              * @param {Flat} Номер квартиры             
              */
-			'change_flat');
+			'change_flat',
+			/**
+             * @event before_query_place
+             * Перед запросом данных о населенном пункте
+             * @param {AddrField} this
+             * @param {Event} Событие              
+             */
+			'before_query_place');
 	}	
 	, getNewAddr: function (){
 		var place_id;
@@ -354,5 +362,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		if (this.addr_visible) {
 			this.getNewAddr();
 		}
+	}
+	, beforePlaceQuery: function(qe) {
+		this.fireEvent('before_query_place', this, qe);
 	}
 })
