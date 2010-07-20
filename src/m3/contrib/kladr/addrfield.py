@@ -332,3 +332,11 @@ class ExtAddrComponent(BaseExtContainer):
     @handler_change_flat.setter
     def handler_change_flat(self, function):
         self._listeners['change_flat'] = function
+
+    @property
+    def handler_before_query_place(self):
+        return self._listeners.get('before_query_place')
+    
+    @handler_before_query_place.setter
+    def handler_before_query_place(self, function):
+        self._listeners['before_query_place'] = function

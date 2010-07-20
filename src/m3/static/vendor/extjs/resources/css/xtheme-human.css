@@ -1770,18 +1770,6 @@ width:57px;
 	background-image: url( ../images/human/taskbar/startbutton-icon.gif ) !important;
 }
 
-.bogus {
-	background-image: url( ../images/bogus.png ) !important;
-}
-
-.logout {
-	background-image: url( ../images/logout.gif ) !important;
-}
-
-.settings {
-	background-image: url( ../images/gears.gif ) !important;
-}
-
 #ux-taskbar button {
 	text-align: left;
 	color: black;
