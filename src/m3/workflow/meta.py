@@ -4,8 +4,6 @@
 Created on 10.03.2010
 @author: akvarats
 '''
-import itertools
-
 from django.db import models
 from django.db.models.base import ModelBase
 
@@ -41,9 +39,10 @@ class MetaWorkflowModel(ModelBase):
         models.CharField(blank = True, null = True, max_length = 30).contribute_to_class(klass, 'resolution')
         
         # Ссылка на запись с дополнительными (определенными пользователем) атрибутами процесса
+        # null=True стоит для того, чтобы миграция проходила даже когда процесс уже с данными
         attributes_model = getattr(wf.Meta, 'attributes_model', None)
         if attributes_model:
-            models.OneToOneField(attributes_model).contribute_to_class(klass, 'attributes')
+            models.OneToOneField(attributes_model, null=True, blank=True).contribute_to_class(klass, 'attributes')
         
         return klass
 
