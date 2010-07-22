@@ -17,4 +17,5 @@ new Ext.Panel({
 	{% if component.anchor %}, anchor: '{{component.anchor}}' {% endif %}
 	,autoScroll: true
 	,items: [{{ component.t_render_items|safe }}]
+	{% if component.auto_load %} ,autoLoad: {{ component.auto_load|safe}} {% endif %}
 })
