@@ -149,7 +149,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         # hasattr используется вместо isinstance, иначе будет перекрестный импорт. В оригинале:
         # if isinstance(ppack, BaseDictionaryActions) or (isinstance(ppack, BaseTreeDictionaryActions) and ppack.list_model):
         # Для линейного справочника и иерархического спр., если задана списочная модель, значит выбирать будут из неё.
-        if hasattr(ppack, 'list_model') or (hasattr(ppack, 'tree_model') and ppack.list_model):
+        if hasattr(ppack, 'model') or (hasattr(ppack, 'tree_model') and ppack.list_model):
             # url формы редактирования элемента
             self.edit_url = ppack.get_edit_url()
             # url автокомплита и данных
