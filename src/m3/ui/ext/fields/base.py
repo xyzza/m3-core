@@ -49,22 +49,22 @@ class BaseExtField(ExtUIComponent):
         self._listeners['change'] = function
     
     def render_base_config(self):
-        res = super(BaseExtField, self).render_base_config()
-        res += self._put_config_value('fieldLabel', self.label)
-        res += self._put_config_value('value', self.value)
-        res += self._put_config_value('labelStyle', self.t_render_label_style, 
+        super(BaseExtField, self).render_base_config()
+        self._put_config_value('fieldLabel', self.label)
+        self._put_config_value('value', self.value)
+        self._put_config_value('labelStyle', self.t_render_label_style, 
                                       condition = self.label_style)
-        res += self._put_config_value('readOnly', self.read_only)
-        res += self._put_config_value('allowBlank', self.allow_blank)
-        res += self._put_config_value('vtype', self.vtype)
-        res += self._put_config_value('minLenght', self.min_length)
-        res += self._put_config_value('minLengthText', self.min_length_text)
-        res += self._put_config_value('maxLength', self.max_length)
-        res += self._put_config_value('maxLengthText', self.max_length_text)
-        res += self._put_config_value('regex', self.regex)
-        res += self._put_config_value('regexText', self.regex_text)
-        res += self._put_config_value('tabIndex', self.tab_index)
-        return res
+        self._put_config_value('readOnly', self.read_only)
+        self._put_config_value('allowBlank', self.allow_blank)
+        self._put_config_value('vtype', self.vtype)
+        self._put_config_value('minLenght', self.min_length)
+        self._put_config_value('minLengthText', self.min_length_text)
+        self._put_config_value('maxLength', self.max_length)
+        self._put_config_value('maxLengthText', self.max_length_text)
+        self._put_config_value('regex', self.regex)
+        self._put_config_value('regexText', self.regex_text)
+        self._put_config_value('tabIndex', self.tab_index)
+
     
 class BaseExtTriggerField(BaseExtField):
     '''Базовый класс для комбобокса, поля выбора справочника'''
@@ -133,25 +133,25 @@ class BaseExtTriggerField(BaseExtField):
     def render_base_config(self):
         self.pre_render()
         
-        res = super(BaseExtTriggerField, self).render_base_config()
-        res += self._put_config_value('displayField', self.display_field)
-        res += self._put_config_value('valueField', self.value_field)
-        res += self._put_config_value('hiddenName', self.hidden_name)
-        res += self._put_config_value('hideTrigger', self.hide_trigger)
-        res += self._put_config_value('typeAhead', self.type_ahead)
-        res += self._put_config_value('queryParam', self.query_param)
-        res += self._put_config_value('pageSize', self.page_size)
-        res += self._put_config_value('maxHeight', self.max_heigth_dropdown_list)
-        res += self._put_config_value('minChars', self.min_chars)
-        res += self._put_config_value('emptyText', self.empty_text)
-        res += self._put_config_value('mode', self.mode)
+        super(BaseExtTriggerField, self).render_base_config()
+        self._put_config_value('displayField', self.display_field)
+        self._put_config_value('valueField', self.value_field)
+        self._put_config_value('hiddenName', self.hidden_name)
+        self._put_config_value('hideTrigger', self.hide_trigger)
+        self._put_config_value('typeAhead', self.type_ahead)
+        self._put_config_value('queryParam', self.query_param)
+        self._put_config_value('pageSize', self.page_size)
+        self._put_config_value('maxHeight', self.max_heigth_dropdown_list)
+        self._put_config_value('minChars', self.min_chars)
+        self._put_config_value('emptyText', self.empty_text)
+        self._put_config_value('mode', self.mode)
         if self.trigger_action_all:
-            res += self._put_config_value('triggerAction', 'all')
+            self._put_config_value('triggerAction', 'all')
             
-        res += self._put_config_value('editable', self.editable)            
-        res += self._put_config_value('forceSelection', self.force_selection)
-        res += self._put_config_value('valueNotFoundText', self.not_found_text)
-        res += self._put_config_value('loadingText', u'Загрузка...')
-        res += self._put_config_value('emptyText', self.empty_text)
-        res += self._put_config_value('store', self.t_render_store, self.get_store())
-        return res
+        self._put_config_value('editable', self.editable)            
+        self._put_config_value('forceSelection', self.force_selection)
+        self._put_config_value('valueNotFoundText', self.not_found_text)
+        self._put_config_value('loadingText', u'Загрузка...')
+        self._put_config_value('emptyText', self.empty_text)
+        self._put_config_value('store', self.t_render_store, self.get_store())
+    

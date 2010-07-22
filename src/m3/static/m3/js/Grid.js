@@ -4,8 +4,8 @@
  */
 Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	constructor: function(baseConfig, params){
-		//console.log(baseConfig);
-		//console.log(params);
+		console.log(baseConfig);
+		console.log(params);
 		
 		// Добавлене selection model если нужно
 		var selModel = params.selModel;

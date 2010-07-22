@@ -1,14 +1,12 @@
 #coding:utf-8
 
-#from m3.ui.ext.containers.forms import ExtPanel
-from m3.ui.ext.containers.container_complex import ExtContainerTable
-from m3.ui.ext.containers.base import BaseExtContainer
-from m3.ui.ext.fields.simple import ExtStringField, ExtTextArea, ExtHiddenField
-from m3.ui.ext.fields.base import BaseExtTriggerField
-from m3.ui.ext.misc import ExtJsonStore
-from m3.ui.actions import utils, Action, PreJsonResult, OperationResult
-from m3.contrib.kladr.models import KladrGeo, KladrStreet
 from django.db.models.query_utils import Q
+
+from m3.ui.ext.containers.base import BaseExtContainer
+from m3.ui.ext.fields.simple import ExtHiddenField
+from m3.ui.actions import Action, PreJsonResult, OperationResult
+from m3.contrib.kladr.models import KladrGeo, KladrStreet
+
 
 class KLADRRowsAction(Action):
     '''
@@ -258,6 +256,8 @@ class ExtAddrComponent(BaseExtContainer):
             self.height += 36+7
 
     def render_params(self):
+        
+        
         res = ''        
         par = []
         par.append('place_field_name: "%s"' % (self.place_field_name if self.place_field_name else '')) 
@@ -296,6 +296,14 @@ class ExtAddrComponent(BaseExtContainer):
     def render_base_config(self):
         res = super(ExtAddrComponent, self).render_base_config()        
         return res
+    
+    def render(self):
+        self.render_base_config()
+        self.render_params()
+        
+        base_config = self._get_config_str()
+        params = self.render_params()
+        return 'new Ext.m3.AddrField({%s},{%s})' % (base_config, params)
 
     @property
     def items(self):       

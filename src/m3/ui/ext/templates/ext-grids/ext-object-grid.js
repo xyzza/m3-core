@@ -1,10 +1,6 @@
 (function(){
-	var baseConf = { {{ component.render_base_config|safe }} };
-	var params = { {{ component.render_params|safe }} };
-	
-	baseConf = Ext.applyIf({
-		store: {{ component.t_render_store|safe }}
-	},baseConf);
+	var baseConf = { {{ component.t_render_base_config|safe }} };
+	var params = { {{ component.t_render_params|safe }} };
 	
 	var objGrid = createObjectGrid(baseConf, params);
 

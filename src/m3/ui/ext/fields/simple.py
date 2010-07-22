@@ -26,10 +26,15 @@ class ExtStringField(BaseExtField):
         self.init_component(*args, **kwargs)
 
     def render_base_config(self):
-        res = super(ExtStringField, self).render_base_config()
-        res += self._put_config_value('inputType', self.input_type)
-        res += self._put_config_value('maskRe', self.mask_re)
-        return res
+        super(ExtStringField, self).render_base_config()
+        self._put_config_value('inputType', self.input_type)
+        self._put_config_value('maskRe', self.mask_re)
+
+    def render(self):
+        self.render_base_config()
+        
+        base_config = self._get_config_str()
+        return 'new Ext.form.TextField({%s})' % base_config
 
 class ExtDateField(BaseExtField):
     '''Поле ввода даты'''
@@ -52,19 +57,20 @@ class ExtDateField(BaseExtField):
         self.init_component(*args, **kwargs)
     
     def render_base_config(self):
-        res = super(ExtDateField, self).render_base_config()
-        res += self._put_config_value('format', self.format)
-        return res
+        super(ExtDateField, self).render_base_config()
+        self._put_config_value('format', self.format)
     
     def render_params(self):
-        res = super(ExtDateField, self).render_params()
-        res += self._put_config_value('hideTriggerToday', self.hide_today_btn, 
-                                      first_value = (len(res) == 0) )
-        return res
+        super(ExtDateField, self).render_params()
+        self._push_params_value('hideTriggerToday', self.hide_today_btn)
     
     def render(self):
-        return 'createAdvancedDataField({%s},{%s})' \
-            % (self.render_base_config(), self.render_params() )
+        self.render_base_config()
+        self.render_params()
+        
+        base_config = self._get_config_str()
+        params = self._get_params_str()
+        return 'createAdvancedDataField({%s},{%s})' % (base_config, params)
     
 class ExtNumberField(BaseExtField):
     '''Поле ввода числового значения'''
@@ -120,6 +126,11 @@ class ExtComboBox(BaseExtTriggerField):
         self.template = 'ext-fields/ext-combo.js'
         self.init_component(*args, **kwargs)
         
+    def render(self):
+        self.render_base_config()
+        
+        base_config = self._get_config_str()
+        return 'new Ext.form.ComboBox({%s})' % base_config
         
 class ExtTimeField(BaseExtField):
     '''Поле ввода времени'''

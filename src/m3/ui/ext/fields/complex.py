@@ -125,6 +125,7 @@ class ExtDictSelectField(BaseExtTriggerField):
     def value(self, val):
         self.__value = val
         
+    # deprecated
     def configure_by_dictpack(self, pack, controller):
         '''
         Метод настройки поля выбора из справочника на основе 
@@ -186,24 +187,32 @@ class ExtDictSelectField(BaseExtTriggerField):
         self._triggers.append( ExtDictSelectField.ExtTrigger(*args,**kwargs) )
         
     def t_render_triggers(self):
-        return ','.join(['{%s}' % item.render() for item in self._triggers])
+        return '[%s]' % ','.join(['{%s}' % item.render() for item in self._triggers])
     
     
     def render_params(self):
-        res = 'askBeforeDeleting: %s' % str(self.ask_before_deleting).lower()
-        res += ',actions:{actionSelectUrl:"%(select_url)s" \
-                          ,actionEditUrl:"%(edit_url)s" \
-                          ,contextJson:%(context_json)s \
-        }' % {'select_url': self.url if self.url else '' ,
-              'edit_url': self.edit_url if self.edit_url else '' ,
-              'context_json': self.action_context.json() if self.action_context else '' ,}    
+        action_context = None
+        if self.action_context:
+            # функция
+            action_context = self.action_context.json
         
-        #res += ',hideTrigger: %s' % str(self.hide_trigger).lower()  
-        res += ',defaultText: "%s"' % self.default_text if self.default_text else ''
-        res += ',defaultValue: "%s"' % self.value if self.value else ''
-        res += ',customTriggers: [%s]' % self.t_render_triggers() \
-                if self._triggers else ''
-        return res
+        self._put_params_value('askBeforeDeleting', self.ask_before_deleting)
+        self._put_params_value('actions', {'actionSelectUrl': self.url,
+                                           'actionEditUrl':self.edit_url,
+                                           'contextJson':  action_context})
+        
+        self._put_params_value('defaultText', self.default_text)
+        self._put_params_value('defaultValue', self.value)
+        self._put_params_value('customTriggers', self.t_render_triggers, self._triggers )
+        
+    
+    def render(self):
+        self.render_base_config()
+        self.render_params()
+        
+        base_config = self._get_config_str()
+        params = self._get_params_str()
+        return 'createAdvancedComboBox({%s},{%s})' % (base_config, params)
         
 class ExtSearchField(BaseExtField):
     '''Поле поиска'''

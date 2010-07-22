@@ -10,8 +10,6 @@ from django.utils.datastructures import SortedDict
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
 
-
-
 class ExtGrid(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtGrid, self).__init__(*args, **kwargs)
@@ -40,16 +38,18 @@ class ExtGrid(BaseExtPanel):
     
     def t_render_banded_columns(self):
         '''
-        Возвращает JS массив состоящий из массивов с описанием объединенных колонок.
-        Каждый вложенный массив соответствует уровню шапки грида от верхней к нижней. 
+        Возвращает JS массив состоящий из массивов с описанием объединенных 
+        колонок. Каждый вложенный массив соответствует уровню шапки грида от 
+        верхней к нижней. 
         '''
         result = []
         for level_list in self.banded_columns.values():       
-            result.append('[%s]' % ','.join([ column.render() for column in level_list ]))
+            result.append('[%s]' % ','.join([ column.render() \
+                                             for column in level_list ]))
         return ','.join(result) 
     
     def t_render_columns(self):
-        return self.t_render_items()
+        return '[%s]' % self.t_render_items()
     
     def t_render_store(self):
         assert self.__store, 'Store is not define'
@@ -71,13 +71,15 @@ class ExtGrid(BaseExtPanel):
         '''
         Добавляет в грид объединенную ячейку.
         @param column: Колонка грида (ExtGridColumn)
-        @param colspan: Количество колонок которые находятся под данной колонкой (int) 
+        @param colspan: Количество колонок которые находятся 
+            под данной колонкой (int) 
         @param level: Уровень учейки где 0 - самый верхний, 1-ниже, и т.д. (int)
         '''
         assert isinstance(level, int)
         assert isinstance(colspan, int)
         assert isinstance(column, ExtGridColumn)
-        # Колонки хранятся в списках внутки сортированного словаря, чтобы их можно было
+        # Колонки хранятся в списках внутки сортированного словаря, 
+        #чтобы их можно было
         # извечь по возрастанию уровней 
         column.colspan = colspan
         level_list = self.banded_columns.get(level, [])
@@ -168,30 +170,44 @@ class ExtGrid(BaseExtPanel):
     #----------------------------------------------------------------------------
     
     def render_base_config(self):
-        res = super(ExtGrid, self).render_base_config()
-        # Значения по-умолчанию:
-        res += self._put_config_value('stripeRows', True)
-        res += self._put_config_value('stateful', True) 
-        res += self._put_config_value('loadMask', self.load_mask)    
-        res += self._put_config_value('autoExpandColumn', self.auto_expand_column)
-        res += self._put_config_value('enableDragDrop', self.drag_drop)
-        res += self._put_config_value('ddGroup', self.drag_drop_group)
-        res += self._put_config_value('view', self.t_render_view, self.view)
-        res += self._put_config_value('autoExpandColumn', self.auto_expand_column)                     
-        res += ',viewConfig: {%s}' % \
-            self._put_config_value('forceFit', self.force_fit, first_value = True)
-        return res
+        super(ExtGrid, self).render_base_config()
+        self._put_config_value('stripeRows', True)
+        self._put_config_value('stateful', True) 
+        self._put_config_value('loadMask', self.load_mask)    
+        self._put_config_value('autoExpandColumn', self.auto_expand_column)
+        self._put_config_value('enableDragDrop', self.drag_drop)
+        self._put_config_value('ddGroup', self.drag_drop_group)
+        self._put_config_value('view', self.t_render_view, self.view)
+        self._put_config_value('autoExpandColumn', self.auto_expand_column)
+        self._put_config_value('store', self.t_render_store, self.get_store())   
+        self._put_config_value('viewConfig', {'forceFit':self.force_fit})
     
     def render_params(self):
-        res = 'menus: {contextMenu:%s, rowContextMenu: %s}' % \
-            (self.handler_contextmenu.render() if self.handler_contextmenu else '""',
-             self.handler_rowcontextmenu.render() if self.handler_rowcontextmenu else '""',)
-        res += ',selModel:%s' % self.sm.render() if self.sm else ''
-        res += ',columns: [%s]' % self.t_render_columns() if self.t_render_columns() else '' 
-        res += ',plugins: {%s}' %  \
-            ('bundedColumns:[%s]' % self.t_render_banded_columns() 
-            if self.show_banded_columns else '')
-        return res
+        super(ExtGrid, self).render_params()
+        
+        handler_cont_menu = self.handler_contextmenu.render \
+                        if self.handler_contextmenu else ''
+            
+        handler_rowcontextmenu = self.handler_rowcontextmenu.render \
+                        if self.handler_rowcontextmenu else ''
+        
+        self._put_params_value('menus', {'contextMenu': handler_cont_menu,
+                                         'rowContextMenu': handler_rowcontextmenu})
+        if self.sm:
+            self._put_params_value('selModel', self.sm.render)
+        
+        self._put_params_value('columns', self.t_render_columns)
+        self._put_params_value('plugins',
+                               {'bundedColumns': self.t_render_banded_columns \
+                                    if self.show_banded_columns else ''})
+    
+    def render(self):
+        self.render_base_config()
+        self.render_params()
+
+        config = self._get_config_str()
+        params = self._get_params_str()
+        return 'createGridPanel({%s}, {%s})' % (config, params)
     
 class BaseExtGridColumn(ExtUIComponent):
     GRID_COLUMN_DEFAULT_WIDTH = 100
@@ -301,7 +317,8 @@ class ExtAdvancedTreeGrid(ExtGrid):
         self.init_component(*args, **kwargs)
     
     def t_render_columns_to_record(self):
-        return ','.join(['{name:"%s"}'  % col.data_index for col in self.columns])
+        return '[%s]' % ','.join(['{name:"%s"}'  % col.data_index \
+                                  for col in self.columns])
     
     def add_column(self, **kwargs):
         # FIXME: Хак, с сгенерированным client_id компонент отказывается работать
@@ -310,24 +327,29 @@ class ExtAdvancedTreeGrid(ExtGrid):
         super(ExtAdvancedTreeGrid, self).add_column(**kwargs)
         
     def render_base_config(self):
-        res = super(ExtAdvancedTreeGrid, self).render_base_config()
-        res += self._put_config_value('master_column_id', self.master_column_id)
-        return res
+        super(ExtAdvancedTreeGrid, self).render_base_config()
+        self._put_config_value('master_column_id', self.master_column_id)
         
     def render_params(self):
-        res = super(ExtAdvancedTreeGrid, self).render_params()
-        res += ',storeParams:{url:"%s", root:"%s"}' % (
-                self.url if self.url else '',
-                self.store_root if self.store_root else '',
-                )
-        res += ',columnsToRecord:[%s]' % self.t_render_columns_to_record()
-        res += ',bbar:{pageSize:%s}' % self.bbar_page_size if self.use_bbar else ''
-        return res
+        super(ExtAdvancedTreeGrid, self).render_params()
+        self._put_params_value('storeParams', {'url': self.url,
+                                               'root': self.store_root})
+        
+        self._put_params_value('columnsToRecord', self.t_render_columns_to_record)
+        
+        if self.use_bbar:
+            self._put_params_value('bbar', {'pageSize': self.bbar_page_size})
     
-#    def render(self):
-#        base_config = self.render_base_config()
-#        params = self.render_params()
-#        return 'createAdvancedTreeGrid({%s},{%s})' %(base_config, params)
+    def t_render_base_config(self):
+        return self._get_config_str()
+    
+    def render(self):
+        self.render_base_config()
+        self.render_params()
+        
+        base_config = self._get_config_str()
+        params = self._get_params_str()
+        return 'createAdvancedTreeGrid({%s},{%s})' %(base_config, params)
 
 class ExtGridGroupingView(BaseExtComponent):
     '''
@@ -347,6 +369,8 @@ class ExtGridGroupingView(BaseExtComponent):
             'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]})'"""
 }
         return result
-    # если требуется вывести какое-либо слово после количества, шаблон должен иметь след вид:
-    # 'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]} {[values.rs.length > 1 ? "Объекта" : "Объект"]})'"""
+    # если требуется вывести какое-либо слово после количества, шаблон должен 
+    #иметь след вид:
+    # 'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]} 
+    #    {[values.rs.length > 1 ? "Объекта" : "Объект"]})'"""
     # но проблемы с обработкой двойных кавычек

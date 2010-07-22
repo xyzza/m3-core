@@ -44,12 +44,11 @@ class BaseExtContainer(ExtUIComponent):
                 item.action_context = self.action_context
     
     def render_base_config(self):
-        res = super(BaseExtContainer, self).render_base_config()
-        res += self._put_config_value('layoutConfig', 
+        super(BaseExtContainer, self).render_base_config()
+        self._put_config_value('layoutConfig', 
                                       self.t_render_layout_config,
                                       self.layout)
-        res += self._put_config_value('layout', self.layout)
-        return res
+        self._put_config_value('layout', self.layout)
     
         
 class BaseExtPanel(BaseExtContainer):
@@ -72,14 +71,13 @@ class BaseExtPanel(BaseExtContainer):
         return self.footer_bar.render()
     
     def render_base_config(self):
-        res = super(BaseExtPanel, self).render_base_config()
-        res += self._put_config_value('title', self.title)
-        res += self._put_config_value('header', self.header)
-        res += self._put_config_value('iconCls', self.icon_cls)
-        res += self._put_config_value('tbar', self.t_render_top_bar, 
+        super(BaseExtPanel, self).render_base_config()
+        self._put_config_value('title', self.title)
+        self._put_config_value('header', self.header)
+        self._put_config_value('iconCls', self.icon_cls)
+        self._put_config_value('tbar', self.t_render_top_bar, 
                                       self.top_bar)
-        res += self._put_config_value('bbar', self.t_render_bottom_bar, 
+        self._put_config_value('bbar', self.t_render_bottom_bar, 
                                       self.bottom_bar)
-        res += self._put_config_value('fbar', self.t_render_footer_bar,
+        self._put_config_value('fbar', self.t_render_footer_bar,
                                       self.footer_bar)
-        return res

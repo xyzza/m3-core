@@ -1,6 +1,6 @@
 function(){
-	var baseConf = { {{ component.render_base_config|safe }} };
-	var params = { {{ component.render_params|safe }} };
+	var baseConf = { {{ component.t_render_base_config|safe }} };
+	var params = { {{ component.t_render_params|safe }} };
 	
 	var objTree = createObjectTree(baseConf, params);
 

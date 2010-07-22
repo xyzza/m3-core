@@ -20,7 +20,6 @@ from m3.helpers import logger
 from m3.ui.actions import ActionContextDeclaration
 
 from users import SelectUsersListWindow
-from m3.ui.ext.panels.grids import ExtObjectGrid
 
 import helpers
 import models
@@ -372,14 +371,10 @@ class RolesEditWindow(windows.ExtEditWindow):
         self.form.url = SaveRoleAction.absolute_url()
         
         field_name = fields.ExtStringField(name='name', label = u'Наименование', allow_blank=False, anchor='100%')
-        field_metarole = fields.ExtDictSelectField(name='metarole', label='Метароль', anchor='100%')
+        field_metarole = fields.ExtDictSelectField(name='metarole', label=u'Метароль', anchor='100%')
         field_metarole.configure_by_dictpack(metaroles.Metaroles_DictPack, app_meta.users_controller)
         
         self.form.items.extend([field_name, field_metarole])
-        
-        #if not new_role:
-        #    self.grid_users = ExtObjectGrid()
-        #    self.form.items.append(self.grid_users)
         
         self.buttons.extend([
             controls.ExtButton(text=u'Сохранить', handler='submitForm'),
@@ -407,7 +402,7 @@ class AssignedUsersWindow(windows.ExtWindow):
         ])
         
         # настройка северной панели
-        self.field_role_name = fields.ExtStringField(name='role-name', label='Роль', anchor='100%', read_only=True)
+        self.field_role_name = fields.ExtStringField(name='role-name', label=u'Роль', anchor='100%', read_only=True)
         self.panel_north.items.append(self.field_role_name)
         
         # настройка центральной панели

@@ -7,7 +7,7 @@ Created on 26.05.2010
 @author: akvarats
 '''
 
-from m3.ui.ext import containers, controls, menus, misc
+from m3.ui.ext import containers, controls, menus, misc, render_component
 
 class ExtObjectGrid(containers.ExtGrid):
     '''
@@ -124,23 +124,49 @@ class ExtObjectGrid(containers.ExtGrid):
             self.store.limit = 25
             self.bottom_bar = self.paging_bar
         
-        return super(ExtObjectGrid, self).render()
+        
+        self.render_base_config()
+        self.render_params()
+        return render_component(self)
 
 
     def render_params(self):
-        res = super(ExtObjectGrid, self).render_params()
-        res += ',actions:{newUrl:"%(new_url)s" \
-                          ,editUrl:"%(edit_url)s" \
-                          ,deleteUrl:"%(delete_url)s" \
-                          ,dataUrl:"%(data_url)s" \
-                          ,contextJson:%(context_json)s \
-        }' % {'new_url': self.action_new.absolute_url() if self.action_new else '' ,
-              'edit_url': self.action_edit.absolute_url() if self.action_edit else '' ,
-              'delete_url': self.action_delete.absolute_url() if self.action_delete else '' ,
-              'data_url': self.action_data.absolute_url() if self.action_data else '' ,
-              'context_json': self.action_context.json() if self.action_context else '' ,}
-                
-                
-        res += ',rowIdName:"%s"' % self.row_id_name if self.row_id_name else ''            
-        res += ',allowPaging:%s' % str(self.allow_paging).lower()          
-        return res
+        super(ExtObjectGrid, self).render_params()
+        
+        new_url = self.action_new.absolute_url() if self.action_new else None
+        edit_url = self.action_edit.absolute_url() if self.action_edit else None
+        delete_url = self.action_delete.absolute_url() if self.action_delete else None
+        data_url = self.action_data.absolute_url() if self.action_data else None
+        context_json = self.action_context.json if self.action_context else None
+        
+        self._put_params_value('actions', {'newUrl': new_url,
+                                            'editUrl': edit_url,
+                                            'deleteUrl': delete_url,
+                                            'dataUrl': data_url,
+                                            'contextJson': context_json})
+        
+        self._put_params_value('rowIdName', self.row_id_name)
+        self._put_params_value('allowPaging', self.allow_paging)
+        
+        
+#        res += ',actions:{newUrl:"%(new_url)s" \
+#                          ,editUrl:"%(edit_url)s" \
+#                          ,deleteUrl:"%(delete_url)s" \
+#                          ,dataUrl:"%(data_url)s" \
+#                          ,contextJson:%(context_json)s \
+#        }' % {'new_url': self.action_new.absolute_url() if self.action_new else '' ,
+#              'edit_url': self.action_edit.absolute_url() if self.action_edit else '' ,
+#              'delete_url': self.action_delete.absolute_url() if self.action_delete else '' ,
+#              'data_url': self.action_data.absolute_url() if self.action_data else '' ,
+#              'context_json': self.action_context.json() if self.action_context else '' ,}
+#                
+#                
+#        res += ',rowIdName:"%s"' % self.row_id_name if self.row_id_name else ''            
+#        res += ',allowPaging:%s' % str(self.allow_paging).lower()          
+#        return res
+    
+    def t_render_base_config(self):
+        return self._get_config_str()
+    
+    def t_render_params(self):
+        return self._get_params_str()
