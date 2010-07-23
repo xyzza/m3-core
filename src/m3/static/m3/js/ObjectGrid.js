@@ -30,6 +30,11 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		
 		Ext.m3.ObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
+	, initComponent: function(){
+		Ext.m3.ObjectGrid.superclass.initComponent.call(this);
+		var store = this.getStore();
+		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});
+	}
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		

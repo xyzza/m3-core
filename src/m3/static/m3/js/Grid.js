@@ -68,7 +68,6 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		}
 		,baseConfig.listeners || {});
 
-
 		var config = Ext.applyIf({
 			sm: selModel
 			,columns: gridColumns
