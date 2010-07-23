@@ -83,7 +83,7 @@ class ExtAddrComponent(BaseExtContainer):
         self._put_params_value('house_label', self.house_label)
         self._put_params_value('flat_label', self.flat_label)
         self._put_params_value('addr_label', self.addr_label)
-        self._put_params_value('addr_visible', ('true' if self.addr_visible else 'false' ))
+        self._put_params_value('addr_visible', (True if self.addr_visible else False ))
         self._put_params_value('level', self.level)
         self._put_params_value('view_mode', self.view_mode)
         self._put_params_value('place_value', (self.place.value if self.place and self.place.value else ''))

@@ -195,14 +195,14 @@ Ext.app.TitlePanel = Ext.extend(Ext.Panel, {
    titleItems: null,
    addTitleItem: function (itemConfig) { 
        var item = Ext.ComponentMgr.create(itemConfig);
-       var itemsDiv = Ext.DomHelper.insertFirst(this.header, {tag:"div", style:"height:15px;float:right;margin-top:-3px;margin-left:3px;"}, true);
+       var itemsDiv = Ext.DomHelper.append(this.header, {tag:"div", style:"float:right;margin-top:-4px;margin-left:3px;"}, true);
        item.render(itemsDiv);
    },
    onRender: function (ct, position) {
        Ext.app.TitlePanel.superclass.onRender.apply(this, arguments);
        if (this.titleItems != null) {
            if(Ext.isArray(this.titleItems)){
-               for (var i = 0; i < this.titleItems.length; i++) {
+               for (var i = this.titleItems.length-1; i >= 0 ; i--) {
                    this.addTitleItem(this.titleItems[i]);
                }
            } else {
