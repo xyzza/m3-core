@@ -410,6 +410,13 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 	/**
 	 * Не нужно вызывать change после потери фокуса
 	 */
-	,triggerBlur: Ext.emptyFn
+	,triggerBlur: function () {
+		if(this.focusClass){
+            this.el.removeClass(this.focusClass);
+        }
+		if(this.wrap){
+            this.wrap.removeClass(this.wrapFocusClass);
+        }
+	}
 	
 });
