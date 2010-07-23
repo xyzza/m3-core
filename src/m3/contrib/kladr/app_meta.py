@@ -3,13 +3,10 @@
 from django.conf import urls
 
 from m3.ui.actions import ActionController
-
-from addrfield import KLADRRowsAction, StreetRowsAction, KLADRGetAddrAction
-
-kladr_controller = ActionController(url='/m3-kladr')
+from actions import kladr_controller, KLADRPack
 
 def register_actions():
-    kladr_controller.packs.extend([KLADRRowsAction, StreetRowsAction, KLADRGetAddrAction])
+    kladr_controller.packs.append(KLADRPack)
     kladr_controller.rebuild_patterns()
 
 def register_urlpatterns():
