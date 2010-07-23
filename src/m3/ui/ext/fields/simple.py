@@ -43,6 +43,12 @@ class ExtDateField(BaseExtField):
         self.template = 'ext-fields/ext-date-field.js'
         self.hide_today_btn = False
         
+            
+            
+        self.init_component(*args, **kwargs)
+    
+    def render_base_config(self):
+        super(ExtDateField, self).render_base_config()
         # ситуация следующая:
         # При установке своего формата, необходимо устанавливать также
         # отформатированную дату, если она нужна по умолчанию
@@ -53,12 +59,8 @@ class ExtDateField(BaseExtField):
             self.format = 'd.m.Y'
             self.value = datetime.now().strftime('%d.%m.%Y')
             
-            
-        self.init_component(*args, **kwargs)
-    
-    def render_base_config(self):
-        super(ExtDateField, self).render_base_config()
         self._put_config_value('format', self.format)
+        self._put_config_value('value', self.value)
     
     def render_params(self):
         super(ExtDateField, self).render_params()

@@ -13,6 +13,7 @@ from uuid import uuid4
 
 from django import template as django_template
 from django.conf import settings
+import datetime
 
 from m3.ui.ext import render_template, render_component
 from m3.helpers import js
@@ -175,7 +176,10 @@ class BaseExtComponent(object):
             
         elif isinstance(item, int):    
             res = item
-            
+        
+        elif isinstance(item, datetime.date):    
+            res = None # нефиг даты передавать
+        
         elif isinstance(item, dict):
             # рекурсивный обход вложенных свойств
             d_tmp = {}
