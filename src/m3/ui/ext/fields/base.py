@@ -52,8 +52,9 @@ class BaseExtField(ExtUIComponent):
         super(BaseExtField, self).render_base_config()
         self._put_config_value('fieldLabel', self.label)
         self._put_config_value('value', self.value)
-        self._put_config_value('labelStyle', self.t_render_label_style, 
-                                      condition = self.label_style)
+        
+        if  self.label_style:
+            self._put_config_value('labelStyle', self.t_render_label_style() )
         self._put_config_value('readOnly', self.read_only)
         self._put_config_value('allowBlank', self.allow_blank)
         self._put_config_value('vtype', self.vtype)

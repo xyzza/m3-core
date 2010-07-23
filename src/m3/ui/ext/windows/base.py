@@ -26,6 +26,8 @@ class BaseExtWindow(ExtUIComponent):
         self.renderer = ExtWindowRenderer()
         self.renderer.window = self
         
+        self._ext_name = 'Ext.Window'
+        
         # параметры окна
         self.width = 400
         self.height = 300
@@ -45,6 +47,28 @@ class BaseExtWindow(ExtUIComponent):
         self.parent_window_id = ''
         self.keys = []
         
+    def render_base_config(self):
+        super(BaseExtWindow, self).render_base_config()
+        self._put_config_value('title', self.title)
+        self._put_config_value('modal', self.modal)
+        self._put_config_value('maximized', self.maximized)
+        self._put_config_value('minimized', self.minimized)
+        self._put_config_value('minimizable', self.minimizable)
+        self._put_config_value('maximizable', self.maximizable)
+        self._put_config_value('closable', self.closable)
+        self._put_config_value('iconCls', self.icon_cls)
+        self._put_config_value('bodyStyle', self.body_style)
+        self._put_config_value('layout', self.layout)
+        self._put_config_value('tbar', self.t_render_top_bar, self.top_bar)
+        self._put_config_value('bbar', self.t_render_buttom_bar, self.buttom_bar)
+        self._put_config_value('fbar', self.t_render_footer_bar, self.footer_bar)
+        self._put_config_value('items', self.t_render_items)
+        self._put_config_value('buttons', self.t_render_buttons, self.buttons)
+        self._put_config_value('resizable', self.resizable)
+        self._put_config_value('parentWindowID', self.parent_window_id)
+        self._put_config_value('keys', self.t_render_keys, self.keys)
+
+        
     @property
     def buttons(self):
         return self.__buttons
@@ -54,10 +78,10 @@ class BaseExtWindow(ExtUIComponent):
         return self.__items
         
     def t_render_items(self):
-        return ','.join([item.render() for item in self.items])    
+        return '[%s]' % ','.join([item.render() for item in self.items])    
         
     def t_render_buttons(self):
-        return 'buttons:[%s]' % ','.join([button.render() for button in self.buttons])
+        return '[%s]' % ','.join([button.render() for button in self.buttons])
     
     def t_render_top_bar(self):
         return self.top_bar.render()
@@ -121,3 +145,6 @@ class BaseExtWindow(ExtUIComponent):
     
     def t_render_keys(self):
         return ','.join(['{%s}' % ','.join(['%s:%s' % (k,v) for k, v in key.items()]) for key in self.keys])        
+    
+
+    

@@ -1,10 +1,10 @@
 (function (){
-    var win = {{ renderer.window.render }};
+    var win = {{ renderer.window.render|safe }};
     win.show();
     
     {{ renderer.window.render_globals }}
     
-    function closeWindow(){ Ext.getCmp('{{window.client_id}}').close(); }
+    function closeWindow(){ win.close(); }
     
     return win;
 })()

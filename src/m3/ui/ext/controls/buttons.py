@@ -36,3 +36,25 @@ class ExtButton(BaseExtControl):
         if self.tooltip_title:
             res += ',title: "%s"' % self.tooltip_title 
         return '{%s}' % res
+    
+    def render_base_config(self):
+        super(ExtButton, self).render_base_config()
+        self._put_config_value('text', self.text)
+        self._put_config_value('icon', self.icon)
+        self._put_config_value('iconCls', self.icon_cls)
+        self._put_config_value('region', self.region)
+        self._put_config_value('flex', self.flex)
+        self._put_config_value('tooltip', self.t_render_tooltip, 
+                                                self.tooltip_text)
+        
+        self._put_config_value('tabIndex', self.tab_index)
+        self._put_config_value('handler', self.t_render_handler, self.handler)
+        if self.menu:
+            self._put_config_value('menu', self.menu.render)
+
+        
+        
+    def render(self):
+        self._ext_name = 'Ext.SplitButton' if self.menu else 'Ext.Button'
+        return super(ExtButton, self).render()
+    

@@ -25,31 +25,14 @@
 		{% if component.top_bar %} ,tbar: {{ component.t_render_top_bar|safe }} {% endif %}
 		{% if component.buttom_bar %} ,bbar: {{ component.t_render_buttom_bar|safe }} {% endif %}
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
-	    ,items:[{{ component.t_render_items|safe }}]  
-	    {% if component.buttons %},{{ component.t_render_buttons|safe }}{% endif %}	
+	    ,items:{{ component.t_render_items|safe }}
+	    {% if component.buttons %} ,buttons: {{ component.t_render_buttons|safe }}{% endif %}	
 	    {% if not component.resizable %} ,resizable: false {% endif %}
 		{% if component.parent_window_id %} ,parentWindowID: '{{ component.parent_window_id }}' {% endif %}
 		{% if component.keys %} ,keys: [{{ component.t_render_keys|safe }}] {% endif %}
 		{% if component.auto_load %} ,autoLoad: {{ component.auto_load|safe}} {% endif %}
 	    {% block window_extenders %}{# здесь помещяется код, расширяющий описание экземпляра окна #}{% endblock %}
 		
-		// счетчик изменений и заголовок для хранения первоначального значения
-		,changesCount: 0
-		,originalTitle: ''
-		,updateTitle: function(){
-			// сохраним оригинальное значение заголовка
-			if (this.title !== this.originalTitle && this.originalTitle == '') {
-				this.originalTitle = this.title;
-			};
-			// изменим заголовок в связи с изменением полей в окне
-			if (this.changesCount !== 0) {
-				this.setTitle('*'+this.originalTitle);
-			} else {
-				this.setTitle(this.originalTitle);
-			}
-		}
-		,forceClose: false
 	});
-	{% block code_extenders %}{# здесь помещяется код, расширяющий функциональность окна #}{% endblock %}
 	return win;
 })()

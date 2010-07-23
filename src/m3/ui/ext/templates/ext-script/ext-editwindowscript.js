@@ -1,5 +1,5 @@
 (function (){
-    var win = {{ window.render }};
+    var win = {{ window.render|safe }};
     
     function submitForm(btn, e, baseParams){
     	var form = Ext.getCmp('{{window.form.client_id}}').getForm();
@@ -28,7 +28,7 @@
     
     function formSubmitSuccessHandler(form, action){
     	{% if form.success_handler %}
-    	{{ form.success_handler}}();
+    		{{ form.success_handler}}();
     	{% endif %}
 		var win = Ext.getCmp('{{window.client_id}}');
     	win.fireEvent('closed_ok');
@@ -36,30 +36,15 @@
     	win.close();
     	smart_eval(action.response.responseText)
     }
-    function defaultSubmitFailureHandler(form, action)
-    {
-    	{# ------ обработчик сообщения об ошибке субмита по умолчанию ----------- #}
+    
+	function defaultSubmitFailureHandler(form, action) {
     	smart_eval(action.response.responseText)
-    	/*if(action.failureType == 'server'){
-            obj = Ext.util.JSON.decode(action.response.responseText);
-            Ext.Msg.show({title: '',
-                          msg: 'Не удалось сохранить данные формы. ' + obj.error_msg,
-                          buttons: Ext.Msg.OK,
-                          icon: Ext.Msg.WARNING});
-        }else{
-            Ext.Msg.show({title: '',
-                          msg: 'Не удалось сохранить данные формы. Сервер временно недоступен.',
-                          buttons: Ext.Msg.OK,
-                          icon: Ext.Msg.WARNING});
-        }*/
-    	// TODO: написать нормальный разбор сообщения об
-    	//Ext.Msg.show({title: 'Сохранение', msg: 'Не удалось сохранить данные формы.', buttons: Ext.Msg.OK, icon: Ext.Msg.WARNING});
     }
     
-    function cancelForm()
-    {
-        Ext.getCmp('{{window.client_id}}').close();
+    function cancelForm(){
+        win.close();
     }
+	
     // пройдемся по всем элементам окна и назначим обработчик 'change' всем полям редактирования
 	function onChangeFieldValue(sender, newValue, oldValue) {
         var win = Ext.getCmp('{{window.client_id}}');
@@ -100,9 +85,11 @@
 			};
 		};
 	};
+	
 	win.items.each(function(item){
 		setFieldOnChange(item);
 	})
+	
 	// подтверждение при закрытии окна
 	function onBeforeClose(win) {
 		if (win.forceClose) {return true;}
@@ -130,9 +117,11 @@
 			return false;
 		} else {return true;}
 	};
+	
 	win.on('beforeclose', onBeforeClose);
-    {{ renderer.window.render_globals }}
-    {# показываем окно #}
+    
+	{{ renderer.window.render_globals }}
+
     win.show();    
     return win;
 })()

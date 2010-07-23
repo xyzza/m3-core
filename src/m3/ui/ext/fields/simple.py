@@ -64,7 +64,7 @@ class ExtDateField(BaseExtField):
     
     def render_params(self):
         super(ExtDateField, self).render_params()
-        self._push_params_value('hideTriggerToday', self.hide_today_btn)
+        self._put_params_value('hideTriggerToday', self.hide_today_btn)
     
     def render(self):
         self.render_base_config()
