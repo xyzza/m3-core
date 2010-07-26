@@ -53,14 +53,12 @@ class ExtDateField(BaseExtField):
         # При установке своего формата, необходимо устанавливать также
         # отформатированную дату, если она нужна по умолчанию
         try:
-            self.format = settings.DATE_FORMAT.replace('%', '')
-            self.value = datetime.now().strftime(settings.DATE_FORMAT)
+            self._put_config_value('format', settings.DATE_FORMAT.replace('%', ''))
+            self._put_config_value('value', self.value.strftime(settings.DATE_FORMAT))
         except:
-            self.format = 'd.m.Y'
-            self.value = datetime.now().strftime('%d.%m.%Y')
-            
-        self._put_config_value('format', self.format)
-        self._put_config_value('value', self.value)
+            self._put_config_value('format', 'd.m.Y')
+            self._put_config_value('value', self.value.strftime('%d.%m.%Y'))
+        
     
     def render_params(self):
         super(ExtDateField, self).render_params()
