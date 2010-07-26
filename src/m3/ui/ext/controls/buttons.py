@@ -52,8 +52,6 @@ class ExtButton(BaseExtControl):
         if self.menu:
             self._put_config_value('menu', self.menu.render)
 
-        
-        
     def render(self):
         self._ext_name = 'Ext.SplitButton' if self.menu else 'Ext.Button'
         return super(ExtButton, self).render()

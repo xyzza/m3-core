@@ -7,194 +7,86 @@
  * Нужно для правильной работы окна 
  */
 Ext.override(Ext.Window, {
-	//minimizable: true
-    //,maximizable: true
-	masked: false
+
+	/*
+	 *  Если установлена модальность и есть родительское окно, то
+	 *  флаг модальности помещается во временную переменную tmpModal, и 
+	 *  this.modal = false;
+	 */
+	tmpModal: false 
+	
 	,manager: new Ext.WindowGroup()
     ,renderTo: 'x-desktop'
     ,constrain: true
-	,parentWindowID: ''
 	,listeners: {
-		'show': function (){
+		'beforeshow': function (){
 			if ( Ext.get('x-desktop').getHeight() < this.getHeight() ) {
 				this.setHeight( Ext.get('x-desktop').getHeight() );
 			}
-			if (this.modal){
-				var parent_wind = Ext.getCmp(this.parentWindowID);
-				if (parent_wind != undefined) {
-					parent_wind.masked = true;
+			
+			if (this.parentWindow) {
+				this.parentWindow.el.mask();
+				this.modal = false;
+				this.tmpModal = true;
+				
+				if (AppDesktop) {
+					var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
+					if (el) {
+						el.mask();
+					}
 				}
-				else {
+
+			}
+			if (this.modal){
 					var taskbar = Ext.get('ux-taskbar');
-					if (taskbar != undefined) {
+					if (taskbar) {
 	 					taskbar.mask();
 					}
  					var toptoolbar = Ext.get('ux-toptoolbar');
-					if (toptoolbar != undefined) {
+					if (toptoolbar) {
 		 				toptoolbar.mask();
 					}
-				}
 			}
 		}
 		,'beforeclose': function (){
-			if (this.modal){
-				var parent_wind = Ext.getCmp(this.parentWindowID);
-				if (parent_wind != undefined) {
-					parent_wind.masked = false;
+			if (this.tmpModal && this.parentWindow) {			
+				this.parentWindow.el.unmask();
+				
+				if (AppDesktop) {
+					var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
+					if (el) {
+						el.unmask();
+					}
 				}
-				else {
-	 				var taskbar = Ext.get('ux-taskbar');
-					if (taskbar != undefined) {
-	 					taskbar.unmask();
-					}
- 					var toptoolbar = Ext.get('ux-toptoolbar');
-					if (toptoolbar != undefined) {
-		 				toptoolbar.unmask();
-					}
+			}
+
+			if (this.modal){
+ 				var taskbar = Ext.get('ux-taskbar');
+				if (taskbar) {
+ 					taskbar.unmask();
+				}
+					var toptoolbar = Ext.get('ux-toptoolbar');
+				if (toptoolbar) {
+	 				toptoolbar.unmask();
 				}
 			}
 		}
 		,'hide': function (){
 			if (this.modal){
-				var parent_wind = Ext.getCmp(this.parentWindowID);
-				if (parent_wind == undefined) {
+				if (!this.parentWindow) {
 	 				var taskbar = Ext.get('ux-taskbar');
-					if (taskbar != undefined) {
+					if (taskbar) {
 	 					taskbar.unmask();
 					}
  					var toptoolbar = Ext.get('ux-toptoolbar');
-					if (toptoolbar != undefined) {
+					if (toptoolbar) {
 		 				toptoolbar.unmask();
 					}
 				}
 			}
 		}
-	},
-	beforeShow : function(){
-        delete this.el.lastXY;
-        delete this.el.lastLT;
-        if(this.x === undefined || this.y === undefined){
-            var xy = this.el.getAlignToXY(this.container, 'c-c');
-            var pos = this.el.translatePoints(xy[0], xy[1]);
-            this.x = this.x === undefined? pos.left : this.x;
-            this.y = this.y === undefined? pos.top : this.y;
-        }
-        this.el.setLeftTop(this.x, this.y);
-
-        if(this.expandOnShow){
-            this.expand(false);
-        }
-
-        if(this.modal){
-            Ext.getBody().addClass('x-body-masked');
-			// kirov
-			// работа с родительским окном
-			var parent_wind = Ext.getCmp(this.parentWindowID);
-			if (parent_wind != undefined) {
-				var box = parent_wind.getBox(true);
-				this.mask.setLeftTop(box.x, box.y);
-				this.mask.setSize(box.width, box.height);
-			}
-			else {
-				this.mask.setLeftTop(0, 0);
-				this.mask.setSize(Ext.lib.Dom.getViewWidth(true), Ext.lib.Dom.getViewHeight(true));
-			}
-            this.mask.show();
-        }
-    },
-	onRender : function(ct, position){
-        Ext.Window.superclass.onRender.call(this, ct, position);
-
-        if(this.plain){
-            this.el.addClass('x-window-plain');
-        }
-
-        // this element allows the Window to be focused for keyboard events
-        this.focusEl = this.el.createChild({
-                    tag: 'a', href:'#', cls:'x-dlg-focus',
-                    tabIndex:'-1', html: '&#160;'});
-        this.focusEl.swallowEvent('click', true);
-
-        this.proxy = this.el.createProxy('x-window-proxy');
-        this.proxy.enableDisplayMode('block');
-
-        if(this.modal){
-			this.mask = this.container.createChild({cls:'m3-el-mask'}, this.el.dom);
-            this.mask.enableDisplayMode('block');
-            this.mask.hide();
-            this.mon(this.mask, 'click', this.focus, this);
-        }
-        if(this.maximizable){
-            this.mon(this.header, 'dblclick', this.toggleMaximize, this);
-        }
-    },
-	onWindowResize : function(){
-        if(this.maximized){
-            this.fitContainer();
-        }
-        if (this.modal) {
-			var parent_wind = Ext.getCmp(this.parentWindowID);
-			if (parent_wind != undefined) {
-				var box = parent_wind.getBox(true);
-				this.mask.setLeftTop(box.x, box.y);
-				this.mask.setSize(box.width, box.height);
-			}
-			else {
-				this.mask.setSize('100%', '100%');
-				var force = this.mask.dom.offsetHeight;
-				this.mask.setLeftTop(0, 0);
-				this.mask.setSize(Ext.lib.Dom.getViewWidth(true), Ext.lib.Dom.getViewHeight(true));
-			}
-		}
-        this.doConstrain();
-    },
-	setZIndex : function(index){
-        if(this.modal){
-			var parent_wind = Ext.getCmp(this.parentWindowID);
-			if (parent_wind != undefined) {
-				this.mask.setStyle('z-index', parent_wind.lastZIndex + 1);
-			}
-			else {
-				this.mask.setStyle('z-index', index);
-			}
-        }
-        this.el.setZIndex(++index);
-        index += 5;
-
-        if(this.resizer){
-            this.resizer.proxy.setStyle('z-index', ++index);
-        }
-
-        this.lastZIndex = index;
-    },
-	hide : function(animateTarget, cb, scope){
-        if(this.hidden || this.fireEvent('beforehide', this) === false){
-            return this;
-        }
-        if(cb){
-            this.on('hide', cb, scope, {single:true});
-        }
-        this.hidden = true;
-        if(animateTarget !== undefined){
-            this.setAnimateTarget(animateTarget);
-        }
-        if(this.modal){
-			// kirov
-			// работа с родительским окном
-			var parent_wind = Ext.getCmp(this.parentWindowID);
-			if (parent_wind == undefined) {
-				this.mask.hide();
-				Ext.getBody().removeClass('x-body-masked');
-			}
-        }
-        if(this.animateTarget){
-            this.animHide();
-        }else{
-            this.el.hide();
-            this.afterHide();
-        }
-        return this;
-    }
+	}
+	// Перенести в класс Ext.m3.EditWindow -->>
 	// счетчик изменений и заголовок для хранения первоначального значения
 	// перенесено сюда из template окна
 	,changesCount: 0
@@ -212,6 +104,7 @@ Ext.override(Ext.Window, {
 		}
 	}
 	,forceClose: false
+	// <<--
 }); 
 
 /**
@@ -219,6 +112,7 @@ Ext.override(Ext.Window, {
  */
 Ext.override(Ext.ux.tree.TreeGrid, {
 	
+	// добавлено
 	fitColumns: function() {
         var nNewTotalWidth = this.getInnerWidth() - Ext.num(this.scrollOffset, Ext.getScrollBarWidth());
         var nOldTotalWidth = this.getTotalColumnWidth();
@@ -236,6 +130,7 @@ Ext.override(Ext.ux.tree.TreeGrid, {
         
         this.updateColumnWidths();
     },
+	// <--
 	onResize : function(w, h) {
         Ext.ux.tree.TreeGrid.superclass.onResize.apply(this, arguments);
         
@@ -261,7 +156,7 @@ Ext.override(Ext.ux.tree.TreeGrid, {
                 }, 10);
             }
         }
-		this.fitColumns();
+		this.fitColumns(); // добавилась/заменила
     }
 }); 
 
@@ -275,8 +170,8 @@ Ext.override(Ext.tree.ColumnResizer, {
         delete this.dragHd;
         
         tree.columns[this.hdIndex].width = nw;
-        //tree.updateColumnWidths();
-		tree.fitColumns();
+        //tree.updateColumnWidths(); // закомментировано
+		tree.fitColumns();			// добавлено
         
         setTimeout(function(){
             tree.headersDisabled = false;
@@ -297,6 +192,7 @@ Ext.override(Ext.tree.TreeNodeUI, {
             if(this.checkbox){
                 this.toggleCheck();
             }
+			// закомментировано. 
             //if(!this.animating && this.node.isExpandable()){
             //    this.node.toggle();
             //}
@@ -321,6 +217,7 @@ Ext.override(Ext.form.Action.Submit, {
                         emptyFields.push(f);
                         f.el.dom.value = "";
                     };
+					// Добавилось
                     // вот тут сделаем добавку
                     if (f instanceof Ext.form.CompositeField) {
                         f.items.each(function(cf) {					
@@ -330,6 +227,7 @@ Ext.override(Ext.form.Action.Submit, {
                             };
                         });
                     };
+					// <--
                 });
             }
             Ext.Ajax.request(Ext.apply(this.createCallback(o), {

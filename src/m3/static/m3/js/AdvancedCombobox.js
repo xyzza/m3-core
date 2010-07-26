@@ -64,8 +64,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 	,allTriggers: []
 	
 	,constructor: function(baseConfig, params){
-		console.log(baseConfig);
-		console.log(params);
+//		console.log(baseConfig);
+//		console.log(params);
 		
 		assert(params.actions, 'params.actions is undefined');
 		

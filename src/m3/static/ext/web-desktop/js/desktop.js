@@ -631,6 +631,19 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
         this.scrollLeft[pos == 0 ? 'addClass' : 'removeClass']('ux-taskbuttons-scroller-left-disabled');
         this.scrollRight[pos >= (this.getScrollWidth()-this.getScrollArea()) ? 'addClass' : 'removeClass']('ux-taskbuttons-scroller-right-disabled');
     }
+	
+	// prefer add 26.10.10
+	// Поиск по win id
+	,getTabWin: function(winId) {
+		
+		console.log( this.items.length);
+		for (var i=0; i< this.items.length; i++){
+			if(this.items[i].win === winId) {
+				return this.items[i].container;
+			}
+		}
+	}
+	
 });
 
 

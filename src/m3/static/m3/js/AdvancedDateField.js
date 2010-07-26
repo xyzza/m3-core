@@ -20,8 +20,8 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 	,hideTriggerToday: false
 	
 	,constructor: function(baseConfig, params){
-		console.log(baseConfig);
-		console.log(params);
+//		console.log(baseConfig);
+//		console.log(params);
 
 		if (params.hideTriggerToday) {
 			this.hideTriggerToday = true;

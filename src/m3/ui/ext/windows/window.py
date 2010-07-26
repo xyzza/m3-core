@@ -21,7 +21,7 @@ class ExtWindow(BaseExtWindow):
     def render_base_config(self):
         super(ExtWindow, self).render_base_config()
         if self.layout_config:
-            self._put_config_value('layoutConfig', self.t_render_layout_config())
+            self._put_config_value('layoutConfig', self.t_render_layout_config)
     
     # Данный код должен находится в базовом классе, но т.к. не вcе шаблоны 
     # переведены на новый рендеринг, остается пока в каждом 

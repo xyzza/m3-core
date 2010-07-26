@@ -26,7 +26,7 @@ class BaseExtWindow(ExtUIComponent):
         self.renderer = ExtWindowRenderer()
         self.renderer.window = self
         
-        self._ext_name = 'Ext.Window'
+        self._ext_name = 'Ext.m3.Window'
         
         # параметры окна
         self.width = 400
@@ -67,9 +67,13 @@ class BaseExtWindow(ExtUIComponent):
         self._put_config_value('items', self.t_render_items)
         self._put_config_value('buttons', self.t_render_buttons, self.buttons)
         self._put_config_value('resizable', self.resizable)
-        self._put_config_value('parentWindowID', self.parent_window_id)
+        #self._put_config_value('parentWindowID', self.parent_window_id)
         self._put_config_value('keys', self.t_render_keys, self.keys)
-        self._put_config_value('autoLoad', self.auto_load)
+        #self._put_config_value('autoLoad', self.auto_load) -- не используется
+        
+    def render_params(self):
+        super(BaseExtWindow, self).render_params()
+        self._put_params_value('parentWindowID', self.parent_window_id)
         
     @property
     def buttons(self):
