@@ -46,6 +46,8 @@ class BaseExtWindow(ExtUIComponent):
         self.resizable = True
         self.parent_window_id = ''
         self.keys = []
+        self.auto_load = None
+        self.hidden = True
         
     def render_base_config(self):
         super(BaseExtWindow, self).render_base_config()
@@ -67,7 +69,7 @@ class BaseExtWindow(ExtUIComponent):
         self._put_config_value('resizable', self.resizable)
         self._put_config_value('parentWindowID', self.parent_window_id)
         self._put_config_value('keys', self.t_render_keys, self.keys)
-
+        self._put_config_value('autoLoad', self.auto_load)
         
     @property
     def buttons(self):
@@ -112,7 +114,8 @@ class BaseExtWindow(ExtUIComponent):
     
     def render_globals(self):
         if self.template_globals:
-            return render_template(self.template_globals, {'component': self, 'window': self})
+            return render_template(self.template_globals, {'component': self, 
+                                                           'window': self})
         return ''
     
     def find_by_name(self, name):

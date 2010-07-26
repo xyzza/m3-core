@@ -10,17 +10,17 @@ Created on 01.03.2010
 '''
 
 from uuid import uuid4
+import datetime
 
 from django import template as django_template
 from django.conf import settings
-import datetime
 
 from m3.ui.ext import render_template, render_component
 from m3.helpers import js
 
 #===============================================================================
 class ExtUIScriptRenderer(object):
-    '''
+    '''m3
     Класс, отвечающий за рендер файла скрипта, который
     будет отправлен клиенту. 
     '''
@@ -92,6 +92,7 @@ class BaseExtComponent(object):
         отображения самого компонента. За рендер полного javascript
         отвечает метод get_script()
         '''
+        self.pre_render()
         return render_component(self)
     # Код ниже раскомментировать как только все компоненты будут поддерживать 
     # новый рендеринг
@@ -115,7 +116,7 @@ class BaseExtComponent(object):
 #                            'base_config': base_config,
 #                            'params': params }
                             
-        return 'new %s' % res if not self._is_function_render else res
+#        return 'new %s' % res if not self._is_function_render else res
     
     def render_globals(self):
         '''

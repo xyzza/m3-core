@@ -42,22 +42,28 @@ class ExtDateField(BaseExtField):
         super(ExtDateField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-date-field.js'
         self.hide_today_btn = False
+        self.value =  datetime.now()  
         
-            
+        try:
+            self.format = settings.DATE_FORMAT.replace('%', '')
+        except:
+            self.format = 'd.m.Y'
             
         self.init_component(*args, **kwargs)
     
     def render_base_config(self):
+        if isinstance(self.value, datetime):
+            try:
+                value = self.value.strftime(settings.DATE_FORMAT)
+            except:
+                value = self.value.strftime('%d.%m.%Y')
+        else:
+            value = self.value
+        
         super(ExtDateField, self).render_base_config()
-        # ситуация следующая:
-        # При установке своего формата, необходимо устанавливать также
-        # отформатированную дату, если она нужна по умолчанию
-        try:
-            self._put_config_value('format', settings.DATE_FORMAT.replace('%', ''))
-            self._put_config_value('value', self.value.strftime(settings.DATE_FORMAT))
-        except:
-            self._put_config_value('format', 'd.m.Y')
-            self._put_config_value('value', self.value.strftime('%d.%m.%Y'))
+        self._put_config_value('format', self.format)
+        self._put_config_value('value', value)
+
         
     
     def render_params(self):
@@ -65,8 +71,11 @@ class ExtDateField(BaseExtField):
         self._put_params_value('hideTriggerToday', self.hide_today_btn)
     
     def render(self):
-        self.render_base_config()
-        self.render_params()
+        try:
+            self.render_base_config()
+            self.render_params()
+        except Exception as msg:
+            raise Exception(msg)
         
         base_config = self._get_config_str()
         params = self._get_params_str()
