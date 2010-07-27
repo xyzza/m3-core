@@ -17,11 +17,11 @@ class WorkflowStep(object):
     
 class WorkflowStartStep(WorkflowStep):
     id = 'new'
-    name = 'Новый'
+    name = u'Новый'
         
 class WorkflowEndStep(WorkflowStep):
     id = 'closed'
-    name = 'Закрыто'
+    name = u'Закрыто'
 
 class Empty:
     pass

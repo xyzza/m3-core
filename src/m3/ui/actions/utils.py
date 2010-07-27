@@ -39,7 +39,7 @@ def create_search_filter(filter_text, fields):
     Фильтрация производится по полям списку полей fields и введеному пользователем тексту filter_text.
     Пример:
         fields = ['name', 'family']
-        filter_text = 'Вася Пупкин'
+        filter_text = u'Вася Пупкин'
     Получится условие WHERE:
         (name like 'Вася' AND name like 'Пупкин') OR (family like 'Вася' AND family like 'Пупкин') 
     '''

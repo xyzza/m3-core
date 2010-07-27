@@ -22,7 +22,7 @@ class Email_Notification_Test(TestCase):
         txt = TxtMessageTest()
         profile = Dummy()
         profile.email = 'ivan@ivan.com'
-        profile.user_name = 'Иван Иванович'
+        profile.user_name = u'Иван Иванович'
         txt.Send(profile, A =  111, B = 222)
         
         self.failUnlessEqual(len(mail.outbox), 1)
@@ -30,7 +30,7 @@ class Email_Notification_Test(TestCase):
         self.failUnlessEqual(email.content_subtype, 'plain')
         #TODO: Узнасть что за хренотень добавляется в начало u'\ufeff' ?
         self.failUnlessEqual(email.subject, u'\ufeff' + u'тема сообщения')
-        checkMsg = 'Тест тесктового сообщения %s %s %s' % (111, 222, profile.user_name)
+        checkMsg = u'Тест тесктового сообщения %s %s %s' % (111, 222, profile.user_name)
         checkMsg = u'\ufeff' + smart_unicode(checkMsg)
         self.failUnlessEqual(email.body, checkMsg)
         self.failUnlessEqual(email.to, ['ivan@ivan.com'])

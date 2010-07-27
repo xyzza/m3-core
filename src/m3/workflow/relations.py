@@ -127,11 +127,11 @@ class RelationQueryManager(WorkflowQueryManager):
 
 class RelationOpenedStep(WorkflowStep):
     id = 'opened'
-    name = 'Открыто'
+    name = u'Открыто'
 
 class RelationClosedStep(WorkflowStep):
     id = 'closed'
-    name = 'Закрыто'
+    name = u'Закрыто'
 
 class RelationOptions(WorkflowOptions):
     def __init__(self):
