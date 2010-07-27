@@ -196,7 +196,7 @@ class BaseExtComponent(object):
             except UnicodeDecodeError:
                 raise Exception('"%s" is not unicode' % item)
         
-            res = '"%s"' % item
+            res = "'%s'" % item
             
         elif isinstance(item, bool):
             res = str(item).lower()
