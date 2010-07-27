@@ -196,7 +196,7 @@ class BaseExtComponent(object):
             except UnicodeDecodeError:
                 raise Exception('"%s" is not unicode' % item)
         
-            res = "'%s'" % item
+            res = "'%s'" % item.replace("'", "\\'") # если в строке уже есть апостроф, то будет очень больно. поэтому replace 
             
         elif isinstance(item, bool):
             res = str(item).lower()
