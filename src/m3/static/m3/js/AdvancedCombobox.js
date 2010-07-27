@@ -356,6 +356,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 			var scope = this;
 			Ext.Ajax.request({
 				url: this.actionSelectUrl
+				,method: 'POST'
 				,params: this.actionContextJson
 				,success: function(response, opts){
 				    var win = smart_eval(response.responseText);
@@ -398,6 +399,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 		
 		Ext.Ajax.request({
 			url: this.actionEditUrl
+			,method: 'POST'
 			,params: this.actionContextJson
 			,success: function(response, opts){
 			    smart_eval(response.responseText);
