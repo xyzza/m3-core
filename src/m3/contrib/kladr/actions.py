@@ -197,7 +197,7 @@ class KLADRGetAddrAction(Action):
             while curr_level > 1:
                 curr_level -= 1
                 addr_text = delim+addr_text
-            addr_text = 'регион'+delim+addr_text
+            addr_text = u'регион'+delim+addr_text
             if curr_index != '':
                 addr_text = curr_index+delim+addr_text
             else:
