@@ -115,7 +115,10 @@ class ExtForm(BaseExtPanel):
                     # Потому что источник имеет заведомо неизвестное происхождение
                     if row != None:
                         default_text = getattr(row, item.display_field)
-                        item.default_text = default_text
+                        if callable(default_text):
+                            item.default_text = default_text()
+                        else:
+                            item.default_text = default_text
                 item.value = value
             elif isinstance(item, ExtComboBox) and hasattr(item, 'bind_rule_reverse'):
                 # Комбобокс как правило передает id выбранного значения. Его не так просто 
