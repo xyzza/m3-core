@@ -18,7 +18,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 	,defaultText: null
 	
 	// кнопка очистки
-	,hideTriggerClear: false
+	,hideTriggerClear: true
 	
 	// кнопка выбора из выпадающего списка
 	,hideTriggerDropDown: false
@@ -93,7 +93,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 		this.allTriggers = [].concat(this.baseTriggers);
 		if (params.customTriggers) {
 			Ext.each(params.customTriggers, function(item, index, all){
-				console.log(item);
 				this.allTriggers.push(item);
 			}, this);
 		

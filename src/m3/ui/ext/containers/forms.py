@@ -53,7 +53,8 @@ class ExtForm(BaseExtPanel):
     
     def bind_to_request(self, request):
         '''
-        Извлекает из запроса параметры и присваивает их соответствующим полям формы
+        Извлекает из запроса параметры и присваивает их соответствующим полям 
+        формы
         '''
         self.request = request or self.request
         all_fields = self._get_all_fields(self)
@@ -64,13 +65,15 @@ class ExtForm(BaseExtPanel):
     #TODO необходимо добавить проверку на возникновение exception'ов
     def from_object(self, object, exclusion = []):
         '''
-        Метод выполнения прямого связывания данных атрибутов объекта object и полей текущей формы
+        Метод выполнения прямого связывания данных атрибутов объекта object и 
+        полей текущей формы
         '''
         
         def _parse_obj(obj, prefix=''):
             '''
-            Разбивает объект на словарь, ключи которого имена полей(имена вложенных 
-            объектов записываются через '.'), а значения - значения соответсвующих полей объекта
+            Разбивает объект на словарь, ключи которого имена полей(имена 
+            вложенных объектов записываются через '.'), 
+            а значения - значения соответсвующих полей объекта
             '''
             attrs = {}
             object_fields = obj if isinstance(obj, dict) else obj.__dict__
@@ -83,10 +86,11 @@ class ExtForm(BaseExtPanel):
                     attrs.update(_parse_obj(value, pre_prefix+str(key)+'.'))
             return attrs
         
-        def isSecretToken(value):
+        def is_secret_token(value):
             ''' 
-            Возвращает истину если значение поля содержит секретный ключ с персональной информацией.
-            Он не должен биндится, т.к. предназначен для обработки в personal.middleware 
+            Возвращает истину если значение поля содержит секретный ключ с 
+            персональной информацией. Он не должен биндится, 
+            т.к. предназначен для обработки в personal.middleware 
             '''
             return unicode(value)[:2] == u'##'
         
@@ -100,9 +104,13 @@ class ExtForm(BaseExtPanel):
                 else:
                     item.value = u''
             elif isinstance(item, ExtDateField):
-                item.value = value.strftime('%d.%m.%Y') if not isSecretToken(value) else unicode(value)     
+                item.value = value.strftime('%d.%m.%Y') \
+                    if not is_secret_token(value) else unicode(value)   
+                      
             elif isinstance(item, ExtTimeField):
-                item.value = value.strftime('%H:%M') if not isSecretToken(value) else unicode(value)
+                item.value = value.strftime('%H:%M') \
+                    if not is_secret_token(value) else unicode(value)
+                    
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
             elif isinstance(item, ExtDictSelectField):
@@ -111,7 +119,8 @@ class ExtForm(BaseExtPanel):
                     # Нельзя импортировать, будет циклический импорт
                     #assert isinstance(item.bind_pack, BaseDictionaryActions)
                     row = item.bind_pack.get_row(value)
-                    # Может случиться что в источнике данных bind_pack не окажется записи с ключом id
+                    # Может случиться что в источнике данных bind_pack 
+                    # не окажется записи с ключом id
                     # Потому что источник имеет заведомо неизвестное происхождение
                     if row != None:
                         default_text = getattr(row, item.display_field)
@@ -122,16 +131,17 @@ class ExtForm(BaseExtPanel):
                             item.default_text = default_text
                 item.value = value
             elif isinstance(item, ExtComboBox) and hasattr(item, 'bind_rule_reverse'):
-                # Комбобокс как правило передает id выбранного значения. Его не так просто 
-                # преобразовать в тип объекта, т.к. мы ничего не знаем о структуре объекта.
-                # Поэтому нужно использовать либо трансляцию значений, либо вызывать специальную
-                # функцию внутри экземпляра комбобокса.
+                # Комбобокс как правило передает id выбранного значения. 
+                #Его не так просто  преобразовать в тип объекта, 
+                # Поэтому нужно использовать либо трансляцию значений, 
+                #либо вызывать специальную функцию внутри экземпляра комбобокса.
                 if callable(item.bind_rule_reverse):
                     item.value = str(item.bind_rule_reverse(value))
                 elif isinstance(item.bind_rule_reverse, dict):
                     item.value = str(item.bind_rule_reverse.get(value))
                 else:
-                    raise ValueError('Invalid attribute type bind_rule_reverse. Must be a function or a dict.')
+                    raise ValueError('Invalid attribute type bind_rule_reverse. \
+                        Must be a function or a dict.')
             else:
                 item.value = unicode(value)
 
@@ -148,22 +158,25 @@ class ExtForm(BaseExtPanel):
     #TODO необходимо добавить проверку на возникновение exception'ов
     def to_object(self, object, exclusion = []):
         '''
-        Метод выполнения прямого связывания данных атрибутов объекта object и полей текущей формы
+        Метод выполнения прямого связывания данных атрибутов объекта object и 
+        полей текущей формы
         '''
 
         def set_field(obj, names, value):
             '''
-            Ищет в объекте obj поле с именем names и присваивает значение value. Если 
-            соответствующего поля не оказалось, то оно не создается
+            Ищет в объекте obj поле с именем names и присваивает значение value. 
+            Если соответствующего поля не оказалось, то оно не создается
             
-            names задается в виде списка, т.о. если его длина больше единицы, то имеются вложенные объекты
+            names задается в виде списка, т.о. если его длина больше единицы, 
+            то имеются вложенные объекты
             '''
             if hasattr(obj, names[0]):
                 if len(names) == 1:
                     if isinstance(obj, dict):
                         obj[names[0]] = value
                     else:
-                        # Для id нельзя присваивать пустое значение! Иначе модели не будет сохраняться
+                        # Для id нельзя присваивать пустое значение! 
+                        # Иначе модели не будет сохраняться
                         if names[0] == 'id' and value == '':
                             return
 
@@ -173,14 +186,17 @@ class ExtForm(BaseExtPanel):
                     set_field(nested, names[1:], value)
 
         def try_to_int(value, default=None):
-            ''' Пробует преобразовать value в целое число, иначе возвращает default '''
+            ''' Пробует преобразовать value в целое число, 
+            иначе возвращает default '''
             try:
                 return int(value)
             except:
                 return default
 
         def convert_value(item):
-            '''Берет значение item.value, и конвертирует его в соответствии с типом item'a'''
+            '''Берет значение item.value, 
+            и конвертирует его в соответствии с типом item'a
+            '''
             val = item.value
             if isinstance(item, ExtNumberField):
                 if val:
@@ -210,17 +226,19 @@ class ExtForm(BaseExtPanel):
             elif isinstance(item, ExtCheckBox):
                 val = True if val == 'on' else False
             elif isinstance(item, ExtComboBox):
-                # Комбобокс как правило передает id выбранного значения. Его не так просто 
-                # преобразовать в тип объекта, т.к. мы ничего не знаем о структуре объекта.
-                # Поэтому нужно использовать либо трансляцию значений, либо вызывать специальную
-                # функцию внутри экземпляра комбобокса.
+                # Комбобокс как правило передает id выбранного значения. 
+                #Его не так просто преобразовать в тип объекта, 
+                # т.к. мы ничего не знаем о структуре объекта.
+                # Поэтому нужно использовать либо трансляцию значений, 
+                # либо вызывать специальную функцию внутри экземпляра комбобокса.
                 if hasattr(item, 'bind_rule'):
                     if callable(item.bind_rule):
                         val = item.bind_rule(val)
                     elif isinstance(item.bind_rule, dict):
                         val = item.bind_rule.get(val)
                     else:
-                        raise ValueError('Invalid attribute type bind_rule. Must be a function or a dict.')
+                        raise ValueError('Invalid attribute type bind_rule. \
+                                Must be a function or a dict.')
                 else:
                     val = try_to_int(val)
                     
@@ -239,8 +257,9 @@ class ExtForm(BaseExtPanel):
         self.object = object
         all_fields = self._get_all_fields(self)
         for field in all_fields:
-            assert isinstance(field.name, str) and len(field.name) > 0,\
-                  'The names of all fields must be set for a successful assignment. Check the definition of the form.'
+            assert isinstance(field.name, str) and len(field.name) > 0, \
+                  'The names of all fields must be set for a successful \
+                      assignment. Check the definition of the form.'
             # заполним атрибуты только те, которые не в списке исключаемых
             if not field.name in exclusion:
                 names = field.name.split('.')            

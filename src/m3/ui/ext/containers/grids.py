@@ -202,10 +202,14 @@ class ExtGrid(BaseExtPanel):
                                     if self.show_banded_columns else ''})
     
     def render(self):
-        self.pre_render()
-        
-        self.render_base_config()
-        self.render_params()
+        try:
+            self.pre_render()
+            
+            self.render_base_config()
+            self.render_params()
+        except Exception as msg:
+            raise Exception(msg)
+            
 
         config = self._get_config_str()
         params = self._get_params_str()
