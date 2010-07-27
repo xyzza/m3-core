@@ -64,8 +64,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 	,allTriggers: []
 	
 	,constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
+		//console.log(baseConfig);
+		//console.log(params);
 		
 		assert(params.actions, 'params.actions is undefined');
 		
@@ -78,7 +78,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 		}
 		
 		this.askBeforeDeleting = params.askBeforeDeleting;
-		this.actionContextJson = params.actions.actionContextJson;
+		
+		this.actionContextJson = params.actions.contextJson;
 		
 		if (baseConfig['hideTrigger'] ) {
 			delete baseConfig['hideTrigger'];
