@@ -322,7 +322,7 @@ class RolesListWindow(windows.ExtWindow):
     def __init__(self, *args, **kwargs):
         super(RolesListWindow, self).__init__(*args, **kwargs)
         
-        self.title = 'Роли пользователей'
+        self.title = u'Роли пользователей'
         self.layout = 'fit'
         self.width = 500
         self.height = 500
