@@ -56,7 +56,7 @@ class ExtAddrComponent(BaseExtContainer):
         if self.view_mode == ExtAddrComponent.VIEW_1:
             self.height = 25
         elif self.view_mode == ExtAddrComponent.VIEW_2:
-            if self.level > ExtAddrComponent.STREET:
+            if self.level >= ExtAddrComponent.STREET:
                 self.height = 25*2
             else:
                 self.height = 25
