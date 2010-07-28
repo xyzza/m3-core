@@ -35,11 +35,6 @@ class ExtEditWindow(BaseExtWindow):
             if isinstance(self.form, ExtForm):
                 self._put_params_value('form', {'id':self.form.client_id,
                                               'url':self.form.url})
-            
-            
-        if self.action_context:
-            self._put_config_value('contextJson', self.action_context.json)
-
 
     # Данный код должен находится в базовом классе, но т.к. не вcе шаблоны 
     # переведены на новый рендеринг, остается пока в каждом 

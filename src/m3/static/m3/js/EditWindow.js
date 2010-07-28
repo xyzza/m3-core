@@ -20,11 +20,6 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	,formUrl: null
 	
 	/**
-	 * Контекст 
-	 */
-	,actionContextJson: null
-	
-	/**
 	 * Количество измененных полей
 	 */
 	,changesCount: 0
@@ -53,12 +48,11 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 					this.formUrl = params.form.url;
 				}
 			}
-			if (params.contextJson){
-				this.actionContextJson = params.contextJson;
-			}
+			
+
 		}
 
-		Ext.m3.EditWindow.superclass.constructor.call(this, baseConfig);
+		Ext.m3.EditWindow.superclass.constructor.call(this, baseConfig, params);
 	}
 	/**
 	 * Инициализация дополнительного функционала

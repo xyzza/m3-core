@@ -83,6 +83,9 @@ class BaseExtWindow(ExtUIComponent):
         super(BaseExtWindow, self).render_params()
         self._put_params_value('parentWindowID', self.parent_window_id)
         
+        if self.action_context:
+            self._put_params_value('contextJson', self.action_context.json )
+        
     @property
     def buttons(self):
         return self.__buttons
