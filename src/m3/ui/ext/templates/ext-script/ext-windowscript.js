@@ -1,11 +1,11 @@
 (function (){
-    var win = {{ renderer.window.render|safe }};
+    var win = {{ window.render|safe }};
+    
+	function closeWindow(){ win.close(); }
+    
+    {{ window.render_globals }}
+    
     win.show();
-    
-    {{ renderer.window.render_globals }}
-    
-    function closeWindow(){ win.close(); }
-    
     return win;
 })()
 

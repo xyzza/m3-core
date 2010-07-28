@@ -13,7 +13,7 @@ class ExtEditWindow(BaseExtWindow):
         super(ExtEditWindow, self).__init__(*args, **kwargs)
         self.__form = None
         self._ext_name = 'Ext.m3.EditWindow'
-        #self.renderer.template = 'ext-script/ext-editwindowscript.js' 
+        self.renderer.template = 'ext-script/ext-editwindowscript.js' 
         self.init_component(*args, **kwargs)
       
     @property
@@ -23,7 +23,7 @@ class ExtEditWindow(BaseExtWindow):
     @form.setter
     def form(self, value):
         # self.items = [value,] -- Если с этим окном используется всегда форма, 
-        # то небходима вставить эту строку
+        # то небходимо вставить эту строку
         self.items.append(value)
         self.__form = value
 
@@ -40,6 +40,7 @@ class ExtEditWindow(BaseExtWindow):
         if self.action_context:
             self._put_config_value('contextJson', self.action_context.json)
 
+
     # Данный код должен находится в базовом классе, но т.к. не вcе шаблоны 
     # переведены на новый рендеринг, остается пока в каждом 
     def render(self):
@@ -51,8 +52,6 @@ class ExtEditWindow(BaseExtWindow):
         try:
             self.render_base_config()
             self.render_params()
-        except UnicodeDecodeError:
-            raise Exception('Some attribute is not unicode')
         except Exception as msg:
             raise Exception(msg) 
         

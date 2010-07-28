@@ -1,5 +1,10 @@
 /**
  * Окно на базе Ext.m3.Window, которое включает такие вещи, как:
+ * 1) Submit формы, если она есть;
+ * 2) Навешивание функции на изменение поля, в связи с чем обновляется заголовок 
+ * окна;
+ * 3) Если поля формы были изменены, то по-умолчанию задается вопрос "Вы 
+ * действительно хотите отказаться от внесенных измений";
  */
 
 Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
@@ -20,14 +25,24 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	,actionContextJson: null
 	
 	/**
+	 * Количество измененных полей
+	 */
+	,changesCount: 0
+	
+	/**
+	 * Оргинальный заголовок
+	 */
+	,originalTitle: null
+	
+	/**
 	 * Инициализация первонального фунционала
 	 * @param {Object} baseConfig Базовый конфиг компонента
 	 * @param {Object} params Дополнительные параметры 
 	 */
 	,constructor: function(baseConfig, params){
-		console.log('Ext.m3.EditWindow >>');
-		console.log(baseConfig);
-		console.log(params);
+//		console.log('Ext.m3.EditWindow >>');
+//		console.log(baseConfig);
+//		console.log(params);
 		
 		if (params) {
 			if (params.form) {
@@ -52,11 +67,10 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		Ext.m3.EditWindow.superclass.initComponent.call(this);
 		
 		// Устанавливает функции на изменение значения
-		console.log('>>');
 		this.items.each(function(item){
-			console.log(item);
 			this.setFieldOnChange(item, this);
 		}, this);
+	
 	}
 	/**
 	 * Сабмит формы
@@ -86,8 +100,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		   ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
 		   ,success: function(form, action){
 				scope.fireEvent('closed_ok');
-				scope.forceClose = true;
-		    	scope.close();
+		    	scope.close(true);
 		    	smart_eval(action.response.responseText)
 		   }
 		   ,failure: function (form, action){
@@ -103,20 +116,20 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	  * @param {Object} oldValue
 	  */
 	,onChangeFieldValue: function (sender, newValue, oldValue, window) {
-		console.log('>> onChangeFieldValue')
-		
+
 		if (sender.originalValue !== newValue) {
-			if (!sender.isModified)
+			if (!sender.isModified) {
 				window.changesCount++;
+			}
 			sender.isModified = true;
 		} else {
-			if (sender.isModified)
+			if (sender.isModified){
 				window.changesCount--;
-				
+			}
+					
 			sender.isModified = false;
 		};
 		
-		console.log(sender);
 		window.updateTitle();
 		sender.updateLabel();
     }
@@ -125,9 +138,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 * @param {Object} item
 	 */
 	,setFieldOnChange: function (item, window){
-		console.log('>> setFieldOnChange');
 		if (item) {
-			console.log(window);
 			if (item instanceof Ext.form.Field && item.isEdit) {
 				item.on('change', function(scope, newValue, oldValue){
 					window.onChangeFieldValue(scope, newValue, oldValue, window);
@@ -153,25 +164,47 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		};
 	}
 	
-	// Перенести в класс Ext.m3.EditWindow -->>
-	// счетчик изменений и заголовок для хранения первоначального значения
-	// перенесено сюда из template окна
-	,changesCount: 0
-	,originalTitle: ''
+	/**
+	 * Обновление заголовка окна
+	 */
 	,updateTitle: function(){
 		// сохраним оригинальное значение заголовка
-		if (this.title !== this.originalTitle && this.originalTitle == '') {
+		if (this.title !== this.originalTitle && this.originalTitle === null) {
 			this.originalTitle = this.title;
 		};
-		// изменим заголовок в связи с изменением полей в окне
+
 		if (this.changesCount !== 0) {
 			this.setTitle('*'+this.originalTitle);
 		} else {
 			this.setTitle(this.originalTitle);
 		}
 	}
-	,forceClose: false
-	// <<--
+	/**
+	 * Перегрузка закрытия окна со вставкой пользовательского приложения
+	 * @param {Bool} forceClose Приндтельное (без вопросов) закрытие окна
+	 */
+	,close: function (forceClose) {
+
+		if (this.changesCount !== 0 && !forceClose ) {
+			var scope = this;
+			Ext.Msg.show({
+				title: "Не сохранять изменения",
+				msg: "Внимание! Данные были изменены! \
+								Закрыть без сохранения изменений?",
+				buttons: Ext.Msg.OKCANCEL,
+				fn: function(buttonId, text, opt){
+					if (buttonId === 'ok') {
+						Ext.m3.EditWindow.superclass.close.call(scope);
+					}
+				},
+				animEl: 'elId',
+				icon: Ext.MessageBox.QUESTION
+			});
+
+			return;
+		};
+		Ext.m3.EditWindow.superclass.close.call(this);
+	}
 	
 })
 

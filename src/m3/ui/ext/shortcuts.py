@@ -98,13 +98,12 @@ def js_fire_event_window(event_name, close_after_fire=True, *args):
     template = u'''
 function(){
     win.fireEvent("%(event_name)s" %(params)s);
-    win.forceClose = true;
     %(win_close)s
 }
     '''
     return template % {'event_name': event_name, 
                        'params': (',"%s"' % '","'.join(args)) if args else '',
-                       'win_close' : 'win.close();' if close_after_fire else ''
+                       'win_close' : 'win.close(true);' if close_after_fire else ''
                        }
     
 def js_fire_event(component, event_name, *args):
