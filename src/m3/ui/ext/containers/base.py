@@ -73,7 +73,9 @@ class BaseExtPanel(BaseExtContainer):
     def render_base_config(self):
         super(BaseExtPanel, self).render_base_config()
         self._put_config_value('title', self.title)
-        self._put_config_value('header', self.header)
+        if not self.title:
+            self._put_config_value('header', self.header)
+            
         self._put_config_value('iconCls', self.icon_cls)
         self._put_config_value('tbar', self.t_render_top_bar, 
                                       self.top_bar)
