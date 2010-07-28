@@ -86,25 +86,6 @@ Ext.override(Ext.Window, {
 			}
 		}
 	}
-	// Перенести в класс Ext.m3.EditWindow -->>
-	// счетчик изменений и заголовок для хранения первоначального значения
-	// перенесено сюда из template окна
-	,changesCount: 0
-	,originalTitle: ''
-	,updateTitle: function(){
-		// сохраним оригинальное значение заголовка
-		if (this.title !== this.originalTitle && this.originalTitle == '') {
-			this.originalTitle = this.title;
-		};
-		// изменим заголовок в связи с изменением полей в окне
-		if (this.changesCount !== 0) {
-			this.setTitle('*'+this.originalTitle);
-		} else {
-			this.setTitle(this.originalTitle);
-		}
-	}
-	,forceClose: false
-	// <<--
 }); 
 
 /**

@@ -5,10 +5,6 @@ Created on 26.05.2010
 @author: akvarats
 '''
 from base import BaseExtWindow
-from m3.ui.ext import containers
-from m3.ui.ext import misc
-from m3.ui.ext import menus
-from m3.ui.ext import controls
 from m3.ui.ext import panels  
 
 class BaseExtListWindow(BaseExtWindow):

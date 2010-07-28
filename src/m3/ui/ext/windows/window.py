@@ -10,24 +10,14 @@ from base import BaseExtWindow
 class ExtWindow(BaseExtWindow):
     def __init__(self, *args, **kwargs):
         super(ExtWindow, self).__init__(*args, **kwargs)
-        self.layout_config = {}
+        self._ext_name = 'Ext.m3.EditWindow'
         self.init_component(*args, **kwargs)
-        
-    def t_render_layout_config(self):
-        '''Рендерит конфиг, если указан layout'''
-        return '{%s}' % ','.join(['%s:"%s"' % (k, v) for k, v in 
-                                                    self.layout_config.items()])
-    
-    def render_base_config(self):
-        super(ExtWindow, self).render_base_config()
-        if self.layout_config:
-            self._put_config_value('layoutConfig', self.t_render_layout_config)
     
     # Данный код должен находится в базовом классе, но т.к. не вcе шаблоны 
     # переведены на новый рендеринг, остается пока в каждом 
     def render(self):
-        assert getattr(self, '_ext_name'), 'Class %s is not define "_ext_name"' % \
-            (self.__class__.__name__,)
+        assert getattr(self, '_ext_name'), \
+            'Class %s is not define "_ext_name"' % self.__class__.__name__
         
         self.pre_render()
         

@@ -158,7 +158,11 @@ Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
  * В поле добавим функционал отображения того, что оно изменено.
  */
 Ext.override(Ext.form.Field, {
-	isEdit: true, // признак, что поле используется для изменения значения, а не для навигации - при Истине будут повешаны обработчики на изменение окна
+	/**
+	 * Признак, что поле используется для изменения значения, 
+	 * а не для навигации - при Истине будут повешаны обработчики на изменение окна
+	 * */ 
+	isEdit: true,
 	isModified: false,
 	updateLabel: function() {
 		this.setFieldLabel(this.fieldLabel);

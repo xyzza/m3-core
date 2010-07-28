@@ -48,6 +48,12 @@ class BaseExtWindow(ExtUIComponent):
         self.keys = []
         self.auto_load = None
         self.hidden = True
+        self.layout_config = {}
+        
+    def t_render_layout_config(self):
+        '''Рендерит конфиг, если указан layout'''
+        return '{%s}' % ','.join(['%s:"%s"' % (k, v) for k, v in 
+                                                    self.layout_config.items()])
         
     def render_base_config(self):
         super(BaseExtWindow, self).render_base_config()
@@ -70,6 +76,8 @@ class BaseExtWindow(ExtUIComponent):
         #self._put_config_value('parentWindowID', self.parent_window_id)
         self._put_config_value('keys', self.t_render_keys, self.keys)
         #self._put_config_value('autoLoad', self.auto_load) -- не используется
+        if self.layout_config:
+            self._put_config_value('layoutConfig', self.t_render_layout_config)
         
     def render_params(self):
         super(BaseExtWindow, self).render_params()

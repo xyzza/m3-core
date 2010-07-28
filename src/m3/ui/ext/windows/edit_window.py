@@ -6,33 +6,45 @@ Created on 02.03.2010
 '''
 
 from base import BaseExtWindow
+from m3.ui.ext.containers import ExtForm
 
 class ExtEditWindow(BaseExtWindow):
     def __init__(self, *args, **kwargs):
         super(ExtEditWindow, self).__init__(*args, **kwargs)
         self.__form = None
-        self.renderer.template = 'ext-script/ext-editwindowscript.js' 
+        self._ext_name = 'Ext.m3.EditWindow'
+        #self.renderer.template = 'ext-script/ext-editwindowscript.js' 
         self.init_component(*args, **kwargs)
-        
-    #=======================================================================
-    # Свойство класса form
-    #=======================================================================
+      
     @property
     def form(self):
         return self.__form
  
     @form.setter
     def form(self, value):
+        # self.items = [value,] -- Если с этим окном используется всегда форма, 
+        # то небходима вставить эту строку
         self.items.append(value)
         self.__form = value
-    #=======================================================================
-    
-    
+
+    def render_params(self):
+        super(ExtEditWindow, self).render_params()
+        if self.form:
+#            assert isinstance(self.form, ExtForm), \
+#                'Form "%s" is not form type' % self.form.__class__.__name__
+            if isinstance(self.form, ExtForm):
+                self._put_params_value('form', {'id':self.form.client_id,
+                                              'url':self.form.url})
+            
+            
+        if self.action_context:
+            self._put_config_value('contextJson', self.action_context.json)
+
     # Данный код должен находится в базовом классе, но т.к. не вcе шаблоны 
     # переведены на новый рендеринг, остается пока в каждом 
     def render(self):
-        assert getattr(self, '_ext_name'), 'Class %s is not define "_ext_name"' % \
-            (self.__class__.__name__,)
+        assert getattr(self, '_ext_name'), \
+            'Class %s is not define "_ext_name"' % (self.__class__.__name__,)
         
         self.pre_render()
         
