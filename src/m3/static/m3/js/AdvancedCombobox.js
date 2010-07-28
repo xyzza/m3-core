@@ -149,6 +149,9 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			/**
 			 * Генерируется сообщение после выбора значения. 
 			 * Здесь может быть валидация и прочие проверки
+			 * Параметры:
+			 * id - Значение 
+			 * text - Текстовое представление значения
 			 * Возвр. значения:
 			 * true - обработка продолжается
 			 * false - отмена обработки
@@ -157,6 +160,9 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		
 			/**
 			 * Генерируется сообщение после установки значения поля
+			 * По-умолчанию в комбобоксе change генерируется при потери фокуса
+			 * В данном контроле вызов change сделан после выбора значения и 
+			 * потеря фокуса контрола обрабатывается вручную
 			*/
 			'changed'
 		);
@@ -325,10 +331,11 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * кнопку очистки
 	 */
 	,clearValue: function(){
+		var oldValue = this.getValue();
 		Ext.m3.AdvancedComboBox.superclass.clearValue.call(this);
 		this.hideClearBtn();
 		
-		this.fireEvent('change', this, '');
+		this.fireEvent('change', this, '', oldValue);
 		this.fireEvent('changed', this);
 	}
 	/**
@@ -386,10 +393,11 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
     	record[this.displayField] = value;
 		this.getStore().loadData({total:1, rows:[record]});    
 		
+		var oldValue = this.getValue()
 		this.setValue(id);
 		this.collapse()
 		
-		this.fireEvent('change', this, id, '');
+		this.fireEvent('change', this, id, oldValue);
 		this.fireEvent('changed', this);
 	}
 	/**
