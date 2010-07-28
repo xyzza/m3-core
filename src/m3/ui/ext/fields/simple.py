@@ -32,7 +32,7 @@ class ExtStringField(BaseExtField):
             self._put_config_value('maskRe', self.t_render_mask_re)
 
     def t_render_mask_re(self):
-        return self.mask_re
+        return '/%s/' % self.mask_re
 
     def render(self):
         self.render_base_config()

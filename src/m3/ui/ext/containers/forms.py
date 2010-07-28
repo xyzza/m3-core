@@ -243,7 +243,7 @@ class ExtForm(BaseExtPanel):
                     val = try_to_int(val)
                     
             elif isinstance(item, ExtDictSelectField):
-                val = val = try_to_int(val, val) if val else None
+                val = try_to_int(val, val) if val else None
                 
             elif isinstance(item, ExtHiddenField):
                 if item.type == ExtHiddenField.INT:

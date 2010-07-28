@@ -3,7 +3,7 @@
  * @param {Object} baseConfig
  * @param {Object} params
  */
-Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
+Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	
 	// Будет ли задаваться вопрос перед очисткой значения
 	askBeforeDeleting: true
@@ -64,8 +64,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
 	,allTriggers: []
 	
 	,constructor: function(baseConfig, params){
-		//console.log(baseConfig);
-		//console.log(params);
+//		console.log(baseConfig);
+//		console.log(params);
 		
 		assert(params.actions, 'params.actions is undefined');
 		
@@ -384,7 +384,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.form.ComboBox,{
     	var record = new Ext.data.Record();
     	record['id'] = id;
     	record[this.displayField] = value;
-		this.getStore().loadData({total:1, rows:[record]});    	
+		this.getStore().loadData({total:1, rows:[record]});    
+		
 		this.setValue(id);
 		this.collapse()
 		
