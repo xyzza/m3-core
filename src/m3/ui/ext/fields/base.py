@@ -58,6 +58,7 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('readOnly', self.read_only)
         self._put_config_value('allowBlank', self.allow_blank)
         self._put_config_value('vtype', self.vtype)
+        self._put_config_value('emptyText', self.empty_text)
         self._put_config_value('minLenght', self.min_length)
         self._put_config_value('minLengthText', self.min_length_text)
         self._put_config_value('maxLength', self.max_length)
@@ -65,6 +66,7 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('regex', self.regex)
         self._put_config_value('regexText', self.regex_text)
         self._put_config_value('tabIndex', self.tab_index)
+        
 
     
 class BaseExtTriggerField(BaseExtField):
@@ -128,7 +130,8 @@ class BaseExtTriggerField(BaseExtField):
         self._listeners['select'] = function
     
     def pre_render(self):
-        self.__store.action_context = self.action_context
+        if self.get_store():
+            self.get_store().action_context = self.action_context
         super(BaseExtTriggerField, self).pre_render()
         
     def render_base_config(self):
@@ -144,7 +147,7 @@ class BaseExtTriggerField(BaseExtField):
         self._put_config_value('pageSize', self.page_size)
         self._put_config_value('maxHeight', self.max_heigth_dropdown_list)
         self._put_config_value('minChars', self.min_chars)
-        self._put_config_value('emptyText', self.empty_text)
+        
         self._put_config_value('mode', self.mode)
         if self.trigger_action_all:
             self._put_config_value('triggerAction', 'all')
@@ -153,6 +156,5 @@ class BaseExtTriggerField(BaseExtField):
         self._put_config_value('forceSelection', self.force_selection)
         self._put_config_value('valueNotFoundText', self.not_found_text)
         self._put_config_value('loadingText', u'Загрузка...')
-        self._put_config_value('emptyText', self.empty_text)
         self._put_config_value('store', self.t_render_store, self.get_store())
     

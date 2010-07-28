@@ -28,7 +28,11 @@ class ExtStringField(BaseExtField):
     def render_base_config(self):
         super(ExtStringField, self).render_base_config()
         self._put_config_value('inputType', self.input_type)
-        self._put_config_value('maskRe', self.mask_re)
+        if self.mask_re:
+            self._put_config_value('maskRe', self.t_render_mask_re)
+
+    def t_render_mask_re(self):
+        return self.mask_re
 
     def render(self):
         self.render_base_config()
@@ -136,8 +140,12 @@ class ExtComboBox(BaseExtTriggerField):
         self.init_component(*args, **kwargs)
         
     def render(self):
-        self.render_base_config()
-        
+        try:
+            self.render_base_config()
+            
+        except Exception as msg:
+            raise Exception(msg)
+       
         base_config = self._get_config_str()
         return 'new Ext.form.ComboBox({%s})' % base_config
         

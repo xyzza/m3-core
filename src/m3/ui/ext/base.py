@@ -167,14 +167,27 @@ class BaseExtComponent(object):
         Рендерит базовый конфиг
         '''
         self._put_config_value('id', self.client_id)
-        self._put_config_value('listeners', self.t_render_simple_listeners, 
-                               self._listeners)
+        if self._listeners:
+            self._put_config_value('listeners', 
+                                   self.t_render_simple_listeners )
     
     def render_params(self):
         '''
         Рендерит дополнительные параметры
         '''
         pass
+    
+    def __check_unicode(self, string):
+        '''
+        Проверка на не юникодную строку в которой есть русские символы
+        Если есть русские символы необходимо использовать юникод!
+        '''
+        try:
+            unicode(string)
+        except UnicodeDecodeError:
+            raise Exception('"%s" is not unicode' % string)
+        else:
+            return string
     
     def _put_base_value(self, src_list, extjs_name, item, condition=True, 
                          depth = 0):
@@ -186,17 +199,14 @@ class BaseExtComponent(object):
         res = None
         if item == None or not condition:
             return
-        elif callable(item): 
-            res = item()
+        elif callable(item):
+            res = self.__check_unicode( item() )
+            
         elif isinstance(item, basestring):
-            # Проверка на не юникодную строку в которой есть русские символы
-            # Если есть русские символы необходимо использовать юникод 
-            try:
-                unicode(item)
-            except UnicodeDecodeError:
-                raise Exception('"%s" is not unicode' % item)
-        
-            res = "'%s'" % item.replace("'", "\\'") # если в строке уже есть апостроф, то будет очень больно. поэтому replace 
+ 
+            # если в строке уже есть апостроф, то будет очень больно. 
+            # поэтому replace
+            res = "'%s'" % self.__check_unicode( item ).replace("'", "\\'")  
             
         elif isinstance(item, bool):
             res = str(item).lower()
@@ -219,7 +229,7 @@ class BaseExtComponent(object):
 
         else:
             # Эээээ... Выводится для себя
-            assert False, 'This is sparta!!! Madness!'
+            assert False, '"%s":"%s" not support' % (extjs_name, item)
         
         if res:
             conf_dict[extjs_name] = res
