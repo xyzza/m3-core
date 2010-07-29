@@ -46,10 +46,10 @@ class ExtGrid(BaseExtPanel):
         for level_list in self.banded_columns.values():       
             result.append('[%s]' % ','.join([ column.render() \
                                              for column in level_list ]))
-        return ','.join(result) 
+        return '[%s]' % ','.join(result) 
     
     def t_render_columns(self):
-        return '[%s]' % self.t_render_items()
+        return self.t_render_items()
     
     def t_render_store(self):
         assert self.__store, 'Store is not define'

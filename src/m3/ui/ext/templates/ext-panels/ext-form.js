@@ -19,7 +19,7 @@
     	{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
     	
      	,baseCls: 'x-plain'
-        ,items: [{{ component.t_render_items|safe }}]
+        ,items: {{ component.t_render_items|safe }}
     });
     {% if component.focused_field %}Ext.getCmp('{{ component.focused_field.client_id}}').focus(false, 1000);{% endif %}
     return form_panel;

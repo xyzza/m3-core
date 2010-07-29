@@ -8,7 +8,6 @@ Created on 25.02.2010
 from m3.ui.ext.base import ExtUIComponent
 from m3.helpers.datastructures import TypedList
 
-
 class BaseExtContainer(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtContainer, self).__init__(*args, **kwargs)
@@ -18,7 +17,7 @@ class BaseExtContainer(ExtUIComponent):
         
     def t_render_items(self):
         ''' Дефолтный рендеринг вложенных объектов'''
-        return ','.join([item.render() for item in self._items])
+        return '[%s]' % ','.join([item.render() for item in self._items])
         
     def find_by_name(self, name):
         '''Осуществляет поиск экземпляра во вложенных объектах по имени экземпляра'''

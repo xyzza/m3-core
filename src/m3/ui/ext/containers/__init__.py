@@ -15,7 +15,6 @@ from grids import (ExtGrid,
 from trees import ExtTree, ExtTreeNode
 from containers import (ExtContainer, 
                         ExtToolBar, 
-                        ExtToolbar, 
                         ExtButtonGroup, 
                         ExtPagingBar)
 from context_menu import ExtContextMenu, ExtContextMenuItem

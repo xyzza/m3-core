@@ -36,7 +36,7 @@ class ExtContextMenu(BaseExtContainer):
                 res.append(item.render(container=self.container))
             else:
                 res.append(item.render())
-        return ','.join(res)
+        return '[%s]' % ','.join(res)
     
     @property
     def items(self):

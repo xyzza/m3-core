@@ -12,18 +12,47 @@ from m3.ui.ext.controls import ExtButton
 class ExtContainer(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtContainer, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-container.js'
+        #self.template = 'ext-containers/ext-container.js'
+        self._ext_name = 'Ext.Container'
         self.init_component(*args, **kwargs)
     
     @property
     def items(self):
         return self._items
+    
+    def render_base_config(self):
+        super(ExtContainer, self).render_base_config()
+        if self._items:
+            self._put_config_value('items', self.t_render_items)
 
+    def render(self):
+        assert getattr(self, '_ext_name'), 'Class %s is not define "_ext_name"' % \
+            (self.__class__.__name__,)
+        
+        self.pre_render()
+        
+        try:
+            self.render_base_config()
+            self.render_params()
+        except UnicodeDecodeError:
+            raise Exception('Some attribute is not unicode')
+        except Exception as msg:
+            raise Exception(msg) 
+        
+        base_config = self._get_config_str()
+        params = self._get_params_str()
+        res =  '%(ext_name)s({%(base_config)s},{%(params)s})' \
+                            % {'ext_name': self._ext_name,
+                            'base_config': base_config,
+                            'params': params }
+                            
+        return 'new %s' % res if not self._is_function_render else res
     
 class ExtToolBar(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtToolBar, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-toolbar.js'
+        self._ext_name = 'Ext.Toolbar'
         self._items = []
         self.init_component(*args, **kwargs)
     
@@ -35,7 +64,7 @@ class ExtToolBar(BaseExtContainer):
                 res.append(item.render()) 
             else:
                 res.append(item)        
-        return ','.join(res)
+        return '[%s]' % ','.join(res)
         
     def add_fill(self):
         self.items.append(ExtStaticToolBarItem('"->"'))
@@ -56,6 +85,34 @@ class ExtToolBar(BaseExtContainer):
     def items(self):
         return self._items
     
+    def render_base_config(self):
+        super(ExtToolBar, self).render_base_config()
+        if self.items:
+            self._put_config_value('items', self.t_render_items)
+    
+    def render(self):
+        assert getattr(self, '_ext_name'), 'Class %s is not define "_ext_name"' % \
+            (self.__class__.__name__,)
+        
+        self.pre_render()
+        
+        try:
+            self.render_base_config()
+            self.render_params()
+        except UnicodeDecodeError:
+            raise Exception('Some attribute is not unicode')
+        except Exception as msg:
+            raise Exception(msg) 
+        
+        base_config = self._get_config_str()
+        params = self._get_params_str()
+        res =  '%(ext_name)s({%(base_config)s},{%(params)s})' \
+                            % {'ext_name': self._ext_name,
+                            'base_config': base_config,
+                            'params': params }
+        
+        return 'new %s' % res if not self._is_function_render else res
+    
 #===============================================================================
 # Преднастроенные элементы в тулбаре
 class ExtStaticToolBarItem(ExtUIComponent):
@@ -63,6 +120,7 @@ class ExtStaticToolBarItem(ExtUIComponent):
         super(ExtStaticToolBarItem, self).__init__(*args, **kwargs)
         self.static_value = static_value
         self.init_component(*args, **kwargs)
+        
     def render(self):
         return self.static_value
 
@@ -75,15 +133,6 @@ class ExtTextToolBarItem(ExtUIComponent):
         self.init_component(*args, **kwargs)
     def render(self):
         return "{xtype: 'tbtext', text: '%s'}" % self.text
-
-class ExtToolbar(ExtToolBar):
-    '''
-    Класс с ошибочным названием
-    @deprecated: использовать базовый класс
-    '''   
-    def __init__(self, *args, **kwargs):
-        super(ExtToolbar, self).__init__(*args, **kwargs)
-        self.init_component(*args, **kwargs)    
         
     
 class ExtPagingBar(BaseExtContainer):   
@@ -129,81 +178,9 @@ class ExtButtonGroup(BaseExtContainer):
         self.buttons.append(ExtButton(**kwargs))
     
     def t_render_buttons(self):
-        return self.t_render_items()
+        return '[%s]' % self.t_render_items()
    
     @property
     def buttons(self):
         return self._items
     
-    
-# Скорей всего Viewport не понадобится и будет удален!
-#class ExtViewport(BaseExtContainer):
-#    ''' Реализует работу Viewport компонента extjs'''
-#    class ViewportItems(BaseExtContainer):
-#        '''Реализует работу вложенных полей контрола viewport, такие как - west, north, center, etc.'''
-#        def __init__(self, *args, **kwargs):
-#            super(ExtViewport.ViewportItems, self).__init__(*args, **kwargs)
-#            self.__items = None
-#            self.xtype = None
-#            self.init_component(*args, **kwargs)
-#            
-#        @property
-#        def items(self):
-#            return self.__items
-#    
-#    
-#    def __init__(self, *args, **kwargs):
-#        super(ExtViewport, self).__init__(*args, **kwargs)
-#        self.template = 'ext-containers/ext-viewport.js'
-#        self.__items = dict(north=None, south=None, east=None, west=None, center=None)
-#        self.init_component(*args, **kwargs)
-#        
-#    def t_render_items(self):
-#        return ','.join([item.render() for item in self.__items.values()])
-#    
-#    def set_north(self, **kwargs):
-#        kwargs['region'] = 'north'
-#        self.__set_item('north', **kwargs)
-#    
-#    def set_south(self, **kwargs):
-#        kwargs['region'] = 'south'
-#        self.__set_item('south', **kwargs)
-#    
-#    def set_east(self, **kwargs):
-#        kwargs['region'] = 'east'
-#        self.__set_item('east', **kwargs)
-#    
-#    def set_west(self, **kwargs):
-#        kwargs['region'] = 'west'
-#        self.__set_item('west', **kwargs)
-#    
-#    def set_center(self, **kwargs):
-#        kwargs['region'] = 'center'
-#        self.__set_item('center', **kwargs)
-#    
-#    def __set_item(self, type, **kwargs):
-#        self.items[type] = ExtViewport.ViewportItems( **kwargs)
-#    
-#    @property
-#    def items(self):
-#        return self.__items
-#    
-#    @property
-#    def north(self):
-#        return self.__items.get('north')
-#    
-#    @property
-#    def south(self):
-#        return self.__items.get('south')
-#    
-#    @property
-#    def east(self):
-#        return self.__items.get('east')
-#    
-#    @property
-#    def west(self):
-#        return self.__items.get('west')
-#    
-#    @property
-#    def center(self):
-#        return self.__items.get('center')

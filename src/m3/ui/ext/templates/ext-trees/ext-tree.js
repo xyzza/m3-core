@@ -28,7 +28,7 @@ function(){
 	    ,containerScroll: true
 	    ,border: false
 		,split: true
-		,columns:[{{ component.t_render_columns|safe }}]
+		,columns:{{ component.t_render_columns|safe }}
 		,loader: {{ component.t_render_tree_loader|safe }}	
 		
 		,root: new Ext.tree.AsyncTreeNode({

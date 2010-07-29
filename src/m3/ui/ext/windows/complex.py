@@ -12,7 +12,7 @@ from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.containers import (ExtContextMenu,
                                 ExtPanel,
                                 ExtListView, 
-                                ExtToolbar, 
+                                ExtToolBar, 
                                 ExtTree,
                                 ExtGrid)
         
@@ -290,7 +290,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             grid = ExtGrid(region='center')
             grid.handler_rowcontextmenu = ExtContextMenu()
             grid.handler_contextmenu = ExtContextMenu()
-            grid.top_bar = ExtToolbar()
+            grid.top_bar = ExtToolBar()
             
             search_grid = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = grid)
             
@@ -314,7 +314,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             tree.handler_contextmenu = ExtContextMenu()
             tree.handler_containercontextmenu = ExtContextMenu()
             tree.handler_click = 'onClickNode'
-            tree.top_bar = ExtToolbar()
+            tree.top_bar = ExtToolBar()
             
             search_tree = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = tree)
             
