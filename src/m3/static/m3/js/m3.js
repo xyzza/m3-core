@@ -14,19 +14,6 @@ Ext.namespace('Ext.m3');
 var SOFTWARE_NAME = 'Платформа М3';
 
 /**
- * Интерпретирует js-строку в вызванном контексте.
- * @param {string} args Строка, которая будет передана параметровм в функцию eval
- * @return {Object} Отэваленый объект
- */
-function m3_eval(args){
-	var win = eval(args);
-	if (win!=undefined) {
-    	AppDesktop.getDesktop().createWindow(win);
-	};
-	return win;
-};
-
-/**
  *  Реализация стандартного assert
  * @param {Boolean} condition
  * @param {Str} errorMsg

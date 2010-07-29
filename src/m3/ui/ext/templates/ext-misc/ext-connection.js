@@ -8,7 +8,7 @@ new Ext.data.Connection().request({
 	,success: {{ component.function_success }}
 	{% else %}
 	,success: function(response, opts){
-	   m3_eval(response.responseText);
+	   smart_eval(response.responseText);
 	}
 	{% endif %}
 	{% if component.function_failure %}
