@@ -59,7 +59,8 @@ class ExtToolBar(BaseExtContainer):
     def t_render_items(self):
         res = []
         for item in self.items:
-            # Если объект нашей структуры классов, то пусть сам рендерится, если нет, отдаем так как есть.
+            # Если объект нашей структуры классов, то пусть сам рендерится, 
+            # если нет, отдаем так как есть.
             if isinstance(item, ExtUIComponent):
                 res.append(item.render()) 
             else:
@@ -138,10 +139,43 @@ class ExtTextToolBarItem(ExtUIComponent):
 class ExtPagingBar(BaseExtContainer):   
     def __init__(self, *args, **kwargs):
         super(ExtPagingBar, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-pagingbar.js'
+        #self.template = 'ext-containers/ext-pagingbar.js'
+        self._ext_name = 'Ext.PagingToolbar'
+        
         self.page_size = 25
+        self.display_message = u'Показано записей {0} - {1} из {2}'
+        self.empty_message = u'Нет записей'
         self.init_component(*args, **kwargs)
         
+    def render_base_config(self):
+        super(ExtPagingBar, self).render_base_config()
+        self._put_config_value('pageSize', self.page_size)
+        self._put_config_value('displayInfo', True)
+        self._put_config_value('displayMsg', self.display_message)
+        self._put_config_value('emptyMsg', self.empty_message)
+        
+    def render(self):
+        assert getattr(self, '_ext_name'), 'Class %s is not define "_ext_name"' % \
+            (self.__class__.__name__,)
+        
+        self.pre_render()
+        
+        try:
+            self.render_base_config()
+            self.render_params()
+        except UnicodeDecodeError:
+            raise Exception('Some attribute is not unicode')
+        except Exception as msg:
+            raise Exception(msg) 
+        
+        base_config = self._get_config_str()
+        params = self._get_params_str()
+        res =  '%(ext_name)s({%(base_config)s},{%(params)s})' \
+                            % {'ext_name': self._ext_name,
+                            'base_config': base_config,
+                            'params': params }
+        
+        return 'new %s' % res if not self._is_function_render else res
          
 class ExtToolbarMenu(ExtUIComponent):
     def __init__(self, *args, **kwargs):

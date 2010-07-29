@@ -1,3 +1,4 @@
+
 (function(){
     var form_panel = new Ext.FormPanel({
     	{% include 'base-ext-ui.js'%}
@@ -17,7 +18,6 @@
     	{% if component.top_bar %} ,tbar: {{ component.t_render_top_bar|safe }} {% endif %}
     	{% if component.buttom_bar %} ,bbar: {{ component.t_render_buttom_bar|safe }} {% endif %}
     	{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
-    	
      	,baseCls: 'x-plain'
         ,items: {{ component.t_render_items|safe }}
     });

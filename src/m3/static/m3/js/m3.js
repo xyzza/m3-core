@@ -3,6 +3,11 @@
  */
 Ext.QuickTips.init();
 
+/**
+ * Чтобы ie и прочие не правильные браузеры, где нет console не падали
+ */
+if (typeof console == "undefined") var console = { log: function() {} };
+
 Ext.namespace('Ext.m3');
 
 
