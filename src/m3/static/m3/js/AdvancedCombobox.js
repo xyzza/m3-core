@@ -64,8 +64,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	,allTriggers: []
 	
 	,constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
+		console.log(baseConfig);
+		console.log(params);
 		
 		assert(params.actions, 'params.actions is undefined');
 		
@@ -105,7 +105,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 */
 	,initComponent: function () {
 		Ext.m3.AdvancedComboBox.superclass.initComponent.call(this);
-	
+		
 		// см. TwinTriggerField
         this.triggerConfig = {
             tag:'span', cls:'x-form-twin-triggers', cn:[]};
@@ -318,12 +318,14 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Показывает кнопку очистки значения
 	 */
 	,showClearBtn: function(){
+		this.el.parent().setOverflow('hidden');
 		this.getTrigger(0).show();
 	}
 	/**
 	 * Скрывает кнопку очистки значения
 	 */
 	,hideClearBtn: function(){
+		this.el.parent().setOverflow('auto');
 		this.getTrigger(0).hide();
 	}
 	/**
