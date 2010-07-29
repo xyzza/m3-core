@@ -156,7 +156,7 @@ var ajax = Ext.Ajax;
 	 * @param {Object} opts
 	 */
 	function renderWindowTree(response, opts, parentNode){
-		var win = m3_eval(response.responseText);
+		var win = smart_eval(response.responseText);
 		if (win!=undefined){
 			win.on('refresh_store', function(event, target){
 				// Если задан родительский узел, то перезаполнянм его дочерние
