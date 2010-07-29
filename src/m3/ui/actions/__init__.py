@@ -584,7 +584,11 @@ class ActionController(object):
             # если контекст неправильный, то возвращаем 
             # фейльный результат операции
             return OperationResult(success = False, message = u'Не удалось выполнить операцию. Не задан обязательный<br>параметр: ' + e.reason)
-            
+        
+        # В request заносим информацию о паках и экшене, которые будут
+        # выполнены в процессе обработки запроса
+        request.target_packs = stack
+        request.target_action = action    
         
         # Все ПРЕ обработчики
         for pack in stack:

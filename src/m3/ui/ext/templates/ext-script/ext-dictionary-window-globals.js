@@ -8,7 +8,7 @@ var ajax = Ext.Ajax;
 	 * Стандартный рендеринг окна c добавлением обработчика. 
 	 */
 	function renderWindowGrid(response, opts){
-		var win = m3_eval(response.responseText);
+		var win = smart_eval(response.responseText);
 		if (win!=undefined){
 			
 			win.on('refresh_store',function(event, target){ // deprecated
