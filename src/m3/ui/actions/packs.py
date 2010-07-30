@@ -132,7 +132,13 @@ class DictSaveAction(Action):
     url = '/save$'
     def run(self, request, context):
         obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
-        return self.parent.save_row(obj)
+        result = self.parent.save_row(obj)
+        if isinstance(result, OperationResult) and result.success == True:
+            # узкое место. после того, как мы переделаем работу экшенов,
+            # имя параметра с идентификатором запси может уже называться не 
+            # id
+            context.id = obj.id
+        return result
     
 class ListDeleteRowAction(Action):
     url = '/delete_row$'
