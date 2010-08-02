@@ -98,7 +98,111 @@ class StreetRowsAction(Action):
                 places = KladrStreet.objects.filter(condition).select_related('parent').order_by('name')[0:50]
         result = {'rows': list(places), 'total': len(places)}
         return PreJsonResult(result)
-    
+
+def GetAddr(place, street = None, house = None, flat = None):
+    qs = KladrGeo.objects.filter(code=place)
+    if qs.count() > 0:
+        place = qs.get()
+    else:
+        return ''
+    qs = KladrStreet.objects.filter(code=street)
+    if qs.count() > 0:
+        street = qs.get()
+    else:
+        street = None
+    '''
+    типАдреса = 0 или 1
+    текИндекс = 0
+    адрес = ""
+    текУровень = 5
+    текЭлемент = кодУлицы
+    если типАдреса = 0
+        раделитель = ", "
+    иначе
+        раделитель = ","
+    пока текЭлемент >= 0
+        если типАдреса > 0 и текЭлемент = 0
+            выход
+        для всех территорий у которых код = текЭлемент
+            имя = территория.имя
+            родитель = территория.родитель
+            уровень = территория.уровень
+            индекс = территория.индекс
+            сокр = территория.сокр
+            если текИндекс = 0 и индекс <> 0, то текИндекс = индекс
+            если типАдреса = 0
+                адрес = сокр+" "+имя+раделитель+адрес
+            иначе
+                текЭлемент = родитель
+                пока текУровень > уровень
+                    текУровень = текУровень-1
+                    адрес = раделитель+адрес
+                адрес = сокр+" "+имя+раделитель+адрес
+                текУровень = текУровень-1
+        если текЭлемент = 0 и родитель = 0
+            выход
+        текЭлемент = родитель
+    если типАдреса = 0
+        если индекс > 0
+            адрес = индекс+раделитель+адрес
+    иначе
+        пока текУровень > 1
+            текУровень = текУровень-1
+            адрес = раделитель+адрес
+        адрес = регион+раделитель+адрес
+        если индекс > 0
+            адрес = раделитель+индекс+раделитель+адрес
+        иначе
+            адрес = раделитель+раделитель+адрес
+    '''
+    addr_type = 0
+    curr_index = ''
+    addr_text = ''
+    curr_level = 5
+    if street:
+        curr_item = street
+    else:
+        curr_item = place
+    if addr_type == 0:
+        delim = ', '
+    else:
+        delim = ','
+    while curr_item:
+        if addr_type != 0 and curr_item.parent == None:
+            break
+        if curr_index == '' and curr_item.zipcode:
+            curr_index = curr_item.zipcode
+        if addr_type == 0:
+            addr_text = curr_item.socr+" "+curr_item.name+delim+addr_text
+        else:
+            if curr_item == street:
+                lv = 4
+            else:
+                lv = curr_item.level
+            while curr_level > lv:
+                curr_level -= 1
+                addr_text = delim+addr_text
+            addr_text = curr_item.socr+" "+curr_item.namebind_pack+delim+addr_text
+            curr_level -= 1
+        curr_item = curr_item.parent
+    if addr_type == 0:
+        if curr_index != '':
+            addr_text = curr_index+delim+addr_text
+    else:
+        while curr_level > 1:
+            curr_level -= 1
+            addr_text = delim+addr_text
+        addr_text = u'регион'+delim+addr_text
+        if curr_index != '':
+            addr_text = curr_index+delim+addr_text
+        else:
+            addr_text = delim+delim+addr_text
+    if house:
+        addr_text = addr_text+u'д. '+house
+    if flat:
+        addr_text = addr_text+delim+u'кв. '+flat
+    return addr_text
+
 class KLADRGetAddrAction(Action):
     '''
     Расчет адреса по составляющим
@@ -107,104 +211,10 @@ class KLADRGetAddrAction(Action):
     
     def run(self, request, context):
         place = request.REQUEST.get('place')
-        if place:
-            place = KladrGeo.objects.filter(code=place)[0]
         street = request.REQUEST.get('street')
-        if street:
-            street = KladrStreet.objects.filter(code=street)[0]
         house = request.REQUEST.get('house')
         flat = request.REQUEST.get('flat')
         addr_cmp = request.REQUEST.get('addr_cmp')
-        '''
-        типАдреса = 0 или 1
-        текИндекс = 0
-        адрес = ""
-        текУровень = 5
-        текЭлемент = кодУлицы
-        если типАдреса = 0
-            раделитель = ", "
-        иначе
-            раделитель = ","
-        пока текЭлемент >= 0
-            если типАдреса > 0 и текЭлемент = 0
-                выход
-            для всех территорий у которых код = текЭлемент
-                имя = территория.имя
-                родитель = территория.родитель
-                уровень = территория.уровень
-                индекс = территория.индекс
-                сокр = территория.сокр
-                если текИндекс = 0 и индекс <> 0, то текИндекс = индекс
-                если типАдреса = 0
-                    адрес = сокр+" "+имя+раделитель+адрес
-                иначе
-                    текЭлемент = родитель
-                    пока текУровень > уровень
-                        текУровень = текУровень-1
-                        адрес = раделитель+адрес
-                    адрес = сокр+" "+имя+раделитель+адрес
-                    текУровень = текУровень-1
-            если текЭлемент = 0 и родитель = 0
-                выход
-            текЭлемент = родитель
-        если типАдреса = 0
-            если индекс > 0
-                адрес = индекс+раделитель+адрес
-        иначе
-            пока текУровень > 1
-                текУровень = текУровень-1
-                адрес = раделитель+адрес
-            адрес = регион+раделитель+адрес
-            если индекс > 0
-                адрес = раделитель+индекс+раделитель+адрес
-            иначе
-                адрес = раделитель+раделитель+адрес
-        '''
-        addr_type = 0
-        curr_index = ''
-        addr_text = ''
-        curr_level = 5
-        if street:
-            curr_item = street
-        else:
-            curr_item = place
-        if addr_type == 0:
-            delim = ', '
-        else:
-            delim = ','
-        while curr_item:
-            if addr_type != 0 and curr_item.parent == None:
-                break
-            if curr_index == '' and curr_item.zipcode:
-                curr_index = curr_item.zipcode
-            if addr_type == 0:
-                addr_text = curr_item.socr+" "+curr_item.name+delim+addr_text
-            else:
-                if curr_item == street:
-                    lv = 4
-                else:
-                    lv = curr_item.level
-                while curr_level > lv:
-                    curr_level -= 1
-                    addr_text = delim+addr_text
-                addr_text = curr_item.socr+" "+curr_item.namebind_pack+delim+addr_text
-                curr_level -= 1
-            curr_item = curr_item.parent
-        if addr_type == 0:
-            if curr_index != '':
-                addr_text = curr_index+delim+addr_text
-        else:
-            while curr_level > 1:
-                curr_level -= 1
-                addr_text = delim+addr_text
-            addr_text = u'регион'+delim+addr_text
-            if curr_index != '':
-                addr_text = curr_index+delim+addr_text
-            else:
-                addr_text = delim+delim+addr_text
-        if house:
-            addr_text = addr_text+u'д. '+house
-        if flat:
-            addr_text = addr_text+delim+u'кв. '+flat
+        addr_text = GetAddr(place, street, house, flat)
         result = u'(function(){ Ext.getCmp("'+addr_cmp+'").setValue("'+addr_text+'");})()'
         return OperationResult(success=True, code = result)
