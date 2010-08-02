@@ -64,8 +64,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	,allTriggers: []
 	
 	,constructor: function(baseConfig, params){
-		console.log(baseConfig);
-		console.log(params);
+		//console.log(baseConfig);
+		//console.log(params);
 		
 		assert(params.actions, 'params.actions is undefined');
 		
@@ -141,8 +141,11 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		this.addEvents(
 			/**
 			 * Генерируется сообщение при нажатии на кнопку вызыва запроса на сервер
-			 * true - обработка продолжается
-			 * false - отмена обработки
+			 * Параметры:
+			 *   this - Сам компонент
+			 * Возвр. значения:
+			 *   true - обработка продолжается
+			 *   false - отмена обработки
 			*/
 			'beforerequest',
 		
@@ -150,11 +153,12 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			 * Генерируется сообщение после выбора значения. 
 			 * Здесь может быть валидация и прочие проверки
 			 * Параметры:
-			 * id - Значение 
-			 * text - Текстовое представление значения
+			 *   this - Сам компонент
+			 *   id - Значение 
+			 *   text - Текстовое представление значения
 			 * Возвр. значения:
-			 * true - обработка продолжается
-			 * false - отмена обработки
+			 *   true - обработка продолжается
+			 *   false - отмена обработки
 			*/
 			'afterselect',
 		
@@ -163,6 +167,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			 * По-умолчанию в комбобоксе change генерируется при потери фокуса
 			 * В данном контроле вызов change сделан после выбора значения и 
 			 * потеря фокуса контрола обрабатывается вручную
+			 * Параметры:
+			 *   this - Сам компонент
 			*/
 			'changed'
 		);
