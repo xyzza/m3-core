@@ -32,9 +32,15 @@ class M3JSONEncoder(json.JSONEncoder):
                 except:
                     pass
             elif isinstance(dict[attribute], datetime.datetime):
-                cleaned_dict[attribute] = dict[attribute].strftime('%d.%m.%Y %H:%M:%S')
+                #cleaned_dict[attribute] = dict[attribute].strftime('%d.%m.%Y %H:%M:%S')
+                # для дат, до 1900 года метод выше не работает
+                time = dict[attribute]
+                cleaned_dict[attribute] = '%02d.%02d.%04d %02d:%02d:%02d' % (time.day,time.month,time.year,time.hour,time.minute,time.second)
             elif isinstance(dict[attribute], datetime.date):
-                cleaned_dict[attribute] = dict[attribute].strftime('%d.%m.%Y')
+                #cleaned_dict[attribute] = dict[attribute].strftime('%d.%m.%Y')
+                # для дат, до 1900 года метод выше не работает
+                day = dict[attribute]
+                cleaned_dict[attribute] = '%02d.%02d.%04d' % (day.day,day.month,day.year)
             elif isinstance(dict[attribute], datetime.time):
                 cleaned_dict[attribute] = dict[attribute].strftime('%H:%M')
             elif isinstance(dict[attribute], decimal.Decimal):
