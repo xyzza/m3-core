@@ -16,7 +16,7 @@ class M3JSONEncoder(json.JSONEncoder):
             # Во всех экземплярах моделей Django есть атрибут "objects", т.к. он является статик-атрибутом модели.
             # Но заботливые разработчики джанги позаботились о нас и выкидывают спицифичную ошибку 
             # "Manager isn't accessible via %s instances" при обращении из экземпляра. Поэтому "objects" нужно игнорировать.
-            if not attr.startswith('_') and attr!='objects':
+            if not attr.startswith('_') and attr!='objects' and attr!='tree':
                 try:
                     if hasattr(getattr(obj, attr), 'json_encode'):
                         if getattr(obj, attr).json_encode:
