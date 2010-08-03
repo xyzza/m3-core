@@ -9,24 +9,36 @@ import string
 class M3JSONEncoder(json.JSONEncoder):
     def default(self, obj):
         cleaned_dict = {}
+        # Прошерстим методы и свойства, найдем те, которые могут передаваться на клиента
+        # Клонирование словаря происходит потому, что сериализуемые методы переопределяются результатами своей работы
         dict = copy.copy(obj.__dict__)
-        # прошерстим методы и свойства, найдем те, которые могут передаваться на клиента
         for attr in dir(obj):
-            if not attr.startswith('_'):
+            # Во всех экземплярах моделей Django есть атрибут "objects", т.к. он является статик-атрибутом модели.
+            # Но заботливые разработчики джанги позаботились о нас и выкидывают спицифичную ошибку 
+            # "Manager isn't accessible via %s instances" при обращении из экземпляра. Поэтому "objects" нужно игнорировать.
+            if not attr.startswith('_') and attr!='objects':
                 try:
                     if hasattr(getattr(obj, attr), 'json_encode'):
                         if getattr(obj, attr).json_encode:
                             dict[attr] = getattr(obj, attr)()
-                except:
-                    pass
+                except Exception, exc:
+                    # Вторая проблема с моделями в том, что dir кроме фактических полей возвращает ассессоры.
+                    # При попытке обратиться к ним происходит запрос(!) и может возникнуть ошибка DoesNotExist
+                    # Заботливые разработчики Django сделали её разной для всех моделей ;)
+                    if exc.__class__.__name__.find('DoesNotExist') == -1:
+                        raise
+                    
         for attribute in dict.keys():
-            if len(attribute) > 3 and attribute[len(attribute)-3:len(attribute)] == '_id':
+            # Для полей типа myfield_id автоматически создается атрибут ссылающияся на наименование,
+            # например для myfield_id будет myfield_ref_name, конечно если у модели myfield есть name.
+            # Зачем это нужно - х.з.
+            if len(attribute) > 3 and attribute.endswith('_id'):
                 try:
                     field_name = attribute[0:len(attribute)-3]
                     cleaned_dict[field_name + '_ref_name'] = getattr(getattr(obj, field_name), 'name')
                 except:
                     pass
-            if len(attribute) > 6 and attribute[len(attribute)-6:len(attribute)] == '_cache':
+            if len(attribute) > 6 and attribute.endswith('_cache'):
                 try:
                     cleaned_dict[attribute[1:len(attribute)-6] + '_ref_name'] = dict['name']
                 except:
