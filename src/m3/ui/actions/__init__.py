@@ -408,24 +408,14 @@ class Action(object):
     @classmethod
     def absolute_url(cls):
         '''
-        Возвращает полный путь до действия
+        Возвращает полный путь до действия.
+        НО при условии что этот экшен используется ТОЛЬКО В ОДНОМ ПАКЕ И КОНТРОЛЛЕРЕ, иначе валим всех!
+        Ищет перебором!
         '''
-#        строки ниже не убирать! это кусок будущего тела метода
-#        if not cls.controller:
-#            ControllerCache.rebuild_patterns_in_controllers()
-#            if not cls.controller:
-#                raise Exception(u'Судя по всему, действие ' + str(cls) + ' не включено ни в один контроллер (не удалось получить absolute_url)')
-#        
-#        return cls.controller.url + self.get_packs_url() + cls.url
-            
-        if ActionController._urltable.has_key(cls):
-            url = ActionController._urltable[cls]
-            ignored_chars = ['^', '&', '$']
-            for char in ignored_chars:
-                url = url.replace(char, '')
-            return url
-        return ''
-    
+        url = ControllerCache.get_action_url(cls)
+        if not url:
+            raise Exception('Action not registered in any controller/pack')
+        return url
   
     def get_packs_url(self):
         '''
@@ -442,6 +432,7 @@ class Action(object):
     def get_absolute_url(self):
         '''
         Возвращает полный путь от хоста до конечного экшена
+        @deprecated: Дублирует absolute_url 
         '''
         assert isinstance(self.controller, ActionController)
         # Очищаем от мусора рег. выр.
@@ -449,7 +440,8 @@ class Action(object):
         for char in ignored_chars:
             url = self.url.replace(char, '')
         return self.controller.url + self.get_packs_url() + url
-    
+
+
 class ActionPack(object):
     '''
     Базовый класс управления набором схожих по смыслу действий
@@ -484,24 +476,37 @@ class ActionController(object):
     их на исполнение соответствущим Action'ам
     '''
     
-    #===============================================================================
-    # Внутренняя таблица урлов
-    #===============================================================================
-    _urltable = {}
+    class FakePacks:
+        pass
     
     def __init__(self, url = ''):
-        self.packs = MutableList()
-        self._patterns = MultiValueDict()
-        self.url = url
-        self._rebuild_lock = threading.RLock()
-        # Словари для быстрого поиска паков
-        self._find_by_name = {}
-        self._find_by_type = {}
+        '''
+        url - используется для отсечения лишней части пути в запросе, поскольку
+              управление в пак передается из вьюшки
+        '''
+        # ДЛЯ СОВМЕСТИМОСТИ.
+        # Имитирует список паков торчащий наружу
+        self.packs = self.FakePacks()
+        self.packs.append = self.append_pack
+        self.packs.extend = self.extend_packs
         
-        # --------------------------------------------------------------
-        # внутренние параметры, которые контролируют работу контроллера в системе
-        self._controller_id = str(uuid.uuid4())[-12:] # уникальный внутренний по системе идентификатор контроллера
-        self._registered = False # признак того, что контроллер зарегистрирован во внутреннем кеше
+        # Используется для отсечения лишней части пути в запросе
+        self.url = url
+        
+        # Словарь для быстрого разрешения запросов. Состоит из полного пути запроса, списка 
+        # вызываемых паков и экшена. Пример: {'/dict/lpu/get_rows': ([DictPack, LPUPack], RowsAction)}
+        self._url_patterns = {}
+        
+        # Словари для быстрого поиска паков по имени и классу, например: {'DictPack', <DictPack instance at 0x01FBACB0>}
+        self._packs_by_name = {}
+        self._packs_by_type = {}
+        self._actions_by_type = {}
+        
+        # Блокировка для перестроения паттернов урлов
+        self._rebuild_lock = threading.RLock()
+        
+        # Признак того, что контроллер зарегистрирован во внутреннем кеше
+        self._registered = False
     
     def _load_class(self, full_path):
         '''
@@ -529,8 +534,8 @@ class ActionController(object):
         
         if isinstance(clazz, ActionPack):
             # Для быстрого поиска
-            self._find_by_name[clazz.__class__.__name__] = clazz
-            self._find_by_type[clazz.__class__] = clazz
+            self._packs_by_name[clazz.__class__.__name__] = clazz
+            self._packs_by_type[clazz.__class__] = clazz
             
             stack.append(clazz)
             # Бежим по экшенам
@@ -541,32 +546,19 @@ class ActionController(object):
                 self._build_pack_node(pack, stack)
             stack.pop()
         else:
+            # Для быстрого поиска
+            self._actions_by_type[clazz.__class__] = clazz
+            
             clazz.controller = self
-            # Полный путь всех паков
-            packs_path = self.url + ''.join([x.url for x in stack])
-            regex = re.compile(clazz.url, re.UNICODE)
-            # Запись паттерна состоит из:
-            # компилированного выражения пути, стека паков и экшена
-            self._patterns.appendlist(packs_path, (regex, stack[:], clazz) )
-            # добавляем полный урл до экшена
-            self.__class__._urltable[clazz.__class__] = packs_path + clazz.url 
-    
+            # Полный путь всех паков и экшена
+            full_path = self.url + ''.join([x.url for x in stack]) + clazz.url
+            # Нормализация урла. В старых версиях может оказаться мусор регулярных выражений
+            for char in ['^', '&', '$']:
+                full_path = full_path.replace(char, '')
+            self._url_patterns[full_path] = (stack[:], clazz)
+
     def rebuild_patterns(self):
-        '''
-        Перестраивает внутренний список URL паттернов
-        '''
-        self._rebuild_lock.acquire()
-        try:
-            if self.packs.changed:
-                self._patterns.clear()
-                self._find_by_name.clear()
-                self._find_by_type.clear()
-                stack = []
-                for pack in self.packs:
-                    self._build_pack_node(pack, stack)
-                self.packs.changed = False
-        finally:
-            self._rebuild_lock.release()
+        print 'WARNING: Deprecated method "rebuild_patterns" called'
     
     def _invoke(self, request, action, stack):
         '''
@@ -584,12 +576,7 @@ class ActionController(object):
             # если контекст неправильный, то возвращаем 
             # фейльный результат операции
             return OperationResult(success = False, message = u'Не удалось выполнить операцию. Не задан обязательный<br>параметр: ' + e.reason)
-        
-        # В request заносим информацию о паках и экшене, которые будут
-        # выполнены в процессе обработки запроса
-        request.target_packs = stack
-        request.target_action = action    
-        
+
         # Все ПРЕ обработчики
         for pack in stack:
             result = pack.pre_run(request, context)
@@ -618,43 +605,16 @@ class ActionController(object):
         Обработка входящего запроса от клиента. Обрабатывается по аналогии с UrlResolver'ом Django
         '''
         ControllerCache.populate()
-        self.rebuild_patterns()
-          
-        # Делим URL на часть пака и часть экшена
+
         path = request.path
-        dot = path.rfind('/', 0, -1)
-        if dot == 0:
-            # URL короткий и состоит только из экшена
-            pack_url = '/' 
-            regex_url = path
-        else:
-            pack_url = path[:dot]
-            regex_url = path[dot:]
-        
-        # Поиск подходящего под запрос экшена
-        pack = self._patterns.getlist(pack_url)
-        if len(pack) == 0:
-            raise http.Http404()
-        
-        # Поиск подходящего экшена внутри пака
-        for regex, stack, action in pack:
-            match = regex.search(regex_url)
-            if not match:
-                continue
-            
-            # Извлечение параметров из выражения (если есть)
-            #kwargs = match.groupdict()
-            #if kwargs:
-            #    args = ()
-            #else:
-            #    args = match.groups()
-            
-            # Непосредственный вызов экшена с отработкой всех событий
+        matched = self._url_patterns.get(path)
+        if matched:
+            stack, action = matched
             result = self._invoke(request, action, stack)
             if isinstance(result, ActionResult):
                 return result.get_http_response()
             return result
-        
+
         raise http.Http404()
     
     def build_context(self, request):
@@ -663,50 +623,150 @@ class ActionController(object):
         '''
         return ActionContext()
     
+    def get_action_url(self, action):
+        '''
+        Возвращает полный URL адрес для класс экшена 
+        '''
+        assert issubclass(action, Action)
+        for path, value in self._url_patterns.items():
+            act = value[1]
+            if isinstance(act, action):
+                return path
+    
+    #========================================================================================
+    # Методы, предназначенные для поиска экшенов и паков в контроллере
+    #========================================================================================
     def find_pack(self, type):
         '''
         Ищет экшенпак внутри иерархии котроллера. Возвращает его экземпляр или None если не находит.
         type может быть классом или строкой с названием класса
         '''
+        # Нужно ли оно тут?
         ControllerCache.populate()
-        self.rebuild_patterns()
-        
+
         if isinstance(type, str):
-            return self._find_by_name.get(type)
+            return self._packs_by_name.get(type)
         elif issubclass(type, ActionPack):
-            return self._find_by_type.get(type)
+            return self._packs_by_type.get(type)
         else:
             raise ValueError('Wrong type of argument %s' % type)
 
-    #=======================================================================
-    # Методы, предназначенные для добавления пакетов действий в контроллер
-    #=======================================================================
+    #========================================================================================
+    # Методы, предназначенные для добавления/изменения/удаления пакетов действий в контроллер
+    #========================================================================================
     def append_pack(self, pack):
         '''
         Добавляет ActionPack в контроллер.
-        
         @param pack: объект типа ActionPack, который необходимо добавить в контроллер
         '''
-        if not pack:
-            return
-        assert isinstance(pack, ActionPack)
+        self._build_pack_node(pack, [])
         ControllerCache.register_controller(self)
-        self.packs.append(pack)
-        self._registered = True
-        
         
     def extend_packs(self, packs):
         '''
         Производит массовое добавление экшенпаков в контроллер.
-        
         @param packs: список объектов типа ActionPack, которые необходимо зарегистрировать в контроллере
         '''
-        if not packs:
-            return
-        ControllerCache.register_controller(self)
-        self.packs.extend(packs)
-        self._registered = True
+        for pack in packs:
+            self.append_pack(pack)
+        
+    def remove_pack(self, type):
+        '''
+        Удаляет экшенпак из иерархии контроллера. Возвращает истину в случае успеха.
+        @param type: Класс экшенпака для удаления.
+        '''
+        raise NotImplementedError()
+        assert issubclass(type, ActionPack)
+        
+        # Получаем экземпляр пака, иначе его не можут быть в нашем контроллере
+        pack = self._packs_by_type.get(type)
+        if pack:
+            # Удаляем все паттерны урлов в стеке которых есть наш пак
+            for path, value in self._url_patterns.items():
+                stack = value[0]
+                if pack in stack:
+                    del self._url_patterns[path]
+            
+            # Удаляем из словарей поиска
+            del self._packs_by_type[type]
+            del self._packs_by_name[type.__name__]
+            for action in pack.actions:
+                del self._actions_by_type[action.__class__]
+        
+            return True    
+
+    def wrap_pack(self, dest_pack, wrap_pack):
+        '''
+        Вставляет экшенпак wrap_pack внутрь иерархии перед dest_pack.
+        Таким образом можно перехватывать запросы и ответы пака dest_pack.
+        
+        Допустим есть цепочка паков:
+           A1 - X - A2 - A3    |   A1 - Y - X - A2 - A3
+           B1 - B2 - X         |   B1 - B2 - Y - X
+           X - C1 - C2         |   Y - X - C1 - C2
+        Для решения нужно:
+        1. Найти экземпляры пака X
+        2. В цепочку вместо X вставить Y->X c учетом левых и правых участников
+        3. Перестроить адреса пробежавшись по цепочке
+        
+        @param dest_pack: Пак который будем оборачивать
+        @param wrap_pack: Оборачивающий пак
+        '''
+        assert issubclass(dest_pack, ActionPack) and issubclass(wrap_pack, ActionPack)
+        
+        wrapper = wrap_pack()
+        wrapper.subpacks = []
+        new_patterns = {}
+        
+        for url, value in self._url_patterns.iteritems():
+            packs_list, final_action = value
+            
+            # Поиск пака и соседей в списке
+            left_pack = right_pack = None
+            for pos, pack in enumerate(packs_list):
+                if pack.__class__ == dest_pack:
+                    if pos > 0:
+                        left_pack = packs_list[pos - 1]
+                    if pos + 1 < len(packs_list):
+                        right_pack = packs_list[pos + 1]
+                    break
+            else:
+                # Просто копируем
+                new_patterns[url] = value
+                continue
+            
+            # Мутация соседей
+            packs_list.insert(pos, wrapper)
+            if left_pack:
+                wrapper.parent = left_pack
+            if right_pack:
+                right_pack.parent = wrapper
+                
+            # Создание нового урла
+            full_path = self.url + ''.join([x.url for x in packs_list]) + final_action.url
+            # Нормализация урла. В старых версиях может оказаться мусор регулярных выражений
+            for char in ['^', '&', '$']:
+                full_path = full_path.replace(char, '')
+            new_patterns[full_path] = (packs_list[:], final_action)
+            
+        self._url_patterns = new_patterns
     
+    def wrap_action(self, dest_pack, dest_action, wrap_pack):
+        '''
+        Нужно для задания https://dev.bars-open.ru/bg/issues/show/14939
+        '''
+        raise NotImplementedError()
+    
+    def dump_urls(self):
+        '''
+        Отладочный метод. Выводит список всех адрес зарегистрированных в контроллере.
+        '''
+        print '==== CONTROLLER WITH URL: %s ======' % self.url
+        for key in sorted(self._url_patterns.keys()):
+            print key
+        print
+        
+
 class ControllerCache(object):
     '''
     Внутренний класс платформы, который отвечает за хранение кеша контроллеров и связанных
@@ -716,33 +776,43 @@ class ControllerCache(object):
     _write_lock = threading.RLock()
     
     # словарь зарегистрированных контроллеров в прикладном приложении
-    _controllers = {}
-    _actions = {}
+    _controllers = set()
+    
+    @classmethod
+    def find_action(cls, type):
+        ''' Ищет экшен по всем зарегистрированным контроллерам '''
+        assert issubclass(type, Action)
+        url = None
+        count = 0
+        for cont in cls._controllers:
+            url = cont.get_action_url(type)
+            if url:
+                count += 1
+                if count > 1:
+                    raise Exception('Many')
+        return url
+    
+    @classmethod
+    def get_action_url(cls, type):
+        ''' Возвращает URL экшена по его классу '''
+        assert issubclass(type, Action)
+        for cont in cls._controllers:
+            url = cont.get_action_url(type)
+            if url:
+                return url
     
     @classmethod
     def register_controller(cls, controller):
         '''
         Выполняет регистрацию контроллера во внутреннем кеше.
         '''
+        assert isinstance(controller, ActionController)
         cls._write_lock.acquire()
         try:
-            if not cls._controllers.has_key(controller._controller_id):
-                cls._controllers[controller._controller_id] = controller
+            cls._controllers.add(controller)
         finally:
             cls._write_lock.acquire()
-            
-    @classmethod
-    def rebuild_patterns_in_controllers(cls):
-        '''
-        Выполняет метод rebuild_patterns внутри зарегистрированных контроллеров
-        '''
-        cls._write_lock.acquire()
-        try:
-            for controller in cls._controllers.values():
-                controller.rebuild_patterns()
-        finally:
-            cls._write_lock.acquire()
-    
+
     @classmethod
     def populate(cls):
         if cls._loaded:
@@ -766,6 +836,12 @@ class ControllerCache(object):
         finally:
             cls._write_lock.release()
         return True
-    
-#TODO: Прикрутить передачу параметров
-#TODO: Что-то сделать с контекстом
+
+    @classmethod
+    def dump_urls(cls):
+        '''
+        Отладочный метод. Выводит адреса всех контроллеров зарегистрированных в кэше.
+        '''
+        print '------------ CONTROLLER CACHE DUMP ------------'
+        for cont in cls._controllers:
+            cont.dump_urls()
