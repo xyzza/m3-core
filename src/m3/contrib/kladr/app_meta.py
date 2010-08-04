@@ -7,7 +7,7 @@ from actions import kladr_controller, KLADRPack
 
 def register_actions():
     kladr_controller.packs.append(KLADRPack)
-    kladr_controller.rebuild_patterns()
+    #kladr_controller.rebuild_patterns()
 
 def register_urlpatterns():
     '''
