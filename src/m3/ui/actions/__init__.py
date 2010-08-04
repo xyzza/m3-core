@@ -577,6 +577,11 @@ class ActionController(object):
             # фейльный результат операции
             return OperationResult(success = False, message = u'Не удалось выполнить операцию. Не задан обязательный<br>параметр: ' + e.reason)
 
+        # В request заносим информацию о паках и экшене, которые будут
+        # выполнены в процессе обработки запроса
+        request.target_packs = stack
+        request.target_action = action
+
         # Все ПРЕ обработчики
         for pack in stack:
             result = pack.pre_run(request, context)
@@ -777,21 +782,7 @@ class ControllerCache(object):
     
     # словарь зарегистрированных контроллеров в прикладном приложении
     _controllers = set()
-    
-    @classmethod
-    def find_action(cls, type):
-        ''' Ищет экшен по всем зарегистрированным контроллерам '''
-        assert issubclass(type, Action)
-        url = None
-        count = 0
-        for cont in cls._controllers:
-            url = cont.get_action_url(type)
-            if url:
-                count += 1
-                if count > 1:
-                    raise Exception('Many')
-        return url
-    
+        
     @classmethod
     def get_action_url(cls, type):
         ''' Возвращает URL экшена по его классу '''

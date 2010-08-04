@@ -166,7 +166,7 @@ class BaseDictionaryActions(ActionPack):
     secret_json = False
     secret_form = False
     # Ширина и высота окна
-    width = 500
+    width = 510
     height = 400
     
     list_paging = True
