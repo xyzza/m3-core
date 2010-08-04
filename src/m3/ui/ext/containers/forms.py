@@ -119,10 +119,13 @@ class ExtForm(BaseExtPanel):
                 item.checked = True if value else False
             elif isinstance(item, ExtDictSelectField):
                 # У поля выбора может быть взязанный с ним пак
-                if hasattr(item, 'bind_pack'):
+                # TODO после окончательного удаления метода configure_by_dictpack в ExtDictSelectField
+                # нужно удалить проверку на 'bind_pack'
+                bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
+                if bind_pack:
                     # Нельзя импортировать, будет циклический импорт
                     #assert isinstance(item.bind_pack, BaseDictionaryActions)
-                    row = item.bind_pack.get_row(value)
+                    row = bind_pack.get_row(value)
                     # Может случиться что в источнике данных bind_pack 
                     # не окажется записи с ключом id
                     # Потому что источник имеет заведомо неизвестное происхождение
@@ -162,8 +165,7 @@ class ExtForm(BaseExtPanel):
     #TODO необходимо добавить проверку на возникновение exception'ов
     def to_object(self, object, exclusion = []):
         '''
-        Метод выполнения прямого связывания данных атрибутов объекта object и 
-        полей текущей формы
+        Метод выполнения обратного связывания данных.
         '''
 
         def set_field(obj, names, value):
