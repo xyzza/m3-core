@@ -614,6 +614,7 @@ class ActionController(object):
                 return result.get_http_response()
             return result
 
+        #self.dump_urls()
         raise http.Http404()
     
     def build_context(self, request):
@@ -700,7 +701,10 @@ class ActionController(object):
         Раньше были планы использовать регулярные выражения в адресах, сейчас остался мусор от них.
         '''
         for char in ['^', '&', '$', '/']:
-            url = url.replace(char, '')
+            if url.startswith(char):
+                url = url[1:]
+            if url.endswith(char):
+                url = url[:-1]
         return '/' + url if url else ''
 
     def _build_full_path(self, packs_list, final_action):
