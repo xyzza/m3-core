@@ -767,14 +767,15 @@ class ActionController(object):
             # Создание нового урла
             full_path = self._build_full_path(packs_list, final_action)
             new_patterns[full_path] = (packs_list[:], final_action)
+            current_packs_slice = packs_list[:pos + 1]
             
         self._url_patterns = new_patterns
         
         # У враппера могут быть собственные экшены и паки. Их тоже нужно построить.
         for subpack in wrapper.subpacks:
-            self._build_pack_node(subpack, packs_list[:pos + 1])
+            self._build_pack_node(subpack, current_packs_slice)
         for action in wrapper.actions:
-            self._build_pack_node(action, packs_list[:pos + 1])
+            self._build_pack_node(action, current_packs_slice)
         
     
     def wrap_action(self, dest_pack, dest_action, wrap_pack):
