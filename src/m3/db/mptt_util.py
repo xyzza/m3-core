@@ -1,7 +1,7 @@
 #coding:utf-8
 
 from django.db.models import signals as model_signals
-from mptt import signals as mptt_signals
+from mptt import signals as mptt_signals   
 
 def disable_mptt_signals(model):
     '''
