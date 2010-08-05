@@ -434,6 +434,7 @@ class Action(object):
         Возвращает полный путь от хоста до конечного экшена
         @deprecated: Дублирует absolute_url 
         '''
+        #TODO: Переписать, т.к. этот код дублирует функции контроллера
         assert isinstance(self.controller, ActionController)
         # Очищаем от мусора рег. выр.
         ignored_chars = ['^', '&', '$']
@@ -550,15 +551,8 @@ class ActionController(object):
             self._actions_by_type[clazz.__class__] = clazz
             
             clazz.controller = self
-            # Полный путь всех паков и экшена
-            full_path = self.url + ''.join([x.url for x in stack]) + clazz.url
-            # Нормализация урла. В старых версиях может оказаться мусор регулярных выражений
-            for char in ['^', '&', '$']:
-                full_path = full_path.replace(char, '')
+            full_path = self._build_full_path(stack, clazz)
             self._url_patterns[full_path] = (stack[:], clazz)
-
-    def rebuild_patterns(self):
-        print 'WARNING: Deprecated method "rebuild_patterns" called'
     
     def _invoke(self, request, action, stack):
         '''
@@ -700,6 +694,21 @@ class ActionController(object):
         
             return True    
 
+    def _norm_url(self, url):
+        '''
+        Очищает части адреса от мусора.
+        Раньше были планы использовать регулярные выражения в адресах, сейчас остался мусор от них.
+        '''
+        for char in ['^', '&', '$', '/']:
+            url = url.replace(char, '')
+        return '/' + url if url else ''
+
+    def _build_full_path(self, packs_list, final_action):
+        '''
+        Возвращает полный адрес от контроллера через паки до конечного экшена. 
+        '''
+        return self._norm_url(self.url) + ''.join([self._norm_url(x.url) for x in packs_list]) + self._norm_url(final_action.url)
+
     def wrap_pack(self, dest_pack, wrap_pack):
         '''
         Вставляет экшенпак wrap_pack внутрь иерархии перед dest_pack.
@@ -720,7 +729,6 @@ class ActionController(object):
         assert issubclass(dest_pack, ActionPack) and issubclass(wrap_pack, ActionPack)
         
         wrapper = wrap_pack()
-        wrapper.subpacks = []
         new_patterns = {}
         
         for url, value in self._url_patterns.iteritems():
@@ -741,20 +749,29 @@ class ActionController(object):
                 continue
             
             # Мутация соседей
+            pack.parent = wrapper
             packs_list.insert(pos, wrapper)
             if left_pack:
                 wrapper.parent = left_pack
             if right_pack:
                 right_pack.parent = wrapper
                 
+            # Добавляем в словари быстрого поиска
+            self._packs_by_name[wrap_pack.__name__] = wrapper
+            self._packs_by_type[wrap_pack] = wrapper
+                
             # Создание нового урла
-            full_path = self.url + ''.join([x.url for x in packs_list]) + final_action.url
-            # Нормализация урла. В старых версиях может оказаться мусор регулярных выражений
-            for char in ['^', '&', '$']:
-                full_path = full_path.replace(char, '')
+            full_path = self._build_full_path(packs_list, final_action)
             new_patterns[full_path] = (packs_list[:], final_action)
             
         self._url_patterns = new_patterns
+        
+        # У враппера могут быть собственные экшены и паки. Их тоже нужно построить.
+        for subpack in wrapper.subpacks:
+            self._build_pack_node(subpack, packs_list[:pos + 1])
+        for action in wrapper.actions:
+            self._build_pack_node(action, packs_list[:pos + 1])
+        
     
     def wrap_action(self, dest_pack, dest_action, wrap_pack):
         '''
