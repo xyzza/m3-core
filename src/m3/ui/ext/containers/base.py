@@ -21,11 +21,11 @@ class BaseExtContainer(ExtUIComponent):
         
     def find_by_name(self, name):
         '''Осуществляет поиск экземпляра во вложенных объектах по имени экземпляра'''
-        for item in self._items:   
+        for item in self.items:   
             if hasattr(item, 'name') and name == getattr(item, 'name'):
                 return item
                 
-            if hasattr(item, '_items'):
+            if hasattr(item, 'items'):
                 res = item.find_by_name(name)
                 if res:
                     return res
