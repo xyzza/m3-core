@@ -1,6 +1,7 @@
 #coding: utf-8
 
-from datetime import datetime, calendar
+from datetime import datetime
+from calendar import calendar
 
 from django.db import models
 from django.db.models.query_utils import Q
