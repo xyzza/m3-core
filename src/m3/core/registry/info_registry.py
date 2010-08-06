@@ -1,6 +1,6 @@
 #coding: utf-8
 
-import datetime
+from datetime import datetime, calendar
 
 from django.db import models
 from django.db.models.query_utils import Q
@@ -22,32 +22,32 @@ def normdate(period, date, begin = True):
     if not date:
         return None        
     if period == PERIOD_SECOND:
-        return datetime.datetime(date.year, date.month, date.day, date.hour, date.minute, date.second)
+        return datetime(date.year, date.month, date.day, date.hour, date.minute, date.second)
     if period == PERIOD_MINUTE:
-        return datetime.datetime(date.year, date.month, date.day, date.hour, date.minute, 0 if begin else 59)
+        return datetime(date.year, date.month, date.day, date.hour, date.minute, 0 if begin else 59)
     if period == PERIOD_HOUR:
-        return datetime.datetime(date.year, date.month, date.day, date.hour, 0 if begin else 59, 0 if begin else 59)
+        return datetime(date.year, date.month, date.day, date.hour, 0 if begin else 59, 0 if begin else 59)
     if period == PERIOD_DAY:
-        return datetime.datetime(date.year, date.month, date.day, 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
+        return datetime(date.year, date.month, date.day, 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
     if period == PERIOD_MONTH:
-        return datetime.datetime(date.year, date.month, 1 if begin else datetime.calendar.monthrange(date.year, date.month)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
+        return datetime(date.year, date.month, 1 if begin else calendar.monthrange(date.year, date.month)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
     if period == PERIOD_QUARTER:
         if date.month < 4:
-            return datetime.datetime(date.year, 1 if begin else 3, 1 if begin else datetime.calendar.monthrange(date.year, 1 if begin else 3)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
+            return datetime(date.year, 1 if begin else 3, 1 if begin else calendar.monthrange(date.year, 1 if begin else 3)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
         if date.month < 7:
-            return datetime.datetime(date.year, 4 if begin else 6, 1 if begin else datetime.calendar.monthrange(date.year, 4 if begin else 6)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
+            return datetime(date.year, 4 if begin else 6, 1 if begin else calendar.monthrange(date.year, 4 if begin else 6)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
         if date.month < 10:
-            return datetime.datetime(date.year, 7 if begin else 9, 1 if begin else datetime.calendar.monthrange(date.year, 7 if begin else 9)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
-        return datetime.datetime(date.year, 10 if begin else 12, 1 if begin else datetime.calendar.monthrange(date.year, 10 if begin else 12)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
+            return datetime(date.year, 7 if begin else 9, 1 if begin else calendar.monthrange(date.year, 7 if begin else 9)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
+        return datetime(date.year, 10 if begin else 12, 1 if begin else calendar.monthrange(date.year, 10 if begin else 12)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
     if period == PERIOD_YEAR:
-        return datetime.datetime(date.year, 1 if begin else 12, 1 if begin else datetime.calendar.monthrange(date.year, 1 if begin else 12)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
+        return datetime(date.year, 1 if begin else 12, 1 if begin else calendar.monthrange(date.year, 1 if begin else 12)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
     return date
 
 class BaseInfoModel(models.Model):
 
-    info_date_prev  = models.DateTimeField(db_index = True)
-    info_date_next = models.DateTimeField(db_index = True)
-    info_date = models.DateTimeField(db_index = True)
+    info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
+    info_date_next = models.DateTimeField(db_index = True, default = datetime.max)
+    info_date = models.DateTimeField(db_index = True, default = datetime.min)
     
     dimentions = [] # перечень реквизитов-измерений
     period = PERIOD_DAY # тип периодичности
@@ -82,7 +82,7 @@ class BaseInfoModel(models.Model):
     
     # сформируем запрос данных на дату
     @classmethod
-    def query_on_date(cls, data, date = None, next = False):
+    def query_on_date(cls, data, date = datetime.now(), next = False):
         '''
         запрос записей на дату
         @data - объект или словарь с ключевыми данными
@@ -91,8 +91,6 @@ class BaseInfoModel(models.Model):
         '''
         query = cls.query_dimentions(data)
         if cls.period != PERIOD_INFTY:
-            if not date:
-                date = datetime.datitime.now()
             q_date = normdate(cls.period,date)
             if next:
                 query = query.filter(info_date_prev__lt = q_date, info_date__gte = q_date)
@@ -134,11 +132,11 @@ class BaseInfoModel(models.Model):
         if new_prev_rec:
             self.info_date_prev = new_prev_rec.info_date
         else:
-            self.info_date_prev = normdate(self.period, datetime.date.min)
+            self.info_date_prev = normdate(self.period, datetime.min)
         if new_next_rec:
             self.info_date_next = new_next_rec.info_date
         else:
-            self.info_date_next = normdate(self.period, datetime.date.max)
+            self.info_date_next = normdate(self.period, datetime.max)
         # сохраним запись
         self._save(*args, **kwargs)
         # изменим найденные ранее записи
@@ -185,10 +183,10 @@ class BaseInfoModel(models.Model):
 
 class BaseIntervalInfoModel(models.Model):
 
-    info_date_prev  = models.DateTimeField(db_index = True)
-    info_date_next = models.DateTimeField(db_index = True)
-    info_date_begin = models.DateTimeField(db_index = True)
-    info_date_end = models.DateTimeField(db_index = True)
+    info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
+    info_date_next = models.DateTimeField(db_index = True, default = datetime.max)
+    info_date_begin = models.DateTimeField(db_index = True, default = datetime.min)
+    info_date_end = models.DateTimeField(db_index = True, default = datetime.max)
     
     dimentions = [] # перечень реквизитов-измерений
     period = PERIOD_DAY # тип периодичности
@@ -223,7 +221,7 @@ class BaseIntervalInfoModel(models.Model):
     
     # сформируем запрос на интервал дат
     @classmethod 
-    def query_interval(cls, data, date_begin, date_end, include_begin = True, include_end = True):
+    def query_interval(cls, data, date_begin = datetime.min, date_end = datetime.max, include_begin = True, include_end = True):
         '''
         Выборка записей, попадающий в указанный интервал дат.
         @data - объект или словарь с ключевыми данными
@@ -234,10 +232,8 @@ class BaseIntervalInfoModel(models.Model):
         '''
         query = cls.query_dimentions(data)
         if cls.period != PERIOD_INFTY:
-            if not date_begin:
-                date_begin = normdate(cls.period, datetime.date.min, True)
-            if not date_end:
-                date_end = normdate(cls.period, datetime.date.max, False)
+            date_begin = normdate(cls.period, datetime.min, True)
+            date_end = normdate(cls.period, datetime.max, False)
             filter = Q(info_date_begin__gte = date_begin) & Q(info_date_end__lte = date_end) # попадание в интервал полностью
             if include_begin:
                 filter = filter | (Q(info_date_begin__lte = date_begin) & Q(info_date_end__gt = date_begin)) # попадание начала интервала в границы записи
@@ -248,7 +244,7 @@ class BaseIntervalInfoModel(models.Model):
     
     # сформируем запрос данных на дату
     @classmethod
-    def query_on_date(cls, data, date = None, active = True, next = False):
+    def query_on_date(cls, data, date = datetime.now(), active = True, next = False):
         '''
         запрос записей на дату
         @data - объект или словарь с ключевыми данными
@@ -258,8 +254,6 @@ class BaseIntervalInfoModel(models.Model):
         '''
         query = cls.query_dimentions(data)
         if cls.period != PERIOD_INFTY:
-            if not date:
-                date = datetime.datitime.now()
             q_date_begin = normdate(cls.period, date, True)
             q_date_end = normdate(cls.period, date, False)
             if next:
@@ -310,11 +304,11 @@ class BaseIntervalInfoModel(models.Model):
         if new_prev_rec:
             self.info_date_prev = new_prev_rec.info_date_end
         else:
-            self.info_date_prev = normdate(self.period, datetime.date.min, False)
+            self.info_date_prev = normdate(self.period, datetime.min, False)
         if new_next_rec:
             self.info_date_next = new_next_rec.info_date_begin
         else:
-            self.info_date_next = normdate(self.period, datetime.date.max, True)
+            self.info_date_next = normdate(self.period, datetime.max, True)
         # сохраним запись
         self._save(*args, **kwargs)
         # изменим найденные ранее записи
