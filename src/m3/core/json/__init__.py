@@ -6,6 +6,8 @@ import json
 import decimal
 import string
 
+from django.db import models as dj_models
+
 class M3JSONEncoder(json.JSONEncoder):
     def default(self, obj):
         cleaned_dict = {}
@@ -13,10 +15,19 @@ class M3JSONEncoder(json.JSONEncoder):
         # Клонирование словаря происходит потому, что сериализуемые методы переопределяются результатами своей работы
         dict = copy.copy(obj.__dict__)
         for attr in dir(obj):
+            # Для джанговских моделей функция dir дополнительно возвращает "ссылки" на 
+            # связанные модели. Их не нужно сериализовать, а также при обращении к ним 
+            # происходят запросы к БД. Причем на практике есть случаи, когда эти запросы 
+            # вызвают эксепешны(например, если изменен id'шник объекта)
+            related_objs_attrs = []
+            if isinstance(obj, dj_models.Model):
+                related_objs = obj._meta.get_all_related_objects()
+                related_objs_attrs = [ro.var_name for ro in related_objs]
             # Во всех экземплярах моделей Django есть атрибут "objects", т.к. он является статик-атрибутом модели.
             # Но заботливые разработчики джанги позаботились о нас и выкидывают спицифичную ошибку 
             # "Manager isn't accessible via %s instances" при обращении из экземпляра. Поэтому "objects" нужно игнорировать.
-            if not attr.startswith('_') and attr!='objects' and attr!='tree':
+            if (not attr.startswith('_') and attr!='objects' and attr!='tree' 
+                and attr not in related_objs_attrs):
                 try:
                     if hasattr(getattr(obj, attr), 'json_encode'):
                         if getattr(obj, attr).json_encode:
