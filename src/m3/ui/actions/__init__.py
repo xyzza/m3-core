@@ -471,6 +471,12 @@ class ActionPack(object):
         '''
         pass
     
+class WrapException(Exception):
+    '''
+    Исключение возникает при неуданой обертке экшена или пака
+    '''
+    pass
+
 class ActionController(object):
     '''
     Класс коонтроллер - обеспечивает обработку пользовательских запросов путем передачи
@@ -508,6 +514,14 @@ class ActionController(object):
         
         # Признак того, что контроллер зарегистрирован во внутреннем кеше
         self._registered = False
+        
+    def _add_pack_to_search_dicts(self, pack):
+        '''
+        Добавляет экшен в словари для быстрого доступа
+        '''
+        assert isinstance(pack, ActionPack)
+        self._packs_by_name[pack.__class__.__name__] = pack
+        self._packs_by_type[pack.__class__] = pack
     
     def _load_class(self, full_path):
         '''
@@ -535,8 +549,7 @@ class ActionController(object):
         
         if isinstance(clazz, ActionPack):
             # Для быстрого поиска
-            self._packs_by_name[clazz.__class__.__name__] = clazz
-            self._packs_by_type[clazz.__class__] = clazz
+            self._add_pack_to_search_dicts(clazz)
             
             stack.append(clazz)
             # Бежим по экшенам
@@ -733,7 +746,9 @@ class ActionController(object):
         assert issubclass(dest_pack, ActionPack) and issubclass(wrap_pack, ActionPack)
         
         wrapper = wrap_pack()
+        self._add_pack_to_search_dicts(wrapper)
         new_patterns = {}
+        current_packs_slice = None
         
         for url, value in self._url_patterns.iteritems():
             packs_list, final_action = value
@@ -760,10 +775,6 @@ class ActionController(object):
             if right_pack:
                 right_pack.parent = wrapper
                 
-            # Добавляем в словари быстрого поиска
-            self._packs_by_name[wrap_pack.__name__] = wrapper
-            self._packs_by_type[wrap_pack] = wrapper
-                
             # Создание нового урла
             full_path = self._build_full_path(packs_list, final_action)
             new_patterns[full_path] = (packs_list[:], final_action)
@@ -772,17 +783,67 @@ class ActionController(object):
         self._url_patterns = new_patterns
         
         # У враппера могут быть собственные экшены и паки. Их тоже нужно построить.
-        for subpack in wrapper.subpacks:
-            self._build_pack_node(subpack, current_packs_slice)
-        for action in wrapper.actions:
-            self._build_pack_node(action, current_packs_slice)
+        if current_packs_slice:
+            for subpack in wrapper.subpacks:
+                self._build_pack_node(subpack, current_packs_slice)
+            for action in wrapper.actions:
+                self._build_pack_node(action, current_packs_slice)
+        else:
+            raise WrapException('ActionPack %s not found in controller' % dest_pack)
         
     
     def wrap_action(self, dest_pack, dest_action, wrap_pack):
         '''
-        Нужно для задания https://dev.bars-open.ru/bg/issues/show/14939
+        Вставляет перед экшеном dest_action входящим в пак dest_pack промежуточный пак wrap_pack.
+        
+        ВНИМАНИЕ! Экшены как правило обращаются к своим пакам через атрибут "parent", поэтому вероятно 
+        будут возникать ошибки из-за того, что оборачивающий пак не предоставляет методы изначального пака.
+        Оборачивающий пак можно наследовать от оригинального, но тогда вместо оборачивая целесообразно
+        использовать подмену паков.        
+        
+        @param dest_pack: Пак в который входит оборачиваемый экшен
+        @param dest_action: Оборачиваемый экшен
+        @param wrap_pack: Оборачивающий пак
         '''
-        raise NotImplementedError()
+        assert issubclass(dest_pack, ActionPack) and issubclass(wrap_pack, ActionPack)
+        assert issubclass(dest_action, Action)
+        
+        wrapper = wrap_pack()
+        self._add_pack_to_search_dicts(wrapper)
+        new_patterns = {}
+        current_packs_slice = None
+        
+        for url, value in self._url_patterns.iteritems():
+            packs_list, final_action = value
+            
+            # Поиск исходного пака и экшена в нём
+            last_pack = packs_list[-1]
+            if last_pack.__class__ == dest_pack and final_action.__class__ == dest_action:
+                # Вставка
+                packs_list.append(wrapper)
+                wrapper.parent = last_pack
+                final_action.parent = wrapper
+                
+                # Создание нового урла
+                full_path = self._build_full_path(packs_list, final_action)
+                new_patterns[full_path] = (packs_list[:], final_action)
+                current_packs_slice = packs_list
+                
+            else:
+                # Просто копируем
+                new_patterns[url] = value
+            
+        self._url_patterns = new_patterns
+            
+        if current_packs_slice:
+            # У враппера могут быть собственные экшены и паки. Их тоже нужно построить.
+            for subpack in wrapper.subpacks:
+                self._build_pack_node(subpack, current_packs_slice)
+            for action in wrapper.actions:
+                self._build_pack_node(action, current_packs_slice)
+        else:
+            raise WrapException('ActionPack %s not found in controller' % dest_pack)
+            
     
     def dump_urls(self):
         '''
