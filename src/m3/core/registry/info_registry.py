@@ -48,7 +48,7 @@ class BaseInfoModel(models.Model):
 
     info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
     info_date_next = models.DateTimeField(db_index = True, default = datetime.max)
-    info_date = models.DateTimeField(db_index = True, default = datetime.min)
+    info_date = models.DateTimeField(db_index = True, blank = True)
     
     dimentions = [] # перечень реквизитов-измерений
     period = PERIOD_DAY # тип периодичности
@@ -186,8 +186,8 @@ class BaseIntervalInfoModel(models.Model):
 
     info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
     info_date_next = models.DateTimeField(db_index = True, default = datetime.max)
-    info_date_begin = models.DateTimeField(db_index = True, default = datetime.min)
-    info_date_end = models.DateTimeField(db_index = True, default = datetime.max)
+    info_date_begin = models.DateTimeField(db_index = True, blank = True)
+    info_date_end = models.DateTimeField(db_index = True, blank = True)
     
     dimentions = [] # перечень реквизитов-измерений
     period = PERIOD_DAY # тип периодичности
