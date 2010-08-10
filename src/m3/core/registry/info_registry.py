@@ -331,7 +331,7 @@ class BaseIntervalInfoModel(models.Model):
 
     # прямое удаление, без обработки
     def _delete(self, *args, **kwargs):
-        super(BaseInfoModel, self).delete(*args, **kwargs)
+        super(BaseIntervalInfoModel, self).delete(*args, **kwargs)
 
     # переопределим удаление объекта, чтобы изменять соседние записи
     def delete(self, *args, **kwargs):
