@@ -250,7 +250,8 @@ function uiShowErrorMessage(response){
 	obj = Ext.util.JSON.decode(response.responseText);
 	if (obj.error_msg)
 		Ext.Msg.alert(SOFTWARE_NAME, obj.error_msg);
-	if (obj.code)
-		alert('Пришел код на выполнение ' + obj.code);
+// Не понятно зачем нужен этот код.
+//	if (obj.code)
+//		alert('Пришел код на выполнение ' + obj.code);
 	return obj.success;
 }
