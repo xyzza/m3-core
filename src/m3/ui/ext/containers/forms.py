@@ -29,6 +29,7 @@ class ExtForm(BaseExtPanel):
         self.layout = 'form'
         self.padding = None
         self.url = None
+        self.file_upload = False
         
         self.request = None
         self.object = None
