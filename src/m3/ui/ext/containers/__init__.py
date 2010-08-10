@@ -1,6 +1,6 @@
 #coding:utf-8
 
-from forms import ExtForm, ExtPanel, ExtTabPanel
+from forms import ExtForm, ExtPanel, ExtTabPanel, ExtFieldSet
 from container_complex import ExtContainerTable
 from grids import (ExtGrid, 
                    ExtGridColumn, 

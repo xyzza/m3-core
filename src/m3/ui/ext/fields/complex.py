@@ -11,6 +11,7 @@ from m3.ui.ext.misc import ExtJsonStore
 from m3.ui.ext.fields.base import BaseExtTriggerField
 from m3.ui.ext.base import BaseExtComponent
 from m3.helpers.datastructures import TypedList
+from m3.ui.actions import ControllerCache
 
 class ExtDictSelectField(BaseExtTriggerField):
     '''
@@ -126,12 +127,17 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.__value = val
         
     # deprecated
-    def configure_by_dictpack(self, pack, controller):
+    def configure_by_dictpack(self, pack, controller=None):
         '''
         Метод настройки поля выбора из справочника на основе 
-        переданного ActionPack работы со справочниками
-        '''   
-        registered_pack = controller.find_pack(pack)
+        переданного ActionPack работы со справочниками.
+        @param pack: Имя класса или класс пака.
+        @controller: Контроллер в котором будет искаться пак. Если не задан, то ищем во всех.
+        '''
+        if controller:
+            registered_pack = controller.find_pack(pack)
+        else:
+            registered_pack = ControllerCache.find_pack(pack)
         if not registered_pack:
             raise Exception('Pack %s not found in controller %s' % (controller, pack))
         self.url = registered_pack.get_select_url()

@@ -876,6 +876,18 @@ class ControllerCache(object):
                 return url
     
     @classmethod
+    def find_pack(cls, pack):
+        """
+        Ищет заданный pack по имени или классу во всех зарегистрированных контроллерах.
+        Возвращает экземпляр первого найденного пака.
+        @param pack: Имя или класс пака.
+        """
+        for cont in list(cls._controllers):
+            p = cont.find_pack(pack)
+            if p:
+                return p
+    
+    @classmethod
     def register_controller(cls, controller):
         '''
         Выполняет регистрацию контроллера во внутреннем кеше.
