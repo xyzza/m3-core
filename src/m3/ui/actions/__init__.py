@@ -699,7 +699,7 @@ class ActionController(object):
                 stack = value[0]
                 if pack in stack:
                     del self._url_patterns[path]
-            
+
             # Удаляем из словарей поиска
             del self._packs_by_type[type]
             del self._packs_by_name[type.__name__]
