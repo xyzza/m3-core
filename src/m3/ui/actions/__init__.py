@@ -931,3 +931,7 @@ class ControllerCache(object):
         print '------------ CONTROLLER CACHE DUMP ------------'
         for cont in cls._controllers:
             cont.dump_urls()
+
+    @classmethod
+    def require_update(cls):
+        cls._loaded = False
