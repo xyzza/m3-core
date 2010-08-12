@@ -50,6 +50,11 @@ class RelationQueryManager(WorkflowQueryManager):
         relation = self.models.wf(state = state)
         relation.start_date = date
         relation.attributes = attr
+        if hasattr(self.workflow.Meta, 'attributes_model') and not relation.attributes:
+            # в случае если в Meta связи объявлена модель атрибутов, а 
+            # при создании связи она не передана, то необходимо создать
+            # пустую модель для хранения "пустых" значений атрибутов
+            relation.attributes = self.workflow.Meta.attributes_model()
         relation.save()
         state.workflow = relation
         state.save()
@@ -78,8 +83,71 @@ class RelationQueryManager(WorkflowQueryManager):
         workflow.id = relation.id
         workflow.record = relation
         return workflow
-    
+
     def filter(self, objects, **kwargs):
+        '''
+        Возвращает запрос к экземплярам связей.
+        
+        @param objects: Словарь со значениями бизнес-ключей, по которым необходимо наложить разрез
+        @param kwargs: Словарь дополнительных свойств операции формирования фильтра
+             * opened_only: отбирать только открытые связи
+             * closed_only: отбирать только закрытые связи
+             * date: дата, на которую отбираются связи
+             * start_date: дата начала интервала действия
+             * end_date: дата окончания интервала действия связи
+        
+        Особенности передачи параметров:
+        * opened_only имеет приоритет над closed_only. 
+        * date имеет приоритет над start_date и end_date. Т.е. заданный параметр date эквивалентен вызову с start_date = date и end_date = date
+        
+        
+        Пример 1. Отобрать все связи, в которые вступил объект obj1:
+            MyRelation.objects.filter({'obj_name': obj1})
+        
+        Пример 2. Отобрать все открытые связи, в которые вступил объект obj1:
+            MyRelation.objects.filter({'obj_name': obj1}, opened_only = True)
+        
+        Пример 3. Отобрать все связи, которые действовали в момент времени date1 для объекта obj1:
+            MyRelation.objects.filter({'obj_name': obj1}, date = date1)
+        
+        Пример 4 (not implemented). Отобрать все связи, которые действовали в момент времени date1 для объекта obj1 и продолжают действовать в текущем состоянии системы:
+            MyRelation.objects.filter({'obj_name': obj1}, date = date1, opened_only = True)
+        
+        Пример 5 (not implemented). Отобрать все связи, которые действовали с момента времени date1:
+            MyRelation.objects.filter({'obj_name': obj1}, start_date = date1) 
+        
+        Пример 6 (not implemented). Отобрать все связи, которые действовали до момента времени date2:
+            MyRelation.objects.filter({'obj_name': obj1}, end_date = date2)
+            
+        Пример 7 (not implemented). Отобрать все связи, которые действовали в интервале времени [date1, date2]
+            MyRelation.objects.filter({'obj_name': obj1}, start_date = date1, end_date = date2)
+        '''
+        
+        # считываем параметры запроса
+        select_opened = kwargs.pop('opened_only', None)
+        select_closed = kwargs.pop('closed_only', None)
+        date = kwargs.pop('date', None)
+                
+        query = self.models.wf.objects
+        # фильтр по бизнес-ключам
+        for object_name, value in objects:
+            if value:
+                query = query.filter({'wso__' + object_name: value})
+        
+        # фильтр по мягким датам
+        if date != None:
+            query = query.filter({'wf__start_date__lge': date})
+            query = query.filter(models.Q({'state__step': 'opened'}) | models.Q({'wf__end_date__gte': date}))
+        
+        # фильтр по состояниям
+        if select_opened != None and select_opened:
+            query = query.filter({'state__step': 'opened'})
+        elif select_closed != None and select_closed:
+            query = query.filter({'state__step': 'closed'})
+        
+        return query
+    
+    def filter_old(self, objects, **kwargs):
         '''
         Выполняет запрос к связям по бизнес ключу заданному объектами рабочего набора objects
         В качестве аргументов kwargs могут идти следующие ключи:
