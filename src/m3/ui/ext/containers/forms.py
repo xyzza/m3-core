@@ -363,6 +363,8 @@ class ExtTabPanel(BaseExtPanel):
     
     
 class ExtFieldSet(ExtPanel):
+    checkboxToggle = False
+    collapsible = False
     def __init__(self, *args, **kwargs):
         super(ExtFieldSet, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-fieldset.js'
