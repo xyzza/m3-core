@@ -19,3 +19,4 @@ id: '{{ component.client_id }}'
 {% if component.label_pad  %} ,labelPad: {{ component.label_pad }} {% endif %}
 // Атрибуты vbox/hbox layout
 {% if component.flex %} ,flex: {{ component.flex }} {% endif %}
+{% if component.cls %} ,cls: '{{ component.cls }}' {% endif %}
