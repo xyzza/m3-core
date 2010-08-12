@@ -120,15 +120,19 @@ class BaseInfoModel(models.Model):
                 raise Exception(u'Info with this keys already exists!')
         # если объект уже хранится, то найдем записи для изменения
         if self.pk:
-            old_prev_rec = self.__class__.query_dimentions(self).filter(info_date = self.info_date_prev)
-            old_next_rec = self.__class__.query_dimentions(self).filter(info_date = self.info_date_next)
+            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_prev)
+            old_prev_rec = q.get() if len(q) == 1 else None
+            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_next)
+            old_next_rec = q.get() if len(q) == 1 else None
         else:
             old_prev_rec = None
             old_next_rec = None
         # вычислим ближайщую запись, которая начинается "левее" текущей
-        new_prev_rec = self.__class__.query_dimentions(self).filter(info_date__lt = self.info_date, info_date_next__gte = self.info_date)
+        q = self.__class__.query_dimentions(self).filter(info_date__lt = self.info_date, info_date_next__gte = self.info_date)
+        new_prev_rec = q.get() if len(q) == 1 else None
         # вычислим ближайшую запись, которая начинается "правее" текущей
-        new_next_rec = self.__class__.query_dimentions(self).filter(info_date__gt = self.info_date, info_date_prev__lte = self.info_date)
+        q = self.__class__.query_dimentions(self).filter(info_date__gt = self.info_date, info_date_prev__lte = self.info_date)
+        new_next_rec = q.get() if len(q) == 1 else None
         # изменим даты исходя из соседей
         if new_prev_rec:
             self.info_date_prev = new_prev_rec.info_date
@@ -144,18 +148,18 @@ class BaseInfoModel(models.Model):
         #TODO: тут можно оптимизировать сохранение, чтобы небыло каскада сохранений
         if old_prev_rec:
             if old_prev_rec != new_prev_rec:
-                old_prev_rec.save(*args, **kwargs)
+                old_prev_rec.save()
         if old_next_rec:
             if old_next_rec != new_next_rec:
-                old_next_rec.save(*args, **kwargs)
+                old_next_rec.save()
         if new_prev_rec:
             if new_prev_rec.info_date_next != self.info_date:
                 new_prev_rec.info_date_next = self.info_date
-                new_prev_rec._save(*args, **kwargs)
+                new_prev_rec._save()
         if new_next_rec:
             if new_next_rec.info_date_prev != self.info_date:
                 new_next_rec.info_date_prev = self.info_date
-                new_next_rec._save(*args, **kwargs)
+                new_next_rec._save()
 
     # прямое удаление, без обработки
     def _delete(self, *args, **kwargs):
@@ -233,8 +237,8 @@ class BaseIntervalInfoModel(models.Model):
         '''
         query = cls.query_dimentions(data)
         if cls.period != PERIOD_INFTY:
-            date_begin = normdate(cls.period, datetime.min, True)
-            date_end = normdate(cls.period, datetime.max, False)
+            date_begin = normdate(cls.period, date_begin, True)
+            date_end = normdate(cls.period, date_end, False)
             filter = Q(info_date_begin__gte = date_begin) & Q(info_date_end__lte = date_end) # попадание в интервал полностью
             if include_begin:
                 filter = filter | (Q(info_date_begin__lte = date_begin) & Q(info_date_end__gt = date_begin)) # попадание начала интервала в границы записи
@@ -294,13 +298,17 @@ class BaseIntervalInfoModel(models.Model):
         old_prev_rec = None
         old_next_rec = None
         if self.pk:
-            old_prev_rec = self.__class__.query_dimentions(self).filter(info_date_end = self.info_date_prev)
-            old_next_rec = self.__class__.query_dimentions(self).filter(info_date_begin = self.info_date_next)
+            q = self.__class__.query_dimentions(self).filter(info_date_end = self.info_date_prev)
+            old_prev_rec = q.get() if len(q) == 1 else None
+            q = self.__class__.query_dimentions(self).filter(info_date_begin = self.info_date_next)
+            old_next_rec = q.get() if len(q) == 1 else None
 
         # вычислим ближайщую запись, которая заканчивается "левее" текущей
-        new_prev_rec = self.__class__.query_dimentions(self).filter(info_date_end__lte = self.info_date_begin, info_date_next__gte = self.info_date_begin)
+        q = self.__class__.query_dimentions(self).filter(info_date_end__lte = self.info_date_begin, info_date_next__gte = self.info_date_begin)
+        new_prev_rec = q.get() if len(q) == 1 else None
         # вычислим ближайшую запись, которая начинается "правее" текущей
-        new_next_rec = self.__class__.query_dimentions(self).filter(info_date_begin__gte = self.info_date_end, info_date_prev__lte = self.info_date_end)
+        q = self.__class__.query_dimentions(self).filter(info_date_begin__gte = self.info_date_end, info_date_prev__lte = self.info_date_end)
+        new_next_rec = q.get() if len(q) == 1 else None
         # изменим даты исходя из соседей
         if new_prev_rec:
             self.info_date_prev = new_prev_rec.info_date_end
@@ -316,18 +324,18 @@ class BaseIntervalInfoModel(models.Model):
         #TODO: тут можно оптимизировать сохранение, чтобы небыло каскада сохранений
         if old_prev_rec:
             if old_prev_rec != new_prev_rec:
-                old_prev_rec.save(*args, **kwargs)
+                old_prev_rec.save()
         if old_next_rec:
             if old_next_rec != new_next_rec:
-                old_next_rec.save(*args, **kwargs)
+                old_next_rec.save()
         if new_prev_rec:
             if new_prev_rec.info_date_next != self.info_date_begin:
                 new_prev_rec.info_date_next = self.info_date_begin
-                new_prev_rec._save(*args, **kwargs)
+                new_prev_rec._save()
         if new_next_rec:
             if new_next_rec.info_date_prev != self.info_date_end:
                 new_next_rec.info_date_prev = self.info_date_end
-                new_next_rec._save(*args, **kwargs)
+                new_next_rec._save()
 
     # прямое удаление, без обработки
     def _delete(self, *args, **kwargs):
