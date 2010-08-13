@@ -77,7 +77,7 @@ class BaseInfoModel(models.Model):
             if isinstance(dim_field, models.Field):
                 dim_attr = dim_field.name
             if isinstance(data, BaseInfoModel):
-                dim_val = getattr(data, dim_field.name, None)
+                dim_val = getattr(data, dim_attr, None)
             elif isinstance(data, dict):
                 if data.has_key(dim_attr):
                     dim_val = data[dim_attr]
@@ -175,8 +175,10 @@ class BaseInfoModel(models.Model):
     def delete(self, *args, **kwargs):
         # если объект уже хранится, то найдем записи для изменения
         if self.pk:
-            old_prev_rec = self.__class__.query_dimentions(self).filter(info_date = self.info_date_prev)
-            old_next_rec = self.__class__.query_dimentions(self).filter(info_date = self.info_date_next)
+            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_prev)
+            old_prev_rec = q.get() if len(q) == 1 else None
+            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_next)
+            old_next_rec = q.get() if len(q) == 1 else None
         else:
             old_prev_rec = None
             old_next_rec = None
@@ -220,7 +222,7 @@ class BaseIntervalInfoModel(models.Model):
             if isinstance(dim_field, models.Field):
                 dim_attr = dim_field.name
             if isinstance(data, BaseInfoModel):
-                dim_val = getattr(data, dim_field.name, None)
+                dim_val = getattr(data, dim_attr, None)
             elif isinstance(data, dict):
                 if data.has_key(dim_attr):
                     dim_val = data[dim_attr]
