@@ -834,6 +834,8 @@ Ext.Desktop = function(app){
                     tbar.add(clock);
                 } else if(m.launcher.text == '-'){
                     tbar.add('-');
+				} else if(m.launcher.text == 'UI_OBJECT'){
+                    tbar.add(m.launcher.ui_object);
                 } else {
                     tbar.add({
                         scale: 'small'
