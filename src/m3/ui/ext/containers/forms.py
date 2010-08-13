@@ -345,6 +345,7 @@ class ExtTabPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-tab-panel.js'
+        self.enable_tab_scroll = True
         self._items = TypedList(type=ExtPanel)
         self.init_component(*args, **kwargs)
     
