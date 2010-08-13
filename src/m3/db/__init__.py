@@ -55,4 +55,17 @@ class BaseEnumerate(object):
     def get_items(cls):
         ''' Используется как источник данных в ArrayStore и DataStore ExtJS '''
         return cls.values.items()
+
+class BaseObjectModel(models.Model):
+    '''
+    Базовая модель для объектов системы. Сюда будут добавляться общие свойства и методы, которые могут быть перекрыты в дальнейшем
+    '''
+    def display(self):
+        '''
+        Отображение объекта по-умолчанию
+        '''
+        return '{%s}' % self.pk
+    display.json_encode = True
     
+    class Meta:
+        abstract = True
