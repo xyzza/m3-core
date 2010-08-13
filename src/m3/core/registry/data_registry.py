@@ -91,7 +91,7 @@ class DataRegistry(object):
         reg_date = cls._normdate(date) 
         
         # временный объект для корректного хранения вставляемых данных
-        query_model = cls._get_model_object(data)
+        query_model = cls._get_model_object(data, model=DataRegistry.QueryDataHolder())
         
         query_affected_models = cls.model.objects
         for dim_field in cls.dimentions:
