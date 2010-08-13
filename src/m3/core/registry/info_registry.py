@@ -44,6 +44,12 @@ def normdate(period, date, begin = True):
         return datetime(date.year, 1 if begin else 12, 1 if begin else calendar.monthrange(date.year, 1 if begin else 12)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
     return date
 
+
+class OverlapError(Exception):
+    r"""Исключение возникающее при наложении интервалов друг на друга."""
+    pass
+
+
 class BaseInfoModel(models.Model):
 
     info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
@@ -117,7 +123,7 @@ class BaseInfoModel(models.Model):
             if self.pk:
                 q = q.exclude(pk = self.pk)
             if q.count() > 0:
-                raise Exception(u'Info with this keys already exists!')
+                raise OverlapError()
         # если объект уже хранится, то найдем записи для изменения
         if self.pk:
             q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_prev)
@@ -292,7 +298,7 @@ class BaseIntervalInfoModel(models.Model):
             if self.pk:
                 q = q.exclude(pk = self.pk)
             if q.count() > 0:
-                raise Exception(u'Info with this keys already exists!')
+                raise OverlapError()
         
         # если объект уже хранится, то найдем записи для изменения
         old_prev_rec = None
