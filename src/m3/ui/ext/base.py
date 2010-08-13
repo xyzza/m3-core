@@ -351,6 +351,7 @@ class ExtUIComponent(BaseExtComponent):
         self.max_height = self.min_height = self.max_width = self.min_width = None
         self.name = None
         self.anchor = None
+        self.cls = None
         # Атрибуты специфичные для form layout
         self.label_width = self.label_align = self.label_pad = None
         
@@ -378,6 +379,7 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('labelWidth', self.label_width)
         self._put_config_value('labelAlign', self.label_align)
         self._put_config_value('labelPad', self.label_pad)
+        self._put_config_value('cls', self.cls)
         #return res
     
 # TODO: закомментированный код ниже необходим для дальнейшей оптимизации
