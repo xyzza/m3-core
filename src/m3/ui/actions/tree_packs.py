@@ -4,6 +4,7 @@
 '''
 
 from django.db import transaction
+from django.dispatch import Signal
 
 from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
 from m3.ui.actions import utils
@@ -500,6 +501,8 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
                 if self.tree_model.objects.filter(parent = node.id).count() == 0:
                     node.leaf = 'true'
                     
+        # генерируем сигнал о том, что узлы дерева подготовлены
+        nodes_prepared.send(sender = self.__class__, nodes = nodes)
         return nodes
     
     def get_rows(self, parent_id, offset, limit, filter):
@@ -631,6 +634,13 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             row.parent_id = dest_id
             row.save()
         return OperationResult()
+    
+#=#===============================================================================
+# Сигналы, который посылаются в процессе работы подсистемы древовидных справочника
+#===============================================================================
+
+# сигнал о том, что узлы дерева иерархического справочника подготовлены
+nodes_prepared = Signal(providing_args = ['nodes'])
     
 #TODO: Избавиться от копипаста в экшенах.
 #TODO: Написать о себе статью в википедии ;)
