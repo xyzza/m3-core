@@ -31,24 +31,43 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		Ext.m3.ObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
 	
-	, initComponent: function(){
+	,initComponent: function(){
 		Ext.m3.ObjectGrid.superclass.initComponent.call(this);
 		var store = this.getStore();
 		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});
+		
+		
+		this.addEvents(
+			/**
+			 * Событие до добавления записи
+			 */
+			'beforenew'
+			);
+		
 	}
+	/**
+	 * Нажатие на кнопку "Новый"
+	 */
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
-		var scope = this;
-	    Ext.Ajax.request({
-	       url: this.actionNewUrl
-	       ,params: this.actionContextJson || {}
-	       ,success: function(res, opt){
-		   		return scope.childWindowOpenHandler(res, opt);
-		    }
-	       ,failure: Ext.emptyFn
-    	});
+		if (this.fireEvent('beforenew', this)) {
+		
+			var scope = this;
+			Ext.Ajax.request({
+				url: this.actionNewUrl,
+				params: this.actionContextJson || {},
+				success: function(res, opt){
+					return scope.childWindowOpenHandler(res, opt);
+				},
+				failure: Ext.emptyFn
+			});
+		}
+		
 	}
+	/**
+	 * Нажатие на кнопку "Редактировать"
+	 */
 	,onEditRecord: function (){
 		assert(this.actionEditUrl, 'actionEditUrl is not define');
 		assert(this.rowIdName, 'rowIdName is not define');
@@ -57,17 +76,23 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 			var baseConf = {};
 			baseConf[this.rowIdName] = this.getSelectionModel().getSelected().id;
 			
-			var scope = this;
-		    Ext.Ajax.request({
-		       url: this.actionEditUrl,
-		       params: Ext.applyIf(baseConf, this.actionContextJson || {}),
-		       success: function(res, opt){
-			   		return scope.childWindowOpenHandler(res, opt);
-			   },
-		       failure: Ext.emptyFn
-		    });
+			if (this.fireEvent('beforeedit', this)) {
+			
+				var scope = this;
+				Ext.Ajax.request({
+					url: this.actionEditUrl,
+					params: Ext.applyIf(baseConf, this.actionContextJson || {}),
+					success: function(res, opt){
+						return scope.childWindowOpenHandler(res, opt);
+					},
+					failure: Ext.emptyFn
+				});
+			}
     	}
 	}
+	/**
+	 * Нажатие на кнопку "Удалить"
+	 */
 	,onDeleteRecord: function (){
 		assert(this.actionDeleteUrl, 'actionDeleteUrl is not define');
 		assert(this.rowIdName, 'rowIdName is not define');
@@ -78,7 +103,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		    msg: 'Вы действительно хотите удалить выбранную запись?',
 		    icon: Ext.Msg.QUESTION,
 	        buttons: Ext.Msg.YESNO,
-	        fn:function(btn,text,opt){ 
+	        fn:function(btn, text, opt){ 
 	            if (btn == 'yes') {
 	                if (scope.getSelectionModel().hasSelection()) {
 						var baseConf = {};
@@ -97,6 +122,12 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	        }
 	    });
 	}
+	
+	/**
+	 * Показ и подписка на сообщения в дочерних окнах
+	 * @param {Object} response Ответ
+	 * @param {Object} opts Доп. параметры
+	 */
 	,childWindowOpenHandler: function (response, opts){
 		
 	    var window = smart_eval(response.responseText);
@@ -107,6 +138,11 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 			});
 	    }
 	}
+	/**
+	 * Хендлер на удаление окна
+	 * @param {Object} response Ответ
+	 * @param {Object} opts Доп. параметры
+	 */
 	,deleteOkHandler: function (response, opts){
 		smart_eval(response.responseText);
 		this.refreshStore();
