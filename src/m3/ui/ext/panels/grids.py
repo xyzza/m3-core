@@ -77,6 +77,14 @@ class ExtObjectGrid(containers.ExtGrid):
         
         self.init_component()
         
+    @property
+    def handler_beforenew(self):
+        return self._listeners.get('beforenew')
+    
+    @handler_beforenew.setter
+    def handler_beforenew(self, function):
+        self._listeners['beforenew'] = function    
+        
     def render(self):
         '''
         Переопределяем рендер грида для того, чтобы модифицировать содержимое его 
