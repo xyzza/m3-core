@@ -343,7 +343,7 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
             if filter and v.upper().find(filter.upper())<0:
                 continue
             else:
-                data.append({'code': k, 'name': v} )
+                data.append({'id': k, 'code': k, 'name': v} )
 
         result = {'rows': data, 'total': len(data)}
         return result
