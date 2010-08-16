@@ -76,18 +76,15 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 			var baseConf = {};
 			baseConf[this.rowIdName] = this.getSelectionModel().getSelected().id;
 			
-			if (this.fireEvent('beforeedit', this)) {
-			
-				var scope = this;
-				Ext.Ajax.request({
-					url: this.actionEditUrl,
-					params: Ext.applyIf(baseConf, this.actionContextJson || {}),
-					success: function(res, opt){
-						return scope.childWindowOpenHandler(res, opt);
-					},
-					failure: Ext.emptyFn
-				});
-			}
+			var scope = this;
+			Ext.Ajax.request({
+				url: this.actionEditUrl,
+				params: Ext.applyIf(baseConf, this.actionContextJson || {}),
+				success: function(res, opt){
+					return scope.childWindowOpenHandler(res, opt);
+				},
+				failure: Ext.emptyFn
+			});
     	}
 	}
 	/**
