@@ -65,6 +65,30 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.__action_select = None
         self.__action_data = None
     
+    @property
+    def handler_afterselect(self):
+        return self._listeners.get('afterselect')
+    
+    @handler_afterselect.setter
+    def handler_afterselect(self, function):
+        self._listeners['afterselect'] = function    
+        
+    @property
+    def handler_beforerequest(self):
+        return self._listeners.get('beforerequest')
+    
+    @handler_beforerequest.setter
+    def handler_beforerequest(self, function):
+        self._listeners['beforerequest'] = function    
+        
+    @property
+    def handler_changed(self):
+        return self._listeners.get('changed')
+    
+    @handler_changed.setter
+    def handler_changed(self, function):
+        self._listeners['changed'] = function  
+    
     #===========================================================================
     # Экшены для управления процессом работы справочника  
     #===========================================================================
