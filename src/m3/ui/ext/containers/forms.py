@@ -177,7 +177,9 @@ class ExtForm(BaseExtPanel):
             names задается в виде списка, т.о. если его длина больше единицы, 
             то имеются вложенные объекты
             '''
-            if hasattr(obj, names[0]):
+            # hasattr не работает для dict'a
+            has_attr = hasattr(obj, names[0]) if not isinstance(obj, dict) else names[0] in obj 
+            if has_attr:
                 if len(names) == 1:
                     if isinstance(obj, dict):
                         obj[names[0]] = value
@@ -189,7 +191,7 @@ class ExtForm(BaseExtPanel):
 
                         setattr(obj, names[0], value)
                 else:
-                    nested = getattr(obj, names[0], None)
+                    nested = getattr(obj, names[0]) if not isinstance(obj, dict) else obj[names[0]]
                     set_field(nested, names[1:], value)
 
         def try_to_int(value, default=None):
