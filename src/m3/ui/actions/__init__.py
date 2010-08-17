@@ -295,7 +295,8 @@ class ActionContext(object):
         elif arg_type == datetime.time:
             d = datetime.datetime.strptime(raw_value, '%H:%M')
             value = datetime.time(d.hour, d.minute, 0)
-            
+        elif arg_type == bool:
+            value = raw_value in ['true', 'True', 1, '1', 'on', True]
         else:
             raise Exception('Can not convert value of "%s" in a given type "%s"' % (raw_value, arg_type))
         

@@ -69,14 +69,18 @@ class RelationQueryManager(WorkflowQueryManager):
             setattr(working_set, field_name, obj)
         working_set.save()
         
-        # Таблица именованных документов
-        open_types = tuple(self.workflow.Meta.open_docs.values())
-        named_docs = self.models.nameddocs(workflow = relation)
-        for field_name, obj in open_docs.items():
-            assert hasattr(named_docs, field_name), 'The named docs models does not contain a field with the name %s' % field_name
-            assert isinstance(obj, open_types), 'Document type is not included in the types of opening documents. Look attribute open_docs in Meta.'
-            setattr(named_docs, field_name, obj)
-        named_docs.save()
+        # FIXME в некоторых случаях не создаются(или не их должно быть) доки. 
+        # Вылетает эксепшн. Где ошибка?
+        if hasattr(self.workflow.Meta, 'open_docs'):
+            # Таблица именованных документов
+            open_types = tuple(self.workflow.Meta.open_docs.values())
+            named_docs = self.models.nameddocs(workflow = relation)
+            for field_name, obj in open_docs.items():
+                assert hasattr(named_docs, field_name), 'The named docs models does not contain a field with the name %s' % field_name
+                assert isinstance(obj, open_types), 'Document type is not included in the types of opening documents. Look attribute open_docs in Meta.'
+                setattr(named_docs, field_name, obj)
+            named_docs.save()
+        
         #TODO: Пока не знаю нужно ли делать записи в док-модели (модели созданных процессом документов), т.к.
         # они не используются в запросах
         
@@ -232,14 +236,19 @@ class Relation(Workflow):
         current_state = current_wf.state
         if current_state.step == self.state_closed.id:
             raise Exception(u'Relation with id=%s already closed!' % self.id)
-        # Записываем закрывающий документ в связь
-        close_types = tuple(self.Meta.close_docs.values())
-        named_docs = current_wf.nameddocs
-        for field_name, obj in close_docs.items():
-            assert hasattr(named_docs, field_name), 'The named docs models does not contain a field with the name %s' % field_name
-            assert isinstance(obj, close_types), 'Document type is not included in the types of closed documents. Look attribute close_docs in Meta.'
-            setattr(named_docs, field_name, obj)
-        named_docs.save()
+
+        # FIXME в некоторых случаях нет доков. 
+        # Вылетает эксепшн. Где ошибка?
+        if hasattr(self.Meta, 'close_docs'):
+            # Записываем закрывающий документ в связь
+            close_types = tuple(self.Meta.close_docs.values())
+            named_docs = current_wf.nameddocs
+            for field_name, obj in close_docs.items():
+                assert hasattr(named_docs, field_name), 'The named docs models does not contain a field with the name %s' % field_name
+                assert isinstance(obj, close_types), 'Document type is not included in the types of closed documents. Look attribute close_docs in Meta.'
+                setattr(named_docs, field_name, obj)
+            named_docs.save()
+        
         # Создаем новое состояние
         params = {'step'     : self.state_closed.id,
                   'workflow' : current_wf,
