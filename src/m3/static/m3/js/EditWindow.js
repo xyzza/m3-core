@@ -67,6 +67,14 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	
 	}
 	/**
+	 * Получает форму по formId
+	 */
+	,getForm: function() {
+		assert(this.formId, 'Не задан formId для формы');
+		
+		return Ext.getCmp(this.formId).getForm();
+	}
+	/**
 	 * Сабмит формы
 	 * @param {Object} btn
 	 * @param {Object} e
