@@ -267,6 +267,8 @@ class Relation(Workflow):
         '''
         # Каскадное удаление процесса
         current_wf = self.models.wf.objects.get(id = self.id)
+        if current_wf.attributes:
+            current_wf.attributes.delete()
         current_wf.delete()
 
 
