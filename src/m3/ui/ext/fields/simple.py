@@ -46,7 +46,7 @@ class ExtDateField(BaseExtField):
         super(ExtDateField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-date-field.js'
         self.hide_today_btn = False
-        self.value =  datetime.now()  
+        #self.value =  datetime.now()  # -- решили не использовать (c) prefer 
         
         try:
             self.format = settings.DATE_FORMAT.replace('%', '')
