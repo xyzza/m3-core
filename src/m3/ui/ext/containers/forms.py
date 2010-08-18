@@ -278,7 +278,15 @@ class ExtForm(BaseExtPanel):
     @property
     def items(self):       
         return self._items
-
+    
+    def pre_render(self):
+        super(ExtForm, self).pre_render()
+        if not self.focused_field:
+            childs = self._get_all_fields(self)
+            for child in childs:
+                if isinstance(child, BaseExtField) and not isinstance(child, ExtHiddenField):
+                    self.focused_field = child
+                    break
 
 class ExtPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):

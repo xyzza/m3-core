@@ -22,6 +22,12 @@
      	,baseCls: 'x-plain'
         ,items: {{ component.t_render_items|safe }}
     });
-    {% if component.focused_field %}Ext.getCmp('{{ component.focused_field.client_id}}').focus(false, 1000);{% endif %}
+    {% if component.focused_field %}
+	form_panel.on('afterrender', function(){
+		Ext.getCmp('{{ component.focused_field.client_id}}').focus();
+	});
+	
+	Ext.getCmp('{{ component.focused_field.client_id}}').focus(false, 1000);
+	{% endif %}
     return form_panel;
 })()
