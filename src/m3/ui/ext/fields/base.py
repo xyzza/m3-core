@@ -128,6 +128,14 @@ class BaseExtTriggerField(BaseExtField):
     @handler_select.setter
     def handler_select(self, function):
         self._listeners['select'] = function
+        
+    @property
+    def handler_afterrender(self):
+        return self._listeners.get('afterrender')
+    
+    @handler_afterrender.setter
+    def handler_afterrender(self, function):
+        self._listeners['afterrender'] = function
     
     def pre_render(self):
         if self.get_store():
