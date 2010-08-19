@@ -6,7 +6,8 @@
 from django.db import transaction
 from django.dispatch import Signal
 
-from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult
+from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult,\
+    ActionContextDeclaration
 from m3.ui.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
@@ -26,6 +27,21 @@ class TreeGetNodesAction(Action):
         filter = request.REQUEST.get('filter')
         result = self.parent.get_nodes(parent_id, filter)
         return PreJsonResult(result)
+    
+class TreeGetNodesLikeRows(Action):
+    '''
+    Возвращает узлы дерева как список. Используется для автокомплита.
+    '''
+    url = '/nodes_like_rows$'
+    
+    def context_declaration(self):
+        return [ActionContextDeclaration(name='filter', default='', type=str, required=True),
+                ActionContextDeclaration(name='branch_id', default=0, type=int, required=True)]
+    
+    def run(self, request, context):
+        result = self.parent.get_nodes_like_rows(self, context.filter, context.branch_id)
+        return PreJsonResult(result)
+    
 
 class TreeGetNodeAction(Action):
     '''
@@ -342,9 +358,11 @@ class BaseTreeDictionaryActions(ActionPack):
         self.node_action  = TreeGetNodeAction()
         self.rows_action  = ListGetRowsAction()
         self.row_action   = ListGetRowAction()
+        self.nodes_like_rows_action = TreeGetNodesLikeRows()
         self.last_used_action = ListLastUsedAction()
         self.actions.extend([self.nodes_action, self.node_action, self.rows_action,
-                             self.row_action, self.last_used_action])
+                             self.row_action, self.last_used_action,
+                             self.nodes_like_rows_action])
         
         # Окна самого справочника
         self.list_window_action   = ListWindowAction()
@@ -412,6 +430,9 @@ class BaseTreeDictionaryActions(ActionPack):
         ''' Возвращает адрес по которому запрашиваются группы дерева. '''
         return self.nodes_action.get_absolute_url()
         
+    def get_nodes_like_rows_url(self):
+        ''' Возвращает адрес по которому запрашиваются группы дерева как список '''
+        return self.nodes_like_rows_action.get_absolute_url()
     
     #=================== ИЗМЕНЕНИЕ ДАННЫХ =======================
     
