@@ -8,4 +8,14 @@ new Ext.form.TimeField({
 	{% if component.min_value %} ,minValue: "{{ component.min_value }}" {% endif %}
 	
 	{% if component.increment %} ,increment: {{ component.increment }} {% endif %}
+	
+	{% if component.t_render_listeners %}
+		{# Прописываются имеющиеся обработчики #}
+		,listeners:{
+			{% for k, v in component.t_render_listeners.items %}
+				'{{k}}': {{v}}
+				{% if not forloop.last %},{% endif %}
+			{% endfor%}
+		}
+	{% endif %}
 })
