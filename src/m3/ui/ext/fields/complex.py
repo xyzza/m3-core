@@ -150,13 +150,13 @@ class ExtDictSelectField(BaseExtTriggerField):
     def value(self, val):
         self.__value = val
         
-    # deprecated
     def configure_by_dictpack(self, pack, controller=None):
         '''
         Метод настройки поля выбора из справочника на основе 
         переданного ActionPack работы со справочниками.
         @param pack: Имя класса или класс пака.
         @controller: Контроллер в котором будет искаться пак. Если не задан, то ищем во всех.
+        @deprecated: 0.4
         '''
         if controller:
             registered_pack = controller.find_pack(pack)
@@ -175,6 +175,8 @@ class ExtDictSelectField(BaseExtTriggerField):
         
     @pack.setter
     def pack(self, ppack):
+        ppack = ControllerCache.find_pack(ppack)
+        assert ppack, 'Pack %s not found in ControllerCache' % ppack
         self.__pack = ppack
         
         # hasattr используется вместо isinstance, иначе будет перекрестный импорт. В оригинале:
@@ -189,7 +191,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         # Для иерархических справочников без списочной модели
         elif hasattr(ppack, 'tree_model') and ppack.tree_model:
             self.edit_url = ppack.get_edit_node_url()
-            self.autocomplete_url = ppack.get_nodes_url()
+            self.autocomplete_url = ppack.get_nodes_like_rows_url()
             
         else:
             raise Exception('Pack %s must be a dictionary pack instance.' % ppack)
