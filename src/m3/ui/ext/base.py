@@ -9,14 +9,13 @@ Created on 01.03.2010
 @author: prefer
 '''
 
-from uuid import uuid4
 import datetime
 
 from django import template as django_template
 from django.conf import settings
 
 from m3.ui.ext import render_template, render_component
-from m3.helpers import js
+from m3.helpers import js, generate_client_id
 
 #===============================================================================
 class ExtUIScriptRenderer(object):
@@ -66,7 +65,7 @@ class BaseExtComponent(object):
     def __init__(self, *args, **kwargs):
         self.template = ''
         self.template_globals = ''
-        self.client_id = 'cmp_' + str(uuid4())[0:8]
+        self.client_id =  generate_client_id()
         
         # action context of the component (normally, this is
         # an instance of m3.ui.actions.ActionContext class

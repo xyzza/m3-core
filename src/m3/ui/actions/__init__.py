@@ -854,6 +854,7 @@ class ActionController(object):
         for key in sorted(self._url_patterns.keys()):
             print key
         print
+        print 'Total patterns %s' % len(self._url_patterns.keys())
         
 
 class ControllerCache(object):
