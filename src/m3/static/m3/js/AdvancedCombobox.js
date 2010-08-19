@@ -39,29 +39,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	,triggerEditClass:'x-form-edit-trigger'
 	
 	// Инициализация происходит в методе initBaseTrigger
-	,baseTriggers: [
-		{
-			iconCls: 'x-form-clear-trigger',
-			handler: null,
-			hide: null
-		}
-		,{
-			iconCls:'', 
-			handler: null,
-			hide: null
-		}
-		,{
-			iconCls:'x-form-select-trigger', 
-			handler: null,
-			hide: null
-		}
-		,{
-			iconCls:'x-form-edit-trigger', 
-			handler: null,
-			hide: true
-		}
-	]
-	,allTriggers: []
+	,baseTriggers: null
+	,allTriggers: null
 	
 	,constructor: function(baseConfig, params){
 		//console.log(baseConfig);
@@ -81,6 +60,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		
 		this.actionContextJson = params.actions.contextJson;
 		
+		this.hideBaseTrigger = false;
 		if (baseConfig['hideTrigger'] ) {
 			delete baseConfig['hideTrigger'];
 			this.hideBaseTrigger = true;
@@ -89,7 +69,28 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 
 		this.defaultValue = params.defaultValue;
 		this.defaultText = params.defaultText;
-		
+		this.baseTriggers = [
+			{
+				iconCls: 'x-form-clear-trigger',
+				handler: null,
+				hide: null
+			}
+			,{
+				iconCls:'', 
+				handler: null,
+				hide: null
+			}
+			,{
+				iconCls:'x-form-select-trigger', 
+				handler: null,
+				hide: null
+			}
+			,{
+				iconCls:'x-form-edit-trigger', 
+				handler: null,
+				hide: true
+			}
+		];
 		this.allTriggers = [].concat(this.baseTriggers);
 		if (params.customTriggers) {
 			Ext.each(params.customTriggers, function(item, index, all){
