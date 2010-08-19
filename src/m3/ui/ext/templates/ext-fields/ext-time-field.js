@@ -13,7 +13,7 @@ new Ext.form.TimeField({
 		{# Прописываются имеющиеся обработчики #}
 		,listeners:{
 			{% for k, v in component.t_render_listeners.items %}
-				'{{k}}': {{v}}
+				'{{k}}': {{v|safe}}
 				{% if not forloop.last %},{% endif %}
 			{% endfor%}
 		}
