@@ -134,10 +134,10 @@ class BaseInfoModel(models.Model):
             old_prev_rec = None
             old_next_rec = None
         # вычислим ближайщую запись, которая начинается "левее" текущей
-        q = self.__class__.query_dimentions(self).filter(info_date__lt = self.info_date, info_date_next__gte = self.info_date)
+        q = self.__class__.query_dimentions(self).filter(info_date__lt = self.info_date, info_date_next__gte = self.info_date).exclude(pk = self.pk)
         new_prev_rec = q.get() if len(q) == 1 else None
         # вычислим ближайшую запись, которая начинается "правее" текущей
-        q = self.__class__.query_dimentions(self).filter(info_date__gt = self.info_date, info_date_prev__lte = self.info_date)
+        q = self.__class__.query_dimentions(self).filter(info_date__gt = self.info_date, info_date_prev__lte = self.info_date).exclude(pk = self.pk)
         new_next_rec = q.get() if len(q) == 1 else None
         # изменим даты исходя из соседей
         if new_prev_rec:
