@@ -175,12 +175,20 @@ class ExtDictSelectField(BaseExtTriggerField):
         
     @pack.setter
     def pack(self, ppack):
+        '''
+           Настраивает поле выбора под указанный экшенпак ppack. Причем в качестве аргумента может быть
+        как сам класс пака так и если имя. Это связано с тем, что не во всех формах можно импортировать
+        паки и может произойти кроссимпорт.
+           Поиск пака производится по всем экшенконтроллерам в системе. Используется первый найденный, т.к.
+        при правильном дизайне один и тот же пак не должен быть в нескольких контроллерах одновременно. 
+        @param ppack: Имя класса пака или класс пака.
+        '''
+        assert isinstance(ppack, str) or hasattr(ppack, '__bases__'), 'Argument %s must be a string or class' % ppack
         ppack = ControllerCache.find_pack(ppack)
         assert ppack, 'Pack %s not found in ControllerCache' % ppack
         self.__pack = ppack
         
-        # hasattr используется вместо isinstance, иначе будет перекрестный импорт. В оригинале:
-        # if isinstance(ppack, BaseDictionaryActions) or (isinstance(ppack, BaseTreeDictionaryActions) and ppack.list_model):
+        # hasattr используется вместо isinstance, иначе будет перекрестный импорт.
         # Для линейного справочника и иерархического спр., если задана списочная модель, значит выбирать будут из неё.
         if hasattr(ppack, 'model') or (hasattr(ppack, 'tree_model') and ppack.list_model):
             # url формы редактирования элемента
