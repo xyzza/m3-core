@@ -844,6 +844,7 @@ Ext.Desktop = function(app){
                        ,iconCls: m.launcher.iconCls
                        ,handler: m.launcher.handler
                        ,menu: m.launcher.menu
+					   ,tooltip: m.launcher.tooltip
                     });
                 };
             };
