@@ -52,3 +52,7 @@ q:before,q:after{content:'';}.m3-el-mask {
 .x-form-current-date-trigger {
 	background-image:url(../images/trigger-current-date.gif) !important;
 }
+
+.x-toolbar-ct .x-btn-focus{
+	border: 1px solid;
+}
