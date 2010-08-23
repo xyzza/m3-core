@@ -65,6 +65,16 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			this.setFieldOnChange(item, this);
 		}, this);
 	
+		this.addEvents(
+			/**
+			 * Генерируется сообщение до начала запроса на сохранение формы
+			 * Проще говоря до начала submit'a
+			 * Параметры:
+			 *   this - Сам компонент
+			*/
+			'beforesubmit'
+			)
+	
 	}
 	/**
 	 * Получает форму по formId
@@ -82,6 +92,8 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 */
 	,submitForm: function(btn, e, baseParams){
 		assert(this.formUrl, 'Не задан url для формы');
+		
+		this.fireEvent('beforesubmit');
 		
 		var form = Ext.getCmp(this.formId).getForm();
 		if (form && !form.isValid()) {

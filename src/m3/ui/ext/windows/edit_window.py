@@ -15,7 +15,19 @@ class ExtEditWindow(BaseExtWindow):
         self._ext_name = 'Ext.m3.EditWindow'
         self.renderer.template = 'ext-script/ext-editwindowscript.js' 
         self.init_component(*args, **kwargs)
-      
+   
+    
+    #===========================================================================
+    # Врапперы над событиями listeners[...]
+    #===========================================================================
+    @property
+    def handler_beforesubmit(self):
+        return self._listeners.get('beforesubmit')
+    
+    @handler_beforesubmit.setter
+    def handler_beforesubmit(self, function):
+        self._listeners['beforesubmit'] = function
+
     @property
     def form(self):
         return self.__form
