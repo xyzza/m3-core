@@ -29,9 +29,9 @@ class BaseExtField(ExtUIComponent):
     def t_render_label_style(self):
         return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
     
-    #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+    #===========================================================================
     # Врапперы над событиями listeners[...]
-    #------------------------------------------------------------------------
+    #===========================================================================
     @property
     def handler_specialkey(self):
         return self._listeners.get('specialkey')
