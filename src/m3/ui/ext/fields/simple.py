@@ -129,6 +129,7 @@ class ExtCheckBox(BaseExtField):
         super(ExtCheckBox, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-checkbox.js'
         self.checked = False
+        self.box_label = None
         self.init_component(*args, **kwargs)
         
         

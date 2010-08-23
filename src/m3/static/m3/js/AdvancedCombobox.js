@@ -4,47 +4,48 @@
  * @param {Object} params
  */
 Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
-	
-	// Будет ли задаваться вопрос перед очисткой значения
-	askBeforeDeleting: true
-	
-	,actionSelectUrl: null
-	,actionEditUrl: null
-	,actionContextJson: null
-	
-	,hideBaseTrigger: false
-	
-	,defaultValue: null
-	,defaultText: null
-	
-	// кнопка очистки
-	,hideTriggerClear: true
-	
-	// кнопка выбора из выпадающего списка
-	,hideTriggerDropDown: false
-	
-	// кнопка выбора из справочника
-	,hideTriggerDictSelect: false
-	
-	// кнопка редактирования элемента
-	,hideTriggerDictEdit: false
-	
-	// Количество записей, которые будут отображаться при нажатии на кнопку 
-	// выпадающего списка
-	,defaultLimit: 50
-	
-	// css классы для иконок на триггеры 
-	,triggerClearClass:'x-form-clear-trigger'
-	,triggerSelectClass:'x-form-select-trigger'
-	,triggerEditClass:'x-form-edit-trigger'
-	
-	// Инициализация происходит в методе initBaseTrigger
-	,baseTriggers: null
-	,allTriggers: null
-	
-	,constructor: function(baseConfig, params){
+	constructor: function(baseConfig, params){
 		//console.log(baseConfig);
 		//console.log(params);
+		
+		/**
+		 * Инициализация значений
+		 */
+		
+		// Будет ли задаваться вопрос перед очисткой значения
+		this.askBeforeDeleting = true;
+		
+		this.actionSelectUrl = null;
+		this.actionEditUrl = null;
+		this.actionContextJson = null;
+		
+		this.hideBaseTrigger = false;
+		
+		this.defaultValue = null;
+		this.defaultText = null;
+		
+		// кнопка очистки
+		this.hideTriggerClear = true;
+		
+		// кнопка выбора из выпадающего списка
+		this.hideTriggerDropDown = false;
+		
+		// кнопка выбора из справочника
+		this.hideTriggerDictSelect = false;
+		
+		// кнопка редактирования элемента
+		this.hideTriggerDictEdit = false;
+		
+		// Количество записей, которые будут отображаться при нажатии на кнопку 
+		// выпадающего списка
+		this.defaultLimit = 50;
+		
+		// css классы для иконок на триггеры 
+		this.triggerClearClass = 'x-form-clear-trigger';
+		this.triggerSelectClass = 'x-form-select-trigger';
+		this.triggerEditClass = 'x-form-edit-trigger';
+		
+		
 		
 		assert(params.actions, 'params.actions is undefined');
 		
@@ -57,7 +58,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		}
 		
 		this.askBeforeDeleting = params.askBeforeDeleting;
-		
 		this.actionContextJson = params.actions.contextJson;
 		
 		this.hideBaseTrigger = false;
@@ -173,6 +173,9 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			*/
 			'changed'
 		);
+		
+		this.getStore().baseParams = Ext.applyIf({start:0, limit: this.defaultLimit }, this.getStore().baseParams );
+		
 	}
 	// см. TwinTriggerField
 	,getTrigger : function(index){
@@ -258,18 +261,9 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			if (this.isExpanded()) {
 				this.collapse();
 			} else {
-				
-				var baseParams = Ext.applyIf({start:0, limit: this.defaultLimit }, this.getStore().baseParams )
-				this.getStore().load({
-					params: baseParams
-				});
-				
+				this.getStore().load();
 				this.onFocus({});
-	            if(this.triggerAction == 'all') {
-	                this.doQuery(this.allQuery, true);
-	            } else {
-	                this.doQuery(this.getRawValue());
-	            }
+				this.doQuery(this.allQuery, true);
 			}
 			this.el.focus();
 		}
@@ -336,6 +330,24 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		this.getTrigger(0).hide();
 	}
 	/**
+	 * Показывает кнопку открытия карточки элемента
+	 */
+	,showEditBtn: function(){
+		if (this.actionEditUrl) {
+			this.el.parent().setOverflow('hidden');
+			this.getTrigger(3).show();
+		}
+	}
+	/**
+	 * Скрывает кнопку открытия карточки элемента
+	 */
+	,hideEditBtn: function(){
+		if (this.actionEditUrl) {
+			this.el.parent().setOverflow('auto');
+			this.getTrigger(3).hide();
+		}
+	}
+	/**
 	 * Перегруженный метод очистки значения, плюс ко всему скрывает 
 	 * кнопку очистки
 	 */
@@ -343,6 +355,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		var oldValue = this.getValue();
 		Ext.m3.AdvancedComboBox.superclass.clearValue.call(this);
 		this.hideClearBtn();
+		this.hideEditBtn();
 		
 		this.fireEvent('change', this, '', oldValue);
 		this.fireEvent('changed', this);
@@ -356,8 +369,10 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		if (value) {
 			if (this.rendered) {
 				this.showClearBtn();
+				this.showEditBtn();
 			} else {
 				this.hideTrigger1 = true;
+				this.hideTrigger4 = true;
 			}
 		}
 	}
