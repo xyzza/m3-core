@@ -8,36 +8,36 @@
  */
 
 Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
-	
-	/**
-	 * id формы в окне, для сабмита
-	 */
-	formId: null
-	
-	/**
-	 * url формы в окне дя сабмита
-	 */
-	,formUrl: null
-	
-	/**
-	 * Количество измененных полей
-	 */
-	,changesCount: 0
-	
-	/**
-	 * Оргинальный заголовок
-	 */
-	,originalTitle: null
-	
 	/**
 	 * Инициализация первонального фунционала
 	 * @param {Object} baseConfig Базовый конфиг компонента
 	 * @param {Object} params Дополнительные параметры 
 	 */
-	,constructor: function(baseConfig, params){
+	constructor: function(baseConfig, params){
 //		console.log('Ext.m3.EditWindow >>');
 //		console.log(baseConfig);
 //		console.log(params);
+		
+		/**
+		 * id формы в окне, для сабмита
+		 */
+		this.formId = null;
+		
+		/**
+		 * url формы в окне дя сабмита
+		 */
+		this.formUrl = null;
+		
+		/**
+		 * Количество измененных полей
+		 */
+		this.changesCount = 0;
+		
+		/**
+		 * Оргинальный заголовок
+		 */
+		this.originalTitle = null;
+		
 		
 		if (params) {
 			if (params.form) {
