@@ -19,6 +19,10 @@ class BaseExtWindow(ExtUIComponent):
     '''
     Базовый класс для всех окон в системе
     '''
+    align_left = 'left'
+    align_center = 'center'
+    align_right = 'right'
+    
     def __init__(self, *args, **kwargs):
         super(BaseExtWindow, self).__init__(*args, **kwargs)
         self.template = 'ext-windows/ext-window.js'
@@ -49,6 +53,7 @@ class BaseExtWindow(ExtUIComponent):
         self.auto_load = None
         self.hidden = True
         self.layout_config = {}
+        self.button_align = None
         
     def t_render_layout_config(self):
         '''Рендерит конфиг, если указан layout'''
@@ -75,7 +80,8 @@ class BaseExtWindow(ExtUIComponent):
         self._put_config_value('resizable', self.resizable)
         #self._put_config_value('parentWindowID', self.parent_window_id)
         self._put_config_value('keys', self.t_render_keys, self.keys)
-        #self._put_config_value('autoLoad', self.auto_load) -- не используется
+        self._put_config_value('buttonAlign', self.button_align)
+
         if self.layout_config:
             self._put_config_value('layoutConfig', self.t_render_layout_config)
         

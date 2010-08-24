@@ -3,20 +3,16 @@
  */
 
 Ext.m3.Window = Ext.extend(Ext.Window, {
-	/**
-	 * Ссылка на родительское окно
-	 */
-	parentWindow: null
-	
-	/**
-	 * Контекст 
-	 */
-	,actionContextJson: null
-	
-	,constructor: function(baseConfig, params){
+	constructor: function(baseConfig, params){
 //		console.log('Ext.m3.Window >>');
 //		console.log(baseConfig);
 //		console.log(params);
+		
+		// Ссылка на родительское окно
+		this.parentWindow = null;
+		
+		// Контекст
+		this.actionContextJson = null;
 		
 		if (params && params.parentWindowID) {
 			this.parentWindow = Ext.getCmp(params.parentWindowID);

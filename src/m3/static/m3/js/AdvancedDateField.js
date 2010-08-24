@@ -3,25 +3,26 @@
  * Добавлена кнопа установки текущий даты
  */
 Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
-	// Базовый конфиг для тригеров
-	baseTriggers: [
-		{
-			iconCls: 'x-form-date-trigger'
-			,handler: null
-			,hide:null
-		},
-		{
-			iconCls: 'x-form-current-date-trigger'
-			,handler: null
-			,hide:null
-		}
-	]
-	
-	,hideTriggerToday: false
-	
-	,constructor: function(baseConfig, params){
+	constructor: function(baseConfig, params){
 //		console.log(baseConfig);
 //		console.log(params);
+
+		// Базовый конфиг для тригеров
+		this.baseTriggers = [
+			{
+				iconCls: 'x-form-date-trigger'
+				,handler: null
+				,hide:null
+			},
+			{
+				iconCls: 'x-form-current-date-trigger'
+				,handler: null
+				,hide:null
+			}
+		];
+		
+		this.hideTriggerToday = false;
+	
 
 		if (params.hideTriggerToday) {
 			this.hideTriggerToday = true;

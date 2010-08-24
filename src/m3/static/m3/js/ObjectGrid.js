@@ -3,16 +3,7 @@
  * @param {Object} config
  */
 Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
-	actionNewUrl: null
-	,actionEditUrl: null
-	,actionDeleteUrl: null
-	,actionDataUrl: null
-	,actionContextJson: null
-	
-	,rowIdName: null
-	,allowPaging: true
-	
-	,constructor: function(baseConfig, params){
+	constructor: function(baseConfig, params){
 //		console.log(baseConfig);
 //		console.log(params);
 		
