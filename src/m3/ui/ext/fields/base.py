@@ -59,7 +59,7 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('allowBlank', self.allow_blank)
         self._put_config_value('vtype', self.vtype)
         self._put_config_value('emptyText', self.empty_text)
-        self._put_config_value('minLenght', self.min_length)
+        self._put_config_value('minLength', self.min_length)
         self._put_config_value('minLengthText', self.min_length_text)
         self._put_config_value('maxLength', self.max_length)
         self._put_config_value('maxLengthText', self.max_length_text)
