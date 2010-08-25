@@ -773,8 +773,8 @@ class ActionController(object):
             packs_list.insert(pos, wrapper)
             if left_pack:
                 wrapper.parent = left_pack
-            if right_pack:
-                right_pack.parent = wrapper
+         #   if right_pack:
+         #       right_pack.parent = wrapper
                 
             # Создание нового урла
             full_path = self._build_full_path(packs_list, final_action)
