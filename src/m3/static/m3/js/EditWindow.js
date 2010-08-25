@@ -113,12 +113,12 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		   ,submitEmptyText: false
 		   ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
 		   ,success: function(form, action){
-				scope.fireEvent('closed_ok');
+				scope.fireEvent('closed_ok', action.response.responseText);
 		    	scope.close(true);
-		    	smart_eval(action.response.responseText)
+		    	smart_eval(action.response.responseText);
 		   }
 		   ,failure: function (form, action){
-		   		smart_eval(action.response.responseText)
+		   		smart_eval(action.response.responseText);
 		   }
     	});
 	}
