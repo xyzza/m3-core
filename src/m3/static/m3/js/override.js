@@ -18,14 +18,25 @@ Ext.override(Ext.Window, {
 	,manager: new Ext.WindowGroup()
     ,renderTo: 'x-desktop'
     ,constrain: true
+	/**
+	 * Выводит окно на передний план
+	 * Вызывается в контексте дочернего 
+	 * по отношению к parentWindow окну
+	 */
+	,activateChildWindow: function(){
+		this.toFront();
+	}
 	,listeners: {
+
 		'beforeshow': function (){
 			if ( Ext.get('x-desktop').getHeight() < this.getHeight() ) {
 				this.setHeight( Ext.get('x-desktop').getHeight() );
 			}
 			
 			if (this.parentWindow) {
-				this.parentWindow.el.mask();
+				this.parentWindow.setDisabled(true);
+				this.parentWindow.on('activate', this.activateChildWindow, this);
+				
 				this.modal = false;
 				this.tmpModal = true;
 				
@@ -35,23 +46,24 @@ Ext.override(Ext.Window, {
 						el.mask();
 					}
 				}
-
 			}
 			if (this.modal){
-					var taskbar = Ext.get('ux-taskbar');
-					if (taskbar) {
-	 					taskbar.mask();
-					}
- 					var toptoolbar = Ext.get('ux-toptoolbar');
-					if (toptoolbar) {
-		 				toptoolbar.mask();
-					}
+				var taskbar = Ext.get('ux-taskbar');
+				if (taskbar) {
+ 					taskbar.mask();
+				}
+					var toptoolbar = Ext.get('ux-toptoolbar');
+				if (toptoolbar) {
+	 				toptoolbar.mask();
+				}
 			}
 		}
 		,'beforeclose': function (){
 			if (this.tmpModal && this.parentWindow) {			
-				this.parentWindow.el.unmask();
-				
+				this.parentWindow.un('activate', this.activateChildWindow, this);
+				this.parentWindow.setDisabled(false);
+				this.parentWindow.toFront();
+
 				if (AppDesktop) {
 					var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
 					if (el) {
