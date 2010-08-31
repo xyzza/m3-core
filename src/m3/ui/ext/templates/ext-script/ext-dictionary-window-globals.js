@@ -96,6 +96,7 @@ var ajax = Ext.Ajax;
 							'id': selectedId.join(',')
 						}
 						,success: function(response, opts){
+							renderWindowGrid(response, opts);
 							// Удаляем из стора только если пришел success=true
 							if (uiShowErrorMessage(response))
 								grid.getStore().remove(selRecords);
@@ -266,6 +267,7 @@ var ajax = Ext.Ajax;
 						,params: Ext.applyIf({ 'id': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 						,success: function(response, opts) {
 							// Удаляем из стора только если пришел success=true
+							renderWindowTree(response, opts);
 							if (uiShowErrorMessage(response)) {
 								tree.getSelectionModel().getSelectedNode().remove();
 							}
