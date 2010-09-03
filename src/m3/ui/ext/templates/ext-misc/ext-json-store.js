@@ -12,5 +12,6 @@ new Ext.data.JsonStore({
 	{% if component.auto_load %} ,autoLoad: true {% endif %}
 	,fields: [{{ component.t_render_fields|safe }}]
 	{% if component.writer %} ,writer: {{ component.writer.render }} {% endif %}
+	{% if component.remote_sort %} ,remoteSort: true {% endif %}
 	{% if not component.auto_save %} ,autoSave: false {% endif %}
 })

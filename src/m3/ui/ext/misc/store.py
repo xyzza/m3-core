@@ -44,6 +44,7 @@ class ExtJsonStore(BaseExtStore):
         self.__limit = -1
         self.total_property = None
         self.root = None
+        self.remote_sort = False
         self.id_property = 'id'
         self.init_component(*args, **kwargs)
         
