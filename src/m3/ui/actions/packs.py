@@ -30,7 +30,7 @@ class DictListWindowAction(Action):
         ''' Добавляем отображаемые колонки. См. описание в базовом классе! '''
         for column in columns:
             if isinstance(column, tuple):
-                column_params = { 'data_index': column[0], 'header': column[1]}
+                column_params = { 'data_index': column[0], 'header': column[1], 'sortable': True }
                 if len(column)>2:
                     column_params['width'] = column[2]
             elif isinstance(column, dict):
@@ -42,7 +42,7 @@ class DictListWindowAction(Action):
     def configure_list(self, win):
         base = self.parent
         # Устанавливаем источники данных
-        grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True)
+        grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True, remote_sort=True)
         grid_store.total_property = 'total'
         grid_store.root = 'rows'
         win.grid.set_store(grid_store)
@@ -105,7 +105,11 @@ class DictRowsAction(Action):
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
         filter = request.REQUEST.get('filter')
-        return PreJsonResult(self.parent.get_rows(offset, limit, filter), self.parent.secret_json)
+        direction = request.REQUEST.get('dir')
+        user_sort = request.REQUEST.get('sort')
+        if direction == 'DESC':
+            user_sort = '-' + user_sort
+        return PreJsonResult(self.parent.get_rows(offset, limit, filter, user_sort), self.parent.secret_json)
     
 class DictLastUsedAction(Action):
     '''
@@ -279,11 +283,12 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     # Пример list_sort_order = ['code', '-name']
     list_sort_order = None
     
-    def get_rows(self, offset, limit, filter):
+    def get_rows(self, offset, limit, filter, user_sort=''):
         '''
         Возвращает данные для грида справочника
         '''
-        query = utils.apply_sort_order(self.model.objects, self.list_columns, self.list_sort_order)
+        sort_order = [user_sort] if user_sort else self.list_sort_order
+        query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, self.filter_fields)
         total = query.count()
         if limit > 0:
