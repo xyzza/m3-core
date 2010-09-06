@@ -142,7 +142,7 @@ class Metaroles_DictPack(BaseDictionaryActions):
     list_columns = [('name', 'Наименование метароли')]
     list_readonly = True
                     
-    def get_rows(self, offset, limit, filter):
+    def get_rows(self, offset, limit, filter, user_sort=''):
         data = []
         for role in metarole_manager.get_registered_metaroles():
             proxy = {'id': role.code, 'name': role.name}
