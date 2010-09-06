@@ -220,7 +220,7 @@ class BaseDictionaryActions(ActionPack):
         return self.rows_action.get_absolute_url()
     
     #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ ДАННЫЕ =====================
-    def get_rows(self, offset, limit, filter):
+    def get_rows(self, offset, limit, filter, user_sort=''):
         '''
         Метод который возвращает записи грида в виде обычного питоновского списка.
         '''
@@ -340,7 +340,7 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
     list_columns = [('code', 'Код', 15),
                     ('name', 'Наименование')]
     
-    def get_rows(self, offset, limit, filter):
+    def get_rows(self, offset, limit, filter, user_sort=''):
         ''' Возвращает данные для грида справочника '''
         assert self.enumerate_class != None, 'Attribute enumerate_class is not defined.'
         data = []
