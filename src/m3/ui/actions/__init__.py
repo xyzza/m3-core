@@ -261,7 +261,18 @@ class ActionContext(object):
         '''
         def __init__(self, reason):
             self.reason = reason
-                    
+    
+    class ValuesList():
+        '''
+        Класс для описания параметров, которые будут передаваться в виде 
+        списка значений, разделенных определенным символом
+        '''
+        def __init__(self, separator=',', type=int):
+            # разделитель элементов
+            self.separator = separator
+            # тип, к которому будут преобразовываться эл-ты списка
+            self.type = type
+            
     def __init__(self, obj=None):
         '''
         В зависимости от типа obj выполняем построение объекта контекста действия
@@ -297,6 +308,8 @@ class ActionContext(object):
             value = datetime.time(d.hour, d.minute, 0)
         elif arg_type == bool:
             value = raw_value in ['true', 'True', 1, '1', 'on', True]
+        elif isinstance(arg_type, ActionContext.ValuesList):
+            value = map(arg_type.separator, raw_value.split(arg_type.type))
         else:
             raise Exception('Can not convert value of "%s" in a given type "%s"' % (raw_value, arg_type))
         
@@ -348,7 +361,9 @@ class ActionContext(object):
         '''
         result = ''
         for k,v in self.__dict__.items():
-            if isinstance(v, int):
+            if isinstance(v, bool):
+                result += '"%s": "%s",' % (k, 'true' if v is True else 'false')
+            elif isinstance(v, int):
                 result += '"%s": %s,' % (k,v)
             elif isinstance(v, datetime.datetime):
                 result += '"%s": "%s",' % (k, v.strftime('%d.%m.%Y'))
