@@ -309,7 +309,7 @@ class ActionContext(object):
         elif arg_type == bool:
             value = raw_value in ['true', 'True', 1, '1', 'on', True]
         elif isinstance(arg_type, ActionContext.ValuesList):
-            value = map(arg_type.separator, raw_value.split(arg_type.type))
+            value = map(arg_type.type, raw_value.split(arg_type.separator))
         else:
             raise Exception('Can not convert value of "%s" in a given type "%s"' % (raw_value, arg_type))
         
