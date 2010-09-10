@@ -62,12 +62,14 @@ def js_failure_response():
     '''
     return http.HttpResponse('{success: false}')
 
-def js_close_window(win):
+def js_close_window(win, forceClose=False):
     '''
     Возвращает JS код закрывающий окно win
     '''
     assert isinstance(win, BaseExtWindow)
-    return 'function(){Ext.getCmp("%s").close();}' % win.client_id
+    forceClose = 'true' if forceClose else 'false'
+    return 'function(){Ext.getCmp("%s").close(%s);}' % (win.client_id, 
+                                                        forceClose,)
 
 def js_submit_ajax(url, params = {}, success_handler = None, failure_handler = None):
     '''
