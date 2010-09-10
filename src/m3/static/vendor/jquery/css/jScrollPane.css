@@ -7,7 +7,7 @@
 
 .jScrollPaneTrack 		{ 
 	position: absolute; 
-	background: url(../images/scroll_back.png) center center no-repeat;
+	background: url(../images/scroll_back.png) center center repeat-y;
 	cursor: pointer; 
 	right: 0; 
 	top: 0; 
@@ -44,7 +44,7 @@ a.jScrollArrowUp {
 	text-indent: -2000px;
 	overflow: hidden;
 	background:url(../images/scroll_top.png) no-repeat center top;
-	height:47px;
+	height:23px;
 }
 a.jScrollArrowDown {
 	display: block;
@@ -55,7 +55,7 @@ a.jScrollArrowDown {
 	text-indent: -2000px;
 	overflow: hidden;
 	background:url(../images/scroll_bott.png) no-repeat center top;
-	height:47px;
+	height:30px;
 }
 a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 	/*background-color: #f00;*/
