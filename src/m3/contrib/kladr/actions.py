@@ -100,16 +100,29 @@ class StreetRowsAction(Action):
         return PreJsonResult(result)
 
 def GetAddr(place, street = None, house = None, flat = None):
-    qs = KladrGeo.objects.filter(code=place)
-    if qs.count() > 0:
-        place = qs.get()
-    else:
-        return ''
-    qs = KladrStreet.objects.filter(code=street)
-    if qs.count() > 0:
-        street = qs.get()
-    else:
-        street = None
+    """
+    Формирует строку полного адреса по выбранным значениям КЛАДРа
+    """
+    # Получаем населенный пункт
+    if isinstance(place, (str, unicode)):
+        qs = KladrGeo.objects.filter(code=place)
+        if qs.count() > 0:
+            place = qs.get()
+        else:
+            return ''
+    elif not isinstance(place, KladrGeo):
+        raise TypeError()
+        
+    # Получаем улицу
+    if isinstance(street, (str, unicode)):
+        qs = KladrStreet.objects.filter(code=street)
+        if qs.count() > 0:
+            street = qs.get()
+        else:
+            street = None
+    elif (street!=None) and (not isinstance(street, KladrStreet)):
+        raise TypeError()
+
     '''
     типАдреса = 0 или 1
     текИндекс = 0
