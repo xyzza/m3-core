@@ -28,6 +28,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		this.place = new Ext.form.ComboBox({
 			name: params.place_field_name,
 			fieldLabel: params.place_label,
+			allowBlank: params.place_allow_blank,
 			hideTrigger: true,
 			minChars: 2,
 			emptyText: 'Введите населенный пункт...',
@@ -67,6 +68,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			this.street = new Ext.form.ComboBox({
 				name: params.street_field_name,
 				fieldLabel: params.street_label,
+				allowBlank: params.street_allow_blank,
 				hideTrigger: true,
 				minChars: 2,
 				emptyText: 'Введите улицу...',

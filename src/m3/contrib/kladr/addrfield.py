@@ -35,6 +35,9 @@ class ExtAddrComponent(BaseExtContainer):
         self.flat_label = u'Квартира'
         self.addr_label = u'Адрес'
         
+        self.place_allow_blank = True
+        self.street_allow_blank = True
+        
         self.pack = kladr_controller.find_pack(KLADRPack)
         #self.action_getaddr = self.pack.get_addr_action
         self.level = ExtAddrComponent.FLAT
@@ -88,8 +91,10 @@ class ExtAddrComponent(BaseExtContainer):
         self._put_params_value('view_mode', self.view_mode)
         self._put_params_value('place_value', (self.place.value if self.place and self.place.value else ''))
         self._put_params_value('place_text', (self.pack.get_place_name(self.place.value) if self.place and self.place.value else ''))
+        self._put_params_value('place_allow_blank', (True if self.place_allow_blank else False))
         self._put_params_value('street_value', (self.street.value if self.street and self.street.value else ''))
         self._put_params_value('street_text', (self.pack.get_street_name(self.street.value) if self.street and self.street.value else ''))
+        self._put_params_value('street_allow_blank', (True if self.street_allow_blank else False))
         self._put_params_value('house_value', (self.house.value if self.house and self.house.value else ''))
         self._put_params_value('flat_value', (self.flat.value if self.flat and self.flat.value else ''))
         self._put_params_value('addr_value', (self.addr.value if self.addr and self.addr.value else ''))
