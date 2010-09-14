@@ -21,7 +21,19 @@
    <!-- Declare the viewer configuration, and the default content/action bindings -->
    <extension
          point="org.eclipse.ui.navigator.viewer">
-      <viewer viewerId="ru.bars_open.med.designer.navigator.view"/>
+      <viewer
+            viewerId="ru.bars_open.med.designer.navigator.view">
+         <popupMenu
+               allowsPlatformContributions="true"
+               id="ru.bars_open.med.designer.navigator.view.menu">
+            <insertionPoint
+                  name="group.new">
+            </insertionPoint>
+            <insertionPoint
+                  name="group.goto">
+            </insertionPoint>
+         </popupMenu>
+      </viewer>
       <viewerContentBinding viewerId="ru.bars_open.med.designer.navigator.view">
          <includes>
             <contentExtension pattern="org.eclipse.ui.navigator.resourceContent"/>
@@ -78,6 +90,24 @@
             <contentExtension pattern="ru.bars_open.med.designer.navigator.propertiesContent"/>
          </includes>
       </viewerContentBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="false"
+            id="ru.bars_open.med.designer.navigator.actions.properiesResorce"
+            objectClass="ru.bars_open.med.designer.navigator.PropertiesTreeData">
+         <action
+               class="ru.bars_open.med.designer.navigator.DeleteModel"
+               enablesFor="1"
+               helpContextId="org.eclipse.ui.edit.delete"
+               icon="icons/prop_ps.gif"
+               id="ru.bars_open.med.designer.navigator.actions.DeleteModel"
+               label="Удалить модель"
+               menubarPath="group.edit"
+               tooltip="Удалить модель">
+         </action>
+      </objectContribution>
    </extension>
   
 </plugin>
