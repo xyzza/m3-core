@@ -34,7 +34,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		this.hideTriggerDictSelect = false;
 		
 		// кнопка редактирования элемента
-		this.hideTriggerDictEdit = false;
+		this.hideTriggerDictEdit = true;
 		
 		// Количество записей, которые будут отображаться при нажатии на кнопку 
 		// выпадающего списка
@@ -311,6 +311,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		if (this.fireEvent('afterselect', this, record.data[this.valueField], record.data[this.displayField] )) {
 			Ext.m3.AdvancedComboBox.superclass.onSelect.call(this, record, index);
 			this.showClearBtn();
+			this.showEditBtn();
 			this.fireEvent('change', this, record.data[this.valueField || this.displayField]);
 			this.fireEvent('changed', this);
 		}

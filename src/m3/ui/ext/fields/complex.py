@@ -200,9 +200,16 @@ class ExtDictSelectField(BaseExtTriggerField):
         elif hasattr(ppack, 'tree_model') and ppack.tree_model:
             self.edit_url = ppack.get_edit_node_url()
             self.autocomplete_url = ppack.get_nodes_like_rows_url()
-            
+        
         else:
-            raise Exception('Pack %s must be a dictionary pack instance.' % ppack)
+            # для иных случаев (например паки без моделей) попробуем найти соответствующие методы
+            if hasattr(ppack, 'get_rows_url') or hasattr(ppack, 'get_edit_url'):  
+                if hasattr(ppack, 'get_rows_url'):
+                    self.autocomplete_url = ppack.get_rows_url()
+                if hasattr(ppack, 'get_edit_url'):
+                    self.edit_url = ppack.get_edit_url()
+            else:
+                raise Exception('Pack %s must be a dictionary pack instance.' % ppack)
         
         # url формы выбора
         self.url = ppack.get_select_url()
