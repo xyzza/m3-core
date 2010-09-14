@@ -205,9 +205,9 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 				title: "Не сохранять изменения",
 				msg: "Внимание! Данные были изменены! \
 								Закрыть без сохранения изменений?",
-				buttons: Ext.Msg.OKCANCEL,
+				buttons: Ext.Msg.YESNO,
 				fn: function(buttonId, text, opt){
-					if (buttonId === 'ok') {
+					if (buttonId === 'yes') {
 						Ext.m3.EditWindow.superclass.close.call(scope);
 					}
 				},
