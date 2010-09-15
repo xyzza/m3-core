@@ -38,8 +38,6 @@ class WorkflowCache(object):
         try:
             if self.loaded:
                 return
-            for app_name in settings.INSTALLED_APPS:
-                print app_name
         finally:
             self.write_lock.release()
     
