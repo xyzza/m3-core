@@ -9,20 +9,61 @@ import string
 from django.db import models as dj_models
 
 class M3JSONEncoder(json.JSONEncoder):
+    def __init__(self, *args, **kwargs):
+        self.dict_list = kwargs.pop('dict_list',None)
+        super(M3JSONEncoder,self).__init__(*args, **kwargs)
+        
     def default(self, obj):
-        cleaned_dict = {}
+        # обработаем простейшие объекты, которые не обрабатываются стандартным способом
+        if isinstance(obj, datetime.datetime):
+            return '%02d.%02d.%04d %02d:%02d:%02d' % (obj.day,obj.month,obj.year,obj.hour,obj.minute,obj.second)
+        elif isinstance(obj, datetime.date):
+            return '%02d.%02d.%04d' % (obj.day,obj.month,obj.year)
+        elif isinstance(obj, datetime.time):
+            return obj.strftime('%H:%M')
+        elif isinstance(obj, decimal.Decimal):
+            return str(obj)
         # Прошерстим методы и свойства, найдем те, которые могут передаваться на клиента
         # Клонирование словаря происходит потому, что сериализуемые методы переопределяются результатами своей работы
+        cleaned_dict = {}
         dict = copy.copy(obj.__dict__)
+        # Для джанговских моделей функция dir дополнительно возвращает "ссылки" на 
+        # связанные модели. Их не нужно сериализовать, а также при обращении к ним 
+        # происходят запросы к БД. Причем на практике есть случаи, когда эти запросы 
+        # вызвают эксепешны(например, если изменен id'шник объекта)
+        related_objs_attrs = []
+        if isinstance(obj, dj_models.Model):
+            related_objs = obj._meta.get_all_related_objects()
+            related_objs_attrs = [ro.var_name for ro in related_objs]
+            
+        # если передали специальный список атрибутов, то пройдемся по ним 
+        # атрибуты вложенных объектов разделены точкой
+        # будут созданы вложенные объекты для кодирования
+        if self.dict_list:
+            for item in self.dict_list:
+                lst = item.split('.')
+                value = obj
+                arr = dict
+                last_attr = None
+                for attr in lst:
+                    if last_attr:
+                        if not arr.has_key(last_attr):
+                            arr[last_attr] = {}
+                        else:
+                            if not isinstance(arr[last_attr], tuple):
+                                value = None
+                                break
+                        arr = arr[last_attr]
+                    if hasattr(value, attr):
+                        value = getattr(value, attr)
+                    else:
+                        value = None
+                        break
+                    last_attr = attr
+                if value:
+                    arr[attr] = value        
+
         for attr in dir(obj):
-            # Для джанговских моделей функция dir дополнительно возвращает "ссылки" на 
-            # связанные модели. Их не нужно сериализовать, а также при обращении к ним 
-            # происходят запросы к БД. Причем на практике есть случаи, когда эти запросы 
-            # вызвают эксепешны(например, если изменен id'шник объекта)
-            related_objs_attrs = []
-            if isinstance(obj, dj_models.Model):
-                related_objs = obj._meta.get_all_related_objects()
-                related_objs_attrs = [ro.var_name for ro in related_objs]
             # Во всех экземплярах моделей Django есть атрибут "objects", т.к. он является статик-атрибутом модели.
             # Но заботливые разработчики джанги позаботились о нас и выкидывают спицифичную ошибку 
             # "Manager isn't accessible via %s instances" при обращении из экземпляра. Поэтому "objects" нужно игнорировать.
@@ -54,20 +95,7 @@ class M3JSONEncoder(json.JSONEncoder):
                     cleaned_dict[attribute[1:len(attribute)-6] + '_ref_name'] = dict['name']
                 except:
                     pass
-            elif isinstance(dict[attribute], datetime.datetime):
-                #cleaned_dict[attribute] = dict[attribute].strftime('%d.%m.%Y %H:%M:%S')
-                # для дат, до 1900 года метод выше не работает
-                time = dict[attribute]
-                cleaned_dict[attribute] = '%02d.%02d.%04d %02d:%02d:%02d' % (time.day,time.month,time.year,time.hour,time.minute,time.second)
-            elif isinstance(dict[attribute], datetime.date):
-                #cleaned_dict[attribute] = dict[attribute].strftime('%d.%m.%Y')
-                # для дат, до 1900 года метод выше не работает
-                day = dict[attribute]
-                cleaned_dict[attribute] = '%02d.%02d.%04d' % (day.day,day.month,day.year)
-            elif isinstance(dict[attribute], datetime.time):
-                cleaned_dict[attribute] = dict[attribute].strftime('%H:%M')
-            elif isinstance(dict[attribute], decimal.Decimal):
-                cleaned_dict[attribute] = str(dict[attribute])
             else:
+                # просто передадим значение, оно будет закодировано в дальнейшем
                 cleaned_dict[attribute] = dict[attribute]
         return cleaned_dict

@@ -100,7 +100,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             
             self.select_button = select_btn
             
-        elif value == ExtDictionaryWindow.SELECT_MODE:
+        elif value == ExtDictionaryWindow.LIST_MODE:
             
             if self.__panel_list_view:
                 self.items.remove(self.__panel_list_view)

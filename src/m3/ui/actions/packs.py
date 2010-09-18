@@ -109,7 +109,10 @@ class DictRowsAction(Action):
         user_sort = request.REQUEST.get('sort')
         if direction == 'DESC':
             user_sort = '-' + user_sort
-        return PreJsonResult(self.parent.get_rows(offset, limit, filter, user_sort), self.parent.secret_json)
+        dict_list = []
+        for item in self.parent.list_columns:
+            dict_list.append(item[0])
+        return PreJsonResult(self.parent.get_rows(offset, limit, filter, user_sort), self.parent.secret_json, dict_list = dict_list)
     
 class DictLastUsedAction(Action):
     '''
