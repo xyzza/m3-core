@@ -56,13 +56,15 @@ class PreJsonResult(ActionResult):
     готовых к сериализации в JSON формат и отправке в response.
     Для данного класса в self.data храниться список некоторых объектов. 
     Метод self.get_http_response выполняет сериализацию этих данных в строковый формат.
+    dict_list - Указываются объекты и/или атрибуты вложенных объектов для более глубокой сериализации.
     '''
-    def __init__(self, data = None, secret_values = False):
+    def __init__(self, data = None, secret_values = False, dict_list = None):
         super(PreJsonResult, self).__init__(data)
         self.secret_values = secret_values
+        self.dict_list = dict_list 
     
     def get_http_response(self):
-        encoder = M3JSONEncoder()
+        encoder = M3JSONEncoder(dict_list = self.dict_list)
         result = encoder.encode(self.data)
         response = http.HttpResponse(result, mimetype='application/json')
         if self.secret_values:
