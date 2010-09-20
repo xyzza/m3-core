@@ -531,6 +531,8 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         #TODO: возможно это не надо было делать - раз не туда обратились, значит сами виноваты
         if self.list_model:
             query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
+            # Подтягиваем группу, т.к. при сериализации она требуется
+            query = query.select_related(self.list_parent_field)
             query = utils.apply_sort_order(query, self.list_columns, self.list_sort_order)
             query = utils.apply_search_filter(query, filter, self.filter_fields)
             # Для работы пейджинга нужно передавать общее количество записей

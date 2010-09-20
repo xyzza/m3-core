@@ -111,7 +111,11 @@ class DictRowsAction(Action):
             user_sort = '-' + user_sort
         dict_list = []
         for item in self.parent.list_columns:
-            dict_list.append(item[0])
+            if isinstance(item, list):
+                dict_list.append(item[0])
+            elif isinstance(item, dict) and item.get('data_index'):
+                dict_list.append(item['data_index'])
+
         return PreJsonResult(self.parent.get_rows(offset, limit, filter, user_sort), self.parent.secret_json, dict_list = dict_list)
     
 class DictLastUsedAction(Action):
