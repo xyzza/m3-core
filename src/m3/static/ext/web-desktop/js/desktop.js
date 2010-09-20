@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.1.1
- * Copyright(c) 2006-2010 Ext JS, LLC
+ * Ext JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -119,12 +119,10 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
         this.mon(toolsUl, 'mouseover', this.onMouseOver, this);
         this.mon(toolsUl, 'mouseout', this.onMouseOut, this);
 
-        if (this.items) {
-            this.items.each(function(item){
-        	item.parentMenu = this;	 
-            }, this);
-        }
- 
+        this.items.each(function(item){
+            item.parentMenu = this;
+        }, this);
+
         this.toolItems.each(
             function(item){
                 var li = document.createElement("li");
@@ -252,9 +250,10 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
     }
 });
 
+
 /*!
- * Ext JS Library 3.1.1
- * Copyright(c) 2006-2010 Ext JS, LLC
+ * Ext JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -453,11 +452,11 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
         if(this.resizeButtons && this.rendered){
             this.autoSize();
         }
-        
         if(this.enableScroll && this.rendered){
             this.autoScroll();
         }
     },
+
     autoSize : function(){
         var count = this.items.length;
         var ow = this.el.dom.offsetWidth;
@@ -477,10 +476,11 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
 
             var tw = Ext.get(btns[i].id).findParent('li').offsetWidth;
             var iw = btn.offsetWidth;
+
             btn.style.width = (each - (tw-iw)) + 'px';
         }
     },
-	
+
     autoScroll : function(){
         var count = this.items.length;
         var ow = this.el.dom.offsetWidth;
@@ -776,15 +776,16 @@ Ext.ux.Clock = Ext.extend(Ext.Toolbar.TextItem,{
 Ext.reg('ux_clock', Ext.ux.Clock);
 
 /*!
- * Ext JS Library 3.1.1
- * Copyright(c) 2006-2010 Ext JS, LLC
+ * Ext JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
 Ext.Desktop = function(app){
     this.taskbar = new Ext.ux.TaskBar(app);
+    this.xTickSize = this.yTickSize = 1;
     var taskbar = this.taskbar;
-    
+
     var desktopEl = Ext.get('x-desktop');
     var taskbarEl = Ext.get('ux-taskbar');
     var shortcuts = Ext.get('x-shortcuts');
@@ -895,6 +896,7 @@ Ext.Desktop = function(app){
          * >>
         var win = new (cls||Ext.Window)(
             Ext.applyIf(config||{}, {
+                renderTo: desktopEl,
                 manager: windows,
                 minimizable: true,
                 maximizable: true
@@ -909,7 +911,7 @@ Ext.Desktop = function(app){
         //});
 
         win.animateTarget = win.taskButton.el;
-        
+
         win.on({
             'activate': {
                 fn: markActive
@@ -927,7 +929,7 @@ Ext.Desktop = function(app){
                 fn: removeWin
             }
         });
-        
+
         layout();
         return win;
     };
@@ -939,21 +941,21 @@ Ext.Desktop = function(app){
     this.getWindow = function(id){
         return windows.get(id);
     }
-    
+
     this.getWinWidth = function(){
         var width = Ext.lib.Dom.getViewWidth();
         return width < 200 ? 200 : width;
     }
-        
+
     this.getWinHeight = function(){
-        var height = (Ext.lib.Dom.getViewHeight()-taskbarEl.getHeight() - toptoolbarEl.getHeight());
+        var height = (Ext.lib.Dom.getViewHeight()-taskbarEl.getHeight());
         return height < 100 ? 100 : height;
     }
-        
+
     this.getWinX = function(width){
         return (Ext.lib.Dom.getViewWidth() - width) / 2
     }
-        
+
     this.getWinY = function(height){
         return (Ext.lib.Dom.getViewHeight()-taskbarEl.getHeight() - height - toptoolbarEl.getHeight()) / 2;
     }
@@ -962,7 +964,8 @@ Ext.Desktop = function(app){
 
     if(shortcuts){
         shortcuts.on('click', function(e, t){
-            if(t = e.getTarget('td', shortcuts)){
+            var t = e.getTarget('td', shortcuts);
+			if(t){
                 e.stopEvent();
                 var module = app.getModule(t.id.replace('-shortcut', ''));
                 if(module){
@@ -973,10 +976,9 @@ Ext.Desktop = function(app){
     }
 };
 
-
 /*!
- * Ext JS Library 3.1.1
- * Copyright(c) 2006-2010 Ext JS, LLC
+ * Ext JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -1037,11 +1039,11 @@ Ext.extend(Ext.app.App, Ext.util.Observable, {
     },
 
     getModule : function(name){
-        var ms = this.modules;
-        for(var i = 0, len = ms.length; i < len; i++){
-            if(ms[i].id == name || ms[i].appType == name){
-                return ms[i];
-            }
+    	var ms = this.modules;
+    	for(var i = 0, len = ms.length; i < len; i++){
+    		if(ms[i].id == name || ms[i].appType == name){
+    			return ms[i];
+			}
         }
         return '';
     },
@@ -1066,8 +1068,8 @@ Ext.extend(Ext.app.App, Ext.util.Observable, {
 });
 
 /*!
- * Ext JS Library 3.1.1
- * Copyright(c) 2006-2010 Ext JS, LLC
+ * Ext JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */

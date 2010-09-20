@@ -5,7 +5,7 @@
  * http://www.extjs.com/license
  */
 html, body {
-	background:#408c1b url(../wallpapers/desktop.jpg) no-repeat left top;
+	background:#408c1b url(../wallpapers/desktop2.jpg) repeat-x left top;
     font: normal 12px tahoma, arial, verdana, sans-serif;
 	margin: 0;
 	padding: 0;
@@ -565,6 +565,10 @@ td.ux-taskButtons-edge {
 }
 
 /* Desktop Shortcuts */
+#x-shortcuts {
+    position: absolute;
+}
+
 #x-shortcuts td {
     float:left;
     margin:15px 0 0 15px;
