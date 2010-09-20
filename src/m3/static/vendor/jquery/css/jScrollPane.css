@@ -43,7 +43,7 @@ a.jScrollArrowUp {
 	right: 0;
 	text-indent: -2000px;
 	overflow: hidden;
-	background:url(../images/scroll_top.png) no-repeat center top;
+	background:url(../images/scrol_top_.png) no-repeat center top;
 	height:23px;
 }
 a.jScrollArrowDown {
@@ -54,7 +54,7 @@ a.jScrollArrowDown {
 	right: 0;
 	text-indent: -2000px;
 	overflow: hidden;
-	background:url(../images/scroll_bott.png) no-repeat center top;
+	background:url(../images/scrol_bot_.png) no-repeat center top;
 	height:30px;
 }
 a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
