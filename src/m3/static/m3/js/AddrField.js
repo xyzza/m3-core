@@ -38,7 +38,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			displayField: 'display_name',
 			valueField: 'code',
 			mode: 'remote',
-			hiddenName: params.place_field_name
+			hiddenName: params.place_field_name,
+			valueNotFoundText: ''
 		});		
 		this.place.setValue(params.place_value);
 		
@@ -78,7 +79,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				displayField: 'display_name',
 				valueField: 'code',
 				mode: 'remote',
-				hiddenName: params.street_field_name
+				hiddenName: params.street_field_name,
+        valueNotFoundText: ''
 			});
 			this.street.setValue(params.street_value);
 			
