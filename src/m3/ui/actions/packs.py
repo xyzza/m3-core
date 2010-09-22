@@ -111,7 +111,7 @@ class DictRowsAction(Action):
             user_sort = '-' + user_sort
         dict_list = []
         for item in self.parent.list_columns:
-            if isinstance(item, list):
+            if isinstance(item, (list, tuple)):
                 dict_list.append(item[0])
             elif isinstance(item, dict) and item.get('data_index'):
                 dict_list.append(item['data_index'])
