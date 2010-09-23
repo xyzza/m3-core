@@ -107,7 +107,7 @@ class ExtContainerTable(BaseExtContainer):
     def __init_table(self):
         self.__table = [list(range(self.__columns_count)) for col in range(self.__rows_count)]
         
-    def set_item(self, row, col, cmp, colspan=1):
+    def set_item(self, row, col, cmp, colspan=1, **kwargs):
         assert isinstance(cmp, ExtUIComponent)
         assert isinstance(colspan, int)
         cont = ExtContainer(layout = 'form', flex=colspan, style=dict(padding="0px"))
@@ -116,8 +116,8 @@ class ExtContainerTable(BaseExtContainer):
             cont.style = dict(padding="0px 0px 0px 5px")
         cmp.anchor = '100%'
         cont.items.append(cmp)
-        
         self.__table[row][col] = cont
+        self.set_properties(row,col,**kwargs)
         if colspan>1:
             self.__table[row][col+1:col+colspan] = [None,]*(colspan-1)
         
