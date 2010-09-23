@@ -9,4 +9,5 @@
 	{%if component.editor %} ,editor: {{ component.render_editor }} {%endif%}
 	{%if component.hidden %} ,hidden: true {%endif%}
 	{%if component.column_renderer %} ,renderer: {{ component.column_renderer }}{%endif%}
+	{%if component.tooltip %} ,tooltip: '{{ component.tooltip|safe}}'{%endif%}
 }
