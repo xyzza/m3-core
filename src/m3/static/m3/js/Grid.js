@@ -40,8 +40,8 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			funcRowContMenu = Ext.emptyFn;
 		}
 		
-		var plugins = [];
-		var bundedColumns = params.plugins.bundedColumns;
+		var plugins = params.plugins || [];
+		var bundedColumns = params.bundedColumns;
 		if (bundedColumns && bundedColumns instanceof Array &&
 			bundedColumns.length > 0) {
 

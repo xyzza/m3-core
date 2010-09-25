@@ -30,11 +30,16 @@ class ExtGrid(BaseExtPanel):
         # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен
         # чтобы знать когда нужен дополнительный column
         self.__checkbox = False
+        # перечень плугинов
+        self.plugins = []
         self.init_component(*args, **kwargs)
         
         # protected
         self.show_banded_columns = False
         self.banded_columns = SortedDict()
+    
+    def t_render_plugins(self):
+        return '[%s]' % ','.join(self.plugins) 
     
     def t_render_banded_columns(self):
         '''
@@ -197,9 +202,8 @@ class ExtGrid(BaseExtPanel):
             self._put_params_value('selModel', self.sm.render)
         
         self._put_params_value('columns', self.t_render_columns)
-        self._put_params_value('plugins',
-                               {'bundedColumns': self.t_render_banded_columns \
-                                    if self.show_banded_columns else ''})
+        self._put_params_value('plugins', self.t_render_plugins)
+        self._put_params_value('bundedColumns', self.t_render_banded_columns)
     
     def render(self):
         try:
@@ -228,6 +232,17 @@ class BaseExtGridColumn(ExtUIComponent):
         self.editor = None
         self.column_renderer = None
         self.tooltip = None
+        self.extra = {} #дополнительные свойства колонки
+
+    def t_render_extra(self):
+        lst = []
+        for key in self.extra.keys():
+            val = self.extra[key]
+            if isinstance(val,BaseExtComponent):
+                lst.append('%s:%s' % (key,val.render()))
+            elif isinstance(val,str):
+                lst.append('%s:%s' % (key,val))
+        return ','.join(lst)
                
     def render_editor(self):
         return self.editor.render()
