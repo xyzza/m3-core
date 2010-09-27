@@ -17,12 +17,7 @@ function createAdvancedTreeGrid(baseConfig, params){
  * @param {Object} params
  */
 function createGridPanel(baseConfig, params){
-  if (baseConfig.editor) {
-    return new Ext.m3.EditorGridPanel(baseConfig, params);
-  }
-  else {
-	  return new Ext.m3.GridPanel(baseConfig, params);
-	}
+	return new Ext.m3.GridPanel(baseConfig, params);
 }
 
 /**
@@ -31,12 +26,7 @@ function createGridPanel(baseConfig, params){
  * @param {Object} params
  */
 function createObjectGrid(baseConfig, params){
-  if (baseConfig.editor) {
-    return new Ext.m3.EditorObjectGrid(baseConfig, params);
-  }
-  else {
-	  return new Ext.m3.ObjectGrid(baseConfig, params);
-	}
+	return new Ext.m3.ObjectGrid(baseConfig, params);
 }
 
 /**

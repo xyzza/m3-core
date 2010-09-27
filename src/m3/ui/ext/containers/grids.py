@@ -183,7 +183,7 @@ class ExtGrid(BaseExtPanel):
         self._put_config_value('enableDragDrop', self.drag_drop)
         self._put_config_value('ddGroup', self.drag_drop_group)
         self._put_config_value('view', self.t_render_view, self.view)
-        self._put_config_value('editor', self.editor)
+        self._put_config_value('autoExpandColumn', self.auto_expand_column)
         self._put_config_value('store', self.t_render_store, self.get_store())   
         self._put_config_value('viewConfig', {'forceFit':self.force_fit})
     
