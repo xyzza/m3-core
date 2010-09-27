@@ -115,9 +115,13 @@ class ExtTextArea(BaseExtField):
     '''Большое :) Текстовое поле'''
     def __init__(self, *args, **kwargs):
         super(ExtTextArea, self).__init__(*args, **kwargs)
+        self.mask_re = None
         self.template = 'ext-fields/ext-text-area.js'
         self.init_component(*args, **kwargs)
-
+    
+    def t_render_mask_re(self):
+        return '/%s/' % self.mask_re
+        
     def render(self):
         if self.value:
             self.value = normalize(self.value)
