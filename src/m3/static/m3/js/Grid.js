@@ -9,7 +9,7 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		
 		// Добавлене selection model если нужно
 		var selModel = params.selModel;
-		var gridColumns = params.columns || [];
+		var gridColumns = params.colModel || [];
 		if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
 			gridColumns.unshift(selModel);
 		}
@@ -70,7 +70,7 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 
 		var config = Ext.applyIf({
 			sm: selModel
-			,columns: gridColumns
+			,colModel: gridColumns
 			,plugins: plugins
 		}, baseConfig);
 		
@@ -85,7 +85,7 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     
     // Добавлене selection model если нужно
     var selModel = params.selModel;
-    var gridColumns = params.columns || [];
+    var gridColumns = params.colModel || [];
     if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
       gridColumns.unshift(selModel);
     }
@@ -146,7 +146,7 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 
     var config = Ext.applyIf({
       sm: selModel
-      ,columns: gridColumns
+      ,colModel: gridColumns
       ,plugins: plugins
     }, baseConfig);
     
