@@ -298,6 +298,7 @@ class ExtPanel(BaseExtPanel):
         self.base_cls = ''
         self.body_cls = ''
         self.anchor = ''
+        self.auto_load = None
         self.init_component(*args, **kwargs)
     
     @property
