@@ -32,6 +32,10 @@ class ExtGrid(BaseExtPanel):
         self.__checkbox = False
         # перечень плугинов
         self.plugins = []
+        # модель колонок
+        self.__cm = None
+        self.col_model = ExtGridDefaultColumnModel()
+        
         self.init_component(*args, **kwargs)
         
         # protected
@@ -135,7 +139,16 @@ class ExtGrid(BaseExtPanel):
         super(ExtGrid, self).pre_render()
         if self.store:
             self.store.action_context = self.action_context
-            
+    
+    @property
+    def col_model(self):
+        return self.__cm
+    
+    @col_model.setter
+    def col_model(self, value):
+        self.__cm = value
+        self.__cm.grid = self
+        
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------
@@ -172,6 +185,7 @@ class ExtGrid(BaseExtPanel):
     def handler_rowcontextmenu(self, menu):
         menu.container = self
         self._listeners['rowcontextmenu'] = menu
+ 
     #----------------------------------------------------------------------------
     
     def render_base_config(self):
@@ -201,7 +215,7 @@ class ExtGrid(BaseExtPanel):
         if self.sm:
             self._put_params_value('selModel', self.sm.render)
         
-        self._put_params_value('columns', self.t_render_columns)
+        self._put_params_value('colModel', self.col_model.render)
         self._put_params_value('plugins', self.t_render_plugins)
         self._put_params_value('bundedColumns', self.t_render_banded_columns)
     
@@ -232,7 +246,8 @@ class BaseExtGridColumn(ExtUIComponent):
         self.editor = None
         self.column_renderer = None
         self.tooltip = None
-        self.extra = {} #дополнительные свойства колонки
+        # дополнительные атрибуты колонки
+        self.extra = {}
 
     def t_render_extra(self):
         lst = []
@@ -242,6 +257,8 @@ class BaseExtGridColumn(ExtUIComponent):
                 lst.append('%s:%s' % (key,val.render()))
             elif isinstance(val,str):
                 lst.append('%s:%s' % (key,val))
+            elif isinstance(val,bool):
+                lst.append('%s:%s' % (key,str(val).lower()))
         return ','.join(lst)
                
     def render_editor(self):
@@ -317,7 +334,26 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
 
     def render(self):
         return 'new Ext.grid.CellSelectionModel()'
-    
+
+
+
+class ExtGridDefaultColumnModel(BaseExtComponent):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridDefaultColumnModel, self).__init__(*args, **kwargs)
+        self.grid = None
+        self.init_component(*args, **kwargs)
+
+    def render(self):
+        return 'new Ext.grid.ColumnModel({columns:%s})' % self.grid.t_render_columns()
+
+class ExtGridLockingColumnModel(BaseExtComponent):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridLockingColumnModel, self).__init__(*args, **kwargs)
+        self.grid = None
+        self.init_component(*args, **kwargs)
+
+    def render(self):
+        return 'new Ext.ux.grid.LockingColumnModel({columns:%s})' % self.grid.t_render_columns()
     
 class ExtAdvancedTreeGrid(ExtGrid):
     '''
@@ -396,3 +432,15 @@ class ExtGridGroupingView(BaseExtComponent):
     # 'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]} 
     #    {[values.rs.length > 1 ? "Объекта" : "Объект"]})'"""
     # но проблемы с обработкой двойных кавычек
+
+class ExtGridLockingView(BaseExtComponent):
+    '''
+    Компонент используемый для блокирования колонок
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtGridLockingView, self).__init__(*args, **kwargs)
+        self.init_component(*args, **kwargs)
+        
+    def render(self):
+        result = 'new Ext.ux.grid.LockingGridView()'
+        return result
