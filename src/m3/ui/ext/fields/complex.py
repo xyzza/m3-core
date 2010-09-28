@@ -36,6 +36,10 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.template = 'ext-fields/ext-dict-select-field.js'
         
         self.hide_trigger = True 
+        self.hide_clear_trigger = False
+        self.hide_edit_trigger = False
+        self.hide_dict_select_trigger = False
+        
         self.min_chars = 2 # количество знаков, с которых начинаются запросы на autocomplete
         
         self.set_store(ExtJsonStore())
@@ -249,6 +253,11 @@ class ExtDictSelectField(BaseExtTriggerField):
                                            'contextJson':  action_context})
         
         self._put_params_value('defaultText', self.default_text)
+        
+        self._put_params_value('hideClearTrigger', self.hide_clear_trigger)
+        self._put_params_value('hideEditTrigger', self.hide_edit_trigger)
+        self._put_params_value('hideDictSelectTrigger', self.hide_dict_select_trigger)
+        
         self._put_params_value('defaultValue', self.value)
         self._put_params_value('customTriggers', self.t_render_triggers, self._triggers )
         

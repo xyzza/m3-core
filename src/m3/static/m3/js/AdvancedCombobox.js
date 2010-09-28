@@ -25,16 +25,19 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		this.defaultText = null;
 		
 		// кнопка очистки
-		this.hideTriggerClear = true;
+		this.hideTriggerClear = params.hideClearTrigger || false;
 		
 		// кнопка выбора из выпадающего списка
 		this.hideTriggerDropDown = false;
 		
 		// кнопка выбора из справочника
-		this.hideTriggerDictSelect = false;
+		this.hideTriggerDictSelect =  params.hideDictSelectTrigger || false;
 		
 		// кнопка редактирования элемента
 		this.hideTriggerDictEdit = true;
+		if (!params.hideEditTrigger){
+			this.hideTriggerDictEdit = params.hideEditTrigger;
+		}
 		
 		// Количество записей, которые будут отображаться при нажатии на кнопку 
 		// выпадающего списка
@@ -124,9 +127,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		if (!this.actionEditUrl) {
 			this.hideTriggerDictEdit = true;
 		}
-		if ( !this.getValue() ) {
-			this.hideTriggerClear = true;
-		}
+		
 		if (this.hideBaseTrigger){
 			this.hideTriggerDropDown = true;
 		}
@@ -226,6 +227,11 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		this.baseTriggers[1].hide = this.hideTriggerDropDown;
 		this.baseTriggers[2].hide = this.hideTriggerDictSelect;
 		this.baseTriggers[3].hide = this.hideTriggerDictEdit;
+		
+		if (!this.getValue()) {
+			this.baseTriggers[0].hide = true;
+			this.baseTriggers[3].hide = true; 
+		}
 	}
 	
 	// см. TwinTriggerField
@@ -320,8 +326,10 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Показывает кнопку очистки значения
 	 */
 	,showClearBtn: function(){
-		this.el.parent().setOverflow('hidden');
-		this.getTrigger(0).show();
+		if (!this.hideTriggerClear) {
+			this.el.parent().setOverflow('hidden');
+			this.getTrigger(0).show();
+		}
 	}
 	/**
 	 * Скрывает кнопку очистки значения
@@ -334,7 +342,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Показывает кнопку открытия карточки элемента
 	 */
 	,showEditBtn: function(){
-		if (this.actionEditUrl) {
+		if (this.actionEditUrl && !this.hideTriggerDictEdit && this.getValue()) {
 			this.el.parent().setOverflow('hidden');
 			this.getTrigger(3).show();
 		}
