@@ -136,6 +136,14 @@ class ExtCheckBox(BaseExtField):
         self.box_label = None
         self.init_component(*args, **kwargs)
         
+    @property
+    def handler_check(self):
+        return self._listeners.get('check')
+    
+    @handler_check.setter
+    def handler_check(self, function):
+        self._listeners['check'] = function
+        
         
 class ExtComboBox(BaseExtTriggerField):
     '''Поле выпадающий список - combobox'''
