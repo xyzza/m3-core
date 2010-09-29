@@ -217,7 +217,8 @@ class ExtGrid(BaseExtPanel):
         
         self._put_params_value('colModel', self.col_model.render)
         self._put_params_value('plugins', self.t_render_plugins)
-        self._put_params_value('bundedColumns', self.t_render_banded_columns)
+        if self.show_banded_columns:
+            self._put_params_value('bundedColumns', self.t_render_banded_columns)
     
     def render(self):
         try:
@@ -354,6 +355,16 @@ class ExtGridLockingColumnModel(BaseExtComponent):
 
     def render(self):
         return 'new Ext.ux.grid.LockingColumnModel({columns:%s})' % self.grid.t_render_columns()
+
+class ExtGridLockingHeaderGroupColumnModel(BaseExtComponent):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridLockingHeaderGroupColumnModel, self).__init__(*args, **kwargs)
+        self.grid = None
+        self.init_component(*args, **kwargs)
+
+    def render(self):
+        return 'new Ext.ux.grid.LockingGroupColumnModel({columns:%s})' % self.grid.t_render_columns()
+
     
 class ExtAdvancedTreeGrid(ExtGrid):
     '''
@@ -443,4 +454,18 @@ class ExtGridLockingView(BaseExtComponent):
         
     def render(self):
         result = 'new Ext.ux.grid.LockingGridView()'
+        return result
+
+class ExtGridLockingHeaderGroupView(BaseExtComponent):
+    '''
+    Компонент используемый для блокирования колонок и их группировки
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtGridLockingHeaderGroupView, self).__init__(*args, **kwargs)
+        self.grid = None
+        self.init_component(*args, **kwargs)
+        
+    def render(self):
+        print self.grid.t_render_banded_columns()
+        result = 'new Ext.ux.grid.LockingHeaderGroupGridView({rows:%s})' % self.grid.t_render_banded_columns()
         return result
