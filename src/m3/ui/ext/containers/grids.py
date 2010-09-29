@@ -466,6 +466,5 @@ class ExtGridLockingHeaderGroupView(BaseExtComponent):
         self.init_component(*args, **kwargs)
         
     def render(self):
-        print self.grid.t_render_banded_columns()
         result = 'new Ext.ux.grid.LockingHeaderGroupGridView({rows:%s})' % self.grid.t_render_banded_columns()
         return result
