@@ -4,14 +4,16 @@ Created on 27.02.2010
 
 @author: prefer
 '''
+from django.db import models
+
+from base import BaseExtField
 
 from m3.ui import actions
-from base import BaseExtField
 from m3.ui.ext.misc import ExtJsonStore
 from m3.ui.ext.fields.base import BaseExtTriggerField
 from m3.ui.ext.base import BaseExtComponent
-from m3.helpers.datastructures import TypedList
 from m3.ui.actions import ControllerCache
+from m3.helpers.datastructures import TypedList
 
 class ExtDictSelectField(BaseExtTriggerField):
     '''
@@ -172,6 +174,14 @@ class ExtDictSelectField(BaseExtTriggerField):
         self.autocomplete_url = registered_pack.rows_action.get_absolute_url()
         self.bind_pack = registered_pack # TODO: можно ли обойтись без bind_back?
     
+    def set_value_from_model(self, obj):
+        """
+        Устанавливает значения value и default_text по экземпляру модели obj.
+        Это позволяет избежать двойного присваивания в коде.
+        """
+        assert isinstance(obj, models.Model), '%s must be a Django model instance.' % obj
+        self.value = getattr(obj, self.value_field)
+        self.default_text = getattr(obj, self.display_field)
     
     @property
     def pack(self):
