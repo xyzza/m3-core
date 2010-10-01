@@ -2,7 +2,7 @@
  * Excel report generator for platform BARS M3
  * Author: Safiullin Vadim
  * License: BSD
- * Version: 0.2 development in progress
+ * Version: 0.3 development in progress
  */
 
 import java.io.FileInputStream;
@@ -13,13 +13,17 @@ import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Footer;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -103,8 +107,20 @@ class ReportGenerator{
 		this.root = json;
 		in_sheet = book.getSheetAt(0);
 		out_sheet = createShadowSheet();
+		
+		// Инициализация всяких констант ;)
+		initializeConstants();
 	}
 	
+	private void initializeConstants() {
+		// Это потому что я не умею определять HashMap сразу
+		COLOR_MAP.put("КРАСНЫЙ", IndexedColors.RED.getIndex());
+		COLOR_MAP.put("ЗАЛЕНЫЙ", IndexedColors.GREEN.getIndex());
+		COLOR_MAP.put("ЖЕЛТЫЙ", IndexedColors.YELLOW.getIndex());
+		COLOR_MAP.put("ЧЕРНЫЙ", IndexedColors.BLACK.getIndex());
+		COLOR_MAP.put("СИНИЙ", IndexedColors.BLUE.getIndex());
+	}
+
 	/**
 	 * Копирование ячейки 1 к 1
 	 * @param oldCell
@@ -269,6 +285,7 @@ class ReportGenerator{
 			Row out_row = out_sheet.getRow(write_to_row + inserted_rows);
 			if (out_row == null)
 				out_row = out_sheet.createRow(write_to_row + inserted_rows);
+			
 			// Если в комментарии автовысота, то не переписываем высоту строки
 			Comment comm = current_cell.getCellComment();
 			if (comm!=null)
@@ -277,14 +294,172 @@ class ReportGenerator{
 			if (!autoHeight)
 				out_row.setHeight(current_row.getHeight());
 			Cell out_cell = out_row.getCell(current_cell.getColumnIndex(), Row.CREATE_NULL_AS_BLANK);
+			
+			// Установка стиля оригинальной ячейке
+			processConditionTag(current_cell, obj);
+			
 			copyCell(current_cell, out_cell);
 			
 			// Подстановка значений в скопированный ячейке
 			processReplaceTag(out_cell, obj, "");
-			
 		}
 	}
+	
+	final static String TOKEN_IF = "#ЕСЛИ";
+	final static String TOKEN_THEN = " ТО";
+	
+	//TODO: Когда-нибудь тут будет больше условий ;)
+	final static String[] TOKEN_CONDITIONS = new String[]{"="};
+	
+	/*
+	 * Обрабатывает условия внутри комментария ячейки.
+	 * Пока поддерживается синтаксис ЕСЛИ условие ТО свойства.
+	 * @param outCell изменяемая ячейка
+	 * @param obj спозиционированный JSON объект
+	 */
+	private void processConditionTag(Cell outCell, JSONObject obj) throws Exception {
+		// Если ли комментарий вообще?
+		Comment comm = outCell.getCellComment();
+		if (comm == null)
+			return;
+		
+		// Пытаемся найти выражение "ЕСЛИ"
+		String comment_text = comm.getString().getString();
+		boolean has_token_if = (comment_text.length() > 5 && comment_text.toUpperCase().startsWith(TOKEN_IF));
+		if (!has_token_if)
+			return;
+		int token_if_index = comment_text.toUpperCase().indexOf(TOKEN_THEN);
+		if (has_token_if && token_if_index<0)
+			throw new Exception("Token " + TOKEN_IF + " found but token " + TOKEN_THEN + " not found.");
+			
+		// Найдено! Извлекаем условие и свойства
+		String condition_text = comment_text.substring(TOKEN_THEN.length() + 3, token_if_index);
+		String properties_text = comment_text.substring(token_if_index + TOKEN_THEN.length());
+		
+		// Проверяем удовлетворяется ли условие
+		int condition_index = 0;
+		int condition_token_len = 0;
+		for (String cond: TOKEN_CONDITIONS){
+			condition_index = condition_text.indexOf(cond);
+			if (condition_index > 0){
+				condition_token_len = cond.length();
+				break;
+			}
+		}
+		if (condition_index == 0)
+			throw new Exception("Condition not found!");
+		
+		// Извлекаем значение первого операнда из контекста 
+		String operand1 = condition_text.substring(0, condition_index);
+		Object value = obj.get(operand1);
+		if (value==null)
+			throw new Exception("Not found value for variable " + operand1);
+		operand1 = value.toString();
+		
+		// Извлекаем значения операндов
+		String operand2 = condition_text.substring(condition_index + condition_token_len);
 
+		boolean equal = false;
+		// Пробуем с целыми 
+		try{
+			int value1 = Integer.parseInt(operand1);
+			int value2 = Integer.parseInt(operand2);
+			if (value1 == value2)
+				equal = true;
+			
+		}catch (Exception e){
+			// Пробуем с булево
+			try{
+				boolean value1 = Boolean.parseBoolean(operand1);
+				boolean value2 = Boolean.parseBoolean(operand2);
+				if (value1 == value2)
+					equal = true;
+				
+			}catch (Exception ex){
+				// Пробуем со строками
+				try{
+					if (operand1.equals(operand2))
+						equal = true;
+					
+				}catch (Exception exc){
+					// Не удалось сравнить!
+					throw new Exception("Not comparable operands " + operand1 + " and " + operand2);
+				}
+			}
+		}
+		
+		//FIXME: Поддерживать больше условий!
+		if (equal){			
+			// Теперь начинается самое интересное! Нужно распарсить параметры новых свойств ячейки!
+			String[] properties = properties_text.split(",");
+			for (String prop: properties){
+				String[] lex = prop.replaceAll(" ", "").split(":");
+				if (lex.length != 2)
+					throw new Exception("Invalid property definition " + prop);
+
+				processCellProperty(outCell, lex[0], lex[1]);
+			}
+		}
+	}
+	
+	final static String PROP_FONT = "ШРИФТ";
+	final static String PROP_COLOR = "ЦВЕТ";
+	final static HashMap<String, Short> COLOR_MAP = new HashMap<String, Short>();
+	
+	/*
+	 * Задает ячейке новое свойство. Проблема заключается в том, что нельзя имзменить текущий стиль ячейки, 
+	 * потому что его могут использовать другие ячейки, соответственно они тоже изменяется.
+	 * Нужно создать новый стиль на основе старого.
+	 * @param outCell изменяемая ячейка
+	 * @param property название свойства
+	 * @param value значение свойства
+	 */
+	private void processCellProperty(Cell outCell, String property, String value) throws Exception{
+		// Создаем новый стиль на основе старого
+		Workbook wb = outCell.getSheet().getWorkbook();
+		CellStyle new_style = wb.createCellStyle();
+		new_style.cloneStyleFrom(outCell.getCellStyle());
+		// Создаем новый шрифт на основе старого
+		Font new_font = clone_font(wb, wb.getFontAt(new_style.getFontIndex()));
+		
+		if (property.equals(PROP_COLOR)){
+			Short color = COLOR_MAP.get(value);
+			if (color == null)
+				throw new Exception("Unknown color " + value);
+			new_font.setColor(color);
+			
+		} else if (property.equals(PROP_FONT)){
+			if (value.equals("ЖИРНЫЙ"))
+				new_font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+			else if (value.equals("ПОДЧЕРКНУТЫЙ"))
+				new_font.setUnderline(Font.U_SINGLE);
+			else if (value.equals("ЗАЧЕРКНУТЫЙ"))
+				new_font.setStrikeout(true);
+			else
+				throw new Exception("Unknown property value " + value);
+			
+		} else
+			throw new Exception("Unknown property " + property);
+		
+		new_style.setFont(new_font);
+		outCell.setCellStyle(new_style);
+	}
+
+	private Font clone_font(Workbook wb, Font font){
+		Font new_font = wb.createFont();
+		new_font.setBoldweight(font.getBoldweight());
+		new_font.setCharSet(font.getCharSet());
+		new_font.setColor(font.getColor());
+		new_font.setFontHeight(font.getFontHeight());
+		new_font.setFontHeightInPoints(font.getFontHeightInPoints());
+		new_font.setFontName(font.getFontName());
+		new_font.setItalic(font.getItalic());
+		new_font.setStrikeout(font.getStrikeout());
+		new_font.setTypeOffset(font.getTypeOffset());
+		new_font.setUnderline(font.getUnderline());
+		return new_font;
+	}
+	
 	/*
 	 * В строке может встретится специальный тег M3 обозначающий что в ней содержится
 	 * тип данных не поддерживаемый напрямую JSON
@@ -816,4 +991,5 @@ class RepeatedArea{
 //TODO: Переписать все к чертям собачим
 //TODO: Прославиться на весь мир
 //TODO: Написать о себе статью в википедии
+//TODO: Генератор превратился в антипаттерн "God Class". Нужно разбить на мелкие специализированные классы.
 
