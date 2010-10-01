@@ -13,7 +13,12 @@ class BaseExtField(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtField, self).__init__(*args, **kwargs)
         self.label = None
-        self.value = None
+        
+        # Нужно высавлять пустое значение для того, чтобы обязательные поля, 
+        # те, которые allow_blank=False подсвечивались автоматически после 
+        # рендеринга 
+        self.value = ""
+        
         self.label_style = {}
         self.read_only = False
         
