@@ -378,8 +378,13 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 			return;
 		var color = enable ? this.highlightColor : "transparent";
 		for(var fn in this.filterFields)
+    {
+      this.filterFields[fn].highlightCtrl.getEl().dom.style.backgroundColor = "transparent";
+    }
+		for(var fn in this.filters)
 		{
-			this.filterFields[fn].highlightCtrl.getEl().dom.style.backgroundColor = color;
+		  if(!Ext.isEmpty(this.filters[fn]))
+		    this.filterFields[fn].highlightCtrl.getEl().dom.style.backgroundColor = color;
 		}
 	},
 	
