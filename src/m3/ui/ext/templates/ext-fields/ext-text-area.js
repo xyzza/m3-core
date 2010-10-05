@@ -4,6 +4,7 @@ new Ext.form.TextArea({
 	
 	{% if component.mask_re %} ,maskRe: {{component.t_render_mask_re}} {% endif %}
 	,allowBlank: {{ component.allow_blank|lower }}
+	,invalidClass: 'm3-form-invalid'
 	{% if component.t_render_listeners %}
 		{# Прописываются имеющиеся обработчики #}
 		,listeners:{
