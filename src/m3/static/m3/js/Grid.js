@@ -29,7 +29,7 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		
 		var funcRowContMenu;
 		if (params.menus.rowContextMenu && 
-			params.menus.contextMenu instanceof Ext.menu.Menu) {
+			params.menus.rowContextMenu instanceof Ext.menu.Menu) {
 			
 			funcRowContMenu = function(grid, index, e){
 				e.stopEvent();
