@@ -68,8 +68,6 @@ class ExtDateField(BaseExtField):
         self._put_config_value('format', self.format)
         self._put_config_value('value', value)
 
-        
-    
     def render_params(self):
         super(ExtDateField, self).render_params()
         self._put_params_value('hideTriggerToday', self.hide_today_btn)
@@ -102,7 +100,8 @@ class ExtNumberField(BaseExtField):
         
         
 class ExtHiddenField(BaseExtField):
-    ''' Скрытое поле, которое не видно пользователю на форме, но хранит значение и передает его при submit'е '''
+    ''' Скрытое поле, которое не видно пользователю на форме, но хранит значение
+     и передает его при submit'е '''
     INT = 0
     STRING = 1
     def __init__(self, *args, **kwargs):
@@ -116,16 +115,20 @@ class ExtTextArea(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtTextArea, self).__init__(*args, **kwargs)
         self.mask_re = None
-        self.template = 'ext-fields/ext-text-area.js'
         self.init_component(*args, **kwargs)
     
     def t_render_mask_re(self):
         return '/%s/' % self.mask_re
+
+    def render_base_config(self):
+        super(ExtTextArea, self).render_base_config()
+        self._put_config_value('maskRe', self.t_render_mask_re, self.mask_re)
         
     def render(self):
-        if self.value:
-            self.value = normalize(self.value)
-        return super(ExtTextArea, self).render()
+        self.render_base_config()
+        
+        base_config = self._get_config_str()
+        return 'new Ext.form.TextArea({%s})' % base_config
 
 class ExtCheckBox(BaseExtField):
     '''Галочка выбора значения'''
