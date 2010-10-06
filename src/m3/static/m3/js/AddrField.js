@@ -87,6 +87,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			if (params.level > 2) {
 				this.house = new Ext.form.TextField({
 					name: params.house_field_name,
+                    allowBlank: params.house_allow_blank,
 					fieldLabel: params.house_label,
 					value: params.house_value,
 					emptyText: '',
