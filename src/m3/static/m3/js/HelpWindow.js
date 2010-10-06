@@ -8,20 +8,19 @@ Ext.m3.HelpWindow = Ext.extend(Ext.Window, {
         this.maximized = true;
         this.maximizable = true;
         this.minimizable = true;
-        this.width=800
-        this.height=550
+        this.width=800;
+        this.height=550;
         
         /*
         this.items = [{
             xtype: 'box',
             autoEl: {
-            tag: 'iframe',
-            width: '100%',
-            height: '100%',
-            src: 'http://127.0.0.1:90'
-        }
-        */
-    }]  
+                tag: 'iframe',
+                width: '100%',
+                height: '100%',
+                src: 'http://127.0.0.1:90'
+            }
+        }]*/  
     
     Ext.m3.HelpWindow.superclass.constructor.call(this, baseConfig);
   }
