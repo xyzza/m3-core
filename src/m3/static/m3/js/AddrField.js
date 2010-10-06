@@ -29,6 +29,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			name: params.place_field_name,
 			fieldLabel: params.place_label,
 			allowBlank: params.place_allow_blank,
+            readOnly: params.read_only,
 			hideTrigger: true,
 			minChars: 2,
 			emptyText: 'Введите населенный пункт...',
@@ -70,6 +71,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				name: params.street_field_name,
 				fieldLabel: params.street_label,
 				allowBlank: params.street_allow_blank,
+                readOnly: params.read_only,
 				hideTrigger: true,
 				minChars: 2,
 				emptyText: 'Введите улицу...',
@@ -88,6 +90,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				this.house = new Ext.form.TextField({
 					name: params.house_field_name,
                     allowBlank: params.house_allow_blank,
+                    readOnly: params.read_only,
 					fieldLabel: params.house_label,
 					value: params.house_value,
 					emptyText: '',
@@ -99,6 +102,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						name: params.flat_field_name,
 						fieldLabel: params.flat_label,
 						value: params.flat_value,
+                        allowBlank: params.flat_allow_blank,
+                        readOnly: params.read_only,
 						emptyText: '',
 						width: 40
 					});
