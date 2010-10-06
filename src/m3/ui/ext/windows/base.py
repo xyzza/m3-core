@@ -5,6 +5,8 @@ Created on 25.02.2010
 @author: akvarats
 '''
 
+from django.conf import settings
+
 from m3.ui.ext.base import ExtUIComponent
 from m3.ui.actions import ActionContext
 from m3.ui.ext.renderers import ExtWindowRenderer
@@ -54,6 +56,7 @@ class BaseExtWindow(ExtUIComponent):
         self.hidden = True
         self.layout_config = {}
         self.button_align = None
+        self.help_topic = None
         
     def t_render_layout_config(self):
         '''Рендерит конфиг, если указан layout'''
@@ -88,7 +91,8 @@ class BaseExtWindow(ExtUIComponent):
     def render_params(self):
         super(BaseExtWindow, self).render_params()
         self._put_params_value('parentWindowID', self.parent_window_id)
-        
+        if self.help_topic:
+            self._put_params_value('helpTopic', settings.HELP_PREFIX + self._help_topic_full_path())
         if self.action_context:
             self._put_params_value('contextJson', self.action_context.json )
         
@@ -170,5 +174,16 @@ class BaseExtWindow(ExtUIComponent):
     def t_render_keys(self):
         return ','.join(['{%s}' % ','.join(['%s:%s' % (k,v) for k, v in key.items()]) for key in self.keys])        
     
+    def _help_topic_full_path(self):
+        '''
+        Возвращает квалицифирующее имя топика помощи
+        '''
+        if not self.help_topic:
+            return ''
+        assert isinstance(self.help_topic, tuple)
+        assert len(self.help_topic) > 0
+        return self.help_topic[0] + '.html' + ('#' + self.help_topic[1] if len(self.help_topic) > 1 else '')
+        
+        
 
     
