@@ -38,6 +38,8 @@ class ExtAddrComponent(BaseExtContainer):
         self.place_allow_blank = True
         self.street_allow_blank = True
         self.house_allow_blank = True
+        self.flat_allow_blank = True
+        self.read_only = False
         
         self.pack = kladr_controller.find_pack(KLADRPack)
         #self.action_getaddr = self.pack.get_addr_action
@@ -90,6 +92,7 @@ class ExtAddrComponent(BaseExtContainer):
         self._put_params_value('addr_visible', (True if self.addr_visible else False ))
         self._put_params_value('level', self.level)
         self._put_params_value('view_mode', self.view_mode)
+        self._put_params_value('read_only', self.read_only)
         self._put_params_value('place_value', (self.place.value if self.place and self.place.value else ''))
         self._put_params_value('place_text', (self.pack.get_place_name(self.place.value) if self.place and self.place.value else ''))
         self._put_params_value('place_allow_blank', (True if self.place_allow_blank else False))
@@ -99,6 +102,7 @@ class ExtAddrComponent(BaseExtContainer):
         self._put_params_value('house_value', (self.house.value if self.house and self.house.value else ''))
         self._put_params_value('house_allow_blank', self.house_allow_blank)
         self._put_params_value('flat_value', (self.flat.value if self.flat and self.flat.value else ''))
+        self._put_params_value('flat_allow_blank', self.flat_allow_blank)
         self._put_params_value('addr_value', (self.addr.value if self.addr and self.addr.value else ''))
         self._put_params_value('get_addr_url', (self.pack.get_addr_action.absolute_url() if self.pack.get_addr_action else ''))
         self._put_params_value('kladr_url', (self.pack.get_places_action.absolute_url() if self.pack.get_places_action else ''))
