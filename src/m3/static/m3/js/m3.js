@@ -237,9 +237,9 @@ function uiFailureResponseOnFormSubmit(context){
     if(context.action.failureType=='server'){
         obj = Ext.util.JSON.decode(context.action.response.responseText);
         Ext.Msg.show({title: context.title,
-                      msg: obj.error_msg,
-                      buttons: Ext.Msg.OK,
-                      icon: Ext.Msg.WARNING});
+            msg: obj.error_msg,
+            buttons: Ext.Msg.OK,
+            icon: Ext.Msg.WARNING});
     }else{
         Ext.Msg.alert(context.title, context.message);
     }

@@ -14,7 +14,7 @@ class BaseExtListWindow(BaseExtWindow):
     def __init__(self, *args, **kwargs):
         super(BaseExtListWindow, self).__init__(*args, **kwargs)
         
-        self.template = 'ext-windows/ext-list-window.js'
+        self.template = 'ext-windows/ext-window.js'
         
         self.layout = 'border'
         self.width = 800
