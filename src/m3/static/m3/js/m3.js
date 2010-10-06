@@ -160,17 +160,19 @@ Ext.override(Ext.form.Field, {
 		this.setFieldLabel(this.fieldLabel);
 	},
 	setFieldLabel : function(text) {
-    	if (this.rendered) {
-      		var newtext = text+':';
-      		if (this.isModified) {newtext = '<span style="color:darkmagenta;">' + newtext + '</span>'; };
-	  		//if (this.isModified) {newtext = '<span">*</span>' + newtext; };
-			var lab = this.el.up('.x-form-item', 10, true);
-			if (lab) {
-				lab.child('.x-form-item-label').update(newtext);
-			}
-    	}
-    	this.fieldLabel = text;
-  	},
+		if ( text != undefined ) {
+	    	if (this.rendered) {
+	      		var newtext = text+':';
+	      		if (this.isModified) {newtext = '<span style="color:darkmagenta;">' + newtext + '</span>'; };
+		  		//if (this.isModified) {newtext = '<span">*</span>' + newtext; };
+				var lab = this.el.up('.x-form-item', 10, true);
+				if (lab) {
+					lab.child('.x-form-item-label').update(newtext);
+				}
+	    	}
+	    	this.fieldLabel = text;
+		}
+	},
 	// переопределим клавишу ENTER для применения изменений поля
 	fireKey : function(e){
         if(e.isSpecialKey()){
