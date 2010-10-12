@@ -34,7 +34,27 @@ Ext.override(Ext.Window, {
 			}
 			
 			if (this.parentWindow) {
+				
 				this.parentWindow.setDisabled(true);
+				
+				/*
+				 * В Extjs 3.3 Добавили общую проверку в функцию mask, см:
+				 *  if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
+                    	me.addClass(XMASKEDRELATIVE);
+               		 }
+				 * 
+				 * было до версии 3.3: 
+				 *  if(!/^body/i.test(dom.tagName) && me.getStyle('position') == 'static'){
+	            		me.addClass(XMASKEDRELATIVE);
+	        		}
+				 * Теперь же расположение замаскированых окон должно быть относительным
+				 * (relative) друг друга
+				 * 
+				 * Такое поведение нам не подходит и другого решения найдено не было.
+				 * Кроме как удалять данный класс
+				 * */
+				this.parentWindow.el.removeClass('x-masked-relative');
+
 				this.parentWindow.on('activate', this.activateChildWindow, this);
 				
 				this.modal = false;
