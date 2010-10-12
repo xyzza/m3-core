@@ -20,7 +20,7 @@
 	background: url(../images/scroll_slider.png) center top no-repeat;
 	cursor: pointer; 
 	overflow: hidden; 
-	height:100px
+	height:59px
 }
 
 .jScrollPaneDragTop {
@@ -43,8 +43,8 @@ a.jScrollArrowUp {
 	right: 0;
 	text-indent: -2000px;
 	overflow: hidden;
-	background:url(../images/scrol_top_.png) no-repeat center top;
-	height:23px;
+	background:url(../images/scroll_top.png) no-repeat center top;
+	height:62px;
 }
 a.jScrollArrowDown {
 	display: block;
@@ -54,8 +54,8 @@ a.jScrollArrowDown {
 	right: 0;
 	text-indent: -2000px;
 	overflow: hidden;
-	background:url(../images/scrol_bot_.png) no-repeat center top;
-	height:30px;
+	background:url(../images/scroll_bot.png) no-repeat center top;
+	height:62px;
 }
 a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
 	/*background-color: #f00;*/
