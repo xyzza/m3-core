@@ -77,7 +77,11 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	 * @cfg {String} highlightColor
 	 * Color for highlighted grid header
 	 */
-	highlightColor: 'orange',
+	// M prefer 13.10.10
+	//highlightColor: 'orange',
+	// -->
+	highlightColor: 'yellow',
+	// M prefer <-
 	
 	/**
 	 * @cfg {Boolean} stateful
@@ -260,6 +264,18 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		if(!this.filters)
 			this.filters = {};
 		this.renderFilters(true);
+		
+		/*
+		 * A prefer 13.10.10
+		 * Monkey pathcing наше все
+		 * по мотивам: 
+		 * http://www.sencha.com/forum/showthread.php?41658-Grid-header-filters&p=522074#post522074
+		 */
+		this.grid.store.on('load', function(store, records, opt){
+        this.renderFilters(false);
+		}, this);
+		// A prefer <
+		
 		this.fireEvent("render", this);
 	},
 	
@@ -380,12 +396,11 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		for(var fn in this.filterFields)
     {
       this.filterFields[fn].highlightCtrl.getEl().dom.style.backgroundColor = "transparent";
+      
+      if(!Ext.isEmpty(this.filters[fn])) { 
+        this.filterFields[fn].highlightCtrl.getEl().dom.style.backgroundColor = color;
+      }
     }
-		for(var fn in this.filters)
-		{
-		  if(!Ext.isEmpty(this.filters[fn]))
-		    this.filterFields[fn].highlightCtrl.getEl().dom.style.backgroundColor = color;
-		}
 	},
 	
 	getFieldValue: function(eField)
