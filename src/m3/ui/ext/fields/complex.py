@@ -180,6 +180,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         Это позволяет избежать двойного присваивания в коде.
         """
         assert isinstance(obj, models.Model), '%s must be a Django model instance.' % obj
+        
         self.value = getattr(obj, self.value_field)
         self.default_text = getattr(obj, self.display_field)
     

@@ -4,7 +4,7 @@
     	{% include 'base-ext-ui.js'%}
 		
     	{% if component.url %} ,url: '{{ component.url }}' {% endif %}
-    	
+    	{% if component.auto_scroll %} ,autoScroll: true {% endif %}
     	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}
     	{% if component.layout_config %} ,layoutConfig: {{ component.t_render_layout_config|safe }} {% endif %}
     	

@@ -10,6 +10,8 @@ from django.utils.datastructures import SortedDict
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
 
+#===============================================================================
+# Компонент таблица, или grid
 class ExtGrid(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtGrid, self).__init__(*args, **kwargs)
@@ -217,6 +219,7 @@ class ExtGrid(BaseExtPanel):
         
         self._put_params_value('colModel', self.col_model.render)
         self._put_params_value('plugins', self.t_render_plugins)
+        
         if self.show_banded_columns:
             self._put_params_value('bundedColumns', self.t_render_banded_columns)
     
@@ -234,6 +237,8 @@ class ExtGrid(BaseExtPanel):
         params = self._get_params_str()
         return 'createGridPanel({%s}, {%s})' % (config, params)
     
+#===============================================================================
+# Колонки к гриду
 class BaseExtGridColumn(ExtUIComponent):
     GRID_COLUMN_DEFAULT_WIDTH = 100
     
@@ -301,10 +306,12 @@ class ExtGridDateColumn(BaseExtGridColumn):
             self.format = 'd.m.Y'
         self.init_component(*args, **kwargs)
 
-
+#==============================================================================
+# Column Model для грида
 class BaseExtGridSelModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtGridSelModel, self).__init__(*args, **kwargs)
+
 
 class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
@@ -336,8 +343,6 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
     def render(self):
         return 'new Ext.grid.CellSelectionModel()'
 
-
-
 class ExtGridDefaultColumnModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtGridDefaultColumnModel, self).__init__(*args, **kwargs)
@@ -365,7 +370,9 @@ class ExtGridLockingHeaderGroupColumnModel(BaseExtComponent):
     def render(self):
         return 'new Ext.ux.grid.LockingGroupColumnModel({columns:%s})' % self.grid.t_render_columns()
 
-    
+#===============================================================================
+# Компнент - расширенное дерево, включающее колонки, с возможностью добавлять
+# view и column model    
 class ExtAdvancedTreeGrid(ExtGrid):
     '''
     Расширенное дерево на базе Ext.ux.maximgb.TreeGrid
@@ -420,6 +427,8 @@ class ExtAdvancedTreeGrid(ExtGrid):
         params = self._get_params_str()
         return 'createAdvancedTreeGrid({%s},{%s})' %(base_config, params)
 
+#===============================================================================
+# Компоненты view для грида
 class ExtGridGroupingView(BaseExtComponent):
     '''
     Компонент используемый при группировке
