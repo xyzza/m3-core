@@ -353,6 +353,7 @@ class ExtUIComponent(BaseExtComponent):
         self.cls = None
         # Атрибуты специфичные для form layout
         self.label_width = self.label_align = self.label_pad = None
+        self.auto_scroll = False
         
     def t_render_style(self):
         return '{%s}' % ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])
@@ -379,6 +380,7 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('labelAlign', self.label_align)
         self._put_config_value('labelPad', self.label_pad)
         self._put_config_value('cls', self.cls)
+        self._put_config_value('autoScroll', self.auto_scroll)
         #return res
     
 # TODO: закомментированный код ниже необходим для дальнейшей оптимизации
