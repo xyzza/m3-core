@@ -354,8 +354,11 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.tree.top_bar.add_menu(icon_cls="search", menu=menu)
             
         # В режиме выбора даблклик работает на выбор
-        if self.grid and self.mode == self.SELECT_MODE:
-            self.grid.handler_dblclick = 'selectValue'
+        if self.mode == self.SELECT_MODE:
+            if self.grid:
+                self.grid.handler_dblclickf = 'selectValue'
+            if self.tree:
+                self.tree.handler_dblclick = 'selectValue'
 
         return super(ExtDictionaryWindow, self).render()
     
