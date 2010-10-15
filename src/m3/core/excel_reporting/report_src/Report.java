@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -472,6 +475,8 @@ class ReportGenerator{
 		return null;
 	}
 	
+	static final Pattern TAG_REGEX_REPLACE = Pattern.compile("\\$.+?\\$");
+	
 	/**
 	 * Поиск и обработка тега ЗАМЕНА в ячейке 
 	 * @param outCell 
@@ -482,65 +487,80 @@ class ReportGenerator{
 		if (outCell.getCellType() != Cell.CELL_TYPE_STRING)
 			return;
 		String cell_text = outCell.getStringCellValue();
-		int start_tag = cell_text.indexOf('$');
-		if (start_tag > -1){
-			int end_tag = cell_text.indexOf('$', start_tag + 1);
-			if (end_tag > -1){
-				String key = cell_text.substring(start_tag + 1, end_tag);
-				
-				// Подходят только ключи с заданным префиксом
-				if (token_prefix.length() > 0)
-					if (key.indexOf(token_prefix) != 0)
-						return;
-					else
-						// Нужно удалить префикс из ключа
-						key = key.substring(token_prefix.length());
-				
-				String tag = cell_text.substring(start_tag, end_tag + 1);
-				Object value = obj.get(key);
-				
-				// Значение для переменной не найдено, значит разработчики так и задумали (оптимистично)
-				if (value == null)
-					value = "";
-				
-				// Если в ячейке есть еще что-то кроме тега, значит нужно заменять как строку, например: заголовки отчетов.
-				// Если в ячейке только тег, то нужно сохранить исходный тип ячейки
-				String str_value = value.toString();
-				if (outCell.getStringCellValue().length() == tag.length()){
-					if (value.getClass() == String.class){
-						// Строка может быть не просто строка, а специальный тип
-						String inner_type = getTypeTagFromString(str_value);
-						if (inner_type != null){
-							str_value = str_value.substring(6);
-							if (inner_type.equals("dd")){
-								Date d = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
-								outCell.setCellValue(d);
-							}else if (inner_type.equals("tt")){
-								Date d = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
-								outCell.setCellValue(d);
-							}else if (inner_type.equals("dt")){
-								Date d = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(str_value);
-								outCell.setCellValue(d);
-							}else
-								throw new Exception("Unknown M3 type token " + str_value);
-						}else
-							outCell.setCellValue(str_value);
-					}else if (value.getClass() == Long.class){
-						outCell.setCellValue(Long.parseLong(str_value));
-					}else if (value.getClass() == Double.class){
-						outCell.setCellValue(Double.parseDouble(str_value));
-					}else if (value.getClass() == Boolean.class){
-						outCell.setCellValue(Boolean.parseBoolean(str_value));
-					}
-				}else{	
-					// Если внутри есть специальный тег типа, то удаляем его
-					if (getTypeTagFromString(str_value) != null)
+		
+		Matcher m = TAG_REGEX_REPLACE.matcher(cell_text);	
+		HashMap<String, Object> keys = new HashMap<String, Object>();
+		while (m.find()){
+			// Извлекаем ключ из найденного выражения
+			String token = m.group();
+			String key = token.substring(1, token.length() - 1);
+			
+			// Если задан префикс, то подходят только ключи с заданным префиксом
+			if (token_prefix.length() > 0)
+				if (key.indexOf(token_prefix) != 0)
+					continue;
+				else
+					key = key.substring(token_prefix.length());
+			
+			Object value = obj.get(key);
+			// Значение для переменной не найдено, значит разработчики так и задумали (оптимистично)
+			if (value == null)
+				value = "";
+			
+			keys.put(token, value);
+		}
+		
+		if (keys.isEmpty())
+			return;
+		
+		// Причем если тег только один и заполняет всю строку, то нужно поменять тип ячейки под это значение
+		if (keys.size() == 1){
+			String token = keys.keySet().toArray()[0].toString();
+			Object value = keys.get(token);
+			String str_value = value.toString();
+			
+			if (cell_text.length() == token.length()){
+				if (value.getClass() == String.class){
+					// Строка может быть не просто строка, а специальный тип
+					String inner_type = getTypeTagFromString(str_value);
+					if (inner_type != null){
 						str_value = str_value.substring(6);
-					cell_text = cell_text.replace(tag, str_value);
-					outCell.setCellValue(cell_text);
+						if (inner_type.equals("dd")){
+							Date d = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
+							outCell.setCellValue(d);
+						}else if (inner_type.equals("tt")){
+							Date d = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
+							outCell.setCellValue(d);
+						}else if (inner_type.equals("dt")){
+							Date d = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(str_value);
+							outCell.setCellValue(d);
+						}else
+							throw new Exception("Unknown M3 type token " + str_value);
+					}else
+						outCell.setCellValue(str_value);
+				}else if (value.getClass() == Long.class){
+					outCell.setCellValue(Long.parseLong(str_value));
+				}else if (value.getClass() == Double.class){
+					outCell.setCellValue(Double.parseDouble(str_value));
+				}else if (value.getClass() == Boolean.class){
+					outCell.setCellValue(Boolean.parseBoolean(str_value));
 				}
+				return;
 			}
 		}
+		
+		// В исходном значении строки нужно заменить каждый тег на соответствующее значение
+		for (Map.Entry<String, Object> entry: keys.entrySet()){
+			String token = entry.getKey();
+			String str_value = entry.getValue().toString();
+				
+			// Если внутри есть специальный тег типа, то удаляем его
+			if (getTypeTagFromString(str_value) != null)
+				str_value = str_value.substring(6);
+			
+			cell_text = cell_text.replace(token, str_value);
+		}
+		outCell.setCellValue(cell_text);
 	}
 
 	/**
@@ -992,4 +1012,3 @@ class RepeatedArea{
 //TODO: Прославиться на весь мир
 //TODO: Написать о себе статью в википедии
 //TODO: Генератор превратился в антипаттерн "God Class". Нужно разбить на мелкие специализированные классы.
-
