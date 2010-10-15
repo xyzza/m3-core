@@ -79,6 +79,17 @@ class ReportGenerator{
 	 * @throws InvalidFormatException
 	 * @throws ParseException
 	 */
+	
+	final static String TOKEN_IF = "#ЕСЛИ";
+	final static String TOKEN_THEN = " ТО";
+	final static String[] TOKEN_CONDITIONS = new String[]{"="}; //TODO: Когда-нибудь тут будет больше условий ;)
+	final static String PROP_FONT = "ШРИФТ";
+	final static String PROP_COLOR = "ЦВЕТ";
+	final static HashMap<String, Short> COLOR_MAP = new HashMap<String, Short>();
+	static final String TAG_REPEAT_START = "#ПОВТОРЯТЬСТРОКУ";
+	static final String TAG_REPEAT_END = "##ПОВТОРЯТЬСТРОКУ";
+	static final String TAG_AUTOHIGHT = "#АВТОВЫСОТА";
+	
 	public static ReportGenerator createFromFiles(String encoding, String JSON_filename)
 	throws IOException, InvalidFormatException, ParseException{
 		InputStream fis = new FileInputStream(JSON_filename);
@@ -100,6 +111,12 @@ class ReportGenerator{
 	JSONObject root;
 	Sheet in_sheet, out_sheet;
 	ArrayList<CellRangeAddress> merged_regions;
+	
+	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
+	// Они запоминаются и используются в дальнейшем
+	Cell cell_repeat_tag_start = null;
+	Cell cell_repeat_tag_end = null;
+	
 	
 	private ReportGenerator(JSONObject json) throws InvalidFormatException, IOException{
 		String XLS_filename = (String)json.get("TEMPLATE_FILE_PATH");
@@ -125,11 +142,29 @@ class ReportGenerator{
 	}
 
 	/**
+	 * Вызывается из копирования ячейки, чтобы запомнить позиции ячеек помеченных специальными тегами.
+	 * Сделать это можно только тут, т.к. новые ячейки имеют другие координаты
+	 * @param oldCell старая ячейка содержащая комментарий
+	 * @param newCell новая ячейка
+	 */
+	private void saveSpecialCellPositions(Cell oldCell, Cell newCell){
+		Comment comment = oldCell.getCellComment();
+		if (comment!=null){
+			String text = comment.getString().getString().toUpperCase();
+			if (text.equals(TAG_REPEAT_START))
+				cell_repeat_tag_start = newCell;
+			else if (text.equals(TAG_REPEAT_END))
+				cell_repeat_tag_end = newCell;
+		}
+	}
+	
+	/**
 	 * Копирование ячейки 1 к 1
 	 * @param oldCell
 	 * @param newCell
 	 */
 	private void copyCell(Cell oldCell, Cell newCell){
+		saveSpecialCellPositions(oldCell, newCell);
         newCell.setCellStyle(oldCell.getCellStyle());
 
         // Копирум значение
@@ -291,8 +326,8 @@ class ReportGenerator{
 			
 			// Если в комментарии автовысота, то не переписываем высоту строки
 			Comment comm = current_cell.getCellComment();
-			if (comm!=null)
-				if (comm.getString().getString().toUpperCase().equals("#АВТОВЫСОТА"))
+			if (comm != null)
+				if (comm.getString().getString().toUpperCase().equals(TAG_AUTOHIGHT))
 					autoHeight = true;
 			if (!autoHeight)
 				out_row.setHeight(current_row.getHeight());
@@ -307,12 +342,6 @@ class ReportGenerator{
 			processReplaceTag(out_cell, obj, "");
 		}
 	}
-	
-	final static String TOKEN_IF = "#ЕСЛИ";
-	final static String TOKEN_THEN = " ТО";
-	
-	//TODO: Когда-нибудь тут будет больше условий ;)
-	final static String[] TOKEN_CONDITIONS = new String[]{"="};
 	
 	/*
 	 * Обрабатывает условия внутри комментария ячейки.
@@ -404,10 +433,6 @@ class ReportGenerator{
 			}
 		}
 	}
-	
-	final static String PROP_FONT = "ШРИФТ";
-	final static String PROP_COLOR = "ЦВЕТ";
-	final static HashMap<String, Short> COLOR_MAP = new HashMap<String, Short>();
 	
 	/*
 	 * Задает ячейке новое свойство. Проблема заключается в том, что нельзя имзменить текущий стиль ячейки, 
@@ -864,29 +889,20 @@ class ReportGenerator{
 	 * Важно! Таги должны быть заданы в первой строке или первой колонке! Интервал повторения один и непрерывный!
 	 * @param sheet Страница для обработки
 	 */
-	private RepeatedArea processRepeatTags(int destSheetIndex, Sheet sheet){
-		RepeatedArea area = new RepeatedArea();
-		// Ищем сначала повторения строк
-		Cell start = Scan(sheet, -1, -1, 0, 0, "#ПовторятьСтроку", true, 0);
-		if (start != null){
-			Cell end = Scan(sheet, start.getRowIndex(), -1, 0, 0, "##ПовторятьСтроку", true, 0);
-			if (end != null){
+	public void setRepeatedArea(int destSheetIndex){
+		if (cell_repeat_tag_start != null){
+			RepeatedArea area = new RepeatedArea();
+			if (cell_repeat_tag_end != null){
 				// Есть завершающий тег, то повторять интервал между ними
-				area.start_row = start.getRowIndex();
-				area.end_row = end.getRowIndex();
+				area.start_row = cell_repeat_tag_start.getRowIndex();
+				area.end_row = cell_repeat_tag_end.getRowIndex();
 			}else{
 				// Если нет закрывающего тега, то повторять только одну строку
-				area.start_row = start.getRowIndex();
-				area.end_row = start.getRowIndex();
+				area.start_row = cell_repeat_tag_start.getRowIndex();
+				area.end_row = cell_repeat_tag_start.getRowIndex();
 			}
+			in_book.setRepeatingRowsAndColumns(destSheetIndex, area.start_col, area.end_col, area.start_row, area.end_row);
 		}
-		//TODO: Ищем теперь ищем повторения колонок
-		
-		return area;
-	}
-	
-	public void setRepeatedArea(int destSheetIndex, RepeatedArea area){
-		in_book.setRepeatingRowsAndColumns(destSheetIndex, area.start_col, area.end_col, area.start_row, area.end_row);
 	}
 	
 	/**
@@ -934,8 +950,6 @@ class ReportGenerator{
 		range.end_row = in_sheet.getLastRowNum();
 		renderRange(root, range, range.start_row);
 		
-		RepeatedArea rep_area = processRepeatTags(in_book.getSheetIndex(out_sheet), in_sheet);
-		
 		// Копируем область печати (больше не копируем - должна определяться сама при предв. просмотре в экселе)
 //		String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
 		
@@ -950,7 +964,7 @@ class ReportGenerator{
 //			in_book.setPrintArea(in_book.getSheetIndex(out_sheet), area);
 //		}
 		
-		setRepeatedArea(in_book.getSheetIndex(out_sheet), rep_area);
+		setRepeatedArea(in_book.getSheetIndex(out_sheet));
 		
 		// Новую закладку делаем активной
 		in_book.setActiveSheet(in_book.getSheetIndex(out_sheet));
