@@ -238,9 +238,12 @@ class BaseExtComponent(object):
             return conf_dict
         
     def _put_config_value(self, extjs_name, item, condition=True):
-        '''
-        Обертка для упаковки базового конфига
-        '''
+        """
+        Добавляет значение в конфиг компонента Sencha для последующей передачи в конструктор JS
+        @param extjs_name: Оригинальное название атрибута в Sencha
+        @param item: Значение атрибута в М3
+        @param condition: Условие добавления в конфиг. Бывает полезно чтобы не использовать лишний if
+        """
         self._put_base_value(self._config_list, extjs_name, item, condition)
         
     def _put_params_value(self, extjs_name, item, condition=True):
