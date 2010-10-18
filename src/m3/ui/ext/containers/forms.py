@@ -301,6 +301,16 @@ class ExtPanel(BaseExtPanel):
         self.auto_load = None
         self.init_component(*args, **kwargs)
     
+    def render_base_config(self):
+        super(BaseExtPanel, self).render_base_config()
+        self._put_config_value('padding', self.padding)
+        self._put_config_value('collapsible', self.collapsible)
+        self._put_config_value('split', self.split)
+        self._put_config_value('baseCls', self.base_cls)
+        self._put_config_value('bodyCls', self.body_cls)
+        self._put_config_value('anchor', self.anchor)
+        self._put_config_value('autoLoad', self.auto_load)
+    
     @property
     def items(self):
         return self._items
