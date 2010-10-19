@@ -89,13 +89,16 @@ class BaseInfoModel(models.Model):
     
     # сформируем запрос данных на дату
     @classmethod
-    def query_on_date(cls, data, date = datetime.now(), next = False):
+    def query_on_date(cls, data, date=None, next = False):
         '''
         запрос записей на дату
         @data - объект или словарь с ключевыми данными
         @date - дата актуальности, по умолчанию текущая
         @next = False - значит будут найдены записи, уже действущие на дату, иначе ближайшиие записи которые будут действовать
         '''
+        if date is None:
+            date = datetime.now()
+
         query = cls.query_dimentions(data)
         if cls.period != PERIOD_INFTY:
             q_date = normdate(cls.period,date)
@@ -257,7 +260,7 @@ class BaseIntervalInfoModel(models.Model):
     
     # сформируем запрос данных на дату
     @classmethod
-    def query_on_date(cls, data, date = datetime.now(), active = True, next = False):
+    def query_on_date(cls, data, date=None, active=True, next=False):
         '''
         запрос записей на дату
         @data - объект или словарь с ключевыми данными
@@ -265,6 +268,9 @@ class BaseIntervalInfoModel(models.Model):
         @active = True - значит будут найдены записи, действующие на указанную дату
         @next = False - значит будут найдены записи, действовавшие до даты, иначе ближайшиие записи которые будут действовать
         '''
+        if date is None:
+            date = datetime.now()
+
         query = cls.query_dimentions(data)
         if cls.period != PERIOD_INFTY:
             q_date_begin = normdate(cls.period, date, True)
