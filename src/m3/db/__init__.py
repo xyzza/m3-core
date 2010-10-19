@@ -64,8 +64,11 @@ class BaseObjectModel(models.Model):
         '''
         Отображение объекта по-умолчанию
         '''
-        return '{%s}' % self.pk
+        return unicode(self)
     display.json_encode = True
-    
+
+    def __unicode__(self):
+        return u'{%s}' % self.pk
+
     class Meta:
         abstract = True
