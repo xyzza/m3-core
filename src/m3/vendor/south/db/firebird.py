@@ -1,5 +1,6 @@
 ﻿import os.path
 import re
+import datetime
 
 from django.db import connection, models
 from django.db.backends.util import truncate_name
@@ -79,7 +80,24 @@ class DatabaseOperations(generic.DatabaseOperations):
         tn = truncate_name(name, connection.ops.max_name_length())
 
         return upper and tn.upper() or tn.lower()
-
+        
+    def trunc_time(self, field):
+        if isinstance(field, (models.DateField, models.DateTimeField, models.TimeField)) and not field.null and not getattr(field, '_suppress_default', False) and field.has_default():
+            default = field.get_default()
+            if default is not None:
+                if callable(default):
+                    default = default()
+                if isinstance(default, (datetime.date, datetime.time, datetime.datetime)):
+                    default = "%s" % default
+                #if isinstance(field, models.DateField):
+                #    default = default[:10]
+                if isinstance(field, models.DateTimeField):
+                    default = default[:24]
+                #if isinstance(field, models.TimeField):
+                #    default = default[:13]
+                field.default = default
+        return field
+        
     def create_table(self, table_name, fields): 
         qn = self.quote_name(table_name, upper = False)
         qn_upper = qn.upper()
@@ -87,6 +105,7 @@ class DatabaseOperations(generic.DatabaseOperations):
         autoinc_sql = ''
 
         for field_name, field in fields:
+            field = self.trunc_time(field)
             col = self.column_sql(qn_upper, field_name, field)
             if not col:
                 continue
