@@ -1,6 +1,6 @@
 #coding: utf-8
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from calendar import calendar
 
 from django.db import models
@@ -44,6 +44,31 @@ def normdate(period, date, begin = True):
         return datetime(date.year, 1 if begin else 12, 1 if begin else calendar.monthrange(date.year, 1 if begin else 12)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
     return date
 
+def shift_date(period, date, step = 1):
+    '''
+    Метод смещает дату на один пункт периода
+    @ step = смещение
+    '''
+    if not date:
+        return None        
+    elif period == PERIOD_SECOND:
+        return date + timedelta(seconds = step)
+    elif period == PERIOD_MINUTE:
+        return date + timedelta(minutes = step)
+    elif period == PERIOD_HOUR:
+        return date + timedelta(hours = step)
+    elif period == PERIOD_DAY:
+        return date + timedelta(days = step)
+    elif period == PERIOD_MONTH:
+        #TODO: не знаю пока как быстро изменить дату на месяц, т.к. день может быть 31, а в пред. месяце его нет
+        return date
+    elif period == PERIOD_QUARTER:
+        #TODO: не знаю пока как быстро изменить дату
+        return date
+    elif period == PERIOD_YEAR:
+        return datetime(date.year + step, date.month, date.day, date.hour, date.minute, date.second)
+    else:
+        return date
 
 class OverlapError(Exception):
     r"""Исключение возникающее при наложении интервалов друг на друга."""
@@ -196,6 +221,72 @@ class BaseInfoModel(models.Model):
     
     class Meta:
         abstract = True
+
+
+def RebuildInfoModel(cls):
+    '''
+    Перестраивает связи между записями в регистре
+    ''' 
+    
+    def eq_keys(dims, key1, key2):
+        for key_attr in dims:
+            if key1[key_attr] != key2[key_attr]:
+                return False
+        return True
+    
+    def get_key(dims, data):
+        key = {}
+        for key_attr in dims:
+            dim_val = None
+            if isinstance(data, BaseInfoModel):
+                dim_val = getattr(data, key_attr, None)
+            elif isinstance(data, dict):
+                if data.has_key(key_attr):
+                    dim_val = data[key_attr]
+            elif hasattr(data, key_attr):
+                dim_val = getattr(data, key_attr, None)
+            key[key_attr] = dim_val
+        return key
+    
+    # вытащить записи регистра сгруппированные по ключевым полям и отсортированные по дате
+    query = cls.objects
+    order = []
+    dims = []
+    period = cls.period
+    for dim_field in cls.dimentions:
+        dim_attr = dim_field
+        if isinstance(dim_field, models.Field):
+            dim_attr = dim_field.name
+        order.append(dim_attr)
+        dims.append(dim_attr)
+    order.append('info_date')
+    query.order_by(order)
+    # начальное значение ключа = пусто
+    last_key = get_key(dims, None)
+    last_rec = None
+    # бежим по записям
+    for rec in query:
+        # получим ключ тек. записи
+        rec_key = get_key(dims, rec)
+        # если тек. ключ не совпадает с предыдущим, то... надо что-то делать
+        if not eq_keys(dims, rec_key, last_key):
+            # отметим что небыло предыдущих записей
+            rec.info_date_prev = normdate(period, datetime.min)
+            # если была старая запись, то меняем ее и запишем
+            if last_rec:
+                last_rec.info_date_next = normdate(period, datetime.max)
+                last_rec._save()
+        # если ключ совпал, то будем менять связи
+        else:
+            last_rec.info_date_next = rec.info_date
+            last_rec._save()
+            rec.info_date_prev = last_rec.info_date
+        last_rec = rec
+        last_key = rec_key
+    # сохраним оставшуюся запись
+    if last_rec:
+        last_rec.info_date_next = normdate(period, datetime.max)
+        last_rec._save()
 
 class BaseIntervalInfoModel(models.Model):
 
@@ -377,3 +468,81 @@ class BaseIntervalInfoModel(models.Model):
     
     class Meta:
         abstract = True
+
+
+def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
+    '''
+    Перестраивает связи между записями в интервальном регистре
+    on_overlap_error: действие при возникновении ошибки перекрытия диапазонов записей
+    0 - вызвать exception
+    1 - изменить интервал записи с ранней датой начала
+    ''' 
+    
+    def eq_keys(dims, key1, key2):
+        for key_attr in dims:
+            if key1[key_attr] != key2[key_attr]:
+                return False
+        return True
+    
+    def get_key(dims, data):
+        key = {}
+        for key_attr in dims:
+            dim_val = None
+            if isinstance(data, BaseIntervalInfoModel):
+                dim_val = getattr(data, key_attr, None)
+            elif isinstance(data, dict):
+                if data.has_key(key_attr):
+                    dim_val = data[key_attr]
+            elif hasattr(data, key_attr):
+                dim_val = getattr(data, key_attr, None)
+            key[key_attr] = dim_val
+        return key
+    
+    # вытащить записи регистра сгруппированные по ключевым полям и отсортированные по дате
+    query = cls.objects
+    order = []
+    dims = []
+    period = cls.period
+    for dim_field in cls.dimentions:
+        dim_attr = dim_field
+        if isinstance(dim_field, models.Field):
+            dim_attr = dim_field.name
+        order.append(dim_attr)
+        dims.append(dim_attr)
+    order.append('info_date_begin')
+    query.order_by(order)
+    # начальное значение ключа = пусто
+    last_key = get_key(dims, None)
+    last_rec = None
+    # бежим по записям
+    for rec in query:
+        # получим ключ тек. записи
+        rec_key = get_key(dims, rec)
+        # если тек. ключ не совпадает с предыдущим, то... надо что-то делать
+        if not eq_keys(dims, rec_key, last_key):
+            # отметим что небыло предыдущих записей
+            rec.info_date_prev = normdate(period, datetime.min, True)
+            # если была старая запись, то меняем ее и запишем
+            if last_rec:
+                last_rec.info_date_next = normdate(period, datetime.max, False)
+                last_rec._save()
+        # если ключ совпал, то будем менять связи, и проверим перекрытие интервала
+        else:
+            # попадает ли текущая запись в интервал предыдущей
+            if rec.info_date_begin < last_rec.info_date_end:
+                # мы попали...
+                # изменим пред. запись
+                if on_overlap_error == 1:
+                    last_rec.info_date_end = normdate(period, shift_date(period, rec.info_date_begin, -1), False)
+                else:
+                    raise OverlapError()
+            
+            last_rec.info_date_next = rec.info_date_begin
+            last_rec._save()
+            rec.info_date_prev = last_rec.info_date_end
+        last_rec = rec
+        last_key = rec_key
+    # сохраним оставшуюся запись
+    if last_rec:
+        last_rec.info_date_next = normdate(period, datetime.max, False)
+        last_rec._save()
