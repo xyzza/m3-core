@@ -99,8 +99,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		if (form && !form.isValid()) {
 			Ext.Msg.show({
 				title: 'Проверка формы',
-				msg: 'Проверьте правильность заполнения полей.<br>Некорректно' +
-						'заполненные поля подчеркнуты красным.',
+				msg: 'На форме имеются некорректно заполненные поля',
 				buttons: Ext.Msg.OK,
 				icon: Ext.Msg.WARNING
 			});
