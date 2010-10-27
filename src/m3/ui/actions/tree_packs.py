@@ -530,9 +530,14 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         # если справочник состоит только из дерева и у него просят запись, то надо брать из модели дерева
         #TODO: возможно это не надо было делать - раз не туда обратились, значит сами виноваты
         if self.list_model:
-            query = self.list_model.objects
-            if parent_id:
-                query = query.filter(**{self.list_parent_field: parent_id})
+            query = None
+            # если parent_id == -1 то отображаются все данные
+            if parent_id == -1:
+                query = self.list_model.objects
+            # инче если parent_id пришло со значением =! -1 то отображаются 
+            # данные с фильтрацие по значению parent_id
+            else:
+                query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
             # Подтягиваем группу, т.к. при сериализации она требуется
             query = query.select_related(self.list_parent_field)
             query = utils.apply_sort_order(query, self.list_columns, self.list_sort_order)
