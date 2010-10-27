@@ -534,8 +534,8 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             # если parent_id == -1 то отображаются все данные
             if parent_id == -1:
                 query = self.list_model.objects
-            # инче если parent_id пришло со значением =! -1 то отображаются 
-            # данные с фильтрацие по значению parent_id
+            # иначе если parent_id пришло со значением =! -1 то отображаются 
+            # данные с фильтрацией по значению parent_id
             else:
                 query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
             # Подтягиваем группу, т.к. при сериализации она требуется
