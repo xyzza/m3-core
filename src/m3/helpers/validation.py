@@ -44,6 +44,20 @@ class Validator:
         rule.callback_on_fail = on_fail
         self.rules.append(rule)
         
+    
+    def addrule_unique(self, value, model, field_name,fail_msg, on_success=None, 
+                       on_fail=None):
+        '''
+        Добавляет правило валидации на уникальность заданного поля
+        '''
+        rule = ModelUniqueField(value, model, field_name)
+        rule.value = value
+        rule.fail_msg = fail_msg
+        rule.callback_on_success = on_success
+        rule.callback_on_fail = on_fail
+        self.rules.append(rule)
+    
+        
     #------------------------------------------------------------------------------
     # методы добавления правил валидации 
     #------------------------------------------------------------------------------ 
@@ -73,7 +87,7 @@ class BaseValidationRule(object):
     '''
     def __init__(self):
         self.value = ''
-        self.fail_msg = ''
+        self.fail_msg = '' 
         self.callback_on_success = None
         self.callback_on_fail = None
     def check(self):
@@ -104,7 +118,7 @@ class NotEqualValidationRule(BaseValidationRule):
 class ModelUniqueField(BaseValidationRule):
     '''
     Проверяет что value нет ни у одной записи в модели.
-    Например у нас есть пользователь с мылом и мы ходит убедиться что такого же мыла 
+    Например у нас есть пользователь с мылом и мы хотим убедиться что такого же мыла 
     нет ни у кого больше. Причем проверяемая запись не исключается. 
     '''
     def __init__(self, value, model, field_name):
@@ -114,12 +128,13 @@ class ModelUniqueField(BaseValidationRule):
         self.field_name = field_name
     
     def check(self):
-        assert isinstance(self.model, models.Model)
+        assert issubclass(self.model, models.Model)
         assert isinstance(self.field_name, str)
-        query = self.model.object.filter(**{self.field_name: self.value})
-        if self.value.id != None:
-            query = query.exclude(id = self.value.id)
-        return query.count() == 0
+        query = self.model.objects.filter(**{self.field_name: self.value})
+        if isinstance(self.value, models.Model):
+            if self.value.id != None:
+                query = query.exclude(id = self.value.id)
+        return not query.exists()
 
 class FailedValidationRule(BaseValidationRule):
     '''
