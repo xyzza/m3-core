@@ -49,7 +49,7 @@ class DictListWindowAction(Action):
         
         if not base.list_readonly:
             # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося
-            win.url_new_grid    = base.edit_window_action.get_absolute_url()
+            win.url_new_grid    = base.add_window_action.get_absolute_url()
             win.url_edit_grid   = base.edit_window_action.get_absolute_url()
             win.url_delete_grid = base.delete_action.get_absolute_url()
     
@@ -87,6 +87,22 @@ class DictEditWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+        win.title = base.title
+        win.form.url = base.save_action.get_absolute_url()
+        
+        return ExtUIScriptResult(base.get_edit_window(win))
+
+class DictAddWindowAction(Action):
+    '''
+    Добавление элемента справочника
+    '''
+    url = '/add-window$'
+    def run(self, request, context):
+        base = self.parent
+        if base.add_window:
+            win = utils.bind_object_from_request_to_form(request, base.get_row, base.add_window)
+        else:
+            win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
         win.title = base.title
         win.form.url = base.save_action.get_absolute_url()
         
@@ -142,7 +158,11 @@ class DictSaveAction(Action):
     '''
     url = '/save$'
     def run(self, request, context):
-        obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        id = utils.extract_int(request, 'id')
+        if not id and self.parent.add_window:
+            obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.add_window)
+        else:
+            obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
         result = self.parent.save_row(obj)
         if isinstance(result, OperationResult) and result.success == True:
             # узкое место. после того, как мы переделаем работу экшенов,
@@ -171,6 +191,7 @@ class BaseDictionaryActions(ActionPack):
     list_columns = []
     # Окно для редактирования элемента справочника 
     edit_window = None
+    add_window = None
     list_form   = ExtDictionaryWindow
     select_form = ExtDictionaryWindow
     # Настройки секретности. Если стоит истина, то в результат добавляется флаг секретности
@@ -189,6 +210,7 @@ class BaseDictionaryActions(ActionPack):
         self.list_window_action   = DictListWindowAction()
         self.select_window_action = DictSelectWindowAction()
         self.edit_window_action   = DictEditWindowAction()
+        self.add_window_action    = DictAddWindowAction()
         self.rows_action          = DictRowsAction()
         self.last_used_action     = DictLastUsedAction()
         self.row_action           = ListGetRowAction()
@@ -197,7 +219,7 @@ class BaseDictionaryActions(ActionPack):
         # Но привязать их все равно нужно
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
-                        self.delete_action]
+                        self.delete_action, self.add_window_action]
     
     #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================    
     def get_list_url(self):
@@ -273,7 +295,6 @@ class BaseDictionaryActions(ActionPack):
     def get_edit_window(self, win):
         ''' Возвращает настроенное окно редактирования элемента справочника '''
         return win
-    
 
 class BaseDictionaryModelActions(BaseDictionaryActions):
     '''

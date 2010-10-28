@@ -85,10 +85,20 @@ class ExtGrid(BaseExtPanel):
         @param colspan: Количество колонок которые находятся 
             под данной колонкой (int) 
         @param level: Уровень учейки где 0 - самый верхний, 1-ниже, и т.д. (int)
+        
+        upd:26.10.2010 kirov
+        колонка может быть не указана, т.е. None, в этом случае на указанном уровне будет "дырка"
         '''
+        class BlankBandColumn():
+            colspan = 0
+            def render(self):
+                return '{%s}' % (('colspan:%s' % self.colspan) if self.colspan else '')
+
         assert isinstance(level, int)
         assert isinstance(colspan, int)
-        assert isinstance(column, ExtGridColumn)
+        assert isinstance(column, ExtGridColumn) or not column
+        if not column:
+            column = BlankBandColumn()
         # Колонки хранятся в списках внутки сортированного словаря, 
         #чтобы их можно было
         # извечь по возрастанию уровней 
