@@ -49,7 +49,7 @@ class DictListWindowAction(Action):
         
         if not base.list_readonly:
             # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося
-            win.url_new_grid    = base.add_window_action.get_absolute_url()
+            win.url_new_grid    = base.edit_window_action.get_absolute_url()
             win.url_edit_grid   = base.edit_window_action.get_absolute_url()
             win.url_delete_grid = base.delete_action.get_absolute_url()
     
@@ -86,20 +86,16 @@ class DictEditWindowAction(Action):
     url = '/edit-window$'
     def run(self, request, context):
         base = self.parent
-        win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
-        win.title = base.title
-        win.form.url = base.save_action.get_absolute_url()
-        
-        return ExtUIScriptResult(base.get_edit_window(win))
-
-class DictAddWindowAction(Action):
-    '''
-    Добавление элемента справочника
-    '''
-    url = '/add-window$'
-    def run(self, request, context):
-        base = self.parent
-        if base.add_window:
+        # Получаем объект по id
+        id = utils.extract_int(request, 'id')
+        obj = base.get_row(id)
+        # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
+        create_new = True
+        if isinstance(obj, dict) and obj.get('id') != None:
+            create_new = False
+        elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
+            create_new = False
+        if create_new and base.add_window:
             win = utils.bind_object_from_request_to_form(request, base.get_row, base.add_window)
         else:
             win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
@@ -107,7 +103,7 @@ class DictAddWindowAction(Action):
         win.form.url = base.save_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_edit_window(win))
-    
+
 class DictRowsAction(Action):
     '''
     Действие, которое возвращает список записей справочника.
@@ -210,7 +206,6 @@ class BaseDictionaryActions(ActionPack):
         self.list_window_action   = DictListWindowAction()
         self.select_window_action = DictSelectWindowAction()
         self.edit_window_action   = DictEditWindowAction()
-        self.add_window_action    = DictAddWindowAction()
         self.rows_action          = DictRowsAction()
         self.last_used_action     = DictLastUsedAction()
         self.row_action           = ListGetRowAction()
@@ -219,7 +214,7 @@ class BaseDictionaryActions(ActionPack):
         # Но привязать их все равно нужно
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
-                        self.delete_action, self.add_window_action]
+                        self.delete_action]
     
     #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================    
     def get_list_url(self):
