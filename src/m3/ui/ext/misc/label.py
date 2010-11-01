@@ -7,7 +7,22 @@ Created on 23.3.2010
 
 from m3.ui.ext.base import ExtUIComponent
 
+#===============================================================================  
 class ExtLabel(ExtUIComponent):
+    '''
+    Произвольный текст
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Label"
+    ,ext_class: "Ext.form.Label"
+    ,xtype: "label"
+    ,attr: [{
+        ext_attr: "text"
+        ,py_attr: "text" 
+    }]}
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtLabel, self).__init__(*args, **kwargs)
         self.template = 'ext-misc/ext-label.js'

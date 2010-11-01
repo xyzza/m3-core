@@ -7,7 +7,19 @@ Created on 25.02.2010
 
 from base import BaseExtWindow
 
+#===============================================================================
 class ExtWindow(BaseExtWindow):
+    '''
+    Окно
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Window"
+    ,ext_class: "Ext.Window"
+    ,xtype: "window"
+    }
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtWindow, self).__init__(*args, **kwargs)
         self._ext_name = 'Ext.m3.EditWindow'

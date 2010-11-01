@@ -8,8 +8,34 @@ Created on 25.02.2010
 from base import BaseExtControl
 from m3.ui.ext.misc import ExtConnection
 
+#===============================================================================
 class ExtButton(BaseExtControl):
-    '''Кнопка'''
+    '''
+    Кнопка
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Button"
+    ,ext_class: "Ext.Button"
+    ,xtype: "button"
+    ,attr: [{
+        ext_attr: "text"
+        ,py_attr: "text" 
+    },{
+        ext_attr: "handler"
+        ,py_attr: "handler"
+    },{
+        ext_attr: "iconCls"
+        ,py_attr: "icon_cls"
+    },{
+        ext_attr: "menu"
+        ,py_attr: "menu"
+    },{
+        ext_attr: "tabIndex"
+        ,py_attr: "tab_index"
+    }]}
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtButton, self).__init__(self, *args, **kwargs)
         self.template = 'ext-controls/ext-button.js'

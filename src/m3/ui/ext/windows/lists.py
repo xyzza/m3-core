@@ -7,6 +7,7 @@ Created on 26.05.2010
 from base import BaseExtWindow
 from m3.ui.ext import panels  
 
+#===============================================================================
 class BaseExtListWindow(BaseExtWindow):
     '''
     Базовое окно со списком записей. 

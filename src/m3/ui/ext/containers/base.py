@@ -2,7 +2,7 @@
 '''
 Created on 25.02.2010
 
-@author: akvarats
+@author: prefer <telepenin@bars-open.ru>
 '''
 
 from m3.ui.ext.base import ExtUIComponent

@@ -8,6 +8,7 @@ Created on 02.03.2010
 from base import BaseExtWindow
 from m3.ui.ext.containers import ExtForm
 
+#===============================================================================
 class ExtEditWindow(BaseExtWindow):
     def __init__(self, *args, **kwargs):
         super(ExtEditWindow, self).__init__(*args, **kwargs)

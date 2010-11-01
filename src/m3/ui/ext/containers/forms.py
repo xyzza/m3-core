@@ -21,8 +21,33 @@ from m3.ui.ext.fields.complex import ExtDictSelectField
 from m3.helpers.datastructures import TypedList
 #from m3.ui.actions.packs import BaseDictionaryActions
 
-
+#===============================================================================
 class ExtForm(BaseExtPanel):
+    '''
+    Форма, умеющая биндиться и делать сабмит по урлу
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Form"
+    ,ext_class: "Ext.form.FormPanel"
+    ,xtype: "form"
+    ,attr: [{
+        ext_attr: "layout"
+        ,py_attr: "layout" 
+        ,default_value: "form"
+    },{
+        ext_attr: "fileUpload"
+        ,py_attr: "file_upload"
+        ,default_value: false
+    },{
+        ext_attr: "url"
+        ,py_attr: "url"
+    },{
+        ext_attr: "padding"
+        ,py_attr: "padding"
+    }]}
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtForm, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-form.js'
@@ -288,13 +313,51 @@ class ExtForm(BaseExtPanel):
                     self.focused_field = child
                     break
 
+#===============================================================================
 class ExtPanel(BaseExtPanel):
+    '''
+    Панель. Kак правило этот контрол включает другие компоненты для отображения
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Panel"
+    ,ext_class: "Ext.Panel"
+    ,xtype: "panel"
+    ,attr: [{
+        ext_attr: "padding"
+        ,py_attr: "padding" 
+    },{
+        ext_attr: "collapsible"
+        ,py_attr: "collapsible"
+    },{
+        ext_attr: "baseCls"
+        ,py_attr: "base_cls"
+    },{
+        ext_attr: "bodyCls"
+        ,py_attr: "body_cls"
+    },{
+        ext_attr: "anchor"
+        ,py_attr: "anchor"
+    },{
+        ext_attr: "autoLoad"
+        ,py_attr: "auto_load"
+    },{
+        ext_attr: "split"
+        ,py_attr: "split"
+    }]}
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-panel.js'
         self.padding = None
         self.collapsible = False
+        
+        # TODO: для чего нужен следующий атрибут?
+        # Похоже он бы в прошлых версиях и его убрали в 3.3
+        # Остается поддерживать для полной совместимости
         self.split = False
+        
         self.base_cls = ''
         self.body_cls = ''
         self.anchor = ''
@@ -315,9 +378,12 @@ class ExtPanel(BaseExtPanel):
     def items(self):
         return self._items
 
-
+#===============================================================================
 class ExtTitlePanel(ExtPanel):
-    """Расширенная панель с возможностью добавления контролов в заголовок."""
+    '''
+    Расширенная панель с возможностью добавления контролов в заголовок.
+    
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtTitlePanel, self).__init__(*args, **kwargs)
         self.template = "ext-panels/ext-title-panel.js"
@@ -358,10 +424,24 @@ class ExtTitlePanel(ExtPanel):
     def title_items(self):
         return self.__title_items
 
-
+#===============================================================================
 class ExtTabPanel(BaseExtPanel):
     '''
-        Класс, отвечающий за работу TabPanel
+    Класс, отвечающий за работу TabPanel
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Tab panel"
+    ,ext_class: "Ext.TabPanel"
+    ,xtype: "tabpanel"
+    ,attr: [{
+        ext_attr: "enableTabScroll"
+        ,py_attr: "enable_tab_scroll" 
+    },{
+        ext_attr: "items"
+        ,py_attr: "tabs"
+    }]}
+    @end_designer
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
@@ -379,14 +459,33 @@ class ExtTabPanel(BaseExtPanel):
     def tabs(self):
         return self._items
 
+    # FIXME: Почему два одинаковых свойства??
     @property
     def items(self):
         return self._items
     
-    
+#===============================================================================    
 class ExtFieldSet(ExtPanel):
+    '''
+    Объеденяет внутренние элементы и создает рамку для остальных контролов
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Field set"
+    ,ext_class: "Ext.form.FieldSet"
+    ,xtype: "fieldset"
+    ,attr: [{
+        ext_attr: "checkboxToggle"
+        ,py_attr: "checkboxToggle" 
+    },{
+        ext_attr: "collapsible"
+        ,py_attr: "collapsible"
+    }]}
+    @end_designer
+    '''
     checkboxToggle = False
     collapsible = False
+    
     def __init__(self, *args, **kwargs):
         super(ExtFieldSet, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-fieldset.js'

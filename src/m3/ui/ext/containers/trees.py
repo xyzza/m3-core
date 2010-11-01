@@ -11,8 +11,12 @@ from m3.ui.ext.containers import ExtGridColumn, ExtGridBooleanColumn, ExtGridDat
 
 from m3.helpers.datastructures import TypedList
 
-
+#===============================================================================
 class ExtTree(BaseExtPanel):
+    '''
+    Дерево с колонками
+    
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtTree, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree.js'
@@ -165,7 +169,7 @@ class ExtTree(BaseExtPanel):
         self._listeners['beforenodedrop'] = function    
     #------------------------------------------------------------------------
     
-    
+#===============================================================================    
 class ExtTreeNode(ExtUIComponent):
     def __init__(self,*args, **kwargs):
         super(ExtTreeNode, self).__init__(*args, **kwargs)
@@ -199,7 +203,7 @@ class ExtTreeNode(ExtUIComponent):
         for k, v in kwargs.items():
             self.items[k] = v
         
-        
+#===============================================================================        
 class ExtTreeLoader(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtTreeLoader, self).__init__(*args, **kwargs)

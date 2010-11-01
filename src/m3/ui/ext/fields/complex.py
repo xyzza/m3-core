@@ -19,8 +19,6 @@ class ExtDictSelectField(BaseExtTriggerField):
     '''
     Поле с выбором из справочника
     
-    Пример конфигурирования поля
-    
     '''
     class ExtTrigger(BaseExtComponent):
         def __init__(self, *args, **kwargs):

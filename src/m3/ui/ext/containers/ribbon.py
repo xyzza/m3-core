@@ -3,6 +3,7 @@
 from base import BaseExtPanel, BaseExtContainer
 from m3.helpers.datastructures import TypedList
 
+#===============================================================================
 class ExtElementGroup(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtElementGroup, self).__init__(*args, **kwargs)
@@ -37,6 +38,7 @@ class ExtElementGroup(BaseExtContainer):
                             
         return '%s' % res if not self._is_function_render else res
 
+#===============================================================================
 class ExtRibbonTab(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtRibbonTab, self).__init__(*args, **kwargs)
@@ -72,6 +74,7 @@ class ExtRibbonTab(BaseExtContainer):
                             
         return '%s' % res if not self._is_function_render else res
         
+#===============================================================================
 class ExtRibbon(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtRibbon, self).__init__(*args, **kwargs)

@@ -11,8 +11,30 @@ from base import BaseExtContainer
 #from m3.ui.ext.containers import ExtGrid, ExtTree
 from m3.ui.ext.misc import ExtConnection
 
-
+#===============================================================================
 class ExtContextMenu(BaseExtContainer):
+    '''
+    Контекстное меню 
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Menu"
+    ,ext_class: "Ext.menu.Menu"
+    ,xtype: "menu"
+    ,attr: [{
+        ext_attr: "items"
+        ,py_attr: "items" 
+    },{
+        ext_attr: "displayMsg"
+        ,py_attr: "display_message"
+        ,default_value: "Показано записей {0} - {1} из {2}"
+    },{
+        ext_attr: "empty_message"
+        ,py_attr: "emptyText"
+        ,default_value: "Нет записей"
+    }]}
+    @end_designer
+    '''
     __SEPARATOR = '"-"'
     def __init__(self, *args, **kwargs):
         super(ExtContextMenu, self).__init__(*args, **kwargs)
@@ -42,7 +64,7 @@ class ExtContextMenu(BaseExtContainer):
     def items(self):
         return self._items
    
-    #----------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
     # Врапперы над событиями listeners[...]
     @property
     def handler_beforeshow(self):
@@ -52,8 +74,12 @@ class ExtContextMenu(BaseExtContainer):
     def handler_beforeshow(self, value):
         self._listeners['beforeshow'] = value
         
-        
+#===============================================================================        
 class ExtContextMenuItem(ExtUIComponent):
+    '''
+    Элементы контекстного меню 
+    
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtContextMenuItem, self).__init__(*args, **kwargs)
         self.text = None
@@ -86,8 +112,12 @@ class ExtContextMenuItem(ExtUIComponent):
                 else:
                     res += ',handler: %s' % self.handler
         return '{%s}' % res
-    
+
+#===============================================================================    
 class ExtContextMenuSeparator(ExtUIComponent):
+    '''
+    Разделитель элементов в меню
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtContextMenuSeparator, self).__init__(*args, **kwargs)
         self.init_component(*args, **kwargs)

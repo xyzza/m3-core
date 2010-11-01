@@ -3,16 +3,31 @@
 Created on 27.02.2010
 
 @author: akvarats
+@author: prefer <telepenin@bars-open.ru>
 '''
 from base import BaseExtContainer
 from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.controls import ExtButton
 
-
+#===============================================================================
 class ExtContainer(BaseExtContainer):
+    '''
+    Класс, имитирующий работу Ext.Container
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Container"
+    ,ext_class: "Ext.Container"
+    ,xtype: "container"
+    ,attr: [{
+        ext_attr: "items"
+        ,py_attr: "items" 
+    }]}
+    @end_designer
+    
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtContainer, self).__init__(*args, **kwargs)
-        #self.template = 'ext-containers/ext-container.js'
         self._ext_name = 'Ext.Container'
         self.init_component(*args, **kwargs)
     
@@ -48,10 +63,26 @@ class ExtContainer(BaseExtContainer):
                             
         return 'new %s' % res if not self._is_function_render else res
     
+#===============================================================================    
 class ExtToolBar(BaseExtContainer):
+    '''
+    Класс, имитирующий работу Ext.Toolbar
+    
+    Атрибуты для дизайнера:
+    @designer: Tool Bar
+    @ext_class: Ext.Toolbar
+    @xtype: toolbar
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Tool Bar"
+    ,ext_class: "Ext.Toolbar"
+    ,xtype: "toolbar"
+    }
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtToolBar, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-toolbar.js'
         self._ext_name = 'Ext.Toolbar'
         self._items = []
         self.init_component(*args, **kwargs)
@@ -59,8 +90,8 @@ class ExtToolBar(BaseExtContainer):
     def t_render_items(self):
         res = []
         for item in self.items:
-            # Если объект нашей структуры классов, то пусть сам рендерится, 
-            # если нет, отдаем так как есть.
+            # Если объект структуры классов, то пусть сам рендерится, 
+            # если нет - так как есть.
             if isinstance(item, ExtUIComponent):
                 res.append(item.render()) 
             else:
@@ -126,7 +157,6 @@ class ExtStaticToolBarItem(ExtUIComponent):
         return self.static_value
 
 #===============================================================================
-
 class ExtTextToolBarItem(ExtUIComponent):
     def __init__(self, static_value = '', *args, **kwargs):
         super(ExtTextToolBarItem, self).__init__(*args, **kwargs)
@@ -135,11 +165,33 @@ class ExtTextToolBarItem(ExtUIComponent):
     def render(self):
         return "{xtype: 'tbtext', text: '%s'}" % self.text
         
-    
+#===============================================================================    
 class ExtPagingBar(BaseExtContainer):   
+    '''
+    Класс, имитирующий работу Ext.PagingToolbar
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Paging Bar"
+    ,ext_class: "Ext.PagingToolbar"
+    ,xtype: "paging"
+    ,attr: [{
+        ext_attr: "pageSize"
+        ,py_attr: "page_size" 
+        ,default_value: 25
+    },{
+        ext_attr: "displayMsg"
+        ,py_attr: "display_message"
+        ,default_value: "Показано записей {0} - {1} из {2}"
+    },{
+        ext_attr: "empty_message"
+        ,py_attr: "emptyText"
+        ,default_value: "Нет записей"
+    }]}
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtPagingBar, self).__init__(*args, **kwargs)
-        #self.template = 'ext-containers/ext-pagingbar.js'
         self._ext_name = 'Ext.PagingToolbar'
         
         self.page_size = 25
@@ -177,7 +229,11 @@ class ExtPagingBar(BaseExtContainer):
         
         return 'new %s' % res if not self._is_function_render else res
          
+#===============================================================================
 class ExtToolbarMenu(ExtUIComponent):
+    '''
+    Класс, позволяющий легко вставлять меню в ToolBar
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtToolbarMenu, self).__init__(*args, **kwargs)
         self.text = None
@@ -199,8 +255,19 @@ class ExtToolbarMenu(ExtUIComponent):
             
         return '{%s}' % res
     
-    
+#===============================================================================
 class ExtButtonGroup(BaseExtContainer):
+    '''
+    Класс, имитирующий работу Ext.ButtonGroup
+    
+    @version: 0.1
+    @begin_designer
+    {title: "Button Group"
+    ,ext_class: "Ext.ButtonGroup"
+    ,xtype: "buttongroup"
+    }
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtButtonGroup, self).__init__(*args, **kwargs)
         self.template = 'ext-containers/ext-button-group.js'

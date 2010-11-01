@@ -2,7 +2,7 @@
 '''
 Created on 21.04.2010
 
-@author: prefer
+@author: prefer <telepenin@bars-open.ru>
 '''
 
 from base import BaseExtContainer

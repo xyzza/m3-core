@@ -16,11 +16,13 @@ from m3.ui.ext.containers import (ExtContextMenu,
                                 ExtTree,
                                 ExtGrid)
         
-                
+#===============================================================================                
 class ExtDictionaryWindow(BaseExtWindow):
+    ''' 
+    Базовое окно для линейного, иерархичесого и совмещенного справочника
+    '''
     LIST_MODE = 0
     SELECT_MODE = 1
-    ''' Базовое окно для линейного, иерархичесого и совмещенного справочника'''
     def __init__(self, *args, **kwargs):
         super(ExtDictionaryWindow, self).__init__(*args, **kwargs)
         self.template = 'ext-windows/ext-window.js'
