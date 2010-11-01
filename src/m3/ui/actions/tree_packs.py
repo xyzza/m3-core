@@ -351,7 +351,7 @@ class BaseTreeDictionaryActions(ActionPack):
     contextTreeIdName = 'id'
     
     def __init__(self):
-        self.actions = []
+        super(BaseTreeDictionaryActions, self).__init__()
         
         # Экшены отдающие данные
         self.nodes_action = TreeGetNodesAction()

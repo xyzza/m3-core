@@ -21,6 +21,7 @@ class UsersActions(actions.ActionPack):
     '''
     
     def __init__(self):
+        super(UsersActions, self).__init__()
         self.actions = [
             UsersDataAction(),
         ]

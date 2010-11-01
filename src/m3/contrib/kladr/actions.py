@@ -8,6 +8,7 @@ kladr_controller = ActionController(url='/m3-kladr')
 class KLADRPack(ActionPack):
     url = ''
     def __init__(self):
+        super(self.__class__, self).__init__()
         self.get_places_action = KLADRRowsAction()
         self.get_streets_action = StreetRowsAction()
         self.get_addr_action = KLADRGetAddrAction()
