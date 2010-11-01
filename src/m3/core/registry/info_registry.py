@@ -84,6 +84,10 @@ class BaseInfoModel(models.Model):
     dimentions = [] # перечень реквизитов-измерений
     period = PERIOD_DAY # тип периодичности
 
+    # Константы с минимальной и максимальной датами регистра. Для удобства.
+    MAX_DATE = datetime.max
+    MIN_DATE = datetime.min
+
     # сформируем запрос по ключу
     @classmethod
     def query_dimentions(cls, data):
@@ -171,11 +175,11 @@ class BaseInfoModel(models.Model):
         if new_prev_rec:
             self.info_date_prev = new_prev_rec.info_date
         else:
-            self.info_date_prev = normdate(self.period, datetime.min)
+            self.info_date_prev = normdate(self.period, self.MIN_DATE)
         if new_next_rec:
             self.info_date_next = new_next_rec.info_date
         else:
-            self.info_date_next = normdate(self.period, datetime.max)
+            self.info_date_next = normdate(self.period, self.MAX_DATE)
         # сохраним запись
         self._save(*args, **kwargs)
         # изменим найденные ранее записи

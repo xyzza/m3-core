@@ -26,14 +26,39 @@ from results import ActionResult, PreJsonResult, JsonResult, ExtGridDataQueryRes
                     OperationResult
 
 from context import ActionContext, ActionContextDeclaration
+
+#=========================== ИСКЛЮЧЕНИЯ ========================================
+
+class ActionNotFoundException(Exception):
+    """ Возникает в случае если экшен не найден ни в одном контроллере """
+    def __init__(self, clazz, *args, **kwargs):
+        super(self.__class__, self).__init__(*args, **kwargs)
+        self.clazz = clazz
+
+    def __str__(self):
+        return 'Action "%s" not registered in any controller/pack' % self.clazz
+
+class WrapException(Exception):
+    """ Исключение возникает при неуданой обертке экшена или пака """
+    pass
+
+class ReinitException(Exception):
+    """
+    Возникает если из-за неправильной структуры паков один и тот же 
+    экземпляр экшена может быть повторно инициализирован неверными значениями.
+      ВНИМАНИЕ! Ошибка может возниктуть есть в конструкторе пака
+    не определить новый список self.actions = []
+    """
+    def __init__(self, clazz, *args, **kwargs):
+        super(self.__class__, self).__init__(*args, **kwargs)
+        self.clazz = clazz
+    
+    def __str__(self):
+        return 'Trying to overwrite class "%s"' % self.clazz
+    
+
 #===============================================================================
-# Внутренняя таблица урлов
-#===============================================================================
-__urltable = {}
 
-
-
-   
     
 class Action(object):
     '''
@@ -85,7 +110,7 @@ class Action(object):
         '''
         url = ControllerCache.get_action_url(cls)
         if not url:
-            raise Exception('Action not registered in any controller/pack')
+            raise ActionNotFoundException(clazz=cls)
         return url
   
     def get_packs_url(self):
@@ -142,11 +167,6 @@ class ActionPack(object):
         '''
         pass
     
-class WrapException(Exception):
-    '''
-    Исключение возникает при неуданой обертке экшена или пака
-    '''
-    pass
 
 class ActionController(object):
     '''
@@ -213,6 +233,12 @@ class ActionController(object):
             clazz = self._load_class(clazz)()
         elif inspect.isclass(clazz):
             clazz = clazz()
+        
+        # Отладочный атрибут built нужен чтобы обнаружить повторное перестроение экшенов
+        # ВНИМАНИЕ!!! Ошибка может возниктуть есть в конструкторе пака не определить новый список self.actions = []
+        if hasattr(clazz, '_built'):
+            raise ReinitException(clazz=clazz)
+        clazz._built = True
         
         # Присваиваем родителя
         if len(stack) > 0:
@@ -443,8 +469,6 @@ class ActionController(object):
             packs_list.insert(pos, wrapper)
             if left_pack:
                 wrapper.parent = left_pack
-         #   if right_pack:
-         #       right_pack.parent = wrapper
                 
             # Создание нового урла
             full_path = self._build_full_path(packs_list, final_action)
@@ -454,11 +478,17 @@ class ActionController(object):
         self._url_patterns = new_patterns
         
         # У враппера могут быть собственные экшены и паки. Их тоже нужно построить.
+        # Но врапперы также могут быть наследованы от оригинальных паков, поэтому не нужно перестраивать
+        # уже существующие экшены и паки, только заменить у них родителя
         if current_packs_slice:
             for subpack in wrapper.subpacks:
-                self._build_pack_node(subpack, current_packs_slice)
+                if subpack not in pack.subpack:
+                    self._build_pack_node(subpack, current_packs_slice)
+
             for action in wrapper.actions:
-                self._build_pack_node(action, current_packs_slice)
+                if action not in pack.actions:
+                    self._build_pack_node(action, current_packs_slice)
+                    
         else:
             raise WrapException('ActionPack %s not found in controller' % dest_pack)
         
