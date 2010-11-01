@@ -5,23 +5,12 @@
 @author: akvarats
 '''
 
-import threading
-import re
 import json
-import inspect
-import time
-import datetime
-import uuid # для генерации уникальных идентификаторов
 
-from django.conf import settings
-from django.utils.importlib import import_module
-from django.utils.datastructures import MultiValueDict
 from django import http
 
-from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
 from m3.helpers import ui as ui_helpers
-from m3.ui.ext.base import BaseExtComponent
 
 from context import ActionContext
 

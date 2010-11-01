@@ -162,7 +162,7 @@ def safe_delete_record(model, id):
     assert issubclass(model, models.Model)
     assert isinstance(id, int)
     try:
-        cursor = connection.cursor()
+        cursor = connection.cursor() #@UndefinedVariable
         sql = "DELETE FROM %s WHERE id = %s" % (model._meta.db_table, id)
         cursor.execute(sql)
         transaction.commit_unless_managed()
