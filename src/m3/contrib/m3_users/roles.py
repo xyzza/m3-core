@@ -34,6 +34,7 @@ class RolesActions(actions.ActionPack):
     url = '/roles'
     
     def __init__(self):
+        super(RolesActions, self).__init__()
         self.actions = [
             RolesWindowAction(),
             EditRoleWindowAction(),

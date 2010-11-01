@@ -201,6 +201,7 @@ class BaseDictionaryActions(ActionPack):
     list_readonly = False
     
     def __init__(self):
+        super(BaseDictionaryActions, self).__init__()
         # В отличие от обычных паков в этом экшены создаются самостоятельно, а не контроллером
         # Чтобы было удобно обращаться к ним по имени
         self.list_window_action   = DictListWindowAction()
