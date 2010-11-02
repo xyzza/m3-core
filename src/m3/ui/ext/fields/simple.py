@@ -21,6 +21,7 @@ class ExtStringField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtStringField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-string-field.js'
+        self.enable_key_events = False # Разрешает перехват нажатий клавиш
         self.input_type = None
         self.mask_re = None
         self.init_component(*args, **kwargs)
@@ -28,8 +29,8 @@ class ExtStringField(BaseExtField):
     def render_base_config(self):
         super(ExtStringField, self).render_base_config()
         self._put_config_value('inputType', self.input_type)
-        if self.mask_re:
-            self._put_config_value('maskRe', self.t_render_mask_re)
+        self._put_config_value('maskRe', self.t_render_mask_re, self.mask_re)
+        self._put_config_value('enableKeyEvents', self.enable_key_events, self.enable_key_events)
 
     def t_render_mask_re(self):
         return '/%s/' % self.mask_re
@@ -46,6 +47,7 @@ class ExtDateField(BaseExtField):
         super(ExtDateField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-date-field.js'
         self.hide_today_btn = False
+        self.enable_key_events = False # Разрешает перехват нажатий клавиш
         #self.value =  datetime.now()  # -- решили не использовать (c) prefer 
         
         try:
@@ -67,6 +69,7 @@ class ExtDateField(BaseExtField):
         super(ExtDateField, self).render_base_config()
         self._put_config_value('format', self.format)
         self._put_config_value('value', value)
+        self._put_config_value('enableKeyEvents', self.enable_key_events, self.enable_key_events)
 
     def render_params(self):
         super(ExtDateField, self).render_params()
