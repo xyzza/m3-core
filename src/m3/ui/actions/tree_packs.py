@@ -39,7 +39,7 @@ class TreeGetNodesLikeRows(Action):
                 ActionContextDeclaration(name='branch_id', default=0, type=int, required=True)]
     
     def run(self, request, context):
-        result = self.parent.get_nodes_like_rows(self, context.filter, context.branch_id)
+        result = self.parent.get_nodes_like_rows(context.filter, context.branch_id)
         return PreJsonResult(result)
     
 
