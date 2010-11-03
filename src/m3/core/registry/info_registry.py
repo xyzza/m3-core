@@ -132,9 +132,9 @@ class BaseInfoModel(models.Model):
         if cls.period != PERIOD_INFTY:
             q_date = normdate(cls.period,date)
             if next:
-                query = query.filter(info_date_prev__lte = q_date, info_date__gte = q_date)
+                query = query.filter(info_date_prev__lte = q_date, info_date__gt = q_date)
             else:
-                query = query.filter(info_date__lte = q_date, info_date_next__gte = q_date)
+                query = query.filter(info_date__lte = q_date, info_date_next__gt = q_date)
         return query
     
     # прямая запись объекта, чтобы можно было записывать без доп. обработки
