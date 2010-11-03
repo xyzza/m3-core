@@ -69,6 +69,10 @@ class ExtGrid(BaseExtPanel):
         # модель колонок
         self.__cm = None
         self.col_model = ExtGridDefaultColumnModel()
+        self._view_config = {}
+        self.show_preview = False
+        self.enable_row_body = False
+        self.get_row_class = None
         
         self.init_component(*args, **kwargs)
         
@@ -234,6 +238,14 @@ class ExtGrid(BaseExtPanel):
     
     def render_base_config(self):
         super(ExtGrid, self).render_base_config()
+        if self.force_fit:
+            self._view_config['forceFit'] = self.force_fit
+        if self.show_preview:
+            self._view_config['showPreview'] = self.show_preview
+        if self.enable_row_body:
+            self._view_config['enableRowBody'] = self.enable_row_body
+        if self.get_row_class:
+            self._view_config['getRowClass'] = self.get_row_class
         self._put_config_value('stripeRows', True)
         self._put_config_value('stateful', True) 
         self._put_config_value('loadMask', self.load_mask)    
@@ -243,7 +255,7 @@ class ExtGrid(BaseExtPanel):
         self._put_config_value('view', self.t_render_view, self.view)
         self._put_config_value('editor', self.editor)
         self._put_config_value('store', self.t_render_store, self.get_store())   
-        self._put_config_value('viewConfig', {'forceFit':self.force_fit})
+        self._put_config_value('viewConfig', self._view_config)
     
     def render_params(self):
         super(ExtGrid, self).render_params()
@@ -481,17 +493,34 @@ class ExtGridGroupingView(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtGridGroupingView, self).__init__(*args, **kwargs)
         self.force_fit = True
+        self.show_preview = False
+        self.enable_row_body = False
+        self.get_row_class = None
+        self.group_text_template = '{text} ({[values.rs.length]})'
         self.init_component(*args, **kwargs)
+
+    def render_params(self):
+        super(ExtGridGroupingView, self).render_params()
+        if self.force_fit:
+            self._put_params_value('forceFit', self.force_fit)
+        if self.show_preview:
+            self._put_params_value('showPreview', self.show_preview)
+        if self.enable_row_body:
+            self._put_params_value('enableRowBody', self.enable_row_body)
+        if self.get_row_class:
+            self._put_params_value('getRowClass', self.get_row_class)
+        self._put_params_value('groupTextTpl', self.group_text_template)
         
     def render(self):
-        result = '''new Ext.grid.GroupingView({
-            %(force_fit)s,
-            %(group_text_tpl)s
-        })
-    '''  % {'force_fit':'forceFit:true' if self.force_fit else 'forceFit:false',
-            'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]})'"""
-}
-        return result
+        try:
+            self.pre_render()            
+            self.render_base_config()
+            self.render_params()
+        except Exception as msg:
+            raise Exception(msg)
+        params = self._get_params_str()
+        return 'new Ext.grid.GroupingView({%s})' % (params)
+        
     # если требуется вывести какое-либо слово после количества, шаблон должен 
     #иметь след вид:
     # 'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]} 

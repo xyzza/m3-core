@@ -63,6 +63,7 @@ class ExtObjectGrid(containers.ExtGrid):
         self.store = misc.ExtJsonStore(auto_load=True, root='rows', id_property='id')
         self.load_mask = True
         self.row_id_name = 'row_id'
+        self.column_param_name = 'column' # имя параметра, через который передается имя выделенной колонки
         self.allow_paging = True
 
         #=======================================================================
@@ -79,11 +80,11 @@ class ExtObjectGrid(containers.ExtGrid):
         
     @property
     def handler_beforenew(self):
-        return self._listeners.get('beforenew')
+        return self._listeners.get('beforenewrequest')
     
     @handler_beforenew.setter
     def handler_beforenew(self, function):
-        self._listeners['beforenew'] = function    
+        self._listeners['beforenewrequest'] = function    
         
     def render(self):
         '''
@@ -154,6 +155,7 @@ class ExtObjectGrid(containers.ExtGrid):
                                             'contextJson': context_json})
         
         self._put_params_value('rowIdName', self.row_id_name)
+        self._put_params_value('columnParamName', self.column_param_name)
         self._put_params_value('allowPaging', self.allow_paging)
         
         
