@@ -283,23 +283,25 @@ class BaseExtGridColumn(ExtUIComponent):
             val = self.extra[key]
             if isinstance(val,BaseExtComponent):
                 lst.append('%s:%s' % (key,val.render()))
-            elif isinstance(val,str):
+            elif isinstance(val, (int,str,unicode)):
                 lst.append('%s:%s' % (key,val))
             elif isinstance(val,bool):
                 lst.append('%s:%s' % (key,str(val).lower()))
+            else: # пусть как хочет так и рендерится
+                lst.append('%s:%s' % (key,val))
         return ','.join(lst)
                
     def render_editor(self):
         return self.editor.render()
         
-    
+#===============================================================================    
 class ExtGridColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridColumn, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-grid-column.js'
         self.init_component(*args, **kwargs)
     
-    
+#===============================================================================    
 class ExtGridBooleanColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridBooleanColumn, self).__init__(*args, **kwargs)
@@ -309,7 +311,7 @@ class ExtGridBooleanColumn(BaseExtGridColumn):
         self.text_undefined = None
         self.init_component(*args, **kwargs)
         
-        
+#===============================================================================        
 class ExtGridNumberColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridNumberColumn, self).__init__(*args, **kwargs)
@@ -317,7 +319,7 @@ class ExtGridNumberColumn(BaseExtGridColumn):
         self.format = None
         self.init_component(*args, **kwargs)
 
-
+#===============================================================================
 class ExtGridDateColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridDateColumn, self).__init__(*args, **kwargs)
@@ -334,7 +336,7 @@ class BaseExtGridSelModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtGridSelModel, self).__init__(*args, **kwargs)
 
-
+#===============================================================================
 class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridCheckBoxSelModel, self).__init__(*args, **kwargs)
@@ -345,7 +347,7 @@ class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
         single_sel = 'singleSelect: true' if self.single_select else ''
         return 'new Ext.grid.CheckboxSelectionModel({ %s })' % single_sel
 
-
+#===============================================================================
 class ExtGridRowSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridRowSelModel, self).__init__(*args, **kwargs)
@@ -356,7 +358,7 @@ class ExtGridRowSelModel(BaseExtGridSelModel):
         single_sel = 'singleSelect: true' if self.single_select else ''
         return 'new Ext.grid.RowSelectionModel({ %s })' % single_sel
 
-
+#===============================================================================
 class ExtGridCellSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridCellSelModel, self).__init__(*args, **kwargs)
@@ -365,6 +367,7 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
     def render(self):
         return 'new Ext.grid.CellSelectionModel()'
 
+#===============================================================================
 class ExtGridDefaultColumnModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtGridDefaultColumnModel, self).__init__(*args, **kwargs)
@@ -374,6 +377,7 @@ class ExtGridDefaultColumnModel(BaseExtComponent):
     def render(self):
         return 'new Ext.grid.ColumnModel({columns:%s})' % self.grid.t_render_columns()
 
+#===============================================================================
 class ExtGridLockingColumnModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtGridLockingColumnModel, self).__init__(*args, **kwargs)
@@ -383,6 +387,7 @@ class ExtGridLockingColumnModel(BaseExtComponent):
     def render(self):
         return 'new Ext.ux.grid.LockingColumnModel({columns:%s})' % self.grid.t_render_columns()
 
+#===============================================================================
 class ExtGridLockingHeaderGroupColumnModel(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtGridLockingHeaderGroupColumnModel, self).__init__(*args, **kwargs)
@@ -393,7 +398,7 @@ class ExtGridLockingHeaderGroupColumnModel(BaseExtComponent):
         return 'new Ext.ux.grid.LockingGroupColumnModel({columns:%s})' % self.grid.t_render_columns()
 
 #===============================================================================
-# Компнент - расширенное дерево, включающее колонки, с возможностью добавлять
+# Компонент - расширенное дерево, включающее колонки, с возможностью добавлять
 # view и column model    
 class ExtAdvancedTreeGrid(ExtGrid):
     '''
@@ -492,6 +497,7 @@ class ExtGridGroupingView(BaseExtComponent):
     #    {[values.rs.length > 1 ? "Объекта" : "Объект"]})'"""
     # но проблемы с обработкой двойных кавычек
 
+#===============================================================================
 class ExtGridLockingView(BaseExtComponent):
     '''
     Компонент используемый для блокирования колонок
@@ -504,6 +510,7 @@ class ExtGridLockingView(BaseExtComponent):
         result = 'new Ext.ux.grid.LockingGridView()'
         return result
 
+#===============================================================================
 class ExtGridLockingHeaderGroupView(BaseExtComponent):
     '''
     Компонент используемый для блокирования колонок и их группировки
