@@ -364,8 +364,8 @@ class ExtUIComponent(BaseExtComponent):
     def render_base_config(self):
         super(ExtUIComponent, self).render_base_config()
         self._put_config_value('style', self.t_render_style, self.style)
-        self._put_config_value('hidden', self.hidden)
-        self._put_config_value('disabled', self.disabled)
+        self._put_config_value('hidden', self.hidden, self.hidden)
+        self._put_config_value('disabled', self.disabled, self.disabled)
         self._put_config_value('height', self.height)
         self._put_config_value('width', self.width)
         self._put_config_value('x', self.x)
@@ -383,7 +383,7 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('labelAlign', self.label_align)
         self._put_config_value('labelPad', self.label_pad)
         self._put_config_value('cls', self.cls)
-        self._put_config_value('autoScroll', self.auto_scroll)
+        self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
         #return res
     
 # TODO: закомментированный код ниже необходим для дальнейшей оптимизации
