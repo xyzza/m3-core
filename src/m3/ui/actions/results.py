@@ -112,9 +112,9 @@ class ExtAdvancedTreeGridDataQueryResult(ActionResult):
         self.limit = limit
     
     def get_http_response(self):
-        return http.HttpResponse(ui_helpers.mptt_json_data(self.data, 
-                                                           self.start, 
-                                                           self.limit),
+        return http.HttpResponse(ui_helpers.mptt_json_data(query = self.data, 
+                                                           start = self.start, 
+                                                           limit = self.limit),
                                  mimetype='application/json')
 
 #===============================================================================

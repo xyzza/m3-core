@@ -93,10 +93,13 @@ def mptt_json_data(query, parent_obj='parent', start = 0, limit = 25):
         elements_list = [item._rgt for item in res_data]
         return max(elements_list) if elements_list else 0
 
-    try:
-        total = query.count()
-    except:
-        total = 0
+    if isinstance(query, QuerySet):
+        try:
+            total = query.count()
+        except:
+            total = 0
+    else:
+        total = len(query)
     
     if start > 0 and limit < 1:
         data = list(query[start:])
