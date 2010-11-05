@@ -7,13 +7,17 @@ Created on 11.06.2010
 @author: akvarats
 '''
 
+from django.db.models.query import QuerySet
 from m3.core import json
 
 def paginated_json_data(query, start = 0, limit = 25):
-    try:
-        total = query.count()
-    except:
-        total = 0
+    if isinstance(query, QuerySet):
+        try:
+            total = query.count()
+        except:
+            total = 0
+    else:
+        total = len(query)
     if start > 0 and limit < 1:
         data = list(query[start:])
     elif start >= 0 and limit > 0:
