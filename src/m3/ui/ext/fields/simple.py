@@ -182,3 +182,17 @@ class ExtTimeField(BaseExtField):
         self.max_value = None
         self.min_value = None
         self.init_component(*args, **kwargs)
+        
+class ExtHTMLEditor(BaseExtField):
+    '''Поле HTML-редактор'''
+    def __init__(self, *args, **kwargs):
+        super(ExtHTMLEditor, self).__init__(*args, **kwargs)
+        self.init_component(*args, **kwargs)
+        
+    def render_base_config(self):
+        super(ExtHTMLEditor, self).render_base_config()
+        
+    def render(self):
+        self.render_base_config()
+        base_config = self._get_config_str()
+        return 'new Ext.form.HtmlEditor({%s})' % base_config
