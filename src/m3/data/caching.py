@@ -130,16 +130,24 @@ class RuntimeCache(object):
         '''
         self.data[self._normalize_dimensions(dimensions)] = value
         
-    def get(self, dimentions, default=None):
+    def get(self, dimensions, default=None):
         '''
         Возвращает значение из кеша
         '''
-        dims = self._normalize_dimensions(dimentions)
+        dims = self._normalize_dimensions(dimensions)
         if self._populate(dims):
             self.stat.out_cache += 1
         else:
             self.stat.in_cache += 1
         return self.data.get(dims, default)
+    
+    def has_data(self, dimensions):
+        '''
+        Возвращает True в случае, если в кеше есть данные для указанных
+        измерений
+        '''
+        dims = self._normalize_dimensions(dimensions)
+        return self.data.has_key(dims)
     
     def get_size(self):
         '''

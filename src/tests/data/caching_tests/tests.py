@@ -73,4 +73,14 @@ class RuntimeCacheTests(TestCase):
         
         self.failUnlessEqual(CustomCache1().get(1),2)
         
-    
+    def test_hasdata(self):
+        '''
+        Проверка работы метода has_data
+        '''
+        
+        RuntimeCache().drop_all()
+        
+        self.failUnlessEqual(RuntimeCache().has_data(1), False)
+        RuntimeCache().set(1,1)
+        self.failUnlessEqual(RuntimeCache().has_data(1), True)
+        self.failUnlessEqual(RuntimeCache().has_data(2), False)
