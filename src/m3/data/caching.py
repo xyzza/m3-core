@@ -51,8 +51,6 @@ class RuntimeCacheMetaclass(type):
         )
         klass.__init__ = default_init
         
-        print klass.__dict__.has_key('handler')
-        
         return klass
     
 class RuntimeCache(object):
