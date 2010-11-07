@@ -92,4 +92,5 @@ INSTALLED_APPS = (
     #'replica_test',
     #'datareg_tests',
     'tests.data.caching_tests',
+    'tests.data.mie_tests',
 )
