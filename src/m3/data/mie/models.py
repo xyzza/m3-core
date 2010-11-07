@@ -11,7 +11,7 @@ from django.db.models.signals import pre_delete
 
 from cache import MieCache
 from exceptions import NoMieMetaException, IncompleteMieMetaException
-from handlers import mei_pre_delete_handler
+from handlers import simple_mei_pre_delete
 
 class BaseMIEMetaclass(ModelBase):
     '''
@@ -36,13 +36,10 @@ class BaseMIEMetaclass(ModelBase):
         setattr(klass, '_mie_meta', klass.MieMeta)
         # регистрируем расширение ведущей модели
         MieCache().add_extender(klass._mie_meta.primary_model, klass)
-        
-        
-        # назначаем хендлер который при удалении ведущей модели
-        # почистит все низлежащие
-        pre_delete.connect(mei_pre_delete_handler, klass._mie_meta.primary_model, weak=True)
-        
+        # присоединяем хендлеры к операциям над моделями
+        klass._connect_handlers()
         return klass
+    
     
     def _check_mie_meta(cls):
         '''
@@ -60,24 +57,41 @@ class BaseMIEMetaclass(ModelBase):
         setattr(mie_meta, 'primary_field', primary_field)
         if not hasattr(cls, primary_field):
             raise IncompleteMieMetaException(u'Для модели ' + str(cls) + u' не задано поле-ссылка на расширяемую модель.')
+    
+        
+    def _connect_handlers(cls):
+        '''
+        Метод, который должен быть переопределен в дочерних классах.
+        
+        Должен выполнять присоединение хендлеров к различным операциям
+        над первичными моделями
+        '''
+        pass
         
 class SimpleMIEMetaclass(BaseMIEMetaclass):
     '''
     Метакласс для моделей, которые расширяют другие модели
     '''
     def __new__(cls, name, bases, attrs):
-        
         klass = super(SimpleMIEMetaclass, cls).__new__(cls, name, bases, attrs)
-        
         return klass
+    
+    
+    def _connect_handlers(cls):
+        '''
+        Переопределенный метод присоединения хендлеров к моделям
+        '''
+        # назначаем хендлер который при удалении ведущей модели
+        # почистит все низлежащие
+        pre_delete.connect(simple_mei_pre_delete, cls._mie_meta.primary_model, weak=True)
+        
     
 class DatedMIEMetaclass(BaseMIEMetaclass):
     
     def __new__(cls, name, bases, attrs):
-        
-        klass = super(DatedMIEMetaclass, cls).__new__(cls, name, bases, attrs)
-        
+        klass = super(DatedMIEMetaclass, cls).__new__(cls, name, bases, attrs)    
         return klass
+    
     
     def _check_mie_meta(cls):
         super(DatedMIEMetaclass, cls)._check_mie_meta()
@@ -90,6 +104,8 @@ class DatedMIEMetaclass(BaseMIEMetaclass):
         # if not hasattr(cls, date_field):
         #    raise IncompleteMieMetaException(u'Для модели ' + str(cls) + u' не задано поле даты.')
         
+    def _connect_handlers(cls):
+        pass
     
 class SimpleModelExtender(models.Model):
     '''
