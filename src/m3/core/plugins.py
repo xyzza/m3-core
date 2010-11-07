@@ -26,7 +26,7 @@ class ExtensionPoint:
         # листенер, который добавляется по умолчанию
         self.default_listener = default_listener
 
-class ExtensionListener:
+class ExtensionHandler:
     '''
     Класс - обертка над обработчиком точки расширения
     '''
@@ -41,6 +41,8 @@ class ExtensionListener:
     def __init__(self, handler = None, call_type = INSTEAD_OF_PARENT):
         self.handler = handler
         self.call_type = call_type
+        
+ExtensionListener = ExtensionHandler # совместимость
 
 class ExtensionManager:
     '''
@@ -86,7 +88,7 @@ class ExtensionManager:
         finally:
             self._write_lock.release()
     
-    def append_point(self, extension_point):
+    def register_point(self, extension_point):
         '''
         Добавляет точку расширения
         '''
@@ -104,7 +106,9 @@ class ExtensionManager:
         self.extensions[point_key] = extension_point
         self.listeners[point_key] = [extension_point.default_listener,]
     
-    def append_listener(self, extension_name, listener):
+    append_point = register_point # для совместимости 
+    
+    def append_handler(self, extension_name, listener):
         '''
         Добавляет листенер точки расширения с именем extension_name
         '''
@@ -116,6 +120,8 @@ class ExtensionManager:
                 # ничего не делаем
                 return
         self.listeners[extension_name].append(listener)
+    
+    append_listener = append_handler # для совместимости
     
     def execute(self, extension_name, *args, **kwargs):
         '''
