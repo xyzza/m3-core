@@ -108,7 +108,7 @@ class ExtensionManager:
     
     append_point = register_point # для совместимости 
     
-    def append_handler(self, extension_name, listener):
+    def register_handler(self, extension_name, listener):
         '''
         Добавляет листенер точки расширения с именем extension_name
         '''
@@ -121,7 +121,7 @@ class ExtensionManager:
                 return
         self.listeners[extension_name].append(listener)
     
-    append_listener = append_handler # для совместимости
+    append_listener = register_handler # для совместимости
     
     def execute(self, extension_name, *args, **kwargs):
         '''
@@ -161,3 +161,13 @@ class ExtensionManager:
                 result = listener.handler(*args, **kwargs)
             
         return result
+    
+    def get_handlers(self, extension_name):
+        '''
+        Возвращает список хендлеров, которые объявлены для указанной точки расширения.
+        
+        Хендлеры возвращаются списком. Элементы данного списка идут в порядке
+        их регистрации
+        '''
+        self._populate()
+        return self.listeners.get(extension_name, [])
