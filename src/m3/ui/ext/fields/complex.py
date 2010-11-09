@@ -290,4 +290,31 @@ class ExtSearchField(BaseExtField):
         self.empty_text =None
         self.component_for_search = None
         self.init_component(*args, **kwargs)
-    
+
+
+class ExtFileUploadField(BaseExtField):
+    r"""Компонент загрузки файлов на сервер."""
+
+    def __init__(self, *args, **kwargs):
+        super(ExtFileUploadField, self).__init__(*args, **kwargs)
+        self.button_text = None
+        self.button_only = None
+        self.button_offset = None
+        self.read_only = None
+        self.init_component(*args, **kwargs)
+
+    def render_base_config(self):
+        super(ExtFileUploadField, self).render_base_config()
+        if self.button_text:
+            self._put_config_value('buttonText', self.button_text)
+        if self.button_only:
+            self._put_config_value('buttonOnly', self.button_only)
+        if self.button_offset:
+            self._put_config_value('buttonOffset', self.button_offset)
+        if self.read_only:
+            self._put_config_value('readOnly', self.read_only)
+
+    def render(self):
+        self.render_base_config()
+        base_config = self._get_config_str()
+        return 'new Ext.form.FileUploadField({%s})' % base_config
