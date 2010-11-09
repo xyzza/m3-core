@@ -99,7 +99,8 @@ class DictEditWindowAction(Action):
             win = utils.bind_object_from_request_to_form(request, base.get_row, base.add_window)
         else:
             win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
-        win.title = base.title
+        if not win.title:
+            win.title = base.title
         win.form.url = base.save_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_edit_window(win))
