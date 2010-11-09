@@ -335,3 +335,19 @@ class ExtHTMLEditor(BaseExtField):
         self.render_base_config()
         base_config = self._get_config_str()
         return 'new Ext.form.HtmlEditor({%s})' % base_config
+
+class ExtDisplayField(BaseExtField):
+    '''
+    Поле отображающее значение (не проверяется и не сабмитится)
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtDisplayField, self).__init__(*args, **kwargs)
+        self.init_component(*args, **kwargs)
+        
+    def render_base_config(self):
+        super(ExtDisplayField, self).render_base_config()
+        
+    def render(self):
+        self.render_base_config()
+        base_config = self._get_config_str()
+        return 'new Ext.form.DisplayField({%s})' % base_config
