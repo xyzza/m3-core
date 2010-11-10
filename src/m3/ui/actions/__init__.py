@@ -29,34 +29,37 @@ from context import ActionContext, ActionContextDeclaration
 
 #=========================== ИСКЛЮЧЕНИЯ ========================================
 
-class ActionNotFoundException(Exception):
-    """ Возникает в случае если экшен не найден ни в одном контроллере """
+class ActionException(Exception):
     def __init__(self, clazz, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
+        super(Exception, self).__init__(*args, **kwargs)
         self.clazz = clazz
 
+class ActionNotFoundException(ActionException):
+    """ Возникает в случае если экшен не найден ни в одном контроллере """
     def __str__(self):
-        return 'Action "%s" not registered in any controller/pack' % self.clazz
+        return 'Action "%s" not registered in controller/pack' % self.clazz
+    
+class ActionPackNotFoundException(ActionException):
+    """ Возникает в случае если экшен не найден ни в одном контроллере """
+    def __str__(self):
+        return 'ActionPack "%s" not registered in controller/pack' % self.clazz
 
-class WrapException(Exception):
-    """ Исключение возникает при неуданой обертке экшена или пака """
-    pass
-
-class ReinitException(Exception):
+class ReinitException(ActionException):
     """
     Возникает если из-за неправильной структуры паков один и тот же 
     экземпляр экшена может быть повторно инициализирован неверными значениями.
-      ВНИМАНИЕ! Ошибка может возниктуть есть в конструкторе пака
-    не определить новый список self.actions = []
     """
-    def __init__(self, clazz, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
-        self.clazz = clazz
-    
     def __str__(self):
         return 'Trying to overwrite class "%s"' % self.clazz
     
-
+class ActionUrlIsNotDefined(ActionException):
+    """
+    Возникает если в классе экшена не задан атрибут url.
+    Это грозит тем, что контроллер не сможет найти и вызвать данный экшен при обработке запросов.
+    """
+    def __str__(self):
+        return 'Attribute "url" is not defined or empty in action "%s"' % self.clazz
+    
 #===============================================================================
 
     
@@ -178,10 +181,11 @@ class ActionController(object):
     class FakePacks:
         pass
     
-    def __init__(self, url = ''):
+    def __init__(self, url = '', name=None):
         '''
         url - используется для отсечения лишней части пути в запросе, поскольку
               управление в пак передается из вьюшки
+        name - человеческое название контроллера. Используется для отладки.
         '''
         # ДЛЯ СОВМЕСТИМОСТИ.
         # Имитирует список паков торчащий наружу
@@ -191,6 +195,7 @@ class ActionController(object):
         
         # Используется для отсечения лишней части пути в запросе
         self.url = url
+        self.name = name
         
         # Словарь для быстрого разрешения запросов. Состоит из полного пути запроса, списка 
         # вызываемых паков и экшена. Пример: {'/dict/lpu/get_rows': ([DictPack, LPUPack], RowsAction)}
@@ -206,6 +211,9 @@ class ActionController(object):
         
         # Признак того, что контроллер зарегистрирован во внутреннем кеше
         self._registered = False
+        
+    def __str__(self):
+        return self.name if self.name else super(ActionController, self).__str__()
         
     def _add_pack_to_search_dicts(self, pack):
         '''
@@ -236,7 +244,6 @@ class ActionController(object):
             clazz = clazz()
         
         # Отладочный атрибут built нужен чтобы обнаружить повторное перестроение экшенов
-        # ВНИМАНИЕ!!! Ошибка может возниктуть есть в конструкторе пака не определить новый список self.actions = []
         if hasattr(clazz, '_built'):
             raise ReinitException(clazz=clazz)
         clazz._built = True
@@ -420,8 +427,10 @@ class ActionController(object):
 
     def _build_full_path(self, packs_list, final_action):
         '''
-        Возвращает полный адрес от контроллера через паки до конечного экшена. 
+        Возвращает полный адрес от контроллера через паки до конечного экшена.
         '''
+        if not final_action.url:
+            raise ActionUrlIsNotDefined(final_action)
         return self._norm_url(self.url) + ''.join([self._norm_url(x.url) for x in packs_list]) + self._norm_url(final_action.url)
 
     def wrap_pack(self, dest_pack, wrap_pack):
@@ -491,7 +500,7 @@ class ActionController(object):
                     self._build_pack_node(action, current_packs_slice)
                     
         else:
-            raise WrapException('ActionPack %s not found in controller' % dest_pack)
+            raise ActionPackNotFoundException(dest_pack)
         
     
     def wrap_action(self, dest_pack, dest_action, wrap_pack):
@@ -544,7 +553,7 @@ class ActionController(object):
             for action in wrapper.actions:
                 self._build_pack_node(action, current_packs_slice)
         else:
-            raise WrapException('ActionPack %s not found in controller' % dest_pack)
+            raise ActionPackNotFoundException(dest_pack)
             
     
     def dump_urls(self):
