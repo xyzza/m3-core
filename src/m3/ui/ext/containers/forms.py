@@ -291,6 +291,8 @@ class ExtForm(BaseExtPanel):
         self.object = object
         all_fields = self._get_all_fields(self)
         for field in all_fields:
+            if not field.name:
+                continue
             assert not isinstance(field.name, unicode), 'The names of all fields must not be instance of unicode'
             assert isinstance(field.name, str) and len(field.name) > 0, \
                   'The names of all fields must be set for a successful \
