@@ -19,7 +19,9 @@ from m3.ui.ext.controls import ExtButton
 
 class BaseExtWindow(ExtUIComponent):
     '''
-    Базовый класс для всех окон в системе
+    Базовый класс для всех окон
+    
+    
     '''
     align_left = 'left'
     align_center = 'center'
