@@ -10,6 +10,25 @@ from m3.helpers.datastructures import TypedList
 
 class BaseExtContainer(ExtUIComponent):
     def __init__(self, *args, **kwargs):
+        '''
+        Базовый класс для контейнерных компонентов
+        
+        @version: 0.1
+        @begin_designer
+        {abstract: true
+        ,attr: [{
+            ext_attr: "layout"
+            ,py_attr: "layout" 
+        },{
+            ext_attr: "layoutConfig"
+            ,py_attr: "layout_config" 
+            ,attr: {
+                 ext_attr: "forceFit"
+                ,py_attr: "force_fit" 
+            }
+        }]}
+        @end_designer
+        '''
         super(BaseExtContainer, self).__init__(*args, **kwargs)
         self.layout = None
         self.layout_config = {}
@@ -51,6 +70,33 @@ class BaseExtContainer(ExtUIComponent):
     
         
 class BaseExtPanel(BaseExtContainer):
+    '''
+    Базовый класс для визуальных контейнерных компонентов
+    
+    @version: 0.1
+    @begin_designer
+    {abstract: true
+    ,attr: [{
+        ext_attr: "title"
+        ,py_attr: "title" 
+    },{
+        ext_attr: "header"
+        ,py_attr: "header" 
+    },{
+        ext_attr: "iconCls"
+        ,py_attr: "icon_cls" 
+    },{
+        ext_attr: "tbar"
+        ,py_attr: "top_bar" 
+    },{
+        ext_attr: "bbar"
+        ,py_attr: "bottom_bar" 
+    },{
+        ext_attr: "fbar"
+        ,py_attr: "footer_bar" 
+    }]}
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
         super(BaseExtPanel, self).__init__(*args, **kwargs)
         self.title = None
@@ -82,3 +128,5 @@ class BaseExtPanel(BaseExtContainer):
                                       self.bottom_bar)
         self._put_config_value('fbar', self.t_render_footer_bar,
                                       self.footer_bar)
+        
+        
