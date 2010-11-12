@@ -9,7 +9,7 @@ from m3.helpers.logger import logging
 
 from cache import MieCache
 
-def simple_mei_pre_delete(sender, instance):
+def simple_mei_pre_delete(sender, instance, *args, **kwargs):
     '''
     Функция удаления extenders-моделей при удалении
     основной модели приложения
