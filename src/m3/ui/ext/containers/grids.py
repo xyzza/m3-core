@@ -41,6 +41,7 @@ class ExtGrid(BaseExtPanel):
         self.show_preview = False
         self.enable_row_body = False
         self.get_row_class = None
+        self.column_lines = True # признак отображения вертикальных линий в гриде
         
         self.init_component(*args, **kwargs)
         
@@ -224,6 +225,7 @@ class ExtGrid(BaseExtPanel):
         self._put_config_value('editor', self.editor)
         self._put_config_value('store', self.t_render_store, self.get_store())   
         self._put_config_value('viewConfig', self._view_config)
+        self._put_config_value('columnLines', self.column_lines, self.column_lines)
     
     def render_params(self):
         super(ExtGrid, self).render_params()

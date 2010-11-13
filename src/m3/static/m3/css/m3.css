@@ -70,3 +70,7 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 .m3-form-invalid {
   background: none repeat scroll 0 0 #ffffaa !important;
 }
+
+.x-grid-with-col-lines .x-grid3-row td.x-grid3-cell {
+    border-right-color: #D0D0D0;
+}
