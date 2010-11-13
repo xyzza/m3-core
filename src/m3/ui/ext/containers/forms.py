@@ -8,12 +8,15 @@ Created on 25.02.2010
 import datetime
 import decimal
 
+from django.core.files.base import ContentFile
+
 from m3.ui.ext.fields.base import BaseExtField
-from m3.ui.ext.fields.simple import (ExtNumberField, 
+from m3.ui.ext.fields import (ExtNumberField, 
                                      ExtStringField, 
                                      ExtDateField,
                                      ExtCheckBox, ExtComboBox, ExtTimeField,
-                                     ExtHiddenField)
+                                     ExtHiddenField,
+                                     ExtFileUploadField)
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent
@@ -61,7 +64,11 @@ class ExtForm(BaseExtPanel):
         all_fields = self._get_all_fields(self)
         for field in all_fields:
             name = field.name
-            field.value = self.request.POST.get(name)
+            if isinstance(field, ExtFileUploadField):
+                field.memory_file = self.request.FILES.get(name)
+            else:
+                value = self.request.POST.get(name)
+                field.value = value
     
     #TODO необходимо добавить проверку на возникновение exception'ов
     def from_object(self, object, exclusion = []):
@@ -258,8 +265,7 @@ class ExtForm(BaseExtPanel):
                 if item.type == ExtHiddenField.INT:
                     val = try_to_int(val)
                 elif item.type == ExtHiddenField.STRING:
-                    val = unicode(val)
-                    
+                    val = unicode(val)           
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
@@ -274,8 +280,21 @@ class ExtForm(BaseExtPanel):
                       assignment. Check the definition of the form.'
             # заполним атрибуты только те, которые не в списке исключаемых
             if not field.name in exclusion:
-                names = field.name.split('.')            
-                set_field(self.object, names, convert_value(field))
+                
+                if isinstance(field, ExtFileUploadField):
+                    # FIXME: Убрать отсюда эту ересь в другое место, т.к. 
+                    # нарушается инкапсуляция, другими словами 
+                    # поля ExtFileUploadField здесь не должно быть
+                    if field.memory_file:
+                        cont_file = ContentFile(field.memory_file.read())
+                        name_file = field.memory_file.name
+                        
+                        if hasattr(self.object, field.name):
+                            l_field = getattr(self.object, field.name)
+                            l_field.save(name_file, cont_file, save = False)
+                else:
+                    names = field.name.split('.')                
+                    set_field(self.object, names, convert_value(field))
      
     @property
     def items(self):       

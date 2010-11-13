@@ -8,4 +8,4 @@ from simple import (ExtDateField,
                     ExtCheckBox,
                     ExtTimeField,
                     ExtHiddenField)
-from complex import ExtDictSelectField, ExtSearchField
+from complex import ExtDictSelectField, ExtSearchField, ExtFileUploadField
