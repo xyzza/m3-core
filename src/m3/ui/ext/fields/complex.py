@@ -300,6 +300,9 @@ class ExtFileUploadField(BaseExtField):
         self.button_offset = None
         self.read_only = None
         self.init_component(*args, **kwargs)
+        
+        # Привязка в файлу
+        self._memory_file = None
 
     def render_base_config(self):
         super(ExtFileUploadField, self).render_base_config()
@@ -316,3 +319,11 @@ class ExtFileUploadField(BaseExtField):
         self.render_base_config()
         base_config = self._get_config_str()
         return 'new Ext.form.FileUploadField({%s})' % base_config
+    
+    @property
+    def memory_file(self):
+        return self._memory_file
+        
+    @memory_file.setter
+    def memory_file(self, memory_file):
+        self._memory_file = memory_file
