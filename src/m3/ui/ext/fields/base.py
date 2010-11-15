@@ -175,8 +175,6 @@ class BaseExtTriggerField(BaseExtField):
         ext_attr: "editable"
         ,py_attr: "editable"
     },{
-        // Необходимо создать свойство trigger_action_all
-        // Внутри него изменять атрибут trigger_action 
         ext_attr: "triggerAction"
         ,py_attr: "trigger_action"
     },{
@@ -187,7 +185,8 @@ class BaseExtTriggerField(BaseExtField):
         ,py_attr: "not_found_text"
     }]}
     @end_designer
-        
+    FIXME: Необходимо создать свойство trigger_action_all
+           Внутри него изменять атрибут trigger_action     
     '''
     def __init__(self, *args, **kwargs):
         super(BaseExtTriggerField, self).__init__(*args, **kwargs)
