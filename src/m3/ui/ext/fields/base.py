@@ -89,7 +89,10 @@ class BaseExtField(ExtUIComponent):
    
     def t_render_label_style(self):
         return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
-    
+
+    def t_render_regex(self):
+        return '/%s/' % self.regex
+
     #===========================================================================
     # Врапперы над событиями listeners[...]
     #===========================================================================
@@ -124,7 +127,7 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('minLengthText', self.min_length_text)
         self._put_config_value('maxLength', self.max_length)
         self._put_config_value('maxLengthText', self.max_length_text)
-        self._put_config_value('regex', self.regex)
+        self._put_config_value('regex', self.t_render_regex, self.regex)
         self._put_config_value('regexText', self.regex_text)
         self._put_config_value('tabIndex', self.tab_index)
         self._put_config_value('invalidClass', self.invalid_class)
