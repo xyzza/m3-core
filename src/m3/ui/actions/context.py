@@ -149,7 +149,7 @@ class ActionContext(object):
                 result += '"%s": "%s",' % (k, v.strftime('%H:%M'))
             else:
                 try:
-                    result += '"%s": "%s",' % (k,str(v))
+                    result += '"%s": "%s",' % (k,unicode(v))
                 except:
                     # TODO: обрабатывать все типы параметров
                     pass
