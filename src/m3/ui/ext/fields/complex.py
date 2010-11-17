@@ -301,7 +301,7 @@ class ExtFileUploadField(BaseExtField):
         self.read_only = None
         self.init_component(*args, **kwargs)
         
-        # Привязка в файлу
+        # Привязка к файлу
         self._memory_file = None
 
     def render_base_config(self):

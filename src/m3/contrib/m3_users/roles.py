@@ -237,6 +237,7 @@ class DeleteRoleAction(actions.Action):
         
         try:
             if not safe_delete(user_role):
+                # FIXME: return в try - это зло
                 return actions.OperationResult(success=False, message=u'Не удалось удалить роль пользователя.<br>На эту запись есть ссылки в базе данных.')
         except:
             logger.exception(u'Не удалось удалить роль пользователя')
