@@ -245,10 +245,95 @@ function uiFailureResponseOnFormSubmit(context){
     }
 }
 
-// Стандартное окно отображаемое если не удалось получить ответ от сервера по неизвестной причине
-function uiAjaxFailMessage(){
-	Ext.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
+/*
+ * Если функция вызвана без параметров, то будет выдано простое сообщение об ошибке
+ * Если передан параметр респонс, то будет нарисовано экстовое окно и в нем отображен
+ * респонс сервера(предназначено для отладки серверных ошибок)
+*/
+function uiAjaxFailMessage (response, opt) {
+	
+	if (Ext.isEmpty(response)) {
+		Ext.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
+	}
+	
+	var bodySize = Ext.getBody().getViewSize(),
+		width = (bodySize.width < 500) ? bodySize.width - 50 : 500,
+		height = (bodySize.height < 300) ? bodySize.height - 50 : 300,
+		win;
+
+	var errorMsg = response.responseText;
+	
+	win = new Ext.Window({ modal: true, width: width, height: height, title: "Request Failure", layout: "fit", maximizable: true,
+		listeners : {
+			"maximize" : {
+				fn : function (el) {
+					var v = Ext.getBody().getViewSize();
+					el.setSize(v.width, v.height);
+				},
+				scope : this
+			},
+
+			"resize" : {
+				fn : function (wnd) {
+					var editor = Ext.getCmp("__ErrorMessageEditor");
+					var sz = wnd.body.getViewSize();
+					editor.setSize(sz.width, sz.height - 42);
+				}
+			}
+		},
+		items : new Ext.form.FormPanel({
+			baseCls : "x-plain",
+			layout  : "absolute",
+			defaultType : "label",
+			items : [
+				{
+					x    : 5,
+					y    : 5,
+					html : '<div class="x-window-dlg"><div class="ext-mb-error" style="width:32px;height:32px"></div></div>'
+				},
+				{
+					x    : 42,
+					y    : 6,
+					html : "<b>Status Code: </b>"
+				},
+				{
+					x    : 125,
+					y    : 6,
+					text : response.status
+				},
+				{
+					x    : 42,
+					y    : 25,
+					html : "<b>Status Text: </b>"
+				},
+				{
+					x    : 125,
+					y    : 25,
+					text : response.statusText
+				},
+				{
+					x  : 0,
+					y  : 42,
+					id : "__ErrorMessageEditor",
+					xtype    : "htmleditor",
+					value    : errorMsg,
+					readOnly : true,
+					enableAlignments : false,
+					enableColors     : false,
+					enableFont       : false,
+					enableFontSize   : false,
+					enableFormat     : false,
+					enableLinks      : false,
+					enableLists      : false,
+					enableSourceEdit : false
+				}
+			]
+		})
+	});
+
+	win.show();
 }
+
 
 // Проверяет есть ли в ответе сообщение и выводит его
 // Возвращает серверный success
