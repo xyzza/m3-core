@@ -24,7 +24,7 @@ def apply_sort_order(query, columns, sort_order):
                     order = 'code'
                     break
             elif isinstance(column, dict):
-                name = dict.get('data_index')
+                name = column.get('data_index')
                 if name == 'name':
                     order = 'name'
                 elif name == 'code':
