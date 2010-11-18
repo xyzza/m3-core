@@ -254,6 +254,7 @@ function uiAjaxFailMessage (response, opt) {
 	
 	if (Ext.isEmpty(response)) {
 		Ext.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
+		return;
 	}
 	
 	var bodySize = Ext.getBody().getViewSize(),
