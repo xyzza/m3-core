@@ -264,7 +264,9 @@ function uiAjaxFailMessage (response, opt) {
 
 	var errorMsg = response.responseText;
 	
-	win = new Ext.Window({ modal: true, width: width, height: height, title: "Request Failure", layout: "fit", maximizable: true,
+	var win = new Ext.Window({ modal: true, width: width, height: height, 
+	    title: "Request Failure", layout: "fit", maximizable: true, 
+	    maximized: true,
 		listeners : {
 			"maximize" : {
 				fn : function (el) {
@@ -346,4 +348,20 @@ function uiShowErrorMessage(response){
 //	if (obj.code)
 //		alert('Пришел код на выполнение ' + obj.code);
 	return obj.success;
+}
+
+/**
+ * Генерирует запрос на сервер по переданному url
+ * @param {String} url URL запроса на получение формы
+ * @param {Object} desktop Объект типа AppDesktop.getDesktop()
+ */
+function sendRequest(url, desktop){                     
+    Ext.Ajax.request({
+        url: url,
+        method: 'POST',
+        success: function(response, options){
+            smart_eval(response.responseText);
+        }, 
+        failure: uiAjaxFailMessage
+    });
 }
