@@ -37,9 +37,7 @@ var ajax = Ext.Ajax;
 			url: "{{ component.url_new_grid }}"
 			,success: renderWindowGrid
 			,params: params
-			,failure: function(response, opts){
-				uiAjaxFailMessage();
-			}
+			,failure: uiAjaxFailMessage
 		});
 	}
 	
@@ -56,9 +54,7 @@ var ajax = Ext.Ajax;
 			url: "{{ component.url_edit_grid }}"
 			,params: Ext.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,success: renderWindowGrid
-			,failure: function(response, opts){
-				uiAjaxFailMessage();
-			}
+			,failure: uiAjaxFailMessage
 		});
 	}
 	
@@ -101,9 +97,7 @@ var ajax = Ext.Ajax;
 							if (uiShowErrorMessage(response))
 								grid.getStore().remove(selRecords);
 						}
-						,failure: function(response, opts){
-							uiAjaxFailMessage();
-						}
+						,failure: uiAjaxFailMessage
 					});
 		    	};
 		   } 
@@ -176,9 +170,7 @@ var ajax = Ext.Ajax;
 						},
 						params: Ext.applyIf({ node: parentNode.id }, 
 							{% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %}),
-						failure: function (response, opts) {
-							uiAjaxFailMessage();
-						}
+						failure: uiAjaxFailMessage
 					});
 				}
 				else {
@@ -198,9 +190,7 @@ var ajax = Ext.Ajax;
 				renderWindowTree(response, opts);
 			}
 			,params: Ext.applyIf({'{{ component.contextTreeIdName }}': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
-			,failure: function(response, opts){
-				uiAjaxFailMessage();
-			}
+			,failure: uiAjaxFailMessage
 		});
 	}
 	
@@ -212,16 +202,14 @@ var ajax = Ext.Ajax;
 		if (!isTreeSelected(tree, 'Новый', 'Элемент не выбран') ) {
 			return;
 		};
-		node = tree.getSelectionModel().getSelectedNode();
+		var node = tree.getSelectionModel().getSelectedNode();
 		ajax.request({
 			url: "{{ component.url_new_tree }}"
 			,success: function (response, opts) {
 				renderWindowTree(response, opts, node);
 			}
 			,params: Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
-			,failure: function(response, opts){
-			   Ext.Msg.alert('','failed');
-			}
+			,failure: uiAjaxFailMessage
 		});
 	}
 	
@@ -233,16 +221,14 @@ var ajax = Ext.Ajax;
 		if (!isTreeSelected(tree, 'Редактирование', 'Элемент не выбран') ) {
 			return;
 		};
-		node = tree.getSelectionModel().getSelectedNode();
+		var node = tree.getSelectionModel().getSelectedNode();
 		ajax.request({
 			url: "{{ component.url_edit_tree }}"
 			,params: Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id}, {% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 			,success: function (response, opts) {
 				renderWindowTree(response, opts, node.parentNode);
 			}
-			,failure: function(response, opts){
-			   Ext.Msg.alert('','failed');
-			}
+			,failure: uiAjaxFailMessage
 		});
 	}
 	
@@ -272,9 +258,7 @@ var ajax = Ext.Ajax;
 								tree.getSelectionModel().getSelectedNode().remove();
 							}
 						}
-						,failure: function(response, opts){
-						   Ext.Msg.alert('','failed');
-						}
+						,failure: uiAjaxFailMessage
 					});
 		    	};
 		   } 
@@ -349,7 +333,7 @@ var ajax = Ext.Ajax;
 				}
 				,failure: function(response, opts){
 					dropObj.cancel = false;
-				    Ext.Msg.alert('','failed');
+				    uiAjaxFailMessage(response, opts);
 				}
 			});
 		} else if (dropObj.source.tree){
@@ -363,7 +347,7 @@ var ajax = Ext.Ajax;
 				,success: Ext.emptyFn
 				,failure: function(response, opts){
 					dropObj.cancel = false;
-				    Ext.Msg.alert('','failed');
+				    uiAjaxFailMessage(response, opts);
 				}
 			});
 		}	
