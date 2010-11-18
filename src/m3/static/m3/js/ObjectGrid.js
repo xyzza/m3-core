@@ -116,7 +116,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 					for(var i = 0, len = sels.length; i < len; i++){
 						ids.push(sels[i].id);
 					}
-					baseConf[this.rowIdName] = ids;
+					baseConf[this.rowIdName] = ids.join();
 				}
 			}
 			// для режима выделения ячейки
@@ -176,7 +176,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 								for(var i = 0, len = sels.length; i < len; i++){
 									ids.push(sels[i].id);
 								}
-								baseConf[scope.rowIdName] = ids;
+								baseConf[scope.rowIdName] = ids.join();
 							}
 						}
 						// для режима выделения ячейки
