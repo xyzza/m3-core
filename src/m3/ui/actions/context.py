@@ -45,11 +45,12 @@ class ActionContext(object):
         Класс для описания параметров, которые будут передаваться в виде 
         списка значений, разделенных определенным символом
         '''
-        def __init__(self, separator=',', type=int):
+        def __init__(self, separator=',', type=int, allow_empty=True):
             # разделитель элементов
             self.separator = separator
             # тип, к которому будут преобразовываться эл-ты списка
             self.type = type
+            self.allow_empty = allow_empty
             
     def __init__(self, obj=None):
         '''
@@ -87,7 +88,10 @@ class ActionContext(object):
         elif arg_type == bool:
             value = raw_value in ['true', 'True', 1, '1', 'on', True]
         elif isinstance(arg_type, ActionContext.ValuesList):
-            value = map(arg_type.type, raw_value.split(arg_type.separator))
+            elements = raw_value.split(arg_type.separator)
+            if not arg_type.allow_empty:
+                elements = [elem for elem in elements if elem]
+            value = map(arg_type.type, elements)
         else:
             raise Exception('Can not convert value of "%s" in a given type "%s"' % (raw_value, arg_type))
         
