@@ -7,6 +7,7 @@ from collections import defaultdict
 
 from models import UserActivity, RequestActivity
 
+
 class Stat:
     """ Содержит статистические данные за период """
     def __init__(self):
@@ -137,9 +138,12 @@ class UsermonMiddleware:
         mon = MonitoringController()
         mon.add_request_stat(request)
     
-    def process_response(self, request, response): 
-        mon = MonitoringController()
-        mon.request_end_processing(request)
+    def process_response(self, request, response):
+        # ВНИМАНИЕ! По неизвестной причине, обработка запроса может начаться с обработки ответа!
+        # Ответ фиктивный и не поддерживает авторизацию пользователей, даже анонимных! 
+        if hasattr(request, 'user'):
+            mon = MonitoringController()
+            mon.request_end_processing(request)
         
 ##     тесты
 #        if mon.auth_request_count:
