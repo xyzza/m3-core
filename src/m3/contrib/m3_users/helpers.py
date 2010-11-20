@@ -69,6 +69,12 @@ def get_assigned_metaroles_query(user):
     '''
     Возвращает список метаролей у пользователя
     '''
-    return [ metarole['role__metarole'] for metarole in AssignedRole.objects.filter(user=user). \
+    lst = [ metarole['role__metarole'] for metarole in AssignedRole.objects.filter(user=user). \
         select_related('role'). values('role__metarole').distinct() \
         if metarole['role__metarole']]
+    # если небыло списка ролей, то возьмем метароли из профиля
+    if not lst:
+        prof = user.get_profile()
+        if hasattr(prof, 'get_metaroles'):
+            lst = prof.get_metaroles()
+    return lst
