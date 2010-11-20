@@ -92,7 +92,10 @@ class MonitoringController(object):
                 if not hasattr(self, 'last_user_activity') or \
                    (datetime.now() - self.last_user_activity).seconds > self.DT_USER_ACTIVITY:
 
-                    UserActivity.objects.get_or_create(user_id=user.id, user_name=user.username) 
+                    # Записей по одному пользователю может быть много, т.к. сингтон работает только в одном процессе
+                    UserActivity.objects.filter(user_id=user.id, user_name=user.username).delete()
+                    UserActivity.objects.create(user_id=user.id, user_name=user.username)
+
                     self.last_user_activity = datetime.now()       
             
             # Записываем статистику по времени отработки запросов
