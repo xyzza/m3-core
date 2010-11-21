@@ -6,7 +6,7 @@ Created on 21.11.2010
 '''
 
 from django.test import TestCase
-from ui import SimpleWindow
+from ui import SimpleWindow, SimpleEditWindow
 
 class GenericExtUITests(TestCase):
     
@@ -33,3 +33,12 @@ class QNamesTests(TestCase):
         self.failUnlessEqual(window.ok_button.qname, 'SimpleWindow__ok_button')
         self.failUnlessEqual(window.cancel_button.qname, 'SimpleWindow__cancel_button')
         
+    def test_simple_edit_window(self):
+        window = SimpleEditWindow()
+        window.prepare_qnames()
+        
+        self.failUnlessEqual(window.form.qname, 'SimpleEditWindow___ExtEditWindow__form')
+        self.failUnlessEqual(window.form.items[0].qname, 'SimpleEditWindow__named_field')
+        self.failUnlessEqual(window.form.items[1].qname, 'SimpleEditWindow___ExtEditWindow__form__ExtStringField0')
+        self.failUnlessEqual(window.form.items[2].qname, 'SimpleEditWindow___ExtEditWindow__form__ExtStringField1')
+        self.failUnlessEqual(window.form.items[3].qname, 'SimpleEditWindow___ExtEditWindow__form__ExtDateField0')
