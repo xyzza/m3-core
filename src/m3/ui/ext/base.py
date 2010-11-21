@@ -408,8 +408,12 @@ class BaseExtComponent(object):
                     attr_name = transposed_cmp_dict.get(nested_cmp, '')
                     if attr_name:
                         # вложенный компонент присутствует в атрибутах
-                        # родительского контейнера. присваиваем
-                        nested_cmp.qname = cmp.qname + '__' + attr_name
+                        # родительского контейнера.
+                        if '__' in attr_name and hasattr(cmp, attr_name + '_qname'):
+                            qname = getattr(cmp, attr_name + '_qname')
+                        else:
+                            qname = attr_name
+                        nested_cmp.qname = cmp.qname + '__' + qname
                     else:
                         component_index = cmp_indicies.get(nested_cmp.__class__, -1) + 1
                         nested_cmp.qname = cmp.qname + '__' + nested_cmp.__class__.__name__ + str(component_index)
@@ -423,7 +427,15 @@ class BaseExtComponent(object):
             for cmp_in_attr, attr_name in transposed_cmp_dict.iteritems():
                 if not cmp_in_attr.qname:
                     cmp_in_attr.qname = cmp.qname + '__' + attr_name
-        
+            
+            # У ДАННОГО МЕХАНИЗМА ЕСТЬ ОДИН НЕПРИЯТНЫЙ САЙД ЭФФЕКТ.
+            # в случае, если в атрибуты этого или одно из вложенных компонентов
+            # попадет нечто левое унаследованное от BaseExtComponent, то его qname
+            # будет заполнен некоторым значением.
+            # чтобы избежать этого, возможно, стоит предусмотреть нечто, что будет
+            # описывать именно те компоненты, которые подлежат обработке.
+            # но хождение по этому нечту приведет к замедлению времени вычисления
+            # квалифицирующих имен компонентов.
         
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):

@@ -37,8 +37,8 @@ class QNamesTests(TestCase):
         window = SimpleEditWindow()
         window.prepare_qnames()
         
-        self.failUnlessEqual(window.form.qname, 'SimpleEditWindow___ExtEditWindow__form')
+        self.failUnlessEqual(window.form.qname, 'SimpleEditWindow__form')
         self.failUnlessEqual(window.form.items[0].qname, 'SimpleEditWindow__named_field')
-        self.failUnlessEqual(window.form.items[1].qname, 'SimpleEditWindow___ExtEditWindow__form__ExtStringField0')
-        self.failUnlessEqual(window.form.items[2].qname, 'SimpleEditWindow___ExtEditWindow__form__ExtStringField1')
-        self.failUnlessEqual(window.form.items[3].qname, 'SimpleEditWindow___ExtEditWindow__form__ExtDateField0')
+        self.failUnlessEqual(window.form.items[1].qname, 'SimpleEditWindow__form__ExtStringField0')
+        self.failUnlessEqual(window.form.items[2].qname, 'SimpleEditWindow__form__ExtStringField1')
+        self.failUnlessEqual(window.form.items[3].qname, 'SimpleEditWindow__form__ExtDateField0')

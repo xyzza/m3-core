@@ -39,6 +39,7 @@ class ExtEditWindow(BaseExtWindow):
         # то небходимо вставить эту строку
         self.items.append(value)
         self.__form = value
+        self.__form_qname = 'form' # для формирования более коротких qnames для контролов
 
     def render_params(self):
         super(ExtEditWindow, self).render_params()
