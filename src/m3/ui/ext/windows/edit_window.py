@@ -71,3 +71,12 @@ class ExtEditWindow(BaseExtWindow):
                             'params': params }
                             
         return 'new %s' % res if not self._is_function_render else res
+    
+    def nested_components(self):
+        '''
+        Метод сбора вложенных компонентов
+        '''
+        nested = super(ExtEditWindow, self).nested_components()
+        nested.insert(0, self.form) # форма для этих вложенных компонентов важнее
+        return nested
+        

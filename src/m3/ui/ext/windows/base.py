@@ -192,8 +192,9 @@ class BaseExtWindow(ExtUIComponent):
         '''
         nested = super(BaseExtWindow, self).nested_components()
         
-        # добавляем в список вложенных компонентов кнопки
-        nested.extend(self.buttons)
+        nested.extend(self.items)   # произвольные вложенные элементы 
+        nested.extend(self.buttons) # кнопки
+        nested.extend([self.top_bar, self.footer_bar]) # топ и футтер бары как контейнет
         
         return nested
         

@@ -69,6 +69,16 @@ class BaseExtContainer(ExtUIComponent):
         self._put_config_value('layout', self.layout)
     
         
+    def nested_components(self):
+        '''
+        Возвращаем список вложенных компонентов
+        '''
+        nested = super(BaseExtContainer, self).nested_components()
+        nested.extend(self._items)
+        
+        return nested
+    
+        
 class BaseExtPanel(BaseExtContainer):
     '''
     Базовый класс для визуальных контейнерных компонентов
