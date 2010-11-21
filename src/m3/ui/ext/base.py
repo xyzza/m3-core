@@ -381,6 +381,9 @@ class BaseExtComponent(object):
             cmp = queue.popleft()
             # проверяем, может быть, квалифицирующее имя
             # уже было вычислено ранее
+            if not cmp:
+                continue
+            
             if not cmp.qname:
                 # формируем имя компонента на основе его типа, qname родительского контрола
                 # и индекса внутри компонентов базового контрола
@@ -401,18 +404,25 @@ class BaseExtComponent(object):
                     transposed_cmp_dict[value] = name
                 
             for nested_cmp in nested:
-                attr_name = transposed_cmp_dict.get(nested_cmp, '')
-                if attr_name:
-                    # вложенный компонент присутствует в атрибутах
-                    # родительского контейнера. присваиваем
-                    nested_cmp.qname = cmp.qname + '__' + attr_name
-                else:
-                    component_index = cmp_indicies.get(nested_cmp.__class__, -1) + 1
-                    nested_cmp.qname = nested_cmp.__class__.__name__ + str(component_index)
-                    cmp_indicies[nested_cmp.__class__] = component_index
-                    
-                # включаем компонент в очередь на дальнейшую обработку
-                queue.append(nested_cmp)
+                if nested_cmp and not nested_cmp.qname:
+                    attr_name = transposed_cmp_dict.get(nested_cmp, '')
+                    if attr_name:
+                        # вложенный компонент присутствует в атрибутах
+                        # родительского контейнера. присваиваем
+                        nested_cmp.qname = cmp.qname + '__' + attr_name
+                    else:
+                        component_index = cmp_indicies.get(nested_cmp.__class__, -1) + 1
+                        nested_cmp.qname = cmp.qname + '__' + nested_cmp.__class__.__name__ + str(component_index)
+                        cmp_indicies[nested_cmp.__class__] = component_index
+                        
+                    # включаем компонент в очередь на дальнейшую обработку
+                    queue.append(nested_cmp)
+            
+            # теперь мы должны пройтись по необработанным ранее компонентам и 
+            # выставить у них qname
+            for cmp_in_attr, attr_name in transposed_cmp_dict.iteritems():
+                if not cmp_in_attr.qname:
+                    cmp_in_attr.qname = cmp.qname + '__' + attr_name
         
         
 #===============================================================================
