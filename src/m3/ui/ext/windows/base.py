@@ -185,6 +185,17 @@ class BaseExtWindow(ExtUIComponent):
         assert isinstance(self.help_topic, tuple)
         assert len(self.help_topic) > 0
         return self.help_topic[0] + '.html' + ('#' + self.help_topic[1] if len(self.help_topic) > 1 else '')
+    
+    def nested_components(self):
+        '''
+        Возвращает список вложенных компонентов
+        '''
+        nested = super(BaseExtWindow, self).nested_components()
+        
+        # добавляем в список вложенных компонентов кнопки
+        nested.extend(self.buttons)
+        
+        return nested
         
         
 

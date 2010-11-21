@@ -10,6 +10,7 @@ Created on 01.03.2010
 '''
 
 import datetime
+import collections
 
 from django import template as django_template
 from django.conf import settings
@@ -84,6 +85,12 @@ class BaseExtComponent(object):
         # Если True, то рендерится как функция, без префикса new
         self._is_function_render = False
         self._ext_name = None
+        
+        # квалифицирующее имя контрола (в пределах некоторого базового компонента)
+        # формируется путем присоединения к имени текущего компонента квалифицирующих
+        # имен родительских контейнеров.
+        # квалицирющее имя текущего компонента формируется из наименования атрибута
+        self.qname = '' 
     
     def render(self):
         '''
@@ -334,7 +341,80 @@ class BaseExtComponent(object):
         Возрвращает доп. параметры в формате json
         '''
         return self._get_base_str(self._param_list)
-            
+    
+    
+    def nested_components(self):
+        '''
+        Метод получения списка внутренних (по отношению
+        к текущему) компонентов.
+        
+        Данный метод следует переопределять в унаследованных классах 
+        '''
+        return []
+    
+    
+    def prepare_qnames(self):
+        '''
+        Метод вычисляет квалицицирующие имена контролов. 
+        
+        Квалифицирующие имена не вычисляются неявно. Т.е. для получения
+        qname контрола необходимо явно вызвать данный метод.
+        
+        Примеры того, как формируются квалифицирующие имена контролов см. в 
+        m3/src/tests/ui/ext_tests/tests.py (test case: QNamesTests)
+        '''
+        if self.qname:
+            # квалицицирующие имена этого и вложенных в него контролов
+            # типа были вычислены заранееы
+            return
+        
+        # вычисляем квалицицирующее имя для текущего компонента.
+        self.qname = self.__class__.__name__
+        
+        # очередь компонентов, для которых необходимо определить qnames
+        # очередь состоит из кортежей (компонент, родительский компонент)
+        queue = collections.deque([self,])
+        
+        # основной цикл, в котором происходит вычисление
+        # квалифицирующих имен
+        while len(queue) > 0:
+            cmp = queue.popleft()
+            # проверяем, может быть, квалифицирующее имя
+            # уже было вычислено ранее
+            if not cmp.qname:
+                # формируем имя компонента на основе его типа, qname родительского контрола
+                # и индекса внутри компонентов базового контрола
+                pass
+
+            # получаем вложенные компоненты
+            nested = cmp.nested_components()
+            # словарь, в котором в качестве ключей будут классы контролов,
+            # а в значениях - количество контролов указанного типа.
+            # это необходимо для того, чтобы формировать имена
+            # типа ...__ExtButton0
+            cmp_indicies = {}
+            # формируем транспонированный словарь атрибутов
+            # ключом будут вложенные атрибуты BaseExtComponent
+            transposed_cmp_dict = {}
+            for name, value in cmp.__dict__.iteritems():
+                if isinstance(value, BaseExtComponent):
+                    transposed_cmp_dict[value] = name
+                
+            for nested_cmp in nested:
+                attr_name = transposed_cmp_dict.get(nested_cmp, '')
+                if attr_name:
+                    # вложенный компонент присутствует в атрибутах
+                    # родительского контейнера. присваиваем
+                    nested_cmp.qname = cmp.qname + '__' + attr_name
+                else:
+                    component_index = cmp_indicies.get(nested_cmp.__class__, -1) + 1
+                    nested_cmp.qname = nested_cmp.__class__.__name__ + str(component_index)
+                    cmp_indicies[nested_cmp.__class__] = component_index
+                    
+                # включаем компонент в очередь на дальнейшую обработку
+                queue.append(nested_cmp)
+        
+        
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):
     '''
