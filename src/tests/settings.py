@@ -93,4 +93,5 @@ INSTALLED_APPS = (
     #'datareg_tests',
     'tests.data.caching_tests',
     'tests.data.mie_tests',
+    'tests.ui.ext_tests',
 )
