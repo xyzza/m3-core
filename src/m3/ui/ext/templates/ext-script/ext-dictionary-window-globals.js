@@ -177,30 +177,6 @@ var ajax = Ext.Ajax;
 					refreshTreeLoader();
 				}
 			});
-			win.on('closed_ok', function(event, target){
-        // Если задан родительский узел, то перезаполнянм его дочерние
-        // элементы и раскрываем его.
-        if (parentNode) {
-          var tree = Ext.getCmp('{{ component.tree.client_id }}');
-          ajax.request({
-            url: tree.getLoader().dataUrl,
-            success: function (response, opts) {
-                var nodes = Ext.util.JSON.decode(response.responseText);
-                var isExpanded = !parentNode.childNodes.length || parentNode.isExpanded();
-                parentNode.removeAll();
-                parentNode.appendChild(nodes);
-                if (isExpanded)
-                  parentNode.expand();
-            },
-            params: Ext.applyIf({ node: parentNode.id }, 
-              {% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %}),
-            failure: uiAjaxFailMessage
-          });
-        }
-        else {
-          refreshTreeLoader();
-        }
-      });
 		};
 	}
 	
