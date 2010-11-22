@@ -126,7 +126,10 @@ class DatabaseOperations(object):
         if self.debug:
             print "   = %s" % sql, params
 
-        get_logger().debug('south execute "%s" with params "%s"' % (sql, params))
+        get_logger().debug('south execute "%s" with params "%s"' % (sql, params), extra={
+            'sql': sql,
+            'params': params,
+        })
 
         if self.dry_run:
             return []
@@ -303,6 +306,9 @@ class DatabaseOperations(object):
         @param name: The name of the column to alter
         @param field: The new field definition to use
         """
+        
+        if self.dry_run:
+            return
 
         # hook for the field to do any resolution prior to it's attributes being queried
         if hasattr(field, 'south_init'):
@@ -339,8 +345,12 @@ class DatabaseOperations(object):
         }
 
         # SQLs is a list of (SQL, values) pairs.
-        sqls = [(self.alter_string_set_type % params, [])]
-
+        sqls = []
+        
+        # Only alter the column if it has a type (Geometry ones sometimes don't)
+        if params["type"] is not None:
+            sqls.append((self.alter_string_set_type % params, []))
+        
         # Next, nullity
         if field.null:
             sqls.append((self.alter_string_set_null % params, []))
@@ -391,6 +401,11 @@ class DatabaseOperations(object):
             ifsc_table = "constraint_column_usage"
         else:
             ifsc_table = "key_column_usage"
+            
+        if self._has_setting("SCHEMA"):
+            schema = self._get_setting("SCHEMA")
+        else:
+            schema = "public"
 
         # First, load all constraint->col mappings for this table.
         rows = self.execute("""
@@ -404,7 +419,7 @@ class DatabaseOperations(object):
                 kc.table_schema = %%s AND
                 kc.table_name = %%s AND
                 c.constraint_type = %%s
-        """ % ifsc_table, ['public', table_name, type])
+        """ % ifsc_table, [schema, table_name, type])
         
         # Load into a dict
         mapping = {}
@@ -504,30 +519,31 @@ class DatabaseOperations(object):
             sqlparams = ()
             # if the field is "NOT NULL" and a default value is provided, create the column with it
             # this allows the addition of a NOT NULL field to a table with existing rows
-            if not field.null and not getattr(field, '_suppress_default', False) and field.has_default():
-                default = field.get_default()
-                # If the default is actually None, don't add a default term
-                if default is not None:
-                    # If the default is a callable, then call it!
-                    if callable(default):
-                        default = default()
-                    # Now do some very cheap quoting. TODO: Redesign return values to avoid this.
-                    if isinstance(default, basestring):
-                        default = "'%s'" % default.replace("'", "''")
-                    elif isinstance(default, (datetime.date, datetime.time, datetime.datetime)):
-                        default = "'%s'" % default
-                    # Escape any % signs in the output (bug #317)
-                    if isinstance(default, basestring):
-                        default = default.replace("%", "%%")
-                    # Add it in
-                    sql += " DEFAULT %s"
-                    sqlparams = (default)
-            elif (not field.null and field.blank) or ((field.get_default() == '') and (not getattr(field, '_suppress_default', False))):
-                if field.empty_strings_allowed and self._get_connection().features.interprets_empty_strings_as_nulls:
-                    sql += " DEFAULT ''"
-                # Error here would be nice, but doesn't seem to play fair.
-                #else:
-                #    raise ValueError("Attempting to add a non null column that isn't character based without an explicit default value.")
+            if not getattr(field, '_suppress_default', False):
+                if field.has_default():
+                    default = field.get_default()
+                    # If the default is actually None, don't add a default term
+                    if default is not None:
+                        # If the default is a callable, then call it!
+                        if callable(default):
+                            default = default()
+                        # Now do some very cheap quoting. TODO: Redesign return values to avoid this.
+                        if isinstance(default, basestring):
+                            default = "'%s'" % default.replace("'", "''")
+                        elif isinstance(default, (datetime.date, datetime.time, datetime.datetime)):
+                            default = "'%s'" % default
+                        # Escape any % signs in the output (bug #317)
+                        if isinstance(default, basestring):
+                            default = default.replace("%", "%%")
+                        # Add it in
+                        sql += " DEFAULT %s"
+                        sqlparams = (default)
+                elif (not field.null and field.blank) or (field.get_default() == ''):
+                    if field.empty_strings_allowed and self._get_connection().features.interprets_empty_strings_as_nulls:
+                        sql += " DEFAULT ''"
+                    # Error here would be nice, but doesn't seem to play fair.
+                    #else:
+                    #    raise ValueError("Attempting to add a non null column that isn't character based without an explicit default value.")
 
             if field.rel and self.supports_foreign_keys:
                 self.add_deferred_sql(
@@ -624,8 +640,8 @@ class DatabaseOperations(object):
             return ''
 
         connection = self._get_connection()
-        if db_tablespace and self._get_connection().features.supports_tablespaces:
-            tablespace_sql = ' ' + self._get_connection().ops.tablespace_sql(db_tablespace)
+        if db_tablespace and connection.features.supports_tablespaces:
+            tablespace_sql = ' ' + connection.ops.tablespace_sql(db_tablespace)
         else:
             tablespace_sql = ''
 
