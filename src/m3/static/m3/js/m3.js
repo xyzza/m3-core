@@ -328,7 +328,47 @@ function uiAjaxFailMessage (response, opt) {
 					enableFormat     : false,
 					enableLinks      : false,
 					enableLists      : false,
-					enableSourceEdit : false
+					enableSourceEdit : false,
+					listeners         : {
+						"push" : {
+							fn : function(self,html) {
+								
+								// событие возникает когда содержимое iframe становится доступно
+								
+								function fixDjangoPageScripts(doc) {
+									//грязный хак - эвалим скрипты в iframe 
+									
+									try {																				
+										var scripts = doc.getElementsByTagName('script');
+										for (var i = 0; i < scripts.length;i++) {
+											if (scripts[i].innerText) {
+												this.eval(scripts[i].innerText);
+											}
+											else {
+												this.eval(scripts[i].textContent);
+											}
+										}	
+																			
+										//и скрыта подробная информация, тк document.onLoad не будет
+										//вызвано
+										this.hideAll(this.getElementsByClassName(doc, 'table', 'vars'));
+										this.hideAll(this.getElementsByClassName(doc, 'ol', 'pre-context'));
+										this.hideAll(this.getElementsByClassName(doc, 'ol', 'post-context'));
+										this.hideAll(this.getElementsByClassName(doc, 'div', 'pastebin'));
+										
+									}
+									catch(er) {
+										//
+									}
+								}
+								
+								//магия - меняем объект исполнения на window из iframe
+								fixDjangoPageScripts.call(this.iframe.contentWindow, this.iframe.contentDocument);
+								//TO DO: нужно еще поправлять стили странички в IE и Сафари
+							}
+						}
+					
+					}
 				}
 			]
 		})
@@ -336,7 +376,6 @@ function uiAjaxFailMessage (response, opt) {
 
 	win.show();
 }
-
 
 // Проверяет есть ли в ответе сообщение и выводит его
 // Возвращает серверный success
