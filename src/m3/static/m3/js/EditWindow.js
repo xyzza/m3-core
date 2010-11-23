@@ -71,6 +71,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			 * Проще говоря до начала submit'a
 			 * Параметры:
 			 *   this - Сам компонент
+			 *   @param (OBJECT) submit - sumbit-запрос для отправки на сервер
 			*/
 			'beforesubmit'
 			)
@@ -93,7 +94,6 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	,submitForm: function(btn, e, baseParams){
 		assert(this.formUrl, 'Не задан url для формы');
 		
-		this.fireEvent('beforesubmit');
 		
 		var form = Ext.getCmp(this.formId).getForm();
 		if (form && !form.isValid()) {
@@ -106,20 +106,23 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			
 			return;
 		}
-		var scope = this;
-    	form.submit({
-    	   url: this.formUrl
-		   ,submitEmptyText: false
-		   ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
-		   ,success: function(form, action){
-				scope.fireEvent('closed_ok', action.response.responseText);
-		    	scope.close(true);
-		    	smart_eval(action.response.responseText);
-		   }
-		   ,failure: function (form, action){
-		   		smart_eval(action.response.responseText);
-		   }
-    	});
+    var scope = this;
+		var submit = {
+        url: this.formUrl
+       ,submitEmptyText: false
+       ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
+       ,success: function(form, action){
+          scope.fireEvent('closed_ok', action.response.responseText);
+          scope.close(true);
+          smart_eval(action.response.responseText);
+       }
+       ,failure: function (form, action){
+          smart_eval(action.response.responseText);
+       }
+    };
+    if (scope.fireEvent('beforesubmit', submit)) {
+    	form.submit(submit);
+    }
 	}
 	
 	 /**
