@@ -38,7 +38,7 @@ def queryset_limiter(queryset, start=0, limit=0):
         limit = 0
     total = queryset.count()
     rows = queryset[start:start+limit]
-    return (list(rows), total,)
+    return (rows, total,)
 
 class BaseEnumerate(object):
     '''
