@@ -24,9 +24,9 @@ def safe_delete(model):
 
 def queryset_limiter(queryset, start=0, limit=0):
     '''
-    Извлекает из QuerySet'a список записей начиная с позиции start до записи start+limit.
+    "Вырезает" из QuerySet'a записи начиная с позиции start до записи start+limit.
     Возвращает (rows, total, ), где
-    rows - список отобранных записей
+    rows -  QuerySet с вырезанными записями
     total - общее кол-во записей в queryset'e
     '''
     
