@@ -160,7 +160,7 @@ def safe_delete_record(model, id):
     Возвращает True в случае успеха, иначе False 
     '''
     assert issubclass(model, models.Model)
-    assert isinstance(id, int)
+    assert (isinstance(id, int) or isinstance(id, long))
     try:
         cursor = connection.cursor() #@UndefinedVariable
         sql = "DELETE FROM %s WHERE id = %s" % (model._meta.db_table, id)
