@@ -8,6 +8,8 @@ import os
 import zipfile
 import smtplib
 import datetime
+import codecs
+import time
 
 from django.conf import settings
 
@@ -16,41 +18,131 @@ from email.mime.text import MIMEText
 
 from m3.helpers import logger
 
+
 #===============================================================================
 # Просмотр логов и чтение логов 
 #===============================================================================
 
+#===============================================================================
+# Константы
+#===============================================================================
+
+# Имена файлов участвующих в разборе(парсинге)
+INFO = u'info.log'
+ERROR = u'error.log'
+
+# Максимальная длина файла парсинга без даты(warning.log)
+MAX_LOG_FILE_LENGHT = 11
+
+# Длина date формата в имени файла (2010-11-19)
+DATE_FORMAT_LENGHT = 10
+
+# Длина Datetime формата (2010-11-17 14:01:58)
+FULL_DATE_LENGHT = 20
+
+# Позиция после datetime
+ADDITIONALLY_TXT_LENGHT = FULL_DATE_LENGHT + 1
+
+# Максимальная длина ошибки в python
+MAX_ERROR_LENGHT = 25
+
+# Позиции message и type_error в тексте
+MESSAGE_TXT_LENGHT = 9
+TYPE_TXT_ERROR = 11
+
+
 def get_log_content(filename):
     '''
-    Возвращает содержимое файла с именем filename из директрии для логов
+    Возвращает содержимое файла с именем filename из директории для логов
     '''
     filepath = os.path.join(settings.MIS_LOG_PATH, filename)
     filedata = None
     try:
-        f = open(filepath, 'rb')
-        filedata = f.read()
+        log_file = codecs.open(filepath, 'rb', 'utf-8')
+        filedata = log_file_parse(log_file)
     except:
         logger.exception(u'Ошибка при попытке чтения файла' + filepath)
         raise
     return filedata
 
-def log_files_list(date = None, to_email = None):
+def log_files_list(start_date_str = None, end_date_str = None, to_email = None):
     '''
     Возвращает список лог-файлов заданный в MIS_LOG_PATсистемы в виде [ключ, файл]. 
     Требует администраторские права.
     '''
     log_files = []
+    today = datetime.date.today()
     path_to_logs = settings.MIS_LOG_PATH
-    for file in os.listdir(path_to_logs):
-        if date:
-            if date in file:
-                if os.path.isfile(os.path.join(path_to_logs, file)):
-                    log_files.append(file)
-        elif not date and len(file) < 12:
-            if os.path.isfile(os.path.join(path_to_logs, file)):
-                log_files.append(file)
-    log_files = [[log_files.index(file), file] for file in log_files if file]
+    for file_item in os.listdir(path_to_logs):
+        full_path = os.path.join(path_to_logs, file_item)
+        creation_date = file_creation_time(full_path)
+        if file_creation_time(full_path).date() != today\
+            and start_date_str and end_date_str:
+            start_date = datetime.datetime.strptime(start_date_str,'%Y-%m-%d')
+            end_date = datetime.datetime.strptime(end_date_str,'%Y-%m-%d')
+            if creation_date >= start_date and creation_date <= end_date:
+                if os.path.isfile(os.path.join(path_to_logs, file_item)):
+                    log_files.append(file_item)
+        elif file_creation_time(full_path).date() == today:
+            if os.path.isfile(os.path.join(path_to_logs, file_item)):
+                log_files.append(file_item)
+    log_files = [[log_files.index(file_item), file_item] for file_item in log_files if file_item]
     return log_files
+
+def file_creation_time(full_path):
+    '''
+    Функция получения даты и времени создания файла
+    '''
+    # Время создания файла
+    # st_ctime, st_mtime - зависит от операционной системы: 
+    # для юниксов содержит дату последнего изменения метаданных, 
+    # а для виндов - дату создания файла
+    creation_time = os.stat(full_path).st_mtime
+    # Переводим в локальное время
+    year, month, day,\
+    hour, min, sec, wday, yday, isdst = time.localtime(creation_time)
+    creation_date = datetime.datetime(year, month, day)
+    return creation_date
+
+def log_file_parse(log_file):
+    '''
+    Функция парсинга файлов логирования
+    Возвращает список из словарей. 
+    info.log [{date: ..., additionally:...},{date:..., }]
+    error.log [{date: ..., message:..., type_error:..., full:...},{...}]
+    '''
+    file_name = os.path.basename(log_file.name)
+    if file_name == INFO:
+        info_lines = []
+        for line in log_file.xreadlines():
+            if line[0] == '[' and 'Версия' in line:
+                info_lines.append({'date': line[1:FULL_DATE_LENGHT],
+                                   'additionally':line[ADDITIONALLY_TXT_LENGHT:]})
+        return info_lines or []
+    elif ERROR in file_name:
+        error_lines = []
+        full_error_text = []
+        tmp_dict = {}
+        for line in log_file.xreadlines():
+            if line[0] == '[':
+                # Точка входа, каждый блок парсинга имеет дату заключенную в []
+                if tmp_dict:
+                    tmp_dict['full'] = "".join(full_error_text[:])
+                    error_lines.append(tmp_dict.copy())
+                    tmp_dict.clear()
+                    full_error_text = []
+                tmp_dict['date'] =  line[1:FULL_DATE_LENGHT]
+            elif 'Message:' in line:
+                tmp_dict['message'] = line[MESSAGE_TXT_LENGHT:]
+            elif 'Error:' in line[:MAX_ERROR_LENGHT]:
+                tmp_dict['type_error'] = line[TYPE_TXT_ERROR:]
+            full_error_text.append(line)
+        # Записывает последние данные в буфере.
+        if tmp_dict:
+            tmp_dict['full'] = "".join(full_error_text[:])
+            error_lines.append(tmp_dict.copy())
+        return error_lines or []
+    return []
 
 # ( Не удалять )Данный кусок кода, предназначен для реализации отправки письма 
 # с заархивированным лог файлом

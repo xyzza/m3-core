@@ -474,8 +474,11 @@ class BaseTreeDictionaryActions(ActionPack):
 
 class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     '''
-    Класс реализует действия над иерархическим справочников основанным на моделях
+    Класс реализует действия над иерархическим справочником, основанном на моделе
     '''
+    # Признак возвращения всех узлов дерева
+    ALL_ROWS = -1
+    
     # Настройки для модели дерева
     tree_model = None # Сама модель дерева
     tree_filter_fields = [] # Поля по которым производится поиск в дереве
@@ -531,13 +534,13 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         #TODO: возможно это не надо было делать - раз не туда обратились, значит сами виноваты
         if self.list_model:
             query = None
-            # если parent_id == -1 то отображаются все данные
-            if parent_id == -1:
-                query = self.list_model.objects
-            # иначе если parent_id пришло со значением =! -1 то отображаются 
-            # данные с фильтрацией по значению parent_id
+            if parent_id == BaseTreeDictionaryModelActions.ALL_ROWS:
+                # отображаются все данные
+                query = self.list_model.objects 
             else:
+                # отображаются данные с фильтрацией по значению parent_id
                 query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
+                
             # Подтягиваем группу, т.к. при сериализации она требуется
             query = query.select_related(self.list_parent_field)
             query = utils.apply_sort_order(query, self.list_columns, self.list_sort_order)
