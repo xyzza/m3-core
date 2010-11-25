@@ -292,33 +292,29 @@ class ExtSearchField(BaseExtField):
 
 class ExtFileUploadField(BaseExtField):
     r"""Компонент загрузки файлов на сервер."""
-
+    # Префикс добавляется к скрытому полю, где передается файл 
+    PREFIX = 'file_'
+    
     def __init__(self, *args, **kwargs):
         super(ExtFileUploadField, self).__init__(*args, **kwargs)
-        self.button_text = None
-        self.button_only = None
-        self.button_offset = None
-        self.read_only = None
+        self.file_url = None
         self.init_component(*args, **kwargs)
         
         # Привязка к файлу
         self._memory_file = None
 
-    def render_base_config(self):
-        super(ExtFileUploadField, self).render_base_config()
-        if self.button_text:
-            self._put_config_value('buttonText', self.button_text)
-        if self.button_only:
-            self._put_config_value('buttonOnly', self.button_only)
-        if self.button_offset:
-            self._put_config_value('buttonOffset', self.button_offset)
-        if self.read_only:
-            self._put_config_value('readOnly', self.read_only)
+    def render_params(self):
+        super(ExtFileUploadField, self).render_params()
+        self._put_params_value('prefixUploadField', ExtFileUploadField.PREFIX)
+        self._put_params_value('fileUrl', self.file_url)
 
     def render(self):
         self.render_base_config()
+        self.render_params()
         base_config = self._get_config_str()
-        return 'new Ext.form.FileUploadField({%s})' % base_config
+        params_config = self._get_params_str()
+        return 'new Ext.ux.form.FileUploadField({%s}, {%s})' % (base_config, 
+                                                          params_config)
     
     @property
     def memory_file(self):

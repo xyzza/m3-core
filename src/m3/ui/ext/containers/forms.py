@@ -7,8 +7,10 @@ Created on 25.02.2010
 
 import datetime
 import decimal
+import os
 
 from django.core.files.base import ContentFile
+from django.conf import settings
 
 from m3.ui.ext.fields.base import BaseExtField
 from m3.ui.ext.fields import (ExtNumberField, 
@@ -58,8 +60,6 @@ class ExtForm(BaseExtPanel):
         self.padding = None
         self.url = None
         self.file_upload = False
-        
-        self.request = None
         self.object = None
         
         # поле, которое будет под фокусом ввода после рендеринга формы
@@ -85,15 +85,18 @@ class ExtForm(BaseExtPanel):
         Извлекает из запроса параметры и присваивает их соответствующим полям 
         формы
         '''
-        self.request = request or self.request
+        assert request, 'Request must be define!'
+
         all_fields = self._get_all_fields(self)
         for field in all_fields:
             name = field.name
             if isinstance(field, ExtFileUploadField):
-                field.memory_file = self.request.FILES.get(name)
-            else:
-                value = self.request.POST.get(name)
-                field.value = value
+                # Файлы нужно забирать из request.FILES
+                field.memory_file = request.FILES.get(
+                                        ExtFileUploadField.PREFIX + field.name)
+      
+            value = request.POST.get(name)
+            field.value = value
     
     #TODO необходимо добавить проверку на возникновение exception'ов
     def from_object(self, object, exclusion = []):
@@ -151,7 +154,7 @@ class ExtForm(BaseExtPanel):
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
             elif isinstance(item, ExtDictSelectField):
-                # У поля выбора может быть взязанный с ним пак
+                # У поля выбора может быть сзязанный с ним пак
                 # TODO после окончательного удаления метода configure_by_dictpack в ExtDictSelectField
                 # нужно удалить проверку на 'bind_pack'
                 bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
@@ -182,6 +185,14 @@ class ExtForm(BaseExtPanel):
                 else:
                     raise ValueError('Invalid attribute type bind_rule_reverse. \
                         Must be a function or a dict.')
+                    
+            elif isinstance(item, ExtFileUploadField):
+                item.value = unicode(value)
+                # Относительную URL ссылку до статики
+                if hasattr(settings, 'STATIC'):
+                    item.file_url = '%s/%s' % (settings.STATIC,  unicode(value) )
+                else:
+                    item.file_url = None
             else:
                 item.value = unicode(value)
 
@@ -310,13 +321,22 @@ class ExtForm(BaseExtPanel):
                     # FIXME: Убрать отсюда эту ересь в другое место, т.к. 
                     # нарушается инкапсуляция, другими словами 
                     # поля ExtFileUploadField здесь не должно быть
-                    if field.memory_file:
-                        cont_file = ContentFile(field.memory_file.read())
-                        name_file = field.memory_file.name
-                        
-                        if hasattr(self.object, field.name):
+                    
+                    # Если файл изменен нужно удалить старый файл
+                    if hasattr(self.object, field.name):
+                        l_field = getattr(self.object, field.name)
+                        if l_field and os.path.exists(l_field.path) and \
+                            os.path.basename(l_field.file.name) != field.value:
+                            # Файл изменился, удаляем старый 
+                            l_field.delete(save=False)
+                                
+                        if field.memory_file:
+                            cont_file = ContentFile(field.memory_file.read())
+                            name_file = field.memory_file.name
+                            
                             l_field = getattr(self.object, field.name)
                             l_field.save(name_file, cont_file, save = False)
+                                         
                 else:
                     names = field.name.split('.')                
                     set_field(self.object, names, convert_value(field))

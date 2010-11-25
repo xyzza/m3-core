@@ -822,33 +822,35 @@ Ext.Desktop = function(app){
         var tbar;
         for(var i = 0, len = ms.length; i < len; i++){
             var m = ms[i];
-            if (m.id.indexOf('toptoolbar-item') == 0) {
-                if(tools_not_created){
-                    pnl = new TopToolbar();
-                    tbar = pnl.getTopToolbar();
-                    tools_not_created = false;
+            if (m && m.id) {                           
+                if (m.id.indexOf('toptoolbar-item') == 0) {
+                    if(tools_not_created){
+                        pnl = new TopToolbar();
+                        tbar = pnl.getTopToolbar();
+                        tools_not_created = false;
+                    };
+                    if(m.launcher.text == 'FILLBLOCK'){
+                        tbar.add('->');
+                    } else if(m.launcher.text == 'TIMEBLOCK'){
+                        var clock = new Ext.ux.Clock();
+                        tbar.add(clock);
+                    } else if(m.launcher.text == '-'){
+                        tbar.add('-');
+    				} else if(m.launcher.text == 'UI_OBJECT'){
+                        tbar.add(m.launcher.ui_object);
+                    } else {
+                        tbar.add({
+                            scale: 'small'
+                           ,iconAlign: 'left'
+                           ,text: m.launcher.text
+                           ,iconCls: m.launcher.iconCls
+                           ,handler: m.launcher.handler
+                           ,menu: m.launcher.menu
+    					   ,tooltip: m.launcher.tooltip
+                        });
+                    };
                 };
-                if(m.launcher.text == 'FILLBLOCK'){
-                    tbar.add('->');
-                } else if(m.launcher.text == 'TIMEBLOCK'){
-                    var clock = new Ext.ux.Clock();
-                    tbar.add(clock);
-                } else if(m.launcher.text == '-'){
-                    tbar.add('-');
-				} else if(m.launcher.text == 'UI_OBJECT'){
-                    tbar.add(m.launcher.ui_object);
-                } else {
-                    tbar.add({
-                        scale: 'small'
-                       ,iconAlign: 'left'
-                       ,text: m.launcher.text
-                       ,iconCls: m.launcher.iconCls
-                       ,handler: m.launcher.handler
-                       ,menu: m.launcher.menu
-					   ,tooltip: m.launcher.tooltip
-                    });
-                };
-            };
+            }
         };
         if(!tools_not_created){
             pnl.doLayout();
@@ -1029,12 +1031,13 @@ Ext.extend(Ext.app.App, Ext.util.Observable, {
 			// M prefer 23.03.10 >>
             // this.launcher.add(m.launcher);	
             // -->
-            if (m.launcher.in_start_menu == true) {
+            if (m && m.launcher && m.launcher.in_start_menu == true) {
             	this.launcher.add(m.launcher);		
             };
             // prefer <<
-           
-            m.app = this;
+           if (m) { 
+                m.app = this;
+           }
         }
     },
 
