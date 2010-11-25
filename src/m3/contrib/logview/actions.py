@@ -4,15 +4,16 @@ Created on 24.08.2010
 
 @author: kir
 '''
+import datetime
 
 from m3.ui.actions import ActionPack, Action, ExtUIScriptResult
 from m3.ui.actions.context import ActionContextDeclaration
 from m3.contrib.logview import forms
 from m3.contrib.logview import helpers as admin_helpers
 from m3.ui.ext.misc.store import ExtDataStore
-from m3.ui.actions.results import JsonResult, OperationResult, PreJsonResult
-import datetime
-    
+from m3.ui.actions.results import OperationResult, PreJsonResult
+
+
 class LogsAction(Action):
     '''
     Выводит наименование имеющихся файлов логирования
@@ -27,8 +28,9 @@ class LogsAction(Action):
         window_params.update(context.__dict__)
         
         win = forms.ExtLogsWindow(window_params)
+        win.grid.action_data = GetLogsAction
         logs_store = ExtDataStore(admin_helpers.log_files_list())
-        win.logFilesCombo.set_store(logs_store)
+        win.log_files_combo.set_store(logs_store)
         return ExtUIScriptResult(win)
 
 class LogsDateChangeAction(Action):
@@ -38,12 +40,13 @@ class LogsDateChangeAction(Action):
     url = '/logs-by-date'
     
     def context_declaration(self):
-        return [ActionContextDeclaration('date', default='', type=str, required=True)]
+        return [ActionContextDeclaration('start_date', default='', type=str, required=True),
+                ActionContextDeclaration('end_date', default='', type=str, required=True)]
     def run(self, request, context):
-        actual_date = datetime.datetime.strptime(context.date,'%Y-%m-%d').date()
-        if actual_date == datetime.date.today():
+        start_date = datetime.datetime.strptime(context.start_date,'%Y-%m-%d').date()
+        if start_date == datetime.date.today():
             return PreJsonResult(admin_helpers.log_files_list())
-        logs = admin_helpers.log_files_list(context.date)
+        logs = admin_helpers.log_files_list(context.start_date, context.end_date)
         return PreJsonResult(logs)
     
 class GetLogsAction(Action):
@@ -53,12 +56,19 @@ class GetLogsAction(Action):
     url = '/get-logs-file'
     
     def context_declaration(self):
-        return [ActionContextDeclaration('filename', default='', type=str, required=True)]
+        
+        return [ActionContextDeclaration(name='start', type=int, required=True,
+                                         default=0),
+                ActionContextDeclaration(name='limit', type=int, required=True,
+                                         default=0),
+                ActionContextDeclaration('filename', default='', type=str, 
+                                         required=True)]
         
     def run(self, request, context):
         if request.POST.get('filename'):
             file_content = admin_helpers.get_log_content(context.filename)
-            return JsonResult(file_content)
+            return PreJsonResult({'total': len(file_content),
+                                  'rows': file_content[context.start: context.start+context.limit]})
         return OperationResult.by_message('Ошибка при попытке чтения файла')
 
 class Mis_Admin_ActionsPack(ActionPack):
@@ -73,3 +83,4 @@ class Mis_Admin_ActionsPack(ActionPack):
         
         self.actions = [ self.LogsAction, self.GetLogsAction
                         ,self.LogsDateChangeAction]
+        

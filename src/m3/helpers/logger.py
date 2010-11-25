@@ -4,6 +4,7 @@ import logging.handlers
 import os
 import sys
 import traceback
+
 from django.http import HttpResponseServerError, HttpRequest
 from django.template.loader import render_to_string
 
@@ -74,12 +75,29 @@ def debug(msg, *args, **kwargs):
 
 def exception(msg='', *args, **kwargs):
     log = logging.getLogger('error_logger')
-    msg = get_session_info(kwargs.get('request', None)) + msg
-    log.error(msg)
+    msg = get_session_info(kwargs.get('request', None)) + 'Message: '+msg+'\n'
+#    adv = 
+#    log.error(msg)
     try:
         exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+#        exceptionVariables = exceptionTraceback.tb_frame.f_locals.items()[:-1]
+        exceptionVariables = exceptionTraceback.tb_frame.f_locals
+        res ='Variables:\n'
+        if exceptionTraceback.tb_frame.f_code.co_name != '<module>':
+            for key,val in exceptionVariables.items():
+                res+='%s: %s\n'.rjust(6)%(key,val)
+                try:
+                    if val.__dict__:
+                        for obj_item_key, obj_item_val in val.__dict__.items():
+                            if obj_item_key[0] !='_':
+                                res+='%s: %s\n'.rjust(12)%(obj_item_key, obj_item_val)
+                except:
+                    pass
+        else:
+            res = ''
+        exceptionVariables = res
         tb = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
-        log.error(u''.join(tb))
+        log.error('\n'+msg+u''.join(tb)+exceptionVariables)
     except:
         pass
 

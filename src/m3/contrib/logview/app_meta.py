@@ -4,10 +4,10 @@ Created on 24.08.2010
 
 @author: kir
 '''
+from django.conf import urls
 
 from m3.ui.actions import ActionController
 from m3.contrib.logview import actions
-from django.conf import urls
 
 m3_logview_controller = ActionController('/m3/logview')
 
