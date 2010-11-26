@@ -6,6 +6,7 @@
 '''
 
 import datetime
+import json
 
 class ActionContextDeclaration(object):
     '''
@@ -92,6 +93,9 @@ class ActionContext(object):
             if not arg_type.allow_empty:
                 elements = [elem for elem in elements if elem]
             value = map(arg_type.type, elements)
+        elif arg_type == object:
+            # обработаем объект как JSON
+            value = json.loads(raw_value)
         else:
             raise Exception('Can not convert value of "%s" in a given type "%s"' % (raw_value, arg_type))
         

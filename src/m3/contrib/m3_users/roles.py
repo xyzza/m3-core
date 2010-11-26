@@ -4,6 +4,7 @@ Created on 11.06.2010
 
 @author: akvarats
 '''
+import inspect
 
 from django.db import transaction
 from django.contrib.auth.models import User
@@ -13,11 +14,14 @@ from m3.ui.ext import windows
 from m3.ui.ext import panels
 from m3.ui.ext import fields
 from m3.ui.ext import controls
+from m3.ui.ext.panels.grids import ExtObjectGrid
+from m3.ui.ext.containers.grids import ExtGridCheckBoxSelModel
+from m3.ui.ext.panels.trees import ExtObjectTree
 
 from m3.helpers import ui as ui_helpers
 from m3.db import safe_delete
 from m3.helpers import logger
-from m3.ui.actions import ActionContextDeclaration
+from m3.ui.actions import ActionContextDeclaration, ControllerCache, ActionPack, Action
 
 from users import SelectUsersListWindow
 
@@ -49,6 +53,9 @@ class RolesActions(actions.ActionPack):
             RolesDataAction(),
             AssignUsers(), # действие на добавление пользователей в роль
             DeleteAssignedUser(), # удаление связанного с ролью пользователя
+            GetRolePermissionAction(), # получение списка прав доступа роли
+            AddRolePermission(), # выбор прав доступа для добавления в роль
+            GetAllPermissions(), # получение дерева всех прав доступа
         ]
 
 #===============================================================================
@@ -129,7 +136,24 @@ class SelectUsersToAssignWindowAction(actions.Action):
         window.action_submit = AssignUsers
         
         return actions.ExtUIScriptResult(window)
-        
+
+class AddRolePermission(actions.Action):
+    '''
+    Выбор прав доступа для добавления в роль
+    '''
+    url = '/role-add-permission-window'
+    
+#    def context_declaration(self):
+#        return [
+#            actions.ActionContextDeclaration(name='userrole_id', type=int, required=True)
+#        ]
+#        
+    def run(self, request, context):
+        #role = models.UserRole.objects.get(id=context.userrole_id)
+        window = SelectPermissionWindow()
+        #window.title = u"Выберите права доступа для роли '%s'" % role.name
+        return actions.ExtUIScriptResult(window)
+
 #===============================================================================
 # DATA actions
 #===============================================================================
@@ -178,7 +202,68 @@ class UsersForRoleAssignmentData(actions.Action):
     def run(self, request, context):
         return actions.ExtGridDataQueryResult(helpers.get_unassigned_users(context.userrole_id, context.filter))
         
-        
+class GetRolePermissionAction(actions.Action):
+    '''
+    Получение списка прав доступа для указанной роли
+    '''
+    url = '/role-permission-rows'
+    
+    def context_declaration(self):
+        return [
+            actions.ActionContextDeclaration(name='userrole_id', type=int, required=True)
+        ]
+    
+    def run(self, request, context):
+        perms = models.RolePermission.objects.filter(role=int(context.userrole_id))
+        res = []
+        for perm in perms:
+            act = ControllerCache.get_action_by_url(perm.permission_code)
+            perm.verbose_name = act.get_verbose_name() if act else ''
+            res.append(perm)
+        return actions.ExtGridDataQueryResult(res)
+    
+class GetAllPermissions(actions.Action):
+    '''
+    Получение дерева прав доступа
+    '''
+    url = '/permission-tree'
+    
+    def run(self, request, context):
+        class PermProxy:
+            def __init__(self, id, parent=None, name='', url='', code = ''):
+                self.parent = parent
+                self.name = name
+                self.url = code
+                self.id = id
+                self.code = code
+        def add_nodes(parent_node, root_pack, res):
+            for act in root_pack.actions:
+                if inspect.isclass(act):
+                    act = act()
+                name = act.get_verbose_name()
+                child1 = PermProxy(len(res)+1, parent_node, name, act.url, act.absolute_url())
+                res.append(child1)
+            for pack in root_pack.subpacks:
+                name = pack.title if hasattr(pack, 'title') and pack.title else pack.__class__.__name__
+                child2 = PermProxy(len(res)+1, parent_node, name, pack.url, '')
+                res.append(child2)
+                add_nodes(child2, pack, res)
+        res = []
+        for ctrl in ControllerCache.get_contollers():
+            root = PermProxy(len(res)+1, None, ctrl.name if ctrl.name else ctrl.__class__.__name__, ctrl.url)
+            res.append(root)
+            for pack in ctrl.get_top_actions():
+                if isinstance(pack, ActionPack):
+                    name = pack.title if hasattr(pack, 'title') and pack.title else pack.__class__.__name__
+                    child1 = PermProxy(len(res)+1, root, name, pack.url, '')
+                    res.append(child1)
+                    add_nodes(child1, pack, res)
+                elif isinstance(pack, Action):
+                    name = pack.get_verbose_name()
+                    child1 = PermProxy(len(res)+1, root, name, pack.url, pack.absolute_url())
+                    res.append(child1)
+        return actions.ExtAdvancedTreeGridDataQueryResult(res)
+
 #===============================================================================
 # OPERATIONS
 #===============================================================================
@@ -192,7 +277,8 @@ class SaveRoleAction(actions.Action):
     
     def context_declaration(self):
         return [
-            ActionContextDeclaration(name=u'userrole_id', type=int, required=True, default=0)
+            ActionContextDeclaration(name=u'userrole_id', type=int, required=True, default=0),
+            ActionContextDeclaration(name=u'perms', type=object, required=True, default=[])
         ]
     
     def run(self, request, context):
@@ -211,6 +297,21 @@ class SaveRoleAction(actions.Action):
             window.form.to_object(user_role)
             
             user_role.save()
+            
+            # сохраним также права доступа
+            ids = []
+            for perm in context.perms:
+                code = perm['permission_code']
+                q = models.RolePermission.objects.filter(role=user_role, permission_code = code).all()
+                if len(q) > 0:
+                    perm_obj = q[0]
+                else:
+                    perm_obj = models.RolePermission(role = user_role, permission_code = perm['permission_code'])
+                perm_obj.disabled = perm['disabled']
+                perm_obj.save()
+                ids.append(perm_obj.id)
+            # удалим те, которые не обновились
+            models.RolePermission.objects.filter(role=user_role).exclude(id__in=ids).delete()
         except:
             logger.exception(u'Не удалось сохранить роль пользователя')
             return actions.OperationResult(success=False, message=u'Не удалось сохранить роль пользователя.')
@@ -363,12 +464,15 @@ class RolesEditWindow(windows.ExtEditWindow):
     def __init__(self, new_role = False, *args, **kwargs):
         super(RolesEditWindow, self).__init__(*args, **kwargs)
         
-        self.width=400
-        self.height=125
+        self.width=500
+        self.height=400
         self.modal = True
         
+        self.template_globals = r'ext-script/ext-edit-role-window.js'
+        
         self.title = u'Роль пользователя'
-        self.form = panels.ExtForm(layout='form')
+        self.layout = 'border'
+        self.form = panels.ExtForm(layout='form', region = 'north', height = 50)
         self.form.label_width = 100
         self.form.url = SaveRoleAction.absolute_url()
         
@@ -377,6 +481,21 @@ class RolesEditWindow(windows.ExtEditWindow):
         field_metarole.configure_by_dictpack(metaroles.Metaroles_DictPack, app_meta.users_controller)
         
         self.form.items.extend([field_name, field_metarole])
+        
+        self.grid = ExtObjectGrid(title=u"Права доступа", region="center")
+        self.grid.action_data = GetRolePermissionAction
+        self.grid.action_new = AddRolePermission
+        self.grid.top_bar.items.append(controls.ExtButton(text = u'Удалить', icon_cls = 'delete_item', handler='deletePermission'))
+        self.grid.top_bar.button_refresh.hidden = True
+        self.grid.force_fit = True
+        self.grid.allow_paging = False
+        self.grid.row_id_name = 'permission_code'
+        self.grid.store.id_property = 'permission_code'
+        self.grid.store.auto_save = False
+        self.grid.add_column(header=u'Действие', data_index='permission_code', width=100)
+        self.grid.add_column(header=u'Наименование', data_index='verbose_name', width=100)
+        self.grid.add_bool_column(header=u'Запрет', data_index='disabled', width=50, text_false = u'Нет', text_true = u'Да')
+        self.items.append(self.grid)
         
         self.buttons.extend([
             controls.ExtButton(text=u'Сохранить', handler='submitForm'),
@@ -428,3 +547,34 @@ class AssignedUsersWindow(windows.ExtWindow):
         
         
         self.buttons.append(controls.ExtButton(text=u'Закрыть', handler='closeWindow'))
+        
+class SelectPermissionWindow(windows.ExtEditWindow):
+    '''
+    Окно выбора прав доступа для добавления в роль
+    '''
+    def __init__(self, *args, **kwargs):
+        super(SelectPermissionWindow, self).__init__(*args, **kwargs)
+        self.title = u'Выберите права доступа для роли'
+        self.width = 600
+        self.height = 500
+        self.maximizable = True
+        self.layout = 'fit'
+        self.tree = ExtObjectTree()
+        self.tree.add_column(header=u'Имя', data_index = 'name', width=140)
+        self.tree.master_column_id = 'name'
+        self.tree.auto_expand_column = 'name'
+        self.tree.add_column(header=u'Адрес', data_index = 'url', width=140)
+        self.tree.top_bar.button_refresh.text = None
+        self.tree.row_id_name = 'id'
+        self.tree.top_bar.hidden = True
+        #self.tree.use_bbar = True
+        self.tree.sm = ExtGridCheckBoxSelModel()
+        self.tree.action_data = GetAllPermissions
+        self.items.append(self.tree)
+        self.buttons.append(controls.ExtButton(text=u'Выбрать', handler='''function select(btn, e, baseParams) {
+            var tree = Ext.getCmp('{{ component.tree.client_id }}');
+            var records = tree.getSelectionModel().getSelections();
+            win.fireEvent('closed_ok', records);
+            win.close(true);
+        }'''))
+        self.buttons.append(controls.ExtButton(text=u'Отмена', handler='cancelForm'))

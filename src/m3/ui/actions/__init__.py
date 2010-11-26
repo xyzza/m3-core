@@ -11,6 +11,7 @@ from django.conf import settings
 from django.utils.importlib import import_module
 from django.utils.datastructures import MultiValueDict
 from django import http
+from django.contrib.auth.models import User
 
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
@@ -76,6 +77,46 @@ class Action(object):
     
     # Ссылка на контроллер к которому принадлежит данный Action
     controller = None
+    
+    # Признак обработки прав доступа при выполнении действия (по-умолчанию отключен)
+    # Как обрабатывается этот признак - смотри в has_permission
+    need_check_permission = False
+    
+    def get_permission_code(self):
+        '''
+        Возвращает код действия, для контроля прав доступа
+        '''
+        return self.get_absolute_url()
+    
+    def has_permission(self, user_obj, request):
+        '''
+        Проверка пава на выполнение действия для указанного пользователя
+        '''
+        assert isinstance(self.parent, ActionPack)
+        # Если в наборе действий need_check_permission=True, а в самом действии False, то права не проверяются
+        # Если в наборе действий need_check_permission=True, и в самом действии True, то права проверяются
+        # Если в наборе действий need_check_permission=False, а в самом действии True, то права не проверяются
+        # Если в наборе действий need_check_permission=False, а в самом действии False, то права не проверяются
+        # Т.е. права проверяются только если в наборе действий и в действии включена проверка прав
+        # Признак need_check_permission в вышестоящих наборах действий не влияет на решение, т.к. в тех наборах свои действия 
+        
+        # Проверим, что в действии и наборе разрешена проверка прав
+        if self.need_check_permission and self.parent.need_check_permission:
+            # если пользователя нет, значит аноним - ему дадим отпор
+            if user_obj:
+                # проверим что права на выполнение есть
+                return user_obj.has_perm(self.get_permission_code())
+            else:
+                return False
+        else:
+            return True
+       
+    def get_verbose_name(self):
+        '''
+        Возвращает имя действия для отображения
+        '''
+        #return u"Действие: "+self.get_absolute_url()
+        return u"Действие: "+self.absolute_url()
     
     def pre_run(self, request, context):
         '''
@@ -151,6 +192,10 @@ class ActionPack(object):
     # Ссылка на вышестоящий пакет, тот в котором зарегистрирован данный пакет
     parent = None
     
+    # Признак обработки прав доступа при выполнении дочерних действий (по-умолчанию отключен)
+    # Как обрабатывается этот признак - смотри в Action.has_permission
+    need_check_permission = False
+
     def __init__(self):
         # Список действий зарегистрированных на исполнение в данном пакете
         self.actions = []
@@ -170,7 +215,6 @@ class ActionPack(object):
         соответствующим Action'ом
         '''
         pass
-    
 
 class ActionController(object):
     '''
@@ -276,6 +320,10 @@ class ActionController(object):
         '''
         Непосредственный вызов экшена с отработкой всех событий
         '''
+        # проверим что права на выполнение есть
+        if not action.has_permission(request.user, request):
+            return OperationResult(success = False, message = u'У вас нет прав на выполнение этого действия!')
+        
         # Заполняем контект
         rules = action.context_declaration()
         context = self.build_context(request)
@@ -565,7 +613,34 @@ class ActionController(object):
             print key
         print
         print 'Total patterns %s' % len(self._url_patterns.keys())
-        
+    
+    def get_action_by_url(self, url):
+        '''
+        Получить Action по url
+        '''
+        ControllerCache.populate()
+
+        matched = self._url_patterns.get(url)
+        if matched:
+            stack, action = matched
+            return action
+        else:
+            return None
+    
+    def get_top_actions(self):
+        '''
+        Получение списка действий или наборов, находящихся на первом уровне 
+        '''
+        top_packs = []
+        for stack, act in self._url_patterns.values():
+            if len(stack) == 0:
+                # значит экшин на верхнем уровне
+                if act not in top_packs:
+                    top_packs.append(act)
+            else:
+                if stack[0] not in top_packs:
+                    top_packs.append(stack[0])
+        return top_packs
 
 class ControllerCache(object):
     '''
@@ -647,3 +722,18 @@ class ControllerCache(object):
     @classmethod
     def require_update(cls):
         cls._loaded = False
+        
+    @classmethod
+    def get_action_by_url(cls, url):
+        '''
+        Возвращает Action по переданному url 
+        '''
+        for cont in cls._controllers:
+            act = cont.get_action_by_url(url)
+            if act:
+                return act
+        return None
+    
+    @classmethod
+    def get_contollers(cls):
+        return cls._controllers
