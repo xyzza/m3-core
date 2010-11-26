@@ -18,38 +18,29 @@ from email.mime.text import MIMEText
 
 from m3.helpers import logger
 
-
 #===============================================================================
 # Просмотр логов и чтение логов 
 #===============================================================================
 
 #===============================================================================
-# Константы
+# - Константы
 #===============================================================================
 
 # Имена файлов участвующих в разборе(парсинге)
 INFO = u'info.log'
 ERROR = u'error.log'
 
-# Максимальная длина файла парсинга без даты(warning.log)
-MAX_LOG_FILE_LENGHT = 11
-
-# Длина date формата в имени файла (2010-11-19)
-DATE_FORMAT_LENGHT = 10
-
 # Длина Datetime формата (2010-11-17 14:01:58)
 FULL_DATE_LENGHT = 20
-
-# Позиция после datetime
-ADDITIONALLY_TXT_LENGHT = FULL_DATE_LENGHT + 1
 
 # Максимальная длина ошибки в python
 MAX_ERROR_LENGHT = 25
 
-# Позиции message и type_error в тексте
-MESSAGE_TXT_LENGHT = 9
-TYPE_TXT_ERROR = 11
+# Позиция в списке после даты и времени [2010-11-25 10:19:13]
+POSITION_AFTER_DATE_TIME = 2
 
+# Версия
+VERSION = 'Версия'
 
 def get_log_content(filename):
     '''
@@ -115,9 +106,10 @@ def log_file_parse(log_file):
     if file_name == INFO:
         info_lines = []
         for line in log_file.xreadlines():
-            if line[0] == '[' and 'Версия' in line:
-                info_lines.append({'date': line[1:FULL_DATE_LENGHT],
-                                   'additionally':line[ADDITIONALLY_TXT_LENGHT:]})
+            if line[0] == '[' and VERSION in line:
+                info_lines.append(
+                {'date': line[1:FULL_DATE_LENGHT],
+                'additionally':' '.join(line.split()[POSITION_AFTER_DATE_TIME:])})
         return info_lines or []
     elif ERROR in file_name:
         error_lines = []
@@ -133,9 +125,11 @@ def log_file_parse(log_file):
                     full_error_text = []
                 tmp_dict['date'] =  line[1:FULL_DATE_LENGHT]
             elif 'Message:' in line:
-                tmp_dict['message'] = line[MESSAGE_TXT_LENGHT:]
+                tmp_dict['message'] = line.split()[1:]
             elif 'Error:' in line[:MAX_ERROR_LENGHT]:
-                tmp_dict['type_error'] = line[TYPE_TXT_ERROR:]
+                tmp_dict['type_error'] = line
+            elif 'DoesNotExist:' in line:
+                tmp_dict['type_error'] = line
             full_error_text.append(line)
         # Записывает последние данные в буфере.
         if tmp_dict:
