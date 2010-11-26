@@ -48,9 +48,10 @@ def get_session_info(request):
     # Адрес запроса
     result = 'URL: ' + request.get_full_path() + ' (' + request.method + ')'
     # Юзер
-    user = request.user
-    if user and user.is_authenticated():
-        result += ' - ' + user.email + ', ' + user.get_full_name()
+    if hasattr(request, 'user'):
+        user = request.user
+        if user and user.is_authenticated():
+            result += ' - ' + user.email + ', ' + user.get_full_name()
     return result + '. '
 
 #====================== ФУНКЦИИ АНАЛОГИЧНЫЕ LOGGING =====================
