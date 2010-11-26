@@ -163,9 +163,9 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     }, baseConfig);
     
     Ext.m3.EditorGridPanel.superclass.constructor.call(this, config);
-s  }
+  }
 	,initComponent: function(){
-		Ext.m3.EditorGridPanels.superclass.initComponent.call(this);
+		Ext.m3.EditorGridPanel.superclass.initComponent.call(this);
 		var store = this.getStore();
 		store.on('exception', this.storeException, this);
 	}
