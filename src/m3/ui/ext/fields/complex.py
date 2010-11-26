@@ -15,6 +15,7 @@ from m3.ui.ext.base import BaseExtComponent
 from m3.ui.actions import ControllerCache
 from m3.helpers.datastructures import TypedList
 
+#===============================================================================
 class ExtDictSelectField(BaseExtTriggerField):
     '''
     Поле с выбором из справочника
@@ -278,7 +279,8 @@ class ExtDictSelectField(BaseExtTriggerField):
         base_config = self._get_config_str()
         params = self._get_params_str()
         return 'createAdvancedComboBox({%s},{%s})' % (base_config, params)
-        
+       
+#===============================================================================        
 class ExtSearchField(BaseExtField):
     '''Поле поиска'''
     def __init__(self, *args, **kwargs):
@@ -289,7 +291,7 @@ class ExtSearchField(BaseExtField):
         self.component_for_search = None
         self.init_component(*args, **kwargs)
 
-
+#===============================================================================
 class ExtFileUploadField(BaseExtField):
     r"""Компонент загрузки файлов на сервер."""
     # Префикс добавляется к скрытому полю, где передается файл 
@@ -298,6 +300,11 @@ class ExtFileUploadField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtFileUploadField, self).__init__(*args, **kwargs)
         self.file_url = None
+        
+        # Пример использования:
+        # possible_file_extensions = ('png', 'jpeg', 'gif', 'bmp')
+        self.possible_file_extensions = None
+        
         self.init_component(*args, **kwargs)
         
         # Привязка к файлу
@@ -307,6 +314,8 @@ class ExtFileUploadField(BaseExtField):
         super(ExtFileUploadField, self).render_params()
         self._put_params_value('prefixUploadField', ExtFileUploadField.PREFIX)
         self._put_params_value('fileUrl', self.file_url)
+#        self._put_params_value('possibleFileExtensions', 
+#                               map(lambda x: x, self.possible_file_extensions or []))
 
     def render(self):
         self.render_base_config()
@@ -323,3 +332,51 @@ class ExtFileUploadField(BaseExtField):
     @memory_file.setter
     def memory_file(self, memory_file):
         self._memory_file = memory_file
+        
+#===============================================================================
+class ExtImageUploadField(ExtFileUploadField):
+    '''
+    Компонент загрузки изображений
+    '''        
+    THUMBNAIL_PREFIX = 'thumbnnail_' 
+    def __init__(self, *args, **kwargs):
+        super(ExtImageUploadField, self).__init__(*args, **kwargs)
+        
+        # Использовать ли миниатюры для изображений
+        self.thumbnail = True
+        
+        # Ширина и высота миниатюры
+        self.thumbnail_size = (300, 300)
+        
+        # Умолчательный параметр, иначе контрол разъедится
+        self.width = 300
+        
+        # Высота и ширина изображения. Изображение будет подгоняться под 
+        # эту высоту
+        self.image_max_size = (1600, 1600)
+        
+        self.init_component(*args, **kwargs)
+        
+        
+    def render_params(self):
+        super(ExtImageUploadField, self).render_params()
+        self._put_params_value('thumbnail', self.thumbnail)
+        if self.thumbnail:
+            assert isinstance(self.thumbnail_size , tuple) and \
+                len(self.thumbnail_size) == 2
+            self._put_params_value('thumbnailWidth', self.thumbnail_size[0], 
+                                   self.thumbnail)
+            self._put_params_value('thumbnailHeight', self.thumbnail_size[1], 
+                                   self.thumbnail)
+            self._put_params_value('prefixThumbnailImg', 
+                                   ExtImageUploadField.THUMBNAIL_PREFIX, 
+                                   self.thumbnail)
+            self._put_params_value('thumbnail', self.thumbnail)
+        
+    def render(self):
+        self.render_base_config()
+        self.render_params()
+        base_config = self._get_config_str()
+        params_config = self._get_params_str()
+        return 'new Ext.ux.form.ImageUploadField({%s}, {%s})' % (base_config, 
+                                                          params_config)

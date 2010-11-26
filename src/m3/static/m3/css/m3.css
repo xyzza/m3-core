@@ -76,16 +76,28 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
     border-right-color: #D0D0D0;
 }
 
-.x-form-file-image {
-    background-image:url(../images/image_add.png) !important;
+.x-form-file-icon {
+    background-image:url(../images/file_add.png) !important;
 }
 
-.x-form-file-clear-image {
+.x-form-file-clear-icon {
     background-image:url(../images/file_del.png) !important;
 }
 
-.x-form-file-download-image {
+.x-form-file-download-icon {
     background-image:url(../images/file_download.png) !important;
+}
+
+.x-form-image-icon {
+    background-image:url(../images/image_add.png) !important;
+}
+
+.x-form-image-clear-icon {
+    background-image:url(../images/image_del.png) !important;
+}
+
+.x-form-image-preview-icon {
+    background-image:url(../images/image_download.png) !important;
 }
 
 .x-form-file-clear {
@@ -98,6 +110,6 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 .x-form-file-download {
     position: absolute;
     
-    right: 42px;
+    right: 44px;
     z-index: 3;
 }

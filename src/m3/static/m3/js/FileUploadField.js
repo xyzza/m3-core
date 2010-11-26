@@ -1,47 +1,36 @@
 Ext.ns('Ext.ux.form');
 
-/**
- * @class Ext.ux.form.FileUploadField
- * @extends Ext.form.TextField
- * Creates a file upload field.
- * @xtype fileuploadfield
- */
 Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
-    /**
-     * @cfg {String} buttonText The button text to display on the upload button (defaults to
-     * 'Browse...').  Note that if you supply a value for {@link #buttonCfg}, the buttonCfg.text
-     * value will be used instead if available.
-     */
-    buttonText: '',
-    /**
-     * @cfg {Boolean} buttonOnly True to display the file upload field as a button with no visible
-     * text field (defaults to false).  If true, all inherited TextField members will still be available.
-     */
-    buttonOnly: false,
-    /**
-     * @cfg {Number} buttonOffset The number of pixels of space reserved between the button and the text field
-     * (defaults to 3).  Note that this only applies if {@link #buttonOnly} = false.
-     */
-    buttonOffset: 0,
+
     /**
      * @cfg {Object} buttonCfg A standard {@link Ext.Button} config object.
      */
 
     // private
-    readOnly: true,
+    readOnly: true
 
     /**
      * @hide
      * @method autoSize
      */
-    autoSize: Ext.emptyFn,
+    ,autoSize: Ext.emptyFn 
+    
+     /**
+     * Класс иконки для выбора файла
+     */
+     ,iconClsSelectFile: 'x-form-file-icon'
+    
+    /**
+     * Класс иконки для очистки файла 
+     */
+    ,iconClsClearFile: 'x-form-file-clear-icon'
 
     /**
-     * Для quick tips
+     * Класс иконки для скачивания файла
      */
-    cls: 'tip-target',
+    ,iconClsDownloadFile: 'x-form-file-download-icon'
 
-    constructor: function(baseConfig, params){
+    ,constructor: function(baseConfig, params){
         
         if (params) {
             if (params.prefixUploadField) {
@@ -50,13 +39,16 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             if (params.fileUrl) {
                 this.fileUrl = params.fileUrl;
             }
-        }        
+            if (params.possibleFileExtensions) {
+                this.possibleFileExtensions = params.possibleFileExtensions;
+            }
+        }    
         
         Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
-    },
+    }
     
     // private
-    initComponent: function(){
+    ,initComponent: function(){
         Ext.ux.form.FileUploadField.superclass.initComponent.call(this);
 
         this.addEvents(
@@ -69,10 +61,10 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
              */
             'fileselected'
         );
-    },
+    }
     
     // private
-    onRender : function(ct, position){
+    ,onRender : function(ct, position){
         Ext.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
 
         // Используем название файла
@@ -85,44 +77,57 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.createFileInput();
 
         var btnCfg = Ext.applyIf(this.buttonCfg || {}, {
-            text: this.buttonText
-            ,iconCls: 'x-form-file-image'
+            iconCls: this.iconClsSelectFile
         });
         this.buttonFile = new Ext.Button(Ext.apply(btnCfg, {
             renderTo: this.wrap
             ,width: 16
             ,cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
-            ,tooltip: 'Выбрать файл'
+            ,tooltip: {
+                text:'Выбрать файл'
+                ,width: 150
+            }
         }));
 
         this.buttonClear = new Ext.Button({
             renderTo: this.wrap
             ,width: 16
             ,cls: 'x-form-file-clear'
-            ,iconCls: 'x-form-file-clear-image'
+            ,iconCls: this.iconClsClearFile
             ,handler: this.clickClearField
             ,scope: this
             ,hidden: this.value ? false : true
-            ,tooltip: 'Очистить'
+            ,tooltip: {
+                text:'Очистить'
+                ,width: 65
+            }
         });
         
-        this.buttonDownload = new Ext.Button({
-            renderTo: this.wrap
-            ,width: 16
-            ,cls: 'x-form-file-download'
-            ,iconCls: 'x-form-file-download-image'
-            ,handler: this.clickDownload
-            ,scope: this
-            ,hidden: this.value ? false : true
-            ,tooltip: 'Загрузить'
-        });
+        this.renderHelperBtn()
         
         this.bindListeners();
         this.resizeEl = this.positionEl = this.wrap;
 
-    },
-    
-    bindListeners: function(){
+    }
+    ,renderHelperBtn: function() {
+        this.buttonDownload = new Ext.Button({
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-download'
+            ,iconCls: this.iconClsDownloadFile
+            ,handler: this.clickDownload
+            ,scope: this
+            ,hidden: this.value ? false : true
+             ,tooltip: {
+                text:'Загрузить'
+                ,width: 65
+            }
+        });
+    }
+    ,getHelperBtn: function(){
+        return this.buttonDownload;
+    }
+    ,bindListeners: function(){
         this.fileInput.on({
             scope: this,
             mouseenter: function() {
@@ -139,15 +144,6 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
              },                   mouseenter: function() {
                  this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
              },
-             mouseleave: function(){
-                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
-             },
-             mousedown: function(){
-                 this.buttonFile.addClass('x-btn-click')
-             },
-             mouseup: function(){
-                                  //     this.button.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
-              },
              change: function(){
                  var v = this.fileInput.dom.value;
                  this.setValue(v);
@@ -165,9 +161,9 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
                 
              }
         }); 
-    },
+    }
     
-    createFileInput : function() {
+    ,createFileInput : function() {
         this.fileInput = this.wrap.createChild({
             id: this.getFileInputId(),
             name: (this.prefixUploadField || '') + this.name,
@@ -185,31 +181,31 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             width: 86,
             dismissDelay: 10000 
         });
-    },
+    }
     
-    reset : function(){ 
+    ,reset : function(){ 
         this.fileInput.remove();
         this.createFileInput();
         this.bindListeners();
         Ext.ux.form.FileUploadField.superclass.reset.call(this);
-    },
+    }
 
     // private
-    getFileInputId: function(){
+    ,getFileInputId: function(){
         return this.id + '-file';
-    },
+    }
 
     // private
-    onResize : function(w, h){
+    ,onResize : function(w, h){
         Ext.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
 
         this.wrap.setWidth(w);
-        var w = this.wrap.getWidth() - this.buttonFile.getEl().getWidth() - this.buttonOffset;
+        var w = this.wrap.getWidth() - this.buttonFile.getEl().getWidth();
         var btnClearWidth = this.buttonClear.getWidth();
         if (btnClearWidth) {
             w -= btnClearWidth;
         }
-        var btnDonwloadWidth = this.buttonDownload.getWidth();
+        var btnDonwloadWidth = this.getHelperBtn() ? this.getHelperBtn().getWidth() : 0;
         if (btnDonwloadWidth) {
             w -= btnDonwloadWidth;
         }
@@ -222,41 +218,42 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             this.el.setWidth(w);
         }
 
-    },
+    }
 
     // private
-    onDestroy: function(){
+    ,onDestroy: function(){
         Ext.ux.form.FileUploadField.superclass.onDestroy.call(this);
         Ext.destroy(this.fileInput, this.buttonFile, this.buttonClear, 
-            this.buttonDownload, this.wrap);
+            this.getHelperBtn(), this.wrap);
         Ext.QuickTips.unregister(this.fileInput);
-    },
+    }
     
-    onDisable: function(){
+    ,onDisable: function(){
         Ext.ux.form.FileUploadField.superclass.onDisable.call(this);
         this.doDisable(true);
-    },
+    }
     
-    onEnable: function(){
+    ,onEnable: function(){
         Ext.ux.form.FileUploadField.superclass.onEnable.call(this);
         this.doDisable(false);
 
-    },
+    }
     
     // private
-    doDisable: function(disabled){
+    ,doDisable: function(disabled){
         this.fileInput.dom.disabled = disabled;
         this.buttonFile.setDisabled(disabled);
         this.buttonClear.setDisabled(disabled);
-        this.buttonDownload.setDisabled(disabled);
-    },
-
-
-    // private
-    preFocus : Ext.emptyFn,
+        if(this.getHelperBtn()) {
+            this.getHelperBtn().setDisabled(disabled);
+        }       
+    }
 
     // private
-    alignErrorIcon : function(){
+    ,preFocus : Ext.emptyFn
+
+    // private
+    ,alignErrorIcon : function(){
         this.errorIcon.alignTo(this.wrap, 'tl-tr', [2, 0]);
     }
     
@@ -264,14 +261,22 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
     ,clickClearField: function(){       
         this.reset();
         this.setValue('');
-        this.el.setWidth( this.el.getWidth() + this.buttonClear.getWidth() + 
-            (this.buttonDownload.isVisible() ? this.buttonDownload.getWidth() : 0 ));
+        var width = this.el.getWidth() + this.buttonClear.getWidth();
+        if (this.getHelperBtn()){
+            width += (this.getHelperBtn().isVisible() ? this.getHelperBtn().getWidth() : 0);
+            this.getHelperBtn().hide();
+        }
+        this.el.setWidth(width);
         this.buttonClear.hide();
-        this.buttonDownload.hide();
+        
+    }
+    
+    ,getFileUrl: function(url){
+        return document.location.protocol + '//' + document.location.host + 
+            '/' + url;
     }
     ,clickDownload: function(){
-        var fUrl = document.location.protocol + '//' + document.location.host + 
-                '/' + this.fileUrl;
+        var fUrl = this.getFileUrl(this.fileUrl);
         if (fUrl){
             window.open(fUrl);
         }       

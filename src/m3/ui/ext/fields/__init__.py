@@ -16,4 +16,5 @@ from simple import (ExtDateField,
                     ExtCheckBox,
                     ExtTimeField,
                     ExtHiddenField)
-from complex import ExtDictSelectField, ExtSearchField, ExtFileUploadField
+from complex import (ExtDictSelectField, ExtSearchField, ExtFileUploadField, 
+                     ExtImageUploadField)
