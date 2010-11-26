@@ -14,14 +14,13 @@ from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.window import ExtWindow
 from m3.ui.ext.containers.container_complex import ExtContainerTable
 from m3.ui.ext.containers.forms import ExtPanel
-from m3.ui.ext.containers.containers import ExtContainer
         
 class ExtLogsWindow(ExtWindow):
     def __init__(self, window_params=None, *args, **kwargs):
         super(ExtLogsWindow, self).__init__(*args, **kwargs)
         self.__dict__.update(window_params)
         self.title=u'Просмотр логов'
-        self.min_width, self.min_height = self.width, self.height = 750, 500
+        self.min_width, self.min_height = self.width, self.height = 800, 500
         self.modal = False
         self.maximizable = True
         self.maximized = True
@@ -31,7 +30,7 @@ class ExtLogsWindow(ExtWindow):
         self.template_globals = 'ui-js/logview.js'
         
         self.grid = ExtObjectGrid(flex=1, region = 'center')
-        self.grid.add_column(header=u'Дата и время', data_index='date', width=30)
+        self.grid.add_column(header=u'Дата и время', data_index='date', width=60)
         self.grid.add_column(header=u'Текст сообщения', data_index='message')
         self.grid.add_column(header=u'Ошибка', data_index='type_error')
         self.grid.add_column(header=u'Дополнительно', data_index='additionally')
