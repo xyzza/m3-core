@@ -118,7 +118,8 @@ class ListEditRowWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
-        win.title = base.title
+        if not win.title:
+            win.title = base.title
         win.form.url = base.save_row_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_edit_window(win))
@@ -139,7 +140,8 @@ class ListNewRowWindowAction(Action):
         win = base.edit_window(create_new = True)
         win.form.from_object(obj)
         # Донастраиваем форму
-        win.title = base.title
+        if not win.title:
+            win.title = base.title
         win.form.url = base.save_row_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_edit_window(win))
@@ -153,7 +155,8 @@ class TreeEditNodeWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         win = utils.bind_object_from_request_to_form(request, base.get_node, base.edit_node_window)
-        win.title = base.title
+        if not win.title:
+            win.title = base.title
         win.form.url = base.save_node_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
@@ -175,7 +178,8 @@ class TreeNewNodeWindowAction(Action):
         win = base.edit_node_window(create_new = True)
         win.form.from_object(obj)
         # Донастраиваем форму
-        win.title = base.title
+        if not win.title:
+            win.title = base.title
         win.form.url = base.save_node_action.get_absolute_url()
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
