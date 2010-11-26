@@ -567,14 +567,13 @@ class SelectPermissionWindow(windows.ExtEditWindow):
         self.tree.top_bar.button_refresh.text = None
         self.tree.row_id_name = 'id'
         self.tree.top_bar.hidden = True
-        #self.tree.use_bbar = True
         self.tree.sm = ExtGridCheckBoxSelModel()
         self.tree.action_data = GetAllPermissions
         self.items.append(self.tree)
         self.buttons.append(controls.ExtButton(text=u'Выбрать', handler='''function select(btn, e, baseParams) {
-            var tree = Ext.getCmp('{{ component.tree.client_id }}');
+            var tree = Ext.getCmp('%s');
             var records = tree.getSelectionModel().getSelections();
             win.fireEvent('closed_ok', records);
             win.close(true);
-        }'''))
+        }''' % self.tree.client_id))
         self.buttons.append(controls.ExtButton(text=u'Отмена', handler='cancelForm'))
