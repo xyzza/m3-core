@@ -76,6 +76,18 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		
 		Ext.m3.GridPanel.superclass.constructor.call(this, config);
 	}
+	,initComponent: function(){
+		Ext.m3.GridPanel.superclass.initComponent.call(this);
+		var store = this.getStore();
+		store.on('exception', this.storeException, this);
+	}
+	/**
+	 * Обработчик исключений хранилица
+	 */
+	,storeException: function (proxy, type, action, options, response, arg){
+		//console.log(proxy, type, action, options, response, arg);
+		uiAjaxFailMessage(response, options);
+	}
 });
 
 Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
@@ -151,5 +163,17 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     }, baseConfig);
     
     Ext.m3.EditorGridPanel.superclass.constructor.call(this, config);
-  }
+s  }
+	,initComponent: function(){
+		Ext.m3.EditorGridPanels.superclass.initComponent.call(this);
+		var store = this.getStore();
+		store.on('exception', this.storeException, this);
+	}
+	/**
+	 * Обработчик исключений хранилица
+	 */
+	,storeException: function (proxy, type, action, options, response, arg){
+		//console.log(proxy, type, action, options, response, arg);
+		uiAjaxFailMessage(response, options);
+	}
 });
