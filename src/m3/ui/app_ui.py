@@ -106,7 +106,7 @@ class DesktopLaunchGroup(BaseDesktopElement):
     def render(self):
         ''' Рендерит имеющийся объект. Вызывается из функции render. '''
         if self.subitems:
-            res = 'text: "%s"' % self.name
+            res = 'text: "%s"' % self.name.replace('"', "&quot;")
             res += ',iconCls:"%s"' % self.icon
             res += ',handler: function(){return false;}'
             res += ',menu:%s' % self.render_items()
@@ -155,7 +155,7 @@ class DesktopLauncher(BaseDesktopElement):
         
     def render(self):
         '''Рендерит текущий объект. Вызывается из метода render_items класса DesktopLaunchGroup'''
-        res = 'text:"%s"' % self.name
+        res = 'text:"%s"' % self.name.replace('"', "&quot;")
         res += ',iconCls:"%s"' % self.icon
         res += ',handler: function(){return sendRequest("%s", AppDesktop.getDesktop());}' % self.url
         return '{%s}' % res
