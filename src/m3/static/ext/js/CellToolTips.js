@@ -199,7 +199,11 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
             finished:	 false
         });
         Ext.applyIf(this.tipConfig, {
-            trackMouse:  true,
+            
+            //prefer M: В ie с запятой не будет работать. 
+            // monkey pathcing mode true
+            //trackMouse:  true,
+            trackMouse:  true
     	});
 
         this.tip = new Ext.ToolTip( this.tipConfig );

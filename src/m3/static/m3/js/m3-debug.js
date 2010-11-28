@@ -6329,6 +6329,295 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
 });
 
 Ext.reg('calendarpanel', Ext.calendar.CalendarPanel);
+// Create the namespace
+Ext.ns('Ext.ux.plugins.grid');
+
+/**
+ * Ext.ux.plugins.grid.CellToolTips plugin for Ext.grid.GridPanel
+ *
+ * A GridPanel plugin that enables the creation of record based,
+ * per-column tooltips that can also be dynamically loaded via Ajax
+ * calls.
+ *
+ * Requires Animal's triggerElement override when using ExtJS 2.x
+ * (from <a href="http://extjs.com/forum/showthread.php?p=265259#post265259">http://extjs.com/forum/showthread.php?p=265259#post265259</a>)
+ * In ExtJS 3.0 this feature is arealy in the standard.
+ *
+ * Starting from version 1.1, CellToolTips also supports dynamic
+ * loading of tooltips via Ajax. Just specify the 'url' parameter
+ * in the respective column configuration for the CellToolTips,
+ * and the data for the tooltip will be loaded from there. By
+ * default, the record data for the current row will be passed
+ * to the request.
+ *
+ * If you want to supply different parameters, you can specify a
+ * function with the 'fn' parameter. This function gets the data
+ * object for the current row record. The object it returns will
+ * be used as the Ajax paremeters.
+ *
+ * An example configuration:
+ * <pre><code>
+	var tts = new Ext.ux.plugins.grid.CellToolTips([
+		{
+			// 'Standard' CellToolTip, the current row record is applied
+			// to the template.
+			field: 'company',
+			tpl:   '<b>Company: {company}</b><br />This is a local column tooltip'
+		},
+		{
+			// Simple Ajax CellToolTip, an Ajax request is dispatched with the
+			// current row record as its parameters, and after adding the property
+			// "ADDITIONAL" to the return data it is applied to the template.
+			field: 'price', 
+			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%<br />{ADDITIONAL}', 
+			url: 'json_ajaxtip1.php',
+			afterFn: function(data) { return Ext.apply({ ADDITIONAL: 'Test' }, data; }
+		},
+		{
+			// Advanced Ajax CellToolTip, the current row record is passed to the
+			// function in 'fn', its return values are passed to an Ajax call and
+			// the Ajax return data is applied to the template.
+			field: 'change', 
+			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%', 
+			fn: function(parms) {
+				parms.price = parms.price * 100;
+				return Ext.apply({},parms);
+			},
+			url: '/json_ajaxtip2.php'
+		}
+	]);
+	
+	var grid = new Ext.grid.GridPanel({
+		... normal config ...
+		,plugins:	[ tts ]
+		// Optional: filter which rows should have a tooltip:
+		,CellToolTipCondition: function( row, rec ) {
+			// don't show a tooltip for the first row or if
+			// the record has a property 'secret' set to true
+			if( row == 0 || rec.get('secret') == true ) {
+				return false;
+			}
+		}
+   </code></pre>
+ *
+ * A complete example can be found <a href="http://www.chrwinter.de/ext3/CellToolTips.html">here</a>.
+ *
+ * @author  BitPoet
+ * @date    July 08, 2009
+ * @version 1.3
+ *
+ * @class Ext.ux.plugins.grid.CellToolTips
+ * @extends Ext.util.Observable
+ */
+Ext.ux.plugins.grid.CellToolTips = function(config) {
+    var cfgTips;
+    if( Ext.isArray(config) ) {
+        cfgTips = config;
+        config = {};
+    } else {
+    	cfgTips = config.ajaxTips;
+    }
+    Ext.ux.plugins.grid.CellToolTips.superclass.constructor.call(this, config);
+    if( config.tipConfig ) {
+    	this.tipConfig = config.tipConfig;
+    }
+    this.ajaxTips = cfgTips;
+} // End of constructor
+
+// plugin code
+Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
+    version: 1.3,
+    /**
+     * Temp storage from the config object
+     *
+     * @private
+     */
+    ajaxTips: false,
+    
+    /**
+     * Tooltip Templates indexed by column id
+     *
+     * @private
+     */
+    tipTpls: false,
+
+    /**
+     * Tooltip data filter function for setting base parameters
+     *
+     * @private
+     */
+    tipFns: false,
+    
+    /**
+     * URLs for ajax backend
+     *
+     * @private
+     */
+    tipUrls: '',
+    
+    /**
+     * Tooltip configuration items
+     *
+     * @private
+     */
+    tipConfig: {},
+
+    /**
+     * Loading action
+     *
+     * @private
+     */
+    request: false,
+
+    /**
+     * Plugin initialization routine
+     *
+     * @param {Ext.grid.GridPanel} grid
+     */
+    init: function(grid) {
+        if( ! this.ajaxTips ) {
+            return;
+        }
+        this.tipTpls = {};
+        this.tipFns  = {};
+      	this.tipAfterFns = {};
+        this.tipUrls = {};
+        // Generate tooltip templates
+        Ext.each( this.ajaxTips, function(tip) {
+        	this.tipTpls[tip.field] = new Ext.XTemplate( tip.tpl );
+        	if( tip.url ) {
+        		this.tipUrls[tip.field] = tip.url;
+        	}
+       		if( tip.fn )
+       			this.tipFns[tip.field] = tip.fn;
+       		if( tip.afterFn )
+       			this.tipAfterFns[tip.field] = tip.afterFn;
+       		if (tip.tipConfig)
+			this.tipConfig = tip.tipConfig;
+
+        }, this);
+        // delete now superfluous config entry for ajaxTips
+        delete( this.ajaxTips );
+        grid.on( 'render', this.onGridRender.createDelegate(this) );
+    } // End of function init
+
+    /**
+     * Set/Add a template for a column
+     *
+     * @param {String} fld
+     * @param {String | Ext.XTemplate} tpl
+     */
+    ,setFieldTpl: function(fld, tpl) {
+        this.tipTpls[fld] = Ext.isObject(tpl) ? tpl : new Ext.XTemplate(tpl);
+    } // End of function setFieldTpl
+
+    /**
+     * Set up the tooltip when the grid is rendered
+     *
+     * @private
+     * @param {Ext.grid.GridPanel} grid
+     */
+    ,onGridRender: function(grid) 
+    {
+        if( ! this.tipTpls ) {
+            return;
+        }
+        // Create one new tooltip for the whole grid
+        Ext.apply(this.tipConfig, {
+            target:      grid.getView().mainBody,
+            delegate:    '.x-grid3-cell-inner',
+            renderTo:    document.body,
+            finished:	 false
+        });
+        Ext.applyIf(this.tipConfig, {
+            
+            //prefer M: В ie с запятой не будет работать. 
+            // monkey pathcing mode true
+            //trackMouse:  true,
+            trackMouse:  true
+    	});
+
+        this.tip = new Ext.ToolTip( this.tipConfig );
+        this.tip.ctt = this;
+        // Hook onto the beforeshow event to update the tooltip 
+        this.tip.on('beforeshow', this.beforeTipShow.createDelegate(this.tip, [this, grid], true));
+        this.tip.on('hide', this.hideTip);
+    } // End of function onGridRender
+
+    /**
+     * Replace the tooltip body by applying current row data to the template
+     *
+     * @private
+     * @param {Ext.ToolTip} tip
+     * @param {Ext.ux.plugins.grid.CellToolTips} ctt
+     * @param {Ext.grid.GridPanel} grid
+     */
+    ,beforeTipShow: function(tip, ctt, grid) {
+	// Get column id and check if a tip is defined for it
+	var colIdx = grid.getView().findCellIndex( tip.triggerElement );
+	var tipId = grid.getColumnModel().getDataIndex( colIdx );
+       	if( ! ctt.tipTpls[tipId] )
+       	    return false;
+    	if( ! tip.finished ) {
+	       	var isAjaxTip = (typeof ctt.tipUrls[tipId] == 'string');
+        	// Fetch the rows record from the store and apply the template
+        	var rowNum = grid.getView().findRowIndex( tip.triggerElement );
+        	var cellRec = grid.getStore().getAt( rowNum );
+	        if( grid.CellToolTipCondition && grid.CellToolTipCondition(rowNum, cellRec) === false ) {
+        	    return false;
+        	}
+        	// create a copy of the record and use its data, otherwise we might
+        	// accidentially modify the original record's values
+        	var data = cellRec.copy().data;
+        	if( isAjaxTip ) {
+        		ctt.loadDetails((ctt.tipFns[tipId]) ? ctt.tipFns[tipId](data) : data, tip, grid, ctt, tipId);
+        		tip.body.dom.innerHTML = 'Loading...';
+        	} else {
+			tip.body.dom.innerHTML = ctt.tipTpls[tipId].apply( (ctt.tipFns[tipId]) ? ctt.tipFns[tipId](cellRec.data) : cellRec.data );
+		}       		
+        } else {
+        	tip.body.dom.innerHTML = tip.ctt.tipTpls[tipId].apply( tip.tipdata );
+        }
+    } // End of function beforeTipShow
+    
+    /**
+     * Fired when the tooltip is hidden, resets the finished handler.
+     *
+     * @private
+     * @param {Ext.ToolTip} tip
+     */
+    ,hideTip: function(tip) {
+    	tip.finished = false;
+    }
+    
+    /**
+     * Loads the data to apply to the tip template via Ajax
+     *
+     * @private
+     * @param {object} data Parameters for the Ajax request
+     * @param {Ext.ToolTip} tip The tooltip object
+     * @param {Ext.grid.GridPanel} grid The grid
+     * @param {Ext.ux.plugins.grid.CellToolTips} ctt The CellToolTips object
+     * @param {String} tipid Id of the tooltip (= field name)
+     */
+    ,loadDetails: function(data, tip, grid, ctt, tipid) {
+    	Ext.Ajax.request({
+    		url:	ctt.tipUrls[tipid],
+    		params:	data,
+    		method: 'POST',
+    		success:	function(resp, opt) {
+    			tip.finished = true;
+    			tip.tipdata  = Ext.decode(resp.responseText);
+    			if( ctt.tipAfterFns[tipid] ) {
+    				tip.tipdata = ctt.tipAfterFns[tipid](tip.tipdata);
+    			}
+    			tip.show();
+    		}
+    	});
+    }
+
+}); // End of extend
+
 /*!
  * Ext JS Library 3.2.0
  * Copyright(c) 2006-2010 Ext JS, Inc.
@@ -6349,7 +6638,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
      * 'Browse...').  Note that if you supply a value for {@link #buttonCfg}, the buttonCfg.text
      * value will be used instead if available.
      */
-    buttonText: 'Browse...',
+    buttonText: '',
     /**
      * @cfg {Boolean} buttonOnly True to display the file upload field as a button with no visible
      * text field (defaults to false).  If true, all inherited TextField members will still be available.
@@ -6372,6 +6661,8 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
      * @method autoSize
      */
     autoSize: Ext.emptyFn,
+
+
 
     // private
     initComponent: function(){
@@ -7624,7 +7915,47 @@ function uiAjaxFailMessage (response, opt) {
 					enableFormat     : false,
 					enableLinks      : false,
 					enableLists      : false,
-					enableSourceEdit : false
+					enableSourceEdit : false,
+					listeners         : {
+						"push" : {
+							fn : function(self,html) {
+								
+								// событие возникает когда содержимое iframe становится доступно
+								
+								function fixDjangoPageScripts(doc) {
+									//грязный хак - эвалим скрипты в iframe 
+									
+									try {																				
+										var scripts = doc.getElementsByTagName('script');
+										for (var i = 0; i < scripts.length;i++) {
+											if (scripts[i].innerText) {
+												this.eval(scripts[i].innerText);
+											}
+											else {
+												this.eval(scripts[i].textContent);
+											}
+										}	
+																			
+										//и скрыта подробная информация, тк document.onLoad не будет
+										//вызвано
+										this.hideAll(this.getElementsByClassName(doc, 'table', 'vars'));
+										this.hideAll(this.getElementsByClassName(doc, 'ol', 'pre-context'));
+										this.hideAll(this.getElementsByClassName(doc, 'ol', 'post-context'));
+										this.hideAll(this.getElementsByClassName(doc, 'div', 'pastebin'));
+										
+									}
+									catch(er) {
+										//
+									}
+								}
+								
+								//магия - меняем объект исполнения на window из iframe
+								fixDjangoPageScripts.call(this.iframe.contentWindow, this.iframe.contentDocument);
+								//TO DO: нужно еще поправлять стили странички в IE и Сафари
+							}
+						}
+					
+					}
 				}
 			]
 		})
@@ -7632,7 +7963,6 @@ function uiAjaxFailMessage (response, opt) {
 
 	win.show();
 }
-
 
 // Проверяет есть ли в ответе сообщение и выводит его
 // Возвращает серверный success
@@ -7751,6 +8081,18 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		
 		Ext.m3.GridPanel.superclass.constructor.call(this, config);
 	}
+	,initComponent: function(){
+		Ext.m3.GridPanel.superclass.initComponent.call(this);
+		var store = this.getStore();
+		store.on('exception', this.storeException, this);
+	}
+	/**
+	 * Обработчик исключений хранилица
+	 */
+	,storeException: function (proxy, type, action, options, response, arg){
+		//console.log(proxy, type, action, options, response, arg);
+		uiAjaxFailMessage(response, options);
+	}
 });
 
 Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
@@ -7827,8 +8169,19 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     
     Ext.m3.EditorGridPanel.superclass.constructor.call(this, config);
   }
+	,initComponent: function(){
+		Ext.m3.EditorGridPanel.superclass.initComponent.call(this);
+		var store = this.getStore();
+		store.on('exception', this.storeException, this);
+	}
+	/**
+	 * Обработчик исключений хранилица
+	 */
+	,storeException: function (proxy, type, action, options, response, arg){
+		//console.log(proxy, type, action, options, response, arg);
+		uiAjaxFailMessage(response, options);
+	}
 });
-
 if (Ext.version == '3.0') {
     Ext.override(Ext.grid.GridView, {
         ensureVisible : function(row, col, hscroll) {
@@ -10076,7 +10429,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 					for(var i = 0, len = sels.length; i < len; i++){
 						ids.push(sels[i].id);
 					}
-					baseConf[this.rowIdName] = ids;
+					baseConf[this.rowIdName] = ids.join();
 				}
 			}
 			// для режима выделения ячейки
@@ -10136,7 +10489,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 								for(var i = 0, len = sels.length; i < len; i++){
 									ids.push(sels[i].id);
 								}
-								baseConf[scope.rowIdName] = ids;
+								baseConf[scope.rowIdName] = ids.join();
 							}
 						}
 						// для режима выделения ячейки
@@ -10453,6 +10806,112 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 
 	}
 });
+Ext.ns('Ext.ux.form');
+
+Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
+
+     /**
+     * Класс иконки для выбора файла
+     */
+     iconClsSelectFile: 'x-form-image-icon'
+    
+    /**
+     * Класс иконки для очистки файла 
+     */
+    ,iconClsClearFile: 'x-form-image-clear-icon'
+
+    /**
+     * Класс иконки для скачивания файла
+     */
+    ,iconClsPreviewImage: 'x-form-image-preview-icon'
+    
+    ,constructor: function(baseConfig, params){
+        
+        if (params) {
+            if (params.thumbnailWidth) {
+                this.thumbnailWidth = params.thumbnailWidth;
+            }
+            if (params.thumbnailHeight) {
+                this.thumbnailHeight = params.thumbnailHeight;
+            }
+            if (params.prefixThumbnailImg) {
+                this.prefixThumbnailImg = params.prefixThumbnailImg;
+            }
+            if (params.thumbnail) {
+                this.thumbnail = params.thumbnail;
+            }
+            
+            this.previewTip = null;
+        }        
+        
+        Ext.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
+    }     
+   ,renderHelperBtn: function(){
+       if (this.thumbnail) {
+            this.buttonPreview = new Ext.Button({
+                renderTo: this.wrap
+                ,width: 16
+                ,cls: 'x-form-file-download'
+                ,iconCls: this.iconClsPreviewImage
+                ,handler: this.clickHelperBtn
+                ,scope: this
+                ,hidden: this.value ? false : true
+                ,tooltip: {
+                    text: 'Предварительный показ'
+                    ,width: 140
+                }
+            });
+        }
+    }
+    ,getHelperBtn: function(){
+        return this.buttonPreview;
+    }    
+    ,clickHelperBtn: function(){
+
+        if (this.fileUrl && this.value) {
+            
+            var mass = this.fileUrl.split('/');
+            var dir = mass.slice(0, mass.length - 1);
+            var file_name = mass[mass.length-1];
+            var prefix = this.prefixThumbnailImg || '';
+            var url = String.format('{0}/{1}{2}', dir.join('/'), prefix, file_name);
+            
+            this.previewTip = new Ext.QuickTip({
+                html: String.format('<image src="{0}" WIDTH={1} HEIGHT={2}>', 
+                        this.getFileUrl(url), this.thumbnailWidth, this.thumbnailHeight)
+                ,autoHide: false
+                ,width: this.thumbnailWidth + 10
+                ,height: this.thumbnailHeight + 10
+            });
+            
+            var el = this.getEl();
+            var xy = el.getXY()
+            this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
+        }
+    }
+    ,createFileInput : function() {
+        this.fileInput = this.wrap.createChild({
+            id: this.getFileInputId(),
+            name: (this.prefixUploadField || '') + this.name,
+            cls: 'x-form-file',
+            tag: 'input',
+            type: 'file',
+            size: 1,
+            width: 20
+        });
+        
+        Ext.QuickTips.unregister(this.fileInput);
+        Ext.QuickTips.register({
+            target: this.fileInput,
+            text: 'Выбрать изображение',
+            width: 130,
+            dismissDelay: 10000 
+        });
+    }
+});
+
+Ext.reg('imageuploadfield', Ext.ux.form.ImageUploadField);
+
 /**
  * Панель редактирования адреса
  */
@@ -10906,6 +11365,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			 * Проще говоря до начала submit'a
 			 * Параметры:
 			 *   this - Сам компонент
+			 *   @param (OBJECT) submit - sumbit-запрос для отправки на сервер
 			*/
 			'beforesubmit'
 			)
@@ -10928,7 +11388,6 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	,submitForm: function(btn, e, baseParams){
 		assert(this.formUrl, 'Не задан url для формы');
 		
-		this.fireEvent('beforesubmit');
 		
 		var form = Ext.getCmp(this.formId).getForm();
 		if (form && !form.isValid()) {
@@ -10941,20 +11400,23 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			
 			return;
 		}
-		var scope = this;
-    	form.submit({
-    	   url: this.formUrl
-		   ,submitEmptyText: false
-		   ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
-		   ,success: function(form, action){
-				scope.fireEvent('closed_ok', action.response.responseText);
-		    	scope.close(true);
-		    	smart_eval(action.response.responseText);
-		   }
-		   ,failure: function (form, action){
-		   		smart_eval(action.response.responseText);
-		   }
-    	});
+    var scope = this;
+		var submit = {
+        url: this.formUrl
+       ,submitEmptyText: false
+       ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
+       ,success: function(form, action){
+          scope.fireEvent('closed_ok', action.response.responseText);
+          scope.close(true);
+          smart_eval(action.response.responseText);
+       }
+       ,failure: function (form, action){
+          smart_eval(action.response.responseText);
+       }
+    };
+    if (scope.fireEvent('beforesubmit', submit)) {
+    	form.submit(submit);
+    }
 	}
 	
 	 /**
@@ -11057,6 +11519,425 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 })
 
 
+/**
+ * Содержит общие функции вызываемые из разных частей
+ */
+Ext.QuickTips.init();
+
+/**
+ * Чтобы ie и прочие не правильные браузеры, где нет console не падали
+ */
+if (typeof console == "undefined") var console = { log: function() {} };
+
+/**
+ * Добавим свой метод для удобной работы с шаблонами и форматированием текста
+ * Пример использования: 
+ *      var result = "Hello {0}! This is {1}.".format("world","foo bar");
+ * Результат: 
+ *      "Hello World! This is foo bar."
+ */
+// String.prototype.format = function(){
+//     var pattern = /\{\d+\}/g;
+//     var args = arguments;
+//     return this.replace(pattern, function(capture){ return args[capture.match(/\d+/)]; });
+// }
+
+Ext.namespace('Ext.m3');
+
+
+var SOFTWARE_NAME = 'Платформа М3';
+
+/**
+ *  Реализация стандартного assert
+ * @param {Boolean} condition
+ * @param {Str} errorMsg
+ */
+function assert(condition, errorMsg) {
+  if (!condition) {
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+  }
+}
+
+/**
+ * 
+ * @param {Object} text
+ */
+function smart_eval(text){
+	if( text == undefined ){
+	    // на случай, когда в процессе получения ответа сервера произошел аборт
+		return;
+	}
+	if(text.substring(0,1) == '{'){
+		// это у нас json объект
+		var obj = Ext.util.JSON.decode(text);
+		if(!obj){
+			return;
+		}
+		if(obj.code){
+			var eval_result = obj.code();
+			if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
+				AppDesktop.getDesktop().createWindow(eval_result);
+			}
+			return eval_result;
+		}
+		else
+		{
+    		if(obj.message && obj.message != ''){
+    			Ext.Msg.show({title:'', msg: obj.message, buttons:Ext.Msg.OK, icon: (obj.success!=undefined && !obj.success ? Ext.Msg.WARNING : Ext.Msg.Info)});
+    			return;
+    		}
+		}
+	}
+	else{
+		var eval_result = eval(text);
+		if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
+			AppDesktop.getDesktop().createWindow(eval_result);
+		}
+		return eval_result;
+	}
+}
+
+Ext.ns('Ext.app.form');
+/**
+ * Модифицированный контрол поиска, за основу был взят контрол от ui.form.SearchField
+ * @class Ext.app.form.SearchField Контрол поиска
+ * @extends Ext.form.TwinTriggerField Абстрактный классс как раз для разного рода таких вещей, типа контрола поиска
+ */
+Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
+    initComponent : function(){
+        Ext.app.form.SearchField.superclass.initComponent.call(this);
+        this.on('specialkey', function(f, e){
+            if(e.getKey() == e.ENTER){
+                this.onTrigger2Click();
+            }
+        }, this);
+    }
+
+    ,validationEvent:false
+    ,validateOnBlur:false
+    ,trigger1Class:'x-form-clear-trigger'
+    ,trigger2Class:'x-form-search-trigger'
+    ,hideTrigger1:true
+    ,width:180
+    ,hasSearch : false
+    ,paramName : 'filter'
+	,paramId: 'id'
+	,nodeId:'-1'
+    
+    ,onTrigger1Click : function(e, html, arg){
+        if(this.hasSearch){
+        	this.el.dom.value = '';
+        	var cmp = this.getComponentForSearch();
+        	if (cmp instanceof Ext.grid.GridPanel) {
+	            var o = {start: 0};
+	            var store = cmp.getStore();
+	            store.baseParams = store.baseParams || {};
+	            store.baseParams[this.paramName] = '';
+				store.baseParams[this.paramId] = this.nodeId || '';	
+	            store.reload({params:o});
+
+	        } else if (cmp instanceof Ext.ux.tree.TreeGrid) {
+	        	this.el.dom.value = '';
+	        	
+	        	var loader = cmp.getLoader();
+	        	loader.baseParams = loader.baseParams || {};
+	        	loader.baseParams[this.paramName] = '';
+	        	var rootNode = cmp.getRootNode();
+	        	loader.load(rootNode);
+	        	rootNode.expand();
+	        };
+	        this.triggers[0].hide();
+	        this.hasSearch = false;
+        }
+    }
+
+    ,onTrigger2Click : function(e, html, arg){
+        var value = this.getRawValue();
+        var cmp = this.getComponentForSearch();
+        if (cmp instanceof Ext.grid.GridPanel) {
+            var o = {start: 0};
+            var store = cmp.getStore();
+	        store.baseParams = store.baseParams || {};
+	        store.baseParams[this.paramName] = value;
+	        store.baseParams[this.paramId] = this.nodeId || '';	
+	        store.reload({params:o});
+        } else if (cmp instanceof Ext.ux.tree.TreeGrid) {
+        	var loader = cmp.getLoader();
+        	loader.baseParams = loader.baseParams || {};
+	        loader.baseParams[this.paramName] = value;
+        	var rootNode = cmp.getRootNode();
+        	loader.load(rootNode);
+        	rootNode.expand();
+        	//console.log(rootNode);
+        };
+        if (value) {
+        	this.hasSearch = true;
+	    	this.triggers[0].show();
+        }
+    }
+    
+    ,clear : function(node_id){ this.onTrigger1Click() }
+    ,search: function(node_id){ this.onTrigger2Click() }
+});
+/**
+ * В поле добавим функционал отображения того, что оно изменено.
+ */
+Ext.override(Ext.form.Field, {
+	/**
+	 * Признак, что поле используется для изменения значения, 
+	 * а не для навигации - при Истине будут повешаны обработчики на изменение окна
+	 * */ 
+	isEdit: true,
+	isModified: false,
+	updateLabel: function() {
+		this.setFieldLabel(this.fieldLabel);
+	},
+	setFieldLabel : function(text) {
+		if ( text != undefined ) {
+	    	if (this.rendered) {
+	      		var newtext = text+':';
+	      		if (this.isModified) {newtext = '<span style="color:darkmagenta;">' + newtext + '</span>'; };
+		  		//if (this.isModified) {newtext = '<span">*</span>' + newtext; };
+				var lab = this.el.up('.x-form-item', 10, true);
+				if (lab) {
+					lab.child('.x-form-item-label').update(newtext);
+				}
+	    	}
+	    	this.fieldLabel = text;
+		}
+	},
+	// переопределим клавишу ENTER для применения изменений поля
+	fireKey : function(e){
+        if(e.isSpecialKey()){
+			if (e.getKey() == e.ENTER) {
+				// этот метод делает применение изменений
+				this.onBlur();
+			};
+            this.fireEvent('specialkey', this, e);
+        }
+    }
+});
+
+/**
+ * Создаётся новый компонент: Панель с возможностью включения в заголовок
+ * визуальных компонентов.
+ */
+Ext.app.TitlePanel = Ext.extend(Ext.Panel, {
+   titleItems: null,
+   addTitleItem: function (itemConfig) { 
+       var item = Ext.ComponentMgr.create(itemConfig);
+       var itemsDiv = Ext.DomHelper.append(this.header, {tag:"div", style:"float:right;margin-top:-4px;margin-left:3px;"}, true);
+       item.render(itemsDiv);
+   },
+   onRender: function (ct, position) {
+       Ext.app.TitlePanel.superclass.onRender.apply(this, arguments);
+       if (this.titleItems != null) {
+           if(Ext.isArray(this.titleItems)){
+               for (var i = this.titleItems.length-1; i >= 0 ; i--) {
+                   this.addTitleItem(this.titleItems[i]);
+               }
+           } else {
+               this.addTitleItems(this.titleItems);
+           }
+           
+           if (this.header)
+               this.header.removeClass('x-unselectable');
+       };
+   },
+   getChildByName: function (name) {
+       if (this.items)
+           for (var i = 0;  i < this.items.length; i++)
+               if (this.items.items[i].name == name)
+                   return this.items.items[i];
+
+       if (this.titleItems)
+           for (var i = 0; i < this.titleItems.length; i++)
+               if (this.titleItems[i].name == name)
+                   return this.titleItems[i];
+
+       return null;
+    }
+});
+
+
+/*
+ * выполняет обработку failure response при submit пользовательских форм
+ * context.action -- объект, передаваемый из failure handle
+ * context.title -- заголовок окон с сообщением об ошибке
+ * context.message -- текст в случае, если с сервера на пришло иного сообщения об ошибке
+ */
+function uiFailureResponseOnFormSubmit(context){
+    if(context.action.failureType=='server'){
+        obj = Ext.util.JSON.decode(context.action.response.responseText);
+        Ext.Msg.show({title: context.title,
+            msg: obj.error_msg,
+            buttons: Ext.Msg.OK,
+            icon: Ext.Msg.WARNING});
+    }else{
+        Ext.Msg.alert(context.title, context.message);
+    }
+}
+
+/*
+ * Если функция вызвана без параметров, то будет выдано простое сообщение об ошибке
+ * Если передан параметр респонс, то будет нарисовано экстовое окно и в нем отображен
+ * респонс сервера(предназначено для отладки серверных ошибок)
+*/
+function uiAjaxFailMessage (response, opt) {
+	
+	if (Ext.isEmpty(response)) {
+		Ext.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
+		return;
+	}
+	
+	var bodySize = Ext.getBody().getViewSize(),
+		width = (bodySize.width < 500) ? bodySize.width - 50 : 500,
+		height = (bodySize.height < 300) ? bodySize.height - 50 : 300,
+		win;
+
+	var errorMsg = response.responseText;
+	
+	var win = new Ext.Window({ modal: true, width: width, height: height, 
+	    title: "Request Failure", layout: "fit", maximizable: true, 
+	    maximized: true,
+		listeners : {
+			"maximize" : {
+				fn : function (el) {
+					var v = Ext.getBody().getViewSize();
+					el.setSize(v.width, v.height);
+				},
+				scope : this
+			},
+
+			"resize" : {
+				fn : function (wnd) {
+					var editor = Ext.getCmp("__ErrorMessageEditor");
+					var sz = wnd.body.getViewSize();
+					editor.setSize(sz.width, sz.height - 42);
+				}
+			}
+		},
+		items : new Ext.form.FormPanel({
+			baseCls : "x-plain",
+			layout  : "absolute",
+			defaultType : "label",
+			items : [
+				{
+					x    : 5,
+					y    : 5,
+					html : '<div class="x-window-dlg"><div class="ext-mb-error" style="width:32px;height:32px"></div></div>'
+				},
+				{
+					x    : 42,
+					y    : 6,
+					html : "<b>Status Code: </b>"
+				},
+				{
+					x    : 125,
+					y    : 6,
+					text : response.status
+				},
+				{
+					x    : 42,
+					y    : 25,
+					html : "<b>Status Text: </b>"
+				},
+				{
+					x    : 125,
+					y    : 25,
+					text : response.statusText
+				},
+				{
+					x  : 0,
+					y  : 42,
+					id : "__ErrorMessageEditor",
+					xtype    : "htmleditor",
+					value    : errorMsg,
+					readOnly : true,
+					enableAlignments : false,
+					enableColors     : false,
+					enableFont       : false,
+					enableFontSize   : false,
+					enableFormat     : false,
+					enableLinks      : false,
+					enableLists      : false,
+					enableSourceEdit : false,
+					listeners         : {
+						"push" : {
+							fn : function(self,html) {
+								
+								// событие возникает когда содержимое iframe становится доступно
+								
+								function fixDjangoPageScripts(doc) {
+									//грязный хак - эвалим скрипты в iframe 
+									
+									try {																				
+										var scripts = doc.getElementsByTagName('script');
+										for (var i = 0; i < scripts.length;i++) {
+											if (scripts[i].innerText) {
+												this.eval(scripts[i].innerText);
+											}
+											else {
+												this.eval(scripts[i].textContent);
+											}
+										}	
+																			
+										//и скрыта подробная информация, тк document.onLoad не будет
+										//вызвано
+										this.hideAll(this.getElementsByClassName(doc, 'table', 'vars'));
+										this.hideAll(this.getElementsByClassName(doc, 'ol', 'pre-context'));
+										this.hideAll(this.getElementsByClassName(doc, 'ol', 'post-context'));
+										this.hideAll(this.getElementsByClassName(doc, 'div', 'pastebin'));
+										
+									}
+									catch(er) {
+										//
+									}
+								}
+								
+								//магия - меняем объект исполнения на window из iframe
+								fixDjangoPageScripts.call(this.iframe.contentWindow, this.iframe.contentDocument);
+								//TO DO: нужно еще поправлять стили странички в IE и Сафари
+							}
+						}
+					
+					}
+				}
+			]
+		})
+	});
+
+	win.show();
+}
+
+// Проверяет есть ли в ответе сообщение и выводит его
+// Возвращает серверный success
+function uiShowErrorMessage(response){
+	obj = Ext.util.JSON.decode(response.responseText);
+	if (obj.error_msg)
+		Ext.Msg.alert(SOFTWARE_NAME, obj.error_msg);
+// Не понятно зачем нужен этот код.
+//	if (obj.code)
+//		alert('Пришел код на выполнение ' + obj.code);
+	return obj.success;
+}
+
+/**
+ * Генерирует запрос на сервер по переданному url
+ * @param {String} url URL запроса на получение формы
+ * @param {Object} desktop Объект типа AppDesktop.getDesktop()
+ */
+function sendRequest(url, desktop){                     
+    Ext.Ajax.request({
+        url: url,
+        method: 'POST',
+        success: function(response, options){
+            smart_eval(response.responseText);
+        }, 
+        failure: uiAjaxFailMessage
+    });
+}
 /**
  * Объектное дерево, включает в себя тулбар с кнопками добавить (в корень и дочерний элемент), редактировать и удалить
  * @param {Object} config
@@ -11660,6 +12541,564 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	}
 	
 });
+
+Ext.ns('Ext.ux.form');
+
+Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
+
+    /**
+     * @cfg {Object} buttonCfg A standard {@link Ext.Button} config object.
+     */
+
+    // private
+    readOnly: true
+
+    /**
+     * @hide
+     * @method autoSize
+     */
+    ,autoSize: Ext.emptyFn 
+    
+     /**
+     * Класс иконки для выбора файла
+     */
+     ,iconClsSelectFile: 'x-form-file-icon'
+    
+    /**
+     * Класс иконки для очистки файла 
+     */
+    ,iconClsClearFile: 'x-form-file-clear-icon'
+
+    /**
+     * Класс иконки для скачивания файла
+     */
+    ,iconClsDownloadFile: 'x-form-file-download-icon'
+
+    ,constructor: function(baseConfig, params){
+        
+        if (params) {
+            if (params.prefixUploadField) {
+                this.prefixUploadField = params.prefixUploadField;
+            }
+            if (params.fileUrl) {
+                this.fileUrl = params.fileUrl;
+            }
+            if (params.possibleFileExtensions) {
+                this.possibleFileExtensions = params.possibleFileExtensions;
+            }
+        }    
+        
+        Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
+    }
+    
+    // private
+    ,initComponent: function(){
+        Ext.ux.form.FileUploadField.superclass.initComponent.call(this);
+
+        this.addEvents(
+            /**
+             * @event fileselected
+             * Fires when the underlying file input field's value has changed from the user
+             * selecting a new file from the system file selection dialog.
+             * @param {Ext.ux.form.FileUploadField} this
+             * @param {String} value The file value returned by the underlying file input field
+             */
+            'fileselected'
+        );
+    }
+    
+    // private
+    ,onRender : function(ct, position){
+        Ext.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
+
+        // Используем название файла
+        this.value = this.getFileName();
+
+        this.wrap = this.el.wrap({cls:'x-form-field-wrap x-form-file-wrap'});
+        this.el.addClass('x-form-file-text');
+        //this.el.dom.removeAttribute('name');
+        
+        this.createFileInput();
+
+        var btnCfg = Ext.applyIf(this.buttonCfg || {}, {
+            iconCls: this.iconClsSelectFile
+        });
+        this.buttonFile = new Ext.Button(Ext.apply(btnCfg, {
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
+            ,tooltip: {
+                text:'Выбрать файл'
+                ,width: 150
+            }
+        }));
+
+        this.buttonClear = new Ext.Button({
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-clear'
+            ,iconCls: this.iconClsClearFile
+            ,handler: this.clickClearField
+            ,scope: this
+            ,hidden: this.value ? false : true
+            ,tooltip: {
+                text:'Очистить'
+                ,width: 65
+            }
+        });
+        
+        this.renderHelperBtn()
+        
+        this.bindListeners();
+        this.resizeEl = this.positionEl = this.wrap;
+
+    }
+    ,renderHelperBtn: function() {
+        this.buttonDownload = new Ext.Button({
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-download'
+            ,iconCls: this.iconClsDownloadFile
+            ,handler: this.clickDownload
+            ,scope: this
+            ,hidden: this.value ? false : true
+             ,tooltip: {
+                text:'Загрузить'
+                ,width: 65
+            }
+        });
+    }
+    ,getHelperBtn: function(){
+        return this.buttonDownload;
+    }
+    ,bindListeners: function(){
+        this.fileInput.on({
+            scope: this,
+            mouseenter: function() {
+                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+             },
+             mouseleave: function(){
+                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+             },
+             mousedown: function(){
+                 this.buttonFile.addClass('x-btn-click')
+             },
+             mouseup: function(){
+                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+             },                   mouseenter: function() {
+                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+             },
+             change: function(){
+                 var v = this.fileInput.dom.value;
+                 this.setValue(v);
+                 this.fireEvent('fileselected', this, v);   
+                 
+                 if (v) {
+                    // Очищаем ссылку на файл
+                    this.fileUrl = null;
+                                                         
+                    if (!this.buttonClear.isVisible()) {
+                        this.buttonClear.show();
+                        this.el.setWidth( this.el.getWidth() - this.buttonClear.getWidth());
+                    }
+                 }
+                
+             }
+        }); 
+    }
+    
+    ,createFileInput : function() {
+        this.fileInput = this.wrap.createChild({
+            id: this.getFileInputId(),
+            name: (this.prefixUploadField || '') + this.name,
+            cls: 'x-form-file',
+            tag: 'input',
+            type: 'file',
+            size: 1,
+            width: 20
+        });
+        
+        Ext.QuickTips.unregister(this.fileInput);
+        Ext.QuickTips.register({
+            target: this.fileInput,
+            text: 'Выбрать файл',
+            width: 86,
+            dismissDelay: 10000 
+        });
+    }
+    
+    ,reset : function(){ 
+        this.fileInput.remove();
+        this.createFileInput();
+        this.bindListeners();
+        Ext.ux.form.FileUploadField.superclass.reset.call(this);
+    }
+
+    // private
+    ,getFileInputId: function(){
+        return this.id + '-file';
+    }
+
+    // private
+    ,onResize : function(w, h){
+        Ext.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
+
+        this.wrap.setWidth(w);
+        var w = this.wrap.getWidth() - this.buttonFile.getEl().getWidth();
+        var btnClearWidth = this.buttonClear.getWidth();
+        if (btnClearWidth) {
+            w -= btnClearWidth;
+        }
+        var btnDonwloadWidth = this.getHelperBtn() ? this.getHelperBtn().getWidth() : 0;
+        if (btnDonwloadWidth) {
+            w -= btnDonwloadWidth;
+        }
+        
+        if (Ext.isWebKit) {
+            // Юлядть 
+            // Некорректная верстка в вебкитовских движках
+            this.el.setWidth(w + 5);
+        } else {
+            this.el.setWidth(w);
+        }
+
+    }
+
+    // private
+    ,onDestroy: function(){
+        Ext.ux.form.FileUploadField.superclass.onDestroy.call(this);
+        Ext.destroy(this.fileInput, this.buttonFile, this.buttonClear, 
+            this.getHelperBtn(), this.wrap);
+        Ext.QuickTips.unregister(this.fileInput);
+    }
+    
+    ,onDisable: function(){
+        Ext.ux.form.FileUploadField.superclass.onDisable.call(this);
+        this.doDisable(true);
+    }
+    
+    ,onEnable: function(){
+        Ext.ux.form.FileUploadField.superclass.onEnable.call(this);
+        this.doDisable(false);
+
+    }
+    
+    // private
+    ,doDisable: function(disabled){
+        this.fileInput.dom.disabled = disabled;
+        this.buttonFile.setDisabled(disabled);
+        this.buttonClear.setDisabled(disabled);
+        if(this.getHelperBtn()) {
+            this.getHelperBtn().setDisabled(disabled);
+        }       
+    }
+
+    // private
+    ,preFocus : Ext.emptyFn
+
+    // private
+    ,alignErrorIcon : function(){
+        this.errorIcon.alignTo(this.wrap, 'tl-tr', [2, 0]);
+    }
+    
+    //private
+    ,clickClearField: function(){       
+        this.reset();
+        this.setValue('');
+        var width = this.el.getWidth() + this.buttonClear.getWidth();
+        if (this.getHelperBtn()){
+            width += (this.getHelperBtn().isVisible() ? this.getHelperBtn().getWidth() : 0);
+            this.getHelperBtn().hide();
+        }
+        this.el.setWidth(width);
+        this.buttonClear.hide();
+        
+    }
+    
+    ,getFileUrl: function(url){
+        return document.location.protocol + '//' + document.location.host + 
+            '/' + url;
+    }
+    ,clickDownload: function(){
+        var fUrl = this.getFileUrl(this.fileUrl);
+        if (fUrl){
+            window.open(fUrl);
+        }       
+    }
+    ,getFileName: function(){
+        return this.value.split('/').reverse()[0];
+    }
+});
+
+Ext.reg('fileuploadfield', Ext.ux.form.FileUploadField);
+
+// backwards compat
+Ext.form.FileUploadField = Ext.ux.form.FileUploadField;
+
+Ext.ns('Ext.ux.form');
+
+Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
+
+    // private
+    readOnly: true,
+
+    /**
+     * @hide
+     * @method autoSize
+     */
+    autoSize: Ext.emptyFn,
+
+    /**
+     * Для quick tips
+     */
+    cls: 'tip-target',
+
+    constructor: function(baseConfig, params){
+        
+        if (params) {
+            if (params.prefixUploadField) {
+                this.prefixUploadField = params.prefixUploadField;
+            }
+            if (params.fileUrl) {
+                this.fileUrl = params.fileUrl;
+            }
+        }        
+        
+        Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
+    },
+    
+    // private
+    initComponent: function(){
+        Ext.ux.form.FileUploadField.superclass.initComponent.call(this);
+
+        this.addEvents(
+            /**
+             * @event fileselected
+             * Fires when the underlying file input field's value has changed from the user
+             * selecting a new file from the system file selection dialog.
+             * @param {Ext.ux.form.FileUploadField} this
+             * @param {String} value The file value returned by the underlying file input field
+             */
+            'fileselected'
+        );
+    },
+    
+    // private
+    onRender : function(ct, position){
+        Ext.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
+
+        // Используем название файла
+        this.value = this.getFileName();
+
+        this.wrap = this.el.wrap({cls:'x-form-field-wrap x-form-file-wrap'});
+        this.el.addClass('x-form-file-text');
+        //this.el.dom.removeAttribute('name');
+        
+        this.createFileInput();
+
+        var btnCfg = Ext.applyIf(this.buttonCfg || {}, {
+            text: this.buttonText
+            ,iconCls: 'x-form-file-image'
+        });
+        this.buttonFile = new Ext.Button(Ext.apply(btnCfg, {
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
+            ,tooltip: 'Выбрать файл'
+        }));
+
+        this.buttonClear = new Ext.Button({
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-clear'
+            ,iconCls: 'x-form-file-clear-image'
+            ,handler: this.clickClearField
+            ,scope: this
+            ,hidden: this.value ? false : true
+            ,tooltip: 'Очистить'
+        });
+        
+        this.buttonDownload = new Ext.Button({
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-download'
+            ,iconCls: 'x-form-file-download-image'
+            ,handler: this.clickHelperBtn
+            ,scope: this
+            ,hidden: this.value ? false : true
+            ,tooltip: 'Загрузить'
+        });
+
+        this.bindListeners();
+        this.resizeEl = this.positionEl = this.wrap;
+
+    },
+    renderHelperBtn: function(){
+
+    },
+    getHelperBtn: function(){
+        return this.buttonDownload;
+    },    
+    bindListeners: function(){
+        this.fileInput.on({
+            scope: this,
+            mouseenter: function() {
+                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+             },
+             mouseleave: function(){
+                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+             },
+             mousedown: function(){
+                 this.buttonFile.addClass('x-btn-click')
+             },
+             mouseup: function(){
+                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+             },                   mouseenter: function() {
+                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+             },
+             mouseleave: function(){
+                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+             },
+             mousedown: function(){
+                 this.buttonFile.addClass('x-btn-click')
+             },
+             mouseup: function(){
+                                  //     this.button.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+              },
+             change: function(){
+                 var v = this.fileInput.dom.value;
+                 this.setValue(v);
+                 this.fireEvent('fileselected', this, v);   
+                 
+                 if (v) {
+                    // Очищаем ссылку на файл
+                    this.fileUrl = null;
+                                                         
+                    if (!this.buttonClear.isVisible()) {
+                        this.buttonClear.show();
+                        this.el.setWidth( this.el.getWidth() - this.buttonClear.getWidth());
+                    }
+                 }
+                
+             }
+        }); 
+    },
+    
+    createFileInput : function() {
+        this.fileInput = this.wrap.createChild({
+            id: this.getFileInputId(),
+            name: (this.prefixUploadField || '') + this.name,
+            cls: 'x-form-file',
+            tag: 'input',
+            type: 'file',
+            size: 1,
+            width: 20
+        });
+        
+        Ext.QuickTips.unregister(this.fileInput);
+        Ext.QuickTips.register({
+            target: this.fileInput,
+            text: 'Выбрать файл',
+            width: 86,
+            dismissDelay: 10000 
+        });
+    },
+    
+    reset : function(){ 
+        this.fileInput.remove();
+        this.createFileInput();
+        this.bindListeners();
+        Ext.ux.form.FileUploadField.superclass.reset.call(this);
+    },
+
+    // private
+    getFileInputId: function(){
+        return this.id + '-file';
+    },
+
+    // private
+    onResize : function(w, h){
+        Ext.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
+
+        this.wrap.setWidth(w);
+        var w = this.wrap.getWidth() - this.buttonFile.getEl().getWidth() - this.buttonOffset;
+        var btnClearWidth = this.buttonClear.getWidth();
+        if (btnClearWidth) {
+            w -= btnClearWidth;
+        }
+        var btnDonwloadWidth = this.getHelperBtn().getWidth();
+        if (btnDonwloadWidth) {
+            w -= btnDonwloadWidth;
+        }
+        
+        if (Ext.isWebKit) {
+            // Юлядть 
+            // Некорректная верстка в вебкитовских движках
+            this.el.setWidth(w + 5);
+        } else {
+            this.el.setWidth(w);
+        }
+
+    },
+
+    // private
+    onDestroy: function(){
+        Ext.ux.form.FileUploadField.superclass.onDestroy.call(this);
+        Ext.destroy(this.fileInput, this.buttonFile, this.buttonClear, 
+            this.getHelperBtn(), this.wrap);
+        Ext.QuickTips.unregister(this.fileInput);
+    },
+    
+    onDisable: function(){
+        Ext.ux.form.FileUploadField.superclass.onDisable.call(this);
+        this.doDisable(true);
+    },
+    
+    onEnable: function(){
+        Ext.ux.form.FileUploadField.superclass.onEnable.call(this);
+        this.doDisable(false);
+
+    },
+    
+    // private
+    doDisable: function(disabled){
+        this.fileInput.dom.disabled = disabled;
+        this.buttonFile.setDisabled(disabled);
+        this.buttonClear.setDisabled(disabled);
+        this.getHelperBtn().setDisabled(disabled);
+    },
+
+
+    // private
+    preFocus : Ext.emptyFn,
+
+    // private
+    alignErrorIcon : function(){
+        this.errorIcon.alignTo(this.wrap, 'tl-tr', [2, 0]);
+    }
+    
+    //private
+    ,clickClearField: function(){       
+        this.reset();
+        this.setValue('');
+        this.el.setWidth( this.el.getWidth() + this.buttonClear.getWidth() + 
+            (this.getHelperBtn().isVisible() ? this.getHelperBtn().getWidth() : 0 ));
+        this.buttonClear.hide();
+        this.getHelperBtn().hide();
+    }
+    ,clickHelperBtn: function(){
+        var fUrl = document.location.protocol + '//' + document.location.host + 
+                '/' + this.fileUrl;
+        if (fUrl){
+            window.open(fUrl);
+        }       
+    }
+    ,getFileName: function(){
+        return this.value.split('/').reverse()[0];
+    }
+});
+
+Ext.reg('fileuploadfield', Ext.ux.form.FileUploadField);
 
 /**
  * Окно показа контекстной помощи
