@@ -6539,7 +6539,7 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
 
         this.tip = new Ext.ToolTip( this.tipConfig );
         this.tip.ctt = this;
-        // Hook onto the beforeshow event to update the tooltip 
+        // Hook onto the beforeshow event to update the tooltip content
         this.tip.on('beforeshow', this.beforeTipShow.createDelegate(this.tip, [this, grid], true));
         this.tip.on('hide', this.hideTip);
     } // End of function onGridRender
@@ -10806,112 +10806,6 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 
 	}
 });
-Ext.ns('Ext.ux.form');
-
-Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
-
-     /**
-     * Класс иконки для выбора файла
-     */
-     iconClsSelectFile: 'x-form-image-icon'
-    
-    /**
-     * Класс иконки для очистки файла 
-     */
-    ,iconClsClearFile: 'x-form-image-clear-icon'
-
-    /**
-     * Класс иконки для скачивания файла
-     */
-    ,iconClsPreviewImage: 'x-form-image-preview-icon'
-    
-    ,constructor: function(baseConfig, params){
-        
-        if (params) {
-            if (params.thumbnailWidth) {
-                this.thumbnailWidth = params.thumbnailWidth;
-            }
-            if (params.thumbnailHeight) {
-                this.thumbnailHeight = params.thumbnailHeight;
-            }
-            if (params.prefixThumbnailImg) {
-                this.prefixThumbnailImg = params.prefixThumbnailImg;
-            }
-            if (params.thumbnail) {
-                this.thumbnail = params.thumbnail;
-            }
-            
-            this.previewTip = null;
-        }        
-        
-        Ext.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
-    }     
-   ,renderHelperBtn: function(){
-       if (this.thumbnail) {
-            this.buttonPreview = new Ext.Button({
-                renderTo: this.wrap
-                ,width: 16
-                ,cls: 'x-form-file-download'
-                ,iconCls: this.iconClsPreviewImage
-                ,handler: this.clickHelperBtn
-                ,scope: this
-                ,hidden: this.value ? false : true
-                ,tooltip: {
-                    text: 'Предварительный показ'
-                    ,width: 140
-                }
-            });
-        }
-    }
-    ,getHelperBtn: function(){
-        return this.buttonPreview;
-    }    
-    ,clickHelperBtn: function(){
-
-        if (this.fileUrl && this.value) {
-            
-            var mass = this.fileUrl.split('/');
-            var dir = mass.slice(0, mass.length - 1);
-            var file_name = mass[mass.length-1];
-            var prefix = this.prefixThumbnailImg || '';
-            var url = String.format('{0}/{1}{2}', dir.join('/'), prefix, file_name);
-            
-            this.previewTip = new Ext.QuickTip({
-                html: String.format('<image src="{0}" WIDTH={1} HEIGHT={2}>', 
-                        this.getFileUrl(url), this.thumbnailWidth, this.thumbnailHeight)
-                ,autoHide: false
-                ,width: this.thumbnailWidth + 10
-                ,height: this.thumbnailHeight + 10
-            });
-            
-            var el = this.getEl();
-            var xy = el.getXY()
-            this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
-        }
-    }
-    ,createFileInput : function() {
-        this.fileInput = this.wrap.createChild({
-            id: this.getFileInputId(),
-            name: (this.prefixUploadField || '') + this.name,
-            cls: 'x-form-file',
-            tag: 'input',
-            type: 'file',
-            size: 1,
-            width: 20
-        });
-        
-        Ext.QuickTips.unregister(this.fileInput);
-        Ext.QuickTips.register({
-            target: this.fileInput,
-            text: 'Выбрать изображение',
-            width: 130,
-            dismissDelay: 10000 
-        });
-    }
-});
-
-Ext.reg('imageuploadfield', Ext.ux.form.ImageUploadField);
-
 /**
  * Панель редактирования адреса
  */
@@ -12546,299 +12440,6 @@ Ext.ns('Ext.ux.form');
 
 Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
-    /**
-     * @cfg {Object} buttonCfg A standard {@link Ext.Button} config object.
-     */
-
-    // private
-    readOnly: true
-
-    /**
-     * @hide
-     * @method autoSize
-     */
-    ,autoSize: Ext.emptyFn 
-    
-     /**
-     * Класс иконки для выбора файла
-     */
-     ,iconClsSelectFile: 'x-form-file-icon'
-    
-    /**
-     * Класс иконки для очистки файла 
-     */
-    ,iconClsClearFile: 'x-form-file-clear-icon'
-
-    /**
-     * Класс иконки для скачивания файла
-     */
-    ,iconClsDownloadFile: 'x-form-file-download-icon'
-
-    ,constructor: function(baseConfig, params){
-        
-        if (params) {
-            if (params.prefixUploadField) {
-                this.prefixUploadField = params.prefixUploadField;
-            }
-            if (params.fileUrl) {
-                this.fileUrl = params.fileUrl;
-            }
-            if (params.possibleFileExtensions) {
-                this.possibleFileExtensions = params.possibleFileExtensions;
-            }
-        }    
-        
-        Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
-    }
-    
-    // private
-    ,initComponent: function(){
-        Ext.ux.form.FileUploadField.superclass.initComponent.call(this);
-
-        this.addEvents(
-            /**
-             * @event fileselected
-             * Fires when the underlying file input field's value has changed from the user
-             * selecting a new file from the system file selection dialog.
-             * @param {Ext.ux.form.FileUploadField} this
-             * @param {String} value The file value returned by the underlying file input field
-             */
-            'fileselected'
-        );
-    }
-    
-    // private
-    ,onRender : function(ct, position){
-        Ext.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
-
-        // Используем название файла
-        this.value = this.getFileName();
-
-        this.wrap = this.el.wrap({cls:'x-form-field-wrap x-form-file-wrap'});
-        this.el.addClass('x-form-file-text');
-        //this.el.dom.removeAttribute('name');
-        
-        this.createFileInput();
-
-        var btnCfg = Ext.applyIf(this.buttonCfg || {}, {
-            iconCls: this.iconClsSelectFile
-        });
-        this.buttonFile = new Ext.Button(Ext.apply(btnCfg, {
-            renderTo: this.wrap
-            ,width: 16
-            ,cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
-            ,tooltip: {
-                text:'Выбрать файл'
-                ,width: 150
-            }
-        }));
-
-        this.buttonClear = new Ext.Button({
-            renderTo: this.wrap
-            ,width: 16
-            ,cls: 'x-form-file-clear'
-            ,iconCls: this.iconClsClearFile
-            ,handler: this.clickClearField
-            ,scope: this
-            ,hidden: this.value ? false : true
-            ,tooltip: {
-                text:'Очистить'
-                ,width: 65
-            }
-        });
-        
-        this.renderHelperBtn()
-        
-        this.bindListeners();
-        this.resizeEl = this.positionEl = this.wrap;
-
-    }
-    ,renderHelperBtn: function() {
-        this.buttonDownload = new Ext.Button({
-            renderTo: this.wrap
-            ,width: 16
-            ,cls: 'x-form-file-download'
-            ,iconCls: this.iconClsDownloadFile
-            ,handler: this.clickDownload
-            ,scope: this
-            ,hidden: this.value ? false : true
-             ,tooltip: {
-                text:'Загрузить'
-                ,width: 65
-            }
-        });
-    }
-    ,getHelperBtn: function(){
-        return this.buttonDownload;
-    }
-    ,bindListeners: function(){
-        this.fileInput.on({
-            scope: this,
-            mouseenter: function() {
-                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
-             },
-             mouseleave: function(){
-                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
-             },
-             mousedown: function(){
-                 this.buttonFile.addClass('x-btn-click')
-             },
-             mouseup: function(){
-                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
-             },                   mouseenter: function() {
-                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
-             },
-             change: function(){
-                 var v = this.fileInput.dom.value;
-                 this.setValue(v);
-                 this.fireEvent('fileselected', this, v);   
-                 
-                 if (v) {
-                    // Очищаем ссылку на файл
-                    this.fileUrl = null;
-                                                         
-                    if (!this.buttonClear.isVisible()) {
-                        this.buttonClear.show();
-                        this.el.setWidth( this.el.getWidth() - this.buttonClear.getWidth());
-                    }
-                 }
-                
-             }
-        }); 
-    }
-    
-    ,createFileInput : function() {
-        this.fileInput = this.wrap.createChild({
-            id: this.getFileInputId(),
-            name: (this.prefixUploadField || '') + this.name,
-            cls: 'x-form-file',
-            tag: 'input',
-            type: 'file',
-            size: 1,
-            width: 20
-        });
-        
-        Ext.QuickTips.unregister(this.fileInput);
-        Ext.QuickTips.register({
-            target: this.fileInput,
-            text: 'Выбрать файл',
-            width: 86,
-            dismissDelay: 10000 
-        });
-    }
-    
-    ,reset : function(){ 
-        this.fileInput.remove();
-        this.createFileInput();
-        this.bindListeners();
-        Ext.ux.form.FileUploadField.superclass.reset.call(this);
-    }
-
-    // private
-    ,getFileInputId: function(){
-        return this.id + '-file';
-    }
-
-    // private
-    ,onResize : function(w, h){
-        Ext.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
-
-        this.wrap.setWidth(w);
-        var w = this.wrap.getWidth() - this.buttonFile.getEl().getWidth();
-        var btnClearWidth = this.buttonClear.getWidth();
-        if (btnClearWidth) {
-            w -= btnClearWidth;
-        }
-        var btnDonwloadWidth = this.getHelperBtn() ? this.getHelperBtn().getWidth() : 0;
-        if (btnDonwloadWidth) {
-            w -= btnDonwloadWidth;
-        }
-        
-        if (Ext.isWebKit) {
-            // Юлядть 
-            // Некорректная верстка в вебкитовских движках
-            this.el.setWidth(w + 5);
-        } else {
-            this.el.setWidth(w);
-        }
-
-    }
-
-    // private
-    ,onDestroy: function(){
-        Ext.ux.form.FileUploadField.superclass.onDestroy.call(this);
-        Ext.destroy(this.fileInput, this.buttonFile, this.buttonClear, 
-            this.getHelperBtn(), this.wrap);
-        Ext.QuickTips.unregister(this.fileInput);
-    }
-    
-    ,onDisable: function(){
-        Ext.ux.form.FileUploadField.superclass.onDisable.call(this);
-        this.doDisable(true);
-    }
-    
-    ,onEnable: function(){
-        Ext.ux.form.FileUploadField.superclass.onEnable.call(this);
-        this.doDisable(false);
-
-    }
-    
-    // private
-    ,doDisable: function(disabled){
-        this.fileInput.dom.disabled = disabled;
-        this.buttonFile.setDisabled(disabled);
-        this.buttonClear.setDisabled(disabled);
-        if(this.getHelperBtn()) {
-            this.getHelperBtn().setDisabled(disabled);
-        }       
-    }
-
-    // private
-    ,preFocus : Ext.emptyFn
-
-    // private
-    ,alignErrorIcon : function(){
-        this.errorIcon.alignTo(this.wrap, 'tl-tr', [2, 0]);
-    }
-    
-    //private
-    ,clickClearField: function(){       
-        this.reset();
-        this.setValue('');
-        var width = this.el.getWidth() + this.buttonClear.getWidth();
-        if (this.getHelperBtn()){
-            width += (this.getHelperBtn().isVisible() ? this.getHelperBtn().getWidth() : 0);
-            this.getHelperBtn().hide();
-        }
-        this.el.setWidth(width);
-        this.buttonClear.hide();
-        
-    }
-    
-    ,getFileUrl: function(url){
-        return document.location.protocol + '//' + document.location.host + 
-            '/' + url;
-    }
-    ,clickDownload: function(){
-        var fUrl = this.getFileUrl(this.fileUrl);
-        if (fUrl){
-            window.open(fUrl);
-        }       
-    }
-    ,getFileName: function(){
-        return this.value.split('/').reverse()[0];
-    }
-});
-
-Ext.reg('fileuploadfield', Ext.ux.form.FileUploadField);
-
-// backwards compat
-Ext.form.FileUploadField = Ext.ux.form.FileUploadField;
-
-Ext.ns('Ext.ux.form');
-
-Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
-
     // private
     readOnly: true,
 
@@ -13207,6 +12808,405 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 
 });
 
+
+Ext.ns('Ext.ux.form');
+
+Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
+
+    /**
+     * @cfg {Object} buttonCfg A standard {@link Ext.Button} config object.
+     */
+
+    // private
+    readOnly: true
+
+    /**
+     * @hide
+     * @method autoSize
+     */
+    ,autoSize: Ext.emptyFn 
+    
+     /**
+     * Класс иконки для выбора файла
+     */
+     ,iconClsSelectFile: 'x-form-file-icon'
+    
+    /**
+     * Класс иконки для очистки файла 
+     */
+    ,iconClsClearFile: 'x-form-file-clear-icon'
+
+    /**
+     * Класс иконки для скачивания файла
+     */
+    ,iconClsDownloadFile: 'x-form-file-download-icon'
+
+    ,constructor: function(baseConfig, params){
+        
+        if (params) {
+            if (params.prefixUploadField) {
+                this.prefixUploadField = params.prefixUploadField;
+            }
+            if (params.fileUrl) {
+                this.fileUrl = params.fileUrl;
+            }
+            if (params.possibleFileExtensions) {
+                this.possibleFileExtensions = params.possibleFileExtensions;
+            }
+        }    
+        
+        Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
+    }
+    
+    // private
+    ,initComponent: function(){
+        Ext.ux.form.FileUploadField.superclass.initComponent.call(this);
+
+        this.addEvents(
+            /**
+             * @event fileselected
+             * Fires when the underlying file input field's value has changed from the user
+             * selecting a new file from the system file selection dialog.
+             * @param {Ext.ux.form.FileUploadField} this
+             * @param {String} value The file value returned by the underlying file input field
+             */
+            'fileselected'
+        );
+    }
+    
+    // private
+    ,onRender : function(ct, position){
+        Ext.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
+
+        // Используем название файла
+        this.value = this.getFileName();
+
+        this.wrap = this.el.wrap({cls:'x-form-field-wrap x-form-file-wrap'});
+        this.el.addClass('x-form-file-text');
+        //this.el.dom.removeAttribute('name');
+        
+        this.createFileInput();
+
+        var btnCfg = Ext.applyIf(this.buttonCfg || {}, {
+            iconCls: this.iconClsSelectFile
+        });
+        this.buttonFile = new Ext.Button(Ext.apply(btnCfg, {
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
+            ,tooltip: {
+                text:'Выбрать файл'
+                ,width: 150
+            }
+        }));
+
+        this.buttonClear = new Ext.Button({
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-clear'
+            ,iconCls: this.iconClsClearFile
+            ,handler: this.clickClearField
+            ,scope: this
+            ,hidden: this.value ? false : true
+            ,tooltip: {
+                text:'Очистить'
+                ,width: 65
+            }
+        });
+        
+        this.renderHelperBtn()
+        
+        this.bindListeners();
+        this.resizeEl = this.positionEl = this.wrap;
+
+    }
+    ,renderHelperBtn: function() {
+        this.buttonDownload = new Ext.Button({
+            renderTo: this.wrap
+            ,width: 16
+            ,cls: 'x-form-file-download'
+            ,iconCls: this.iconClsDownloadFile
+            ,handler: this.clickDownload
+            ,scope: this
+            ,hidden: this.value ? false : true
+             ,tooltip: {
+                text:'Загрузить'
+                ,width: 65
+            }
+        });
+    }
+    ,getHelperBtn: function(){
+        return this.buttonDownload;
+    }
+    ,bindListeners: function(){
+        this.fileInput.on({
+            scope: this,
+            mouseenter: function() {
+                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+             },
+             mouseleave: function(){
+                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+             },
+             mousedown: function(){
+                 this.buttonFile.addClass('x-btn-click')
+             },
+             mouseup: function(){
+                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+             },                   mouseenter: function() {
+                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+             },
+             change: function(){
+                 var v = this.fileInput.dom.value;
+                 this.setValue(v);
+                 this.fireEvent('fileselected', this, v);   
+                 
+                 if (v) {
+                    // Очищаем ссылку на файл
+                    this.fileUrl = null;
+                                                         
+                    if (!this.buttonClear.isVisible()) {
+                        this.buttonClear.show();
+                        this.el.setWidth( this.el.getWidth() - this.buttonClear.getWidth());
+                    }
+                 }
+                
+             }
+        }); 
+    }
+    
+    ,createFileInput : function() {
+        this.fileInput = this.wrap.createChild({
+            id: this.getFileInputId(),
+            name: (this.prefixUploadField || '') + this.name,
+            cls: 'x-form-file',
+            tag: 'input',
+            type: 'file',
+            size: 1,
+            width: 20
+        });
+        
+        Ext.QuickTips.unregister(this.fileInput);
+        Ext.QuickTips.register({
+            target: this.fileInput,
+            text: 'Выбрать файл',
+            width: 86,
+            dismissDelay: 10000 
+        });
+    }
+    
+    ,reset : function(){ 
+        this.fileInput.remove();
+        this.createFileInput();
+        this.bindListeners();
+        Ext.ux.form.FileUploadField.superclass.reset.call(this);
+    }
+
+    // private
+    ,getFileInputId: function(){
+        return this.id + '-file';
+    }
+
+    // private
+    ,onResize : function(w, h){
+        Ext.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
+
+        this.wrap.setWidth(w);
+        var w = this.wrap.getWidth() - this.buttonFile.getEl().getWidth();
+        var btnClearWidth = this.buttonClear.getWidth();
+        if (btnClearWidth) {
+            w -= btnClearWidth;
+        }
+        var btnDonwloadWidth = this.getHelperBtn() ? this.getHelperBtn().getWidth() : 0;
+        if (btnDonwloadWidth) {
+            w -= btnDonwloadWidth;
+        }
+        
+        if (Ext.isWebKit) {
+            // Юлядть 
+            // Некорректная верстка в вебкитовских движках
+            this.el.setWidth(w + 5);
+        } else {
+            this.el.setWidth(w);
+        }
+
+    }
+
+    // private
+    ,onDestroy: function(){
+        Ext.ux.form.FileUploadField.superclass.onDestroy.call(this);
+        Ext.destroy(this.fileInput, this.buttonFile, this.buttonClear, 
+            this.getHelperBtn(), this.wrap);
+        Ext.QuickTips.unregister(this.fileInput);
+    }
+    
+    ,onDisable: function(){
+        Ext.ux.form.FileUploadField.superclass.onDisable.call(this);
+        this.doDisable(true);
+    }
+    
+    ,onEnable: function(){
+        Ext.ux.form.FileUploadField.superclass.onEnable.call(this);
+        this.doDisable(false);
+
+    }
+    
+    // private
+    ,doDisable: function(disabled){
+        this.fileInput.dom.disabled = disabled;
+        this.buttonFile.setDisabled(disabled);
+        this.buttonClear.setDisabled(disabled);
+        if(this.getHelperBtn()) {
+            this.getHelperBtn().setDisabled(disabled);
+        }       
+    }
+
+    // private
+    ,preFocus : Ext.emptyFn
+
+    // private
+    ,alignErrorIcon : function(){
+        this.errorIcon.alignTo(this.wrap, 'tl-tr', [2, 0]);
+    }
+    
+    //private
+    ,clickClearField: function(){       
+        this.reset();
+        this.setValue('');
+        var width = this.el.getWidth() + this.buttonClear.getWidth();
+        if (this.getHelperBtn()){
+            width += (this.getHelperBtn().isVisible() ? this.getHelperBtn().getWidth() : 0);
+            this.getHelperBtn().hide();
+        }
+        this.el.setWidth(width);
+        this.buttonClear.hide();
+        
+    }
+    
+    ,getFileUrl: function(url){
+        return document.location.protocol + '//' + document.location.host + 
+            '/' + url;
+    }
+    ,clickDownload: function(){
+        var fUrl = this.getFileUrl(this.fileUrl);
+        if (fUrl){
+            window.open(fUrl);
+        }       
+    }
+    ,getFileName: function(){
+        return this.value.split('/').reverse()[0];
+    }
+});
+
+Ext.reg('fileuploadfield', Ext.ux.form.FileUploadField);
+
+// backwards compat
+Ext.form.FileUploadField = Ext.ux.form.FileUploadField;
+
+Ext.ns('Ext.ux.form');
+
+Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
+
+     /**
+     * Класс иконки для выбора файла
+     */
+     iconClsSelectFile: 'x-form-image-icon'
+    
+    /**
+     * Класс иконки для очистки файла 
+     */
+    ,iconClsClearFile: 'x-form-image-clear-icon'
+
+    /**
+     * Класс иконки для скачивания файла
+     */
+    ,iconClsPreviewImage: 'x-form-image-preview-icon'
+    
+    ,constructor: function(baseConfig, params){
+        
+        if (params) {
+            if (params.thumbnailWidth) {
+                this.thumbnailWidth = params.thumbnailWidth;
+            }
+            if (params.thumbnailHeight) {
+                this.thumbnailHeight = params.thumbnailHeight;
+            }
+            if (params.prefixThumbnailImg) {
+                this.prefixThumbnailImg = params.prefixThumbnailImg;
+            }
+            if (params.thumbnail) {
+                this.thumbnail = params.thumbnail;
+            }
+            
+            this.previewTip = null;
+        }        
+        
+        Ext.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
+    }     
+   ,renderHelperBtn: function(){
+       if (this.thumbnail) {
+            this.buttonPreview = new Ext.Button({
+                renderTo: this.wrap
+                ,width: 16
+                ,cls: 'x-form-file-download'
+                ,iconCls: this.iconClsPreviewImage
+                ,handler: this.clickHelperBtn
+                ,scope: this
+                ,hidden: this.value ? false : true
+                ,tooltip: {
+                    text: 'Предварительный показ'
+                    ,width: 140
+                }
+            });
+        }
+    }
+    ,getHelperBtn: function(){
+        return this.buttonPreview;
+    }    
+    ,clickHelperBtn: function(){
+
+        if (this.fileUrl && this.value) {
+            
+            var mass = this.fileUrl.split('/');
+            var dir = mass.slice(0, mass.length - 1);
+            var file_name = mass[mass.length-1];
+            var prefix = this.prefixThumbnailImg || '';
+            var url = String.format('{0}/{1}{2}', dir.join('/'), prefix, file_name);
+            
+            this.previewTip = new Ext.QuickTip({
+                html: String.format('<image src="{0}" WIDTH={1} HEIGHT={2}>', 
+                        this.getFileUrl(url), this.thumbnailWidth, this.thumbnailHeight)
+                ,autoHide: false
+                ,width: this.thumbnailWidth + 10
+                ,height: this.thumbnailHeight + 10
+            });
+            
+            var el = this.getEl();
+            var xy = el.getXY()
+            this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
+        }
+    }
+    ,createFileInput : function() {
+        this.fileInput = this.wrap.createChild({
+            id: this.getFileInputId(),
+            name: (this.prefixUploadField || '') + this.name,
+            cls: 'x-form-file',
+            tag: 'input',
+            type: 'file',
+            size: 1,
+            width: 20
+        });
+        
+        Ext.QuickTips.unregister(this.fileInput);
+        Ext.QuickTips.register({
+            target: this.fileInput,
+            text: 'Выбрать изображение',
+            width: 130,
+            dismissDelay: 10000 
+        });
+    }
+});
+
+Ext.reg('imageuploadfield', Ext.ux.form.ImageUploadField);
 
 /**
  * Функции рендера компонентов-контейнеров

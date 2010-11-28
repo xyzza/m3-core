@@ -1,7 +1,7 @@
 #coding:utf-8
 import os
 
-VERSION = '0.5'
+VERSION = '0.6'
 
 PROJECT_PATH = os.path.abspath(__file__)
 M3_PROJECT_PATH = os.path.dirname(os.path.dirname(PROJECT_PATH))
@@ -21,9 +21,11 @@ HIGH_PRIORITY = ('m3.js',
                  'Grid.js', 
                  'TreeGrid.js',
                  'Window.js', 
-                 'AdvancedTreeGrid.js')
+                 'AdvancedTreeGrid.js',
+                 )
 # Файлы с наименьшем приоритетом
-LOW_PRIORITY = ('containers.js', 'override.js',)
+LOW_PRIORITY = ('FileUploadField.js', 'ImageUploadField.js', 
+                'containers.js', 'override.js',)
 
 # Название файла
 FILE_NAME = 'm3-debug.js'
