@@ -8,7 +8,6 @@ var grid = Ext.getCmp('{{component.grid.client_id}}');
 var updateButton = Ext.getCmp('{{component.update_button.client_id}}');
 var startDate = Ext.getCmp('{{component.start_date.client_id}}');
 var endDate = Ext.getCmp('{{component.end_date.client_id}}');
-var win = Ext.getCmp('{{component.client_id}}');
 
 //Хендлер на операцию изменения даты
 startDate.on('select',callBackfunc_date,this);

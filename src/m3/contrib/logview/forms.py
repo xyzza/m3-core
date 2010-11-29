@@ -11,11 +11,11 @@ from m3.ui.ext.shortcuts import js_close_window
 from m3.ui.ext.fields.simple import ExtComboBox, ExtDateField, ExtTextArea
 from m3.ui.ext.panels.grids import ExtObjectGrid
 from m3.ui.ext.misc.store import ExtJsonStore
-from m3.ui.ext.windows.window import ExtWindow
 from m3.ui.ext.containers.container_complex import ExtContainerTable
 from m3.ui.ext.containers.forms import ExtPanel
+from m3.ui.ext.windows.base import BaseExtWindow
         
-class ExtLogsWindow(ExtWindow):
+class ExtLogsWindow(BaseExtWindow):
     def __init__(self, window_params=None, *args, **kwargs):
         super(ExtLogsWindow, self).__init__(*args, **kwargs)
         self.__dict__.update(window_params)
@@ -71,7 +71,8 @@ class ExtLogsWindow(ExtWindow):
                                      width=120, label_width = 15)
         top_container_table.set_item(row=0, col=3, cmp=self.end_date,
                                      width=120, label_width = 15)
-        top_container_table.set_item(row=0, col=5, cmp=self.log_files_combo, width=300)
+        top_container_table.set_item(row=0, col=5, cmp=self.log_files_combo,
+                                     width=300)
         top_container_table.set_properties(col_num=2, width=30)
         top_container_table.set_properties(col_num=4, width=30)
         top_container_table.set_properties(col_num=0, width=30)
@@ -83,7 +84,8 @@ class ExtLogsWindow(ExtWindow):
                                       body_cls='x-window-mc',
                                       region = 'south',
                                       layout='fit',
-                                      collapsible=True)
+                                      collapsible = True,
+                                      split = True)
         self.text_field = ExtTextArea(read_only=True)
         self.file_context_panel.items.append(self.text_field)
         
