@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
+from m3.core.exceptions import ApplicationLogicException
 from m3.helpers import ui as ui_helpers
 from m3.ui.ext.base import BaseExtComponent
 
@@ -341,25 +342,29 @@ class ActionController(object):
         # выполнены в процессе обработки запроса
         request.target_packs = stack
         request.target_action = action
-
-        # Все ПРЕ обработчики
-        for pack in stack:
-            result = pack.pre_run(request, context)
+        
+        try:
+            # Все ПРЕ обработчики
+            for pack in stack:
+                result = pack.pre_run(request, context)
+                if result != None:
+                    return result
+            # Сам экшен
+            result = action.pre_run(request, context)
             if result != None:
                 return result
-        # Сам экшен
-        result = action.pre_run(request, context)
-        if result != None:
-            return result
-        response = action.run(request, context)
-        result = action.post_run(request, context, response)
-        if result != None:
-            return result
-        # Все ПОСТ обработчики с конца
-        for pack in reversed(stack):
-            result = pack.post_run(request, context, response)
+            response = action.run(request, context)
+            result = action.post_run(request, context, response)
             if result != None:
                 return result
+            # Все ПОСТ обработчики с конца
+            for pack in reversed(stack):
+                result = pack.post_run(request, context, response)
+                if result != None:
+                    return result
+        except ApplicationLogicException as exc:
+            return OperationResult(success = False, message = exc.exception_message)
+            
         # по возможности запихиваем текущий контекст в response
         if isinstance(response, BaseContextedResult):
             response.set_context(context)
