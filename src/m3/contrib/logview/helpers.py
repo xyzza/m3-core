@@ -99,8 +99,7 @@ def log_file_parse(log_file):
     '''
     Функция парсинга файлов логирования
     Возвращает список из словарей. 
-    info.log [{date: ..., additionally:...},{date:..., }]
-    error.log [{date: ..., message:..., type_error:..., full:...},{...}]
+    .log [{date: ..., message:...}]
     '''
     file_name = os.path.basename(log_file.name)
     if file_name == INFO:
@@ -109,32 +108,36 @@ def log_file_parse(log_file):
             if line[0] == '[' and VERSION in line:
                 info_lines.append(
                 {'date': line[1:FULL_DATE_LENGHT],
-                'additionally':' '.join(line.split()[POSITION_AFTER_DATE_TIME:])})
+                'message':' '.join(line.split()[POSITION_AFTER_DATE_TIME:])})
         return info_lines or []
     elif ERROR in file_name:
         error_lines = []
         full_error_text = []
-        tmp_dict = {}
+        message_list = []
+        message_dict = {}
         for line in log_file.xreadlines():
             if line[0] == '[':
                 # Точка входа, каждый блок парсинга имеет дату заключенную в []
-                if tmp_dict:
-                    tmp_dict['full'] = "".join(full_error_text[:])
-                    error_lines.append(tmp_dict.copy())
-                    tmp_dict.clear()
+                if message_dict:
+                    message_dict['full'] = "".join(full_error_text[:])
+                    message_dict['message'] = "; ".join(message_list[:])
+                    error_lines.append(message_dict.copy())
+                    message_dict.clear()
                     full_error_text = []
-                tmp_dict['date'] =  line[1:FULL_DATE_LENGHT]
+                    message_list = []
+                message_dict['date'] = line[1:FULL_DATE_LENGHT]
             elif 'Message:' in line:
-                tmp_dict['message'] = line.split()[1:]
+                message_list.append(" ".join(line.split()[1:]))
             elif 'Error:' in line[:MAX_ERROR_LENGHT]:
-                tmp_dict['type_error'] = line
+                message_list.append(line)
             elif 'DoesNotExist:' in line:
-                tmp_dict['type_error'] = line
+                message_list.append(line)
             full_error_text.append(line)
         # Записывает последние данные в буфере.
-        if tmp_dict:
-            tmp_dict['full'] = "".join(full_error_text[:])
-            error_lines.append(tmp_dict.copy())
+        if message_dict:
+            message_dict['full'] = "".join(full_error_text[:])
+            message_dict['message'] = "; ".join(message_list[:])
+            error_lines.append(message_dict.copy())
         return error_lines or []
     return []
 

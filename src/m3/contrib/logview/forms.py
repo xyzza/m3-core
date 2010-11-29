@@ -13,9 +13,9 @@ from m3.ui.ext.panels.grids import ExtObjectGrid
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.containers.container_complex import ExtContainerTable
 from m3.ui.ext.containers.forms import ExtPanel
-from m3.ui.ext.windows.base import BaseExtWindow
+from m3.ui.ext.windows.window import ExtWindow
         
-class ExtLogsWindow(BaseExtWindow):
+class ExtLogsWindow(ExtWindow):
     def __init__(self, window_params=None, *args, **kwargs):
         super(ExtLogsWindow, self).__init__(*args, **kwargs)
         self.__dict__.update(window_params)
@@ -23,17 +23,14 @@ class ExtLogsWindow(BaseExtWindow):
         self.min_width, self.min_height = self.width, self.height = 800, 500
         self.modal = False
         self.maximizable = True
-        self.maximized = True
         self.closable = True
         self.layout = 'border'
         self.layout_config = {'align': 'stretch'}
         self.template_globals = 'ui-js/logview.js'
         
         self.grid = ExtObjectGrid(flex=1, region = 'center')
-        self.grid.add_column(header=u'Дата и время', data_index='date', width=60)
+        self.grid.add_column(header=u'Дата и время', data_index='date', width=22)
         self.grid.add_column(header=u'Текст сообщения', data_index='message')
-        self.grid.add_column(header=u'Ошибка', data_index='type_error')
-        self.grid.add_column(header=u'Дополнительно', data_index='additionally')
         self.grid.add_column(header=u'Польное тело сообщения', data_index='full', 
                              hidden=True)
         grid_store = ExtJsonStore(auto_load=False, total_property='total', root='rows')
@@ -79,7 +76,7 @@ class ExtLogsWindow(BaseExtWindow):
         
         self.file_context_panel = ExtPanel(
                                       title = u'Содержимое',
-                                      height=150, 
+                                      height=200, 
                                       padding = 5, 
                                       body_cls='x-window-mc',
                                       region = 'south',
