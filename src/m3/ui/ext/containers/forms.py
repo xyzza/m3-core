@@ -9,7 +9,7 @@ import datetime
 import decimal
 import os
 
-import Image # require PIL module 
+from PIL import Image # require PIL module 
 
 from django.core.files.base import ContentFile
 from django.conf import settings
