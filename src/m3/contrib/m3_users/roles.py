@@ -238,30 +238,36 @@ class GetAllPermissions(actions.Action):
                 self.code = code
         def add_nodes(parent_node, root_pack, res):
             for act in root_pack.actions:
-                if inspect.isclass(act):
-                    act = act()
-                name = act.get_verbose_name()
-                child1 = PermProxy(len(res)+1, parent_node, name, act.url, act.absolute_url())
-                res.append(child1)
+                if act.need_check_permission:
+                    if inspect.isclass(act):
+                        act = act()
+                    name = act.get_verbose_name()
+                    child1 = PermProxy(len(res)+1, parent_node, name, act.absolute_url(), act.absolute_url())
+                    res.append(child1)
             for pack in root_pack.subpacks:
-                name = pack.title if hasattr(pack, 'title') and pack.title else pack.__class__.__name__
-                child2 = PermProxy(len(res)+1, parent_node, name, pack.url, '')
-                res.append(child2)
-                add_nodes(child2, pack, res)
+                if isinstance(pack, ActionPack) and pack.need_check_permission: 
+                    name = pack.title if hasattr(pack, 'title') and pack.title else pack.__class__.__name__
+                    child2 = PermProxy(len(res)+1, parent_node, name, pack.url, pack.url)
+                    res.append(child2)
+                    add_nodes(child2, pack, res)
         res = []
         for ctrl in ControllerCache.get_contollers():
-            root = PermProxy(len(res)+1, None, ctrl.name if ctrl.name else ctrl.__class__.__name__, ctrl.url)
+            root = PermProxy(len(res)+1, None, ctrl.name if ctrl.name else ctrl.__class__.__name__, ctrl.url, ctrl.url)
             res.append(root)
+            count = len(res)
             for pack in ctrl.get_top_actions():
-                if isinstance(pack, ActionPack):
+                if isinstance(pack, ActionPack) and pack.need_check_permission:
                     name = pack.title if hasattr(pack, 'title') and pack.title else pack.__class__.__name__
-                    child1 = PermProxy(len(res)+1, root, name, pack.url, '')
+                    child1 = PermProxy(len(res)+1, root, name, pack.url, pack.url)
                     res.append(child1)
                     add_nodes(child1, pack, res)
-                elif isinstance(pack, Action):
+                elif isinstance(pack, Action) and pack.need_check_permission:
                     name = pack.get_verbose_name()
-                    child1 = PermProxy(len(res)+1, root, name, pack.url, pack.absolute_url())
+                    child1 = PermProxy(len(res)+1, root, name, pack.absolute_url(), pack.absolute_url())
                     res.append(child1)
+            subcount = len(res)-count
+            if subcount == 0:
+                res.remove(root)
         return actions.ExtAdvancedTreeGridDataQueryResult(res)
 
 #===============================================================================
@@ -468,7 +474,7 @@ class RolesEditWindow(windows.ExtEditWindow):
         self.height=400
         self.modal = True
         
-        self.template_globals = r'ext-script/ext-edit-role-window.js'
+        self.template_globals = 'm3-users/edit-role-window.js'
         
         self.title = u'Роль пользователя'
         self.layout = 'border'
