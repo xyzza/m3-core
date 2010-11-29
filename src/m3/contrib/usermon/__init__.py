@@ -138,8 +138,9 @@ class UsermonMiddleware:
     '''
     
     def process_request(self, request):
-        mon = MonitoringController()
-        mon.add_request_stat(request)
+        if hasattr(request, 'user'):
+            mon = MonitoringController()
+            mon.add_request_stat(request)
     
     def process_response(self, request, response):
         # ВНИМАНИЕ! По неизвестной причине, обработка запроса может начаться с обработки ответа!
