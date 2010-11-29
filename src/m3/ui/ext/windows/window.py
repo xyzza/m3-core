@@ -10,7 +10,7 @@ from base import BaseExtWindow
 class ExtWindow(BaseExtWindow):
     def __init__(self, *args, **kwargs):
         super(ExtWindow, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.m3.EditWindow'
+        self._ext_name = 'Ext.m3.Window'
         self.init_component(*args, **kwargs)
     
     # Данный код должен находится в базовом классе, но т.к. не вcе шаблоны 

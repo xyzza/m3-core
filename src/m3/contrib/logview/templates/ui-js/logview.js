@@ -82,5 +82,5 @@ grid.on('cellclick', GridClick);
 
 function GridClick(grid, row, col, e) {
     var rec = grid.getStore().getAt(row);
-    textField.setValue(rec.get('full')||rec.get('additionally'));
+    textField.setValue(rec.get('full')||rec.get('message'));
 }
