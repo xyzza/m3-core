@@ -1133,7 +1133,7 @@
 		'showArrows'				: false,
 		'maintainPosition'			: true,
 		'clickOnTrack'				: true,
-		'autoReinitialise'			: false,
+		'autoReinitialise'			: true,
 		'autoReinitialiseDelay'		: 500,
 		'verticalDragMinHeight'		: 0,
 		'verticalDragMaxHeight'		: 99999,
