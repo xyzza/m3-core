@@ -174,6 +174,17 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 	 */
 	,storeException: function (proxy, type, action, options, response, arg){
 		//console.log(proxy, type, action, options, response, arg);
-		uiAjaxFailMessage(response, options);
+		if (type == 'remote' && action != Ext.data.Api.actions.read) {
+		  if (response.raw.message) {
+  		  Ext.Msg.show({
+  		    title: 'Внимание!',
+  		    msg: response.raw.message,
+  		    buttons: Ext.Msg.CANCEL,
+  		    icon: Ext.Msg.WARNING
+  		  });
+  		};
+		} else {
+		  uiAjaxFailMessage(response, options);
+		};
 	}
 });
