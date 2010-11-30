@@ -478,7 +478,7 @@ class RolesEditWindow(windows.ExtEditWindow):
         
         self.title = u'Роль пользователя'
         self.layout = 'border'
-        self.form = panels.ExtForm(layout='form', region = 'north', height = 50)
+        self.form = panels.ExtForm(layout='form', region = 'north', height = 60, style = {'padding': '5px'})
         self.form.label_width = 100
         self.form.url = SaveRoleAction.absolute_url()
         
