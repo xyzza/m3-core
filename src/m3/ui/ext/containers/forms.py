@@ -229,9 +229,68 @@ class ExtForm(BaseExtPanel):
     def to_object(self, object, exclusion = []):
         '''
         Метод выполнения обратного связывания данных.
-        '''
+        '''       
+        def _save_image(obj, name, field):
+            # Работа с изображением 
+            if hasattr(obj, name):
+                l_field = getattr(obj, name)
+                if l_field and os.path.exists(l_field.path) and \
+                    os.path.basename(l_field.file.name) != field.value:
+                    
+                    # Сначало нужно удалить thumbnail картинки
+                    if isinstance(field, ExtImageUploadField) and \
+                        field.thumbnail:
+                        current_dir = os.path.dirname(l_field.path)
+                        basename = os.path.basename(l_field.path)
+                        thumb = os.path.join(current_dir, 
+                                             field.THUMBNAIL_PREFIX + basename)
+                        
+                        if os.path.exists(thumb):
+                            os.remove(thumb)
+                    
+                    # Файл изменился, удаляем старый     
+                    l_field.delete(save=False)
+                        
+                if field.memory_file:
+                    cont_file = ContentFile(field.memory_file.read())
+                    name_file = field.memory_file.name
+                    
+                    l_field = getattr(obj, name)
+                    l_field.save(name_file, cont_file, save = False)
+                    
+                    
+                    # А так же нужно сохронять thumbnail картинки
+                    if isinstance(field, ExtImageUploadField) and \
+                        field.thumbnail:
+                        current_dir = os.path.dirname(l_field.path)
+                        
+                        img = Image.open(l_field.path)
+                        
+                        width, height = img.size
+                        max_width, max_height = field.image_max_size
+                
+                        # Обрезаем изображение, если нужно
+                        if width > max_width or height > max_height:
+                
+                            curr_width, curr_height = \
+                                get_img_size(field.image_max_size, img.size)
+                                
+                            new_img = img.resize((curr_width, curr_height),
+                                       Image.ANTIALIAS)
+                            new_img.save(l_field.path)
+                        
+                        # Генерируем thumbnails
+                        tmumb_curr_width, tmumb_curr_height = \
+                            get_img_size(field.thumbnail_size, img.size)
+                            
+                        img.thumbnail((tmumb_curr_width, tmumb_curr_height), 
+                                        Image.ANTIALIAS)
+                        base_name = os.path.basename(l_field.path)
+                        tmb_path = os.path.join(current_dir, 
+                                ExtImageUploadField.THUMBNAIL_PREFIX + base_name)
+                        img.save(tmb_path)    
 
-        def set_field(obj, names, value):
+        def set_field(obj, names, value, field=None):
             '''
             Ищет в объекте obj поле с именем names и присваивает значение value. 
             Если соответствующего поля не оказалось, то оно не создается
@@ -239,12 +298,19 @@ class ExtForm(BaseExtPanel):
             names задается в виде списка, т.о. если его длина больше единицы, 
             то имеются вложенные объекты
             '''
+
             # hasattr не работает для dict'a
             has_attr = hasattr(obj, names[0]) if not isinstance(obj, dict) else names[0] in obj 
             if has_attr:
                 if len(names) == 1:
                     if isinstance(obj, dict):
                         obj[names[0]] = value
+                        
+                    elif isinstance(field, ExtFileUploadField) or \
+                        isinstance(field, ExtImageUploadField):
+                        
+                        _save_image(obj, names[0], field)
+                        
                     else:
                         # Для id нельзя присваивать пустое значение! 
                         # Иначе модели не будет сохраняться
@@ -329,81 +395,15 @@ class ExtForm(BaseExtPanel):
         for field in all_fields:
             if not field.name:
                 continue
-            assert not isinstance(field.name, unicode), 'The names of all fields must not be instance of unicode'
+            assert not isinstance(field.name, unicode), 'The names of all fields \
+                must not be instance of unicode'
             assert isinstance(field.name, str) and len(field.name) > 0, \
                   'The names of all fields must be set for a successful \
                       assignment. Check the definition of the form.'
             # заполним атрибуты только те, которые не в списке исключаемых
             if not field.name in exclusion:
-                
-                if isinstance(field, ExtFileUploadField) or \
-                    isinstance(field, ExtImageUploadField):
-                    # FIXME: Убрать отсюда эту ересь в другое место, т.к. 
-                    # нарушается инкапсуляция, другими словами 
-                    # поля ExtFileUploadField здесь не должно быть
-                    
-                    # Если файл изменен нужно удалить старый файл
-                    if hasattr(self.object, field.name):
-                        l_field = getattr(self.object, field.name)
-                        if l_field and os.path.exists(l_field.path) and \
-                            os.path.basename(l_field.file.name) != field.value:
-                            # Файл изменился, удаляем старый 
-
-                            # Сначало нужно удалить thumbnail картинки
-                            if isinstance(field, ExtImageUploadField) and \
-                                field.thumbnail:
-                                current_dir = os.path.dirname(l_field.path)
-                                basename = os.path.basename(l_field.path)
-                                thumb = os.path.join(current_dir, 
-                                                     field.THUMBNAIL_PREFIX + basename)
-                                
-                                if os.path.exists(thumb):
-                                    os.remove(thumb)
-                                
-                            l_field.delete(save=False)
-                                
-                        if field.memory_file:
-                            cont_file = ContentFile(field.memory_file.read())
-                            name_file = field.memory_file.name
-                            
-                            l_field = getattr(self.object, field.name)
-                            l_field.save(name_file, cont_file, save = False)
-                            
-                            
-                            # А так же нужно сохронять thumbnail картинки
-                            if isinstance(field, ExtImageUploadField) and \
-                                field.thumbnail:
-                                current_dir = os.path.dirname(l_field.path)
-                                
-                                img = Image.open(l_field.path)
-                                
-                                width, height = img.size
-                                max_width, max_height = field.image_max_size
-
-                                # Обрезаем изображение, если нужно
-                                if width > max_width or height > max_height:
- 
-                                    curr_width, curr_height = \
-                                        get_img_size(field.image_max_size, img.size)
-                                        
-                                    new_img = img.resize((curr_width, curr_height),
-                                               Image.ANTIALIAS)
-                                    new_img.save(l_field.path)
-                                
-                                # Генерируем thumbnails
-                                tmumb_curr_width, tmumb_curr_height = \
-                                    get_img_size(field.thumbnail_size, img.size)
-                                    
-                                img.thumbnail((tmumb_curr_width, tmumb_curr_height), 
-                                                Image.ANTIALIAS)
-                                base_name = os.path.basename(l_field.path)
-                                tmb_path = os.path.join(current_dir, 
-                                        ExtImageUploadField.THUMBNAIL_PREFIX + base_name)
-                                img.save(tmb_path)
-                                                                                   
-                else:
-                    names = field.name.split('.')                
-                    set_field(self.object, names, convert_value(field))
+                names = field.name.split('.')                
+                set_field(self.object, names, convert_value(field), field)
      
     @property
     def items(self):       
