@@ -273,3 +273,22 @@ def extract_list(request, key):
             obj = [obj]
         return obj
     return []
+
+def apply_column_filter(query, request, map):
+    '''
+    Накладывает колоночный фильтр
+    @param query: Запрос
+    @param request: Данные с клиента включающие фильтры
+    @param map: карта связи фильтров в request и полей в объекте: ключ - поле объекта, значение - параметр фильтра, например:
+            {'unit__name':'unit_ref_name'}
+    '''
+    assert isinstance(map, dict)
+    cond = None
+    for key, value in map.items():
+        filter_word = request.REQUEST.get(value)
+        if filter_word:
+            filter = Q(**{key+'__icontains': filter_word})
+            cond = filter if not cond else (cond & filter)
+    if cond:
+        query = query.filter(cond)
+    return query
