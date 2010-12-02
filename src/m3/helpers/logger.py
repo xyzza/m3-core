@@ -82,15 +82,18 @@ def exception(msg='', *args, **kwargs):
         exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
         exceptionVariables = exceptionTraceback.tb_frame.f_locals
         res = ['Variables:\n']
-        if exceptionTraceback.tb_frame.f_code.co_name != '<module>':
-            for key,val in exceptionVariables.items():
-                res.append('%s: %s\n'.rjust(6)%(key,val))
-                if val.__dict__:
-                    for obj_item_key, obj_item_val in val.__dict__.items():
-                        if obj_item_key[0] !='_':
-                            res.append('%s: %s\n'.rjust(12)%(obj_item_key, obj_item_val))
-        else:
-            res = []
+        try:
+            if exceptionTraceback.tb_frame.f_code.co_name != '<module>':
+                for key,val in exceptionVariables.items():
+                    res.append('%s: %s\n'.rjust(6)%(key,val))
+                    if val.__dict__:
+                        for obj_item_key, obj_item_val in val.__dict__.items():
+                            if obj_item_key[0] !='_':
+                                res.append('%s: %s\n'.rjust(12)%(obj_item_key, obj_item_val))
+            else:
+                res = []
+        except:
+            pass
         exceptionVariables_str = ''.join(res)
         tb = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
         log.error('\n'+msg+u''.join(tb)+exceptionVariables_str)
