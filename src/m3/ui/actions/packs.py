@@ -338,7 +338,6 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         obj.save()
         return OperationResult(success = True)
 
-    @transaction.commit_on_success
     def delete_row(self, objs):
         message = ''
         if len(objs) == 0:
@@ -346,8 +345,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         else:
             for obj in objs:
                 if not utils.safe_delete_record(self.model, obj.id):
-                    message = u'Не удалось удалить элемент %s. Возможно на него есть ссылки.' % obj.id
-                    break
+                    message += u'Не удалось удалить элемент %s. Возможно на него есть ссылки.<br>' % obj.id
         
         return OperationResult.by_message(message)
 

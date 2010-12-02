@@ -166,8 +166,13 @@ def safe_delete_record(model, id):
         sql = "DELETE FROM %s WHERE id = %s" % (model._meta.db_table, id)
         cursor.execute(sql)
         transaction.commit_unless_managed()
-    except IntegrityError:
-        return False
+    except Exception, e:
+        # Встроенный в Django IntegrityError не генерируется. Кидаются исключения 
+        # специфичные для каждого драйвера БД. Но по спецификации PEP 249 все они
+        # называются IntegrityError
+        if e.__class__.__name__ == 'IntegrityError':
+            return False
+        raise
     
     return True
 
