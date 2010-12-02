@@ -195,8 +195,9 @@ class ExtForm(BaseExtPanel):
                 isinstance(item, ExtImageUploadField):
                 item.value = unicode(value)
                 # Относительную URL ссылку до статики
-                if hasattr(settings, 'STATIC'):
-                    item.file_url = '%s/%s' % (settings.STATIC,  unicode(value) )
+                
+                if hasattr(settings, 'MEDIA_URL'):                    
+                    item.file_url = '%s/%s' % (settings.MEDIA_URL,  unicode(value) )
                 else:
                     item.file_url = None
                     
@@ -232,7 +233,7 @@ class ExtForm(BaseExtPanel):
         Метод выполнения обратного связывания данных.
         '''       
         def _save_image(obj, name, field):
-            # Работа с изображением 
+            # Работа с изображением или файлом
             if hasattr(obj, name):
                 l_field = getattr(obj, name)
                 if l_field and os.path.exists(l_field.path) and \
@@ -258,7 +259,6 @@ class ExtForm(BaseExtPanel):
                     
                     l_field = getattr(obj, name)
                     l_field.save(name_file, cont_file, save = False)
-                    
                     
                     # А так же нужно сохранять thumbnail картинки
                     if isinstance(field, ExtImageUploadField) and \
