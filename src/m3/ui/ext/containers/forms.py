@@ -75,12 +75,13 @@ class ExtForm(BaseExtPanel):
         Возвращает список всех полей формы включая вложенные в контейнеры
         '''
         if list == None:
-            list = []
+            list = []   
         if isinstance(item, BaseExtField):
             list.append(item)
+            #print list
         elif hasattr(item, 'items'):
             for it in item.items:
-                self._get_all_fields(it, list)
+                self._get_all_fields(it, list)       
         return list
     
     def bind_to_request(self, request):
@@ -259,7 +260,7 @@ class ExtForm(BaseExtPanel):
                     l_field.save(name_file, cont_file, save = False)
                     
                     
-                    # А так же нужно сохронять thumbnail картинки
+                    # А так же нужно сохранять thumbnail картинки
                     if isinstance(field, ExtImageUploadField) and \
                         field.thumbnail:
                         current_dir = os.path.dirname(l_field.path)
@@ -304,11 +305,9 @@ class ExtForm(BaseExtPanel):
             if has_attr:
                 if len(names) == 1:
                     if isinstance(obj, dict):
-                        obj[names[0]] = value
-                        
+                        obj[names[0]] = value        
                     elif isinstance(field, ExtFileUploadField) or \
                         isinstance(field, ExtImageUploadField):
-                        
                         _save_image(obj, names[0], field)
                         
                     else:
@@ -320,7 +319,7 @@ class ExtForm(BaseExtPanel):
                         setattr(obj, names[0], value)
                 else:
                     nested = getattr(obj, names[0]) if not isinstance(obj, dict) else obj[names[0]]
-                    set_field(nested, names[1:], value)
+                    set_field(nested, names[1:], value, field)
 
         def try_to_int(value, default=None):
             ''' Пробует преобразовать value в целое число, 
@@ -347,7 +346,7 @@ class ExtForm(BaseExtPanel):
                 else:
                     val = None
             elif isinstance(item, ExtStringField):
-                val = unicode(val)
+                val = unicode(val)   
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
                 if val and val.strip():
@@ -390,7 +389,7 @@ class ExtForm(BaseExtPanel):
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
-        self.object = object
+        self.object = object        
         all_fields = self._get_all_fields(self)
         for field in all_fields:
             if not field.name:
@@ -402,6 +401,7 @@ class ExtForm(BaseExtPanel):
                       assignment. Check the definition of the form.'
             # заполним атрибуты только те, которые не в списке исключаемых
             if not field.name in exclusion:
+
                 names = field.name.split('.')                
                 set_field(self.object, names, convert_value(field), field)
      
