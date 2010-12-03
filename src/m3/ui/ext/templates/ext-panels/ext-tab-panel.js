@@ -10,5 +10,7 @@ new Ext.TabPanel({
     {% else %}
     ,enableTabScroll: false
     {% endif %}
+    , border: {{component.border|lower}}
+    , bodyBorder: {{component.body_border|lower}}
 	,items: [{{ component.t_render_items|safe }}]
 })
