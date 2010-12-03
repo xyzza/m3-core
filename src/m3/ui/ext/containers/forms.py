@@ -457,7 +457,9 @@ class ExtPanel(BaseExtPanel):
         self.template = 'ext-panels/ext-panel.js'
         self.padding = None
         self.collapsible = False
-        
+        self.border = True
+        self.body_border = True
+
         # TODO: для чего нужен следующий атрибут?
         # Похоже он бы в прошлых версиях и его убрали в 3.3
         # Остается поддерживать для полной совместимости
@@ -478,6 +480,8 @@ class ExtPanel(BaseExtPanel):
         self._put_config_value('bodyCls', self.body_cls)
         self._put_config_value('anchor', self.anchor)
         self._put_config_value('autoLoad', self.auto_load)
+        self._put_config_value('border', self.border)
+        self._put_config_value('bodyBorder', self.body_border)
     
     @property
     def items(self):
@@ -552,6 +556,8 @@ class ExtTabPanel(BaseExtPanel):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-tab-panel.js'
         self.enable_tab_scroll = True
+        self.border = True
+        self.body_border = True
         self._items = TypedList(type=ExtPanel)
         self.init_component(*args, **kwargs)
     
