@@ -217,8 +217,13 @@ class GetRolePermissionAction(actions.Action):
         perms = models.RolePermission.objects.filter(role=int(context.userrole_id))
         res = []
         for perm in perms:
-            act = ControllerCache.get_action_by_url(perm.permission_code)
-            perm.verbose_name = act.get_verbose_name() if act else ''
+            codes = perm.permission_code.split('#')
+            act_code = codes[0]
+            sub_code = codes[1] if len(codes) > 1 else ''
+            act = ControllerCache.get_action_by_url(act_code)
+            perm.verbose_name = act.verbose_name if act.verbose_name else act.__class__.__name__
+            if sub_code and sub_code in act.sub_permissions.keys():
+                perm.verbose_name = act.sub_permissions[sub_code]
             res.append(perm)
         return actions.ExtGridDataQueryResult(res)
     
@@ -230,43 +235,60 @@ class GetAllPermissions(actions.Action):
     
     def run(self, request, context):
         class PermProxy:
-            def __init__(self, id, parent=None, name='', url='', code = ''):
+            def __init__(self, id, parent=None, name='', url='', can_select = True):
                 self.parent = parent
                 self.name = name
-                self.url = code
+                self.url = url
                 self.id = id
-                self.code = code
-        def add_nodes(parent_node, root_pack, res):
-            for act in root_pack.actions:
-                if act.need_check_permission:
-                    if inspect.isclass(act):
-                        act = act()
-                    name = act.get_verbose_name()
-                    child1 = PermProxy(len(res)+1, parent_node, name, act.absolute_url(), act.absolute_url())
-                    res.append(child1)
-            for pack in root_pack.subpacks:
-                if isinstance(pack, ActionPack) and pack.need_check_permission: 
-                    name = pack.title if hasattr(pack, 'title') and pack.title else pack.__class__.__name__
-                    child2 = PermProxy(len(res)+1, parent_node, name, pack.url, pack.url)
-                    res.append(child2)
-                    add_nodes(child2, pack, res)
+                self.can_select = can_select
+        def add_nodes(parent_node, action_set, res):
+            # если передали Набор действий, то у него надо взять Действия и подчиненные Наборы
+            if isinstance(action_set, ActionPack):
+                # обработаем действия
+                for act in action_set.actions:
+                    # добавляем если надо проверять права или есть подчиненные права
+                    if act.need_check_permission or act.sub_permissions:
+                        if inspect.isclass(act):
+                            act = act()
+                        name = act.verbose_name if act.verbose_name else act.__class__.__name__ 
+                        child1 = PermProxy(len(res)+1, parent_node, name, act.absolute_url(), act.need_check_permission)
+                        res.append(child1)
+                        add_nodes(child1, act, res)
+                # обработаем подчиненные Наборы
+                for pack in action_set.subpacks:
+                    if isinstance(pack, ActionPack) and pack.need_check_permission: 
+                        name = pack.title if hasattr(pack, 'title') and pack.title else pack.verbose_name if pack.verbose_name else pack.__class__.__name__
+                        child2 = PermProxy(len(res)+1, parent_node, name, pack.url, False)
+                        res.append(child2)
+                        sub_count = len(res)
+                        add_nodes(child2, pack, res)
+                        if len(res)-sub_count == 0:
+                            res.remove(child2)
+            # если передали Действие, то у него надо взять подчиненные права
+            elif isinstance(action_set, Action):
+                for key, value in action_set.sub_permissions.items():
+                    child3 = PermProxy(len(res)+1, parent_node, value, action_set.get_sub_permission_code(key), True)
+                    res.append(child3)
         res = []
         for ctrl in ControllerCache.get_contollers():
-            root = PermProxy(len(res)+1, None, ctrl.name if ctrl.name else ctrl.__class__.__name__, ctrl.url, ctrl.url)
+            root = PermProxy(len(res)+1, None, ctrl.verbose_name if ctrl.verbose_name else ctrl.__class__.__name__, ctrl.url)
             res.append(root)
             count = len(res)
             for pack in ctrl.get_top_actions():
                 if isinstance(pack, ActionPack) and pack.need_check_permission:
-                    name = pack.title if hasattr(pack, 'title') and pack.title else pack.__class__.__name__
-                    child1 = PermProxy(len(res)+1, root, name, pack.url, pack.url)
+                    name = pack.title if hasattr(pack, 'title') and pack.title else pack.verbose_name if pack.verbose_name else pack.__class__.__name__
+                    child1 = PermProxy(len(res)+1, root, name, pack.url, False)
+                    res.append(child1)
+                    sub_count = len(res)
+                    add_nodes(child1, pack, res)
+                    if len(res)-sub_count == 0:
+                        res.remove(child1)
+                elif isinstance(pack, Action) and (pack.need_check_permission or pack.sub_permissions):
+                    name = pack.verbose_name if pack.verbose_name else pack.__class__.__name__
+                    child1 = PermProxy(len(res)+1, root, name, pack.absolute_url(), pack.need_check_permission)
                     res.append(child1)
                     add_nodes(child1, pack, res)
-                elif isinstance(pack, Action) and pack.need_check_permission:
-                    name = pack.get_verbose_name()
-                    child1 = PermProxy(len(res)+1, root, name, pack.absolute_url(), pack.absolute_url())
-                    res.append(child1)
-            subcount = len(res)-count
-            if subcount == 0:
+            if len(res)-count == 0:
                 res.remove(root)
         return actions.ExtAdvancedTreeGridDataQueryResult(res)
 
