@@ -9,7 +9,7 @@ class ExtCalendar(ExtPanel):
     Обёртка над Sencha Calendar
     """
     def __init__(self, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
+        super(ExtCalendar, self).__init__(*args, **kwargs)
         self._ext_name = 'Ext.m3.Calendar'
         
         # Родные атрибуты календаря
@@ -28,7 +28,7 @@ class ExtCalendar(ExtPanel):
         
 
     def render_base_config(self):
-        super(self.__class__, self).render_base_config()
+        super(ExtCalendar, self).render_base_config()
         self._put_config_value('showDayView', self.show_day_view)
         self._put_config_value('showWeekView', self.show_week_view)
         self._put_config_value('showMonthView', self.show_month_view)
