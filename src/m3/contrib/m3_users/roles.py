@@ -78,7 +78,8 @@ class EditRoleWindowAction(actions.Action):
     Получение окна редактирования роли пользователя
     '''
     url = '/edit-role-window'
-    
+    need_check_permission = True
+    verbose_name = u'Добавление и редактирование роли'
     def context_declaration(self):
         return [
             ActionContextDeclaration(name=u'userrole_id', type=int, required=True, default=0)
@@ -122,6 +123,8 @@ class SelectUsersToAssignWindowAction(actions.Action):
     Показ окна с выбором сотрудников, которые не были выбраны ранее для указанной роли
     '''
     url = '/role-assigned-users-append-window'
+    need_check_permission = True
+    verbose_name = u'Добавление пользователя роли'
     
     def context_declaration(self):
         return [
@@ -142,7 +145,8 @@ class AddRolePermission(actions.Action):
     Выбор прав доступа для добавления в роль
     '''
     url = '/role-add-permission-window'
-    
+    need_check_permission = True
+    verbose_name = u'Добавление прав'
 #    def context_declaration(self):
 #        return [
 #            actions.ActionContextDeclaration(name='userrole_id', type=int, required=True)
@@ -349,7 +353,8 @@ class SaveRoleAction(actions.Action):
 class DeleteRoleAction(actions.Action):
     
     url = '/delete-role'
-    
+    need_check_permission = True
+    verbose_name = u'Удаление роли'
     def context_declaration(self):
         return [
             ActionContextDeclaration(name=u'userrole_id', type=int, required=True)
@@ -423,7 +428,8 @@ class DeleteAssignedUser(actions.Action):
     Удаление связанного с ролью пользователя
     '''
     url = '/delete-assigned-user'
-    
+    need_check_permission = True
+    verbose_name = u'Удаление пользователя роли'
     def context_declaration(self):
         return [
             actions.ActionContextDeclaration(name='assigneduser_id', type=int, required=True)
