@@ -19,8 +19,6 @@ class Migration(SchemaMigration):
         # Changing field 'UserActivity.user_id'
         db.alter_column('m3_usermon_activity', 'user_id', self.gf('django.db.models.fields.PositiveIntegerField')())
 
-        # Removing index on 'useractivity', fields ['user_id']
-        db.delete_index('m3_usermon_activity', ['user_id_id'])
 
 
     def backwards(self, orm):
@@ -36,8 +34,6 @@ class Migration(SchemaMigration):
         # Changing field 'UserActivity.user_id'
         db.alter_column('m3_usermon_activity', 'user_id_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User']))
 
-        # Adding index on 'useractivity', fields ['user_id']
-        db.create_index('m3_usermon_activity', ['user_id_id'])
 
 
     models = {
