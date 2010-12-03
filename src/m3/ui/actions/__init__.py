@@ -79,9 +79,46 @@ class Action(object):
     # Ссылка на контроллер к которому принадлежит данный Action
     controller = None
     
+    # Наименование действия для отображения
+    verbose_name = None
+    
     # Признак обработки прав доступа при выполнении действия (по-умолчанию отключен)
     # Как обрабатывается этот признак - смотри в has_permission
     need_check_permission = False
+    
+    # Словарь внутренних прав доступа, используемых в действии
+    # ключ - код права, который совмещается с кодом действия
+    # значение - наименование права
+    # Пример: {'tab2':u'Редактирование вкладки Доп. сведения', 'work_visible':u'Просмотр сведений о работе'}
+    # Общий код права доступа будет иметь вид: /edit#tab2 и /edit#work_visible соответственно
+    # Как обрабатывается этот список - смотри в has_sub_permission
+    sub_permissions = {}
+    
+    def get_sub_permission_code(self, sub_code):
+        '''
+        Возвращает код суб-права
+        '''
+        return self.get_permission_code()+'#'+sub_code
+    
+    def has_sub_permission(self, user_obj, sub_code, request = None):
+        '''
+        Проверка на внутреннее право для указанного пользователя
+        '''
+        assert isinstance(self.parent, ActionPack)
+        assert isinstance(sub_code, str)
+        
+        # Подчиненные права являются независимыми от того, если ли право на выполнение действия, 
+        # т.к. эти права проверяются уже внутри действия (т.е. уже при его выполнении)
+        # Но должно быть право проверять права в родительском наборе действий!
+        # Если переданный код не прописан в правах этого действия, то это не наш код - значит всё разрешено 
+        if self.parent.need_check_permission and sub_code in self.sub_permissions.keys():
+            # если пользователя нет, значит аноним - ему дадим отпор
+            if user_obj:
+                # проверим что права на выполнение есть
+                return user_obj.has_perm(self.get_sub_permission_code(sub_code))
+            else:
+                return False
+        return True
     
     def get_permission_code(self):
         '''
@@ -89,7 +126,7 @@ class Action(object):
         '''
         return self.get_absolute_url()
     
-    def has_permission(self, user_obj, request):
+    def has_permission(self, user_obj, request = None):
         '''
         Проверка пава на выполнение действия для указанного пользователя
         '''
@@ -111,14 +148,7 @@ class Action(object):
                 return False
         else:
             return True
-       
-    def get_verbose_name(self):
-        '''
-        Возвращает имя действия для отображения
-        '''
-        #return u"Действие: "+self.get_absolute_url()
-        return u"Действие: "+self.absolute_url()
-    
+           
     def pre_run(self, request, context):
         '''
         Предварительная обработка входящего запроса (request) и контекста (context)
@@ -193,6 +223,9 @@ class ActionPack(object):
     # Ссылка на вышестоящий пакет, тот в котором зарегистрирован данный пакет
     parent = None
     
+    # Наименование Набора действий для отображения
+    verbose_name = None
+    
     # Признак обработки прав доступа при выполнении дочерних действий (по-умолчанию отключен)
     # Как обрабатывается этот признак - смотри в Action.has_permission
     need_check_permission = False
@@ -222,6 +255,9 @@ class ActionController(object):
     Класс коонтроллер - обеспечивает обработку пользовательских запросов путем передачи
     их на исполнение соответствущим Action'ам
     '''
+    
+    # Наименование Контроллера для отображения
+    verbose_name = None
     
     class FakePacks:
         pass

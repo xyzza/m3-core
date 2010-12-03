@@ -1,3 +1,5 @@
+#coding:utf-8
+
 from django.contrib.auth.models import User
 from django.contrib.auth import get_backends
 
@@ -25,7 +27,9 @@ class ActionsBackend(object):
             perms = RolePermission.objects.filter(role__in=roles
                 ).values_list('permission_code'
                 ).order_by('permission_code')
-            user_obj._role_perm_cache = set(code for code in perms)
+            user_obj._role_perm_cache = set()
+            for code in perms:
+                user_obj._role_perm_cache.update(code)
         return user_obj._role_perm_cache
 
     def get_all_permissions(self, user_obj):
