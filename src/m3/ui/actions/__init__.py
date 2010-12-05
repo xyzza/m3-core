@@ -29,6 +29,8 @@ from results import ActionResult, PreJsonResult, JsonResult, ExtGridDataQueryRes
 
 from context import ActionContext, ActionContextDeclaration
 
+ACD = ActionContextDeclaration
+
 #=========================== ИСКЛЮЧЕНИЯ ========================================
 
 class ActionException(Exception):
