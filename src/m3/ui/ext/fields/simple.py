@@ -59,7 +59,10 @@ class ExtStringField(BaseExtField):
         return '/%s/' % self.mask_re
 
     def render(self):
-        self.render_base_config()
+        try:
+            self.render_base_config()
+        except Exception as msg:
+            raise Exception(msg)
         
         base_config = self._get_config_str()
         return 'new Ext.form.TextField({%s})' % base_config
@@ -213,13 +216,17 @@ class ExtTextArea(BaseExtField):
         return '/%s/' % self.mask_re
 
     def render_base_config(self):
-        self.value = normalize(self.value)
+        if self.value:
+            self.value = normalize(self.value)
         
         super(ExtTextArea, self).render_base_config()
         self._put_config_value('maskRe', self.t_render_mask_re, self.mask_re)
         
     def render(self):
-        self.render_base_config()
+        try:
+            self.render_base_config()
+        except Exception as msg:
+            raise Exception(msg)
         
         base_config = self._get_config_str()
         return 'new Ext.form.TextArea({%s})' % base_config
@@ -332,7 +339,11 @@ class ExtHTMLEditor(BaseExtField):
         super(ExtHTMLEditor, self).render_base_config()
         
     def render(self):
-        self.render_base_config()
+        try:
+            self.render_base_config()
+        except Exception as msg:
+            raise Exception(msg)
+        
         base_config = self._get_config_str()
         return 'new Ext.form.HtmlEditor({%s})' % base_config
 
@@ -348,6 +359,10 @@ class ExtDisplayField(BaseExtField):
         super(ExtDisplayField, self).render_base_config()
         
     def render(self):
-        self.render_base_config()
+        try:
+            self.render_base_config()
+        except Exception as msg:
+            raise Exception(msg)
+        
         base_config = self._get_config_str()
         return 'new Ext.form.DisplayField({%s})' % base_config
