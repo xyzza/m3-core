@@ -45,22 +45,25 @@ class M3JSONEncoder(json.JSONEncoder):
                 value = obj
                 arr = dict
                 last_attr = None
+                setValue = False
                 for attr in lst:
                     if last_attr:
                         if not arr.has_key(last_attr):
                             arr[last_attr] = {}
                         else:
-                            if not isinstance(arr[last_attr], tuple):
+                            if not isinstance(arr[last_attr], type({})):
                                 value = None
+                                setValue = False #у объекта уже стоит свойтво не словарь пришло откуда-то свыше
                                 break
                         arr = arr[last_attr]
                     if hasattr(value, attr):
                         value = getattr(value, attr)
+                        setValue = True #наши свойство значит надо его поставить после цикла
                     else:
                         value = None
-                        break
+                        #break #если нас просят найти ref1.name а ref1 is None то надо выдать ref1 = {name:None}
                     last_attr = attr
-                if value:
+                if setValue:
                     arr[attr] = value        
 
         for attr in dir(obj):
@@ -91,10 +94,13 @@ class M3JSONEncoder(json.JSONEncoder):
                 except:
                     pass
             if len(attribute) > 6 and attribute.endswith('_cache'):
-                try:
-                    cleaned_dict[attribute[1:len(attribute)-6] + '_ref_name'] = dict['name']
-                except:
-                    pass
+                # вережим этот кусок, т.к. если есть кэш на форегин кеи то он отработался на верхнем этапе
+                # а если кэш на что-то другое (set etc) то фиг знает какое свойство у него надо брать
+                #try:
+                #    cleaned_dict[attribute[1:len(attribute)-6] + '_ref_name'] = dict['name']
+                #except:
+                #    pass
+                pass
             else:
                 # просто передадим значение, оно будет закодировано в дальнейшем
                 cleaned_dict[attribute] = dict[attribute]
