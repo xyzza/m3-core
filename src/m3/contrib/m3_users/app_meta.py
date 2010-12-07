@@ -8,6 +8,7 @@ Created on 10.06.2010
 from django.conf import urls
 
 from m3.ui.actions import ActionController
+from m3.helpers.users import authenticated_user_required
 
 from roles import RolesActions
 from users import UsersActions
@@ -65,5 +66,6 @@ def register_metaroles(manager):
 #===============================================================================
 # Представления
 #===============================================================================
+@authenticated_user_required
 def users_view(request):
     return users_controller.process_request(request) 

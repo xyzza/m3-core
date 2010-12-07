@@ -308,6 +308,7 @@ class BaseExtGridColumn(ExtUIComponent):
         self.editor = None
         self.column_renderer = None
         self.tooltip = None
+        self.hidden = False
         # дополнительные атрибуты колонки
         self.extra = {}
 

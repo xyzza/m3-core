@@ -90,28 +90,24 @@ class ExtContextMenuItem(ExtUIComponent):
         self.init_component(*args, **kwargs)
         
     def render(self, container=None):
-        res = 'text:"%s"' % self.text
+        res = ['text:"%s"' % self.text]
         if self.icon_cls:
-            res += ',iconCls: "%s"' % self.icon_cls
+            res.append('iconCls: "%s"' % self.icon_cls)
         if self.disabled:
-            res += ',disabled: true'
+            res.append('disabled: true')
         if self.hidden:
-            res += ',hidden: true'
+            res.append('hidden: true')
         if self.menu:
-            res += ',menu: '+ self.menu.render()
+            res.append('menu: '+ self.menu.render())
         if self.handler:
             if self.custom_handler:
-                res += ',handler: %s' % self.handler
+                res.append('handler: %s' % self.handler)
             else:
                 if isinstance(self.handler, ExtConnection):
-                    res += ',handler: function(){%s} ' % self.handler.render() 
-#                elif isinstance(container, ExtGrid): # Будет работать только с templates-globals!!!
-#                    res += ',handler: function(){return %s(grid)}' % self.handler
-#                elif isinstance(container, ExtTree):
-#                    res += ',handler: function(){return %s(tree)}' % self.handler
+                    res.append('handler: function(){%s} ' % self.handler.render()) 
                 else:
-                    res += ',handler: %s' % self.handler
-        return '{%s}' % res
+                    res.append('handler: %s' % self.handler)
+        return '{%s}' % ','.join(res)
 
 #===============================================================================    
 class ExtContextMenuSeparator(ExtUIComponent):

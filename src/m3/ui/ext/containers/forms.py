@@ -464,6 +464,9 @@ class ExtPanel(BaseExtPanel):
         # Похоже он бы в прошлых версиях и его убрали в 3.3
         # Остается поддерживать для полной совместимости
         self.split = False
+        self.collapse_mode = None
+        self.collapsible = False
+        self.collapsed = False
         
         self.base_cls = ''
         self.body_cls = ''
@@ -480,8 +483,12 @@ class ExtPanel(BaseExtPanel):
         self._put_config_value('bodyCls', self.body_cls)
         self._put_config_value('anchor', self.anchor)
         self._put_config_value('autoLoad', self.auto_load)
+        self._put_config_value('collapseMode', self.collapse_mode)
+        self._put_config_value('collapsible', self.collapsible)
+        self._put_config_value('collapsed', self.collapsed)
         self._put_config_value('border', self.border)
         self._put_config_value('bodyBorder', self.body_border)
+
     
     @property
     def items(self):
