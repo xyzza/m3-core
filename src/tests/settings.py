@@ -3,7 +3,7 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-TEST_RUNNER = 'm3.contrib.tests.runner'
+TEST_RUNNER = 'm3.contrib.tests.M3TestSuiteRunner'
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
