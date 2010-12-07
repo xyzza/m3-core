@@ -4,6 +4,8 @@ Created on 27.02.2010
 
 @author: prefer
 '''
+import os
+
 from django.db import models
 
 from base import BaseExtField
@@ -331,7 +333,7 @@ class ExtFileUploadField(BaseExtField):
         
     @memory_file.setter
     def memory_file(self, memory_file):
-        self._memory_file = memory_file
+        self._memory_file = memory_file            
         
 #===============================================================================
 class ExtImageUploadField(ExtFileUploadField):
@@ -340,21 +342,20 @@ class ExtImageUploadField(ExtFileUploadField):
     '''        
     THUMBNAIL_PREFIX = 'thumbnnail_' 
     def __init__(self, *args, **kwargs):
-        super(ExtImageUploadField, self).__init__(*args, **kwargs)
-        
-        # Использовать ли миниатюры для изображений
-        self.thumbnail = True
-        
         # Ширина и высота миниатюры
         self.thumbnail_size = (300, 300)
         
-        # Умолчательный параметр, иначе контрол разъедется
-        self.width = 300
+        # Использовать ли миниатюры для изображений
+        self.thumbnail = True
         
         # Высота и ширина изображения. Изображение будет подгоняться под 
         # эту высоту
         self.image_max_size = (1600, 1600)
         
+        super(ExtImageUploadField, self).__init__(*args, **kwargs)
+        
+        # Умолчательный параметр, иначе контрол разъедется
+        self.width = 300
         self.init_component(*args, **kwargs)
         
         
@@ -380,3 +381,10 @@ class ExtImageUploadField(ExtFileUploadField):
         params_config = self._get_params_str()
         return 'new Ext.ux.form.ImageUploadField({%s}, {%s})' % (base_config, 
                                                           params_config)
+        
+    @staticmethod
+    def get_tumbnail_path(path):
+        if os.path.exists(path):
+            dir = os.path.dirname(path)
+            name = os.path.basename(path)
+            return os.path.join(dir, ExtImageUploadField.THUMBNAIL_PREFIX + name)
