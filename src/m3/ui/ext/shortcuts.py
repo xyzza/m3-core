@@ -53,12 +53,14 @@ function(){
 def js_success_response():
     '''
     Возвращает Ext Ajax ответ что операция прошла успешно
+    @deprecated: Нужно использовать OperationResult
     '''
     return http.HttpResponse('{success: true}')
     
 def js_failure_response():
     '''
     Возвращает Ext Ajax ответ что операция прервана
+    @deprecated: Нужно использовать OperationResult
     '''
     return http.HttpResponse('{success: false}')
 

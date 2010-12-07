@@ -700,6 +700,7 @@ class ControllerCache(object):
     def get_action_url(cls, type):
         ''' Возвращает URL экшена по его классу '''
         assert issubclass(type, Action)
+        cls.populate()
         for cont in cls._controllers:
             url = cont.get_action_url(type)
             if url:
