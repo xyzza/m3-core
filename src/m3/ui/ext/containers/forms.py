@@ -205,7 +205,7 @@ class ExtForm(BaseExtPanel):
                 # Прибиндим оригинальные размеры thumbnail
                 if isinstance(item, ExtImageUploadField):
                     if hasattr(settings, 'MEDIA_ROOT') and item.thumbnail:
-                        ffile = os.path.join(settings.MEDIA_ROOT, value)
+                        ffile = os.path.join(settings.MEDIA_ROOT, unicode(value))
                         dir = os.path.dirname(ffile)
                         file_name = os.path.basename(ffile)
                         
