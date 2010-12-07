@@ -32,39 +32,39 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		this.addEvents(
 			/**
 			 * Событие до запроса добавления записи - запрос отменится при возврате false
-			 * @param (ObjectGrid) this
-			 * @param (JSON) request - AJAX-запрос для отправки на сервер
+			 * @param ObjectGrid this
+			 * @param JSON request - AJAX-запрос для отправки на сервер
 			 */
 			'beforenewrequest',
 			/**
 			 * Событие после запроса добавления записи - обработка отменится при возврате false
-			 * @param (ObjectGrid) this
+			 * @param ObjectGrid this
 			 * @param res - результат запроса
 			 * @param opt - параметры запроса 
 			 */
 			'afternewrequest',
 			/**
 			 * Событие до запроса редактирования записи - запрос отменится при возврате false
-			 * @param (ObjectGrid) this
-			 * @param (JSON) request - AJAX-запрос для отправки на сервер 
+			 * @param ObjectGrid this
+			 * @param JSON request - AJAX-запрос для отправки на сервер 
 			 */
 			'beforeeditrequest',
 			/**
 			 * Событие после запроса редактирования записи - обработка отменится при возврате false
-			 * @param (ObjectGrid) this
+			 * @param ObjectGrid this
 			 * @param res - результат запроса
 			 * @param opt - параметры запроса 
 			 */
 			'aftereditrequest',
 			/**
 			 * Событие до запроса удаления записи - запрос отменится при возврате false
-			 * @param (ObjectGrid) this
-			 * @param (JSON) request - AJAX-запрос для отправки на сервер 
+			 * @param ObjectGrid this
+			 * @param JSON request - AJAX-запрос для отправки на сервер 
 			 */
 			'beforedeleterequest',
 			/**
 			 * Событие после запроса удаления записи - обработка отменится при возврате false
-			 * @param (ObjectGrid) this
+			 * @param ObjectGrid this
 			 * @param res - результат запроса
 			 * @param opt - параметры запроса 
 			 */
@@ -278,39 +278,39 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 		this.addEvents(
 			/**
 			 * Событие до запроса добавления записи - запрос отменится при возврате false
-			 * @param (ObjectGrid) this
-			 * @param (JSON) request - AJAX-запрос для отправки на сервер
+			 * @param {ObjectGrid} this
+			 * @param {JSON} request - AJAX-запрос для отправки на сервер
 			 */
 			'beforenewrequest',
 			/**
 			 * Событие после запроса добавления записи - обработка отменится при возврате false
-			 * @param (ObjectGrid) this
+			 * @param {ObjectGrid} this
 			 * @param res - результат запроса
 			 * @param opt - параметры запроса 
 			 */
 			'afternewrequest',
 			/**
 			 * Событие до запроса редактирования записи - запрос отменится при возврате false
-			 * @param (ObjectGrid) this
-			 * @param (JSON) request - AJAX-запрос для отправки на сервер 
+			 * @param {ObjectGrid} this
+			 * @param {JSON} request - AJAX-запрос для отправки на сервер 
 			 */
 			'beforeeditrequest',
 			/**
 			 * Событие после запроса редактирования записи - обработка отменится при возврате false
-			 * @param (ObjectGrid) this
+			 * @param {ObjectGrid} this
 			 * @param res - результат запроса
 			 * @param opt - параметры запроса 
 			 */
 			'aftereditrequest',
 			/**
 			 * Событие до запроса удаления записи - запрос отменится при возврате false
-			 * @param (ObjectGrid) this
-			 * @param (JSON) request - AJAX-запрос для отправки на сервер 
+			 * @param {ObjectGrid} this
+			 * @param {JSON} request - AJAX-запрос для отправки на сервер 
 			 */
 			'beforedeleterequest',
 			/**
 			 * Событие после запроса удаления записи - обработка отменится при возврате false
-			 * @param (ObjectGrid) this
+			 * @param {ObjectGrid} this
 			 * @param res - результат запроса
 			 * @param opt - параметры запроса 
 			 */
