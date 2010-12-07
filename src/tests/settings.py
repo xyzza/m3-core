@@ -1,5 +1,9 @@
 # Django settings for m3project project.
 
+#import logging
+
+from m3.helpers import logger
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -94,4 +98,7 @@ INSTALLED_APPS = (
     'tests.data.caching_tests',
     'tests.data.mie_tests',
     'tests.ui.ext_tests',
+    'tests.helpers.urls_tests',
 )
+
+logger.init_logging('./logs')
