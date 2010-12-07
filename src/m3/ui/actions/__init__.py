@@ -289,6 +289,8 @@ class ActionController(object):
         self._packs_by_type = {}
         self._actions_by_type = {}
         
+        self.top_level_packs = []
+        
         # Блокировка для перестроения паттернов урлов
         self._rebuild_lock = threading.RLock()
         
@@ -469,6 +471,18 @@ class ActionController(object):
         @param pack: объект типа ActionPack, который необходимо добавить в контроллер
         '''
         self._build_pack_node(pack, [])
+        
+        # нам обязательно нужен экземпляр класса
+        # этот метод повторяется кучу раз
+        if isinstance(pack, str):
+            cleaned_pack = self._load_class(pack)()
+        elif inspect.isclass(pack):
+            cleaned_pack = pack()
+        else:
+            cleaned_pack = pack
+        
+        if cleaned_pack not in self.top_level_packs:
+            self.top_level_packs.append(cleaned_pack) 
         ControllerCache.register_controller(self)
         
     def extend_packs(self, packs):
