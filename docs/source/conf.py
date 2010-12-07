@@ -20,20 +20,12 @@ sys.path.insert(0, os.path.abspath('.'))
 
 ROOT_DIRNAME = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-# Path to django
-#print os.path.abspath('settings.py')
-
-
-os.environ['DJANGO_SETTINGS_MODULE'] = os.path.abspath('settings.py')
+#os.environ['DJANGO_SETTINGS_MODULE'] = os.path.abspath('settings.py')
 
 sys.path.extend([ 
     os.path.join(ROOT_DIRNAME, 'src'),
     os.path.join(ROOT_DIRNAME, 'src', 'm3', 'vendor'),    
 ])
-
-
-from django.conf import settings 
-print settings.MODE
 
 # -- General configuration -----------------------------------------------------
 
