@@ -393,9 +393,11 @@ function uiShowErrorMessage(response){
  * Генерирует запрос на сервер по переданному url
  * @param {String} url URL запроса на получение формы
  * @param {Object} desktop Объект типа AppDesktop.getDesktop()
+ * @param {Object} параметры запроса
  */
-function sendRequest(url, desktop){                     
+function sendRequest(url, desktop, params){                     
     Ext.Ajax.request({
+    	params: params,
         url: url,
         method: 'POST',
         success: function(response, options){

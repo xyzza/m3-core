@@ -24,6 +24,7 @@ from m3.contrib.m3_users.metaroles import UserMetarole
 from m3.ui.actions.packs import BaseDictionaryActions
 from m3.ui.actions import ControllerCache, Action
 from m3.ui.actions.tree_packs import BaseTreeDictionaryActions
+from m3.core.json import M3JSONEncoder
 
 #from mis.users.metaroles import UserMetaRole, get_metarole
 
@@ -107,9 +108,9 @@ class DesktopLaunchGroup(BaseDesktopElement):
         ''' Рендерит имеющийся объект. Вызывается из функции render. '''
         if self.subitems:
             res = 'text: "%s"' % self.name.replace('"', "&quot;")
-            res += ',iconCls:"%s"' % self.icon
+            res += ',iconCls: "%s"' % self.icon
             res += ',handler: function(){return false;}'
-            res += ',menu:%s' % self.render_items()
+            res += ',menu: %s' % self.render_items()
             return '{%s}' % res 
         else:
             return None
@@ -147,17 +148,22 @@ class DesktopLauncher(BaseDesktopElement):
         self.url = ''
         self.icon = 'default-launcher'
         self.index = 100
+        self.context = {} # словарь контекста
         self._init_component(*args, **kwargs)
         
     def t_is_subitems(self):
         ''' Для удобства понимания что рендерить. Используется в шаблонах.'''
         return False
+    
+    def t_render_context(self):
+        return M3JSONEncoder().encode(self.context)
         
     def render(self):
         '''Рендерит текущий объект. Вызывается из метода render_items класса DesktopLaunchGroup'''
         res = 'text:"%s"' % self.name.replace('"', "&quot;")
         res += ',iconCls:"%s"' % self.icon
-        res += ',handler: function(){return sendRequest("%s", AppDesktop.getDesktop());}' % self.url
+        res += ',handler: function(){return sendRequest("%s", AppDesktop.getDesktop(), %s);}' % (self.url, self.t_render_context())
+        res += ',scope: this'
         return '{%s}' % res
 
 
