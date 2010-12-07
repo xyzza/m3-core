@@ -13,10 +13,13 @@ def add_file(src_file, dst_files, folder):
     @attr folder Папка откуда добавляются файлы
     '''
     for ffile in dst_files:
-        file_path = os.path.join(folder, ffile)
-        with codecs.open(file_path, 'r', encoding='utf-8') as f:
-            src_file.write(f.read())
-            src_file.write('\n')
+        file_names = ffile.split('.')
+        if len(file_names) > 0 and file_names[-1] in conf.FILE_EXTENSIONS:
+                        
+            file_path = os.path.join(folder, ffile)
+            with codecs.open(file_path, 'r', encoding='utf-8') as f:
+                src_file.write(f.read())
+                src_file.write('\n')
 
 def compile_production(src_file):
     '''
@@ -61,4 +64,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    print 'Is a Good job'
+    print "It's a Good job"

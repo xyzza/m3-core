@@ -71,7 +71,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			 * Проще говоря до начала submit'a
 			 * Параметры:
 			 *   this - Сам компонент
-			 *   @param (OBJECT) submit - sumbit-запрос для отправки на сервер
+			 *   @param {Object} submit - sumbit-запрос для отправки на сервер
 			*/
 			'beforesubmit'
 			)

@@ -67,8 +67,8 @@ function smart_eval(text){
 Ext.ns('Ext.app.form');
 /**
  * Модифицированный контрол поиска, за основу был взят контрол от ui.form.SearchField
- * @class Ext.app.form.SearchField Контрол поиска
- * @extends Ext.form.TwinTriggerField Абстрактный классс как раз для разного рода таких вещей, типа контрола поиска
+ * @class {Ext.app.form.SearchField} Контрол поиска
+ * @extends {Ext.form.TwinTriggerField} Абстрактный класс как раз для разного рода таких вещей, типа контрола поиска
  */
 Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
     initComponent : function(){
