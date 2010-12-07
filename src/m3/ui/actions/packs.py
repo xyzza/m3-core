@@ -129,7 +129,7 @@ class DictRowsAction(Action):
             elif isinstance(item, dict) and item.get('data_index'):
                 dict_list.append(item['data_index'])
 
-        return PreJsonResult(self.parent.get_rows(offset, limit, filter, user_sort), self.parent.secret_json, dict_list = dict_list)
+        return PreJsonResult(self.parent.get_rows(offset, limit, filter, user_sort, request, context), self.parent.secret_json, dict_list = dict_list)
     
 class DictLastUsedAction(Action):
     '''
@@ -308,18 +308,26 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     # Пример list_sort_order = ['code', '-name']
     list_sort_order = None
     
-    def get_rows(self, offset, limit, filter, user_sort=''):
+    def get_rows(self, offset, limit, filter, user_sort='', request=None, context=None):
         '''
         Возвращает данные для грида справочника
         '''
         sort_order = [user_sort] if user_sort else self.list_sort_order
         query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, self.filter_fields)
+        query = self.modify_get_rows(query, request, context)
         total = query.count()
         if limit > 0:
             query = query[offset: offset + limit]
         result = {'rows': list(query.all()), 'total': total}
         return result
+    
+    def modify_get_rows(self, query, request, context):
+        '''
+        Модифицирует запрос на получение данных. Данный метод необходимо переопределять в 
+        дочерних классах.
+        '''
+        return query
     
     def get_row(self, id):
         assert isinstance(id, int)
