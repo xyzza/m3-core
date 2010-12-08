@@ -17,9 +17,9 @@
 		,closable: {{component.t_get_closable|lower }}
 		{% endifnotequal %}	
 	
-    ,draggable: {{component.t_get_draggable|lower }}
-    ,resizable: {{component.t_get_resizable|lower }}
-    ,border: {{component.t_get_border|lower }}
+    ,draggable: {{component.draggable|lower }}
+    ,resizable: {{component.resizable|lower }}
+    ,border: {{component.border|lower }}
   
 		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 		{% if component.body_style %}, bodyStyle : '{{ component.body_style }}' {% endif %}
