@@ -54,7 +54,7 @@ def get_action(action_name):
     квалифицирующим именем.
     '''
     action_data = ActionsNameCache().get(action_name, None)
-    return action_data[0] if action_data else ''
+    return action_data[0] if action_data else None
     
     
 def get_url(action_name):
@@ -107,6 +107,21 @@ def inner_name_cache_handler(for_actions=True):
     Используется в хендлерах сборки кешей
     
     '''
+    def get_shortname(obj):
+        '''
+        Возвращает короткое имя для экшена или пака. 
+        Сам объект экшена или пака передается в параметре
+        obj.
+        '''
+        names = ['shortname', 'short_name',]
+        objects = [obj.__class__, obj]
+        for o in objects:
+            for name in names:
+                if hasattr(o, name) and isinstance(getattr(o, name), str):
+                    return getattr(o, name, '')
+
+        return ''
+         
     # TODO посмотреть как работает для врапнутых классов
     result = {}
     
@@ -136,9 +151,16 @@ def inner_name_cache_handler(for_actions=True):
                 key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
                 url = cleaned_action.__class__.absolute_url()
                 result[key] = (cleaned_action, url,)
+                
+                shortname = get_shortname(cleaned_action)
+                if shortname:
+                    result[shortname] = (cleaned_action, url,)
         else:
             cleaned_pack = get_instance(pack)
             key = cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__
-            result[key] = (cleaned_pack,)
+            result[key] = cleaned_pack
+            shortname = get_shortname(cleaned_pack)
+            if shortname:
+                result[shortname] = cleaned_pack
             
     return result

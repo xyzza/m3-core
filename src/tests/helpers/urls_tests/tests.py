@@ -15,9 +15,37 @@ class ActionNamesTests(TestCase):
     
     def test_main(self):
         
+        # проверяем все варианты экшенов для урлов
         self.failUnlessEqual(get_url('tests.helpers.urls_tests.actions.TestAction11'), '/urls-tests/pack1/action1')
         self.failUnlessEqual(get_url('tests.helpers.urls_tests.actions.TestAction12'), '/urls-tests/pack1/action2')
         self.failUnlessEqual(get_url('tests.helpers.urls_tests.actions.TestAction13'), '/urls-tests/pack1/action3')
         self.failUnlessEqual(get_url('tests.helpers.urls_tests.actions.TestAction21'), '/urls-tests/pack2/action1')
         self.failUnlessEqual(get_url('tests.helpers.urls_tests.actions.TestAction22'), '/urls-tests/pack2/action2')
         self.failUnlessEqual(get_url('tests.helpers.urls_tests.actions.TestAction23'), '/urls-tests/pack2/action3')
+        
+        # проверяем как прогружается объект экшена
+        self.failUnlessEqual(type(get_action('tests.helpers.urls_tests.actions.TestAction21')), 
+                             type(test_actions.TestAction21()))
+        
+        # проверяем как прогружается объект пака
+        self.failUnlessEqual(type(get_pack('tests.helpers.urls_tests.actions.TestActionPack2')), 
+                             type(test_actions.TestActionPack2()))
+        
+        # проверяем короткие имена
+        self.failUnlessEqual(get_url('test-action-11'), '/urls-tests/pack1/action1')
+        self.failUnlessEqual(get_url('test-action-12'), '/urls-tests/pack1/action2')
+        self.failUnlessEqual(get_url('test-action-21'), '/urls-tests/pack2/action1')
+        self.failUnlessEqual(get_url('test-action-22'), '/urls-tests/pack2/action2')
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
