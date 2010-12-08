@@ -13,3 +13,4 @@ relre:.orig$
 relre:~[0-9]+
 glob:src/m3/externals/KLADR.dbf
 glob:src/m3/externals/STREET.dbf
+glob:.idea/*
