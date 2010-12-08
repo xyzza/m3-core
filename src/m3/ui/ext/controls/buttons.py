@@ -47,6 +47,12 @@ class ExtButton(BaseExtControl):
         self.tooltip_text = None
         self.menu = None
         self.tab_index = None
+        
+        self.enable_toggle = False
+        self.toggle_group = None
+        self.allow_depress = False
+        self.pressed = False
+        
         self.init_component(*args, **kwargs)
     
     def t_render_handler(self):
@@ -62,7 +68,7 @@ class ExtButton(BaseExtControl):
         if self.tooltip_title:
             res += ',title: "%s"' % self.tooltip_title 
         return '{%s}' % res
-    
+
     def render_base_config(self):
         super(ExtButton, self).render_base_config()
         self._put_config_value('text', self.text)
@@ -73,6 +79,10 @@ class ExtButton(BaseExtControl):
         self._put_config_value('tooltip', self.t_render_tooltip, 
                                                 self.tooltip_text)
         
+        self._put_config_value('enableToggle', self.enable_toggle)
+        self._put_config_value('toggleGroup', self.toggle_group)
+        self._put_config_value('allowDepress', self.allow_depress)
+
         self._put_config_value('tabIndex', self.tab_index)
         self._put_config_value('handler', self.t_render_handler, self.handler)
         if self.menu:

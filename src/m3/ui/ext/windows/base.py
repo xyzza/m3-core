@@ -51,6 +51,8 @@ class BaseExtWindow(ExtUIComponent):
         self.top_bar = None
         self.buttom_bar = None
         self.footer_bar = None
+        self.border = True
+        self.draggable = True
         self.resizable = True
         self.parent_window_id = ''
         self.keys = []
@@ -62,8 +64,8 @@ class BaseExtWindow(ExtUIComponent):
         
     def t_render_layout_config(self):
         '''Рендерит конфиг, если указан layout'''
-        return '{%s}' % ','.join(['%s:"%s"' % (k, v) for k, v in 
-                                                    self.layout_config.items()])
+        return '{%s}' % ','.join(['%s:"%s"' % (k, v)
+            for k, v in self.layout_config.items()])
         
     def render_base_config(self):
         super(BaseExtWindow, self).render_base_config()
@@ -82,7 +84,9 @@ class BaseExtWindow(ExtUIComponent):
         self._put_config_value('fbar', self.t_render_footer_bar, self.footer_bar)
         self._put_config_value('items', self.t_render_items)
         self._put_config_value('buttons', self.t_render_buttons, self.buttons)
+        self._put_config_value('border', self.border)
         self._put_config_value('resizable', self.resizable)
+        self._put_config_value('draggable', self.draggable)
         #self._put_config_value('parentWindowID', self.parent_window_id)
         self._put_config_value('keys', self.t_render_keys, self.keys)
         self._put_config_value('buttonAlign', self.button_align)
