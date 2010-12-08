@@ -100,6 +100,13 @@ class TextResult(ActionResult):
     def get_http_response(self):
         return http.HttpResponse(self.data)
 
+class XMLResult(ActionResult):
+    '''
+    Результат в формате xml, данные которого напрямую передаются в HttpResponse
+    '''
+    def get_http_response(self):
+        return http.HttpResponse(self.data,mimetype='application/xml')
+
 
 class ExtAdvancedTreeGridDataQueryResult(ActionResult):
     '''
@@ -148,8 +155,8 @@ class ExtUIComponentResult(BaseContextedResult):
     def get_http_response(self):
         self.data.action_context = self.context
         return http.HttpResponse(self.data.render())
-    
-        
+
+
 
 class ExtUIScriptResult(BaseContextedResult):
     '''
