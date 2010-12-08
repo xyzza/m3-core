@@ -17,6 +17,10 @@
 		,closable: {{component.t_get_closable|lower }}
 		{% endifnotequal %}	
 	
+    ,draggable: {{component.t_get_draggable|lower }}
+    ,resizable: {{component.t_get_resizable|lower }}
+    ,border: {{component.t_get_border|lower }}
+  
 		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 		{% if component.body_style %}, bodyStyle : '{{ component.body_style }}' {% endif %}
 		{% if component.layout %} ,layout: '{{ component.layout}}' {% endif %}
@@ -27,12 +31,13 @@
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
 	    ,items:{{ component.t_render_items|safe }}
 	    {% if component.buttons %} ,buttons: {{ component.t_render_buttons|safe }}{% endif %}	
-	    {% if not component.resizable %} ,resizable: false {% endif %}
+//	    {% if not component.resizable %} ,resizable: false {% endif %}
 		{% if component.parent_window_id %} ,parentWindowID: '{{ component.parent_window_id }}' {% endif %}
 		{% if component.keys %} ,keys: [{{ component.t_render_keys|safe }}] {% endif %}
 		{% if component.auto_load %} ,autoLoad: {{ component.auto_load|safe}} {% endif %}
 	    {% block window_extenders %}{# здесь помещяется код, расширяющий описание экземпляра окна #}{% endblock %}
 		
 	});
+	{% block usercode %}{% endblock %}
 	return win;
 })()
