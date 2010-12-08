@@ -129,7 +129,7 @@ class DictRowsAction(Action):
             elif isinstance(item, dict) and item.get('data_index'):
                 dict_list.append(item['data_index'])
         
-        if hasattr(self.parent, 'modify_rows_query') and callable(self.modify_rows_query):
+        if hasattr(self.parent, 'modify_rows_query') and callable(self.parent.modify_rows_query):
             rows = self.parent.get_rows_modified(offset, limit, filter, user_sort, request, context)
         else:
             rows = self.parent.get_rows(offset, limit, filter, user_sort)
@@ -320,7 +320,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, self.filter_fields)
         if hasattr(self, 'modify_rows_query') and callable(self.modify_rows_query):
-            query = self.modify_get_rows(query, request, context)
+            query = self.modify_rows_query(query, request, context)
         total = query.count()
         if limit > 0:
             query = query[offset: offset + limit]
