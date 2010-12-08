@@ -5,7 +5,7 @@
 import json
 
 from django.db.models.query_utils import Q
-from django.db import models, connection, transaction, IntegrityError
+from django.db import models, connection, transaction, signals
 
 def apply_sort_order(query, columns, sort_order):
     '''
@@ -154,15 +154,20 @@ def bind_request_form_to_object(request, obj_factory, form):
     win.form.to_object(obj)
     return obj
 
-def safe_delete_record(model, id):
+def safe_delete_record(model, id=None):
     '''
     Безопасное удаление записи в базе. В отличие от джанговского ORM не удаляет каскадно.
     Возвращает True в случае успеха, иначе False 
     '''
-    assert issubclass(model, models.Model)
-    assert (isinstance(id, int) or isinstance(id, long))
+    assert (isinstance(model, models.Model) or issubclass(model, models.Model))
+    assert (isinstance(id, int) or isinstance(id, long) or id is None)
+    if isinstance(model, models.Model):
+        models.signals.pre_delete.send(sender=model.__class__, instance=model)
+    else:
+        models.signals.pre_delete.send(sender=model, instance=id) #наверно лучше передать id чем вирутальный model(id=id)
     try:
         cursor = connection.cursor() #@UndefinedVariable
+        id = id if id is not None else model.id
         sql = "DELETE FROM %s WHERE id = %s" % (model._meta.db_table, id)
         cursor.execute(sql)
         transaction.commit_unless_managed()
@@ -173,6 +178,10 @@ def safe_delete_record(model, id):
         if e.__class__.__name__ == 'IntegrityError':
             return False
         raise
+    if isinstance(model, models.Model):
+        models.signals.post_delete.send(sender=model.__class__, instance=model)
+    else:
+        models.signals.post_delete.send(sender=model, instance=id) #наверно лучше передать id чем вирутальный model(id=id)
     
     return True
 

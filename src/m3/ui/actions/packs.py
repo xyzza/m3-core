@@ -367,7 +367,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
             message = u'Элемент не существует в базе данных.'
         else:
             for obj in objs:
-                if not utils.safe_delete_record(self.model, obj.id):
+                if not utils.safe_delete_record(obj):
                     message += u'Не удалось удалить элемент %s. Возможно на него есть ссылки.<br>' % obj.id
         
         return OperationResult.by_message(message)
