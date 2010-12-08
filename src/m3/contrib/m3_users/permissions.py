@@ -24,7 +24,7 @@ class ActionsBackend(object):
         """
         if not hasattr(user_obj, '_role_perm_cache'):
             roles = AssignedRole.objects.filter(user = user_obj)
-            perms = RolePermission.objects.filter(role__in=roles
+            perms = RolePermission.objects.filter(role__assignedrole__in=roles
                 ).values_list('permission_code'
                 ).order_by('permission_code')
             user_obj._role_perm_cache = set()

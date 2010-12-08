@@ -225,9 +225,12 @@ class GetRolePermissionAction(actions.Action):
             act_code = codes[0]
             sub_code = codes[1] if len(codes) > 1 else ''
             act = ControllerCache.get_action_by_url(act_code)
-            perm.verbose_name = act.verbose_name if act.verbose_name else act.__class__.__name__
-            if sub_code and sub_code in act.sub_permissions.keys():
-                perm.verbose_name = act.sub_permissions[sub_code]
+            if not act:
+                perm.verbose_name = u'отсутствует-'
+            else:
+                perm.verbose_name = act.verbose_name if act.verbose_name else act.__class__.__name__
+                if sub_code and sub_code in act.sub_permissions.keys():
+                    perm.verbose_name = act.sub_permissions[sub_code]
             res.append(perm)
         return actions.ExtGridDataQueryResult(res)
     
