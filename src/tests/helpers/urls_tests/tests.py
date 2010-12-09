@@ -24,12 +24,12 @@ class ActionNamesTests(TestCase):
         self.failUnlessEqual(get_url('tests.helpers.urls_tests.actions.TestAction23'), '/urls-tests/pack2/action3')
         
         # проверяем как прогружается объект экшена
-        self.failUnlessEqual(type(get_action('tests.helpers.urls_tests.actions.TestAction21')), 
-                             type(test_actions.TestAction21()))
+        self.failUnlessEqual(get_action('tests.helpers.urls_tests.actions.TestAction21'), 
+                             test_actions.TestAction21)
         
         # проверяем как прогружается объект пака
-        self.failUnlessEqual(type(get_pack('tests.helpers.urls_tests.actions.TestActionPack2')), 
-                             type(test_actions.TestActionPack2()))
+        self.failUnlessEqual(get_pack('tests.helpers.urls_tests.actions.TestActionPack2'), 
+                             test_actions.TestActionPack2)
         
         # проверяем короткие имена
         self.failUnlessEqual(get_url('test-action-11'), '/urls-tests/pack1/action1')
