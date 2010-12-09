@@ -150,17 +150,17 @@ def inner_name_cache_handler(for_actions=True):
                 
                 key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
                 url = cleaned_action.__class__.absolute_url()
-                result[key] = (cleaned_action, url,)
+                result[key] = (cleaned_action.__class__, url,)
                 
                 shortname = get_shortname(cleaned_action)
                 if shortname:
-                    result[shortname] = (cleaned_action, url,)
+                    result[shortname] = (cleaned_action.__class__, url,)
         else:
             cleaned_pack = get_instance(pack)
             key = cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__
-            result[key] = cleaned_pack
+            result[key] = cleaned_pack.__class__
             shortname = get_shortname(cleaned_pack)
             if shortname:
-                result[shortname] = cleaned_pack
+                result[shortname] = cleaned_pack.__class__
             
     return result
