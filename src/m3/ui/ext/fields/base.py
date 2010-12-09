@@ -77,6 +77,8 @@ class BaseExtField(ExtUIComponent):
         self.label_style = {}
         self.read_only = False
         
+        self.is_edit = True
+        
         # Свойства валидации, специфичные для TextField
         self.allow_blank = True
         self.vtype= None
@@ -120,6 +122,7 @@ class BaseExtField(ExtUIComponent):
         if  self.label_style:
             self._put_config_value('labelStyle', self.t_render_label_style() )
         self._put_config_value('readOnly', self.read_only, self.read_only)
+        self._put_config_value('isEdit', self.is_edit)
         self._put_config_value('allowBlank', self.allow_blank, not self.allow_blank)
         self._put_config_value('vtype', self.vtype)
         self._put_config_value('emptyText', self.empty_text)
