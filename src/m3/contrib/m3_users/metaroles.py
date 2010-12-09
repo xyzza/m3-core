@@ -69,7 +69,7 @@ class MetaroleManager(object):
         Возвращает экземпляры всех зарегистроированных в системе метаролей
         '''
         self._populate()
-        return self._metaroles.values()
+        return sorted(self._metaroles.values(), key=lambda metarole: metarole.name)
     
     def _populate(self):
         '''
