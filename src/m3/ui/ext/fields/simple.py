@@ -47,12 +47,14 @@ class ExtStringField(BaseExtField):
         self.enable_key_events = False # Разрешает перехват нажатий клавиш
         self.input_type = None
         self.mask_re = None
+        self.select_on_focus = None
         self.init_component(*args, **kwargs)
 
     def render_base_config(self):
         super(ExtStringField, self).render_base_config()
         self._put_config_value('inputType', self.input_type)
         self._put_config_value('maskRe', self.t_render_mask_re, self.mask_re)
+        self._put_config_value('selectOnFocus', self.select_on_focus)
         self._put_config_value('enableKeyEvents', self.enable_key_events, self.enable_key_events)
 
     def t_render_mask_re(self):
