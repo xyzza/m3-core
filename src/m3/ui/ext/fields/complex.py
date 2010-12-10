@@ -7,6 +7,7 @@ Created on 27.02.2010
 import os
 
 from django.db import models
+from django.conf import settings
 
 from base import BaseExtField
 
@@ -340,7 +341,7 @@ class ExtImageUploadField(ExtFileUploadField):
     '''
     Компонент загрузки изображений
     '''        
-    THUMBNAIL_PREFIX = 'thumbnnail_' 
+    THUMBNAIL_PREFIX = 'thumbnail_' 
     def __init__(self, *args, **kwargs):
         # Ширина и высота миниатюры
         self.thumbnail_size = (300, 300)
@@ -383,8 +384,14 @@ class ExtImageUploadField(ExtFileUploadField):
                                                           params_config)
         
     @staticmethod
-    def get_tumbnail_path(path):
+    def get_thumbnail_path(path):
         if os.path.exists(path):
             dir = os.path.dirname(path)
             name = os.path.basename(path)
             return os.path.join(dir, ExtImageUploadField.THUMBNAIL_PREFIX + name)
+        
+    @staticmethod
+    def get_thumbnail_url(name):
+        base_url, file_name = name.split('/') 
+        return '%s/%s' % (settings.MEDIA_URL, '%s/%s%s' % ( base_url, 
+                          ExtImageUploadField.THUMBNAIL_PREFIX, file_name))

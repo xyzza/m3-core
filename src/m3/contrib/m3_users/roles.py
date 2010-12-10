@@ -424,7 +424,7 @@ class AssignUsers(actions.Action):
             logger.exception(u'Не удалось добавить список пользователей в роль')
             transaction.rollback()
             return actions.OperationResult(success = False, message = u'Не удалось добавить пользователей в роль')
-        return actions.OperationResult(success = True, message = u'Пользователи успешно добавлены в роль')
+        return actions.OperationResult(success = True,)
 
 class DeleteAssignedUser(actions.Action):
     '''

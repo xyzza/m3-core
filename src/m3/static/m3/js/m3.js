@@ -257,124 +257,123 @@ function uiAjaxFailMessage (response, opt) {
 		return;
 	}
 	
-	var bodySize = Ext.getBody().getViewSize(),
-		width = (bodySize.width < 500) ? bodySize.width - 50 : 500,
-		height = (bodySize.height < 300) ? bodySize.height - 50 : 300,
-		win;
-
-	var errorMsg = response.responseText;
+	if (opt['failureType'] === "server"){ 
+	    // Пришел OperationResult('success':False)
+	    if (opt && opt.response && opt.response.responseText) {
+	        smart_eval( opt.response.responseText );
+	    }	    	    
+	} else {
+    	var bodySize = Ext.getBody().getViewSize(),
+    		width = (bodySize.width < 500) ? bodySize.width - 50 : 500,
+    		height = (bodySize.height < 300) ? bodySize.height - 50 : 300,
+    		win;
+        
+        // Для submit'a response приходит вторым параметром
+        if (!response.responseText && opt && opt.response){
+            response = opt.response;
+        }
+    	var errorMsg = response.responseText;
 	
-	var win = new Ext.Window({ modal: true, width: width, height: height, 
-	    title: "Request Failure", layout: "fit", maximizable: true, 
-	    maximized: true,
-		listeners : {
-			"maximize" : {
-				fn : function (el) {
-					var v = Ext.getBody().getViewSize();
-					el.setSize(v.width, v.height);
-				},
-				scope : this
-			},
-
-			"resize" : {
-				fn : function (wnd) {
-					var editor = Ext.getCmp("__ErrorMessageEditor");
-					var sz = wnd.body.getViewSize();
-					editor.setSize(sz.width, sz.height - 42);
-				}
-			}
-		},
-		items : new Ext.form.FormPanel({
-			baseCls : "x-plain",
-			layout  : "absolute",
-			defaultType : "label",
-			items : [
-				{
-					x    : 5,
-					y    : 5,
-					html : '<div class="x-window-dlg"><div class="ext-mb-error" style="width:32px;height:32px"></div></div>'
-				},
-				{
-					x    : 42,
-					y    : 6,
-					html : "<b>Status Code: </b>"
-				},
-				{
-					x    : 125,
-					y    : 6,
-					text : response.status
-				},
-				{
-					x    : 42,
-					y    : 25,
-					html : "<b>Status Text: </b>"
-				},
-				{
-					x    : 125,
-					y    : 25,
-					text : response.statusText
-				},
-				{
-					x  : 0,
-					y  : 42,
-					id : "__ErrorMessageEditor",
-					xtype    : "htmleditor",
-					value    : errorMsg,
-					readOnly : true,
-					enableAlignments : false,
-					enableColors     : false,
-					enableFont       : false,
-					enableFontSize   : false,
-					enableFormat     : false,
-					enableLinks      : false,
-					enableLists      : false,
-					enableSourceEdit : false,
-					listeners         : {
-						"push" : {
-							fn : function(self,html) {
-								
-								// событие возникает когда содержимое iframe становится доступно
-								
-								function fixDjangoPageScripts(doc) {
-									//грязный хак - эвалим скрипты в iframe 
-									
-									try {																				
-										var scripts = doc.getElementsByTagName('script');
-										for (var i = 0; i < scripts.length;i++) {
-											if (scripts[i].innerText) {
-												this.eval(scripts[i].innerText);
-											}
-											else {
-												this.eval(scripts[i].textContent);
-											}
-										}	
-																			
-										//и скрыта подробная информация, тк document.onLoad не будет
-										//вызвано
-										this.hideAll(this.getElementsByClassName(doc, 'table', 'vars'));
-										this.hideAll(this.getElementsByClassName(doc, 'ol', 'pre-context'));
-										this.hideAll(this.getElementsByClassName(doc, 'ol', 'post-context'));
-										this.hideAll(this.getElementsByClassName(doc, 'div', 'pastebin'));
-										
-									}
-									catch(er) {
-										//
-									}
-								}
-								
-								//магия - меняем объект исполнения на window из iframe
-								fixDjangoPageScripts.call(this.iframe.contentWindow, this.iframe.contentDocument);
-								//TO DO: нужно еще поправлять стили странички в IE и Сафари
-							}
-						}
-					
-					}
-				}
-			]
-		})
-	});
-
-	win.show();
+    	var win = new Ext.Window({ modal: true, width: width, height: height, 
+    	    title: "Request Failure", layout: "fit", maximizable: true, 
+    	    maximized: true,
+    		listeners : {
+    			"maximize" : {
+    				fn : function (el) {
+    					var v = Ext.getBody().getViewSize();
+    					el.setSize(v.width, v.height);
+    				},
+    				scope : this
+    			},
+    
+    			"resize" : {
+    				fn : function (wnd) {
+    					var editor = Ext.getCmp("__ErrorMessageEditor");
+    					var sz = wnd.body.getViewSize();
+    					editor.setSize(sz.width, sz.height - 42);
+    				}
+    			}
+    		},
+    		items : new Ext.form.FormPanel({
+    			baseCls : "x-plain",
+    			layout  : "absolute",
+    			defaultType : "label",
+    			items : [
+    				{x: 5,y: 5,
+    					html : '<div class="x-window-dlg"><div class="ext-mb-error" style="width:32px;height:32px"></div></div>'
+    				},
+    				{x: 42,y: 6,
+    					html : "<b>Status Code: </b>"
+    				},
+    				{x: 125,y: 6,
+    					text : response.status
+    				},
+    				{x: 42,y: 25,
+    					html : "<b>Status Text: </b>"
+    				},
+    				{x: 125,y: 25,
+    					text : response.statusText
+    				},
+    				{x: 0,y: 42,
+    					id : "__ErrorMessageEditor",
+    					xtype    : "htmleditor",
+    					value    : errorMsg,
+    					readOnly : true,
+    					enableAlignments : false,
+    					enableColors     : false,
+    					enableFont       : false,
+    					enableFontSize   : false,
+    					enableFormat     : false,
+    					enableLinks      : false,
+    					enableLists      : false,
+    					enableSourceEdit : false,
+    					listeners         : {
+    						"push" : {
+    							fn : function(self,html) {
+    								
+    								// событие возникает когда содержимое iframe становится доступно
+    								
+    								function fixDjangoPageScripts(doc) {
+    									//грязный хак - эвалим скрипты в iframe 
+    									
+    									try {																				
+    										var scripts = doc.getElementsByTagName('script');
+    										for (var i = 0; i < scripts.length;i++) {
+    											if (scripts[i].innerText) {
+    												this.eval(scripts[i].innerText);
+    											}
+    											else {
+    												this.eval(scripts[i].textContent);
+    											}
+    										}	
+    																			
+    										//и скрыта подробная информация, тк document.onLoad не будет
+    										//вызвано
+    										this.hideAll(this.getElementsByClassName(doc, 'table', 'vars'));
+    										this.hideAll(this.getElementsByClassName(doc, 'ol', 'pre-context'));
+    										this.hideAll(this.getElementsByClassName(doc, 'ol', 'post-context'));
+    										this.hideAll(this.getElementsByClassName(doc, 'div', 'pastebin'));
+    										
+    									}
+    									catch(er) {
+    										//
+    									}
+    								}
+    								
+    								//магия - меняем объект исполнения на window из iframe
+    								fixDjangoPageScripts.call(this.iframe.contentWindow, this.iframe.contentDocument);
+    								//TO DO: нужно еще поправлять стили странички в IE и Сафари
+    							}
+    						}
+    					
+    					}
+    				}
+    			]
+    		})
+    	});
+    
+    	win.show();
+	}
 }
 
 // Проверяет есть ли в ответе сообщение и выводит его

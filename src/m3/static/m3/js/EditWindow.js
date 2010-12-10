@@ -115,23 +115,23 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			
 			return;
 		}
-    var scope = this;
+        var scope = this;
 		var submit = {
-        url: this.formUrl
-       ,submitEmptyText: false
-       ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
-       ,success: function(form, action){
-          scope.fireEvent('closed_ok', action.response.responseText);
-          scope.close(true);
-          smart_eval(action.response.responseText);
-       }
-       ,failure: function (form, action){
-          smart_eval(action.response.responseText);
-       }
-    };
-    if (scope.fireEvent('beforesubmit', submit)) {
-    	form.submit(submit);
-    }
+            url: this.formUrl
+           ,submitEmptyText: false
+           ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
+           ,success: function(form, action){
+              scope.fireEvent('closed_ok', action.response.responseText);
+              scope.close(true);
+              smart_eval(action.response.responseText);
+           }
+           ,failure: function (form, action){
+              smart_eval(action.response.responseText);
+           }
+        };
+        if (scope.fireEvent('beforesubmit', submit)) {
+        	form.submit(submit);
+        }
 	}
 	
 	 /**
