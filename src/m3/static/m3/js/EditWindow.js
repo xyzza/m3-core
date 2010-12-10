@@ -74,6 +74,15 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			 *   @param {Object} submit - sumbit-запрос для отправки на сервер
 			*/
 			'beforesubmit'
+			/**
+			 * Генерируется, если произошел запрос на закрытие окна
+			 * (через win.close()) при несохраненных изменениях, а пользователь
+			 * в диалоге, запрашивающем подтверждение закрытия без сохранения,
+			 * отказался закрывать окно.
+			 * Параметры:
+			 *   this - Сам компонент
+			 */
+			 ,'closing_canceled'
 			)
 	
 	}
@@ -198,6 +207,9 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	/**
 	 * Перегрузка закрытия окна со вставкой пользовательского приложения
 	 * @param {Bool} forceClose Приндтельное (без вопросов) закрытие окна
+	 * 
+	 * Если forceClose != true и пользователь в ответ на диалог
+	 * откажется закрывать окно, возбуждается событие 'closing_canceled'
 	 */
 	,close: function (forceClose) {
 
@@ -211,6 +223,8 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 				fn: function(buttonId, text, opt){
 					if (buttonId === 'yes') {
 						Ext.m3.EditWindow.superclass.close.call(scope);
+					} else {
+					  scope.fireEvent('closing_canceled');
 					}
 				},
 				animEl: 'elId',
