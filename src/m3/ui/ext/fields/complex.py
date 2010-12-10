@@ -392,6 +392,6 @@ class ExtImageUploadField(ExtFileUploadField):
         
     @staticmethod
     def get_thumbnail_url(name):
-        base_url, file_name = name.split('/') 
+        base_url, file_name = os.path.split(name)
         return '%s/%s' % (settings.MEDIA_URL, '%s/%s%s' % ( base_url, 
                           ExtImageUploadField.THUMBNAIL_PREFIX, file_name))
