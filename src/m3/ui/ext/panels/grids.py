@@ -22,9 +22,12 @@ class ExtObjectGrid(containers.ExtGrid):
         '''
         def __init__(self, *args, **kwargs):
             super(ExtObjectGrid.GridContextMenu, self).__init__(*args, **kwargs)
-            self.menuitem_new = menus.ExtContextMenuItem(text = u'Добавить', icon_cls = 'add_item', handler='contextMenuNew')
-            self.menuitem_edit = menus.ExtContextMenuItem(text = u'Изменить', icon_cls = 'edit_item', handler='contextMenuEdit')
-            self.menuitem_delete = menus.ExtContextMenuItem(text = u'Удалить', icon_cls = 'delete_item', handler='contextMenuDelete')
+            self.menuitem_new = menus.ExtContextMenuItem(text = u'Добавить', 
+                                icon_cls = 'add_item', handler='contextMenuNew')
+            self.menuitem_edit = menus.ExtContextMenuItem(text = u'Изменить', 
+                                icon_cls = 'edit_item', handler='contextMenuEdit')
+            self.menuitem_delete = menus.ExtContextMenuItem(text = u'Удалить', 
+                                icon_cls = 'delete_item', handler='contextMenuDelete')
             self.menuitem_separator = menus.ExtContextMenuSeparator()            
             
             # self.items.extend([self.menuitem_add, self.menuitem_edit, self.menuitem_delete, self.menuitem_separator])
@@ -36,10 +39,14 @@ class ExtObjectGrid(containers.ExtGrid):
         '''
         def __init__(self, *args, **kwargs):
             super(ExtObjectGrid.GridTopBar, self).__init__(*args, **kwargs)
-            self.button_new = controls.ExtButton(text = u'Добавить', icon_cls = 'add_item', handler='topBarNew')
-            self.button_edit = controls.ExtButton(text = u'Изменить', icon_cls = 'edit_item', handler='topBarEdit')
-            self.button_delete = controls.ExtButton(text = u'Удалить', icon_cls = 'delete_item', handler='topBarDelete')
-            self.button_refresh = controls.ExtButton(text = u'Обновить', icon_cls = 'refresh-icon-16', handler='topBarRefresh')
+            self.button_new = controls.ExtButton(text = u'Добавить', 
+                                    icon_cls = 'add_item', handler='topBarNew')
+            self.button_edit = controls.ExtButton(text = u'Изменить', 
+                                    icon_cls = 'edit_item', handler='topBarEdit')
+            self.button_delete = controls.ExtButton(text = u'Удалить', 
+                                    icon_cls = 'delete_item', handler='topBarDelete')
+            self.button_refresh = controls.ExtButton(text = u'Обновить', 
+                                    icon_cls = 'refresh-icon-16', handler='topBarRefresh')
             self.init_component()
             
     #===========================================================================
@@ -49,9 +56,9 @@ class ExtObjectGrid(containers.ExtGrid):
     def __init__(self, *args, **kwargs):
         super(ExtObjectGrid, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-object-grid.js'
-        #===============================================================================
+        #=======================================================================
         # Действия, выполняемые изнутри грида 
-        #===============================================================================
+        #=======================================================================
         self.action_new = None
         self.action_edit = None
         self.action_delete = None
@@ -158,23 +165,6 @@ class ExtObjectGrid(containers.ExtGrid):
         self._put_params_value('columnParamName', self.column_param_name)
         self._put_params_value('allowPaging', self.allow_paging)
         
-        
-#        res += ',actions:{newUrl:"%(new_url)s" \
-#                          ,editUrl:"%(edit_url)s" \
-#                          ,deleteUrl:"%(delete_url)s" \
-#                          ,dataUrl:"%(data_url)s" \
-#                          ,contextJson:%(context_json)s \
-#        }' % {'new_url': self.action_new.absolute_url() if self.action_new else '' ,
-#              'edit_url': self.action_edit.absolute_url() if self.action_edit else '' ,
-#              'delete_url': self.action_delete.absolute_url() if self.action_delete else '' ,
-#              'data_url': self.action_data.absolute_url() if self.action_data else '' ,
-#              'context_json': self.action_context.json() if self.action_context else '' ,}
-#                
-#                
-#        res += ',rowIdName:"%s"' % self.row_id_name if self.row_id_name else ''            
-#        res += ',allowPaging:%s' % str(self.allow_paging).lower()          
-#        return res
-    
     def t_render_base_config(self):
         return self._get_config_str()
     
