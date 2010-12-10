@@ -1,1194 +1,706 @@
-/*!
- * jScrollPane - v2.0.0beta6 - 2010-10-28
- * http://jscrollpane.kelvinluck.com/
- *
- * Copyright (c) 2010 Kelvin Luck
- * Dual licensed under the MIT and GPL licenses.
+/* Copyright (c) 2009 Kelvin Luck (kelvin AT kelvinluck DOT com || http://www.kelvinluck.com)
+ * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) 
+ * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
+ * 
+ * See http://kelvinluck.com/assets/jquery/jScrollPane/
+ * $Id: jScrollPane.js 93 2010-06-01 08:17:28Z kelvin.luck $
  */
 
-// Script: jScrollPane - cross browser customisable scrollbars
-//
-// *Version: 2.0.0beta6, Last updated: 2010-10-28*
-//
-// Project Home - http://jscrollpane.kelvinluck.com/
-// GitHub       - http://github.com/vitch/jScrollPane
-// Source       - http://github.com/vitch/jScrollPane/raw/master/script/jquery.jscrollpane.js
-// (Minified)   - http://github.com/vitch/jScrollPane/raw/master/script/jquery.jscrollpane.min.js
-//
-// About: License
-//
-// Copyright (c) 2010 Kelvin Luck
-// Dual licensed under the MIT or GPL Version 2 licenses.
-// http://jscrollpane.kelvinluck.com/MIT-LICENSE.txt
-// http://jscrollpane.kelvinluck.com/GPL-LICENSE.txt
-//
-// About: Examples
-//
-// All examples and demos are available through the jScrollPane example site at:
-// http://jscrollpane.kelvinluck.com/
-//
-// About: Support and Testing
-//
-// This plugin is tested on the browsers below and has been found to work reliably on them. If you run
-// into a problem on one of the supported browsers then please visit the support section on the jScrollPane
-// website (http://jscrollpane.kelvinluck.com/) for more information on getting support. You are also
-// welcome to fork the project on GitHub if you can contribute a fix for a given issue. 
-//
-// jQuery Versions - tested in 1.4.2+ - reported to work in 1.3.x
-// Browsers Tested - Firefox 3.6.8, Safari 5, Opera 10.6, Chrome 5.0, IE 6, 7, 8
-//
-// About: Release History
-//
-// 2.0.0beta6 - (in progress) scrollToElement horizontal support
-// 2.0.0beta5 - (2010-10-18) jQuery 1.4.3 support, various bug fixes
-// 2.0.0beta4 - (2010-09-17) clickOnTrack support, bug fixes
-// 2.0.0beta3 - (2010-08-27) Horizontal mousewheel, mwheelIntent, keyboard support, bug fixes
-// 2.0.0beta2 - (2010-08-21) Bug fixes
-// 2.0.0beta1 - (2010-08-17) Rewrite to follow modern best practices and enable horizontal scrolling, initially hidden
-//							 elements and dynamically sized elements.
-// 1.x - (2006-12-31 - 2010-07-31) Initial version, hosted at googlecode, deprecated
+/**
+ * Replace the vertical scroll bars on any matched elements with a fancy
+ * styleable (via CSS) version. With JS disabled the elements will
+ * gracefully degrade to the browsers own implementation of overflow:auto.
+ * If the mousewheel plugin has been included on the page then the scrollable areas will also
+ * respond to the mouse wheel.
+ *
+ * @example jQuery(".scroll-pane").jScrollPane();
+ *
+ * @name jScrollPane
+ * @type jQuery
+ * @param Object  settings  hash with options, described below.
+ *                scrollbarWidth  - The width of the generated scrollbar in pixels
+ *                scrollbarMargin - The amount of space to leave on the side of the scrollbar in pixels
+ *                wheelSpeed    - The speed the pane will scroll in response to the mouse wheel in pixels
+ *                showArrows    - Whether to display arrows for the user to scroll with
+ *                arrowSize   - The height of the arrow buttons if showArrows=true
+ *                animateTo   - Whether to animate when calling scrollTo and scrollBy
+ *                dragMinHeight - The minimum height to allow the drag bar to be
+ *                dragMaxHeight - The maximum height to allow the drag bar to be
+ *                animateInterval - The interval in milliseconds to update an animating scrollPane (default 100)
+ *                animateStep   - The amount to divide the remaining scroll distance by when animating (default 3)
+ *                maintainPosition- Whether you want the contents of the scroll pane to maintain it's position when you re-initialise it - so it doesn't scroll as you add more content (default true)
+ *                tabIndex    - The tabindex for this jScrollPane to control when it is tabbed to when navigating via keyboard (default 0)
+ *                enableKeyboardNavigation - Whether to allow keyboard scrolling of this jScrollPane when it is focused (default true)
+ *                animateToInternalLinks - Whether the move to an internal link (e.g. when it's focused by tabbing or by a hash change in the URL) should be animated or instant (default false)
+ *                scrollbarOnLeft - Display the scrollbar on the left side?  (needs stylesheet changes, see examples.html)
+ *                reinitialiseOnImageLoad - Whether the jScrollPane should automatically re-initialise itself when any contained images are loaded (default false)
+ *                topCapHeight  - The height of the "cap" area between the top of the jScrollPane and the top of the track/ buttons
+ *                bottomCapHeight - The height of the "cap" area between the bottom of the jScrollPane and the bottom of the track/ buttons
+ *                observeHash   - Whether jScrollPane should attempt to automagically scroll to the correct place when an anchor inside the scrollpane is linked to (default true)
+ * @return jQuery
+ * @cat Plugins/jScrollPane
+ * @author Kelvin Luck (kelvin AT kelvinluck DOT com || http://www.kelvinluck.com)
+ */
 
-(function($,window,undefined){
+(function($) {
 
-	$.fn.jScrollPane = function(settings)
-	{
-		// JScrollPane "class" - public methods are available through $('selector').data('jsp')
-		function JScrollPane(elem, s)
-		{
+$.jScrollPane = {
+  active : []
+};
+$.fn.jScrollPane = function(settings)
+{
+  settings = $.extend({}, $.fn.jScrollPane.defaults, settings);
 
-			var settings, jsp = this, pane, paneWidth, paneHeight, container, contentWidth, contentHeight,
-				percentInViewH, percentInViewV, isScrollableV, isScrollableH, verticalDrag, dragMaxY,
-				verticalDragPosition, horizontalDrag, dragMaxX, horizontalDragPosition,
-				verticalBar, verticalTrack, scrollbarWidth, verticalTrackHeight, verticalDragHeight, arrowUp, arrowDown,
-				horizontalBar, horizontalTrack, horizontalTrackWidth, horizontalDragWidth, arrowLeft, arrowRight,
-				reinitialiseInterval, originalPadding, originalPaddingTotalWidth, previousPaneWidth,
-				wasAtTop = true, wasAtLeft = true, wasAtBottom = false, wasAtRight = false,
-				mwEvent = $.fn.mwheelIntent ? 'mwheelIntent.jsp' : 'mousewheel.jsp';
+  var rf = function() { return false; };
+  
+  return this.each(
+    function()
+    {
+      var $this = $(this);
+      var paneEle = this;
+      var currentScrollPosition = 0;
+      var paneWidth;
+      var paneHeight;
+      var trackHeight;
+      var trackOffset = settings.topCapHeight;
+      var $container;
+      
+      if ($(this).parent().is('.jScrollPaneContainer')) {
+        $container = $(this).parent();
+        currentScrollPosition = settings.maintainPosition ? $this.position().top : 0;
+        var $c = $(this).parent();
+        paneWidth = $c.innerWidth();
+        paneHeight = $c.outerHeight();
+        $('>.jScrollPaneTrack, >.jScrollArrowUp, >.jScrollArrowDown, >.jScrollCap', $c).remove();
+        $this.css({'top':0});
+      } else {
+        $this.data('originalStyleTag', $this.attr('style'));
+        // Switch the element's overflow to hidden to ensure we get the size of the element without the scrollbars [http://plugins.jquery.com/node/1208]
+        $this.css('overflow', 'hidden');
+        this.originalPadding = $this.css('paddingTop') + ' ' + $this.css('paddingRight') + ' ' + $this.css('paddingBottom') + ' ' + $this.css('paddingLeft');
+        this.originalSidePaddingTotal = (parseInt($this.css('paddingLeft')) || 0) + (parseInt($this.css('paddingRight')) || 0);
+        paneWidth = $this.innerWidth();
+        paneHeight = $this.innerHeight();
+        $container = $('<div></div>')
+          .attr({'className':'jScrollPaneContainer'})
+          .css(
+            {
+              'height':paneHeight+'px', 
+              'width':paneWidth+'px'
+            }
+          );
+        if (settings.enableKeyboardNavigation) {
+          $container.attr(
+            'tabindex', 
+            settings.tabIndex
+          );
+        }
+        $this.wrap($container);
+        $container = $this.parent();
+        // deal with text size changes (if the jquery.em plugin is included)
+        // and re-initialise the scrollPane so the track maintains the
+        // correct size
+        $(document).bind(
+          'emchange', 
+          function(e, cur, prev)
+          {
+            $this.jScrollPane(settings);
+          }
+        );
+        
+      }
+      trackHeight = paneHeight;
+      
+      if (settings.reinitialiseOnImageLoad) {
+        // code inspired by jquery.onImagesLoad: http://plugins.jquery.com/project/onImagesLoad
+        // except we re-initialise the scroll pane when each image loads so that the scroll pane is always up to size...
+        // TODO: Do I even need to store it in $.data? Is a local variable here the same since I don't pass the reinitialiseOnImageLoad when I re-initialise?
+        var $imagesToLoad = $.data(paneEle, 'jScrollPaneImagesToLoad') || $('img', $this);
+        var loadedImages = [];
+        
+        if ($imagesToLoad.length) {
+          $imagesToLoad.each(function(i, val) {
+            $(this).bind('load readystatechange', function() {
+              if($.inArray(i, loadedImages) == -1){ //don't double count images
+                loadedImages.push(val); //keep a record of images we've seen
+                $imagesToLoad = $.grep($imagesToLoad, function(n, i) {
+                  return n != val;
+                });
+                $.data(paneEle, 'jScrollPaneImagesToLoad', $imagesToLoad);
+                var s2 = $.extend(settings, {reinitialiseOnImageLoad:false});
+                $this.jScrollPane(s2); // re-initialise
+              }
+            }).each(function(i, val) {
+              if(this.complete || this.complete===undefined) { 
+                //needed for potential cached images
+                this.src = this.src; 
+              } 
+            });
+          });
+        };
+      }
 
-			originalPadding = elem.css('paddingTop') + ' ' +
-								elem.css('paddingRight') + ' ' +
-								elem.css('paddingBottom') + ' ' +
-								elem.css('paddingLeft');
-			originalPaddingTotalWidth = (parseInt(elem.css('paddingLeft')) || 0) +
-										(parseInt(elem.css('paddingRight')) || 0);
+      var p = this.originalSidePaddingTotal;
+      var realPaneWidth = paneWidth - settings.scrollbarWidth - settings.scrollbarMargin - p;
 
-			initialise(s);
+      var cssToApply = {
+        'height':'auto',
+        'width': realPaneWidth + 'px'
+      }
 
-			function initialise(s)
-			{
+      if(settings.scrollbarOnLeft) {
+        cssToApply.paddingLeft = settings.scrollbarMargin + settings.scrollbarWidth + 'px';
+      } else {
+        cssToApply.paddingRight = settings.scrollbarMargin + 'px';
+      }
 
-				var clonedElem, tempWrapper, /*firstChild, lastChild, */isMaintainingPositon, lastContentX, lastContentY,
-						hasContainingSpaceChanged;
+      $this.css(cssToApply);
 
-				settings = s;
+      var contentHeight = $this.outerHeight();
+      var percentInView = paneHeight / contentHeight;
+      
+      var isScrollable = percentInView < .99;
+      $container[isScrollable ? 'addClass' : 'removeClass']('jScrollPaneScrollable');
 
-				if (pane == undefined) {
-
-					elem.css(
-						{
-							'overflow': 'hidden',
-							'padding': 0
-						}
-					);
-					// TODO: Deal with where width/ height is 0 as it probably means the element is hidden and we should
-					// come back to it later and check once it is unhidden...
-					paneWidth = elem.innerWidth() + originalPaddingTotalWidth;
-					paneHeight = elem.innerHeight();
-
-					elem.width(paneWidth);
-					
-					pane = $('<div class="jspPane" />').wrap(
-						$('<div class="jspContainer" />')
-							.css({
-								'width': paneWidth + 'px',
-								'height': paneHeight + 'px'
-							}
-						)
-					);
-
-					elem.wrapInner(pane.parent());
-					// Need to get the vars after being added to the document, otherwise they reference weird
-					// disconnected orphan elements...
-					container = elem.find('>.jspContainer');
-					pane = container.find('>.jspPane');
-					pane.css('padding', originalPadding);
-
-					/*
-					// Move any margins from the first and last children up to the container so they can still
-					// collapse with neighbouring elements as they would before jScrollPane 
-					firstChild = pane.find(':first-child');
-					lastChild = pane.find(':last-child');
-					elem.css(
-						{
-							'margin-top': firstChild.css('margin-top'),
-							'margin-bottom': lastChild.css('margin-bottom')
-						}
-					);
-					firstChild.css('margin-top', 0);
-					lastChild.css('margin-bottom', 0);
-					*/
-				} else {
-					elem.css('width', '');
-
-					hasContainingSpaceChanged = elem.outerWidth() + originalPaddingTotalWidth != paneWidth || elem.outerHeight() != paneHeight;
-
-					if (hasContainingSpaceChanged) {
-						paneWidth = elem.innerWidth() + originalPaddingTotalWidth;
-						paneHeight = elem.innerHeight();
-						container.css({
-							'width': paneWidth + 'px',
-							'height': paneHeight + 'px'
-						});
-					}
-
-					previousPaneWidth = pane.innerWidth();
-
-					if (!hasContainingSpaceChanged && pane.outerWidth() == contentWidth && pane.outerHeight() == contentHeight) {
-						// Nothing has changed since we last initialised
-						if (isScrollableH || isScrollableV) { // If we had already set a width then re-set it
-							pane.css('width', previousPaneWidth + 'px');
-							elem.css('width', (previousPaneWidth + originalPaddingTotalWidth) + 'px');
-						}
-						// Then abort...
-						return;
-					}
-					
-					pane.css('width', '');
-					elem.css('width', (paneWidth ) + 'px');
-
-					container.find('>.jspVerticalBar,>.jspHorizontalBar').remove().end();
-				}
-
-				// Unfortunately it isn't that easy to find out the width of the element as it will always report the
-				// width as allowed by its container, regardless of overflow settings.
-				// A cunning workaround is to clone the element, set its position to absolute and place it in a narrow
-				// container. Now it will push outwards to its maxium real width...
-				clonedElem = pane.clone().css('position', 'absolute');
-				tempWrapper = $('<div style="width:1px; position: relative;" />').append(clonedElem);
-				$('body').append(tempWrapper);
-				contentWidth = Math.max(pane.outerWidth(), clonedElem.outerWidth());
-				tempWrapper.remove();
-				
-				contentHeight = pane.outerHeight();
-				percentInViewH = contentWidth / paneWidth;
-				percentInViewV = contentHeight / paneHeight;
-				isScrollableV = percentInViewV > 1;
-
-				isScrollableH = percentInViewH > 1;
-
-				//console.log(paneWidth, paneHeight, contentWidth, contentHeight, percentInViewH, percentInViewV, isScrollableH, isScrollableV);
-
-				if (!(isScrollableH || isScrollableV)) {
-					elem.removeClass('jspScrollable');
-					pane.css({
-						'top': 0,
-						'width': container.width() - originalPaddingTotalWidth
-					});
-					removeMousewheel();
-					removeFocusHandler();
-					removeKeyboardNav();
-					removeClickOnTrack();
-					unhijackInternalLinks();
-				} else {
-					elem.addClass('jspScrollable');
-
-					isMaintainingPositon = settings.maintainPosition && (verticalDragPosition || horizontalDragPosition);
-					if (isMaintainingPositon) {
-						lastContentX = contentPositionX();
-						lastContentY = contentPositionY();
-					}
-
-					initialiseVerticalScroll();
-					initialiseHorizontalScroll();
-					resizeScrollbars();
-
-					if (isMaintainingPositon) {
-						scrollToX(lastContentX);
-						scrollToY(lastContentY);
-					}
-
-					initFocusHandler();
-					initMousewheel();
-					if (settings.enableKeyboardNavigation) {
-						initKeyboardNav();
-					}
-					if (settings.clickOnTrack) {
-						initClickOnTrack();
-					}
-					
-					observeHash();
-					if (settings.hijackInternalLinks) {
-						hijackInternalLinks();
-					}
-				}
-
-				if (settings.autoReinitialise && !reinitialiseInterval) {
-					reinitialiseInterval = setInterval(
-						function()
-						{
-							initialise(settings);
-						},
-						settings.autoReinitialiseDelay
-					);
-				} else if (!settings.autoReinitialise && reinitialiseInterval) {
-					clearInterval(reinitialiseInterval)
-				}
-
-				elem.trigger('jsp-initialised', [isScrollableH || isScrollableV]);
-			}
-
-			function initialiseVerticalScroll()
-			{
-				if (isScrollableV) {
-
-					container.append(
-						$('<div class="jspVerticalBar" />').append(
-							$('<div class="jspCap jspCapTop" />'),
-							$('<div class="jspTrack" />').append(
-								$('<div class="jspDrag" />').append(
-									$('<div class="jspDragTop" />'),
-									$('<div class="jspDragBottom" />')
-								)
-							),
-							$('<div class="jspCap jspCapBottom" />')
-						)
-					);
-
-					verticalBar = container.find('>.jspVerticalBar');
-					verticalTrack = verticalBar.find('>.jspTrack');
-					verticalDrag = verticalTrack.find('>.jspDrag');
-
-					if (settings.showArrows) {
-						arrowUp = $('<a class="jspArrow jspArrowUp" />').bind(
-							'mousedown.jsp', getArrowScroll(0, -1)
-						).bind('click.jsp', nil);
-						arrowDown = $('<a class="jspArrow jspArrowDown" />').bind(
-							'mousedown.jsp', getArrowScroll(0, 1)
-						).bind('click.jsp', nil);
-						if (settings.arrowScrollOnHover) {
-							arrowUp.bind('mouseover.jsp', getArrowScroll(0, -1, arrowUp));
-							arrowDown.bind('mouseover.jsp', getArrowScroll(0, 1, arrowDown));
-						}
-
-						appendArrows(verticalTrack, settings.verticalArrowPositions, arrowUp, arrowDown);
-                        
-                        // Ipad, Iphone, Ipod and Android support(275-308)
-                        // Добавлена поддержка touch скроллина, сторонее дополнение написанное народнымим умельцами 
-                        if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i)) || (navigator.userAgent.match(/iPad/i)) || (navigator.userAgent.match(/Android/i))) {
-                                var isTouchScreen = 1;
-                            }else{
-                                var isTouchScreen = 0;
-                            }
+      if (isScrollable) {
+        $container.append(
+          $('<div></div>').addClass('jScrollCap jScrollCapTop').css({height:settings.topCapHeight}),
+          $('<div></div>').attr({'className':'jScrollPaneTrack'}).css({'width':settings.scrollbarWidth+'px'}).append(
+            $('<div></div>').attr({'className':'jScrollPaneDrag'}).css({'width':settings.scrollbarWidth+'px'}).append(
+              $('<div></div>').attr({'className':'jScrollPaneDragTop'}).css({'width':settings.scrollbarWidth+'px'}),
+              $('<div></div>').attr({'className':'jScrollPaneDragBottom'}).css({'width':settings.scrollbarWidth+'px'})
+            )
+          ),
+          $('<div></div>').addClass('jScrollCap jScrollCapBottom').css({height:settings.bottomCapHeight})
+        );
+        
+        var $track = $('>.jScrollPaneTrack', $container);
+        var $drag = $('>.jScrollPaneTrack .jScrollPaneDrag', $container);
         
         
-                        container.bind('touchstart', function(e){
-                            var cpos = dragPosition;
-                            if(isTouchScreen){
-                                            e = e.originalEvent.touches[0];
-                                        }
-                            var sY = e.pageY;
-                            var sX = e.pageX;
+        var currentArrowDirection;
+        var currentArrowTimerArr = [];// Array is used to store timers since they can stack up when dealing with keyboard events. This ensures all timers are cleaned up in the end, preventing an acceleration bug.
+        var currentArrowInc;
+        var whileArrowButtonDown = function() 
+        {
+          if (currentArrowInc > 4 || currentArrowInc % 4 == 0) {
+            positionDrag(dragPosition + currentArrowDirection * mouseWheelMultiplier);
+          }
+          currentArrowInc++;
+        };
+
+        if (settings.enableKeyboardNavigation) {
+          $container.bind(
+            'keydown.jscrollpane',
+            function(e) 
+            {
+              switch (e.keyCode) {
+                case 38: //up
+                  currentArrowDirection = -1;
+                  currentArrowInc = 0;
+                  whileArrowButtonDown();
+                  currentArrowTimerArr[currentArrowTimerArr.length] = setInterval(whileArrowButtonDown, 100);
+                  return false;
+                case 40: //down
+                  currentArrowDirection = 1;
+                  currentArrowInc = 0;
+                  whileArrowButtonDown();
+                  currentArrowTimerArr[currentArrowTimerArr.length] = setInterval(whileArrowButtonDown, 100);
+                  return false;
+                case 33: // page up
+                case 34: // page down
+                  // TODO
+                  return false;
+                default:
+              }
+            }
+          ).bind(
+            'keyup.jscrollpane',
+            function(e) 
+            {
+              if (e.keyCode == 38 || e.keyCode == 40) {
+                for (var i = 0; i < currentArrowTimerArr.length; i++) {
+                  clearInterval(currentArrowTimerArr[i]);
+                }
+                return false;
+              }
+            }
+          );
+        }
+
+        if (settings.showArrows) {
+          
+          var currentArrowButton;
+          var currentArrowInterval;
+
+          var onArrowMouseUp = function(event)
+          {
+            $('html').unbind('mouseup', onArrowMouseUp);
+            currentArrowButton.removeClass('jScrollActiveArrowButton');
+            clearInterval(currentArrowInterval);
+          };
+          var onArrowMouseDown = function() {
+            $('html').bind('mouseup', onArrowMouseUp);
+            currentArrowButton.addClass('jScrollActiveArrowButton');
+            currentArrowInc = 0;
+            whileArrowButtonDown();
+            currentArrowInterval = setInterval(whileArrowButtonDown, 100);
+          };
+          $container
+            .append(
+              $('<a></a>')
+                .attr(
+                  {
+                    'href':'javascript:;', 
+                    'className':'jScrollArrowUp', 
+                    'tabindex':-1
+                  }
+                )
+                .css(
+                  {
+                    'width':settings.scrollbarWidth+'px',
+                    'top':settings.topCapHeight + 'px'
+                  }
+                )
+                .html('Scroll up')
+                .bind('mousedown', function()
+                {
+                  currentArrowButton = $(this);
+                  currentArrowDirection = -1;
+                  onArrowMouseDown();
+                  this.blur();
+                  return false;
+                })
+                .bind('click', rf),
+              $('<a></a>')
+                .attr(
+                  {
+                    'href':'javascript:;', 
+                    'className':'jScrollArrowDown', 
+                    'tabindex':-1
+                  }
+                )
+                .css(
+                  {
+                    'width':settings.scrollbarWidth+'px',
+                    'bottom':settings.bottomCapHeight + 'px'
+                  }
+                )
+                .html('Scroll down')
+                .bind('mousedown', function()
+                {
+                  currentArrowButton = $(this);
+                  currentArrowDirection = 1;
+                  onArrowMouseDown();
+                  this.blur();
+                  return false;
+                })
+                .bind('click', rf)
+            );
+           
+         // Ipad, Iphone, Ipod and Android support
+         //(302-332)
+         if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i)) || (navigator.userAgent.match(/iPad/i)) || (navigator.userAgent.match(/Android/i))) {
+             var isTouchScreen = 1;
+           }else{
+             var isTouchScreen = 0;
+           }
+  
+  
+         $container.bind('touchstart', function(e){
+           var cpos = dragPosition;
+           if(isTouchScreen){
+                   e = e.originalEvent.touches[0];
+                 }
+           var sY = e.pageY;
+           var sX = e.pageX;
+  
+  
+           $container.bind('touchmove',function(ev){
+             if(isTouchScreen){
+               ev.preventDefault();
+               ev = ev.originalEvent.touches[0];
+             }
+  
+             var top = cpos-(ev.pageY-sY);
+             positionDrag(top);
+  
+           });
+           $container.bind('touchend',function(ev){
+             $container.unbind('touchmove touchend');
+           });
+         });
+
+          var $upArrow = $('>.jScrollArrowUp', $container);
+          var $downArrow = $('>.jScrollArrowDown', $container);
+        }
+        
+        if (settings.arrowSize) {
+          trackHeight = paneHeight - settings.arrowSize - settings.arrowSize;
+          trackOffset += settings.arrowSize;
+        } else if ($upArrow) {
+          var topArrowHeight = $upArrow.height();
+          settings.arrowSize = topArrowHeight;
+          trackHeight = paneHeight - topArrowHeight - $downArrow.height();
+          trackOffset += topArrowHeight;
+        }
+        trackHeight -= settings.topCapHeight + settings.bottomCapHeight;
+        $track.css({'height': trackHeight+'px', top:trackOffset+'px'})
+        
+        var $pane = $(this).css({'position':'absolute', 'overflow':'visible'});
+        
+        var currentOffset;
+        var maxY;
+        var mouseWheelMultiplier;
+        // store this in a seperate variable so we can keep track more accurately than just updating the css property..
+        var dragPosition = 0;
+        var dragMiddle = percentInView*paneHeight/2;
+        
+        // pos function borrowed from tooltip plugin and adapted...
+        var getPos = function (event, c) {
+          var p = c == 'X' ? 'Left' : 'Top';
+          return event['page' + c] || (event['client' + c] + (document.documentElement['scroll' + p] || document.body['scroll' + p])) || 0;
+        };
+        
+        var ignoreNativeDrag = function() { return false; };
+        
+        var initDrag = function()
+        {
+          ceaseAnimation();
+          currentOffset = $drag.offset(false);
+          currentOffset.top -= dragPosition;
+          maxY = trackHeight - $drag[0].offsetHeight;
+          mouseWheelMultiplier = 2 * settings.wheelSpeed * maxY / contentHeight;
+        };
+        
+        var onStartDrag = function(event)
+        {
+          initDrag();
+          dragMiddle = getPos(event, 'Y') - dragPosition - currentOffset.top;
+          $('html').bind('mouseup', onStopDrag).bind('mousemove', updateScroll).bind('mouseleave', onStopDrag)
+          if ($.browser.msie) {
+            $('html').bind('dragstart', ignoreNativeDrag).bind('selectstart', ignoreNativeDrag);
+          }
+          return false;
+        };
+        var onStopDrag = function()
+        {
+          $('html').unbind('mouseup', onStopDrag).unbind('mousemove', updateScroll);
+          dragMiddle = percentInView*paneHeight/2;
+          if ($.browser.msie) {
+            $('html').unbind('dragstart', ignoreNativeDrag).unbind('selectstart', ignoreNativeDrag);
+          }
+        };
+        var positionDrag = function(destY)
+        {
+          $container.scrollTop(0);
+          destY = destY < 0 ? 0 : (destY > maxY ? maxY : destY);
+          dragPosition = destY;
+          $drag.css({'top':destY+'px'});
+          var p = destY / maxY;
+          $this.data('jScrollPanePosition', (paneHeight-contentHeight)*-p);
+          $pane.css({'top':((paneHeight-contentHeight)*p) + 'px'});
+          $this.trigger('scroll');
+          if (settings.showArrows) {
+            $upArrow[destY == 0 ? 'addClass' : 'removeClass']('disabled');
+            $downArrow[destY == maxY ? 'addClass' : 'removeClass']('disabled');
+          }
+        };
+        var updateScroll = function(e)
+        {
+          positionDrag(getPos(e, 'Y') - currentOffset.top - dragMiddle);
+        };
+        
+        var dragH = Math.max(Math.min(percentInView*(paneHeight-settings.arrowSize*2), settings.dragMaxHeight), settings.dragMinHeight);
+        
+        $drag.css(
+          {'height':dragH+'px'}
+        ).bind('mousedown', onStartDrag);
+        
+        var trackScrollInterval;
+        var trackScrollInc;
+        var trackScrollMousePos;
+        var doTrackScroll = function()
+        {
+          if (trackScrollInc > 8 || trackScrollInc%4==0) {
+            positionDrag((dragPosition - ((dragPosition - trackScrollMousePos) / 2)));
+          }
+          trackScrollInc ++;
+        };
+        var onStopTrackClick = function()
+        {
+          clearInterval(trackScrollInterval);
+          $('html').unbind('mouseup', onStopTrackClick).unbind('mousemove', onTrackMouseMove);
+        };
+        var onTrackMouseMove = function(event)
+        {
+          trackScrollMousePos = getPos(event, 'Y') - currentOffset.top - dragMiddle;
+        };
+        var onTrackClick = function(event)
+        {
+          initDrag();
+          onTrackMouseMove(event);
+          trackScrollInc = 0;
+          $('html').bind('mouseup', onStopTrackClick).bind('mousemove', onTrackMouseMove);
+          trackScrollInterval = setInterval(doTrackScroll, 100);
+          doTrackScroll();
+          return false;
+        };
+        
+        $track.bind('mousedown', onTrackClick);
+        
+        $container.bind(
+          'mousewheel',
+          function (event, delta) {
+            delta = delta || (event.wheelDelta ? event.wheelDelta / 120 : (event.detail) ?
+-event.detail/3 : 0);
+            initDrag();
+            ceaseAnimation();
+            var d = dragPosition;
+            positionDrag(dragPosition - delta * mouseWheelMultiplier);
+            var dragOccured = d != dragPosition;
+            return !dragOccured;
+          }
+        );
+
+        var _animateToPosition;
+        var _animateToInterval;
+        function animateToPosition()
+        {
+          var diff = (_animateToPosition - dragPosition) / settings.animateStep;
+          if (diff > 1 || diff < -1) {
+            positionDrag(dragPosition + diff);
+          } else {
+            positionDrag(_animateToPosition);
+            ceaseAnimation();
+          }
+        }
+        var ceaseAnimation = function()
+        {
+          if (_animateToInterval) {
+            clearInterval(_animateToInterval);
+            delete _animateToPosition;
+          }
+        };
+        var scrollTo = function(pos, preventAni)
+        {
+          if (typeof pos == "string") {
+            // Legal hash values aren't necessarily legal jQuery selectors so we need to catch any
+            // errors from the lookup...
+            try {
+              $e = $(pos, $this);
+            } catch (err) {
+              return;
+            }
+            if (!$e.length) return;
+            pos = $e.offset().top - $this.offset().top;
+          }
+          ceaseAnimation();
+          var maxScroll = contentHeight - paneHeight;
+          pos = pos > maxScroll ? maxScroll : pos;
+          $this.data('jScrollPaneMaxScroll', maxScroll);
+          var destDragPosition = pos/maxScroll * maxY;
+          if (preventAni || !settings.animateTo) {
+            positionDrag(destDragPosition);
+          } else {
+            $container.scrollTop(0);
+            _animateToPosition = destDragPosition;
+            _animateToInterval = setInterval(animateToPosition, settings.animateInterval);
+          }
+        };
+        $this[0].scrollTo = scrollTo;
+        
+        $this[0].scrollBy = function(delta)
+        {
+          var currentPos = -parseInt($pane.css('top')) || 0;
+          scrollTo(currentPos + delta);
+        };
+        
+        initDrag();
+        
+        scrollTo(-currentScrollPosition, true);
+      
+        // Deal with it when the user tabs to a link or form element within this scrollpane
+        $('*', this).bind(
+          'focus',
+          function(event)
+          {
+            var $e = $(this);
+            
+            // loop through parents adding the offset top of any elements that are relatively positioned between
+            // the focused element and the jScrollPaneContainer so we can get the true distance from the top
+            // of the focused element to the top of the scrollpane...
+            var eleTop = 0;
+            
+            var preventInfiniteLoop = 100;
+            
+            while ($e[0] != $this[0]) {
+              eleTop += $e.position().top;
+              $e = $e.offsetParent();
+              if (!preventInfiniteLoop--) {
+                return;
+              }
+            }
+            
+            var viewportTop = -parseInt($pane.css('top')) || 0;
+            var maxVisibleEleTop = viewportTop + paneHeight;
+            var eleInView = eleTop > viewportTop && eleTop < maxVisibleEleTop;
+            if (!eleInView) {
+              var destPos = eleTop - settings.scrollbarMargin;
+              if (eleTop > viewportTop) { // element is below viewport - scroll so it is at bottom.
+                destPos += $(this).height() + 15 + settings.scrollbarMargin - paneHeight;
+              }
+              scrollTo(destPos);
+            }
+          }
+        )
         
         
-                            container.bind('touchmove',function(ev){
-                                if(isTouchScreen){
-                                    ev.preventDefault();
-                                    ev = ev.originalEvent.touches[0];
-                                }
+        if (settings.observeHash) {
+          if (location.hash && location.hash.length > 1) {
+            setTimeout(function(){
+              scrollTo(location.hash);
+            }, $.browser.safari ? 100 : 0);
+          }
+          
+          // use event delegation to listen for all clicks on links and hijack them if they are links to
+          // anchors within our content...
+          $(document).bind('click', function(e){
+            $target = $(e.target);
+            if ($target.is('a')) {
+              var h = $target.attr('href');
+              if (h && h.substr(0, 1) == '#' && h.length > 1) {
+                setTimeout(function(){
+                  scrollTo(h, !settings.animateToInternalLinks);
+                }, $.browser.safari ? 100 : 0);
+              }
+            }
+          });
+        }
         
-                                var top = cpos-(ev.pageY-sY);
-                                positionDrag(top);
+        // Deal with dragging and selecting text to make the scrollpane scroll...
+        function onSelectScrollMouseDown(e)
+        {
+           $(document).bind('mousemove.jScrollPaneDragging', onTextSelectionScrollMouseMove);
+           $(document).bind('mouseup.jScrollPaneDragging',   onSelectScrollMouseUp);
+          
+        }
         
-                            });
-                            container.bind('touchend',function(ev){
-                                container.unbind('touchmove touchend');
-                            });
-                        });
-                        
-					}
-
-					verticalTrackHeight = paneHeight;
-					container.find('>.jspVerticalBar>.jspCap:visible,>.jspVerticalBar>.jspArrow').each(
-						function()
-						{
-							verticalTrackHeight -= $(this).outerHeight();
-						}
-					);
-
-
-					verticalDrag.hover(
-						function()
-						{
-							verticalDrag.addClass('jspHover');
-						},
-						function()
-						{
-							verticalDrag.removeClass('jspHover');
-						}
-					).bind(
-						'mousedown.jsp',
-						function(e)
-						{
-							// Stop IE from allowing text selection
-							$('html').bind('dragstart.jsp selectstart.jsp', function() { return false; });
-
-							verticalDrag.addClass('jspActive');
-
-							var startY = e.pageY - verticalDrag.position().top;
-
-							$('html').bind(
-								'mousemove.jsp',
-								function(e)
-								{
-									positionDragY(e.pageY - startY, false);
-								}
-							).bind('mouseup.jsp mouseleave.jsp', cancelDrag);
-							return false;
-						}
-					);
-					sizeVerticalScrollbar();
-				}
-			}
-
-			function sizeVerticalScrollbar()
-			{
-				verticalTrack.height(verticalTrackHeight + 'px');
-				verticalDragPosition = 0;
-				scrollbarWidth = settings.verticalGutter + verticalTrack.outerWidth();
-
-				// Make the pane thinner to allow for the vertical scrollbar
-				pane.width(paneWidth - scrollbarWidth - originalPaddingTotalWidth);
-
-				// Add margin to the left of the pane if scrollbars are on that side (to position
-				// the scrollbar on the left or right set it's left or right property in CSS)
-				if (verticalBar.position().left == 0) {
-					pane.css('margin-left', scrollbarWidth + 'px');
-				}
-			}
-
-			function initialiseHorizontalScroll()
-			{
-				if (isScrollableH) {
-
-					container.append(
-						$('<div class="jspHorizontalBar" />').append(
-							$('<div class="jspCap jspCapLeft" />'),
-							$('<div class="jspTrack" />').append(
-								$('<div class="jspDrag" />').append(
-									$('<div class="jspDragLeft" />'),
-									$('<div class="jspDragRight" />')
-								)
-							),
-							$('<div class="jspCap jspCapRight" />')
-						)
-					);
-
-					horizontalBar = container.find('>.jspHorizontalBar');
-					horizontalTrack = horizontalBar.find('>.jspTrack');
-					horizontalDrag = horizontalTrack.find('>.jspDrag');
-
-					if (settings.showArrows) {
-						arrowLeft = $('<a class="jspArrow jspArrowLeft" />').bind(
-							'mousedown.jsp', getArrowScroll(-1, 0)
-						).bind('click.jsp', nil);
-						arrowRight = $('<a class="jspArrow jspArrowRight" />').bind(
-							'mousedown.jsp', getArrowScroll(1, 0)
-						).bind('click.jsp', nil);
-						if (settings.arrowScrollOnHover) {
-							arrowLeft.bind('mouseover.jsp', getArrowScroll(-1, 0, arrowLeft));
-							arrowRight.bind('mouseover.jsp', getArrowScroll(1, 0, arrowRight));
-						}
-						appendArrows(horizontalTrack, settings.horizontalArrowPositions, arrowLeft, arrowRight);
-					}
-
-					horizontalDrag.hover(
-						function()
-						{
-							horizontalDrag.addClass('jspHover');
-						},
-						function()
-						{
-							horizontalDrag.removeClass('jspHover');
-						}
-					).bind(
-						'mousedown.jsp',
-						function(e)
-						{
-							// Stop IE from allowing text selection
-							$('html').bind('dragstart.jsp selectstart.jsp', function() { return false; });
-
-							horizontalDrag.addClass('jspActive');
-
-							var startX = e.pageX - horizontalDrag.position().left;
-
-							$('html').bind(
-								'mousemove.jsp',
-								function(e)
-								{
-									positionDragX(e.pageX - startX, false);
-								}
-							).bind('mouseup.jsp mouseleave.jsp', cancelDrag);
-							return false;
-						}
-					);
-					horizontalTrackWidth = container.innerWidth();
-					sizeHorizontalScrollbar();
-				} else {
-					// no horizontal scroll
-				}
-			}
-
-			function sizeHorizontalScrollbar()
-			{
-
-				container.find('>.jspHorizontalBar>.jspCap:visible,>.jspHorizontalBar>.jspArrow').each(
-					function()
-					{
-						horizontalTrackWidth -= $(this).outerWidth();
-					}
-				);
-
-				horizontalTrack.width(horizontalTrackWidth + 'px');
-				horizontalDragPosition = 0;
-			}
-
-			function resizeScrollbars()
-			{
-				if (isScrollableH && isScrollableV) {
-					var horizontalTrackHeight = horizontalTrack.outerHeight(),
-						verticalTrackWidth = verticalTrack.outerWidth();
-					verticalTrackHeight -= horizontalTrackHeight;
-					$(horizontalBar).find('>.jspCap:visible,>.jspArrow').each(
-						function()
-						{
-							horizontalTrackWidth += $(this).outerWidth();
-						}
-					);
-					horizontalTrackWidth -= verticalTrackWidth;
-					paneHeight -= verticalTrackWidth;
-					paneWidth -= horizontalTrackHeight;
-					horizontalTrack.parent().append(
-						$('<div class="jspCorner" />').css('width', horizontalTrackHeight + 'px')
-					);
-					sizeVerticalScrollbar();
-					sizeHorizontalScrollbar();
-				}
-				// reflow content
-				if (isScrollableH) {
-					pane.width((container.outerWidth() - originalPaddingTotalWidth) + 'px');
-				}
-				contentHeight = pane.outerHeight();
-				percentInViewV = contentHeight / paneHeight;
-
-				if (isScrollableH) {
-					horizontalDragWidth = 1 / percentInViewH * horizontalTrackWidth;
-					if (horizontalDragWidth > settings.horizontalDragMaxWidth) {
-						horizontalDragWidth = settings.horizontalDragMaxWidth;
-					} else if (horizontalDragWidth < settings.horizontalDragMinWidth) {
-						horizontalDragWidth = settings.horizontalDragMinWidth;
-					}
-					horizontalDrag.width(horizontalDragWidth + 'px');
-					dragMaxX = horizontalTrackWidth - horizontalDragWidth;
-					_positionDragX(horizontalDragPosition); // To update the state for the arrow buttons
-				}
-				if (isScrollableV) {
-					verticalDragHeight = 1 / percentInViewV * verticalTrackHeight;
-					if (verticalDragHeight > settings.verticalDragMaxHeight) {
-						verticalDragHeight = settings.verticalDragMaxHeight;
-					} else if (verticalDragHeight < settings.verticalDragMinHeight) {
-						verticalDragHeight = settings.verticalDragMinHeight;
-					}
-					verticalDrag.height(verticalDragHeight + 'px');
-					dragMaxY = verticalTrackHeight - verticalDragHeight;
-					_positionDragY(verticalDragPosition); // To update the state for the arrow buttons
-				}
-			}
-
-			function appendArrows(ele, p, a1, a2)
-			{
-				var p1 = "before", p2 = "after", aTemp;
-				
-				// Sniff for mac... Is there a better way to determine whether the arrows would naturally appear
-				// at the top or the bottom of the bar?
-				if (p == "os") {
-					p = /Mac/.test(navigator.platform) ? "after" : "split";
-				}
-				if (p == p1) {
-					p2 = p;
-				} else if (p == p2) {
-					p1 = p;
-					aTemp = a1;
-					a1 = a2;
-					a2 = aTemp;
-				}
-
-				ele[p1](a1)[p2](a2);
-			}
-
-			function getArrowScroll(dirX, dirY, ele) {
-				return function()
-				{
-					arrowScroll(dirX, dirY, this, ele);
-					this.blur();
-					return false;
-				}
-			}
-
-			function arrowScroll(dirX, dirY, arrow, ele)
-			{
-				arrow = $(arrow).addClass('jspActive');
-
-				var eve, doScroll = function()
-					{
-						if (dirX != 0) {
-							positionDragX(horizontalDragPosition + dirX * settings.arrowButtonSpeed, false);
-						}
-						if (dirY != 0) {
-							positionDragY(verticalDragPosition + dirY * settings.arrowButtonSpeed, false);
-						}
-					},
-					scrollInt = setInterval(doScroll, settings.arrowRepeatFreq);
-
-				doScroll();
-
-				eve = ele == undefined ? 'mouseup.jsp' : 'mouseout.jsp';
-				ele = ele || $('html');
-				ele.bind(
-					eve,
-					function()
-					{
-						arrow.removeClass('jspActive');
-						clearInterval(scrollInt);
-						ele.unbind(eve);
-					}
-				);
-			}
-
-			function initClickOnTrack()
-			{
-				removeClickOnTrack();
-				if (isScrollableV) {
-					verticalTrack.bind(
-						'mousedown.jsp',
-						function(e)
-						{
-							if (e.originalTarget == undefined || e.originalTarget == e.currentTarget) {
-								var clickedTrack = $(this),
-									scrollInt = setInterval(
-										function()
-										{
-											var offset = clickedTrack.offset(), pos = e.pageY - offset.top;
-											if (verticalDragPosition + verticalDragHeight < pos) {
-												positionDragY(verticalDragPosition + settings.trackClickSpeed);
-											} else if (pos < verticalDragPosition) {
-												positionDragY(verticalDragPosition - settings.trackClickSpeed);
-											} else {
-												cancelClick();
-											}
-										},
-										settings.trackClickRepeatFreq
-									),
-									cancelClick = function()
-									{
-										scrollInt && clearInterval(scrollInt);
-										scrollInt = null;
-										$(document).unbind('mouseup.jsp', cancelClick);
-									};
-								$(document).bind('mouseup.jsp', cancelClick);
-								return false;
-							}
-						}
-					);
-				}
-				if (isScrollableH) {
-					horizontalTrack.bind(
-						'mousedown.jsp',
-						function(e)
-						{
-							if (e.originalTarget == undefined || e.originalTarget == e.currentTarget) {
-								var clickedTrack = $(this),
-									scrollInt = setInterval(
-										function()
-										{
-											var offset = clickedTrack.offset(), pos = e.pageX - offset.left;
-											if (horizontalDragPosition + horizontalDragWidth < pos) {
-												positionDragX(horizontalDragPosition + settings.trackClickSpeed);
-											} else if (pos < horizontalDragPosition) {
-												positionDragX(horizontalDragPosition - settings.trackClickSpeed);
-											} else {
-												cancelClick();
-											}
-										},
-										settings.trackClickRepeatFreq
-									),
-									cancelClick = function()
-									{
-										scrollInt && clearInterval(scrollInt);
-										scrollInt = null;
-										$(document).unbind('mouseup.jsp', cancelClick);
-									};
-								$(document).bind('mouseup.jsp', cancelClick);
-								return false;
-							}
-						}
-					);
-				}
-			}
-
-			function removeClickOnTrack()
-			{
-				horizontalTrack && horizontalTrack.unbind('mousedown.jsp');
-				verticalTrack && verticalTrack.unbind('mousedown.jsp');
-			}
-
-			function cancelDrag()
-			{
-				$('html').unbind('dragstart.jsp selectstart.jsp mousemove.jsp mouseup.jsp mouseleave.jsp');
-
-				verticalDrag && verticalDrag.removeClass('jspActive');
-				horizontalDrag && horizontalDrag.removeClass('jspActive');
-			}
-
-			function positionDragY(destY, animate)
-			{
-				if (!isScrollableV) {
-					return;
-				}
-				if (destY < 0) {
-					destY = 0;
-				} else if (destY > dragMaxY) {
-					destY = dragMaxY;
-				}
-
-				// can't just check if(animate) because false is a valid value that could be passed in...
-				if (animate == undefined) {
-					animate = settings.animateScroll;
-				}
-				if (animate) {
-					jsp.animate(verticalDrag, 'top', destY,	_positionDragY);
-				} else {
-					verticalDrag.css('top', destY);
-					_positionDragY(destY);
-				}
-
-			}
-
-			function _positionDragY(destY)
-			{
-				if (destY == undefined) {
-					destY = verticalDrag.position().top;
-				}
-
-				container.scrollTop(0);
-				verticalDragPosition = destY;
-
-				var isAtTop = verticalDragPosition == 0,
-					isAtBottom = verticalDragPosition == dragMaxY,
-					percentScrolled = destY/ dragMaxY,
-					destTop = -percentScrolled * (contentHeight - paneHeight);
-
-				if (wasAtTop != isAtTop || wasAtBottom != isAtBottom) {
-					wasAtTop = isAtTop;
-					wasAtBottom = isAtBottom;
-					elem.trigger('jsp-arrow-change', [wasAtTop, wasAtBottom, wasAtLeft, wasAtRight]);
-				}
-				
-				updateVerticalArrows(isAtTop, isAtBottom);
-				pane.css('top', destTop);
-				elem.trigger('jsp-scroll-y', [-destTop, isAtTop, isAtBottom]);
-			}
-
-			function positionDragX(destX, animate)
-			{
-				if (!isScrollableH) {
-					return;
-				}
-				if (destX < 0) {
-					destX = 0;
-				} else if (destX > dragMaxX) {
-					destX = dragMaxX;
-				}
-
-				if (animate == undefined) {
-					animate = settings.animateScroll;
-				}
-				if (animate) {
-					jsp.animate(horizontalDrag, 'left', destX,	_positionDragX);
-				} else {
-					horizontalDrag.css('left', destX);
-					_positionDragX(destX);
-				}
-			}
-
-			function _positionDragX(destX)
-			{
-				if (destX == undefined) {
-					destX = horizontalDrag.position().left;
-				}
-
-				container.scrollTop(0);
-				horizontalDragPosition = destX;
-
-				var isAtLeft = horizontalDragPosition == 0,
-					isAtRight = horizontalDragPosition == dragMaxX,
-					percentScrolled = destX / dragMaxX,
-					destLeft = -percentScrolled * (contentWidth - paneWidth);
-
-				if (wasAtLeft != isAtLeft || wasAtRight != isAtRight) {
-					wasAtLeft = isAtLeft;
-					wasAtRight = isAtRight;
-					elem.trigger('jsp-arrow-change', [wasAtTop, wasAtBottom, wasAtLeft, wasAtRight]);
-				}
-				
-				updateHorizontalArrows(isAtLeft, isAtRight);
-				pane.css('left', destLeft);
-				elem.trigger('jsp-scroll-x', [-destLeft, isAtLeft, isAtRight]);
-			}
-
-			function updateVerticalArrows(isAtTop, isAtBottom)
-			{
-				if (settings.showArrows) {
-					arrowUp[isAtTop ? 'addClass' : 'removeClass']('jspDisabled');
-					arrowDown[isAtBottom ? 'addClass' : 'removeClass']('jspDisabled');
-				}
-			}
-
-			function updateHorizontalArrows(isAtLeft, isAtRight)
-			{
-				if (settings.showArrows) {
-					arrowLeft[isAtLeft ? 'addClass' : 'removeClass']('jspDisabled');
-					arrowRight[isAtRight ? 'addClass' : 'removeClass']('jspDisabled');
-				}
-			}
-
-			function scrollToY(destY, animate)
-			{
-				var percentScrolled = destY / (contentHeight - paneHeight);
-				positionDragY(percentScrolled * dragMaxY, animate);
-			}
-
-			function scrollToX(destX, animate)
-			{
-				var percentScrolled = destX / (contentWidth - paneWidth);
-				positionDragX(percentScrolled * dragMaxX, animate);
-			}
-
-			function scrollToElement(ele, stickToTop, animate)
-			{
-				var e, eleHeight, eleWidth, eleTop = 0, eleLeft = 0, viewportTop, maxVisibleEleTop, maxVisibleEleLeft, destY, destX;
-
-				// Legal hash values aren't necessarily legal jQuery selectors so we need to catch any
-				// errors from the lookup...
-				try {
-					e = $(ele);
-				} catch (err) {
-					return;
-				}
-				eleHeight = e.outerHeight();
-				eleWidth= e.outerWidth();
-
-				container.scrollTop(0);
-				container.scrollLeft(0);
-				
-				// loop through parents adding the offset top of any elements that are relatively positioned between
-				// the focused element and the jspPane so we can get the true distance from the top
-				// of the focused element to the top of the scrollpane...
-				while (!e.is('.jspPane')) {
-					eleTop += e.position().top;
-					eleLeft += e.position().left;
-					e = e.offsetParent();
-					if (/^body|html$/i.test(e[0].nodeName)) {
-						// we ended up too high in the document structure. Quit!
-						return;
-					}
-				}
-
-				viewportTop = contentPositionY();
-				maxVisibleEleTop = viewportTop + paneHeight;
-				if (eleTop < viewportTop || stickToTop) { // element is above viewport
-					destY = eleTop - settings.verticalGutter;
-				} else if (eleTop + eleHeight > maxVisibleEleTop) { // element is below viewport
-					destY = eleTop - paneHeight + eleHeight + settings.verticalGutter;
-				}
-				if (destY) {
-					scrollToY(destY, animate);
-				}
-				
-				viewportLeft = contentPositionX();
-	            maxVisibleEleLeft = viewportLeft + paneWidth;
-	            if (eleLeft < viewportLeft || stickToTop) { // element is to the left of viewport
-	                destX = eleLeft - settings.horizontalGutter;
-	            } else if (eleLeft + eleWidth > maxVisibleEleLeft) { // element is to the right viewport
-	                destX = eleLeft - paneWidth + eleWidth + settings.horizontalGutter;
-	            }
-	            if (destX) {
-	                scrollToX(destX, animate);
-	            }
-
-			}
-
-			function contentPositionX()
-			{
-				return -pane.position().left;
-			}
-
-			function contentPositionY()
-			{
-				return -pane.position().top;
-			}
-
-			function initMousewheel()
-			{
-				container.unbind(mwEvent).bind(
-					mwEvent,
-					function (event, delta, deltaX, deltaY) {
-						var dX = horizontalDragPosition, dY = verticalDragPosition;
-						positionDragX(horizontalDragPosition + deltaX * settings.mouseWheelSpeed, false)
-						positionDragY(verticalDragPosition - deltaY * settings.mouseWheelSpeed, false);
-						// return true if there was no movement so rest of screen can scroll
-						return dX == horizontalDragPosition && dY == verticalDragPosition;
-					}
-				);
-			}
-
-			function removeMousewheel()
-			{
-				container.unbind(mwEvent);
-			}
-
-			function nil()
-			{
-				return false;
-			}
-
-			function initFocusHandler()
-			{
-				pane.unbind('focusin.jsp').bind(
-					'focusin.jsp',
-					function(e)
-					{
-						if(e.target === pane[0]){return;}
-						scrollToElement(e.target, false);
-					}
-				);
-			}
-
-			function removeFocusHandler()
-			{
-
-				pane.unbind('focusin.jsp');
-			}
-			
-			function initKeyboardNav()
-			{
-				var pressed, pressedTimer;
-				elem.attr('tabindex', 0)
-					.unbind('keydown.jsp')
-					.bind(
-						'keydown.jsp',
-						function(e)
-						{
-							if(e.target !== elem[0]){
-								return;
-							}
-							var dX = horizontalDragPosition, dY = verticalDragPosition, step = pressed ? 2 : 16;
-							switch(e.keyCode) {
-								case 40: // down
-									positionDragY(verticalDragPosition + step, false);
-									break;
-								case 38: // up
-									positionDragY(verticalDragPosition - step, false);
-									break;
-								case 34: // page down
-								case 32: // space
-									scrollToY(contentPositionY() + Math.max(32, paneHeight) - 16);
-									break;
-								case 33: // page up
-									scrollToY(contentPositionY() - paneHeight + 16);
-									break;
-								case 35: // end
-									scrollToY(contentHeight - paneHeight);
-									break;
-								case 36: // home
-									scrollToY(0);
-									break;
-								case 39: // right
-									positionDragX(horizontalDragPosition + step, false);
-									break;
-								case 37: // left
-									positionDragX(horizontalDragPosition - step, false);
-									break;
-							}
-
-							if( !(dX == horizontalDragPosition && dY == verticalDragPosition) ){
-								pressed = true;
-								clearTimeout(pressedTimer);
-								pressedTimer = setTimeout(function(){
-									pressed = false;
-								}, 260);
-								return false;
-							}
-						}
-					);
-				if(settings.hideFocus) {
-					elem.css('outline', 'none');
-					if('hideFocus' in container[0]){
-						elem.attr('hideFocus', true);
-					}
-				} else {
-					elem.css('outline', '');
-					if('hideFocus' in container[0]){
-						elem.attr('hideFocus', false);
-					}
-				}
-			}
-			
-			function removeKeyboardNav()
-			{
-				elem.attr('tabindex', '-1')
-					.removeAttr('tabindex')
-					.unbind('keydown.jsp');
-			}
-
-			function observeHash()
-			{
-				if (location.hash && location.hash.length > 1) {
-					var e, retryInt;
-					try {
-						e = $(location.hash);
-					} catch (err) {
-						return;
-					}
-
-					if (e.length && pane.find(e)) {
-						// nasty workaround but it appears to take a little while before the hash has done its thing
-						// to the rendered page so we just wait until the container's scrollTop has been messed up.
-						if (container.scrollTop() == 0) {
-							retryInt = setInterval(
-								function()
-								{
-									if (container.scrollTop() > 0) {
-										scrollToElement(location.hash, true);
-										$(document).scrollTop(container.position().top);
-										clearInterval(retryInt);
-									}
-								},
-								50
-							)
-						} else {
-							scrollToElement(location.hash, true);
-							$(document).scrollTop(container.position().top);
-						}
-					}
-				}
-			}
-
-			function unhijackInternalLinks()
-			{
-				$('a.jspHijack').unbind('click.jsp-hijack').removeClass('jspHijack');
-			}
-
-			function hijackInternalLinks()
-			{
-				unhijackInternalLinks();
-				$('a[href^=#]').addClass('jspHijack').bind(
-					'click.jsp-hijack',
-					function()
-					{
-						var uriParts = this.href.split('#'), hash;
-						if (uriParts.length > 1) {
-							hash = uriParts[1];
-							if (hash.length > 0 && pane.find('#' + hash).length > 0) {
-								scrollToElement('#' + hash, true);
-								// Need to return false otherwise things mess up... Would be nice to maybe also scroll
-								// the window to the top of the scrollpane?
-								return false;
-							}
-						}
-					}
-				)
-			}
-
-			// Public API
-			$.extend(
-				jsp,
-				{
-					// Reinitialises the scroll pane (if it's internal dimensions have changed since the last time it
-					// was initialised). The settings object which is passed in will override any settings from the
-					// previous time it was initialised - if you don't pass any settings then the ones from the previous
-					// initialisation will be used.
-					reinitialise: function(s)
-					{
-						s = $.extend({}, s, settings);
-						initialise(s);
-					},
-					// Scrolls the specified element (a jQuery object, DOM node or jQuery selector string) into view so
-					// that it can be seen within the viewport. If stickToTop is true then the element will appear at
-					// the top of the viewport, if it is false then the viewport will scroll as little as possible to
-					// show the element. You can also specify if you want animation to occur. If you don't provide this
-					// argument then the animateScroll value from the settings object is used instead.
-					scrollToElement: function(ele, stickToTop, animate)
-					{
-						scrollToElement(ele, stickToTop, animate);
-					},
-					// Scrolls the pane so that the specified co-ordinates within the content are at the top left
-					// of the viewport. animate is optional and if not passed then the value of animateScroll from
-					// the settings object this jScrollPane was initialised with is used.
-					scrollTo: function(destX, destY, animate)
-					{
-						scrollToX(destX, animate);
-						scrollToY(destY, animate);
-					},
-					// Scrolls the pane so that the specified co-ordinate within the content is at the left of the
-					// viewport. animate is optional and if not passed then the value of animateScroll from the settings
-					// object this jScrollPane was initialised with is used.
-					scrollToX: function(destX, animate)
-					{
-						scrollToX(destX, animate);
-					},
-					// Scrolls the pane so that the specified co-ordinate within the content is at the top of the
-					// viewport. animate is optional and if not passed then the value of animateScroll from the settings
-					// object this jScrollPane was initialised with is used.
-					scrollToY: function(destY, animate)
-					{
-						scrollToY(destY, animate);
-					},
-					// Scrolls the pane by the specified amount of pixels. animate is optional and if not passed then
-					// the value of animateScroll from the settings object this jScrollPane was initialised with is used.
-					scrollBy: function(deltaX, deltaY, animate)
-					{
-						jsp.scrollByX(deltaX, animate);
-						jsp.scrollByY(deltaY, animate);
-					},
-					// Scrolls the pane by the specified amount of pixels. animate is optional and if not passed then
-					// the value of animateScroll from the settings object this jScrollPane was initialised with is used.
-					scrollByX: function(deltaX, animate)
-					{
-						var destX = contentPositionX() + deltaX,
-							percentScrolled = destX / (contentWidth - paneWidth);
-						positionDragX(percentScrolled * dragMaxX, animate);
-					},
-					// Scrolls the pane by the specified amount of pixels. animate is optional and if not passed then
-					// the value of animateScroll from the settings object this jScrollPane was initialised with is used.
-					scrollByY: function(deltaY, animate)
-					{
-						var destY = contentPositionY() + deltaY,
-							percentScrolled = destY / (contentHeight - paneHeight);
-						positionDragY(percentScrolled * dragMaxY, animate);
-					},
-					// This method is called when jScrollPane is trying to animate to a new position. You can override
-					// it if you want to provide advanced animation functionality. It is passed the following arguments:
-					//  * ele          - the element whose position is being animated
-					//  * prop         - the property that is being animated
-					//  * value        - the value it's being animated to
-					//  * stepCallback - a function that you must execute each time you update the value of the property
-					// You can use the default implementation (below) as a starting point for your own implementation.
-					animate: function(ele, prop, value, stepCallback)
-					{
-						var params = {};
-						params[prop] = value;
-						ele.animate(
-							params,
-							{
-								'duration'	: settings.animateDuration,
-								'ease'		: settings.animateEase,
-								'queue'		: false,
-								'step'		: stepCallback
-							}
-						);
-					},
-					// Returns the current x position of the viewport with regards to the content pane.
-					getContentPositionX: function()
-					{
-						return contentPositionX();
-					},
-					// Returns the current y position of the viewport with regards to the content pane.
-					getContentPositionY: function()
-					{
-						return contentPositionY();
-					},
-					// Returns whether or not this scrollpane has a horizontal scrollbar.
-					getIsScrollableH: function()
-					{
-						return isScrollableH;
-					},
-					// Returns whether or not this scrollpane has a vertical scrollbar.
-					getIsScrollableV: function()
-					{
-						return isScrollableV;
-					},
-					// Gets a reference to the content pane. It is important that you use this method if you want to
-					// edit the content of your jScrollPane as if you access the element directly then you may have some
-					// problems (as your original element has had additional elements for the scrollbars etc added into
-					// it).
-					getContentPane: function()
-					{
-						return pane;
-					},
-					// Scrolls this jScrollPane down as far as it can currently scroll. If animate isn't passed then the
-					// animateScroll value from settings is used instead.
-					scrollToBottom: function(animate)
-					{
-						positionDragY(dragMaxY, animate);
-					},
-					// Hijacks the links on the page which link to content inside the scrollpane. If you have changed
-					// the content of your page (e.g. via AJAX) and want to make sure any new anchor links to the
-					// contents of your scroll pane will work then call this function.
-					hijackInternalLinks: function()
-					{
-						hijackInternalLinks();
-					}
-				}
-			);
-		}
-
-		// Pluginifying code...
-
-		settings = $.extend({}, $.fn.jScrollPane.defaults, settings);
-
-		var ret;
-		this.each(
-			function()
-			{
-				var elem = $(this), jspApi = elem.data('jsp');
-				if (jspApi) {
-					jspApi.reinitialise(settings);
-				} else {
-					jspApi = new JScrollPane(elem, settings);
-					elem.data('jsp', jspApi);
-				}
-				ret = ret ? ret.add(elem) : elem;
-			}
-		)
-		return ret;
-	};
-
-	$.fn.jScrollPane.defaults = {
-		'showArrows'				: false,
-		'maintainPosition'			: true,
-		'clickOnTrack'				: true,
-		'autoReinitialise'			: true,
-		'autoReinitialiseDelay'		: 500,
-		'verticalDragMinHeight'		: 0,
-		'verticalDragMaxHeight'		: 99999,
-		'horizontalDragMinWidth'	: 0,
-		'horizontalDragMaxWidth'	: 99999,
-		'animateScroll'				: false,
-		'animateDuration'			: 300,
-		'animateEase'				: 'linear',
-		'hijackInternalLinks'		: false,
-		'verticalGutter'			: 4,
-		'horizontalGutter'			: 4,
-		'mouseWheelSpeed'			: 10,
-		'arrowButtonSpeed'			: 10,
-		'arrowRepeatFreq'			: 100,
-		'arrowScrollOnHover'		: false,
-		'trackClickSpeed'			: 30,
-		'trackClickRepeatFreq'		: 100,
-		'verticalArrowPositions'	: 'split',
-		'horizontalArrowPositions'	: 'split',
-		'enableKeyboardNavigation'	: true,
-		'hideFocus'					: false
-	};
-
-})(jQuery,this);
+        var textDragDistanceAway;
+        var textSelectionInterval;
+        
+        function onTextSelectionInterval()
+        {
+          direction = textDragDistanceAway < 0 ? -1 : 1;
+          $this[0].scrollBy(textDragDistanceAway / 2);
+        }
+
+        function clearTextSelectionInterval()
+        {
+          if (textSelectionInterval) {
+            clearInterval(textSelectionInterval);
+            textSelectionInterval = undefined;
+          }
+        }
+        
+        function onTextSelectionScrollMouseMove(e)
+        {
+          var offset = $this.parent().offset().top;
+          var maxOffset = offset + paneHeight;
+          var mouseOffset = getPos(e, 'Y');
+          textDragDistanceAway = mouseOffset < offset ? mouseOffset - offset : (mouseOffset > maxOffset ? mouseOffset - maxOffset : 0);
+          if (textDragDistanceAway == 0) {
+            clearTextSelectionInterval();
+          } else {
+            if (!textSelectionInterval) {
+              textSelectionInterval  = setInterval(onTextSelectionInterval, 100);
+            }
+          }
+        }
+
+        function onSelectScrollMouseUp(e)
+        {
+           $(document)
+            .unbind('mousemove.jScrollPaneDragging')
+            .unbind('mouseup.jScrollPaneDragging');
+           clearTextSelectionInterval();
+        }
+
+        $container.bind('mousedown.jScrollPane', onSelectScrollMouseDown);
+
+        
+        $.jScrollPane.active.push($this[0]);
+        
+      } else {
+        $this.css(
+          {
+            'height':paneHeight+'px',
+            'width':paneWidth-this.originalSidePaddingTotal+'px',
+            'padding':this.originalPadding
+          }
+        );
+        $this[0].scrollTo = $this[0].scrollBy = function() {};
+        // clean up listeners
+        $this.parent().unbind('mousewheel').unbind('mousedown.jScrollPane').unbind('keydown.jscrollpane').unbind('keyup.jscrollpane');
+      }
+      
+    }
+  )
+};
+
+$.fn.jScrollPaneRemove = function()
+{
+  $(this).each(function()
+  {
+    $this = $(this);
+    var $c = $this.parent();
+    if ($c.is('.jScrollPaneContainer')) {
+      $this.css(
+        {
+          'top':'',
+          'height':'',
+          'width':'',
+          'padding':'',
+          'overflow':'',
+          'position':''
+        }
+      );
+      $this.attr('style', $this.data('originalStyleTag'));
+      $c.after($this).remove();
+    }
+  });
+}
+
+$.fn.jScrollPane.defaults = {
+  scrollbarWidth : 59,
+  scrollbarMargin : 5,
+  wheelSpeed : 18,
+  showArrows : true,
+  arrowSize : 0,
+  animateTo : false,
+  dragMinHeight : 59,
+  dragMaxHeight : 59,
+  animateInterval : 100,
+  animateStep: 3,
+  maintainPosition: true,
+  scrollbarOnLeft: false,
+  reinitialiseOnImageLoad: true,
+  tabIndex : 0,
+  enableKeyboardNavigation: true,
+  animateToInternalLinks: false,
+  topCapHeight: 0,
+  bottomCapHeight: 0,
+  observeHash: true
+};
+
+// clean up the scrollTo expandos
+$(window)
+  .bind('unload', function() {
+    var els = $.jScrollPane.active; 
+    for (var i=0; i<els.length; i++) {
+      els[i].scrollTo = els[i].scrollBy = null;
+    }
+  }
+);
+
+})(jQuery);
