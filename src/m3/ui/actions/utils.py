@@ -168,7 +168,7 @@ def safe_delete_record(model, id=None):
     try:
         cursor = connection.cursor() #@UndefinedVariable
         id = id if id is not None else model.id
-        sql = "DELETE FROM %s WHERE id = %s" % (model._meta.db_table, id)
+        sql = "DELETE FROM %s WHERE id = %s" % (connection.ops.quote_name(model._meta.db_table), id)
         cursor.execute(sql)
         transaction.commit_unless_managed()
     except Exception, e:
