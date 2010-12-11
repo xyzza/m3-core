@@ -21,7 +21,7 @@ function(){
 	    ,useArrows: true
 	    ,autoScroll: false
 	    ,animate: true
-	    {% if component.drag_drop %} 
+	    {% if component.drag_drop and not component.read_only%} 
 		,enableDD: true 
 		,dropConfig: {allowContainerDrop: true }
 		{% endif %}

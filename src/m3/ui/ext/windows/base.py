@@ -15,6 +15,8 @@ from m3.ui.ext import render_template
 from m3.helpers.datastructures import TypedList
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from m3.ui.ext.controls import ExtButton
+from m3.ui.ext.containers.base import BaseExtContainer
+from m3.ui.ext.controls.base import BaseExtControl
 
 
 class BaseExtWindow(ExtUIComponent):
@@ -49,7 +51,7 @@ class BaseExtWindow(ExtUIComponent):
         self.body_style = 'padding:5px;'
         self.icon_cls = None
         self.top_bar = None
-        self.buttom_bar = None
+        self.bottom_bar = None
         self.footer_bar = None
         self.border = True
         self.draggable = True
@@ -80,7 +82,7 @@ class BaseExtWindow(ExtUIComponent):
         self._put_config_value('bodyStyle', self.body_style)
         self._put_config_value('layout', self.layout)
         self._put_config_value('tbar', self.t_render_top_bar, self.top_bar)
-        self._put_config_value('bbar', self.t_render_buttom_bar, self.buttom_bar)
+        self._put_config_value('bbar', self.t_render_bottom_bar, self.bottom_bar)
         self._put_config_value('fbar', self.t_render_footer_bar, self.footer_bar)
         self._put_config_value('items', self.t_render_items)
         self._put_config_value('buttons', self.t_render_buttons, self.buttons)
@@ -119,8 +121,8 @@ class BaseExtWindow(ExtUIComponent):
     def t_render_top_bar(self):
         return self.top_bar.render()
     
-    def t_render_buttom_bar(self):
-        return self.buttom_bar.render()
+    def t_render_bottom_bar(self):
+        return self.bottom_bar.render()
     
     def t_render_footer_bar(self):
         return self.footer_bar.render()
@@ -201,6 +203,22 @@ class BaseExtWindow(ExtUIComponent):
         nested.extend([self.top_bar, self.footer_bar]) # топ и футтер бары как контейнет
         
         return nested
+    
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        for item in self.__items:
+            item.make_read_only(access_off)
+        bar_typle = (self.footer_bar, self.bottom_bar, self.top_bar)
+        for bar in bar_typle:    
+            if bar and bar._items:
+                # Обязательно проверяем, что пришел контейнер.
+                assert isinstance(bar, BaseExtContainer)
+                for item in bar._items:
+                    item.make_read_only(access_off)
+        if self.__buttons and self.__buttons:
+            for button in self.__buttons:
+                assert isinstance(button, BaseExtControl)
+                button.make_read_only(access_off)
         
         
 

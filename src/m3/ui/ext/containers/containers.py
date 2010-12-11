@@ -155,6 +155,10 @@ class ExtStaticToolBarItem(ExtUIComponent):
         
     def render(self):
         return self.static_value
+    
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        pass
 
 #===============================================================================
 class ExtTextToolBarItem(ExtUIComponent):
@@ -164,6 +168,10 @@ class ExtTextToolBarItem(ExtUIComponent):
         self.init_component(*args, **kwargs)
     def render(self):
         return "{xtype: 'tbtext', text: '%s'}" % self.text
+    
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        pass
         
 #===============================================================================    
 class ExtPagingBar(BaseExtContainer):   

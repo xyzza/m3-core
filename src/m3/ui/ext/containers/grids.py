@@ -74,6 +74,7 @@ class ExtGrid(BaseExtPanel):
         self.enable_row_body = False
         self.get_row_class = None
         self.column_lines = True # признак отображения вертикальных линий в гриде
+        self.read_only = False #Если True не рендерим drag and drop, выключаем editor
         
         self.init_component(*args, **kwargs)
         
@@ -159,7 +160,12 @@ class ExtGrid(BaseExtPanel):
         return self.__store
     
     store = property(get_store, set_store)
-
+    
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        super(ExtGrid, self).make_read_only(access_off)
+        self.read_only = access_off
+    
     @property
     def columns(self):
         return self._items
@@ -251,10 +257,11 @@ class ExtGrid(BaseExtPanel):
         self._put_config_value('stateful', True) 
         self._put_config_value('loadMask', self.load_mask)    
         self._put_config_value('autoExpandColumn', self.auto_expand_column)
-        self._put_config_value('enableDragDrop', self.drag_drop)
-        self._put_config_value('ddGroup', self.drag_drop_group)
+        if not self.read_only:
+            self._put_config_value('enableDragDrop', self.drag_drop)
+            self._put_config_value('ddGroup', self.drag_drop_group)
+            self._put_config_value('editor', self.editor)
         self._put_config_value('view', self.t_render_view, self.view)
-        self._put_config_value('editor', self.editor)
         self._put_config_value('store', self.t_render_store, self.get_store())   
         self._put_config_value('viewConfig', self._view_config)
         self._put_config_value('columnLines', self.column_lines, self.column_lines)
@@ -309,6 +316,7 @@ class BaseExtGridColumn(ExtUIComponent):
         self.column_renderer = None
         self.tooltip = None
         self.hidden = False
+        self.read_only = False
         # дополнительные атрибуты колонки
         self.extra = {}
 
@@ -328,6 +336,10 @@ class BaseExtGridColumn(ExtUIComponent):
                
     def render_editor(self):
         return self.editor.render()
+    
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        self.read_only = access_off
         
 #===============================================================================    
 class ExtGridColumn(BaseExtGridColumn):

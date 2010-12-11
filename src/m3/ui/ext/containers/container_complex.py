@@ -75,6 +75,11 @@ class ExtContainerTable(BaseExtContainer):
         elif row_num != None:
             for d in self._properties.values():
                 d[row_num].update(kwargs)
+                
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        for item in self.items:
+            item.make_read_only(access_off)
   
     @property
     def items(self):       

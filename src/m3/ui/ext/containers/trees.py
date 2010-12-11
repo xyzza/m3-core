@@ -27,7 +27,13 @@ class ExtTree(BaseExtPanel):
         self.root_text = None
         self.drag_drop = False
         self.custom_load = False
+        self.read_only = False # Если включен - не рендерим drag'n'drop
         self.init_component(*args, **kwargs)
+        
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        super(ExtTree, self).make_read_only(access_off)
+        self.read_only = True
     
     @staticmethod    
     def nodes_auto_check(node):

@@ -78,6 +78,12 @@ class BaseExtContainer(ExtUIComponent):
         
         return nested
     
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        if self._items:
+            for item in self._items:
+                item.make_read_only(access_off)
+    
         
 class BaseExtPanel(BaseExtContainer):
     '''
@@ -138,5 +144,18 @@ class BaseExtPanel(BaseExtContainer):
                                       self.bottom_bar)
         self._put_config_value('fbar', self.t_render_footer_bar,
                                       self.footer_bar)
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        # вызываем родительский метод для итемов.
+        super(BaseExtPanel, self).make_read_only(access_off)
+        bar_typle = (self.footer_bar, self.bottom_bar, self.top_bar)
+        for bar in bar_typle:    
+            if bar and bar._items:
+                # Обязательно проверяем, что пришел контейнер.
+                assert isinstance(bar, BaseExtContainer)
+                for item in bar._items:
+                    item.make_read_only(access_off)
+        
+        
         
         
