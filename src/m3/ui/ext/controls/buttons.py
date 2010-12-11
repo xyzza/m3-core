@@ -92,3 +92,7 @@ class ExtButton(BaseExtControl):
         self._ext_name = 'Ext.SplitButton' if self.menu else 'Ext.Button'
         return super(ExtButton, self).render()
     
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        self.disabled = access_off
+    

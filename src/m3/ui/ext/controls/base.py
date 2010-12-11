@@ -19,3 +19,7 @@ class BaseExtControl(ExtUIComponent):
     '''
     def __init__(self, *args, **kwargs):
         super(BaseExtControl, self).__init__(*args, **kwargs)
+        
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        raise NotImplementedError()

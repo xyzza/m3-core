@@ -94,6 +94,10 @@ class BaseExtField(ExtUIComponent):
 
     def t_render_regex(self):
         return '/%s/' % self.regex
+    
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        self.read_only = access_off
 
     #===========================================================================
     # Врапперы над событиями listeners[...]

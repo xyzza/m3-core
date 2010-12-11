@@ -85,6 +85,16 @@ class ExtObjectGrid(containers.ExtGrid):
         
         self.init_component()
         
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        self.top_bar.button_new.make_read_only(access_off)
+        self.top_bar.button_edit.make_read_only(access_off)
+        self.top_bar.button_delete.make_read_only(access_off)
+        self.context_menu_grid.menuitem_new.make_read_only(access_off)
+        self.context_menu_grid.menuitem_edit.make_read_only(access_off)
+        self.context_menu_grid.menuitem_delete.make_read_only(access_off)
+        
+        
     @property
     def handler_beforenew(self):
         return self._listeners.get('beforenewrequest')

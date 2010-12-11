@@ -28,3 +28,7 @@ class ExtLabel(ExtUIComponent):
         self.template = 'ext-misc/ext-label.js'
         self.text = None
         self.init_component(*args, **kwargs)
+        
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUiComponent.
+        pass

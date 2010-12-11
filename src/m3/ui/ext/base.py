@@ -487,34 +487,15 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('cls', self.cls)
         self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
         #return res
-    
-# TODO: закомментированный код ниже необходим для дальнейшей оптимизации
-# рендеринга шаблонов. Все мелкие шаблоны (поля, столбцы грида, элементы меню и т.д.
-# необходимо вынести напрямую в питоновский код
-    
-#def base_component_config(component):
-#    '''
-#    Возвращает часть скрипта конфигурации компонента
-#    '''
-#    def put_config_value(component, name, value):
-#        if getattr(component, name, ''):
-#            return '%s\n' % value
-#        return ''
-#    
-#    result  = '%s\n' % component.client_id
-#    result += put_config_value(component, 'disabled',   ',disabled: true')
-#    result += put_config_value(component, 'hidden',     ',hidden: true')
-#    result += put_config_value(component, 'width',      ',width: %s' % getattr(component, 'width', ''))
-#    result += put_config_value(component, 'height',     ',height: %s' % getattr(component, 'height', ''))
-#    result += put_config_value(component, 'html',       ',html: %s' % getattr(component, 'html', ''))
-#    result += put_config_value(component, 'style',      ',style: {{ component.t_render_style|safe }} {% endif %}
-#    result += put_config_value(component, 'x',          ',x: {{ component.x }} {% endif %}
-#    result += put_config_value(component, 'y',          ',y: {{ component.y }} {% endif %}
-#    result += put_config_value(component, 'region',     ',region: '{{ component.region }}' {% endif %}
-#    result += put_config_value(component, 'flex',       ',flex: {{ component.flex }} {% endif %}
-#    result += put_config_value(component, 'max_height', ',boxMaxHeight: {{ component.max_height }} {% endif %}
-#    result += put_config_value(component, 'min_height', ',boxMinHeight: {{ component.min_height }} {% endif %}
-#    result += put_config_value(component, 'max_width',  ',boxMaxWidth: {{ component.max_width }} {% endif %}
-#    result += put_config_value(component, 'min_width',  ',boxMinWidth: {{ component.min_width }} {% endif %}
-#    result += put_config_value(component, 'anchor',     ',anchor: '{{ component.anchor|safe }}' {% endif %}
-    
+        
+    def make_read_only(self, access_off=True):
+        '''
+        Позволяет сделать компонент недоступным для изменения.
+        Обязательно должен быть переопределен в наследуемых классах.
+        При вызове метода без параметров используется параметр по умолчанию
+        access_off=True, и метод делает компонент, и все контролы расположенные
+        на нем неизменяемыми. При вызове с параметром False работает 
+        обратный метод, и возвращает компоненты в исходное состояние.
+        '''
+        excp_name = self.__class__.__name__ 
+        raise NotImplementedError(u'В компоненте %s не переопределен базовый метод.' % excp_name)
