@@ -221,5 +221,12 @@ class BaseExtWindow(ExtUIComponent):
                 button.make_read_only(access_off)
         
         
-
+    @property
+    def buttom_bar(self):
+        '''@deprecated: Использовать bottom_bar'''
+        return self.bottom_bar
     
+    @buttom_bar.setter
+    def buttom_bar(self, value):
+        '''@deprecated: Использовать bottom_bar'''
+        self.bottom_bar = value
