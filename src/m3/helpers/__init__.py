@@ -31,3 +31,11 @@ def get_img_size(src_size, dest_size):
     if height >= width:                     
         return (int(float(width)/height*src_height), src_height)                             
     return (src_width,  int(float(height)/width*src_width))
+
+def generate_id():
+    '''
+    Генерирует восьмизначный random.
+    Используется для id строки в локальных сторах заявки и корзины, чтобы
+    избежать пересечения id-шников
+    '''
+    return str(uuid4())[0:8]
