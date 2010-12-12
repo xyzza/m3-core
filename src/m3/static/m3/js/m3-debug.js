@@ -7807,6 +7807,56 @@ function sendRequest(url, desktop, params){
         failure: uiAjaxFailMessage
     });
 }
+
+/**
+ * Для правильного отображения колонок в гриде для цен и сумм
+ * Использовать в качестве renderer в колонке грида
+ * param Значение в колонке
+ */
+ function thousandCurrencyRenderer(val) {
+    if (typeof (val) != 'number') {
+        var num = val;
+        try { num = parseFloat(val.replace(/,+/, ".").replace(/\s+/g, "")); }
+        catch (ex) { num = NaN; }
+
+        if (isNaN(num)) {
+            return val;
+        }
+        else {
+            val = num;
+        }
+    }
+
+    var retVal = "";
+    var x = val.toFixed(2).split('.');
+    var real = x[0];
+    var decimal = x[1];
+    var g = 0;
+    var i = 0;
+    var offset = real.length % 3;
+
+    for (i; i < offset; i++) {
+        retVal += real.charAt(i);
+    }
+    retVal += ' ';
+
+    for (i; i < real.length; i++) {
+        if (g % 3 == 0) {
+            retVal += ' ';
+        }
+        retVal += real.charAt(i);
+        g++;
+
+    }
+
+    if (decimal) {
+        retVal += ',' + decimal;
+    }
+
+    retVal = retVal.replace(/\s,/, ",");
+
+    return retVal;
+}
 /**
  * Расширенный функционал комбобокса
  */
@@ -11001,9 +11051,11 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
                 t.dom.style.display = 'none';
                 this['hidden' + triggerIndex] = true;
             }
-            this.mon(t, 'click', this.allTriggers[index].handler, this, {preventDefault:true});
-            t.addClassOnOver('x-form-trigger-over');
-            t.addClassOnClick('x-form-trigger-click');
+            if (!this.disabled) { 
+                this.mon(t, 'click', this.allTriggers[index].handler, this, {preventDefault:true});
+                t.addClassOnOver('x-form-trigger-over');
+                t.addClassOnClick('x-form-trigger-click');
+            }
         }, this);
 		
         this.triggers = ts.elements;
@@ -11256,9 +11308,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             this.wrap.removeClass(this.wrapFocusClass);
         }
 	}
-	
 });
-
 /**
  * Панель редактирования адреса
  */

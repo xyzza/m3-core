@@ -207,9 +207,11 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
                 t.dom.style.display = 'none';
                 this['hidden' + triggerIndex] = true;
             }
-            this.mon(t, 'click', this.allTriggers[index].handler, this, {preventDefault:true});
-            t.addClassOnOver('x-form-trigger-over');
-            t.addClassOnClick('x-form-trigger-click');
+            if (!this.disabled) { 
+                this.mon(t, 'click', this.allTriggers[index].handler, this, {preventDefault:true});
+                t.addClassOnOver('x-form-trigger-over');
+                t.addClassOnClick('x-form-trigger-click');
+            }
         }, this);
 		
         this.triggers = ts.elements;
@@ -462,5 +464,4 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             this.wrap.removeClass(this.wrapFocusClass);
         }
 	}
-	
 });
