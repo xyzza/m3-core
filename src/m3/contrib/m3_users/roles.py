@@ -10,6 +10,7 @@ from django.db import transaction
 from django.contrib.auth.models import User
 
 from m3.ui import actions
+from m3.ui.actions.packs import BaseDictionaryModelActions
 from m3.ui.ext import windows
 from m3.ui.ext import panels
 from m3.ui.ext import fields
@@ -614,3 +615,21 @@ class SelectPermissionWindow(windows.ExtEditWindow):
             win.close(true);
         }''' % self.tree.client_id))
         self.buttons.append(controls.ExtButton(text=u'Отмена', handler='cancelForm'))
+        
+        
+#===============================================================================
+# Справочник "Роли пользователей"
+#===============================================================================
+class Roles_DictPack(BaseDictionaryModelActions):
+    '''
+    Справочник "Роли пользователей".
+    
+    Используется для выбора значений.
+    '''
+    url = '/roles-dict'
+    shortname = 'user-roles-dictpack'
+    model = models.UserRole
+    title = u'Роли пользователей системы'
+    list_columns = [('name', u'Наименование'),]
+    edit_window = RolesEditWindow
+    filter_fields = ['name']

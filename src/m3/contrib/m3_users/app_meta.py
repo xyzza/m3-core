@@ -10,7 +10,7 @@ from django.conf import urls
 from m3.ui.actions import ActionController
 from m3.helpers.users import authenticated_user_required
 
-from roles import RolesActions
+from roles import RolesActions, Roles_DictPack
 from users import UsersActions
 from metaroles import metarole_manager, UserMetarole, Metaroles_DictPack
 
@@ -27,6 +27,7 @@ def register_actions():
     users_controller.packs.extend([
         RolesActions,
         UsersActions,
+        Roles_DictPack,
         
         Metaroles_DictPack, # метароли пользователей
     ])
