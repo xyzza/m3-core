@@ -56,7 +56,7 @@ class AssignedRole(models.Model):
     Роль, назначенная на пользователя
     '''
     user = models.ForeignKey(User)
-    role = models.ForeignKey(UserRole)
+    role = models.ForeignKey(UserRole, related_name='assigned_users')
     
     def user_login(self):
         return self.user.username if self.user else ''
