@@ -633,3 +633,4 @@ class Roles_DictPack(BaseDictionaryModelActions):
     list_columns = [('name', u'Наименование'),]
     edit_window = RolesEditWindow
     filter_fields = ['name']
+    list_readonly = True # справочник - только для выбора из него
