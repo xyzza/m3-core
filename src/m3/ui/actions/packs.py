@@ -76,7 +76,12 @@ class DictSelectWindowAction(DictListWindowAction):
         list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
         win.list_view.set_store(list_store)
         
-        win.column_name_on_select = 'name'
+        # M prefer 12.12.10 >
+        # win.column_name_on_select = "name"
+        #-----:
+        win.column_name_on_select = base.column_name_on_select
+        # prefer <
+        
         return ExtUIScriptResult(self.parent.get_select_window(win))
 
 class DictEditWindowAction(Action):
@@ -191,19 +196,22 @@ class BaseDictionaryActions(ActionPack):
     # Список колонок состоящий из кортежей (имя json поля, имя колонки в окне)
     list_columns = []
     # Окно для редактирования элемента справочника 
-    edit_window = None
-    add_window = None
+    edit_window = add_window = None
+     
     list_form   = ExtDictionaryWindow
     select_form = ExtDictionaryWindow
     # Настройки секретности. Если стоит истина, то в результат добавляется флаг секретности
     secret_json = False
     secret_form = False
     # Ширина и высота окна
-    width = 510
-    height = 400
+    width, height = 510, 400     
     
     list_paging = True
     list_readonly = False
+    
+    # Значение колонки по-умолчанию, которое будет подбираться 
+    # при выборе значения из справочника
+    column_name_on_select = 'name'
     
     def __init__(self):
         super(BaseDictionaryActions, self).__init__()
