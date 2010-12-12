@@ -75,7 +75,8 @@ class ExtGrid(BaseExtPanel):
         self.get_row_class = None
         self.column_lines = True # признак отображения вертикальных линий в гриде
         self.read_only = False #Если True не рендерим drag and drop, выключаем editor
-        
+        self.label = None
+
         self.init_component(*args, **kwargs)
         
         # protected
@@ -265,6 +266,8 @@ class ExtGrid(BaseExtPanel):
         self._put_config_value('store', self.t_render_store, self.get_store())   
         self._put_config_value('viewConfig', self._view_config)
         self._put_config_value('columnLines', self.column_lines, self.column_lines)
+        if self.label:
+            self._put_config_value('fieldLabel', self.label)
     
     def render_params(self):
         super(ExtGrid, self).render_params()
