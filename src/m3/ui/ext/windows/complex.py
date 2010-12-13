@@ -114,6 +114,19 @@ class ExtDictionaryWindow(BaseExtWindow):
 
         self.__mode = value
         
+    def make_read_only(self, access_off=True):
+        # Описание в базовом классе ExtUIComponent.
+        super(ExtDictionaryWindow, self).make_read_only(access_off)
+        if self.tree:
+            self.tree.make_read_only(access_off)
+        if self.grid:
+            self.grid.make_read_only(access_off)
+        # Включаем обратно refresh, ибо он нужен.
+        for component in self.__components_refresh_grid:
+            component.make_read_only(False)
+        for component in self.__components_refresh_tree:
+            component.make_read_only(False)
+        
     def _add_menu_item_grid(self, to_tbar = True, to_row_menu = True, to_grid_menu = True, to_menu = None, **kwargs):
         '''
         Добавление контролов управления в грид
@@ -278,7 +291,8 @@ class ExtDictionaryWindow(BaseExtWindow):
             components = [components]
         for component in components:
             component.handler = handler
-            component.disabled = False
+            # Если окно в режиме только для чтения, все контролы будут отключены.
+            component.disabled = self.read_only
             
     def _clear_handler(self, components):
         if not isinstance(components, (list, tuple)):

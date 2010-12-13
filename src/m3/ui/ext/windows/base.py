@@ -63,6 +63,7 @@ class BaseExtWindow(ExtUIComponent):
         self.layout_config = {}
         self.button_align = None
         self.help_topic = None
+        self.read_only = False
         
     def t_render_layout_config(self):
         '''Рендерит конфиг, если указан layout'''
@@ -219,6 +220,7 @@ class BaseExtWindow(ExtUIComponent):
             for button in self.__buttons:
                 assert isinstance(button, BaseExtControl)
                 button.make_read_only(access_off)
+        self.read_only = access_off
         
         
     @property
