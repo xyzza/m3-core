@@ -430,15 +430,15 @@ function sendRequest(url, desktop, params){
     var real = x[0];
     var decimal = x[1];
     var g = 0;
-    var i = 0;
+ 
     var offset = real.length % 3;
 
-    for (i; i < offset; i++) {
+    for (var i = 0; i < offset; i++) {
         retVal += real.charAt(i);
     }
     retVal += ' ';
 
-    for (i; i < real.length; i++) {
+    for (var i = 0; i < real.length; i++) {
         if (g % 3 == 0) {
             retVal += ' ';
         }

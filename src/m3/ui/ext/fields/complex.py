@@ -352,11 +352,10 @@ class ExtImageUploadField(ExtFileUploadField):
     MAX_THUMBNAIL_PREFIX = '%s_%s' %(MAX, THUMBNAIL_PREFIX)
     
     def __init__(self, *args, **kwargs):
-        # Ширина и высота миниатюры
+
+        self.middle_thumbnail_size = self.max_thumbnail_size = self.min_thumbnail_size = None
+        
         self.thumbnail_size = (300, 300)
-        self.middle_thumbnail_size = None
-        self.max_thumbnail_size = None
-        self.min_thumbnail_size = self.thumbnail_size
         
         # Использовать ли миниатюры для изображений
         self.thumbnail = True
@@ -374,15 +373,23 @@ class ExtImageUploadField(ExtFileUploadField):
         self.init_component(*args, **kwargs)
         
         
+    @property
+    def thumbnail_size(self):
+        return  self.min_thumbnail_size
+    
+    @thumbnail_size.setter
+    def thumbnail_size(self, value):
+        self.min_thumbnail_size = value
+        
     def render_params(self):
         super(ExtImageUploadField, self).render_params()
         self._put_params_value('thumbnail', self.thumbnail)
         if self.thumbnail:
             assert isinstance(self.thumbnail_size , tuple) and \
                 len(self.thumbnail_size) == 2
-            self._put_params_value('thumbnailWidth', self.thumbnail_size[0], 
+            self._put_params_value('thumbnailWidth', self.min_thumbnail_size[0], 
                                    self.thumbnail)
-            self._put_params_value('thumbnailHeight', self.thumbnail_size[1], 
+            self._put_params_value('thumbnailHeight', self.min_thumbnail_size[1], 
                                    self.thumbnail)
             self._put_params_value('prefixThumbnailImg', 
                                    ExtImageUploadField.MIN_THUMBNAIL_PREFIX, 
@@ -398,13 +405,13 @@ class ExtImageUploadField(ExtFileUploadField):
                                                          params_config)
     @staticmethod
     def _prefix_by_size(size = None):
-        if size == 'middle':
-            _THUMBNAIL_PREFIX = ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX
-        elif size == 'max':
-            _THUMBNAIL_PREFIX = ExtImageUploadField.MAX_THUMBNAIL_PREFIX
+        if size == ExtImageUploadField.MIDDLE:
+            return ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX
+        elif size == ExtImageUploadField.MAX:
+            return ExtImageUploadField.MAX_THUMBNAIL_PREFIX
         else:
-            _THUMBNAIL_PREFIX = ExtImageUploadField.MIN_THUMBNAIL_PREFIX
-        return _THUMBNAIL_PREFIX
+            return ExtImageUploadField.MIN_THUMBNAIL_PREFIX
+
    
     @staticmethod
     def get_thumbnail_path(path, size = None):
@@ -416,8 +423,11 @@ class ExtImageUploadField(ExtFileUploadField):
         
     @staticmethod
     def get_thumbnail_url(name, size = None):
-        #Первым параметром принимает имя thumbnail'а
-        #Вторым параметром принимает размер thumbnail'а
+        '''
+        Возвращает url до thumbnail
+        @param name: Имя
+        @param size: Размер
+        '''
         base_url, file_name = os.path.split(name)
         _THUMBNAIL_PREFIX = ExtImageUploadField._prefix_by_size(size)
         return '%s/%s' % (settings.MEDIA_URL, '%s/%s%s' % ( base_url, 

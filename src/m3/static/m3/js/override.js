@@ -59,8 +59,8 @@ Ext.override(Ext.Window, {
 				
 				this.modal = false;
 				this.tmpModal = true;
-				
-				if (AppDesktop) {
+                
+				if (window.AppDesktop) {
 					var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
 					if (el) {
 						el.mask();
@@ -84,7 +84,7 @@ Ext.override(Ext.Window, {
 				this.parentWindow.setDisabled(false);
 				this.parentWindow.toFront();
 
-				if (AppDesktop) {
+				if (window.AppDesktop) {
 					var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
 					if (el) {
 						el.unmask();
