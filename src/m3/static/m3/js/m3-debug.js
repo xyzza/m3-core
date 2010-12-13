@@ -1,3 +1,123 @@
+Ext.namespace('Ext.ux.Ribbon');
+
+Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
+
+    titleId: null,
+
+    constructor: function(config){
+        this.titleId = new Array();
+
+        Ext.apply(config, {
+            baseCls: "x-plain ui-ribbon",
+            margins: "0 0 0 0",
+            // plugins: new Ext.ux.TabScrollerMenu({
+            //     maxText: 15,
+            //     pageSize: 5
+            // }),
+            //enableTabScroll: true,
+            plain: true,
+            border: false,
+            deferredRender: false,
+            layoutOnTabChange: true,
+            title: '',
+            //collapsible: true,
+            activeTab: 0,
+            listeners: {
+                beforetabchange: function(tp, ntb, ctb){
+                    tp.expand();
+                },
+                afterrender: {
+                    scope: this,
+                    fn: function(){
+                        //this.expand();
+                        //this.doLayout();
+                        if (this.titleId.length > 0){
+                            for (var key = 0; key < this.titleId.length; key++){
+                                r = Ext.get(this.titleId[key].id);
+                                if (r)
+                                r.on('click', this.titleId[key].fn);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        Ext.apply(this, Ext.apply(this.initialConfig, config));
+
+        if (config.items){
+            for (var i = 0; i < config.items.length; i++)
+            this.initRibbon(config.items[i], i);
+        }
+
+        Ext.ux.Ribbon.superclass.constructor.apply(this, arguments);
+        
+    },
+
+    initRibbon: function(item, index){
+        var tbarr = new Array();
+        for (var j = 0; j < item.ribbon.length; j++){
+            // for (var i = 0; i < item.ribbon[j].items.length; i++){
+            //                             if (item.ribbon[j].items[i].scale !== "small"){
+            //                                 item.ribbon[j].items[i].text = String(item.ribbon[j].items[i].text).replace(/[ +]/gi, "<br/>");
+            //                             }
+            //                         }
+            c = {
+                xtype: "buttongroup",
+                cls: "x-btn-group-ribbonstyle",
+                defaults: {
+                    scale: "small",
+                    iconAlign: "left",
+                    minWidth: 40
+                },
+                items: item.ribbon[j].items
+            };
+
+            title = item.ribbon[j].title || '';
+            topTitle = item.ribbon[j].topTitle || false;
+            onTitleClick = item.ribbon[j].onTitleClick || false;
+
+            if (onTitleClick){
+                titleId = 'ux-ribbon-' + Ext.id();
+                title = '<span id="' + titleId + '" style="cursor:pointer;">' + title + '</span>';
+                this.titleId.push({
+                    id: titleId,
+                    fn: onTitleClick
+                });
+            }
+            if (title !== ''){
+                if (!topTitle){
+                    Ext.apply(c, {
+                        footerCfg: {
+                            cls: "x-btn-group-header x-unselectable",
+                            tag: "span",
+                            html: title
+                        }
+                    });
+                } else{
+                    Ext.apply(c, {
+                        title: title
+                    });
+                }
+            }
+
+            cfg = item.ribbon[j].cfg || null;
+
+            if (cfg){
+                Ext.applyIf(c, item.ribbon[j].cfg);
+                if (cfg.defaults)
+                Ext.apply(c.defaults, cfg.defaults);
+            }
+
+            tbarr.push(c);
+        }
+
+        Ext.apply(item, {
+            baseCls: "x-plain",
+            tbar: tbarr
+        });
+    }
+});
 Ext.namespace("Ext.ux.grid");
 
 /**
@@ -1741,126 +1861,6 @@ Ext.ux.grid.LockingGroupColumnModel = Ext.extend(Ext.grid.ColumnModel, {
     }
 });
 
-Ext.namespace('Ext.ux.Ribbon');
-
-Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
-
-    titleId: null,
-
-    constructor: function(config){
-        this.titleId = new Array();
-
-        Ext.apply(config, {
-            baseCls: "x-plain ui-ribbon",
-            margins: "0 0 0 0",
-            // plugins: new Ext.ux.TabScrollerMenu({
-            //     maxText: 15,
-            //     pageSize: 5
-            // }),
-            //enableTabScroll: true,
-            plain: true,
-            border: false,
-            deferredRender: false,
-            layoutOnTabChange: true,
-            title: '',
-            //collapsible: true,
-            activeTab: 0,
-            listeners: {
-                beforetabchange: function(tp, ntb, ctb){
-                    tp.expand();
-                },
-                afterrender: {
-                    scope: this,
-                    fn: function(){
-                        //this.expand();
-                        //this.doLayout();
-                        if (this.titleId.length > 0){
-                            for (var key = 0; key < this.titleId.length; key++){
-                                r = Ext.get(this.titleId[key].id);
-                                if (r)
-                                r.on('click', this.titleId[key].fn);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        Ext.apply(this, Ext.apply(this.initialConfig, config));
-
-        if (config.items){
-            for (var i = 0; i < config.items.length; i++)
-            this.initRibbon(config.items[i], i);
-        }
-
-        Ext.ux.Ribbon.superclass.constructor.apply(this, arguments);
-        
-    },
-
-    initRibbon: function(item, index){
-        var tbarr = new Array();
-        for (var j = 0; j < item.ribbon.length; j++){
-            // for (var i = 0; i < item.ribbon[j].items.length; i++){
-            //                             if (item.ribbon[j].items[i].scale !== "small"){
-            //                                 item.ribbon[j].items[i].text = String(item.ribbon[j].items[i].text).replace(/[ +]/gi, "<br/>");
-            //                             }
-            //                         }
-            c = {
-                xtype: "buttongroup",
-                cls: "x-btn-group-ribbonstyle",
-                defaults: {
-                    scale: "small",
-                    iconAlign: "left",
-                    minWidth: 40
-                },
-                items: item.ribbon[j].items
-            };
-
-            title = item.ribbon[j].title || '';
-            topTitle = item.ribbon[j].topTitle || false;
-            onTitleClick = item.ribbon[j].onTitleClick || false;
-
-            if (onTitleClick){
-                titleId = 'ux-ribbon-' + Ext.id();
-                title = '<span id="' + titleId + '" style="cursor:pointer;">' + title + '</span>';
-                this.titleId.push({
-                    id: titleId,
-                    fn: onTitleClick
-                });
-            }
-            if (title !== ''){
-                if (!topTitle){
-                    Ext.apply(c, {
-                        footerCfg: {
-                            cls: "x-btn-group-header x-unselectable",
-                            tag: "span",
-                            html: title
-                        }
-                    });
-                } else{
-                    Ext.apply(c, {
-                        title: title
-                    });
-                }
-            }
-
-            cfg = item.ribbon[j].cfg || null;
-
-            if (cfg){
-                Ext.applyIf(c, item.ribbon[j].cfg);
-                if (cfg.defaults)
-                Ext.apply(c.defaults, cfg.defaults);
-            }
-
-            tbarr.push(c);
-        }
-
-        Ext.apply(item, {
-            baseCls: "x-plain",
-            tbar: tbarr
-        });
-    }
-});
 // Create the namespace
 Ext.ns('Ext.ux.plugins.grid');
 
@@ -10189,165 +10189,6 @@ Ext.m3.AdvancedTreeGrid = Ext.extend(Ext.ux.maximgb.tg.GridPanel, {
 });
 
 /**
- * Объектное дерево, включает в себя тулбар с кнопками добавить (в корень и дочерний элемент), редактировать и удалить
- * @param {Object} config
- */
-Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
-	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
-		
-		assert(params.allowPaging !== undefined,'allowPaging is undefined');
-		assert(params.rowIdName !== undefined,'rowIdName is undefined');
-		assert(params.actions !== undefined,'actions is undefined');
-		
-		this.allowPaging = params.allowPaging;
-		this.rowIdName = params.rowIdName;
-		this.actionNewUrl = params.actions.newUrl;
-		this.actionEditUrl = params.actions.editUrl;
-		this.actionDeleteUrl = params.actions.deleteUrl;
-		this.actionDataUrl = params.actions.dataUrl;
-		this.actionContextJson = params.actions.contextJson;
-		
-		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
-	}
-	,onNewRecord: function (){
-		assert(this.actionNewUrl, 'actionNewUrl is not define');
-		
-		var scope = this;
-	    Ext.Ajax.request({
-	       url: this.actionNewUrl
-	       ,params: this.actionContextJson || {}
-	       ,success: function(res, opt){
-		   		return scope.childWindowOpenHandler(res, opt);
-		    }
-	       ,failure: Ext.emptyFn
-    	});
-	}
-	,onNewRecordChild: function (){
-		assert(this.actionNewUrl, 'actionNewUrl is not define');
-		
-		if (!this.getSelectionModel().getSelected()) {
-			Ext.Msg.show({
-			   title: 'Новый',
-			   msg: 'Элемент не выбран',
-			   buttons: Ext.Msg.OK,
-			   icon: Ext.MessageBox.INFO
-			});
-			return;
-		}
-		var baseConf = {};
-		baseConf[this.rowIdName] = this.getSelectionModel().getSelected().get('_parent');
-		var scope = this;
-	    Ext.Ajax.request({
-	       url: this.actionNewUrl
-	       ,params: Ext.applyIf(baseConf, this.actionContextJson || {})
-	       ,success: function(res, opt){
-		   		return scope.childWindowOpenHandler(res, opt);
-		    }
-	       ,failure: Ext.emptyFn
-    	});
-	}
-	,onEditRecord: function (){
-		assert(this.actionEditUrl, 'actionEditUrl is not define');
-		assert(this.rowIdName, 'rowIdName is not define');
-		
-	    if (this.getSelectionModel().hasSelection()) {
-			var baseConf = {};
-			baseConf[this.rowIdName] = this.getSelectionModel().getSelected().id;
-			
-			var scope = this;
-		    Ext.Ajax.request({
-		       url: this.actionEditUrl,
-		       params: Ext.applyIf(baseConf, this.actionContextJson || {}),
-		       success: function(res, opt){
-			   		return scope.childWindowOpenHandler(res, opt);
-			   },
-		       failure: Ext.emptyFn
-		    });
-    	}
-	}
-	,onDeleteRecord: function (){
-		assert(this.actionDeleteUrl, 'actionDeleteUrl is not define');
-		assert(this.rowIdName, 'rowIdName is not define');
-		
-		var scope = this;
-	    Ext.Msg.show({
-	        title: 'Удаление записи',
-		    msg: 'Вы действительно хотите удалить выбранную запись?',
-		    icon: Ext.Msg.QUESTION,
-	        buttons: Ext.Msg.YESNO,
-	        fn:function(btn,text,opt){ 
-	            if (btn == 'yes') {
-	                if (scope.getSelectionModel().hasSelection()) {
-						var baseConf = {};
-						baseConf[scope.rowIdName] = scope.getSelectionModel().getSelected().id;
-			
-		                Ext.Ajax.request({
-		                   url: scope.actionDeleteUrl,
-		                   params: Ext.applyIf(baseConf, scope.actionContextJson || {}),
-		                   success: function(res, opt){
-						   	    return scope.deleteOkHandler(res, opt);
-						   },
-		                   failure: Ext.emptyFn
-		                });
-	                }
-	            }
-	        }
-	    });
-	}
-	,childWindowOpenHandler: function (response, opts){
-		
-	    var window = smart_eval(response.responseText);
-	    if(window){
-			var scope = this;
-	        window.on('closed_ok', function(){
-				return scope.refreshStore()
-			});
-	    }
-	}
-	,deleteOkHandler: function (response, opts){
-		smart_eval(response.responseText);
-		this.refreshStore();
-	}
-	,refreshStore: function (){
-		if (this.allowPaging) {
-			var pagingBar = this.getBottomToolbar(); 
-			if(pagingBar &&  pagingBar instanceof Ext.PagingToolbar){
-			    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
-		        pagingBar.changePage(active_page);
-			}
-		} else {
-			this.getStore().load(); 	
-		}
-
-	}
-});
-
-
-/**
- * Окно показа контекстной помощи
- */
-
-Ext.m3.HelpWindow = Ext.extend(Ext.Window, {
-    constructor: function(baseConfig, params){
-        this.title = 'Справочная информация';
-        this.maximized = true;
-        this.maximizable = true;
-        this.minimizable = true;
-        this.width=800;
-        this.height=550;
-
-    Ext.m3.HelpWindow.superclass.constructor.call(this, baseConfig);
-  }
-});
-
-function showHelpWindow(url){
-
-    window.open(url);
-}
-
-/**
  * Объектный грид, включает в себя тулбар с кнопками добавить, редактировать и удалить
  * @param {Object} config
  */
@@ -10843,6 +10684,165 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 	}
 });
 /**
+ * Окно показа контекстной помощи
+ */
+
+Ext.m3.HelpWindow = Ext.extend(Ext.Window, {
+    constructor: function(baseConfig, params){
+        this.title = 'Справочная информация';
+        this.maximized = true;
+        this.maximizable = true;
+        this.minimizable = true;
+        this.width=800;
+        this.height=550;
+
+    Ext.m3.HelpWindow.superclass.constructor.call(this, baseConfig);
+  }
+});
+
+function showHelpWindow(url){
+
+    window.open(url);
+}
+
+/**
+ * Объектное дерево, включает в себя тулбар с кнопками добавить (в корень и дочерний элемент), редактировать и удалить
+ * @param {Object} config
+ */
+Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
+	constructor: function(baseConfig, params){
+//		console.log(baseConfig);
+//		console.log(params);
+		
+		assert(params.allowPaging !== undefined,'allowPaging is undefined');
+		assert(params.rowIdName !== undefined,'rowIdName is undefined');
+		assert(params.actions !== undefined,'actions is undefined');
+		
+		this.allowPaging = params.allowPaging;
+		this.rowIdName = params.rowIdName;
+		this.actionNewUrl = params.actions.newUrl;
+		this.actionEditUrl = params.actions.editUrl;
+		this.actionDeleteUrl = params.actions.deleteUrl;
+		this.actionDataUrl = params.actions.dataUrl;
+		this.actionContextJson = params.actions.contextJson;
+		
+		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
+	}
+	,onNewRecord: function (){
+		assert(this.actionNewUrl, 'actionNewUrl is not define');
+		
+		var scope = this;
+	    Ext.Ajax.request({
+	       url: this.actionNewUrl
+	       ,params: this.actionContextJson || {}
+	       ,success: function(res, opt){
+		   		return scope.childWindowOpenHandler(res, opt);
+		    }
+	       ,failure: Ext.emptyFn
+    	});
+	}
+	,onNewRecordChild: function (){
+		assert(this.actionNewUrl, 'actionNewUrl is not define');
+		
+		if (!this.getSelectionModel().getSelected()) {
+			Ext.Msg.show({
+			   title: 'Новый',
+			   msg: 'Элемент не выбран',
+			   buttons: Ext.Msg.OK,
+			   icon: Ext.MessageBox.INFO
+			});
+			return;
+		}
+		var baseConf = {};
+		baseConf[this.rowIdName] = this.getSelectionModel().getSelected().get('_parent');
+		var scope = this;
+	    Ext.Ajax.request({
+	       url: this.actionNewUrl
+	       ,params: Ext.applyIf(baseConf, this.actionContextJson || {})
+	       ,success: function(res, opt){
+		   		return scope.childWindowOpenHandler(res, opt);
+		    }
+	       ,failure: Ext.emptyFn
+    	});
+	}
+	,onEditRecord: function (){
+		assert(this.actionEditUrl, 'actionEditUrl is not define');
+		assert(this.rowIdName, 'rowIdName is not define');
+		
+	    if (this.getSelectionModel().hasSelection()) {
+			var baseConf = {};
+			baseConf[this.rowIdName] = this.getSelectionModel().getSelected().id;
+			
+			var scope = this;
+		    Ext.Ajax.request({
+		       url: this.actionEditUrl,
+		       params: Ext.applyIf(baseConf, this.actionContextJson || {}),
+		       success: function(res, opt){
+			   		return scope.childWindowOpenHandler(res, opt);
+			   },
+		       failure: Ext.emptyFn
+		    });
+    	}
+	}
+	,onDeleteRecord: function (){
+		assert(this.actionDeleteUrl, 'actionDeleteUrl is not define');
+		assert(this.rowIdName, 'rowIdName is not define');
+		
+		var scope = this;
+	    Ext.Msg.show({
+	        title: 'Удаление записи',
+		    msg: 'Вы действительно хотите удалить выбранную запись?',
+		    icon: Ext.Msg.QUESTION,
+	        buttons: Ext.Msg.YESNO,
+	        fn:function(btn,text,opt){ 
+	            if (btn == 'yes') {
+	                if (scope.getSelectionModel().hasSelection()) {
+						var baseConf = {};
+						baseConf[scope.rowIdName] = scope.getSelectionModel().getSelected().id;
+			
+		                Ext.Ajax.request({
+		                   url: scope.actionDeleteUrl,
+		                   params: Ext.applyIf(baseConf, scope.actionContextJson || {}),
+		                   success: function(res, opt){
+						   	    return scope.deleteOkHandler(res, opt);
+						   },
+		                   failure: Ext.emptyFn
+		                });
+	                }
+	            }
+	        }
+	    });
+	}
+	,childWindowOpenHandler: function (response, opts){
+		
+	    var window = smart_eval(response.responseText);
+	    if(window){
+			var scope = this;
+	        window.on('closed_ok', function(){
+				return scope.refreshStore()
+			});
+	    }
+	}
+	,deleteOkHandler: function (response, opts){
+		smart_eval(response.responseText);
+		this.refreshStore();
+	}
+	,refreshStore: function (){
+		if (this.allowPaging) {
+			var pagingBar = this.getBottomToolbar(); 
+			if(pagingBar &&  pagingBar instanceof Ext.PagingToolbar){
+			    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
+		        pagingBar.changePage(active_page);
+			}
+		} else {
+			this.getStore().load(); 	
+		}
+
+	}
+});
+
+
+/**
  * Расширенный комбобокс, включает несколько кнопок
  * @param {Object} baseConfig
  * @param {Object} params
@@ -11309,6 +11309,92 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
         }
 	}
 });
+/**
+ * Компонент поля даты. 
+ * Добавлена кнопа установки текущий даты
+ */
+Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
+	constructor: function(baseConfig, params){
+//		console.log(baseConfig);
+//		console.log(params);
+
+		// Базовый конфиг для тригеров
+		this.baseTriggers = [
+			{
+				iconCls: 'x-form-date-trigger'
+				,handler: null
+				,hide:null
+			},
+			{
+				iconCls: 'x-form-current-date-trigger'
+				,handler: null
+				,hide:null
+			}
+		];
+		
+		this.hideTriggerToday = false;
+	
+
+		if (params.hideTriggerToday) {
+			this.hideTriggerToday = true;
+		};
+		
+		Ext.m3.AdvancedDataField.superclass.constructor.call(this, baseConfig);
+	}
+	,initComponent: function(){
+		Ext.m3.AdvancedDataField.superclass.initComponent.call(this);
+
+        this.triggerConfig = {
+            tag:'span', cls:'x-form-twin-triggers', cn:[]};
+
+		Ext.each(this.baseTriggers, function(item, index, all){
+			this.triggerConfig.cn.push(
+				{tag: "img", src: Ext.BLANK_IMAGE_URL, cls: "x-form-trigger " + item.iconCls}
+			);
+		}, this);
+
+		this.initBaseTrigger()
+	},
+	initTrigger : function(){
+		
+        var ts = this.trigger.select('.x-form-trigger', true);
+        var triggerField = this;
+        ts.each(function(t, all, index){
+			
+            var triggerIndex = 'Trigger'+(index+1);
+            t.hide = function(){
+                var w = triggerField.wrap.getWidth();
+                this.dom.style.display = 'none';
+                triggerField.el.setWidth(w-triggerField.trigger.getWidth());
+                this['hidden' + triggerIndex] = true;
+            };
+            t.show = function(){
+                var w = triggerField.wrap.getWidth();
+                this.dom.style.display = '';
+                triggerField.el.setWidth(w-triggerField.trigger.getWidth());
+                this['hidden' + triggerIndex] = false;
+            };
+
+            if( this.baseTriggers[index].hide ){
+                t.dom.style.display = 'none';
+                this['hidden' + triggerIndex] = true;
+            }
+            this.mon(t, 'click', this.baseTriggers[index].handler, this, {preventDefault:true});
+            t.addClassOnOver('x-form-trigger-over');
+            t.addClassOnClick('x-form-trigger-click');
+        }, this);
+		
+        this.triggers = ts.elements;
+    }
+	,initBaseTrigger: function(){
+		this.baseTriggers[0].handler = this.onTriggerClick;
+		this.baseTriggers[1].handler = function(){ this.setValue( new Date() ); };
+		this.baseTriggers[1].hide = this.hideTriggerToday;
+	}
+
+});
+
+
 /**
  * Панель редактирования адреса
  */
@@ -11928,92 +12014,6 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	}
 	
 })
-
-
-/**
- * Компонент поля даты. 
- * Добавлена кнопа установки текущий даты
- */
-Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
-	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
-
-		// Базовый конфиг для тригеров
-		this.baseTriggers = [
-			{
-				iconCls: 'x-form-date-trigger'
-				,handler: null
-				,hide:null
-			},
-			{
-				iconCls: 'x-form-current-date-trigger'
-				,handler: null
-				,hide:null
-			}
-		];
-		
-		this.hideTriggerToday = false;
-	
-
-		if (params.hideTriggerToday) {
-			this.hideTriggerToday = true;
-		};
-		
-		Ext.m3.AdvancedDataField.superclass.constructor.call(this, baseConfig);
-	}
-	,initComponent: function(){
-		Ext.m3.AdvancedDataField.superclass.initComponent.call(this);
-
-        this.triggerConfig = {
-            tag:'span', cls:'x-form-twin-triggers', cn:[]};
-
-		Ext.each(this.baseTriggers, function(item, index, all){
-			this.triggerConfig.cn.push(
-				{tag: "img", src: Ext.BLANK_IMAGE_URL, cls: "x-form-trigger " + item.iconCls}
-			);
-		}, this);
-
-		this.initBaseTrigger()
-	},
-	initTrigger : function(){
-		
-        var ts = this.trigger.select('.x-form-trigger', true);
-        var triggerField = this;
-        ts.each(function(t, all, index){
-			
-            var triggerIndex = 'Trigger'+(index+1);
-            t.hide = function(){
-                var w = triggerField.wrap.getWidth();
-                this.dom.style.display = 'none';
-                triggerField.el.setWidth(w-triggerField.trigger.getWidth());
-                this['hidden' + triggerIndex] = true;
-            };
-            t.show = function(){
-                var w = triggerField.wrap.getWidth();
-                this.dom.style.display = '';
-                triggerField.el.setWidth(w-triggerField.trigger.getWidth());
-                this['hidden' + triggerIndex] = false;
-            };
-
-            if( this.baseTriggers[index].hide ){
-                t.dom.style.display = 'none';
-                this['hidden' + triggerIndex] = true;
-            }
-            this.mon(t, 'click', this.baseTriggers[index].handler, this, {preventDefault:true});
-            t.addClassOnOver('x-form-trigger-over');
-            t.addClassOnClick('x-form-trigger-click');
-        }, this);
-		
-        this.triggers = ts.elements;
-    }
-	,initBaseTrigger: function(){
-		this.baseTriggers[0].handler = this.onTriggerClick;
-		this.baseTriggers[1].handler = function(){ this.setValue( new Date() ); };
-		this.baseTriggers[1].hide = this.hideTriggerToday;
-	}
-
-});
 
 
 Ext.ns('Ext.ux.form');
