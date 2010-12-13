@@ -263,6 +263,10 @@ class ExtToolbarMenu(ExtUIComponent):
             
         return '{%s}' % res
     
+    def make_read_only(self, access_off=True):
+        self.menu.make_read_only(access_off)
+
+    
 #===============================================================================
 class ExtButtonGroup(BaseExtContainer):
     '''
