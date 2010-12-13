@@ -16,13 +16,13 @@ class KLADRPack(ActionPack):
 
     @classmethod
     def get_place_name(self, code):
-        place = KladrGeo.objects.select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').get(code = code)
-        return place.display_name() if place else ''
+        place = KladrGeo.objects.select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').filter(code = code)
+        return place[0].display_name() if place else ''
 
     @classmethod
     def get_street_name(self, code):
-        street = KladrStreet.objects.select_related('parent').get(code = code)
-        return street.display_name() if street else ''
+        street = KladrStreet.objects.select_related('parent').filter(code = code)
+        return street[0].display_name() if street else ''
 
 class KLADRRowsAction(Action):
     '''
