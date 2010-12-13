@@ -21,7 +21,7 @@ from m3.ui.ext.panels.trees import ExtObjectTree
 
 from m3.helpers import ui as ui_helpers
 from m3.db import safe_delete
-from m3.helpers import logger
+from m3.helpers import logger, urls
 from m3.ui.actions import ActionContextDeclaration, ControllerCache, ActionPack, Action
 
 from users import SelectUsersListWindow
@@ -30,6 +30,8 @@ import helpers
 import models
 import metaroles
 import app_meta
+
+PERM_OBJECT_NOT_FOUND = u'** объект права не найден **'
 
 class RolesActions(actions.ActionPack):
     '''
@@ -227,7 +229,15 @@ class GetRolePermissionAction(actions.Action):
             sub_code = codes[1] if len(codes) > 1 else ''
             act = ControllerCache.get_action_by_url(act_code)
             if not act:
-                perm.verbose_name = u'отсутствует-'
+                perm.verbose_name = PERM_OBJECT_NOT_FOUND
+                # попробуем найти набор экшенов, если есть суб-код
+                if sub_code: 
+                    pack = urls.get_pack_by_url(act_code)
+                    if pack:
+                        #pack_name = pack.title if hasattr(pack, 'title') and pack.title else pack.verbose_name if pack.verbose_name else pack.__class__.__name__
+                        if sub_code and sub_code in pack.sub_permissions.keys():
+                            #perm.verbose_name = "%s. %s" % (pack_name,pack.sub_permissions[sub_code])
+                            perm.verbose_name = pack.sub_permissions[sub_code]
             else:
                 perm.verbose_name = act.verbose_name if act.verbose_name else act.__class__.__name__
                 if sub_code and sub_code in act.sub_permissions.keys():
@@ -252,50 +262,47 @@ class GetAllPermissions(actions.Action):
         def add_nodes(parent_node, action_set, res):
             # если передали Набор действий, то у него надо взять Действия и подчиненные Наборы
             if isinstance(action_set, ActionPack):
+                name = action_set.title if hasattr(action_set, 'title') and action_set.title else action_set.verbose_name if action_set.verbose_name else action_set.__class__.__name__
+                item = PermProxy(len(res)+1, parent_node, name, action_set.absolute_url(), False)
+                res.append(item)
+                count = len(res)
                 # обработаем действия
                 for act in action_set.actions:
                     # добавляем если надо проверять права или есть подчиненные права
-                    if act.need_check_permission or act.sub_permissions:
-                        if inspect.isclass(act):
-                            act = act()
-                        name = act.verbose_name if act.verbose_name else act.__class__.__name__ 
-                        child1 = PermProxy(len(res)+1, parent_node, name, act.absolute_url(), act.need_check_permission)
-                        res.append(child1)
-                        add_nodes(child1, act, res)
+                    add_nodes(item, act, res)
+                # обработаем подчиненные права
+                # добавляем если надо проверять права или есть подчиненные права
+                if action_set.need_check_permission and action_set.sub_permissions:
+                    for key, value in action_set.sub_permissions.items():
+                        child4 = PermProxy(len(res)+1, item, value, action_set.get_sub_permission_code(key), True)
+                        res.append(child4)
                 # обработаем подчиненные Наборы
                 for pack in action_set.subpacks:
-                    if isinstance(pack, ActionPack) and pack.need_check_permission: 
-                        name = pack.title if hasattr(pack, 'title') and pack.title else pack.verbose_name if pack.verbose_name else pack.__class__.__name__
-                        child2 = PermProxy(len(res)+1, parent_node, name, pack.url, False)
-                        res.append(child2)
-                        sub_count = len(res)
-                        add_nodes(child2, pack, res)
-                        if len(res)-sub_count == 0:
-                            res.remove(child2)
-            # если передали Действие, то у него надо взять подчиненные права
+                    add_nodes(item, pack, res)
+                # удалим элемент, если небыло дочерних
+                if len(res)-count == 0:
+                    res.remove(item)
+            # если передали Действие
             elif isinstance(action_set, Action):
-                for key, value in action_set.sub_permissions.items():
-                    child3 = PermProxy(len(res)+1, parent_node, value, action_set.get_sub_permission_code(key), True)
-                    res.append(child3)
+                if action_set.need_check_permission or action_set.sub_permissions:
+                    if inspect.isclass(action_set):
+                        action_set = action_set()
+                    name = action_set.verbose_name if action_set.verbose_name else action_set.__class__.__name__
+                    item = PermProxy(len(res)+1, parent_node, name, action_set.absolute_url(), action_set.need_check_permission)
+                    res.append(item)
+                    # у действия берем подчиненные права
+                    for key, value in action_set.sub_permissions.items():
+                        child3 = PermProxy(len(res)+1, item, value, action_set.get_sub_permission_code(key), True)
+                        res.append(child3)
         res = []
-        for ctrl in ControllerCache.get_contollers():
-            root = PermProxy(len(res)+1, None, ctrl.verbose_name if ctrl.verbose_name else ctrl.__class__.__name__, ctrl.url)
+        # пройдемся по контроллерам
+        for ctrl in ControllerCache.get_controllers():
+            root = PermProxy(len(res)+1, None, ctrl.verbose_name if ctrl.verbose_name else ctrl.__class__.__name__, ctrl.url, False)
             res.append(root)
             count = len(res)
+            # пройдемся по верхним наборам действий
             for pack in ctrl.get_top_actions():
-                if isinstance(pack, ActionPack) and pack.need_check_permission:
-                    name = pack.title if hasattr(pack, 'title') and pack.title else pack.verbose_name if pack.verbose_name else pack.__class__.__name__
-                    child1 = PermProxy(len(res)+1, root, name, pack.url, False)
-                    res.append(child1)
-                    sub_count = len(res)
-                    add_nodes(child1, pack, res)
-                    if len(res)-sub_count == 0:
-                        res.remove(child1)
-                elif isinstance(pack, Action) and (pack.need_check_permission or pack.sub_permissions):
-                    name = pack.verbose_name if pack.verbose_name else pack.__class__.__name__
-                    child1 = PermProxy(len(res)+1, root, name, pack.absolute_url(), pack.need_check_permission)
-                    res.append(child1)
-                    add_nodes(child1, pack, res)
+                add_nodes(root, pack, res)
             if len(res)-count == 0:
                 res.remove(root)
         return actions.ExtAdvancedTreeGridDataQueryResult(res)

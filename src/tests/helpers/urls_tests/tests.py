@@ -7,7 +7,7 @@ Created on 07.12.2010
 
 from django.test import TestCase
 
-from m3.helpers.urls import get_action, get_pack, get_url
+from m3.helpers.urls import get_action, get_pack, get_url, get_pack_url
 
 import actions as test_actions
 
@@ -37,15 +37,8 @@ class ActionNamesTests(TestCase):
         self.failUnlessEqual(get_url('test-action-21'), '/urls-tests/pack2/action1')
         self.failUnlessEqual(get_url('test-action-22'), '/urls-tests/pack2/action2')
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        # проверяем получение url набора экшенов
+        self.failUnlessEqual(get_pack_url('tests.helpers.urls_tests.actions.TestActionPack1'), '/urls-tests/pack1')
+        self.failUnlessEqual(get_pack_url('tests.helpers.urls_tests.actions.TestActionPack2'), '/urls-tests/pack2')
+        # проверяем получение url набора экшенов по короткому имени
+        self.failUnlessEqual(get_pack_url('test-action-12'), '/urls-tests/pack2')

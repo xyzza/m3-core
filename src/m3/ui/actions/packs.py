@@ -41,6 +41,7 @@ class DictListWindowAction(Action):
     
     def configure_list(self, win):
         base = self.parent
+        
         # Устанавливаем источники данных
         grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True, remote_sort=True)
         grid_store.total_property = 'total'
@@ -57,6 +58,10 @@ class DictListWindowAction(Action):
         win = self.create_window(request, context, mode=0)
         self.create_columns(win.grid, self.parent.list_columns)
         self.configure_list(win)
+        
+        # проверим право редактирования
+        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+            win.make_read_only()
         
         return ExtUIScriptResult(self.parent.get_list_window(win))
     
@@ -81,6 +86,10 @@ class DictSelectWindowAction(DictListWindowAction):
         #-----:
         win.column_name_on_select = base.column_name_on_select
         # prefer <
+        
+        # проверим право редактирования
+        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+            win.make_read_only()
         
         return ExtUIScriptResult(self.parent.get_select_window(win))
 
@@ -108,6 +117,10 @@ class DictEditWindowAction(Action):
             win.title = base.title
         win.form.url = base.save_action.get_absolute_url()
         
+        # проверим право редактирования
+        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+            win.make_read_only()
+            
         return ExtUIScriptResult(base.get_edit_window(win))
 
 class DictRowsAction(Action):
@@ -212,6 +225,10 @@ class BaseDictionaryActions(ActionPack):
     # Значение колонки по-умолчанию, которое будет подбираться 
     # при выборе значения из справочника
     column_name_on_select = 'name'
+    
+    # права доступа для базовых справочников
+    PERM_EDIT = 'edit'
+    sub_permissions = {PERM_EDIT: u'Редактирование справочника'}
     
     def __init__(self):
         super(BaseDictionaryActions, self).__init__()

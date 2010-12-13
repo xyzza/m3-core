@@ -45,8 +45,10 @@ def get_app_urlpatterns():
 
 def get_pack(pack_name):
     '''
+    Получает набор экшинов по имени
     '''
-    return PacksNameCache().get(pack_name, None)
+    pack_data = PacksNameCache().get(pack_name, None)
+    return pack_data[0] if pack_data else None
 
 def get_action(action_name):
     '''
@@ -64,6 +66,33 @@ def get_url(action_name):
     action_data = ActionsNameCache().get(action_name, None)
     return action_data[1] if action_data else ''
     
+get_acton_url = get_url
+
+def get_pack_url(pack_name):
+    '''
+    Возвращает абсолютный путь для набора экшенов 
+    '''
+    pack_data = PacksNameCache().get(pack_name, None)
+    return pack_data[1] if pack_data else ''
+
+def get_pack_by_url(url):
+    '''
+    Возвращает набор экшенов по переданному url 
+    '''
+    ControllerCache.populate()
+    packs = collections.deque([])
+    for controller in ControllerCache.get_controllers():
+        packs.extend(controller.top_level_packs)
+        
+    while len(packs) > 0:
+        pack = packs.popleft()
+        if hasattr(pack, 'subpacks'):
+            packs.extend(pack.subpacks)
+        
+        cleaned_pack = get_instance(pack)
+        if url == cleaned_pack.__class__.absolute_url():
+            return cleaned_pack  
+    return None
 #===============================================================================
 # Кеш, используемый для хранения соответствия экшенов
 #===============================================================================
@@ -131,7 +160,7 @@ def inner_name_cache_handler(for_actions=True):
     
     packs = collections.deque([])
     
-    controllers = actions.ControllerCache.get_contollers()
+    controllers = actions.ControllerCache.get_controllers()
     
     # считываем паки верхнего уровня
     for controller in controllers:
@@ -158,9 +187,10 @@ def inner_name_cache_handler(for_actions=True):
         else:
             cleaned_pack = get_instance(pack)
             key = cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__
-            result[key] = cleaned_pack.__class__
+            url = cleaned_pack.__class__.absolute_url()
+            result[key] = (cleaned_pack.__class__, url)
             shortname = get_shortname(cleaned_pack)
             if shortname:
-                result[shortname] = cleaned_pack.__class__
+                result[shortname] = (cleaned_pack.__class__, url)
             
     return result

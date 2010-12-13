@@ -23,10 +23,7 @@ class ActionsBackend(object):
         В нашем случае это роли и права в ролях
         """
         if not hasattr(user_obj, '_role_perm_cache'):
-            roles = AssignedRole.objects.filter(user = user_obj)
-            perms = RolePermission.objects.filter(role__assignedrole__in=roles
-                ).values_list('permission_code'
-                ).order_by('permission_code')
+            perms = RolePermission.objects.filter(role__assigned_users__user = user_obj).values_list('permission_code').order_by('permission_code')
             user_obj._role_perm_cache = set()
             for code in perms:
                 user_obj._role_perm_cache.update(code)
