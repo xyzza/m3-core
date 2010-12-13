@@ -11,11 +11,85 @@ from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
 
 #===============================================================================
+#
+#===============================================================================
+class ExtPivotGrid(BaseExtPanel):
+    '''
+    Сводная таблица
+    '''
+
+    def __init__(self,*args, **kwargs):
+        super(ExtPivotGrid, self).__init__(*args,**kwargs)
+        self.template = 'ext-grids/ext-pivot-grid.js'
+        self.__store = None
+        self.aggregator = None
+        self.measure = None
+        self.left_axis = None
+        self.top_axis = None
+        self._items = []
+        self.__cm = None
+        self.col_model = ExtGridDefaultColumnModel()
+        self.init_component(*args,**kwargs)
+
+    def t_render_store(self):
+        return self.__store.render([col.data_index for col in self.columns])
+
+    def t_render_columns(self):
+        return self.t_render_items()
+
+    def add_column(self, **kwargs):
+        self.columns.append(ExtGridColumn(**kwargs))
+
+    def render_base_config(self):
+        super(ExtPivotGrid, self).render_base_config()
+        self._put_config_value('store',self.t_render_store,self.get_store())
+        self._put_config_value('measure',self.measure)
+        self._put_config_value('aggregator',self.aggregator)
+        self._put_config_value('leftAxis',self.t_render_left_axis)
+        self._put_config_value('topAxis',self.t_render_top_axis)
+
+        self._put_config_value('colModel', self.col_model.render)
+
+    @property
+    def columns(self):
+        return self._items
+
+    def render(self):
+        self.render_base_config()
+        self.render_params()
+        config = self._get_config_str()
+        params = self._get_params_str()
+        return 'new Ext.grid.PivotGrid({%s}, {%s})' % (config, params)
+
+    def set_store(self, store):
+        self.__store = store
+
+    def get_store(self):
+        return self.__store
+
+    store = property(get_store, set_store)
+
+    @property
+    def col_model(self):
+        return self.__cm
+
+    @col_model.setter
+    def col_model(self, value):
+        self.__cm = value
+        self.__cm.grid = self
+
+    def t_render_left_axis(self):
+        return '[%s]' % ','.join(['{dataIndex:"%s",header:"test"}'  % col for col in self.left_axis])
+
+    def t_render_top_axis(self):
+        return '[%s]' % ','.join(['{dataIndex:"%s",header:"test"}'  % col for col in self.top_axis])
+
+#===============================================================================
 # Компонент таблица, или grid
 class ExtGrid(BaseExtPanel):
     '''
     Таблица
-    
+
     @version: 0.1
     @begin_designer
     {title: "Grid"
@@ -23,7 +97,7 @@ class ExtGrid(BaseExtPanel):
     ,xtype: "grid"
     ,attr: [{
         ext_attr: "loadMask"
-        ,py_attr: "load_mask" 
+        ,py_attr: "load_mask"
     },{
         ext_attr: "enableDragDrop"
         ,py_attr: "drag_drop"
@@ -74,55 +148,55 @@ class ExtGrid(BaseExtPanel):
         self.enable_row_body = False
         self.get_row_class = None
         self.column_lines = True # признак отображения вертикальных линий в гриде
-        
+
         self.init_component(*args, **kwargs)
-        
+
         # protected
         self.show_banded_columns = False
         self.banded_columns = SortedDict()
-    
+
     def t_render_plugins(self):
-        return '[%s]' % ','.join(self.plugins) 
-    
+        return '[%s]' % ','.join(self.plugins)
+
     def t_render_banded_columns(self):
         '''
-        Возвращает JS массив состоящий из массивов с описанием объединенных 
-        колонок. Каждый вложенный массив соответствует уровню шапки грида от 
-        верхней к нижней. 
+        Возвращает JS массив состоящий из массивов с описанием объединенных
+        колонок. Каждый вложенный массив соответствует уровню шапки грида от
+        верхней к нижней.
         '''
         result = []
-        for level_list in self.banded_columns.values():       
+        for level_list in self.banded_columns.values():
             result.append('[%s]' % ','.join([ column.render() \
                                              for column in level_list ]))
-        return '[%s]' % ','.join(result) 
-    
+        return '[%s]' % ','.join(result)
+
     def t_render_columns(self):
         return self.t_render_items()
-    
+
     def t_render_store(self):
         assert self.__store, 'Store is not define'
         return self.__store.render([column.data_index for column in self.columns])
-    
+
     def add_column(self, **kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
-    
+
     def add_bool_column(self, **kwargs):
         self.columns.append(ExtGridBooleanColumn(**kwargs))
-        
+
     def add_number_column(self, **kwargs):
         self.columns.append(ExtGridNumberColumn(**kwargs))
-        
+
     def add_date_column(self, **kwargs):
         self.columns.append(ExtGridDateColumn(**kwargs))
-        
+
     def add_banded_column(self, column, level, colspan):
         '''
         Добавляет в грид объединенную ячейку.
         @param column: Колонка грида (ExtGridColumn)
-        @param colspan: Количество колонок которые находятся 
-            под данной колонкой (int) 
+        @param colspan: Количество колонок которые находятся
+            под данной колонкой (int)
         @param level: Уровень учейки где 0 - самый верхний, 1-ниже, и т.д. (int)
-        
+
         upd:26.10.2010 kirov
         колонка может быть не указана, т.е. None, в этом случае на указанном уровне будет "дырка"
         '''
@@ -136,28 +210,28 @@ class ExtGrid(BaseExtPanel):
         assert isinstance(column, ExtGridColumn) or not column
         if not column:
             column = BlankBandColumn()
-        # Колонки хранятся в списках внутки сортированного словаря, 
+        # Колонки хранятся в списках внутки сортированного словаря,
         #чтобы их можно было
-        # извечь по возрастанию уровней 
+        # извечь по возрастанию уровней
         column.colspan = colspan
         level_list = self.banded_columns.get(level, [])
         level_list.append(column)
         self.banded_columns[level] = level_list
         self.show_banded_columns = True
-        
+
     def clear_banded_columns(self):
         '''
         Удаляет все объединенные колонки из грида
         '''
         self.banded_columns.clear()
         self.show_banded_columns = False
-        
+
     def set_store(self, store):
         self.__store = store
-        
+
     def get_store(self):
         return self.__store
-    
+
     store = property(get_store, set_store)
 
     @property
@@ -167,76 +241,76 @@ class ExtGrid(BaseExtPanel):
     @property
     def sm(self):
         return self.__sm
-    
+
     @sm.setter
     def sm(self, value):
         self.__sm = value
         self.checkbox_model = isinstance(self.__sm, ExtGridCheckBoxSelModel)
-    
+
     @property
     def view(self):
         return self.__view
-    
+
     @view.setter
     def view(self, value):
-        self.__view = value    
-        
+        self.__view = value
+
     def t_render_view(self):
         return self.view.render()
-    
+
     def pre_render(self):
         super(ExtGrid, self).pre_render()
         if self.store:
             self.store.action_context = self.action_context
-    
+
     @property
     def col_model(self):
         return self.__cm
-    
+
     @col_model.setter
     def col_model(self, value):
         self.__cm = value
         self.__cm.grid = self
-        
+
     #//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     # Врапперы над событиями listeners[...]
     #------------------------------------------------------------------------
     @property
     def handler_click(self):
         return self._listeners.get('click')
-    
+
     @handler_click.setter
     def handler_click(self, function):
         self._listeners['click'] = function
-    
+
     @property
     def handler_dblclick(self):
         return self._listeners.get('dblclick')
-    
+
     @handler_dblclick.setter
     def handler_dblclick(self, function):
         self._listeners['dblclick'] = function
-    
+
     @property
     def handler_contextmenu(self):
         return self._listeners.get('contextmenu')
-    
+
     @handler_contextmenu.setter
     def handler_contextmenu(self, menu):
         menu.container = self
         self._listeners['contextmenu'] = menu
-        
+
     @property
     def handler_rowcontextmenu(self):
         return self._listeners.get('rowcontextmenu')
-    
+
     @handler_rowcontextmenu.setter
     def handler_rowcontextmenu(self, menu):
         menu.container = self
         self._listeners['rowcontextmenu'] = menu
- 
+
     #----------------------------------------------------------------------------
-    
+
     def render_base_config(self):
         super(ExtGrid, self).render_base_config()
         if self.force_fit:
@@ -248,56 +322,56 @@ class ExtGrid(BaseExtPanel):
         if self.get_row_class:
             self._view_config['getRowClass'] = self.get_row_class
         self._put_config_value('stripeRows', True)
-        self._put_config_value('stateful', True) 
-        self._put_config_value('loadMask', self.load_mask)    
+        self._put_config_value('stateful', True)
+        self._put_config_value('loadMask', self.load_mask)
         self._put_config_value('autoExpandColumn', self.auto_expand_column)
         self._put_config_value('enableDragDrop', self.drag_drop)
         self._put_config_value('ddGroup', self.drag_drop_group)
         self._put_config_value('view', self.t_render_view, self.view)
         self._put_config_value('editor', self.editor)
-        self._put_config_value('store', self.t_render_store, self.get_store())   
+        self._put_config_value('store', self.t_render_store, self.get_store())
         self._put_config_value('viewConfig', self._view_config)
         self._put_config_value('columnLines', self.column_lines, self.column_lines)
-    
+
     def render_params(self):
         super(ExtGrid, self).render_params()
-        
+
         handler_cont_menu = self.handler_contextmenu.render \
                         if self.handler_contextmenu else ''
-            
+
         handler_rowcontextmenu = self.handler_rowcontextmenu.render \
                         if self.handler_rowcontextmenu else ''
-        
+
         self._put_params_value('menus', {'contextMenu': handler_cont_menu,
                                          'rowContextMenu': handler_rowcontextmenu})
         if self.sm:
             self._put_params_value('selModel', self.sm.render)
-        
+
         self._put_params_value('colModel', self.col_model.render)
         self._put_params_value('plugins', self.t_render_plugins)
-        
+
         if self.show_banded_columns:
             self._put_params_value('bundedColumns', self.t_render_banded_columns)
-    
+
     def render(self):
         try:
             self.pre_render()
-            
             self.render_base_config()
             self.render_params()
         except Exception as msg:
             raise Exception(msg)
-            
+
 
         config = self._get_config_str()
+        config = config + ",layout:'fit', header:'false'"
         params = self._get_params_str()
         return 'createGridPanel({%s}, {%s})' % (config, params)
-    
+
 #===============================================================================
 # Колонки к гриду
 class BaseExtGridColumn(ExtUIComponent):
     GRID_COLUMN_DEFAULT_WIDTH = 100
-    
+
     def __init__(self, *args, **kwargs):
         super(BaseExtGridColumn, self).__init__(*args, **kwargs)
         self.header = None
@@ -325,18 +399,18 @@ class BaseExtGridColumn(ExtUIComponent):
             else: # пусть как хочет так и рендерится
                 lst.append('%s:%s' % (key,val))
         return ','.join(lst)
-               
+
     def render_editor(self):
         return self.editor.render()
-        
-#===============================================================================    
+
+#===============================================================================
 class ExtGridColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridColumn, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-grid-column.js'
         self.init_component(*args, **kwargs)
-    
-#===============================================================================    
+
+#===============================================================================
 class ExtGridBooleanColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridBooleanColumn, self).__init__(*args, **kwargs)
@@ -345,8 +419,8 @@ class ExtGridBooleanColumn(BaseExtGridColumn):
         self.text_true = None
         self.text_undefined = None
         self.init_component(*args, **kwargs)
-        
-#===============================================================================        
+
+#===============================================================================
 class ExtGridNumberColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridNumberColumn, self).__init__(*args, **kwargs)
@@ -377,7 +451,7 @@ class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
         super(ExtGridCheckBoxSelModel, self).__init__(*args, **kwargs)
         self.single_select = False
         self.init_component(*args, **kwargs)
-        
+
     def render(self):
         single_sel = 'singleSelect: true' if self.single_select else ''
         return 'new Ext.grid.CheckboxSelectionModel({ %s })' % single_sel
@@ -434,7 +508,7 @@ class ExtGridLockingHeaderGroupColumnModel(BaseExtComponent):
 
 #===============================================================================
 # Компонент - расширенное дерево, включающее колонки, с возможностью добавлять
-# view и column model    
+# view и column model
 class ExtAdvancedTreeGrid(ExtGrid):
     '''
     Расширенное дерево на базе Ext.ux.maximgb.TreeGrid
@@ -444,47 +518,47 @@ class ExtAdvancedTreeGrid(ExtGrid):
         self.template = 'ext-grids/ext-advanced-treegrid.js'
         self.url = None
         self.master_column_id = None
-        
+
         # Свойства для внутреннего store:
         self.store_root = 'rows'
-        
+
         # Свойства для внутеннего bottom bara:
         self.use_bbar = False
         self.bbar_page_size = 10
-        
+
         self.init_component(*args, **kwargs)
-    
+
     def t_render_columns_to_record(self):
         return '[%s]' % ','.join(['{name:"%s"}'  % col.data_index \
                                   for col in self.columns])
-    
+
     def add_column(self, **kwargs):
         # FIXME: Хак, с сгенерированным client_id компонент отказывается работать
         if kwargs.get('data_index'):
             kwargs['client_id'] = kwargs.get('data_index')
         super(ExtAdvancedTreeGrid, self).add_column(**kwargs)
-        
+
     def render_base_config(self):
         super(ExtAdvancedTreeGrid, self).render_base_config()
         self._put_config_value('master_column_id', self.master_column_id)
-        
+
     def render_params(self):
         super(ExtAdvancedTreeGrid, self).render_params()
         self._put_params_value('storeParams', {'url': self.url,
                                                'root': self.store_root})
-        
+
         self._put_params_value('columnsToRecord', self.t_render_columns_to_record)
-        
+
         if self.use_bbar:
             self._put_params_value('bbar', {'pageSize': self.bbar_page_size})
-    
+
     def t_render_base_config(self):
         return self._get_config_str()
-    
+
     def render(self):
         self.render_base_config()
         self.render_params()
-        
+
         base_config = self._get_config_str()
         params = self._get_params_str()
         return 'createAdvancedTreeGrid({%s},{%s})' %(base_config, params)
@@ -515,20 +589,20 @@ class ExtGridGroupingView(BaseExtComponent):
         if self.get_row_class:
             self._put_params_value('getRowClass', self.get_row_class)
         self._put_params_value('groupTextTpl', self.group_text_template)
-        
+
     def render(self):
         try:
-            self.pre_render()            
+            self.pre_render()
             self.render_base_config()
             self.render_params()
         except Exception as msg:
             raise Exception(msg)
         params = self._get_params_str()
         return 'new Ext.grid.GroupingView({%s})' % (params)
-        
-    # если требуется вывести какое-либо слово после количества, шаблон должен 
+
+    # если требуется вывести какое-либо слово после количества, шаблон должен
     #иметь след вид:
-    # 'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]} 
+    # 'group_text_tpl': """groupTextTpl:'{text} ({[values.rs.length]}
     #    {[values.rs.length > 1 ? "Объекта" : "Объект"]})'"""
     # но проблемы с обработкой двойных кавычек
 
@@ -540,7 +614,7 @@ class ExtGridLockingView(BaseExtComponent):
     def __init__(self, *args, **kwargs):
         super(ExtGridLockingView, self).__init__(*args, **kwargs)
         self.init_component(*args, **kwargs)
-        
+
     def render(self):
         result = 'new Ext.ux.grid.LockingGridView()'
         return result
@@ -554,7 +628,7 @@ class ExtGridLockingHeaderGroupView(BaseExtComponent):
         super(ExtGridLockingHeaderGroupView, self).__init__(*args, **kwargs)
         self.grid = None
         self.init_component(*args, **kwargs)
-        
+
     def render(self):
         result = 'new Ext.ux.grid.LockingHeaderGroupGridView({rows:%s})' % self.grid.t_render_banded_columns()
         return result
