@@ -299,11 +299,28 @@ class ExtForm(BaseExtPanel):
                     l_field = getattr(obj, name)
                     l_field.save(name_file, cont_file, save = False)
                     
-                    # А так же нужно сохранять thumbnail картинки
+                # А так же нужно сохранять thumbnail картинки
+                # Состовляем лист thumbnail_size'ов
+                thumbnails = [field.min_thumbnail_size]
+                if field.middle_thumbnail_size:
+                    thumbnails.append(field.middle_thumbnail_size)
+                if field.max_thumbnail_size:
+                    thumbnails.append(field.max_thumbnail_size)
+                # Проходим по составленному листу
+                for item in thumbnails:
+                    
+                    if item == field.middle_thumbnail_size:
+                        _THUMBNAIL_PREFIX = ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX
+                        field.thumbnail_size = field.middle_thumbnail_size
+                    elif item == field.max_thumbnail_size:
+                        _THUMBNAIL_PREFIX= ExtImageUploadField.MAX_THUMBNAIL_PREFIX
+                        field.thumbnail_size = field.max_thumbnail_size
+                    else:
+                        _THUMBNAIL_PREFIX = ExtImageUploadField.MIN_THUMBNAIL_PREFIX
+                    
                     if isinstance(field, ExtImageUploadField) and \
                         field.thumbnail:
                         current_dir = os.path.dirname(l_field.path)
-                        
                         img = Image.open(l_field.path)
                         
                         width, height = img.size
@@ -318,7 +335,7 @@ class ExtForm(BaseExtPanel):
                             new_img = img.resize((curr_width, curr_height),
                                        Image.ANTIALIAS)
                             new_img.save(l_field.path)
-                        
+
                         # Генерируем thumbnails
                         tmumb_curr_width, tmumb_curr_height = \
                             get_img_size(field.thumbnail_size, img.size)
@@ -327,7 +344,7 @@ class ExtForm(BaseExtPanel):
                                         Image.ANTIALIAS)
                         base_name = os.path.basename(l_field.path)
                         tmb_path = os.path.join(current_dir, 
-                                ExtImageUploadField.THUMBNAIL_PREFIX + base_name)
+                                _THUMBNAIL_PREFIX + base_name)
                         img.save(tmb_path)    
 
         def set_field(obj, names, value, field=None):
