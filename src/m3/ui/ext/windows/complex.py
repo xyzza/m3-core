@@ -119,13 +119,14 @@ class ExtDictionaryWindow(BaseExtWindow):
         super(ExtDictionaryWindow, self).make_read_only(access_off)
         if self.tree:
             self.tree.make_read_only(access_off)
+            # Включаем обратно refresh, ибо он нужен.
+            for component in self.__components_refresh_tree:
+                component.make_read_only(False)
         if self.grid:
             self.grid.make_read_only(access_off)
-        # Включаем обратно refresh, ибо он нужен.
-        for component in self.__components_refresh_grid:
-            component.make_read_only(False)
-        for component in self.__components_refresh_tree:
-            component.make_read_only(False)
+            # Включаем обратно refresh, ибо он нужен.
+            for component in self.__components_refresh_grid:
+                component.make_read_only(False)    
         
     def _add_menu_item_grid(self, to_tbar = True, to_row_menu = True, to_grid_menu = True, to_menu = None, **kwargs):
         '''

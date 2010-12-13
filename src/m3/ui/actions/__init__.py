@@ -232,11 +232,67 @@ class ActionPack(object):
     # Как обрабатывается этот признак - смотри в Action.has_permission
     need_check_permission = False
 
+    # Словарь внутренних прав доступа, используемых в наборе действий
+    # ключ - код права, который совмещается с адресом (кодом) набора действий
+    # значение - наименование права
+    # Пример: {'edit':u'Редактирование записи'}
+    # Общий код права доступа будет иметь вид: /users#edit
+    # Как обрабатывается этот список - смотри в has_sub_permission
+    sub_permissions = {}
+
     def __init__(self):
         # Список действий зарегистрированных на исполнение в данном пакете
         self.actions = []
         # Список дочерних пакетов (подпакетов) зарегистрированных на исполнение в данном пакете
         self.subpacks = []
+    
+    @classmethod
+    def absolute_url(cls):
+        '''
+        Возвращает путь всех паков до текущего по иерархии
+        '''
+        path = [cls.url]
+        pack = cls.parent
+        while pack != None:
+            path.append(pack.url)
+            pack = pack.parent
+        url = ''.join( reversed(path) )
+        contr_url = ''
+        for cont in ControllerCache.get_controllers():
+            p = cont.find_pack(cls)
+            if p:
+                contr_url = cont.url
+                break
+        return contr_url + url
+    
+    def get_permission_code(self):
+        '''
+        Возвращает код, для контроля прав доступа
+        '''
+        return self.absolute_url()
+    
+    def get_sub_permission_code(self, sub_code):
+        '''
+        Возвращает код суб-права
+        '''
+        return self.get_permission_code()+'#'+sub_code
+    
+    def has_sub_permission(self, user_obj, sub_code, request = None):
+        '''
+        Проверка на внутреннее право для указанного пользователя
+        '''
+        assert isinstance(sub_code, str)
+        
+        # Подчиненные права набора действий проверяются только в случае разрешения проверки в наборе действий
+        # Если переданный код не прописан в правах этого действия, то это не наш код - значит всё разрешено 
+        if self.need_check_permission and sub_code in self.sub_permissions.keys():
+            # если пользователя нет, значит аноним - ему дадим отпор
+            if user_obj:
+                # проверим что права на выполнение есть
+                return user_obj.has_perm(self.get_sub_permission_code(sub_code))
+            else:
+                return False
+        return True
     
     def pre_run(self, request, context):
         '''
@@ -793,5 +849,5 @@ class ControllerCache(object):
         return None
     
     @classmethod
-    def get_contollers(cls):
+    def get_controllers(cls):
         return cls._controllers
