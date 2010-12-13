@@ -319,6 +319,8 @@ class ExtFileUploadField(BaseExtField):
         self._put_params_value('fileUrl', self.file_url)
 #        self._put_params_value('possibleFileExtensions', 
 #                               map(lambda x: x, self.possible_file_extensions or []))
+        self._put_params_value('possibleFileExtensions',
+                                   ','.join(self.possible_file_extensions or ()))
 
     def render(self):
         self.render_base_config()
@@ -341,7 +343,7 @@ class ExtImageUploadField(ExtFileUploadField):
     '''
     Компонент загрузки изображений
     '''        
-    THUMBNAIL_PREFIX = 'thumbnail_' 
+    THUMBNAIL_PREFIX = 'thumbnail_'
     def __init__(self, *args, **kwargs):
         # Ширина и высота миниатюры
         self.thumbnail_size = (300, 300)
@@ -354,6 +356,8 @@ class ExtImageUploadField(ExtFileUploadField):
         self.image_max_size = (1600, 1600)
         
         super(ExtImageUploadField, self).__init__(*args, **kwargs)
+
+        self.possible_file_extensions = ('png', 'jpeg', 'gif', 'bmp', 'jpg')
         
         # Умолчательный параметр, иначе контрол разъедется
         self.width = 300
