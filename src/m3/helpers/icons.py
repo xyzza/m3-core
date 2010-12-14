@@ -1,6 +1,16 @@
 #coding:utf-8
 
 class Icons:
+    '''
+    Статический класс, который включает пак набора иконок и дефолтные иконки m3
+    '''
+    # дефолтные иконки m3
+    M3_ADD = 'add_item'
+    M3_EDIT = 'edit_item'
+    M3_DELETE = 'delete_item'
+    M3_SEARCH = 'search'
+    
+    # Сгенерированный набор иконок
     ACCEPT = 'icon-accept'
     ADD = 'icon-add'
     ANCHOR = 'icon-anchor'
