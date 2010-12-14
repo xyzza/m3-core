@@ -122,6 +122,10 @@ class ListEditRowWindowAction(Action):
             win.title = base.title
         win.form.url = base.save_row_action.get_absolute_url()
         
+        # проверим право редактирования
+        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+            win.make_read_only()
+        
         return ExtUIScriptResult(base.get_edit_window(win))
     
 class ListNewRowWindowAction(Action):
@@ -158,6 +162,10 @@ class TreeEditNodeWindowAction(Action):
         if not win.title:
             win.title = base.title
         win.form.url = base.save_node_action.get_absolute_url()
+        
+        # проверим право редактирования
+        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+            win.make_read_only()
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
     
@@ -225,6 +233,7 @@ class ListWindowAction(Action):
         win.tree.width = base.tree_width
         win.tree.root_text = base.title
         win.contextTreeIdName = base.contextTreeIdName
+        
         return win
     
     def create_columns(self, control, columns):
@@ -297,6 +306,11 @@ class ListWindowAction(Action):
         self.configure_list(win, request, context)
         self.configure_other(win, request, context)        
         win = self.parent.get_list_window(win)
+        
+        # проверим право редактирования
+        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+            win.make_read_only()
+                    
         return ExtUIScriptResult(win)
 
 class SelectWindowAction(ListWindowAction):
@@ -324,6 +338,11 @@ class SelectWindowAction(ListWindowAction):
         win.column_name_on_select = 'name'
         win = self.parent.get_select_window(win)
         win.contextTreeIdName = base.contextTreeIdName
+        
+        # проверим право редактирования
+        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+            win.make_read_only()
+                    
         return ExtUIScriptResult(win)
 
 class BaseTreeDictionaryActions(ActionPack):
@@ -353,6 +372,10 @@ class BaseTreeDictionaryActions(ActionPack):
     tree_width = 200
     
     contextTreeIdName = 'id'
+    
+    # права доступа для базовых справочников
+    PERM_EDIT = 'edit'
+    sub_permissions = {PERM_EDIT: u'Редактирование справочника'}
     
     def __init__(self):
         super(BaseTreeDictionaryActions, self).__init__()

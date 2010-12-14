@@ -29,7 +29,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         self.template_globals = 'ext-script/ext-dictionary-window-globals.js'
         self.layout='border'
         
-        self.buttons.append(ExtButton(text = u'Закрыть',
+        self.buttons.append(ExtButton(name = 'close_btn', text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
 
         # Основные контролы должны быть доступны для изменения
@@ -97,7 +97,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.__panel_list_view = button_panel
             self.list_view = list_view
         
-            select_btn = ExtButton(text = u'Выбрать', disabled=True)
+            select_btn = ExtButton(name = 'select_btn',text = u'Выбрать', disabled=True)
             self.buttons.insert(0, select_btn)
             
             self.select_button = select_btn
@@ -126,7 +126,24 @@ class ExtDictionaryWindow(BaseExtWindow):
             self.grid.make_read_only(access_off)
             # Включаем обратно refresh, ибо он нужен.
             for component in self.__components_refresh_grid:
-                component.make_read_only(False)    
+                component.make_read_only(False)
+                
+        # Закроем контекстное меню
+        if self.grid:
+            for item in self.grid.handler_rowcontextmenu.items:
+                item.disabled = access_off
+            for item in self.grid.handler_contextmenu.items:
+                item.disabled = access_off
+        if self.tree:
+            for item in self.tree.handler_contextmenu.items:
+                item.disabled = access_off
+            for item in self.tree.handler_containercontextmenu.items:
+                item.disabled = access_off
+            
+        # Оставим кнопку Закрыть и Выбрать
+        for btn in self.buttons:
+            if btn.name in ['close_btn', 'select_btn']:
+                btn.make_read_only(False)
         
     def _add_menu_item_grid(self, to_tbar = True, to_row_menu = True, to_grid_menu = True, to_menu = None, **kwargs):
         '''
