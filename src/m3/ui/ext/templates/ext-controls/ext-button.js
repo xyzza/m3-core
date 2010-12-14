@@ -15,9 +15,10 @@ new Ext.Button({
 	{% if component.handler %} ,handler: {{ component.t_render_handler|safe}}{% endif%}
 	{% if component.menu %} ,menu: {{ component.menu.render|safe}} {% endif%}
 	,enableToggle: {{ component.enable_toggle|lower }}
-  ,allowDepress: {{ component.allow_depress|lower }}
+    ,allowDepress: {{ component.allow_depress|lower }}
 	{% if component.toggle_group %}, toggleGroup: '{{ component.toggle_group }}'{% endif %}
 	, pressed: {{ component.pressed|lower }}
+    {% if component.margins %} ,margins: '{{ component.margins }}' {% endif %}
 })
 
 
