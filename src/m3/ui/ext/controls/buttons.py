@@ -47,7 +47,7 @@ class ExtButton(BaseExtControl):
         self.tooltip_text = None
         self.menu = None
         self.tab_index = None
-        
+        self.margins = None
         self.enable_toggle = False
         self.toggle_group = None
         self.allow_depress = False
@@ -87,6 +87,8 @@ class ExtButton(BaseExtControl):
         self._put_config_value('handler', self.t_render_handler, self.handler)
         if self.menu:
             self._put_config_value('menu', self.menu.render)
+        if self.margins:
+            self._put_config_value('margins', self.margins)
 
     def render(self):
         self._ext_name = 'Ext.SplitButton' if self.menu else 'Ext.Button'
