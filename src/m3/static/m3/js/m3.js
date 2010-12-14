@@ -50,7 +50,7 @@ function smart_eval(text){
 		else
 		{
     		if(obj.message && obj.message != ''){
-    			Ext.Msg.show({title:'', msg: obj.message, buttons:Ext.Msg.OK, icon: (obj.success!=undefined && !obj.success ? Ext.Msg.WARNING : Ext.Msg.Info)});
+    			Ext.Msg.show({title:'Внимание', msg: obj.message, buttons:Ext.Msg.OK, icon: (obj.success!=undefined && !obj.success ? Ext.Msg.WARNING : Ext.Msg.Info)});
     			return;
     		}
 		}
