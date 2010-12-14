@@ -280,7 +280,7 @@ class ExtForm(BaseExtPanel):
                         _THUMBNAIL_PREFIX = ExtImageUploadField.MIN_THUMBNAIL_PREFIX
                     
                     if isinstance(field, ExtImageUploadField) and \
-                        field.thumbnail:
+                        field.thumbnail and field.memory_file:
                         current_dir = os.path.dirname(l_field.path)
                         img = Image.open(l_field.path)
                         
