@@ -25,7 +25,7 @@ from m3.ui.ext.fields import (ExtNumberField,
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.fields.complex import ExtDictSelectField
-from m3.helpers import get_img_size
+from m3.helpers import get_img_size, logger
 from m3.helpers.datastructures import TypedList
 #from m3.ui.actions.packs import BaseDictionaryActions
 
@@ -210,7 +210,7 @@ class ExtForm(BaseExtPanel):
                         file_name = os.path.basename(ffile)
                         
                         thumb_file = os.path.join(dir, 
-                            ExtImageUploadField.THUMBNAIL_PREFIX + file_name)
+                            ExtImageUploadField.MIN_THUMBNAIL_PREFIX + file_name)
                         if os.path.exists(thumb_file):
                             thumb = Image.open(thumb_file)
                             item.thumbnail_size = thumb.size
@@ -283,11 +283,16 @@ class ExtForm(BaseExtPanel):
                         field.thumbnail:
                         current_dir = os.path.dirname(l_field.path)
                         basename = os.path.basename(l_field.path)
-                        thumb = os.path.join(current_dir, 
-                                             field.THUMBNAIL_PREFIX + basename)
-                        
-                        if os.path.exists(thumb):
-                            os.remove(thumb)
+                                                
+                        thumb_prefix = (ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX, 
+                                      ExtImageUploadField.MIN_THUMBNAIL_PREFIX, 
+                                      ExtImageUploadField.MIN_THUMBNAIL_PREFIX,)
+                            
+                        for prefix in thumb_prefix:
+                            thumb = os.path.join(current_dir, prefix + basename)
+                    
+                            if os.path.exists(thumb):
+                                os.remove(thumb)
                     
                     # Файл изменился, удаляем старый     
                     l_field.delete(save=False)
@@ -299,53 +304,59 @@ class ExtForm(BaseExtPanel):
                     l_field = getattr(obj, name)
                     l_field.save(name_file, cont_file, save = False)
                     
-                # А так же нужно сохранять thumbnail картинки
-                # Состовляем лист thumbnail_size'ов
-                thumbnails = [field.min_thumbnail_size]
-                if field.middle_thumbnail_size:
-                    thumbnails.append(field.middle_thumbnail_size)
-                if field.max_thumbnail_size:
-                    thumbnails.append(field.max_thumbnail_size)
-                # Проходим по составленному листу
-                for item in thumbnails:
+                    try:
+                        img = Image.open(l_field.path)
+                    except IOError:
+                        # Кроме логирования ничего не нужно
+                        logger.exception()                        
+                          
+                    width, height = img.size
+                    max_width, max_height = field.image_max_size
                     
-                    if item == field.middle_thumbnail_size:
-                        _THUMBNAIL_PREFIX = ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX
-                        field.thumbnail_size = field.middle_thumbnail_size
-                    elif item == field.max_thumbnail_size:
-                        _THUMBNAIL_PREFIX= ExtImageUploadField.MAX_THUMBNAIL_PREFIX
-                        field.thumbnail_size = field.max_thumbnail_size
-                    else:
-                        _THUMBNAIL_PREFIX = ExtImageUploadField.MIN_THUMBNAIL_PREFIX
+                    # Обрезаем изображение, если нужно
+                    if width > max_width or height > max_height:
+            
+                        curr_width, curr_height = \
+                            get_img_size(field.image_max_size, img.size)
+                            
+                        new_img = img.resize((curr_width, curr_height),
+                                   Image.ANTIALIAS)
+                        new_img.save(l_field.path)
                     
                     if isinstance(field, ExtImageUploadField) and \
                         field.thumbnail and field.memory_file:
                         current_dir = os.path.dirname(l_field.path)
-                        img = Image.open(l_field.path)
-                        
-                        width, height = img.size
-                        max_width, max_height = field.image_max_size
-                
-                        # Обрезаем изображение, если нужно
-                        if width > max_width or height > max_height:
-                
-                            curr_width, curr_height = \
-                                get_img_size(field.image_max_size, img.size)
-                                
-                            new_img = img.resize((curr_width, curr_height),
-                                       Image.ANTIALIAS)
-                            new_img.save(l_field.path)
-
-                        # Генерируем thumbnails
-                        tmumb_curr_width, tmumb_curr_height = \
-                            get_img_size(field.thumbnail_size, img.size)
+                    
+                        # А так же нужно сохранять thumbnail картинки
+                        # Состовляем лист thumbnail_size'ов
+                        thumbnails = [field.min_thumbnail_size]
+                        if field.middle_thumbnail_size:
+                            thumbnails.append(field.middle_thumbnail_size)
+                        if field.max_thumbnail_size:
+                            thumbnails.append(field.max_thumbnail_size)
+                                                    
+                        for item in thumbnails:
                             
-                        img.thumbnail((tmumb_curr_width, tmumb_curr_height), 
-                                        Image.ANTIALIAS)
-                        base_name = os.path.basename(l_field.path)
-                        tmb_path = os.path.join(current_dir, 
-                                _THUMBNAIL_PREFIX + base_name)
-                        img.save(tmb_path)    
+                            if item == field.middle_thumbnail_size:
+                                thumbn_prefix= ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX
+                                thumbnail_size = field.middle_thumbnail_size
+                            elif item == field.max_thumbnail_size:
+                                thumbn_prefix= ExtImageUploadField.MAX_THUMBNAIL_PREFIX
+                                thumbnail_size = field.max_thumbnail_size
+                            else:
+                                thumbn_prefix = ExtImageUploadField.MIN_THUMBNAIL_PREFIX
+                                thumbnail_size = field.min_thumbnail_size
+                            
+                            # Генерируем thumbnails
+                            tmumb_curr_width, tmumb_curr_height = \
+                                get_img_size(thumbnail_size, img.size)
+                                
+                            img.thumbnail((tmumb_curr_width, tmumb_curr_height), 
+                                            Image.ANTIALIAS)
+                            base_name = os.path.basename(l_field.path)
+                            tmb_path = os.path.join(current_dir, 
+                                    thumbn_prefix + base_name)
+                            img.save(tmb_path)    
 
         def set_field(obj, names, value, field=None):
             '''

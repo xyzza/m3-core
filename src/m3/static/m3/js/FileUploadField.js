@@ -143,8 +143,16 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
              },
              change: function(){
                  if (!this.isFileExtensionOK()){
-                     Ext.MessageBox.alert('Ошибка', 'Неверное расширение файла');
-                     this.reset();
+                     Ext.Msg.show({
+                       title:'Внимание'
+                       ,msg: 'Неверное расширение файла'
+                       ,buttons: Ext.Msg.OK
+                       ,fn: Ext.emptyFn
+                       ,animEl: 'elId'
+                       ,icon: Ext.MessageBox.WARNING
+                    });
+                     
+                     this.clickClearField();
                      return;
                  }
                  var v = this.fileInput.dom.value;
