@@ -6,6 +6,12 @@
 /**
  * Нужно для правильной работы окна 
  */
+var windowsRenderTo = 'x-desktop'
+
+if (Ext.fly('x-desktop') == null) {
+	windowsRenderTo = Ext.getBody().id;
+}
+ 
 Ext.override(Ext.Window, {
 
 	/*
@@ -16,7 +22,7 @@ Ext.override(Ext.Window, {
 	tmpModal: false 
 	
 	,manager: new Ext.WindowGroup()
-    ,renderTo: 'x-desktop'
+    ,renderTo: windowsRenderTo
     ,constrain: true
 	/**
 	 * Выводит окно на передний план
@@ -29,8 +35,8 @@ Ext.override(Ext.Window, {
 	,listeners: {
 
 		'beforeshow': function (){
-			if ( Ext.get('x-desktop').getHeight() < this.getHeight() ) {
-				this.setHeight( Ext.get('x-desktop').getHeight() );
+			if ( Ext.get(this.renderTo).getHeight() < this.getHeight() ) {
+				this.setHeight( Ext.get(this.renderTo).getHeight() );
 			}
 			
 			if (this.parentWindow) {
