@@ -13,6 +13,8 @@ from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.actions.packs import ListDeleteRowAction
 from m3.ui.ext.containers import ExtPagingBar
+from m3.db import BaseObjectModel
+from m3.core.exceptions import RelatedError
 
 
 class TreeGetNodesAction(Action):
@@ -639,18 +641,42 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     def save_node(self, obj):
         obj.save()
         return OperationResult(success = True)
-    
+
     def delete_row(self, objs):
-        message = ''
-        if len(objs) == 0:
-            message = u'Элемент не существует в базе данных.'
-        else:
-            for obj in objs:
-                if not utils.safe_delete_record(self.list_model, obj.id):
-                    message += u'Не удалось удалить элемент %s. Возможно на него есть ссылки.<br>' % obj.id
-        
-        return OperationResult.by_message(message)
-        
+        # Такая реализация обусловлена тем, что IntegrityError невозможно отловить
+        # до завершения транзакции, и приходится оборачивать транзакцию.
+        @transaction.commit_on_success
+        def delete_row_in_transaction(self, objs):
+            message = ''
+            if len(objs) == 0:
+                message = u'Элемент не существует в базе данных.'
+            else:
+                for obj in objs:
+                    if (isinstance(obj, BaseObjectModel) or 
+                        (hasattr(obj, 'safe_delete') and callable(obj.safe_delete))):
+                        try:
+                            obj.safe_delete()
+                        except RelatedError, e:
+                            message = e.args[0]
+                    else:
+                        if not utils.safe_delete_record(self.model, obj.id):
+                            message = u'Не удалось удалить элемент %s. Возможно на него есть ссылки.' % obj.id
+                            break
+            return OperationResult.by_message(message)
+        # Тут пытаемся поймать ошибку из транзакции.
+        try:
+            return delete_row_in_transaction(self, objs)
+        except Exception, e:
+            # Встроенный в Django IntegrityError не генерируется. Кидаются исключения
+            # специфичные для каждого драйвера БД. Но по спецификации PEP 249 все они
+            # называются IntegrityError
+            if e.__class__.__name__ == 'IntegrityError':
+                message = u'Не удалось удалить элемент. Возможно на него есть ссылки.'
+                return OperationResult.by_message(message)
+            else:
+                # все левые ошибки выпускаем наверх
+                raise
+
     def delete_node(self, obj):
         '''
         Удаление группы справочника.

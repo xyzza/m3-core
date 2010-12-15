@@ -3,6 +3,7 @@
 from django.db import models, connection, transaction, IntegrityError, router
 from django.db.models.query import QuerySet, delete_objects
 from django.db.models.query_utils import CollectedObjects
+from m3.core.exceptions import RelatedError
 
 def safe_delete(model):
     '''
@@ -58,6 +59,7 @@ class BaseEnumerate(object):
         ''' Используется как источник данных в ArrayStore и DataStore ExtJS '''
         return cls.values.items()
 
+
 class BaseObjectModel(models.Model):
     """
     Базовая модель для объектов системы. 
@@ -74,6 +76,10 @@ class BaseObjectModel(models.Model):
     def __unicode__(self):
         """ Определяет текстовое представление объекта """
         return u'{%s}' % self.pk
+    
+    @classmethod
+    def get_verbose_name(cls):
+        return cls._meta.verbose_name
 
     def safe_delete(self):
         """
