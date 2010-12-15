@@ -18,7 +18,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
      /**
      * Класс иконки для выбора файла
      */
-     ,iconClsSelectFile: 'x-form-file-icon'
+    ,iconClsSelectFile: 'x-form-file-icon'
 
     /**
      * Класс иконки для очистки файла
@@ -144,6 +144,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
              change: function(){
                  if (!this.isFileExtensionOK()){
                      Ext.MessageBox.alert('Ошибка', 'Неверное расширение файла');
+                     this.reset();
                      return;
                  }
                  var v = this.fileInput.dom.value;
@@ -270,9 +271,9 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.el.setWidth(width);
         this.buttonClear.hide();
 
-    }
+    },
 
-    ,getFileUrl: function(url){
+    getFileUrl: function(url){
         return document.location.protocol + '//' + document.location.host +
             '/' + url;
     }
@@ -290,10 +291,9 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         if (fileExtension.length > 0){
             //Поиск на существование элемента внутри массива
             return this.possibleFileExtensions.split(',')
-                    .indexOf(fileExtension[fileExtension.length-1]) != -1;
+                    .indexOf(fileExtension[fileExtension.length-1].toLowerCase()) != -1;
         }
-        else
-            return false;
+        return false;
     }
 });
 
