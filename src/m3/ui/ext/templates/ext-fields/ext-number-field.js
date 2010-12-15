@@ -14,4 +14,5 @@ new Ext.form.NumberField({
 	{% if min_text %} ,minText: '{{ component.min_text }}' {% endif %}
 	{% if max_text %} ,maxText: '{{ component.max_text }}' {% endif %}
 	{% if component.max_length %} ,maxLength: {{ component.max_length }} {% endif %}
+	{% if component.empty_text %} ,emptyText: '{{ component.empty_text }}' {% endif %}
 })
