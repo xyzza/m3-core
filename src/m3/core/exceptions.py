@@ -21,3 +21,7 @@ class ApplicationLogicException(Exception):
         '''
         '''
         return self.exception_message
+    
+class RelatedError(Exception):
+    '''Исключение для получения связанных объектов.'''
+    pass
