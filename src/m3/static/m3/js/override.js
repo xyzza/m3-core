@@ -270,3 +270,12 @@ Ext.override(Ext.form.Action.Submit, {
         }
     }
 });
+
+/**
+ * Раньше нельзя было перейти на конкретную страницу в движках webkit. Т.к.
+ * Событие PagingBlur наступает раньше pagingChange, и обновлялась текущая 
+ * страница, т.к. PagingBlur обновляет индекс.
+ */
+Ext.override(Ext.PagingToolbar, {
+    onPagingBlur: Ext.emptyFn
+});
