@@ -303,11 +303,12 @@ class ExtFileUploadField(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtFileUploadField, self).__init__(*args, **kwargs)
         self.file_url = None
-        
+
         # Пример использования:
         # possible_file_extensions = ('png', 'jpeg', 'gif', 'bmp')
-        self.possible_file_extensions = None
-        
+
+        #Пусто
+        self.possible_file_extensions = ()
         self.init_component(*args, **kwargs)
         
         # Привязка к файлу
@@ -317,8 +318,8 @@ class ExtFileUploadField(BaseExtField):
         super(ExtFileUploadField, self).render_params()
         self._put_params_value('prefixUploadField', ExtFileUploadField.PREFIX)
         self._put_params_value('fileUrl', self.file_url)
-#        self._put_params_value('possibleFileExtensions', 
-#                               map(lambda x: x, self.possible_file_extensions or []))
+        self._put_params_value('possibleFileExtensions',','.join(
+                               self.possible_file_extensions))
 
     def render(self):
         self.render_base_config()
@@ -334,7 +335,7 @@ class ExtFileUploadField(BaseExtField):
         
     @memory_file.setter
     def memory_file(self, memory_file):
-        self._memory_file = memory_file            
+        self._memory_file = memory_file
         
 #===============================================================================
 class ExtImageUploadField(ExtFileUploadField):
@@ -361,11 +362,14 @@ class ExtImageUploadField(ExtFileUploadField):
         # Высота и ширина изображения. Изображение будет подгоняться под 
         # эту высоту
         self.image_max_size = (1600, 1600)
-        
+
         super(ExtImageUploadField, self).__init__(*args, **kwargs)
-        
+
         # Умолчательный параметр, иначе контрол разъедется
         self.width = 300
+        # начальные допустимые расширения
+        self.possible_file_extensions = ('png', 'jpeg', 'gif', 'bmp', 'jpg')
+
         self.init_component(*args, **kwargs)
         
         

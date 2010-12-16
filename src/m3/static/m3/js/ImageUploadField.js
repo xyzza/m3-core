@@ -100,6 +100,10 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
             dismissDelay: 10000 
         });
     }
+    ,onDestroy: function(){
+        Ext.ux.form.ImageUploadField.superclass.onDestroy.call(this);
+        Ext.destroy(this.previewTip);
+    }
 });
 
 Ext.reg('imageuploadfield', Ext.ux.form.ImageUploadField);

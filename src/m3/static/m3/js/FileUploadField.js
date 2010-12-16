@@ -37,12 +37,15 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             }
             if (params.fileUrl) {
                 this.fileUrl = params.fileUrl;
+            }                            
+            if (baseConfig.readOnly) {
+                this.readOnlyAll = true;
             }
             if (params.possibleFileExtensions) {
                 this.possibleFileExtensions = params.possibleFileExtensions;
             }
-            if (baseConfig.readOnly) {
-                this.readOnlyAll = true;
+            else{
+                this.possibleFileExtensions = '';
             }
         }
 
@@ -163,9 +166,8 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
                        ,fn: Ext.emptyFn
                        ,animEl: 'elId'
                        ,icon: Ext.MessageBox.WARNING
-                    });
-                     
-                     this.clickClearField();
+                    });                     
+                     this.reset();
                      return;
                  }
                  var v = this.fileInput.dom.value;
