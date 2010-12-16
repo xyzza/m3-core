@@ -395,14 +395,20 @@ function uiShowErrorMessage(response){
  * @param {Object} параметры запроса
  */
 function sendRequest(url, desktop, params){                     
+    var mask = new Ext.LoadMask(Ext.getBody());
+    mask.show();
     Ext.Ajax.request({
     	params: params,
         url: url,
         method: 'POST',
-        success: function(response, options){
+        success: function(response, options){            
             smart_eval(response.responseText);
+            mask.hide();
         }, 
-        failure: uiAjaxFailMessage
+        failure: function(){            
+            uiAjaxFailMessage.apply(this, arguments);
+            mask.hide();
+        }
     });
 }
 
@@ -456,3 +462,4 @@ function sendRequest(url, desktop, params){
 
     return retVal;
 }
+

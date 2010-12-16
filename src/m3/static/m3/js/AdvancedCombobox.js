@@ -412,7 +412,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 				    };
 				}
 				,failure: function(response, opts){
-					uiAjaxFailMessage();
+					uiAjaxFailMessage.apply(this, arguments);
 				}
 			});
 		}

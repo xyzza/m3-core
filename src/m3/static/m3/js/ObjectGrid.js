@@ -4,8 +4,6 @@
  */
 Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
 		
 		assert(params.allowPaging !== undefined,'allowPaging is undefined');
 		assert(params.rowIdName !== undefined,'rowIdName is undefined');
@@ -77,20 +75,28 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	 */
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
+		var mask = new Ext.LoadMask(this.body);
 		
 		var req = {
 			url: this.actionNewUrl,
 			params: this.actionContextJson || {},
 			success: function(res, opt){
 				if (scope.fireEvent('afternewrequest', scope, res, opt)) {
-					return scope.childWindowOpenHandler(res, opt);
+				    var child_win = scope.childWindowOpenHandler(res, opt);
+				    mask.hide();
+					return child_win;
 				}
-			},
-			failure: Ext.emptyFn
+				mask.hide();
+			}
+           ,failure: function(){ 
+               uiAjaxFailMessage.apply(this, arguments);
+               mask.hide();
+           }
 		};
 		
 		if (this.fireEvent('beforenewrequest', this, req)) {
 			var scope = this;
+			mask.show();
 			Ext.Ajax.request(req);
 		}
 		
@@ -130,19 +136,27 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 					baseConf[this.columnParamName] = this.getColumnModel().getDataIndex(cell[1]); // получаем имя колонки
 				}
 			}
+			
+			var mask = new Ext.LoadMask(this.body);
 			var req = {
 				url: this.actionEditUrl,
 				params: Ext.applyIf(baseConf, this.actionContextJson || {}),
 				success: function(res, opt){
 					if (scope.fireEvent('aftereditrequest', scope, res, opt)) {
-						return scope.childWindowOpenHandler(res, opt);
+						var child_win = scope.childWindowOpenHandler(res, opt);
+						mask.hide();
+						return child_win;
 					}
-				},
-				failure: Ext.emptyFn
+				}
+               ,failure: function(){ 
+                   uiAjaxFailMessage.apply(this, arguments);
+                   mask.hide();
+               }
 			};
 			
 			if (this.fireEvent('beforeeditrequest', this, req)) {
 				var scope = this;
+				mask.show();
 				Ext.Ajax.request(req);
 			}
     	}
@@ -191,17 +205,24 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 							}
 						}
 						
+						var mask = new Ext.LoadMask(scope.body);
 						var req = {
 		                   url: scope.actionDeleteUrl,
 		                   params: Ext.applyIf(baseConf, scope.actionContextJson || {}),
 		                   success: function(res, opt){
 		                	   if (scope.fireEvent('afterdeleterequest', scope, res, opt)) {
-		                		   return scope.deleteOkHandler(res, opt);
+		                		   var child_win =  scope.deleteOkHandler(res, opt);
+		                		   mask.hide();
+		                		   return child_win;
 		                	   }
-						   },
-		                   failure: Ext.emptyFn
+						   }
+                           ,failure: function(){ 
+                               uiAjaxFailMessage.apply(this, arguments);
+                               mask.hide();
+                           }
 		                };
 						if (scope.fireEvent('beforedeleterequest', scope, req)) {
+						    mask.show();
 							Ext.Ajax.request(req);
 						}
 	                }

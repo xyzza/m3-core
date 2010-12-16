@@ -7,7 +7,7 @@ var ajax = Ext.Ajax;
 	/**
 	 * Стандартный рендеринг окна c добавлением обработчика. 
 	 */
-	function renderWindowGrid(response, opts){
+	function renderWindowGrid(response, opts){	    	    
 		var win = smart_eval(response.responseText);
 		if (win!=undefined){
 			
@@ -32,12 +32,20 @@ var ajax = Ext.Ajax;
 			};
 			params = Ext.applyIf({ 'id': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		{%endif%}
-			
+                
+        var mask = new Ext.LoadMask(win.body);			
+        mask.show();
 		ajax.request({
 			url: "{{ component.url_new_grid }}"
-			,success: renderWindowGrid
+			,success: function(){			    
+			    renderWindowGrid.apply(this, arguments);
+			    mask.hide();
+			}
 			,params: params
-			,failure: uiAjaxFailMessage
+			,failure: function(){ 
+			    uiAjaxFailMessage.apply(win, arguments);
+			    mask.hide();
+			}
 		});
 	}
 	
@@ -50,11 +58,19 @@ var ajax = Ext.Ajax;
 			return;
 		};
 		
+		var mask = new Ext.LoadMask(win.body);   
+		mask.show();
 		ajax.request({
 			url: "{{ component.url_edit_grid }}"
 			,params: Ext.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
-			,success: renderWindowGrid
-			,failure: uiAjaxFailMessage
+			,success: function(){                
+                renderWindowGrid.apply(this, arguments);
+                mask.hide();
+            }            
+            ,failure: function(){ 
+                uiAjaxFailMessage.apply(win, arguments);
+                mask.hide();
+            }
 		});
 	}
 	
@@ -79,6 +95,7 @@ var ajax = Ext.Ajax;
 		else
 			message = 'Вы действительно хотите удалить элемент?'
 		
+
 		Ext.Msg.show({
 		   title:'Подтверждение',
 		   msg: message,
@@ -86,6 +103,10 @@ var ajax = Ext.Ajax;
 		   icon: Ext.MessageBox.QUESTION,
 		   fn:function(btn,text,opt){ 
 		    	if (btn == 'yes') {
+		    	    
+		    	    var mask = new Ext.LoadMask(win.body);
+                    mask.show();
+        
 		    		ajax.request({
 						url: "{{ component.url_delete_grid }}"
 						,params: {
@@ -93,11 +114,15 @@ var ajax = Ext.Ajax;
 						}
 						,success: function(response, opts){
 							renderWindowGrid(response, opts);
+							mask.hide();
 							// Удаляем из стора только если пришел success=true
 							if (uiShowErrorMessage(response))
 								grid.getStore().remove(selRecords);
 						}
-						,failure: uiAjaxFailMessage
+						,failure: function(){ 
+                            uiAjaxFailMessage.apply(win, arguments);
+                            mask.hide();
+                        }
 					});
 		    	};
 		   } 
@@ -208,13 +233,20 @@ var ajax = Ext.Ajax;
 	 *  Создание нового значения в корне дерева
 	 */
 	function newValueTreeRoot() {
+	    var tree = Ext.getCmp('{{ component.tree.client_id}}');
+	    var mask = new Ext.LoadMask(win.body);
+	    mask.show();
 		ajax.request({
 			url: "{{ component.url_new_tree }}"
 			,success: function(response, opts) {
 				renderWindowTree(response, opts);
+				mask.hide();
 			}
 			,params: Ext.applyIf({'{{ component.contextTreeIdName }}': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
-			,failure: uiAjaxFailMessage
+			,failure: function(){ 
+                uiAjaxFailMessage.apply(win, arguments);
+                mask.hide();
+            }
 		});
 	}
 	
@@ -227,13 +259,19 @@ var ajax = Ext.Ajax;
 			return;
 		};
 		var node = tree.getSelectionModel().getSelectedNode();
+		var mask = new Ext.LoadMask(win.body);
+		mask.show();
 		ajax.request({
 			url: "{{ component.url_new_tree }}"
 			,success: function (response, opts) {
 				renderWindowTree(response, opts, node);
+				mask.hide();
 			}
 			,params: Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
-			,failure: uiAjaxFailMessage
+            ,failure: function(){ 
+                uiAjaxFailMessage.apply(win, arguments);
+                mask.hide();
+            }
 		});
 	}
 	
@@ -391,8 +429,7 @@ var ajax = Ext.Ajax;
 			}
 			
 			id = grid.getSelectionModel().getSelected().id;
-			displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}");
-			//console.log( displayText );
+			displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}");			
 		{% else %}
 			var tree = Ext.getCmp('{{ component.tree.client_id}}');
 			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {

@@ -23,18 +23,18 @@ function callBackfunc_date(){
        end_date : endDate.getValue().format('Y-m-d') || ''
     };
     Ext.Ajax.request({
-    method: 'POST',
-    url: '{{ component.logs_list_by_date_url }}',
-    params: params,
-    success: function(response, opts) {
-      logFilesCombo.setValue('');
-      textField.setValue('');
-      logFilesCombo.getStore().loadData(Ext.decode(response.responseText));
-      
-    },
-    failure: function(response, opts) {
-      uiAjaxFailMessage();
-    }
+        method: 'POST',
+        url: '{{ component.logs_list_by_date_url }}',
+        params: params,
+        success: function(response, opts) {
+          logFilesCombo.setValue('');
+          textField.setValue('');
+          logFilesCombo.getStore().loadData(Ext.decode(response.responseText));
+          
+        },
+        failure: function(response, opts) {
+          uiAjaxFailMessage.apply(this, arguments);
+        }
   });
 }
 };
@@ -66,7 +66,7 @@ function callBackfunc_combo(){
         grid.getStore().loadData(Ext.decode(response.responseText));
     },
     failure: function(response, opts) {
-      uiAjaxFailMessage();
+      uiAjaxFailMessage.apply(this, arguments);
     }
   });
 };

@@ -361,7 +361,7 @@ class ExtImageUploadField(ExtFileUploadField):
         
         # Высота и ширина изображения. Изображение будет подгоняться под 
         # эту высоту
-        self.image_max_size = (1600, 1600)
+        self.image_max_size = (600, 600)
 
         super(ExtImageUploadField, self).__init__(*args, **kwargs)
 
@@ -432,3 +432,7 @@ class ExtImageUploadField(ExtFileUploadField):
         prefix = ExtImageUploadField._prefix_by_type(type_img)
         return '%s/%s' % (settings.MEDIA_URL, '%s/%s%s' % ( base_url, 
                           prefix, file_name))
+
+    @staticmethod
+    def get_image_url(name):
+        return '%s/%s' % (settings.MEDIA_URL, name)
