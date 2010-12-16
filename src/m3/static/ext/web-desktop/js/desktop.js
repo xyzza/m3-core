@@ -790,6 +790,14 @@ Ext.Desktop = function(app){
     var taskbarEl = Ext.get('ux-taskbar');
     var shortcuts = Ext.get('x-shortcuts');
 
+
+    //ZIgi 16.12 дабы окна рендерились только внутри десктопа
+    //оставляя верхний и нижний тулбары
+    Ext.override(Ext.Window,
+    {
+        renderTo: 'x-desktop'
+    });
+
     var windows = new Ext.WindowGroup();
     var activeWindow;
 

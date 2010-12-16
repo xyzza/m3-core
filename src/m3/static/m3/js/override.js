@@ -6,12 +6,8 @@
 /**
  * Нужно для правильной работы окна 
  */
-var windowsRenderTo = 'x-desktop'
 
-if (Ext.fly('x-desktop') == null) {
-	windowsRenderTo = Ext.getBody().id;
-}
- 
+var bodyId = Ext.getBody().id;
 Ext.override(Ext.Window, {
 
 	/*
@@ -20,9 +16,8 @@ Ext.override(Ext.Window, {
 	 *  this.modal = false;
 	 */
 	tmpModal: false 
-	
 	,manager: new Ext.WindowGroup()
-    ,renderTo: windowsRenderTo
+    ,renderTo: bodyId
     ,constrain: true
 	/**
 	 * Выводит окно на передний план
