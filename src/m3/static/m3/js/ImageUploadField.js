@@ -6,18 +6,19 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
      * Класс иконки для выбора файла
      */
      iconClsSelectFile: 'x-form-image-icon'
-
+    
     /**
-     * Класс иконки для очистки файла
+     * Класс иконки для очистки файла 
      */
     ,iconClsClearFile: 'x-form-image-clear-icon'
 
     /**
-     * Класс иконки для скачивания файла
+     * Класс иконки для предпросмотра файла
      */
     ,iconClsPreviewImage: 'x-form-image-preview-icon'
-
+    
     ,constructor: function(baseConfig, params){
+        
         if (params) {
             if (params.thumbnailWidth) {
                 this.thumbnailWidth = params.thumbnailWidth;
@@ -31,12 +32,12 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
             if (params.thumbnail) {
                 this.thumbnail = params.thumbnail;
             }
-
+            
             this.previewTip = null;
-        }
-
+        }        
+        
         Ext.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
-    }
+    }     
    ,renderHelperBtn: function(){
        if (this.thumbnail) {
             this.buttonPreview = new Ext.Button({
@@ -56,27 +57,30 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
     }
     ,getHelperBtn: function(){
         return this.buttonPreview;
-    }
+    }    
     ,clickHelperBtn: function(){
 
         if (this.fileUrl && this.value) {
-
             var mass = this.fileUrl.split('/');
             var dir = mass.slice(0, mass.length - 1);
             var file_name = mass[mass.length-1];
             var prefix = this.prefixThumbnailImg || '';
             var url = String.format('{0}/{1}{2}', dir.join('/'), prefix, file_name);
-
+            
             this.previewTip = new Ext.QuickTip({
-                html: String.format('<image src="{0}" WIDTH={1} HEIGHT={2}>',
-                        this.getFileUrl(url), this.thumbnailWidth, this.thumbnailHeight)
+                id: 'preview_tip_window',  
+                html: String.format('<a href="{0}" rel="lightbox"><image src="{1}" WIDTH={2} HEIGHT={3} OnClick=Ext.getCmp("preview_tip_window").hide()></a>', 
+                        this.fileUrl,
+                        this.getFileUrl(url),
+                        this.thumbnailWidth,
+                        this.thumbnailHeight)
                 ,autoHide: false
                 ,width: this.thumbnailWidth + 10
                 ,height: this.thumbnailHeight + 10
             });
-
+            
             var el = this.getEl();
-            var xy = el.getXY();
+            var xy = el.getXY()
             this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
         }
     }
@@ -90,23 +94,20 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
             size: 1,
             width: 20
         });
-
+        
         Ext.QuickTips.unregister(this.fileInput);
         Ext.QuickTips.register({
             target: this.fileInput,
             text: 'Выбрать изображение',
             width: 130,
-            dismissDelay: 10000
+            dismissDelay: 10000 
         });
     }
     ,onDestroy: function(){
         Ext.ux.form.ImageUploadField.superclass.onDestroy.call(this);
         Ext.destroy(this.previewTip);
     }
-    ,onDestroy: function(){
-        Ext.ux.form.ImageUploadField.superclass.onDestroy.call(this);
-        Ext.destroy(this.previewTip);
-    }
 });
-
+// Регистрация lightbox
+Ext.ux.Lightbox.register('a[rel^=lightbox]');
 Ext.reg('imageuploadfield', Ext.ux.form.ImageUploadField);
