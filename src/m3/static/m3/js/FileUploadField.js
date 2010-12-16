@@ -41,6 +41,9 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             if (params.possibleFileExtensions) {
                 this.possibleFileExtensions = params.possibleFileExtensions;
             }
+            if (baseConfig.readOnly) {
+                this.readOnlyAll = true;
+            }
         }
 
         Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
@@ -106,6 +109,16 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
         this.bindListeners();
         this.resizeEl = this.positionEl = this.wrap;
+        
+        if (this.readOnlyAll) {                      
+            this.buttonFile.setDisabled(true); 
+            // Перекрывает невидимый индекс
+            this.buttonFile.getEl().setStyle('z-index', 3);
+            this.buttonClear.setDisabled(true); 
+            if (this.getHelperBtn() ) {
+                this.getHelperBtn().setDisabled(true); 
+            }
+        }
 
     }
     ,renderHelperBtn: function() {
@@ -302,6 +315,13 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
                     .indexOf(fileExtension[fileExtension.length-1].toLowerCase()) != -1;
         }
         return false;
+    }
+    //override
+    ,setReadOnly: function(readOnly){
+         Ext.ux.form.FileUploadField.superclass.setReadOnly.call(this, readOnly);
+         console.log(123);
+
+         
     }
 });
 

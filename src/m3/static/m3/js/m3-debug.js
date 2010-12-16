@@ -7832,15 +7832,16 @@ function sendRequest(url, desktop, params){
     var real = x[0];
     var decimal = x[1];
     var g = 0;
- 
+    var i = 0;
+    
     var offset = real.length % 3;
 
-    for (var i = 0; i < offset; i++) {
+    for (i; i < offset; i++) {
         retVal += real.charAt(i);
     }
     retVal += ' ';
 
-    for (var i = 0; i < real.length; i++) {
+    for (i; i < real.length; i++) {
         if (g % 3 == 0) {
             retVal += ' ';
         }
@@ -8058,8 +8059,6 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 		  uiAjaxFailMessage(response, options);
 		};
 	}
-	
-	,onBlur: Ext.emptyFn 
 });
 if (Ext.version == '3.0') {
     Ext.override(Ext.grid.GridView, {
@@ -12061,6 +12060,9 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             if (params.possibleFileExtensions) {
                 this.possibleFileExtensions = params.possibleFileExtensions;
             }
+            if (baseConfig.readOnly) {
+                this.readOnlyAll = true;
+            }
         }
 
         Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
@@ -12126,6 +12128,16 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
         this.bindListeners();
         this.resizeEl = this.positionEl = this.wrap;
+        
+        if (this.readOnlyAll) {                      
+            this.buttonFile.setDisabled(true); 
+            // Перекрывает невидимый индекс
+            this.buttonFile.getEl().setStyle('z-index', 3);
+            this.buttonClear.setDisabled(true); 
+            if (this.getHelperBtn() ) {
+                this.getHelperBtn().setDisabled(true); 
+            }
+        }
 
     }
     ,renderHelperBtn: function() {
@@ -12322,6 +12334,13 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
                     .indexOf(fileExtension[fileExtension.length-1].toLowerCase()) != -1;
         }
         return false;
+    }
+    //override
+    ,setReadOnly: function(readOnly){
+         Ext.ux.form.FileUploadField.superclass.setReadOnly.call(this, readOnly);
+         console.log(123);
+
+         
     }
 });
 
@@ -12801,6 +12820,11 @@ Ext.override(Ext.form.Action.Submit, {
     }
 });
 
+/**
+ * Раньше нельзя было перейти на конкретную страницу в движках webkit. Т.к.
+ * Событие PagingBlur наступает раньше pagingChange, и обновлялась текущая 
+ * страница, т.к. PagingBlur обновляет индекс.
+ */
 Ext.override(Ext.PagingToolbar, {
     onPagingBlur: Ext.emptyFn
 });

@@ -113,3 +113,7 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
     right: 44px;
     z-index: 3;
 }
+
+.m3-grey-field{
+    background: none repeat scroll 0 0 #f3f3f3 !important;
+}
