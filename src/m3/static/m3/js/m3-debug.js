@@ -12779,7 +12779,7 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
             
             this.previewTip = new Ext.QuickTip({
                 id: 'preview_tip_window',  
-                html: String.format('<a href="{0}" rel="lightbox"><image src="{1}" WIDTH={2} HEIGHT={3} OnClick=Ext.getCmp("preview_tip_window").hide()></a>', 
+                html: String.format('<a href="{0}" rel="lightbox"><image src="{1}" WIDTH={2} HEIGHT={3} OnClick=Ext.getCmp("preview_tip_window").destroy()></a>', 
                         this.fileUrl,
                         this.getFileUrl(url),
                         this.thumbnailWidth,
