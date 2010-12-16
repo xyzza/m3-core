@@ -321,9 +321,6 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
     //override
     ,setReadOnly: function(readOnly){
          Ext.ux.form.FileUploadField.superclass.setReadOnly.call(this, readOnly);
-         console.log(123);
-
-         
     }
 });
 
