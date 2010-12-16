@@ -14,9 +14,6 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 * @param {Object} params Дополнительные параметры 
 	 */
 	constructor: function(baseConfig, params){
-//		console.log('Ext.m3.EditWindow >>');
-//		console.log(baseConfig);
-//		console.log(params);
 		
 		/**
 		 * id формы в окне, для сабмита
@@ -116,6 +113,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			return;
 		}
         var scope = this;
+		var mask = new Ext.LoadMask(this.body);
 		var submit = {
             url: this.formUrl
            ,submitEmptyText: false
@@ -124,12 +122,16 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
               scope.fireEvent('closed_ok', action.response.responseText);
               scope.close(true);
               smart_eval(action.response.responseText);
+              mask.hide();
            }
            ,failure: function (form, action){
-              smart_eval(action.response.responseText);
+              uiAjaxFailMessage.apply(scope, arguments);
+              mask.hide();
            }
         };
+        
         if (scope.fireEvent('beforesubmit', submit)) {
+        	mask.show();
         	form.submit(submit);
         }
 	}
