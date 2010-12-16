@@ -119,6 +119,10 @@ class BaseExtField(ExtUIComponent):
         self._listeners['change'] = function
     
     def render_base_config(self):
+        if self.read_only:
+            grey_cls = 'm3-grey-field'
+            self.cls = grey_cls  if not self.cls else self.cls + grey_cls
+        
         super(BaseExtField, self).render_base_config()
         self._put_config_value('fieldLabel', self.label)
         self._put_config_value('value', self.value)
