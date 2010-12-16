@@ -404,10 +404,10 @@ class ExtImageUploadField(ExtFileUploadField):
         return 'new Ext.ux.form.ImageUploadField({%s}, {%s})' % (base_config, 
                                                          params_config)
     @staticmethod
-    def _prefix_by_size(size = None):
-        if size == ExtImageUploadField.MIDDLE:
+    def _prefix_by_type(type_img = None):
+        if type_img == ExtImageUploadField.MIDDLE:
             return ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX
-        elif size == ExtImageUploadField.MAX:
+        elif type_img == ExtImageUploadField.MAX:
             return ExtImageUploadField.MAX_THUMBNAIL_PREFIX
         else:
             return ExtImageUploadField.MIN_THUMBNAIL_PREFIX
@@ -418,17 +418,17 @@ class ExtImageUploadField(ExtFileUploadField):
         if os.path.exists(path):
             dir = os.path.dirname(path)
             name = os.path.basename(path)
-            _THUMBNAIL_PREFIX = ExtImageUploadField._prefix_by_size(size)
-            return os.path.join(dir, _THUMBNAIL_PREFIX + name)
+            prefix = ExtImageUploadField._prefix_by_type(size)
+            return os.path.join(dir, prefix + name)
         
     @staticmethod
-    def get_thumbnail_url(name, size = None):
+    def get_thumbnail_url(name, type_img = None):
         '''
         Возвращает url до thumbnail
         @param name: Имя
         @param size: Размер
         '''
         base_url, file_name = os.path.split(name)
-        _THUMBNAIL_PREFIX = ExtImageUploadField._prefix_by_size(size)
+        prefix = ExtImageUploadField._prefix_by_type(type_img)
         return '%s/%s' % (settings.MEDIA_URL, '%s/%s%s' % ( base_url, 
-                          _THUMBNAIL_PREFIX, file_name))
+                          prefix, file_name))
