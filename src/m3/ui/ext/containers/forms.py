@@ -247,7 +247,7 @@ class ExtForm(BaseExtPanel):
                                                 
                         thumb_prefix = (ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX, 
                                       ExtImageUploadField.MIN_THUMBNAIL_PREFIX, 
-                                      ExtImageUploadField.MIN_THUMBNAIL_PREFIX,)
+                                      ExtImageUploadField.MAX_THUMBNAIL_PREFIX,)
                             
                         for prefix in thumb_prefix:
                             thumb = os.path.join(current_dir, prefix + basename)
@@ -265,59 +265,54 @@ class ExtForm(BaseExtPanel):
                     l_field = getattr(obj, name)
                     l_field.save(name_file, cont_file, save = False)
                     
-                    try:
-                        img = Image.open(l_field.path)
-                    except IOError:
-                        # Кроме логирования ничего не нужно
-                        logger.exception()                        
-                          
-                    width, height = img.size
-                    max_width, max_height = field.image_max_size
-                    
-                    # Обрезаем изображение, если нужно
-                    if width > max_width or height > max_height:
-            
-                        curr_width, curr_height = \
-                            get_img_size(field.image_max_size, img.size)
-                            
-                        new_img = img.resize((curr_width, curr_height),
-                                   Image.ANTIALIAS)
-                        new_img.save(l_field.path)
-                    
-                    if isinstance(field, ExtImageUploadField) and \
-                        field.thumbnail and field.memory_file:
-                        current_dir = os.path.dirname(l_field.path)
-                    
-                        # А так же нужно сохранять thumbnail картинки
-                        # Состовляем лист thumbnail_size'ов
-                        thumbnails = [field.min_thumbnail_size]
-                        if field.middle_thumbnail_size:
-                            thumbnails.append(field.middle_thumbnail_size)
-                        if field.max_thumbnail_size:
-                            thumbnails.append(field.max_thumbnail_size)
-                                                    
-                        for item in thumbnails:
-                            
-                            if item == field.middle_thumbnail_size:
-                                thumbn_prefix= ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX
-                                thumbnail_size = field.middle_thumbnail_size
-                            elif item == field.max_thumbnail_size:
-                                thumbn_prefix= ExtImageUploadField.MAX_THUMBNAIL_PREFIX
-                                thumbnail_size = field.max_thumbnail_size
-                            else:
-                                thumbn_prefix = ExtImageUploadField.MIN_THUMBNAIL_PREFIX
-                                thumbnail_size = field.min_thumbnail_size
-                            
-                            # Генерируем thumbnails
-                            tmumb_curr_width, tmumb_curr_height = \
-                                get_img_size(thumbnail_size, img.size)
+                    if isinstance(field, ExtImageUploadField):
+                        try:
+                            img = Image.open(l_field.path)
+                        except IOError:
+                            # Кроме логирования ничего не нужно
+                            logger.exception()  
+                            return                      
+                              
+                        width, height = img.size
+                        max_width, max_height = field.image_max_size
+                        
+                        # Обрезаем изображение, если нужно
+                        if width > max_width or height > max_height:
+                
+                            curr_width, curr_height = \
+                                get_img_size(field.image_max_size, img.size)
                                 
-                            img.thumbnail((tmumb_curr_width, tmumb_curr_height), 
-                                            Image.ANTIALIAS)
-                            base_name = os.path.basename(l_field.path)
-                            tmb_path = os.path.join(current_dir, 
-                                    thumbn_prefix + base_name)
-                            img.save(tmb_path)    
+                            new_img = img.resize((curr_width, curr_height),
+                                       Image.ANTIALIAS)
+                            new_img.save(l_field.path)
+                        
+                        if isinstance(field, ExtImageUploadField) and \
+                            field.thumbnail and field.memory_file:
+                            current_dir = os.path.dirname(l_field.path)
+                        
+                            # А так же нужно сохранять thumbnail картинки
+                            # Состовляем лист thumbnail_size'ов
+                            thumbnails = [(field.min_thumbnail_size, 
+                                           ExtImageUploadField.MIN_THUMBNAIL_PREFIX  )]
+                            
+                            if field.middle_thumbnail_size:
+                                thumbnails.append( (field.middle_thumbnail_size, 
+                                                    ExtImageUploadField.MIDDLE_THUMBNAIL_PREFIX   ))
+                            
+                            if field.max_thumbnail_size:
+                                thumbnails.append( (field.max_thumbnail_size, 
+                                                    ExtImageUploadField.MAX_THUMBNAIL_PREFIX  ))
+                                                        
+                            for size, prefix in thumbnails:                            
+                                                                                        
+                                # Генерируем thumbnails
+                                thumb_zise = get_img_size(size, img.size)                                                                                                                                        
+                                new_img = img.resize(thumb_zise, Image.ANTIALIAS)
+                                
+                                base_name = os.path.basename(l_field.path)
+                                tmb_path = os.path.join(current_dir, 
+                                        prefix + base_name)
+                                new_img.save(tmb_path)    
 
         def set_field(obj, names, value, field=None):
             '''
