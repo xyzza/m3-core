@@ -641,7 +641,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     def save_node(self, obj):
         obj.save()
         return OperationResult(success = True)
-
+    
     def delete_row(self, objs):
         # Такая реализация обусловлена тем, что IntegrityError невозможно отловить
         # до завершения транзакции, и приходится оборачивать транзакцию.

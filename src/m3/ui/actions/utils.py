@@ -5,7 +5,7 @@
 import json
 
 from django.db.models.query_utils import Q
-from django.db import models, connection, transaction, signals
+from django.db import models, connection, transaction, IntegrityError
 
 def apply_sort_order(query, columns, sort_order):
     '''
@@ -154,34 +154,20 @@ def bind_request_form_to_object(request, obj_factory, form):
     win.form.to_object(obj)
     return obj
 
-def safe_delete_record(model, id=None):
+def safe_delete_record(model, id):
     '''
     Безопасное удаление записи в базе. В отличие от джанговского ORM не удаляет каскадно.
     Возвращает True в случае успеха, иначе False 
     '''
-    assert (isinstance(model, models.Model) or issubclass(model, models.Model))
-    assert (isinstance(id, int) or isinstance(id, long) or id is None)
-    if isinstance(model, models.Model):
-        models.signals.pre_delete.send(sender=model.__class__, instance=model)
-    else:
-        models.signals.pre_delete.send(sender=model, instance=id) #наверно лучше передать id чем вирутальный model(id=id)
+    assert issubclass(model, models.Model)
+    assert (isinstance(id, int) or isinstance(id, long))
     try:
         cursor = connection.cursor() #@UndefinedVariable
-        id = id if id is not None else model.id
-        sql = "DELETE FROM %s WHERE id = %s" % (connection.ops.quote_name(model._meta.db_table), id)
+        sql = "DELETE FROM %s WHERE id = %s" % (model._meta.db_table, id)
         cursor.execute(sql)
         transaction.commit_unless_managed()
-    except Exception, e:
-        # Встроенный в Django IntegrityError не генерируется. Кидаются исключения 
-        # специфичные для каждого драйвера БД. Но по спецификации PEP 249 все они
-        # называются IntegrityError
-        if e.__class__.__name__ == 'IntegrityError':
-            return False
-        raise
-    if isinstance(model, models.Model):
-        models.signals.post_delete.send(sender=model.__class__, instance=model)
-    else:
-        models.signals.post_delete.send(sender=model, instance=id) #наверно лучше передать id чем вирутальный model(id=id)
+    except IntegrityError:
+        return False
     
     return True
 

@@ -320,8 +320,6 @@ class ExtFileUploadField(BaseExtField):
         self._put_params_value('fileUrl', self.file_url)
         self._put_params_value('possibleFileExtensions',','.join(
                                self.possible_file_extensions))
-        self._put_params_value('possibleFileExtensions',
-                                   ','.join(self.possible_file_extensions or ()))
 
     def render(self):
         self.render_base_config()
@@ -366,8 +364,6 @@ class ExtImageUploadField(ExtFileUploadField):
         self.image_max_size = (600, 600)
 
         super(ExtImageUploadField, self).__init__(*args, **kwargs)
-
-        self.possible_file_extensions = ('png', 'jpeg', 'gif', 'bmp', 'jpg')
 
         # Умолчательный параметр, иначе контрол разъедется
         self.width = 300
