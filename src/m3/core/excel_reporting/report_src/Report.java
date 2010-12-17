@@ -928,7 +928,10 @@ class ReportGenerator{
 			}
 			// Удаляем если есть мусор
 			if (has_tag){
-				//sheet.removeRow(row);
+				// Может отвалиться из-за отсутствия строки row_num + 1
+				if (row_num == sheet.getLastRowNum()){
+					sheet.createRow(row_num + 1);
+				}
 				sheet.shiftRows(row_num + 1, sheet.getLastRowNum(), -1);
 			}
 		}
