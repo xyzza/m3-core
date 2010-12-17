@@ -237,7 +237,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
                            }
 		                };
 						if (scope.fireEvent('beforedeleterequest', scope, req)) {
-						    this.disableToolbars(true);
+						    scope.disableToolbars(true);
 						    mask.show();
 							Ext.Ajax.request(req);
 						}
