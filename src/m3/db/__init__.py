@@ -13,6 +13,7 @@ def safe_delete(model):
     
     @deprecated: Нужно пользоваться safe_delete из BaseObjectModel
     '''
+    models.signals.pre_delete.send(sender=model.__class__, instance=model)
     try:
         cursor = connection.cursor()
         sql = "DELETE FROM %s WHERE id = %s" % (model.__class__._meta.db_table, model.id)
@@ -21,6 +22,7 @@ def safe_delete(model):
     except IntegrityError:
         return False
     
+    models.signals.post_delete.send(sender=model.__class__, instance=model)
     return True
 
 def queryset_limiter(queryset, start=0, limit=0):
@@ -87,14 +89,16 @@ class BaseObjectModel(models.Model):
         В случае, если запись не удалось удалисть по причине нарушения
         целостности, возвращается False, иначе True.
         """
+        models.signals.pre_delete.send(sender=self.__class__, instance=self)
         try:
             cursor = connection.cursor()
-            sql = "DELETE FROM %s WHERE id = %s" % (self._meta.db_table, self.id)
+            sql = "DELETE FROM %s WHERE id = %s" % (connection.ops.quote_name(self._meta.db_table), self.id)
             cursor.execute(sql)
             transaction.commit_unless_managed()
         except IntegrityError:
             return False
         else:
+            models.signals.post_delete.send(sender=self.__class__, instance=self)
             return True
 
     def get_related_objects(self):

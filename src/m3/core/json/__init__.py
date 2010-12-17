@@ -45,7 +45,7 @@ class M3JSONEncoder(json.JSONEncoder):
                 value = obj
                 arr = dict
                 last_attr = None
-                setValue = False
+                set_value = False
                 for attr in lst:
                     if last_attr:
                         if not arr.has_key(last_attr):
@@ -53,17 +53,17 @@ class M3JSONEncoder(json.JSONEncoder):
                         else:
                             if not isinstance(arr[last_attr], type({})):
                                 value = None
-                                setValue = False #у объекта уже стоит свойтво не словарь пришло откуда-то свыше
+                                set_value = False #у объекта уже стоит свойство не словарь, видимо оно пришло откуда-то свыше
                                 break
                         arr = arr[last_attr]
                     if hasattr(value, attr):
                         value = getattr(value, attr)
-                        setValue = True #наши свойство значит надо его поставить после цикла
+                        set_value = True #нашли свойство, значит надо его будет поставить после цикла
                     else:
                         value = None
-                        #break #если нас просят найти ref1.name а ref1 is None то надо выдать ref1 = {name:None}
+                        #break #если нас просят найти ref1.name а ref1 is None, то надо выдать ref1 = {name:None}
                     last_attr = attr
-                if setValue:
+                if set_value:
                     arr[attr] = value        
 
         for attr in dir(obj):

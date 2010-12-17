@@ -110,22 +110,23 @@ class ExtForm(BaseExtPanel):
         полей текущей формы
         '''
         
-        def _parse_obj(obj, prefix=''):
-            '''
-            Разбивает объект на словарь, ключи которого имена полей(имена 
-            вложенных объектов записываются через '.'), 
-            а значения - значения соответсвующих полей объекта
-            '''
-            attrs = {}
-            object_fields = obj if isinstance(obj, dict) else obj.__dict__
-            for key, value in object_fields.items():
-                #TODO как определить, что класс встроенный
-                if not hasattr(value, '__dict__') and not isinstance(value, dict):
-                    attrs[prefix+str(key)] = value
-                else:
-                    pre_prefix = prefix+'.' if prefix else ''
-                    attrs.update(_parse_obj(value, pre_prefix+str(key)+'.'))
-            return attrs
+#        неправильно обходить объект, надо обходить форму 
+#        def _parse_obj(obj, prefix=''):
+#            '''
+#            Разбивает объект на словарь, ключи которого имена полей(имена 
+#            вложенных объектов записываются через '.'), 
+#            а значения - значения соответсвующих полей объекта
+#            '''
+#            attrs = {}
+#            object_fields = obj if isinstance(obj, dict) else obj.__dict__
+#            for key, value in object_fields.items():
+#                #TODO как определить, что класс встроенный
+#                if not hasattr(value, '__dict__') and not isinstance(value, dict):
+#                    attrs[prefix+str(key)] = value
+#                else:
+#                    pre_prefix = prefix+'.' if prefix else ''
+#                    attrs.update(_parse_obj(value, pre_prefix+str(key)+'.'))
+#            return attrs
         
         def is_secret_token(value):
             ''' 
@@ -204,7 +205,7 @@ class ExtForm(BaseExtPanel):
                 # Прибиндим оригинальные размеры thumbnail
                 if isinstance(item, ExtImageUploadField):
                     if hasattr(settings, 'MEDIA_ROOT') and item.thumbnail:
-                        ffile = os.path.join(settings.MEDIA_ROOT, value)
+                        ffile = os.path.join(settings.MEDIA_ROOT, unicode(value))
                         dir = os.path.dirname(ffile)
                         file_name = os.path.basename(ffile)
                         
@@ -217,15 +218,53 @@ class ExtForm(BaseExtPanel):
             else:
                 item.value = unicode(value)
 
+        def get_value(obj, names):
+            '''
+            Ищет в объекте obj поле с именем names и возвращает его значение. 
+            Если соответствующего поля не оказалось, то возвращает None
+            
+            names задается в виде списка, т.о. если его длина больше единицы, 
+            то имеются вложенные объекты и их надо обработать
+            '''
+
+            # hasattr не работает для dict'a
+            has_attr = hasattr(obj, names[0]) if not isinstance(obj, dict) else names[0] in obj 
+            if has_attr:
+                if len(names) == 1:
+                    if isinstance(obj, dict):
+                        return obj[names[0]]         
+                    else:
+                        return getattr(obj, names[0])
+                else:
+                    nested = getattr(obj, names[0]) if not isinstance(obj, dict) else obj[names[0]]
+                    return get_value(nested, names[1:])
+            return None
+
+        all_fields = self._get_all_fields(self)
+        for field in all_fields:
+            if not field.name:
+                continue
+            assert not isinstance(field.name, unicode), 'The names of all fields \
+                must not be instance of unicode'
+            assert isinstance(field.name, str) and len(field.name) > 0, \
+                  'The names of all fields must be set for a successful \
+                      assignment. Check the definition of the form.'
+            # заполним атрибуты только те, которые не в списке исключаемых
+            if not field.name in exclusion:
+
+                names = field.name.split('.')                
+                new_val = get_value(object, names)
+                if new_val != None:
+                    _assign_value(new_val, field)
         
-        fields = _parse_obj(object)
-        if fields:
-            for item in self._get_all_fields(self):
-                # заполним атрибуты только те, которые не в списке исключаемых
-                if not item.name in exclusion:
-                    new_val = fields.get(item.name, None)
-                    if new_val != None:
-                        _assign_value(new_val, item)
+        
+        #неправильно сначала обходить объект, надо обходить форму 
+        #fields = _parse_obj(object)
+        #if fields:
+        #    for item in self._get_all_fields(self):
+        #        # заполним атрибуты только те, которые не в списке исключаемых
+        #        if not item.name in exclusion:
+        #
 
     #TODO необходимо добавить проверку на возникновение exception'ов
     def to_object(self, object, exclusion = []):
