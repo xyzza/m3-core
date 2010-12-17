@@ -99,8 +99,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 */
 	,submitForm: function(btn, e, baseParams){
 		assert(this.formUrl, 'Не задан url для формы');
-		
-		
+
 		var form = Ext.getCmp(this.formId).getForm();
 		if (form && !form.isValid()) {
 			Ext.Msg.show({
@@ -112,8 +111,9 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			
 			return;
 		}
+				
         var scope = this;
-		var mask = new Ext.LoadMask(this.body);
+		var mask = new Ext.LoadMask(this.body, {msg:'Сохранение...'});
 		var submit = {
             url: this.formUrl
            ,submitEmptyText: false
@@ -123,14 +123,17 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
               scope.close(true);
               smart_eval(action.response.responseText);
               mask.hide();
+              scope.disableToolbars(false);
            }
            ,failure: function (form, action){
               uiAjaxFailMessage.apply(scope, arguments);
               mask.hide();
+              scope.disableToolbars(false);
            }
         };
         
         if (scope.fireEvent('beforesubmit', submit)) {
+            this.disableToolbars(true);
         	mask.show();
         	form.submit(submit);
         }
@@ -237,6 +240,14 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		};
 		Ext.m3.EditWindow.superclass.close.call(this);
 	}
-	
+    ,disableToolbars: function(disabled){
+        var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
+                       this.getBottomToolbar()]
+        for (var i=0; i<toolbars.length; i++){
+            if (toolbars[i]){
+                toolbars[i].setDisabled(disabled);
+            }
+        }
+    }
 })
 

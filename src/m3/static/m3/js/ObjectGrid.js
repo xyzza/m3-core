@@ -84,18 +84,24 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 				if (scope.fireEvent('afternewrequest', scope, res, opt)) {
 				    var child_win = scope.childWindowOpenHandler(res, opt);
 				    mask.hide();
+				    scope.disableToolbars(false);
 					return child_win;
 				}
 				mask.hide();
+				scope.disableToolbars(false);
 			}
            ,failure: function(){ 
                uiAjaxFailMessage.apply(this, arguments);
                mask.hide();
+               scope.disableToolbars(false);
+               
            }
 		};
 		
 		if (this.fireEvent('beforenewrequest', this, req)) {
 			var scope = this;
+
+			this.disableToolbars(true);
 			mask.show();
 			Ext.Ajax.request(req);
 		}
@@ -145,17 +151,22 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 					if (scope.fireEvent('aftereditrequest', scope, res, opt)) {
 						var child_win = scope.childWindowOpenHandler(res, opt);
 						mask.hide();
+						scope.disableToolbars(false);
 						return child_win;
 					}
+					mask.hide();
+                    scope.disableToolbars(false);
 				}
                ,failure: function(){ 
                    uiAjaxFailMessage.apply(this, arguments);
                    mask.hide();
+                   scope.disableToolbars(false);
                }
 			};
 			
 			if (this.fireEvent('beforeeditrequest', this, req)) {
 				var scope = this;
+				this.disableToolbars(true);
 				mask.show();
 				Ext.Ajax.request(req);
 			}
@@ -213,15 +224,20 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		                	   if (scope.fireEvent('afterdeleterequest', scope, res, opt)) {
 		                		   var child_win =  scope.deleteOkHandler(res, opt);
 		                		   mask.hide();
+		                		   scope.disableToolbars(false);
 		                		   return child_win;
 		                	   }
+		                	   mask.hide();
+                               scope.disableToolbars(false);
 						   }
                            ,failure: function(){ 
                                uiAjaxFailMessage.apply(this, arguments);
                                mask.hide();
+                               scope.disableToolbars(false);
                            }
 		                };
 						if (scope.fireEvent('beforedeleterequest', scope, req)) {
+						    this.disableToolbars(true);
 						    mask.show();
 							Ext.Ajax.request(req);
 						}
@@ -267,6 +283,15 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		}
 
 	}
+	,disableToolbars: function(disabled){
+        var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
+                       this.getBottomToolbar()]
+        for (var i=0; i<toolbars.length; i++){
+            if (toolbars[i]){
+                toolbars[i].setDisabled(disabled);
+            }
+        }
+    }
 });
 
 Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
