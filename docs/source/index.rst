@@ -18,8 +18,13 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-m3.helpers.datastructures
-=========================
-.. automodule:: m3.ui.ext.windows.base        
+
+m3.ui.actions.packs
+===================
+
+    Здесь могут быть картинки и прочая документация к action packs
+    
+.. automodule:: m3.ui.actions.packs
   :members:
+  
 

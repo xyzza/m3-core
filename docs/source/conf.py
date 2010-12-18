@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 ROOT_DIRNAME = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-#os.environ['DJANGO_SETTINGS_MODULE'] = os.path.abspath('settings.py')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 sys.path.extend([ 
     os.path.join(ROOT_DIRNAME, 'src'),
