@@ -88,7 +88,7 @@ def check_inn(inn):
     else:
         raise Exception('Length of the inn must be 8 or 10')    
     
-def check_strah():
+def check_strah(base_strah):
     '''
     1. Вычисляется контрольная сумма по первым 9-ти цифрам со следующими весовыми 
     коэффициентами: (9,8,7,6,5,4,3,2,1).
@@ -97,8 +97,11 @@ def check_strah():
     свидетельства ПФ. В случае их равенства номер страхования свидетельства ПФ 
     считается правильным.
     '''
-    pass
-
+    assert isinstance(base_strah, basestring), 'strah must be string'
+    COEF = (9,8,7,6,5,4,3,2,1)
+    strah_str = ''.join(base_strah.split(' ')[:-1])
+    strah = checksum(strah_str, COEF)%101
+    return strah == int(base_strah[-2:])
 
 def check_okpo(okpo):
     '''
@@ -245,13 +248,12 @@ def check_ogrn(ogrn):
         return ogrn == int(ogrn_str_base[-1])
     
     assert isinstance(ogrn, basestring), 'ogrn must be string'
+    assert len(ogrn)==13 or 15, 'Length of the ogrn must be 13 or 15'
     ogrn_str = ogrn if isinstance(ogrn, basestring) else str(ogrn)
     if len(ogrn_str) == 13:
         return ogrn13(ogrn_str)
     elif len(ogrn_str) == 15:
         return ogrn15(ogrn_str)
-    else:
-        raise Exception('Length of the ogrn must be 13 or 15')   
 
 def check_snils(base_snils):
     '''
