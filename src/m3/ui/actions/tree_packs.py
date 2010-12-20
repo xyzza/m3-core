@@ -1,4 +1,4 @@
-#coding:utf-8
+﻿#coding:utf-8
 '''
 Паки для иерархических справочников
 '''
@@ -135,14 +135,15 @@ class ListNewRowWindowAction(Action):
     Экшен для создания нового элемента списка
     '''
     url = '/grid_new_window$'
+    
+    def context_declaration(self):
+        return [ActionContextDeclaration(name='id', type=int, required=True, verbose_name=u'Код группы')]
+    
     def run(self, request, context):
         base = self.parent
-        # Получаем id родительской группы. Если приходит не валидное значение, то создаем узел в корне
-        parent_id = utils.extract_int(request, 'id')
-        assert parent_id > 0, 'The request must contain the "id" of the selected group is greater than 0.'
         # Создаем новую группу и биндим ее к форме
         obj = base.get_row()
-        setattr(obj, base.list_parent_field + '_id', parent_id)
+        setattr(obj, base.list_parent_field + '_id', context.id)
         win = base.edit_window(create_new = True)
         win.form.from_object(obj)
         # Донастраиваем форму
