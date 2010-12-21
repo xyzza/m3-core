@@ -8,17 +8,15 @@ def checksum(number_str, coeffs):
     Проверяет соответстие длин(номера и множетеля), 
     и возвращает сумму после перемнмножения элементов. 
     '''
-    assert len(number_str)==len(coeffs), "Length of the arguments doesn't match"
+    if not len(number_str)==len(coeffs):
+        return False
 
     summands = [coef*int(num) for coef, num in zip(coeffs, number_str)]
     return sum(summands)
 
 def check_inn(inn):
     '''
-    Проверка ИНН. Номер ИНН может задаваться как в виде строки, так и в виде 
-    числа.
-    
-    
+    Проверка ИНН.     
     Для 10-ти значного ИНН алгоритм проверки выглядит следующим образом:
     1. Вычисляется контрольная сумма со следующими весовыми 
     коэффициентами: (2,4,10,3,5,9,4,6,8,0)
@@ -45,15 +43,6 @@ def check_inn(inn):
     7. Контрольное число(1) проверяется с одиннадцатым знаком ИНН и 
     контрольное число(2) проверяется с двенадцатым знаком ИНН. В случае их 
     равенства ИНН считается правильным.
-
-    >>>check_inn('7707083893')
-    True
-    >>>check_inn(164907541786)
-    True
-    >>>check_inn('165607117345')
-    True
-    >>>check_inn('0000000000')
-    True
     '''
     
     def inn10(inn):
@@ -80,13 +69,12 @@ def check_inn(inn):
         return (inn[10] == str(checknumber1)) and (inn[11] == str(checknumber2))
     
     assert isinstance(inn, basestring), 'inn must be string'
-    inn_str = inn if isinstance(inn, basestring) else str(inn)
-    if len(inn_str) == 10:
-        return inn10(inn_str)
-    elif len(inn_str) == 12:
-        return inn12(inn_str)
+    if len(inn) == 10:
+        return inn10(inn)
+    elif len(inn) == 12:
+        return inn12(inn)
     else:
-        raise Exception('Length of the inn must be 8 or 10')    
+        return False    
     
 def check_strah(base_strah):
     '''
@@ -137,27 +125,29 @@ def check_okpo(okpo):
     True
     '''
     assert isinstance(okpo, basestring), 'okpo must be string'
-    okpo_str = okpo if isinstance(okpo, basestring) else str(okpo)
-    okpo_len = len(okpo_str)
+    okpo_len = len(okpo)
     if okpo_len != 8 and okpo_len !=10:
-        raise Exception('Length of the inn must be 8 or 10')
+        return False
     
     COEF1 = range(1, 11)
     COEF2 = (3,13)
-    checksum1 = checksum(okpo_str[:okpo_len-1], COEF1[:okpo_len-1])
+    checksum1 = checksum(okpo[:okpo_len-1], COEF1[:okpo_len-1])
     checknumber1 = checksum1 % 11
     if checknumber1 < 10:
-        return okpo_str[-1] == str(checknumber1)
+        return okpo[-1] == str(checknumber1)
     else:
-        checksum2 = checksum(okpo_str[:okpo_len-1], COEF2[:okpo_len-1])
+        checksum2 = checksum(okpo[:okpo_len-1], COEF2[:okpo_len-1])
         checknumber2 = checksum2 % 11
         if checknumber2 == 10:
             checknumber2 = 0
-        return okpo_str[-1] == str(checknumber2)
+        return okpo[-1] == str(checknumber2)
 
 
 def check_ks(ks, bik):
     '''
+    Номер корреспондентского счета: длина 20 символов
+    БИК банка: длина 9 символов
+    
     Проверка правильности указания корреспондентского счёта.
     
     Алгоритм проверки корреспондентского счёта с помощью БИКа банка:
@@ -172,14 +162,11 @@ def check_ks(ks, bik):
     '''
     assert isinstance(ks, basestring), 'ks must be string'
     assert isinstance(bik, basestring), 'bik must be string'
-    ks_str = ks if isinstance(ks, basestring) else str(ks)
-    bik_str = bik if isinstance(bik, basestring) else str(bik)
-    
-    assert len(ks_str)==20, 'Length of the ks must be 20'
-    assert len(bik_str)==9, 'Length of the bik must be 9'
+    if len(ks)!=20 or len(bik)!=9:
+        return False
     
     COEF = (7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,)
-    ks_modif = ''.join(['0', bik_str[5:7], ks_str])
+    ks_modif = ''.join(['0', bik[5:7], ks])
     checksum1 = checksum(ks_modif, COEF)
     checknumber = checksum1 % 10
     return checknumber == 0
@@ -187,6 +174,9 @@ def check_ks(ks, bik):
 
 def check_rs(rs, bik):
     '''
+    Номер расчетного счета: длина 20 символов
+    БИК банка: длина 9 символов
+    
     Проверка правильности указания расчётного счёта.
     
     Алгоритм проверки расчётного счёта с помощью БИКа банка:
@@ -201,14 +191,10 @@ def check_rs(rs, bik):
     '''
     assert isinstance(rs, basestring), 'ks must be string'
     assert isinstance(bik, basestring), 'bik must be string'
-    
-    rs_str = rs if isinstance(rs, basestring) else str(rs)
-    bik_str = bik if isinstance(bik, basestring) else str(bik)
-    assert len(rs_str)==20, 'Length of the rs must be 20'
-    assert len(bik_str)==9, 'Length of the bik must be 9'
-    
+    if len(rs)!=20 or len(bik)!=9:
+        return False
     COEF = (7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,)
-    rs_modif = bik_str[-3:] + rs_str
+    rs_modif = bik[-3:] + rs
     checksum1 = checksum(rs_modif, COEF)
     checknumber = checksum1 % 10
     return checknumber == 0
@@ -237,29 +223,31 @@ def check_ogrn(ogrn):
     -Полученное число на шаге 3 должно совпадать с контрольным числом (15-знак) 
     проверяемого ОГРН. В противном случае проверяемый ОРГН некорректен.
     '''
-    def ogrn13(ogrn_str_base):
-        ogrn_str = ogrn_str_base[:-1]
+    def ogrn13(ogrn_base):
+        ogrn_str = ogrn_base[:-1]
         ogrn = int(ogrn_str)%11
-        return ogrn == int(ogrn_str_base[-1])
+        return ogrn == int(ogrn_base[-1])
         
-    def ogrn15(ogrn_str_base):
-        ogrn_str = ogrn_str_base[:-1]
+    def ogrn15(ogrn_base):
+        ogrn_str = ogrn_base[:-1]
         ogrn = int(ogrn_str)%13
-        return ogrn == int(ogrn_str_base[-1])
+        return ogrn == int(ogrn_base[-1])
     
     assert isinstance(ogrn, basestring), 'ogrn must be string'
-    assert len(ogrn)==13 or 15, 'Length of the ogrn must be 13 or 15'
-    ogrn_str = ogrn if isinstance(ogrn, basestring) else str(ogrn)
-    if len(ogrn_str) == 13:
-        return ogrn13(ogrn_str)
-    elif len(ogrn_str) == 15:
-        return ogrn15(ogrn_str)
+    if len(ogrn) == 13:
+        return ogrn13(ogrn)
+    elif len(ogrn) == 15:
+        return ogrn15(ogrn)
+    else:
+        return False
 
 def check_snils(base_snils):
     '''
+    СНИЛС: длина 9 символов + 2 символа контрольной суммы 001—001-998 99 ("XXX-XXX-XXX YY")
+    
     Алгоритм формирования контрольного числа СНИЛС таков:
     1) Проверка контрольного числа Страхового номера проводится только для 
-    номеров больше номера 001—001-998 ("XXX-XXX-XXX YY")
+    номеров больше номера 001—001-998 99 ("XXX-XXX-XXX YY")
     2) Контрольное число СНИЛС рассчитывается следующим образом:
     2.1) Каждая цифра СНИЛС умножается на номер своей позиции 
     (позиции отсчитываются с конца)
@@ -275,8 +263,7 @@ def check_snils(base_snils):
     assert isinstance(base_snils, basestring), 'snils must be string'
     list_of_snils_digits = base_snils[:-3].split('-')
     COEF = base_snils[-2:]
-    snils =  ''.join(list_of_snils_digits)
-    snils_str = snils if isinstance(snils, basestring) else str(snils)
+    snils_str =  ''.join(list_of_snils_digits)
     snils = checksum(snils_str, range(len(snils_str),0, -1))
     if snils < 100:
         check_number = snils
@@ -285,5 +272,5 @@ def check_snils(base_snils):
     elif snils > 101:
         check_number = snils % 101
     else:
-        raise Exception('Length of the snils must be 9 digit numbers') 
+        False
     return COEF == str(check_number)
