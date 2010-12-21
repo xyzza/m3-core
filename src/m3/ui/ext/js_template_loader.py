@@ -19,16 +19,16 @@ import os
 import sys
 
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist
 from django.utils._os import safe_join
-from django.utils.importlib import import_module
 
 # At compile time, cache the directories to search.
 fs_encoding = sys.getfilesystemencoding() or sys.getdefaultencoding()
-template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+template_dir_ext = os.path.join(os.path.dirname(__file__), 'templates')
+template_dir_gears = os.path.join(os.path.dirname(__file__), '../gears/templates')
 app_template_dirs = (
-    template_dir.decode(fs_encoding),
+    template_dir_ext.decode(fs_encoding),
+    template_dir_gears.decode(fs_encoding),
 )
 
 def get_template_sources(template_name, template_dirs=None):
