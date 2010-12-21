@@ -99,6 +99,7 @@ class MetaroleManager(object):
             self._loaded = True
         except:
             logger.exception(u'Не удалось выполнить метод _populate у MetaroleManager')
+            raise
         finally:
             self._write_lock.release()
         
