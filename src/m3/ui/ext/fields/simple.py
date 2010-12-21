@@ -160,7 +160,7 @@ class ExtNumberField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtNumberField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-number-field.js'
+        #self.template = 'ext-fields/ext-number-field.js'
         # Свойства валидации специфичные для чисел
         self.allow_decimals = True
         self.allow_negative = True
@@ -170,6 +170,27 @@ class ExtNumberField(BaseExtField):
         self.min_value = None
         self.min_text = None
         self.init_component(*args, **kwargs)
+        
+        
+    def render_base_config(self):
+        super(ExtNumberField, self).render_base_config()
+        self._put_config_value('allowDecimals', self.allow_decimals)
+        self._put_config_value('allowNegative', self.allow_negative)
+        self._put_config_value('decimalPrecision', self.decimal_precision)
+        self._put_config_value('minValue', self.min_value)
+        self._put_config_value('maxValue', self.max_value)
+        self._put_config_value('maxText', self.max_text)
+        self._put_config_value('minText', self.min_text)
+        self._put_config_value('minText', self.min_text)
+        
+    def render(self):
+        try:
+            self.render_base_config()
+        except Exception as msg:
+            raise Exception(msg)
+        
+        base_config = self._get_config_str()
+        return 'new Ext.form.NumberField({%s})' % base_config
         
 #===============================================================================        
 class ExtHiddenField(BaseExtField):
@@ -282,7 +303,7 @@ class ExtComboBox(BaseExtTriggerField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtComboBox, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-combo.js'
+        #self.template = 'ext-fields/ext-combo.js'
         self.init_component(*args, **kwargs)
         
     def render(self):
@@ -359,6 +380,11 @@ class ExtDisplayField(BaseExtField):
         
     def render_base_config(self):
         super(ExtDisplayField, self).render_base_config()
+        
+        # Для данного класса установка дополнительно css класса при read_only - 
+        # излишне
+        if self.read_only:
+            self._set_config_value('cls', None)
         
     def render(self):
         try:

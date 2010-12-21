@@ -13,6 +13,8 @@ from django import http
 
 def js_submit_form(form, success_handler='', failure_handler='', invalid_handler='', params=None):
     '''
+    @deprecated: Использовать методы окна, например, в ExtEditWindow метод submitForm
+    
     Шорткат, который позволяет назначить хендлер для обработки субмита формы
     @param form: экземпляр ExtForm
     @param success_handler: анонимная JS функция срабатывающая при успешном исходе субмита 
@@ -52,6 +54,8 @@ function(){
 
 def js_success_response():
     '''
+    @deprecated: Использовать OperationResult
+    
     Возвращает Ext Ajax ответ что операция прошла успешно
     @deprecated: Нужно использовать OperationResult
     '''
@@ -59,6 +63,8 @@ def js_success_response():
     
 def js_failure_response():
     '''
+    @deprecated: Использовать OperationResult
+    
     Возвращает Ext Ajax ответ что операция прервана
     @deprecated: Нужно использовать OperationResult
     '''
@@ -66,6 +72,8 @@ def js_failure_response():
 
 def js_close_window(win, forceClose=False):
     '''
+    @deprecated: Использовать методы окна, например, в ExtEditWindow метод calcelForm
+    
     Возвращает JS код закрывающий окно win
     '''
     assert isinstance(win, BaseExtWindow)
@@ -75,6 +83,8 @@ def js_close_window(win, forceClose=False):
 
 def js_submit_ajax(url, params = {}, success_handler = None, failure_handler = None):
     '''
+    @deprecated: Использовать sendRequest из m3.js
+    
     Возвращает JS код посылающий AJAX запрос
     '''
     template = u'''
