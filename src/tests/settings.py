@@ -99,6 +99,7 @@ INSTALLED_APPS = (
     'tests.data.mie_tests',
     'tests.ui.ext_tests',
     'tests.helpers.urls_tests',
+    'tests.contrib.m3_audit_tests',
 )
 
 logger.init_logging('./logs')
