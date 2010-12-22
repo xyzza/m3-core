@@ -281,7 +281,10 @@ class ListWindowAction(Action):
             if isinstance(column, tuple):
                 column_params = { 'data_index': column[0], 'header': column[1]}
                 if len(column)>2:
-                    column_params['width'] = column[2]
+                    if column[2]==0:
+                        column_params['hidden'] = True
+                    else:
+                        column_params['width'] = column[2]
                 else:
                     column_params['width'] = 10
             elif isinstance(column, dict):
@@ -338,7 +341,9 @@ class SelectWindowAction(ListWindowAction):
         # Заглушка, иначе ругается что нет стора
         win.list_view.set_store(ExtJsonStore(url='/ui/grid-json-store-data', auto_load=False))
         
-        win.column_name_on_select = 'name'
+        #win.column_name_on_select = 'name'
+        win.column_name_on_select = base.column_name_on_select
+        
         win = self.parent.get_select_window(win)
         win.contextTreeIdName = base.contextTreeIdName
         
@@ -379,6 +384,9 @@ class BaseTreeDictionaryActions(ActionPack):
     # права доступа для базовых справочников
     PERM_EDIT = 'edit'
     sub_permissions = {PERM_EDIT: u'Редактирование справочника'}
+    
+    # Колонка для выбора по умолчанию
+    column_name_on_select = 'name'
     
     def __init__(self):
         super(BaseTreeDictionaryActions, self).__init__()
