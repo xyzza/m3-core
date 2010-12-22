@@ -2,14 +2,14 @@
 
 import os
 
-from django.db import transaction
+from django.db import transaction, connection
 from dbfpy import dbf
 
 from m3.contrib.kladr import models
 
 
 @transaction.commit_manually
-def fill_kladr(region_only = None, dbf_path = ''):
+def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
     '''
     Заполнение справочника КЛАДР
     region_only - первые два символа региона, для ограничения загрузки только этого региона 
@@ -56,6 +56,14 @@ def fill_kladr(region_only = None, dbf_path = ''):
     # открываем .dbf для чтения
     db_geo = dbf.Dbf(db_file_geo, readOnly=True, new=False)
     db_street = dbf.Dbf(db_file_street, readOnly=True, new=False)
+    
+    # Предварительная очистка таблиц кладра
+    if clear_before:
+        cursor = connection.cursor() #@UndefinedVariable
+        for mod in [models.KladrStreet, models.KladrGeo]:
+            sql = "TRUNCATE TABLE %s CASCADE;" % connection.ops.quote_name(mod._meta.db_table) #@UndefinedVariable 
+            cursor.execute(sql)
+        print u'Старые записи КЛАДРа удалены.'
 
     # список субъектов
     sub_list = {}
