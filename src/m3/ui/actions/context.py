@@ -147,6 +147,9 @@ class ActionContext(object):
         '''
         result = ''
         for k,v in self.__dict__.items():
+            if v is None:
+                continue
+            
             if isinstance(v, bool):
                 result += '"%s": "%s",' % (k, 'true' if v is True else 'false')
             elif isinstance(v, int):
