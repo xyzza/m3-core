@@ -356,8 +356,9 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         Возвращает данные для грида справочника
         '''
         sort_order = [user_sort] if user_sort else self.list_sort_order
+        filter_fields = self._default_filter()
         query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
-        query = utils.apply_search_filter(query, filter, self.filter_fields)
+        query = utils.apply_search_filter(query, filter, filter_fields)
         if hasattr(self, 'modify_rows_query') and callable(self.modify_rows_query):
             query = self.modify_rows_query(query, request, context)
         total = query.count()
@@ -368,8 +369,9 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     
     def get_rows(self, offset, limit, filter, user_sort=''):
         sort_order = [user_sort] if user_sort else self.list_sort_order
+        filter_fields = self._default_filter()
         query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
-        query = utils.apply_search_filter(query, filter, self.filter_fields)
+        query = utils.apply_search_filter(query, filter, filter_fields)
         total = query.count()
         if limit > 0:
             query = query[offset: offset + limit]
@@ -434,8 +436,19 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
             else:
                 # все левые ошибки выпускаем наверх
                 raise
-
-
+                     
+    def _default_filter(self):
+        '''
+        Устанавливаем параметры поиска по умолчанию 'code' и 'name' в случае, 
+        если у модели есть такие поля
+        '''
+        filter_fields = self.filter_fields                     
+        if not filter_fields:            
+            filter_fields.extend([field.attname for field in self.model._meta.local_fields \
+                                  if field.attname in ('code', 'name')])
+        return filter_fields            
+                
+            
 class BaseEnumerateDictionary(BaseDictionaryActions):
     '''
     Базовый экшен пак для построения справочников основанных на перечислениях, т.е.
