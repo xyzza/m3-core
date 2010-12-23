@@ -23,12 +23,17 @@ class ExtPivotGrid(BaseExtPanel):
         self.template = 'ext-grids/ext-pivot-grid.js'
         self.__store = None
         self.aggregator = None
+        self.renderer = None
         self.measure = None
-        self.left_axis = None
-        self.top_axis = None
+        self._left_axis = []
+        self._top_axis = []
         self._items = []
         self.__cm = None
         self.col_model = ExtGridDefaultColumnModel()
+        self.force_fit = True
+        self.auto_fill = True
+        self.__view = None
+        self._view_config = {}
         self.init_component(*args,**kwargs)
 
     def t_render_store(self):
@@ -40,19 +45,46 @@ class ExtPivotGrid(BaseExtPanel):
     def add_column(self, **kwargs):
         self.columns.append(ExtGridColumn(**kwargs))
 
+    def add_left_axis(self, **kwargs):
+        self.left_axis.append(ExtPivotGridAxis(**kwargs))
+
+    def add_top_axis(self, **kwargs):
+        self.top_axis.append(ExtPivotGridAxis(**kwargs))
+
     def render_base_config(self):
         super(ExtPivotGrid, self).render_base_config()
+        self._view_config['forceFit'] = self.force_fit
+        self._view_config['autoFill'] = self.auto_fill
         self._put_config_value('store',self.t_render_store,self.get_store())
         self._put_config_value('measure',self.measure)
         self._put_config_value('aggregator',self.aggregator)
+        self._put_config_value('renderer',self.renderer)
         self._put_config_value('leftAxis',self.t_render_left_axis)
         self._put_config_value('topAxis',self.t_render_top_axis)
 
         self._put_config_value('colModel', self.col_model.render)
+        self._put_config_value('view', self.t_render_view, self.view)
+        self._put_config_value('viewConfig', self._view_config)
 
     @property
     def columns(self):
         return self._items
+
+    @property
+    def left_axis(self):
+        return self._left_axis
+
+    @property
+    def top_axis(self):
+        return self._top_axis
+
+    @property
+    def view(self):
+        return self.__view
+
+    @view.setter
+    def view(self, value):
+        self.__view = value
 
     def render(self):
         self.render_base_config()
@@ -78,11 +110,38 @@ class ExtPivotGrid(BaseExtPanel):
         self.__cm = value
         self.__cm.grid = self
 
+    def t_render_view(self):
+        return self.view.render()
+
     def t_render_left_axis(self):
-        return '[%s]' % ','.join(['{dataIndex:"%s",header:"test"}'  % col for col in self.left_axis])
+        return '[%s]' % ','.join(['''{
+            dataIndex:"%s",
+            header:"%s",
+            width:%d,
+            defaultHeaderWidth:%d,
+            orientation:"%s"
+        }'''  % (
+            axe.data_index,
+            axe.header,
+            axe.width,
+            axe.default_header_width,
+            axe.orientation
+        ) for axe in self.left_axis])
 
     def t_render_top_axis(self):
-        return '[%s]' % ','.join(['{dataIndex:"%s",header:"test"}'  % col for col in self.top_axis])
+        return '[%s]' % ','.join(['''{
+            dataIndex:"%s",
+            header:"%s",
+            width:%d,
+            defaultHeaderWidth:%d,
+            orientation:"%s"
+        }'''  % (
+            axe.data_index,
+            axe.header,
+            axe.width,
+            axe.default_header_width,
+            axe.orientation
+        ) for axe in self.top_axis])
 
 #===============================================================================
 # Компонент таблица, или grid
@@ -376,6 +435,24 @@ class ExtGrid(BaseExtPanel):
         config = self._get_config_str()
         params = self._get_params_str()
         return 'createGridPanel({%s}, {%s})' % (config, params)
+
+
+#===============================================================================
+# Оси к пивот гриду
+#===============================================================================
+
+class ExtPivotGridAxis(ExtUIComponent):
+    DEFAULT_HEADER_WIDTH = 100
+
+    def __init__(self,*args, **kwargs):
+        super(ExtPivotGridAxis,self).__init__(*args,**kwargs)
+        self.width = ExtPivotGridAxis.DEFAULT_HEADER_WIDTH
+        self.data_index = None
+        self.orientation = 'horizontal'
+        self.header = None
+        self.default_header_width = 80
+        self.init_component(*args, **kwargs)
+
 
 #===============================================================================
 # Колонки к гриду
