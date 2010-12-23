@@ -500,7 +500,8 @@ class ReportGenerator{
 		return null;
 	}
 	
-	static final Pattern TAG_REGEX_REPLACE = Pattern.compile("\\$.+?\\$");
+	static final Pattern TAG_REGEX_REPLACE = Pattern.compile("(?=[^\\@]|^)\\$.+?\\$(?=[^\\@]|$)");
+	static final Pattern TAG_REGEX_NOREPLACE = Pattern.compile("[\\@].+?[\\@]");
 	
 	/**
 	 * Поиск и обработка тега ЗАМЕНА в ячейке 
@@ -511,8 +512,8 @@ class ReportGenerator{
 	private void processReplaceTag(Cell outCell, JSONObject obj, String token_prefix) throws Exception {
 		if (outCell.getCellType() != Cell.CELL_TYPE_STRING)
 			return;
-		String cell_text = outCell.getStringCellValue();
-		
+        String cell_text = outCell.getStringCellValue();
+
 		Matcher m = TAG_REGEX_REPLACE.matcher(cell_text);	
 		HashMap<String, Object> keys = new HashMap<String, Object>();
 		while (m.find()){
@@ -534,9 +535,20 @@ class ReportGenerator{
 			
 			keys.put(token, value);
 		}
+
+
+        Matcher m2 = TAG_REGEX_NOREPLACE.matcher(cell_text);	
+        while (m2.find()){
+            String token = m2.group();
+            String key = token.substring(1, token.length() - 1);
+            cell_text = cell_text.replace(token, key);
+        }
 		
 		if (keys.isEmpty())
+        {
+		    outCell.setCellValue(cell_text);
 			return;
+        }
 		
 		// Причем если тег только один и заполняет всю строку, то нужно поменять тип ячейки под это значение
 		if (keys.size() == 1){
@@ -585,6 +597,8 @@ class ReportGenerator{
 			
 			cell_text = cell_text.replace(token, str_value);
 		}
+
+
 		outCell.setCellValue(cell_text);
 	}
 
@@ -608,32 +622,32 @@ class ReportGenerator{
 		out_sheet.setDisplayRowColHeadings(in_sheet.isDisplayRowColHeadings());
 		
 		// Копируем кучу параметров печати
-		PrintSetup out_print = out_sheet.getPrintSetup();
-		PrintSetup in_print = in_sheet.getPrintSetup();
-		out_print.setCopies(in_print.getCopies());
-		out_print.setDraft(in_print.getDraft());
-		out_print.setFitHeight(in_print.getFitHeight());
-		out_print.setFitWidth(in_print.getFitWidth());
-		out_print.setFooterMargin(in_print.getFooterMargin());
-		out_print.setHeaderMargin(in_print.getHeaderMargin());
-		out_print.setHResolution(in_print.getHResolution());
-		out_print.setLandscape(in_print.getLandscape());
-		out_print.setLeftToRight(in_print.getLeftToRight());
-		out_print.setNoColor(in_print.getNoColor());
-		out_print.setNoOrientation(in_print.getNoOrientation());
-		out_print.setNotes(in_print.getNotes());
-		out_print.setPageStart(in_print.getPageStart());
-		out_print.setPaperSize(in_print.getPaperSize());
-		out_print.setScale(in_print.getScale());
-		out_print.setVResolution(in_print.getVResolution());
+        PrintSetup out_print = out_sheet.getPrintSetup();
+        PrintSetup in_print = in_sheet.getPrintSetup();
+        out_print.setCopies(in_print.getCopies());
+        out_print.setDraft(in_print.getDraft());
+        out_print.setFitHeight(in_print.getFitHeight());
+        out_print.setFitWidth(in_print.getFitWidth());
+        out_print.setFooterMargin(in_print.getFooterMargin());
+        out_print.setHeaderMargin(in_print.getHeaderMargin());
+        out_print.setHResolution(in_print.getHResolution());
+        out_print.setLandscape(in_print.getLandscape());
+        out_print.setLeftToRight(in_print.getLeftToRight());
+        out_print.setNoColor(in_print.getNoColor());
+        out_print.setNoOrientation(in_print.getNoOrientation());
+        out_print.setNotes(in_print.getNotes());
+        out_print.setPageStart(in_print.getPageStart());
+        out_print.setPaperSize(in_print.getPaperSize());
+        out_print.setScale(in_print.getScale());
+        out_print.setVResolution(in_print.getVResolution());
 		
 		// Колонтитулы, мать их, неправильно ставит MS Office 2007
 		// Если генератор падает тут, значит колонтитул нужно прописать вручную
-		Footer in_foot = in_sheet.getFooter();
-		Footer out_foot = out_sheet.getFooter();
-		out_foot.setCenter(in_foot.getCenter());
-		out_foot.setLeft(in_foot.getLeft());
-		out_foot.setRight(in_foot.getRight());
+        Footer in_foot = in_sheet.getFooter();
+        Footer out_foot = out_sheet.getFooter();
+        out_foot.setCenter(in_foot.getCenter());
+        out_foot.setLeft(in_foot.getLeft());
+        out_foot.setRight(in_foot.getRight());
 				
 		return out_sheet;
 	}
