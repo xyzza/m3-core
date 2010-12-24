@@ -32,6 +32,9 @@ class BaseExtField(ExtUIComponent):
         ext_attr: "allowBlank"
         ,py_attr: "allow_blank" 
     },{
+        ext_attr: "hideLabel"
+        ,py_attr: "hide_label"
+    },{
         ext_attr: "vtype"
         ,py_attr: "vtype" 
     },{
@@ -75,6 +78,7 @@ class BaseExtField(ExtUIComponent):
         self.value = ""
         
         self.label_style = {}
+        self.hide_label = False
         self.read_only = False
         
         self.is_edit = True
@@ -142,6 +146,7 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('regexText', self.regex_text)
         self._put_config_value('tabIndex', self.tab_index)
         self._put_config_value('invalidClass', self.invalid_class)
+        self._put_config_value('hideLabel', self.hide_label)
         
 
     
