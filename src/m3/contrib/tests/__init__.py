@@ -16,10 +16,6 @@ from django.test.testcases import TestCase
 from django.utils.module_loading import module_has_submodule
 
 
-# Похоже весь верхний код устарел ;)
-# Удалим его когда с тестами всё устаканится
-#==================================== НОВАЯ ВЕРСИЯ БЕГУНКА =========================================
-
 class TestAppCache(AppCache):
     """ Добавлена поддержка приложений без моделей """
     

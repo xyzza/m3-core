@@ -1,6 +1,6 @@
 #coding:utf-8
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.db import models
 from m3.db import BaseObjectModel, BaseEnumerate
 
@@ -49,7 +49,7 @@ class Tasks(BaseObjectModel):
     task_name = models.CharField(max_length=200, db_index=True, blank=False)
     proc_name = models.CharField(max_length=200, null=False, blank=False)
     last_run = models.DateTimeField(null=True)
-    next_run = models.DateTimeField(default=datetime.now())
+    next_run = models.DateTimeField()
     period = models.PositiveIntegerField(choices=PeriodTypeEnum.get_choices(),
                                             null=False, blank=False)
     executing = models.BooleanField(null=False, default=False)
@@ -71,4 +71,4 @@ class Tasks(BaseObjectModel):
         return self.status == StatusTypeEnum.NEW
 
     class Meta:
-        db_table = 'task_schedule'
+        db_table = 'm3_task_scheduler'
