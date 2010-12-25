@@ -91,9 +91,9 @@ def get_proc(proc_name):
     '''
     Извлекает процедуру по названиям модуля и процедуры.
     '''
-    module_name,dot,proc_name_short = proc_name.rpartition('.')
+    module_name, _, proc_name_short = proc_name.rpartition('.')
     module = import_module(module_name)
     proc = getattr(module, proc_name_short, None)
-    assert callable(proc),'Procedure %s is not callable.' \
+    assert callable(proc), 'Procedure %s is not callable.' \
         %(proc_name)
     return proc
