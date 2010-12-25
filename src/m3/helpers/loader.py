@@ -126,7 +126,9 @@ def read_tree_dict_file(filename):
                 self.is_leaf = not re.match(VALID_BRANCH, self.attrs[0])
                 # убираем плюсик в скобках у веток
                 if not self.is_leaf:
-                    self.attrs[0] = self.attrs[0][3:].strip() 
+                    self.attrs[0] = self.attrs[0][3:].strip()
+                    if self.attrs[0] == '-':
+                        self.attrs[0] = ' '
                 
             else:
                 # листьям разрешено не иметь полей 
