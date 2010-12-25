@@ -83,6 +83,7 @@ class ExtContextMenuItem(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(ExtContextMenuItem, self).__init__(*args, **kwargs)
         self.text = None
+        self.item_id = None
         self.handler = None
         self.icon_cls = None
         self.menu = None
@@ -97,6 +98,8 @@ class ExtContextMenuItem(ExtUIComponent):
             res.append('disabled: true')
         if self.hidden:
             res.append('hidden: true')
+        if self.item_id:
+            res.append('itemId: '+ self.item_id)    
         if self.menu:
             res.append('menu: '+ self.menu.render())
         if self.handler:
