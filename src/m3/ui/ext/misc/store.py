@@ -4,6 +4,8 @@ Created on 3.3.2010
 
 @author: prefer
 '''
+from django.utils.html import escape
+
 from m3.ui.ext.base import BaseExtComponent
 from base_store import BaseExtStore
 
@@ -36,7 +38,7 @@ class ExtDataStore(BaseExtStore):
         '''Прописывается в шаблоне и заполняется при рендеринге'''
         res = []
         for item in self.data:    
-            res.append('[%s]' % ','.join(['"%s"' % subitem for subitem in item]))
+            res.append('[%s]' % ','.join(['"%s"' % escape(subitem) for subitem in item]))
         return ','.join(res)
             
     
