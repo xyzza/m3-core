@@ -194,7 +194,10 @@ def check_rs(rs, bik):
     if len(rs)!=20 or len(bik)!=9:
         return False
     COEF = (7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,)
-    rs_modif = bik[-3:] + rs
+    if (bik[6:9] == '001')or(bik[6:9] == '000'):
+        rs_modif = ''.join(['0', bik[4:6], rs])
+    else:
+        rs_modif = bik[-3:] + rs
     checksum1 = checksum(rs_modif, COEF)
     checknumber = checksum1 % 10
     return checknumber == 0
