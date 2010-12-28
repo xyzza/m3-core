@@ -166,7 +166,7 @@ def check_ks(ks, bik):
         return False
     
     COEF = (7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,3,7,1,)
-    ks_modif = ''.join(['0', bik[5:7], ks])
+    ks_modif = ''.join(['0', bik[4:6], ks])
     checksum1 = checksum(ks_modif, COEF)
     checknumber = checksum1 % 10
     return checknumber == 0
