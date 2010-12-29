@@ -322,6 +322,7 @@ class ExtDictionaryWindow(BaseExtWindow):
     def init_grid_components(self):
         if not self.grid:
             grid = ExtGrid(region='center')
+            grid.load_mask = True
             grid.handler_rowcontextmenu = ExtContextMenu()
             grid.handler_contextmenu = ExtContextMenu()
             grid.top_bar = ExtToolBar()
