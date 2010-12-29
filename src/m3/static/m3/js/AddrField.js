@@ -272,6 +272,11 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
 		};
 		this.addEvents(
+            /**
+             * @event change
+             * При изменении адресного поля целиком. 
+             */
+		    'change',
 			/**
              * @event change_place
              * При изменении населенного пункта 
@@ -326,11 +331,15 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		var flat_num;
 		if (this.flat != undefined) {
 			flat_num = this.flat.getValue();
-		}		
+		}
+		var addrCmp = this
 		Ext.Ajax.request({
 			url: this.get_addr_url,
 			params: Ext.applyIf({ place: place_id, street: street_id, house: house_num, flat: flat_num, addr_cmp: this.addr.id }, this.params),
-			success: function(response, opts){ smart_eval(response.responseText); },
+			success: function(response, opts){
+			    smart_eval(response.responseText);
+			    addrCmp.fireEvent('change');
+			    },
 			failure: function(){Ext.Msg.show({ title:'', msg: 'Не удалось получить адрес.<br>Причина: сервер временно недоступен.', buttons:Ext.Msg.OK, icon: Ext.Msg.WARNING });}
 		});
     }
