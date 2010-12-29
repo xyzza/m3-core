@@ -90,7 +90,9 @@ class EditRoleWindowAction(actions.Action):
     
     def run(self, request, context):
         
+        new_role = True
         if(context.userrole_id > 0):
+            new_role = False
             try:
                 user_role = models.UserRole.objects.get(pk=context.userrole_id)
             except models.UserRole.DoesNotExist:
@@ -98,7 +100,7 @@ class EditRoleWindowAction(actions.Action):
         else:
             user_role = models.UserRole()
         
-        window = RolesEditWindow()
+        window = RolesEditWindow(new_role)
         window.form.from_object(user_role)                
         
         return actions.ExtUIScriptResult(data=window)
@@ -512,6 +514,8 @@ class RolesEditWindow(windows.ExtEditWindow):
         self.width=500
         self.height=400
         self.modal = True
+        
+        self.new_role = new_role
         
         self.template_globals = 'm3-users/edit-role-window.js'
         
