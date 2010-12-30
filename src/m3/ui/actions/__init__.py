@@ -497,7 +497,8 @@ class ActionController(object):
         assert issubclass(action, Action)
         for path, value in self._url_patterns.items():
             act = value[1]
-            if isinstance(act, action):
+#            if isinstance(act, action):
+            if act.__class__ == action:
                 return path
     
     #========================================================================================
