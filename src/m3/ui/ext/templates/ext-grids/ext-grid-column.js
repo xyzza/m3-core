@@ -6,7 +6,7 @@
 	,sortable: {{ component.sortable|lower }}
 	{%if component.data_index %} ,dataIndex: '{{ component.data_index }}' {%endif%}
 	{%if component.align %} ,align: '{{ component.align }}' {%endif%}
-	{%if component.editor and not component.read_only %} ,editor: {{ component.render_editor|safe }} {%endif%}
+	{%if component.editor %} ,editor: {{ component.render_editor|safe }} {%endif%}
 	{%if component.hidden %} ,hidden: true {%endif%}
 	{%if component.column_renderer %} ,renderer: {{ component.column_renderer|safe }}{%endif%}
 	{%if component.tooltip %} ,tooltip: '{{ component.tooltip|safe}}'{%endif%}
