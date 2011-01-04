@@ -100,6 +100,7 @@ INSTALLED_APPS = (
     'tests.ui.ext_tests',
     'tests.helpers.urls_tests',
     'tests.contrib.m3_audit_tests',
+    'tests.contrib.palo_olap',
 )
 
 logger.init_logging('./logs')
