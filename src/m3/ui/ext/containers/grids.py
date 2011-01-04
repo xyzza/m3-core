@@ -295,10 +295,33 @@ class ExtGrid(BaseExtPanel):
 
     store = property(get_store, set_store)
 
-    def make_read_only(self, access_off=True):
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUiComponent.
-        super(ExtGrid, self).make_read_only(access_off)
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, 
+                                             *args, **kwargs)
+        # Выключаем\включаем компоненты.
+        super(ExtGrid, self).make_read_only(access_off, exclude_list, 
+                                            *args, **kwargs)
         self.read_only = access_off
+        if self.columns:
+            for column in self.columns:
+                column.make_read_only(self.read_only, exclude_list, 
+                                                    *args, **kwargs)
+        # контекстное меню.
+        context_menu_items = [self.handler_contextmenu, 
+                              self.handler_rowcontextmenu]
+        for context_menu in context_menu_items:
+            if (context_menu and
+                hasattr(context_menu,'items') and
+                context_menu.items and
+                hasattr(context_menu.items,'__iter__')):
+                for item in context_menu.items:
+                    if isinstance(item, ExtUIComponent):
+                        item.make_read_only(self.read_only, 
+                                            exclude_list, 
+                                            *args, **kwargs)
+            
 
     @property
     def columns(self):
@@ -394,7 +417,7 @@ class ExtGrid(BaseExtPanel):
         if not self.read_only:
             self._put_config_value('enableDragDrop', self.drag_drop)
             self._put_config_value('ddGroup', self.drag_drop_group)
-            self._put_config_value('editor', self.editor)
+        self._put_config_value('editor', self.editor)
         self._put_config_value('view', self.t_render_view, self.view)
         self._put_config_value('store', self.t_render_store, self.get_store())
         self._put_config_value('viewConfig', self._view_config)
@@ -491,9 +514,14 @@ class BaseExtGridColumn(ExtUIComponent):
     def render_editor(self):
         return self.editor.render()
 
-    def make_read_only(self, access_off=True):
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUiComponent.
-        self.read_only = access_off
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+	self.read_only = access_off
+        if self.editor and isinstance(self.editor, ExtUIComponent):
+            self.editor.make_read_only(self.read_only, exclude_list, *args, **kwargs)
+        
 
 #===============================================================================
 class ExtGridColumn(BaseExtGridColumn):

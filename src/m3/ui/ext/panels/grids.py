@@ -84,15 +84,19 @@ class ExtObjectGrid(containers.ExtGrid):
         self.dblclick_handler = 'onEditRecord'
         
         self.init_component()
-        
-    def make_read_only(self, access_off=True):
+
+
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUiComponent.
-        self.top_bar.button_new.make_read_only(access_off)
-        self.top_bar.button_edit.make_read_only(access_off)
-        self.top_bar.button_delete.make_read_only(access_off)
-        self.context_menu_grid.menuitem_new.make_read_only(access_off)
-        self.context_menu_grid.menuitem_edit.make_read_only(access_off)
-        self.context_menu_grid.menuitem_delete.make_read_only(access_off)
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+        # Выключаем\включаем компоненты.
+        self.top_bar.button_new.make_read_only(access_off, exclude_list, *args, **kwargs)
+        self.top_bar.button_edit.make_read_only(access_off, exclude_list, *args, **kwargs)
+        self.top_bar.button_delete.make_read_only(access_off, exclude_list, *args, **kwargs)
+        self.context_menu_grid.menuitem_new.make_read_only(access_off, exclude_list, *args, **kwargs)
+        self.context_menu_grid.menuitem_edit.make_read_only(access_off, exclude_list, *args, **kwargs)
+        self.context_menu_grid.menuitem_delete.make_read_only(access_off, exclude_list, *args, **kwargs)
         
         
     @property

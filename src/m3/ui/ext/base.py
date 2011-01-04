@@ -488,8 +488,27 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
         #return res
         
-    def make_read_only(self, access_off=True):
+    def pre_make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         '''
+        Выполняется перед методом make_read_only, определяет находится ли
+        данный компонент в списке исключений(в список может передаваться имя объекта,
+        или даже сам объект). Если компонент в списке исключенний, то
+        действие метода становится противопложным.
+        Т.е. если вызывали make_read_only - компонент не будет отключаться, и 
+        наоборот, если вызывали make_read_only(False) объект будет отключен.
+        '''
+        if ((self in exclude_list) or
+            (hasattr(self,'name') and
+             self.name and
+             self.name in exclude_list)):
+            access_off = not access_off
+        return access_off
+        
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+        '''
+        @access_off - переменная регулирует вкл\выкл режима для чтения. 
+        @exclude_list - список, содержит в себе имена элементов, 
+        которые не надо выключать.
         Позволяет сделать компонент недоступным для изменения.
         Обязательно должен быть переопределен в наследуемых классах.
         При вызове метода без параметров используется параметр по умолчанию
