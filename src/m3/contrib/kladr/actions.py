@@ -214,7 +214,7 @@ def GetAddr(place, street = None, house = None, flat = None):
     if house:
         addr_text = addr_text+u'д. '+house
     if flat:
-        addr_text = addr_text+delim+u'кв. '+flat
+        addr_text = addr_text+delim+u'к. '+flat
     return addr_text
 
 class KLADRGetAddrAction(Action):
