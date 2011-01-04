@@ -205,24 +205,31 @@ class BaseExtWindow(ExtUIComponent):
         
         return nested
     
-    def make_read_only(self, access_off=True):
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUiComponent.
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+        # Выключаем\включаем компоненты.
+        # Задаем собственный атрибут окна.
+        self.read_only = access_off
+        # Перебираем итемы.
         for item in self.__items:
-            item.make_read_only(access_off)
+            item.make_read_only(self.read_only, exclude_list, *args, **kwargs)
+        # Перебираем бары.
         bar_typle = (self.footer_bar, self.bottom_bar, self.top_bar)
         for bar in bar_typle:    
             if bar and bar._items:
                 # Обязательно проверяем, что пришел контейнер.
                 assert isinstance(bar, BaseExtContainer)
                 for item in bar._items:
-                    item.make_read_only(access_off)
+                    item.make_read_only(self.read_only, exclude_list, *args, **kwargs)
+        # Перебираем кнопки.
         if self.__buttons and self.__buttons:
             for button in self.__buttons:
                 assert isinstance(button, BaseExtControl)
-                button.make_read_only(access_off)
-        self.read_only = access_off
-        
-        
+                button.make_read_only(self.read_only, exclude_list, *args, **kwargs)
+
+
     @property
     def buttom_bar(self):
         '''@deprecated: Использовать bottom_bar'''

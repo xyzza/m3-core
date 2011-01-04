@@ -112,8 +112,11 @@ class ExtContextMenuItem(ExtUIComponent):
                     res.append('handler: %s' % self.handler)
         return '{%s}' % ','.join(res)
     
-    def make_read_only(self, access_off=True):
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUiComponent.
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+        # Выключаем\включаем компоненты.
         self.disabled = access_off
 
 #===============================================================================    
@@ -127,3 +130,7 @@ class ExtContextMenuSeparator(ExtUIComponent):
     
     def render(self, *args, **kwargs):
         return '"-"'
+    
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+        # Заглшука.
+        pass

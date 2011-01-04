@@ -114,31 +114,39 @@ class ExtDictionaryWindow(BaseExtWindow):
 
         self.__mode = value
         
-    def make_read_only(self, access_off=True):
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUIComponent.
-        super(ExtDictionaryWindow, self).make_read_only(access_off)
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+        # Выключаем\включаем компоненты.
+        # Задаем собственный атрибут окна.
+        self.read_only = access_off
+        super(ExtDictionaryWindow, self).make_read_only(self.read_only, exclude_list, *args, **kwargs)
         if self.tree:
-            self.tree.make_read_only(access_off)
             # Включаем обратно refresh, ибо он нужен.
             for component in self.__components_refresh_tree:
-                component.make_read_only(False)
+                exclude_list.append(component)
+            self.tree.make_read_only(self.read_only, exclude_list, *args, **kwargs)
+            
         if self.grid:
-            self.grid.make_read_only(access_off)
             # Включаем обратно refresh, ибо он нужен.
             for component in self.__components_refresh_grid:
-                component.make_read_only(False)
-                
-        # Закроем контекстное меню
-        if self.grid:
-            for item in self.grid.handler_rowcontextmenu.items:
-                item.disabled = access_off
-            for item in self.grid.handler_contextmenu.items:
-                item.disabled = access_off
-        if self.tree:
-            for item in self.tree.handler_contextmenu.items:
-                item.disabled = access_off
-            for item in self.tree.handler_containercontextmenu.items:
-                item.disabled = access_off
+                exclude_list.append(component)
+            self.grid.make_read_only(self.read_only, exclude_list, *args, **kwargs)
+            
+#        Если все будет нормально-убрать, так как в гриде и дереве контекстнрое меню
+#        должно выключаться самостоятельно.
+#        # Закроем контекстное меню
+#        if self.grid:
+#            for item in self.grid.handler_rowcontextmenu.items:
+#                item.disabled = access_off
+#            for item in self.grid.handler_contextmenu.items:
+#                item.disabled = access_off
+#        if self.tree:
+#            for item in self.tree.handler_contextmenu.items:
+#                item.disabled = access_off
+#            for item in self.tree.handler_containercontextmenu.items:
+#                item.disabled = access_off
             
         # Оставим кнопку Закрыть и Выбрать
         for btn in self.buttons:

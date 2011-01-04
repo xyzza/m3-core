@@ -30,10 +30,26 @@ class ExtTree(BaseExtPanel):
         self.read_only = False # Если включен - не рендерим drag'n'drop
         self.init_component(*args, **kwargs)
         
-    def make_read_only(self, access_off=True):
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUiComponent.
-        super(ExtTree, self).make_read_only(access_off)
-        self.read_only = True
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+        # Выключаем\включаем компоненты.
+        super(ExtTree, self).make_read_only(access_off, exclude_list, *args, **kwargs)
+        self.read_only = access_off
+        # контекстное меню.
+        context_menu_items = [self.handler_contextmenu,
+                              self.handler_containercontextmenu]
+        for context_menu in context_menu_items:
+            if (context_menu and
+                hasattr(context_menu,'items') and
+                context_menu.items and
+                hasattr(context_menu.items,'__iter__')):
+                    for item in context_menu.items:
+                        if isinstance(item, ExtUIComponent):
+                            item.make_read_only(self.read_only, exclude_list, *args, **kwargs)
+            
+        
     
     @staticmethod    
     def nodes_auto_check(node):
