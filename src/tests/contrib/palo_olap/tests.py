@@ -4,17 +4,34 @@ Created on 04.01.2011
 
 @author: kirov
 '''
-import calendar
-
 from django.test import TestCase
 from m3.contrib.palo_olap.server import PaloServer
-from m3.contrib.palo_olap.dimension import ELEMENT_TYPE_CONSOLIDATED, ELEMENT_TYPE_STRING
+from m3.contrib.palo_olap.dimension import ELEMENT_TYPE_CONSOLIDATED, ELEMENT_TYPE_STRING, ELEMENT_TYPE_NUMERIC
+
+DB_NAME = 'olap_test'
+YEAR_DIM = u'Года'
+MON_DIM = u'Месяцы'
+MONTH_NAMES = (
+        (1,u'Январь'),
+        (2,u'Февраль'),
+        (3,u'Март'),
+        (4,u'Апрель'),
+        (5,u'Май'),
+        (6,u'Июнь'),
+        (7,u'Июль'),
+        (8,u'Август'),
+        (9,u'Сентябрь'),
+        (10,u'Октябрь'),
+        (11,u'Ноябрь'),
+        (12,u'Декабрь'),
+    )
+UNIT_DIM = u'Учреждения'
+MAX_UNITS = 1000
 
 class PaloTests(TestCase):
     '''
     Тесты Palo Olap
     '''
-    
     def test_1(self):
         p = PaloServer(server_host='localhost',user='admin',password='admin')
         # подключаемся к серверу
@@ -22,49 +39,93 @@ class PaloTests(TestCase):
         # загружаем список баз
         p.load_db_list()
         # проверяем наличие базы 'olap_test'
-        if p.db_exists('olap_test'):
+        if p.db_exists(DB_NAME):
             # получаем базу
-            db = p.get_db('olap_test')
+            db = p.get_db(DB_NAME)
         else:
             # создаем базу
-            db = p.create_db('olap_test')
+            db = p.create_db(DB_NAME)
         
         #db.load_dimensions()
         # проверим в базе наличие размерности 'years'
-        if db.dimension_exists(u'Года'):
-            d_years = db.get_dimension(u'Года')
+        if db.dimension_exists(YEAR_DIM):
+            d_years = db.get_dimension(YEAR_DIM)
         else:
-            d_years = db.create_dimension(u'Года')
+            d_years = db.create_dimension(YEAR_DIM)
         
         # очистим размерность
         d_years.clear()
         # заполним ее годами
         years_list = []
-        for year in range(2000,2010):
-            res = d_years.create_element(u'%s год' % year, type = ELEMENT_TYPE_STRING)
+        for year in range(2000,2010+1):
+            res = d_years.create_element(u'%s год' % year)
             years_list.append(res[1]) # тут имя элемента
         d_years.create_consolidate_element(u'Все года', years_list)
         
         # тоже сделаем и с месяцами
-        if db.dimension_exists(u'Месяцы'):
-            d_mons = db.get_dimension(u'Месяцы')
+        if db.dimension_exists(MON_DIM):
+            d_mons = db.get_dimension(MON_DIM)
         else:
-            d_mons = db.create_dimension(u'Месяцы')
+            d_mons = db.create_dimension(MON_DIM)
         d_mons.clear()
         month_list = []
-        for month in range(1,12):
-            res = d_mons.create_element(calendar.month_name[month], type = ELEMENT_TYPE_STRING)
+        for month in range(1,12+1):
+            res = d_mons.create_element(MONTH_NAMES[month-1][1])
             month_list.append(res[1])
         d_mons.create_consolidate_element(u'Все месяцы', month_list)
         
         # попробуем добавить большое количество учреждений
-        if db.dimension_exists(u'Учреждения'):
-            d_units = db.get_dimension(u'Учреждения')
+        if db.dimension_exists(UNIT_DIM):
+            d_units = db.get_dimension(UNIT_DIM)
         else:
-            d_units = db.create_dimension(u'Учреждения')
+            d_units = db.create_dimension(UNIT_DIM)
         d_units.clear()
         unit_list = []
-        for unit in range(1,10000):
-            res = d_units.create_element(u'Учреждение №%s' % unit, type = ELEMENT_TYPE_STRING)
+        for unit in range(1,10000+1):
+            res = d_units.create_element(u'Учреждение №%s' % unit)
             unit_list.append(res[1])
-        d_units.create_consolidate_element(u'Все учреждения', unit_list)
+        all_units_id = d_units.create_consolidate_element(u'Все учреждения', unit_list)[0]
+        
+        # дополним еще большим количеством учреждений
+        unit_list = []
+        unit_id_list = []
+        for unit in range(10001,100000+1):
+            unit_list.append(u'Учреждение №%s' % unit)
+            # id будет совпадать с номером учреждения, поэтому пока не загоняемся
+            unit_id_list.append(unit)
+        d_units.create_elements(unit_list)
+        # добавим новые учреждения во "Все учреждения"
+        d_units.append_to_consolidate_element(all_units_id, unit_id_list)
+        
+        # создадим промежуточные группировочные элементы
+        for g_unit in range(1, 10+1):
+            id_list = []
+            if g_unit == 1:
+                for unit in range(0, 10000):
+                    id_list.append((g_unit-1)*10000+unit)
+            else:
+                for unit in range(1, 10000+1):
+                    id_list.append((g_unit-1)*10000+unit)
+            g_id = d_units.create_element(u'Группа %s' % g_unit, ELEMENT_TYPE_CONSOLIDATED, id_list)[0]
+            d_units.append_to_consolidate_element(all_units_id, [g_id])
+        
+        # сохраним базу
+        db.save()
+        
+        db.load_cubes()
+        # проверим что есть куб или создадим новый
+        if db.cube_exists(u'Численность'):
+            c_count = db.get_cube(u'Численность')
+        else:
+            # пока без разреза учреждений
+            #dims = [d_years.get_id(), d_mons.get_id(), d_units.get_id()]
+            dims = [d_years.get_id(), d_mons.get_id()]
+            c_count = db.create_cube(u'Численность', dims)
+        
+        #c_count.clear()
+        
+        # заполним куб какими-то значениями
+        coord = (u'2005 год', u'Декабрь')
+        c_count.replace(coord, 1)
+        coord = (u'2002 год', u'Январь')
+        c_count.replace(coord, 23.45)

@@ -11,10 +11,14 @@ class PaloCube():
         self.getUrlResult = Connection.getUrlResult        
         self.getDatabaseUrlRequest = Connection.getDatabaseUrlRequest
         self.ServerRoot = Connection.ServerRoot
-        self.getCube = Connection.getCube
-        self.__DataBaseID = Connection.getID()
+        self.getCube = Connection.get_cube
+        self.__DataBaseID = Connection.get_id()
         self.__ID = APIOutput[0]
-        self.__Name = APIOutput[1][1:-1]
+        try:
+            name = APIOutput[1][1:-1].decode('utf-8')
+        except UnicodeDecodeError:
+            name = APIOutput[1][1:-1]
+        self.__Name = name
         self.__NumDimensions = APIOutput[2]
         self.__DimensionsIDList = APIOutput[3].split(',')
         self.__DimensionsList = {}
@@ -36,7 +40,7 @@ class PaloCube():
         '''
         return self.__DataBaseID
 
-    def getID(self):
+    def get_id(self):
         '''
         ID куба
         '''
@@ -129,7 +133,7 @@ class PaloCube():
         '''
         Ссылка на команду управления кубом
         '''
-        Param['cube'] = self.getID()
+        Param['cube'] = self.get_id()
         return self.getDatabaseUrlRequest(CMD, Param)
     
     def LoadRules(self):
@@ -196,7 +200,7 @@ class PaloCube():
         Res = self.getUrlResult(Url)
         return Res.read()
         
-    def Save(self):
+    def save(self):
         '''
         Сохранить куб
         '''
@@ -252,13 +256,13 @@ class PaloCube():
         '''
         return ':'.join([str(Value) for Value in Values])
 
-    def Replace(self, Coordinate, Value, Splash = 0):
+    def replace(self, Coordinate, Value, Splash = 0):
         '''
         Заменить данные ячейки
         '''
         CMD = 'cell/replace'
-        Path = self.getCellPath(Coordinate)
-        Param = {'path': Path,
+        path = self.getCellPath(Coordinate)
+        Param = {'path': path,
                  'value': str(Value),
                  'splash': Splash}
         Url = self.getCubeUrlRequest(CMD, Param)
@@ -266,7 +270,7 @@ class PaloCube():
             Res = self.getUrlResult(Url)
         except:
             return False
-        self.Save()
+        self.save()
         return Res.read()
 
     def ReplaceBulk(self, Coordinates, Values, Splash = 0):
@@ -286,7 +290,7 @@ class PaloCube():
             return False
         return Res.read()
         
-    def Clear(self, Coordinates):
+    def clear(self, Coordinates):
         '''
         Очистить область
         '''
@@ -461,7 +465,7 @@ class CubeDumpIterator:
         for DimID, ElementID in zip(self.CubeObj.getDimensionsIDList(), Record):
             Dim = self.CubeObj.getDimensionByID(DimID)
             AttrCubeName = Dim.getAttributeCubeName()
-            AttrCube = self.CubeObj.getCube(AttrCubeName)
+            AttrCube = self.CubeObj.get_cube(AttrCubeName)
             if AttrCube and AttrCube.isSystemCube:
                 AttrDim = AttrCube.getAttrDimension()
                 if AttrDim.KeyDataWarehouseExists():

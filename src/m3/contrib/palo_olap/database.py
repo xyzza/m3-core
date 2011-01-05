@@ -29,9 +29,9 @@ class PaloDataBase():
         self.__DimensionsDictionary = {}
         self.__CubesDictionary = {}
         self.load_dimensions()
-        self.loadCubes()  
+        self.load_cubes()  
     
-    def getID(self):
+    def get_id(self):
         '''
         Идентификатор базы
         '''
@@ -78,9 +78,9 @@ class PaloDataBase():
         for Row in Res.read().split('\n')[:-1]:
             DimObj = PaloDimension(self, Row)
             self.__DimensionsList[DimObj.getName()] = DimObj
-            self.__DimensionsDictionary[str(DimObj.getID())] = DimObj.getName()
+            self.__DimensionsDictionary[str(DimObj.get_id())] = DimObj.getName()
 
-    def loadCubes(self):
+    def load_cubes(self):
         '''
         Загрузить кубы
         '''
@@ -92,7 +92,7 @@ class PaloDataBase():
             if int(Row.split(';')[4]) > 0:
                 CubeObj = PaloCube(self, Row)
                 self.__CubesList[CubeObj.getName()] = CubeObj
-                self.__CubesDictionary[str(CubeObj.getID())] = CubeObj.getName()
+                self.__CubesDictionary[str(CubeObj.get_id())] = CubeObj.getName()
     
     def get_dimension(self, dimension_name):
         '''
@@ -125,7 +125,7 @@ class PaloDataBase():
         Удалить размерность по имени
         '''
         CMD = 'dimension/destroy'
-        Param = {'dimension': self.getDimension(Name).getID()}
+        Param = {'dimension': self.getDimension(Name).get_id()}
         Url = self.getDatabaseUrlRequest(CMD, Param)
         self.getUrlResult(Url)
         del self.__DimensionsDictionary[Name]
@@ -136,16 +136,16 @@ class PaloDataBase():
         '''
         self.getDimension(Name).Clear()
     
-    def getCube(self, CubeName):
+    def get_cube(self, name):
         '''
         Получить куб по имени
         '''
         try:
-            return self.__CubesList[CubeName]
+            return self.__CubesList[name]
         except:
             return False
 
-    def Save(self, Param = {}):
+    def save(self):
         '''
         Сохранить базу (не кубы)
         '''
@@ -158,7 +158,7 @@ class PaloDataBase():
         '''
         Ссылка на команду управления базой
         '''
-        UrlRequest = self.ServerRoot + CMD + '?sid=' + self.Sid + '&database=' + self.getID()
+        UrlRequest = self.ServerRoot + CMD + '?sid=' + self.Sid + '&database=' + self.get_id()
         ''
         return UrlRequest + '&' + self.UrlEncoder(Param)
     
@@ -176,11 +176,36 @@ class PaloDataBase():
         Res = self.getUrlResult(Url)
         DimObj = PaloDimension(self, Res.read())
         self.__DimensionsList[name] = DimObj
-        self.__DimensionsDictionary[str(DimObj.getID())] = name
+        self.__DimensionsDictionary[str(DimObj.get_id())] = name
         return DimObj
     
-    def dimension_exists(self, Name):
+    def dimension_exists(self, name):
         '''
-        Проверка присутствия размерности в кубе
+        Проверка присутствия размерности в базе
         '''
-        return Name in self.__DimensionsList.keys()
+        return name in self.__DimensionsList.keys()
+    
+    def create_cube(self, name, dimension_ids):
+        '''
+        Создать куб
+        '''
+        CMD = 'cube/create'
+        try:
+            name = name.encode('utf-8')
+        except UnicodeDecodeError:
+            pass
+        Param = {'new_name': name,
+                 'dimensions': ','.join(['%s' % id for id in dimension_ids])
+                 }
+        Url = self.getDatabaseUrlRequest(CMD, Param)
+        Res = self.getUrlResult(Url)
+        CubeObj = PaloCube(self, Res.read())
+        self.__CubesList[CubeObj.getName()] = CubeObj
+        self.__CubesDictionary[str(CubeObj.get_id())] = CubeObj.getName()
+        return CubeObj
+    
+    def cube_exists(self, name):
+        '''
+        Проверка присутствия куба в базе
+        '''
+        return name in self.__CubesList.keys()

@@ -15,7 +15,7 @@ class PaloDimension():
         self.getUrlResult = Connection.getUrlResult
         self.getDatabaseUrlRequest = Connection.getDatabaseUrlRequest
         self.ServerRoot = Connection.ServerRoot
-        self.__DataBaseID = Connection.getID()
+        self.__DataBaseID = Connection.get_id()
         self.__ID = APIOutput[0]
         try:
             name = APIOutput[1][1:-1].decode('utf-8')
@@ -38,7 +38,7 @@ class PaloDimension():
         '''
         return self.__DataBaseID
 
-    def getID(self):
+    def get_id(self):
         '''
         ID размерности
         '''
@@ -84,7 +84,7 @@ class PaloDimension():
         '''
         Ссылка на команду управления размерностями
         '''
-        Param['dimension'] = self.getID()
+        Param['dimension'] = self.get_id()
         return self.getDatabaseUrlRequest(CMD, Param)
 
     def _getAttrCubeName(self):
@@ -116,10 +116,14 @@ class PaloDimension():
         Res = self.getUrlResult(Url)
         List = Res.read().split('\n')[:-1]
         for Element in List:
-            ID, Name = Element.split(';')[:2]
-            self.__Elements[Name[1:-1]] = str(ID)
-            self.__ElementsByID[str(ID)] = Name[1:-1]
-            self.__ElementsIDList.append(ID)
+            id, name = Element.split(';')[:2]
+            try:
+                name = name[1:-1].decode('utf-8')
+            except UnicodeDecodeError:
+                name = name[1:-1]
+            self.__Elements[name] = str(id)
+            self.__ElementsByID[str(id)] = name
+            self.__ElementsIDList.append(id)
             #self.__ElementsAliasByID[str(ID)]['alias_name'] = 'alias_value'
         self.__isLoaded = True
             
@@ -222,25 +226,32 @@ class PaloDimension():
         TypeDict = {"0": "NORMAL", "1": "SYSTEM", "2": "ATTRIBUTE", "3":"USER_INFO"}
         return TypeDict[TypeID]
     
-    def create_element(self, name, type = ELEMENT_TYPE_STRING):
+    def create_element(self, name, type = ELEMENT_TYPE_NUMERIC, children_ids = None):
         '''
-        Добавлени элемента в размерность
+        Добавление элемента в размерность
         '''
         CMD = 'element/create'
         try:
             name = name.encode('utf-8')
         except UnicodeDecodeError:
             pass
-        Param = {'new_name': name,
-                 'type': type}
-        Url = self.getDimensionUrlRequest(CMD, Param)
+        param = {'new_name': name,
+                 'type': type
+                 }
+        if type == ELEMENT_TYPE_CONSOLIDATED:
+            param['children'] = ','.join(['%s' % id for id in children_ids])
+        Url = self.getDimensionUrlRequest(CMD, param)
         Res = self.getUrlResult(Url)
         Element = Res.read().split('\n')[:-1][0]
-        ID, Name = Element.split(';')[:2]
-        self.__Elements[Name[1:-1]] = str(ID)
-        self.__ElementsByID[str(ID)] = Name[1:-1]
-        self.__ElementsIDList.append(ID)
-        return [ID,Name[1:-1]]
+        id, name = Element.split(';')[:2]
+        try:
+            name = name[1:-1].decode('utf-8')
+        except UnicodeDecodeError:
+            name = name[1:-1]
+        self.__Elements[name] = str(id)
+        self.__ElementsByID[str(id)] = name
+        self.__ElementsIDList.append(id)
+        return [id,name]
     
     def create_consolidate_element(self, name, childrens):
         '''
@@ -261,8 +272,39 @@ class PaloDimension():
         Url = self.getDimensionUrlRequest(CMD, Param)
         Res = self.getUrlResult(Url)
         Element = Res.read().split('\n')[:-1][0]
-        ID, Name = Element.split(';')[:2]
-        self.__Elements[Name[1:-1]] = str(ID)
-        self.__ElementsByID[str(ID)] = Name[1:-1]
-        self.__ElementsIDList.append(ID)
-        return [ID,Name[1:-1]]
+        id, name = Element.split(';')[:2]
+        try:
+            name = name[1:-1].decode('utf-8')
+        except UnicodeDecodeError:
+            name = name[1:-1]
+        self.__Elements[name] = str(id)
+        self.__ElementsByID[str(id)] = name
+        self.__ElementsIDList.append(id)
+        return [id,name]
+    
+    def create_elements(self, names, type = ELEMENT_TYPE_NUMERIC):
+        '''
+        Массовое добавление элементов в размерность
+        '''
+        CMD = 'element/create_bulk'
+        names = ','.join(names)
+        try:
+            names = names.encode('utf-8')
+        except UnicodeDecodeError:
+            pass
+        Param = {'name_elements': names,
+                 'type': type}
+        Url = self.getDimensionUrlRequest(CMD, Param)
+        self.getUrlResult(Url)
+        self.loadElements()
+        
+    def append_to_consolidate_element(self, element_id, children_ids):
+        '''
+        Добавление к сводному элементу размерности
+        '''
+        CMD = 'element/append'
+        Param = {'element': element_id,
+                 'children': ','.join(['%s' % id for id in children_ids])}
+        Url = self.getDimensionUrlRequest(CMD, Param)
+        self.getUrlResult(Url)
+        self.loadElements()
