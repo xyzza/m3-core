@@ -369,7 +369,7 @@ class ExtForm(BaseExtPanel):
                 else:
                     val = None
             elif isinstance(item, ExtStringField):
-                val = unicode(val)   
+                val = unicode(val) if val is not None else None  
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
                 if val and val.strip():
