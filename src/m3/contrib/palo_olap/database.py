@@ -175,8 +175,8 @@ class PaloDataBase():
         Url = self.getDatabaseUrlRequest(CMD, Param)
         Res = self.getUrlResult(Url)
         DimObj = PaloDimension(self, Res.read())
-        self.__DimensionsList[name] = DimObj
-        self.__DimensionsDictionary[str(DimObj.get_id())] = name
+        self.__DimensionsList[DimObj.getName()] = DimObj
+        self.__DimensionsDictionary[str(DimObj.get_id())] = DimObj.getName()
         return DimObj
     
     def dimension_exists(self, name):

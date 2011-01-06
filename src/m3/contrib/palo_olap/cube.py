@@ -10,6 +10,7 @@ class PaloCube():
         self.Client = Connection.Client
         self.getUrlResult = Connection.getUrlResult        
         self.getDatabaseUrlRequest = Connection.getDatabaseUrlRequest
+        self.UrlEncoder = Connection.UrlEncoder
         self.ServerRoot = Connection.ServerRoot
         self.getCube = Connection.get_cube
         self.__DataBaseID = Connection.get_id()
@@ -228,27 +229,37 @@ class PaloCube():
         '''
         ElementsID = []
         AreaPath = []
-        for i, Elements in enumerate(Coordinates):
-            ID = self.getDimensionsIDList()[i]
-            Dim = self.getDimensionByID(ID)
+        for coord in Coordinates:
             ElementsID = []
-            if not type(Elements) == tuple:
-                if Elements == '*':
-                    AreaPath.append(Elements)
-                else:
-                    ElementsID = Dim.getElementID(Elements)
-                    if not ElementsID == False:
-                        AreaPath.append(str(ElementsID))
-                    else:
-                        return False
-#                    AreaPath.append(str(Dim.getElementID(Elements)))
-            else:
-                for E in Elements:
-                    IDElem = Dim.getElementID(E)
-                    if not IDElem == False: 
-                        ElementsID.append(str(IDElem))
-                AreaPath.append(':'.join(ElementsID))
-        return ','.join(AreaPath)
+            for i, element in enumerate(coord):
+                ID = self.getDimensionsIDList()[i]
+                Dim = self.getDimensionByID(ID)
+                id_elem = Dim.getElementID(element)
+                if not id_elem == False:
+                    ElementsID.append(str(id_elem))
+            AreaPath.append(','.join(ElementsID))
+        return ':'.join(AreaPath)
+#        for i, Elements in enumerate(Coordinates):
+#            ID = self.getDimensionsIDList()[i]
+#            Dim = self.getDimensionByID(ID)
+#            ElementsID = []
+#            if not type(Elements) in (tuple, list):
+#                if Elements == '*':
+#                    AreaPath.append(Elements)
+#                else:
+#                    ElementsID = Dim.getElementID(Elements)
+#                    if not ElementsID == False:
+#                        AreaPath.append(str(ElementsID))
+#                    else:
+#                        return False
+##                    AreaPath.append(str(Dim.getElementID(Elements)))
+#            else:
+#                for E in Elements:
+#                    IDElem = Dim.getElementID(E)
+#                    if not IDElem == False: 
+#                        ElementsID.append(str(IDElem))
+#                AreaPath.append(','.join(ElementsID))
+#        return ':'.join(AreaPath)
     
     def getValuePath(self, Values):
         '''
@@ -273,17 +284,20 @@ class PaloCube():
         self.save()
         return Res.read()
 
-    def ReplaceBulk(self, Coordinates, Values, Splash = 0):
+    def replace_bulk(self, Coordinates, Values, Splash = 0):
         '''
         Заменить данные множества ячеек
         '''
+        #http://localhost:7777/cell/replace_bulk?sid=0000&database=1&cube=7&paths=1,1,1,1,1,1:2,2,2,2,2,2&values=123.00:-1&splash=1
         CMD = 'cell/replace_bulk'
-        Paths = self.getAreaPath(Coordinates)
-        Values = self.getValuePath(Values)
-        Param = {'paths': Paths,
-                 'values': Values,
+        paths = self.getAreaPath(Coordinates)
+        #print paths
+        values = self.getValuePath(Values)
+        Param = {'paths': paths,
+                 'values': values,
                  'splash': Splash}
         Url = self.getCubeUrlRequest(CMD, Param)
+        #print Url
         try:
             Res = self.getUrlResult(Url)
         except:

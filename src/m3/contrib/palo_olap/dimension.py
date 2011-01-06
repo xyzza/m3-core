@@ -308,3 +308,15 @@ class PaloDimension():
         Url = self.getDimensionUrlRequest(CMD, Param)
         self.getUrlResult(Url)
         self.loadElements()
+    
+    def replace_consolidate_element(self, element_id, children_ids):
+        '''
+        Замена значений сводного элемента размерности
+        '''
+        CMD = 'element/replace'
+        Param = {'element': element_id,
+                 'type': ELEMENT_TYPE_CONSOLIDATED,
+                 'children': ','.join(['%s' % id for id in children_ids])}
+        Url = self.getDimensionUrlRequest(CMD, Param)
+        self.getUrlResult(Url)
+        self.loadElements()
