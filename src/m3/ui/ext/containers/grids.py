@@ -481,6 +481,7 @@ class ExtPivotGridAxis(ExtUIComponent):
 # Колонки к гриду
 class BaseExtGridColumn(ExtUIComponent):
     GRID_COLUMN_DEFAULT_WIDTH = 100
+    THOUSAND_CURRENCY_RENDERER = 'thousandCurrencyRenderer'
 
     def __init__(self, *args, **kwargs):
         super(BaseExtGridColumn, self).__init__(*args, **kwargs)
@@ -490,10 +491,11 @@ class BaseExtGridColumn(ExtUIComponent):
         self.align = None
         self.width = BaseExtGridColumn.GRID_COLUMN_DEFAULT_WIDTH
         self.editor = None
-        self.column_renderer = None
+        self._column_renderer = []
         self.tooltip = None
         self.hidden = False
         self.read_only = False
+        self.colspan = None
         # дополнительные атрибуты колонки
         self.extra = {}
 
@@ -518,17 +520,78 @@ class BaseExtGridColumn(ExtUIComponent):
         # Описание в базовом классе ExtUiComponent.
         # Обрабатываем исключения.
         access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
-	self.read_only = access_off
+        self.read_only = access_off
         if self.editor and isinstance(self.editor, ExtUIComponent):
             self.editor.make_read_only(self.read_only, exclude_list, *args, **kwargs)
         
-
+    def render_base_config(self):
+        super(BaseExtGridColumn, self).render_base_config()
+        self._put_config_value('header', self.header)
+        self._put_config_value('sortable', self.sortable)
+        self._put_config_value('dataIndex', self.data_index)
+        self._put_config_value('align', self.align)
+        self._put_config_value('editor', self.editor)
+        self._put_config_value('hidden', self.hidden)
+        self._put_config_value('readOnly', self.read_only)
+        self._put_config_value('colspan', self.colspan)
+        
+        for i, render in enumerate(self._column_renderer):
+            if BaseExtGridColumn.THOUSAND_CURRENCY_RENDERER == render:
+                #Финансовый формат для Сумм и Цен подразумевает прижимание к правому краю.             
+                thousand_column_renderer = \
+                '(function(val, metaData){ metaData.attr="style=text-align:right"; return %s.apply(this, arguments);}) ' \
+                    % BaseExtGridColumn.THOUSAND_CURRENCY_RENDERER
+                    
+                self._column_renderer[i] = thousand_column_renderer
+            
+        self._put_config_value('renderer', self.render_column_renderer)
+        self._put_config_value('tooltip', self.tooltip)
+        
+    @property
+    def column_renderer(self):
+        return ','.join(self._column_renderer)
+    
+    @column_renderer.setter
+    def column_renderer(self, value):
+        self._column_renderer.append(value)
+        
+    def render_column_renderer(self):
+        '''
+        Кастомный рендеринг функций-рендерера колонок
+        '''
+        if self._column_renderer:
+            self._column_renderer.reverse()
+            val =  self._get_renderer_func(self._column_renderer)
+            return  'function(val, metaData, record, rowIndex, colIndex, store){return %s}' % val
+        return None
+    
+    def _get_renderer_func(self, list_renderers):        
+        '''
+        Рекурсивная функция, оборачивающая друг в друга рендереры колонок
+        '''
+        if list_renderers:            
+            return '%s(%s, metaData, record, rowIndex, colIndex, store)' \
+                % (list_renderers[0], self._get_renderer_func(list_renderers[1:]) )
+        else:
+            return 'val'
+        
+        
 #===============================================================================
 class ExtGridColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridColumn, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-grid-column.js'
+        #self.template = 'ext-grids/ext-grid-column.js'
         self.init_component(*args, **kwargs)
+
+    def render(self):
+        try:
+            self.render_base_config()            
+        except Exception as msg:
+            raise Exception(msg)
+        
+        config = self._get_config_str()        
+        extra = self.t_render_extra()
+        return '{%s}' % (config + ',' + extra if extra else config)    
 
 #===============================================================================
 class ExtGridBooleanColumn(BaseExtGridColumn):
