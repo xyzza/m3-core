@@ -590,6 +590,7 @@ class ExtTabPanel(BaseExtPanel):
         self.body_border = True
         self._items = TypedList(type=ExtPanel)
         self.init_component(*args, **kwargs)
+        self.deferred_render = None
     
     def add_tab(self, **kwargs):
         panel = ExtPanel(**kwargs)
