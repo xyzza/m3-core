@@ -503,14 +503,16 @@ class BaseExtGridColumn(ExtUIComponent):
         lst = []
         for key in self.extra.keys():
             val = self.extra[key]
+
             if isinstance(val,BaseExtComponent):
                 lst.append('%s:%s' % (key,val.render()))
-            elif isinstance(val, (int,str,unicode)):
-                lst.append('%s:%s' % (key,val))
             elif isinstance(val,bool):
                 lst.append('%s:%s' % (key,str(val).lower()))
+            elif isinstance(val, (int,str,unicode)):
+                lst.append('%s:%s' % (key,val))
             else: # пусть как хочет так и рендерится
                 lst.append('%s:%s' % (key,val))
+        print lst
         return ','.join(lst)
 
     def render_editor(self):
