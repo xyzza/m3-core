@@ -530,7 +530,7 @@ class BaseExtGridColumn(ExtUIComponent):
         self._put_config_value('sortable', self.sortable)
         self._put_config_value('dataIndex', self.data_index)
         self._put_config_value('align', self.align)
-        self._put_config_value('editor', self.editor)
+        self._put_config_value('editor', self.editor.render if self.editor else None)
         self._put_config_value('hidden', self.hidden)
         self._put_config_value('readOnly', self.read_only)
         self._put_config_value('colspan', self.colspan)
