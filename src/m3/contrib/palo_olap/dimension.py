@@ -2,6 +2,9 @@
 '''
 Управление размерностями куба на сервере Palo Olap
 '''
+class PaloOlapError(Exception):
+    r"""Исключение возникающее при работе с Palo Olap"""
+    pass
 
 ELEMENT_TYPE_NUMERIC = 1
 ELEMENT_TYPE_STRING = 2
@@ -118,7 +121,7 @@ class PaloDimension():
         for Element in List:
             id, name = Element.split(';')[:2]
             try:
-                name = name[1:-1].decode('utf-8')
+                name = name[1:-1].decode('utf-8').replace('""','"')
             except UnicodeDecodeError:
                 name = name[1:-1]
             self.__Elements[name] = str(id)
@@ -241,7 +244,13 @@ class PaloDimension():
         if type == ELEMENT_TYPE_CONSOLIDATED:
             param['children'] = ','.join(['%s' % id for id in children_ids])
         Url = self.getDimensionUrlRequest(CMD, param)
-        Res = self.getUrlResult(Url)
+        try:
+            Res = self.getUrlResult(Url)
+        except Exception as err:
+            if err.code == 400:
+                raise PaloOlapError(err.read())
+            else:
+                raise err
         Element = Res.read().split('\n')[:-1][0]
         id, name = Element.split(';')[:2]
         try:
@@ -251,9 +260,9 @@ class PaloDimension():
         self.__Elements[name] = str(id)
         self.__ElementsByID[str(id)] = name
         self.__ElementsIDList.append(id)
-        return [id,name]
+        return id
     
-    def create_consolidate_element(self, name, childrens):
+    def create_consolidate_element(self, name, childrens = None, children_ids = None):
         '''
         Создание сводного элемента размерности
         '''
@@ -263,14 +272,23 @@ class PaloDimension():
         except UnicodeDecodeError:
             pass
         list = [] 
-        for C in childrens:
-            if self.getElementID(C):
-                list.append(self.getElementID(C))
+        if not children_ids:
+            for C in childrens:
+                if self.getElementID(C):
+                    list.append(self.getElementID(C))
+        else:
+            list = ['%s' % id for id in children_ids]
         Param = {'new_name': name,
                  'type': ELEMENT_TYPE_CONSOLIDATED,
                  'children': ','.join(list)}
         Url = self.getDimensionUrlRequest(CMD, Param)
-        Res = self.getUrlResult(Url)
+        try:
+            Res = self.getUrlResult(Url)
+        except Exception as err:
+            if err.code == 400:
+                raise PaloOlapError(err.read())
+            else:
+                raise err
         Element = Res.read().split('\n')[:-1][0]
         id, name = Element.split(';')[:2]
         try:
@@ -280,7 +298,7 @@ class PaloDimension():
         self.__Elements[name] = str(id)
         self.__ElementsByID[str(id)] = name
         self.__ElementsIDList.append(id)
-        return [id,name]
+        return id
     
     def create_elements(self, names, type = ELEMENT_TYPE_NUMERIC):
         '''
@@ -295,7 +313,13 @@ class PaloDimension():
         Param = {'name_elements': names,
                  'type': type}
         Url = self.getDimensionUrlRequest(CMD, Param)
-        self.getUrlResult(Url)
+        try:
+            self.getUrlResult(Url)
+        except Exception as err:
+            if err.code == 400:
+                raise PaloOlapError(err.read())
+            else:
+                raise err
         self.loadElements()
         
     def append_to_consolidate_element(self, element_id, children_ids):

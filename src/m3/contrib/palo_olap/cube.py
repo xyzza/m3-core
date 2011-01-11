@@ -2,6 +2,7 @@
 '''
 Управление кубом на сервере Palo Olap
 '''
+from dimension import PaloOlapError
 
 class PaloCube():
     def __init__(self, Connection, APIOutput):
@@ -232,12 +233,20 @@ class PaloCube():
         for coord in Coordinates:
             ElementsID = []
             for i, element in enumerate(coord):
-                ID = self.getDimensionsIDList()[i]
-                Dim = self.getDimensionByID(ID)
-                id_elem = Dim.getElementID(element)
-                if not id_elem == False:
-                    ElementsID.append(str(id_elem))
-            AreaPath.append(','.join(ElementsID))
+                if element == '*':
+                    ElementsID.append(element)
+                else:
+                    ID = self.getDimensionsIDList()[i]
+                    Dim = self.getDimensionByID(ID)
+                    id_elem = Dim.getElementID(element)
+                    if not id_elem == False:
+                        ElementsID.append(str(id_elem))
+                    else:
+                        print i, ID, Dim, element
+                        ElementsID = []
+                        break
+            if ElementsID:
+                AreaPath.append(','.join(ElementsID))
         return ':'.join(AreaPath)
 #        for i, Elements in enumerate(Coordinates):
 #            ID = self.getDimensionsIDList()[i]
@@ -291,17 +300,18 @@ class PaloCube():
         #http://localhost:7777/cell/replace_bulk?sid=0000&database=1&cube=7&paths=1,1,1,1,1,1:2,2,2,2,2,2&values=123.00:-1&splash=1
         CMD = 'cell/replace_bulk'
         paths = self.getAreaPath(Coordinates)
-        #print paths
         values = self.getValuePath(Values)
         Param = {'paths': paths,
                  'values': values,
                  'splash': Splash}
         Url = self.getCubeUrlRequest(CMD, Param)
-        #print Url
         try:
             Res = self.getUrlResult(Url)
-        except:
-            return False
+        except Exception as err:
+            if err.code == 400:
+                raise PaloOlapError(err.read())
+            else:
+                raise err
         return Res.read()
         
     def clear(self, Coordinates):

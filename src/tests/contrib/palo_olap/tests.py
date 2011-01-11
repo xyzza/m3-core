@@ -61,7 +61,7 @@ class PaloTests(TestCase):
         years_list = []
         for year in range(2000,2010+1):
             res = d_years.create_element(u'%s год' % year)
-            years_list.append(res[1]) # тут имя элемента
+            years_list.append(u'%s год' % year) # тут имя элемента
         d_years.create_consolidate_element(u'Все года', years_list)
         
         # тоже сделаем и с месяцами
@@ -73,7 +73,7 @@ class PaloTests(TestCase):
         month_list = []
         for month in range(1,12+1):
             res = d_mons.create_element(MONTH_NAMES[month-1][1])
-            month_list.append(res[1])
+            month_list.append(MONTH_NAMES[month-1][1])
         d_mons.create_consolidate_element(u'Все месяцы', month_list)
         
         # попробуем добавить большое количество учреждений
@@ -85,8 +85,8 @@ class PaloTests(TestCase):
         unit_list = []
         for unit in range(1,MAX_UNITS/10+1):
             res = d_units.create_element(u'Учреждение №%s' % unit)
-            unit_list.append(res[1])
-        all_units_id = d_units.create_consolidate_element(u'Все учреждения', unit_list)[0]
+            unit_list.append(u'Учреждение №%s' % unit)
+        all_units_id = d_units.create_consolidate_element(u'Все учреждения', unit_list)
         
         # дополним еще большим количеством учреждений
         unit_list = []
@@ -109,7 +109,7 @@ class PaloTests(TestCase):
             else:
                 for unit in range(1, MAX_UNITS/10+1):
                     id_list.append((g_unit-1)*MAX_UNITS/10+unit)
-            g_id = d_units.create_element(u'Группа %s' % g_unit, ELEMENT_TYPE_CONSOLIDATED, id_list)[0]
+            g_id = d_units.create_element(u'Группа %s' % g_unit, ELEMENT_TYPE_CONSOLIDATED, id_list)
             g_ids.append(g_id)
             d_units.append_to_consolidate_element(all_units_id, [g_id])
         
