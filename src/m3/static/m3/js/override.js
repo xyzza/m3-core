@@ -273,3 +273,23 @@ Ext.override(Ext.form.Action.Submit, {
 Ext.override(Ext.PagingToolbar, {
     onPagingBlur: Ext.emptyFn
 });
+
+/*
+ * Проблема скроллинга хидеров в компонентах ExtPanel или ExtFieldSet
+ * (Скролятся только хидеры)
+ */
+
+if  (Ext.isIE7) {
+    Ext.Panel.override({
+        setAutoScroll: function() {
+        if (this.rendered && this.autoScroll) {
+            var el = this.body || this.el;
+        if (el) {
+            el.setOverflow('auto');
+            // Following line required to fix autoScroll
+            el.dom.style.position = 'relative';
+            }
+        }
+        }
+    });
+}
