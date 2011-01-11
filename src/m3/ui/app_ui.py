@@ -253,7 +253,10 @@ class DesktopLoader(object):
                             join_list(ex_el.subitems, in_el.subitems)
                             break
   
-                elif in_el in existing_list:
+                elif in_el in existing_list: #ищем элемент просто в списке, для скорости
+                    continue
+                elif hasattr(in_el, 'name') and in_el.name in [getattr(e, 'name', None) for e in existing_list]: 
+                    #ищем элемент по имени, т.к. у нас добавляются копии элементов
                     continue
                 else:
                     existing_list.append(in_el)
@@ -291,14 +294,11 @@ class DesktopLoader(object):
             cls._load_desktop_from_apps()
 
         assign_roles = get_assigned_metaroles_query(user)
-        if not assign_roles:
-            if user.is_superuser:
-                add_el_to_desktop(cls, desktop, SUPER_ADMIN)
-            else:
-                add_el_to_desktop(cls, desktop, GENERIC_USER)
-        else:
-            for role in assign_roles:
-                add_el_to_desktop(cls, desktop, role)
+        if user.is_superuser:
+            add_el_to_desktop(cls, desktop, SUPER_ADMIN)
+        add_el_to_desktop(cls, desktop, GENERIC_USER) #добавим все ярлычки обобщенного пользователя
+        for role in assign_roles:
+            add_el_to_desktop(cls, desktop, role)
 
         sort_desktop(desktop.desktop)
         sort_desktop(desktop.start_menu)
