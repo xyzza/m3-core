@@ -6,33 +6,32 @@
 /**
  * Нужно для правильной работы окна 
  */
-
-var bodyId = Ext.getBody().id;
+Ext.onReady(function(){
 Ext.override(Ext.Window, {
 
-	/*
-	 *  Если установлена модальность и есть родительское окно, то
-	 *  флаг модальности помещается во временную переменную tmpModal, и 
-	 *  this.modal = false;
-	 */
-	tmpModal: false 
-	,manager: new Ext.WindowGroup()
-    ,renderTo: bodyId
-    ,constrain: true
-	/**
-	 * Выводит окно на передний план
-	 * Вызывается в контексте дочернего 
-	 * по отношению к parentWindow окну
-	 */
-	,activateChildWindow: function(){
-		this.toFront();
-	}
-	,listeners: {
+  /*
+   *  Если установлена модальность и есть родительское окно, то
+   *  флаг модальности помещается во временную переменную tmpModal, и 
+   *  this.modal = false;
+   */
+  tmpModal: false 
+  ,manager: new Ext.WindowGroup()
+  ,renderTo: Ext.getBody().id
+  ,constrain: true
+  /**
+   * Выводит окно на передний план
+   * Вызывается в контексте дочернего 
+   * по отношению к parentWindow окну
+   */
+  ,activateChildWindow: function(){
+    this.toFront();
+  }
+  ,listeners: {
 
-		'beforeshow': function (){
-			if ( Ext.get(this.renderTo).getHeight() < this.getHeight() ) {
-				this.setHeight( Ext.get(this.renderTo).getHeight() );
-			}
+    'beforeshow': function (){
+      if ( Ext.get(this.renderTo).getHeight() < this.getHeight() ) {
+        this.setHeight( Ext.get(this.renderTo).getHeight() );
+      }
 			
 			if (this.parentWindow) {
 				
@@ -120,7 +119,7 @@ Ext.override(Ext.Window, {
 		}
 	}
 }); 
-
+})
 /**
  * Обновим TreeGrid чтобы колонки занимали всю ширину дерева
  */
