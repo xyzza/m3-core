@@ -211,6 +211,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
                 this.mon(t, 'click', this.allTriggers[index].handler, this, {preventDefault:true});
                 t.addClassOnOver('x-form-trigger-over');
                 t.addClassOnClick('x-form-trigger-click');
+            } else {
+                this.mun(t, 'click', this.allTriggers[index].handler, this, {preventDefault:true});
             }
         }, this);
 		

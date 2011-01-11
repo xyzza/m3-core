@@ -221,19 +221,21 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		if (this.changesCount !== 0 && !forceClose ) {
 			var scope = this;
 			Ext.Msg.show({
-				title: "Не сохранять изменения",
-				msg: "Внимание! Данные были изменены! \
-								Закрыть без сохранения изменений?",
-				buttons: Ext.Msg.YESNO,
+				title: "Внимание",
+				msg: "Данные были изменены! Cохранить изменения?",
+				buttons: Ext.Msg.YESNOCANCEL,
 				fn: function(buttonId, text, opt){
 					if (buttonId === 'yes') {
-						Ext.m3.EditWindow.superclass.close.call(scope);
+						this.submitForm();
+					} else if (buttonId === 'no') {
+					    Ext.m3.EditWindow.superclass.close.call(scope);					  
 					} else {
-					  scope.fireEvent('closing_canceled');
+					   scope.fireEvent('closing_canceled');  
 					}
 				},
 				animEl: 'elId',
-				icon: Ext.MessageBox.QUESTION
+				icon: Ext.MessageBox.QUESTION,
+				scope: this				
 			});
 
 			return;
