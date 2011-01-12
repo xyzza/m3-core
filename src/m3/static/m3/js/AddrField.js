@@ -217,12 +217,13 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						xtype: 'container'
 						, layout: 'form'
 						, items: this.house 
+            , style: {overflow: 'hidden'} 
 					}];
 					if (params.level > 3) {
 						row_items.push({
 							xtype: 'container'
 							, layout: 'form'
-							, style: {padding: '0px 0px 0px 5px'}
+							, style: {padding: '0px 0px 0px 5px', overflow: 'hidden'}
 							, items: this.flat
 						});
 					}
@@ -230,6 +231,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						anchor: '100%'
 						, layout: 'column'
 						, items: row_items
+            , style: {overflow: 'hidden'} 
 					});
 					items.push(row);
 				}
