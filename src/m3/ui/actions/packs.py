@@ -125,7 +125,8 @@ class DictEditWindowAction(Action):
         
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
-            win.make_read_only()
+            exclude_list = ['close_btn', 'cancel_btn']
+            win.make_read_only(True, exclude_list)
             
         return ExtUIScriptResult(base.get_edit_window(win))
 
