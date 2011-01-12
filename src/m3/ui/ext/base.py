@@ -10,6 +10,7 @@ Created on 01.03.2010
 '''
 
 import datetime
+import decimal
 import collections
 
 from django import template as django_template
@@ -217,7 +218,7 @@ class BaseExtComponent(object):
         elif isinstance(item, bool):
             res = str(item).lower()
             
-        elif isinstance(item, int):    
+        elif isinstance(item, (int, float, decimal.Decimal)):    
             res = item
         
         elif isinstance(item, datetime.date):    
