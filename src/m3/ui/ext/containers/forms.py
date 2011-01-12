@@ -237,8 +237,7 @@ class ExtForm(BaseExtPanel):
             if hasattr(obj, name):
                 l_field = getattr(obj, name)
                 if l_field and os.path.exists(l_field.path) and \
-                    os.path.basename(l_field.file.name) != field.value:
-                    
+                    (os.path.basename(l_field.file.name)).lower() != (field.value).lower():
                     # Сначало нужно удалить thumbnail картинки
                     if isinstance(field, ExtImageUploadField) and \
                         field.thumbnail:
