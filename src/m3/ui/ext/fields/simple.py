@@ -78,12 +78,17 @@ class ExtDateField(BaseExtField):
     @begin_designer
     {title: "Advanced data field"
     ,xtype: "advanceddatefield"
-    }
+    ,attr: [{
+        ext_attr: "startDay"
+        ,py_attr: "start_day"
+    }]}
     @end_designer
     '''
     def __init__(self, *args, **kwargs):
         super(ExtDateField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-date-field.js'
+        self.start_day = 1 # атрибут задает с какого дня начинается неделя в календаре.
+                            # 0-Воскресенье, 1-Понедельник, 2-Вторник и т.д.
         self.hide_today_btn = False
         self.enable_key_events = False # Разрешает перехват нажатий клавиш
         #self.value =  datetime.now()  # -- решили не использовать (c) prefer 
@@ -108,6 +113,7 @@ class ExtDateField(BaseExtField):
         self._put_config_value('format', self.format)
         self._put_config_value('value', value)
         self._put_config_value('enableKeyEvents', self.enable_key_events, self.enable_key_events)
+        self._put_config_value('startDay', self.start_day)
 
     def render_params(self):
         super(ExtDateField, self).render_params()
