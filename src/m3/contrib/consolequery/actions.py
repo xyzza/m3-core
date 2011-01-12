@@ -144,9 +144,9 @@ class CustomQueries_DictPack(BaseDictionaryModelActions):
     url = '/custom_queries'
     model = models.CustomQueries
     title = u'Пользовательские запросы'
-    list_columns = [('code', 'Код', 15),
-                    ('name', 'Наименование'),
-                    ('query', 'SQL запрос')]
+    list_columns = [('code', u'Код', 15),
+                    ('name', u'Наименование'),
+                    ('query', u'SQL запрос')]
 
     filter_fields = ['name']
     
