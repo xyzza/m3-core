@@ -41,7 +41,7 @@ class ExtContainer(BaseExtContainer):
             self._put_config_value('items', self.t_render_items)
 
     def render(self):
-        self.style['overflow'] = 'hidden' #делается для хака IE иначе иногда дочерние элементы ведут себя словно у них задано position: fixed т.е. начинаю неадекватничать   
+        #self.style['overflow'] = 'hidden' #делается для хака IE иначе иногда дочерние элементы ведут себя словно у них задано position: fixed т.е. начинаю неадекватничать   
         assert getattr(self, '_ext_name'), 'Class %s is not define "_ext_name"' % \
             (self.__class__.__name__,)
         
