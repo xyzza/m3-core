@@ -64,6 +64,18 @@ class ActionUrlIsNotDefined(ActionException):
     def __str__(self):
         return 'Attribute "url" is not defined or empty in action "%s"' % self.clazz
     
+class ActionUrlAlreadyExists(ActionException):
+    """ Возникает при попытке зарегистрировать Action с полным URL,
+        который уже зарегистрирован в этом контроллере """
+    def __init__(self, clazz, collision, full_url, *args, **kwargs):
+        super(ActionUrlAlreadyExists, self).__init__(clazz)
+        self.full_url = full_url
+        self.collision = collision
+        
+    def __str__(self):
+        return 'While registering the action "%s" was what full URL "%s" already registered in "%s"' %\
+               (self.clazz, self.full_url, self.collision)
+    
 #===============================================================================
 
     
@@ -411,6 +423,13 @@ class ActionController(object):
             
             clazz.controller = self
             full_path = self._build_full_path(stack, clazz)
+            
+            # URL экшен считается пересекающимся, только если у пересекаемого экшена другой класс 
+            if self._url_patterns.has_key(full_path):
+                _, collision = self._url_patterns[full_path]
+                if collision.__class__ != clazz.__class__:
+                    raise ActionUrlAlreadyExists(clazz, collision, full_path)
+            
             self._url_patterns[full_path] = (stack[:], clazz)
     
     def _invoke(self, request, action, stack):
