@@ -5,6 +5,8 @@ import os
 import sys
 import traceback
 
+from django.conf import settings
+
 from django.http import HttpResponseServerError, HttpRequest
 from django.template.loader import render_to_string
 
@@ -70,9 +72,13 @@ def error(msg, *args, **kwargs):
     log.error(msg)
 
 def debug(msg, *args, **kwargs):
-    log = logging.getLogger('debug_logger')
-    msg = get_session_info(kwargs.get('request', None)) + msg
-    log.debug(msg)
+    '''
+    Выводит информацию в debug-log только в случае включенного режима отладки
+    '''
+    if settings.DEBUG:
+        log = logging.getLogger('debug_logger')
+        msg = get_session_info(kwargs.get('request', None)) + msg
+        log.debug(msg)
 
 def exception(msg='', *args, **kwargs):
     #Не желаемые ключи логирования
