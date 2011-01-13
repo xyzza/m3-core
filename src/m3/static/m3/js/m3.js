@@ -439,14 +439,16 @@ function sendRequest(url, desktop, params){
     var i = 0;
     
     var offset = real.length % 3;
-
-    for (i; i < offset; i++) {
-        retVal += real.charAt(i);
-    }
-    retVal += ' ';
-
+	
+	if (offset != 0) {
+		for (i; i < offset; i++) {
+			retVal += real.charAt(i);
+		}
+		retVal += ' ';
+	}
+	
     for (i; i < real.length; i++) {
-        if (g % 3 == 0) {
+        if (g % 3 == 0 && g != 0) {
             retVal += ' ';
         }
         retVal += real.charAt(i);
