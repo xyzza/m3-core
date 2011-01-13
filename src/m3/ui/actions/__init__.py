@@ -424,11 +424,12 @@ class ActionController(object):
             clazz.controller = self
             full_path = self._build_full_path(stack, clazz)
             
-            # URL экшен считается пересекающимся, только если у пересекаемого экшена другой класс 
-            if self._url_patterns.has_key(full_path):
-                _, collision = self._url_patterns[full_path]
-                if collision.__class__ != clazz.__class__:
-                    raise ActionUrlAlreadyExists(clazz, collision, full_path)
+            # URL экшен считается пересекающимся, только если у пересекаемого экшена другой класс
+            # Оставим для лучших времен 
+#            if self._url_patterns.has_key(full_path):
+#                _, collision = self._url_patterns[full_path]
+#                if collision.__class__ != clazz.__class__:
+#                    raise ActionUrlAlreadyExists(clazz, collision, full_path)
             
             self._url_patterns[full_path] = (stack[:], clazz)
     
