@@ -140,7 +140,7 @@ get_metaroles = metarole_manager.get_registered_metaroles
 class Metaroles_DictPack(BaseDictionaryActions):
     url = '/metarole'
     title = u'Метароли системы'
-    list_columns = [('name', 'Наименование метароли')]
+    list_columns = [('name', u'Наименование метароли')]
     list_readonly = True
                     
     def get_rows(self, offset, limit, filter, user_sort=''):
