@@ -8,7 +8,7 @@ Created on 14.12.2010
 from django.db import connections
 from django.db import transaction 
 from m3.contrib.consolequery.models import CustomQueries
-
+import urllib
 
 @transaction.commit_manually
 def query_result_list(sql):
@@ -29,7 +29,7 @@ def query_result_list(sql):
         return cursor.fetchall(), None, cursor.description
         
 def new_query_save(name, sql):
-    sql  = transform_query(sql)
+    sql  = urllib.unquote_plus(sql)    
     if CustomQueries.objects.filter(name=name):
         old_query = CustomQueries.objects.get(name=name)
         old_query.query = sql
@@ -38,15 +38,6 @@ def new_query_save(name, sql):
         nqs = CustomQueries(name = name, query = sql)
         nqs.save()
         return None
-  
-def transform_query(sql):
-    dict_sym = {1:'\n',2:' ',3:'=',4:'>',5:'<'}
-    dict_lit = {1:'%0A',2:'%20',3:'%3D',4:'%3E',5:'%3C'} 
-    i = 1
-    for l in dict_sym:
-        sql = sql.replace(dict_lit[i],dict_sym[i])
-        i = i + 1
-    return sql
 
 def load_query(query_id,arg):
     '''
