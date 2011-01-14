@@ -12,7 +12,6 @@ from m3.helpers import logger
 from m3.contrib.consolequery import helpers as admin_helpers
 from m3.contrib.consolequery import models
 from m3.ui.actions.packs import BaseDictionaryModelActions
-from m3.contrib.consolequery.helpers import transform_query
 
 class QueryConsoleActionsPack(ActionPack):
     '''
