@@ -244,6 +244,9 @@ class ExtGrid(BaseExtPanel):
     def add_bool_column(self, **kwargs):
         self.columns.append(ExtGridBooleanColumn(**kwargs))
 
+    def add_check_column(self, **kwargs):
+        self.columns.append(ExtGridCheckColumn(**kwargs))
+
     def add_number_column(self, **kwargs):
         self.columns.append(ExtGridNumberColumn(**kwargs))
 
@@ -496,6 +499,7 @@ class BaseExtGridColumn(ExtUIComponent):
         self.hidden = False
         self.read_only = False
         self.colspan = None
+        self.fixed = False
         # дополнительные атрибуты колонки
         self.extra = {}
 
@@ -535,6 +539,7 @@ class BaseExtGridColumn(ExtUIComponent):
         self._put_config_value('hidden', self.hidden)
         self._put_config_value('readOnly', self.read_only)
         self._put_config_value('colspan', self.colspan)
+        self._put_config_value('fixed', self.fixed)
         
         for i, render in enumerate(self._column_renderer):
             if BaseExtGridColumn.THOUSAND_CURRENCY_RENDERER == render:
@@ -602,6 +607,13 @@ class ExtGridBooleanColumn(BaseExtGridColumn):
         self.text_false = None
         self.text_true = None
         self.text_undefined = None
+        self.init_component(*args, **kwargs)
+
+#===============================================================================
+class ExtGridCheckColumn(BaseExtGridColumn):
+    def __init__(self, *args, **kwargs):
+        super(ExtGridCheckColumn, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-check-column.js'
         self.init_component(*args, **kwargs)
 
 #===============================================================================
