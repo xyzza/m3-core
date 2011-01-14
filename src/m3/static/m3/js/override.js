@@ -7,118 +7,121 @@
  * Нужно для правильной работы окна 
  */
 Ext.onReady(function(){
-Ext.override(Ext.Window, {
-
-  /*
-   *  Если установлена модальность и есть родительское окно, то
-   *  флаг модальности помещается во временную переменную tmpModal, и 
-   *  this.modal = false;
-   */
-  tmpModal: false 
-  ,manager: new Ext.WindowGroup()
-  ,renderTo: Ext.getBody().id
-  ,constrain: true
-  /**
-   * Выводит окно на передний план
-   * Вызывается в контексте дочернего 
-   * по отношению к parentWindow окну
-   */
-  ,activateChildWindow: function(){
-    this.toFront();
-  }
-  ,listeners: {
-
-    'beforeshow': function (){
-      if ( Ext.get(this.renderTo).getHeight() < this.getHeight() ) {
-        this.setHeight( Ext.get(this.renderTo).getHeight() );
-      }
-			
-			if (this.parentWindow) {
+	Ext.override(Ext.Window, {
+	
+	  /*
+	   *  Если установлена модальность и есть родительское окно, то
+	   *  флаг модальности помещается во временную переменную tmpModal, и 
+	   *  this.modal = false;
+	   */
+	  tmpModal: false 
+	  ,manager: new Ext.WindowGroup()
+	  // 2011.01.14 kirov
+	  // убрал, т.к. совместно с desktop.js это представляет собой гремучую смесь
+	  // кому нужно - пусть прописывает Ext.getBody() в своем "десктопе" на onReady или когда хочет
+	  //,renderTo: Ext.getBody().id
+	  ,constrain: true
+	  /**
+	   * Выводит окно на передний план
+	   * Вызывается в контексте дочернего 
+	   * по отношению к parentWindow окну
+	   */
+	  ,activateChildWindow: function(){
+	    this.toFront();
+	  }
+	  ,listeners: {
+	
+	    'beforeshow': function (){
+	      if ( Ext.get(this.renderTo).getHeight() < this.getHeight() ) {
+	        this.setHeight( Ext.get(this.renderTo).getHeight() );
+	      }
 				
-				this.parentWindow.setDisabled(true);
-				
-				/*
-				 * В Extjs 3.3 Добавили общую проверку в функцию mask, см:
-				 *  if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
-                    	me.addClass(XMASKEDRELATIVE);
-               		 }
-				 * 
-				 * было до версии 3.3: 
-				 *  if(!/^body/i.test(dom.tagName) && me.getStyle('position') == 'static'){
-	            		me.addClass(XMASKEDRELATIVE);
-	        		}
-				 * Теперь же расположение замаскированых окон должно быть относительным
-				 * (relative) друг друга
-				 * 
-				 * Такое поведение нам не подходит и другого решения найдено не было.
-				 * Кроме как удалять данный класс
-				 * */
-				this.parentWindow.el.removeClass('x-masked-relative');
-
-				this.parentWindow.on('activate', this.activateChildWindow, this);
-				
-				this.modal = false;
-				this.tmpModal = true;
-                
-				if (window.AppDesktop) {
-					var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
-					if (el) {
-						el.mask();
+				if (this.parentWindow) {
+					
+					this.parentWindow.setDisabled(true);
+					
+					/*
+					 * В Extjs 3.3 Добавили общую проверку в функцию mask, см:
+					 *  if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
+	                    	me.addClass(XMASKEDRELATIVE);
+	               		 }
+					 * 
+					 * было до версии 3.3: 
+					 *  if(!/^body/i.test(dom.tagName) && me.getStyle('position') == 'static'){
+		            		me.addClass(XMASKEDRELATIVE);
+		        		}
+					 * Теперь же расположение замаскированых окон должно быть относительным
+					 * (relative) друг друга
+					 * 
+					 * Такое поведение нам не подходит и другого решения найдено не было.
+					 * Кроме как удалять данный класс
+					 * */
+					this.parentWindow.el.removeClass('x-masked-relative');
+	
+					this.parentWindow.on('activate', this.activateChildWindow, this);
+					
+					this.modal = false;
+					this.tmpModal = true;
+	                
+					if (window.AppDesktop) {
+						var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
+						if (el) {
+							el.mask();
+						}
+					}
+				}
+				if (this.modal){
+					var taskbar = Ext.get('ux-taskbar');
+					if (taskbar) {
+	 					taskbar.mask();
+					}
+						var toptoolbar = Ext.get('ux-toptoolbar');
+					if (toptoolbar) {
+		 				toptoolbar.mask();
 					}
 				}
 			}
-			if (this.modal){
-				var taskbar = Ext.get('ux-taskbar');
-				if (taskbar) {
- 					taskbar.mask();
-				}
-					var toptoolbar = Ext.get('ux-toptoolbar');
-				if (toptoolbar) {
-	 				toptoolbar.mask();
-				}
-			}
-		}
-		,'beforeclose': function (){
-			if (this.tmpModal && this.parentWindow) {			
-				this.parentWindow.un('activate', this.activateChildWindow, this);
-				this.parentWindow.setDisabled(false);
-				this.parentWindow.toFront();
-
-				if (window.AppDesktop) {
-					var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
-					if (el) {
-						el.unmask();
+			,'beforeclose': function (){
+				if (this.tmpModal && this.parentWindow) {			
+					this.parentWindow.un('activate', this.activateChildWindow, this);
+					this.parentWindow.setDisabled(false);
+					this.parentWindow.toFront();
+	
+					if (window.AppDesktop) {
+						var el = AppDesktop.getDesktop().taskbar.tbPanel.getTabWin(this.parentWindow);
+						if (el) {
+							el.unmask();
+						}
 					}
 				}
-			}
-
-			if (this.modal){
- 				var taskbar = Ext.get('ux-taskbar');
-				if (taskbar) {
- 					taskbar.unmask();
-				}
-					var toptoolbar = Ext.get('ux-toptoolbar');
-				if (toptoolbar) {
-	 				toptoolbar.unmask();
-				}
-			}
-		}
-		,'hide': function (){
-			if (this.modal){
-				if (!this.parentWindow) {
+	
+				if (this.modal){
 	 				var taskbar = Ext.get('ux-taskbar');
 					if (taskbar) {
 	 					taskbar.unmask();
 					}
- 					var toptoolbar = Ext.get('ux-toptoolbar');
+						var toptoolbar = Ext.get('ux-toptoolbar');
 					if (toptoolbar) {
 		 				toptoolbar.unmask();
 					}
 				}
 			}
+			,'hide': function (){
+				if (this.modal){
+					if (!this.parentWindow) {
+		 				var taskbar = Ext.get('ux-taskbar');
+						if (taskbar) {
+		 					taskbar.unmask();
+						}
+	 					var toptoolbar = Ext.get('ux-toptoolbar');
+						if (toptoolbar) {
+			 				toptoolbar.unmask();
+						}
+					}
+				}
+			}
 		}
-	}
-}); 
+	}); 
 })
 /**
  * Обновим TreeGrid чтобы колонки занимали всю ширину дерева
