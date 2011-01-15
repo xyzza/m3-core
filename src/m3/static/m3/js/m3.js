@@ -56,7 +56,19 @@ function smart_eval(text){
 		}
 	}
 	else{
-		var eval_result = eval(text);
+	    try{ 
+		    var eval_result = eval(text);
+		} catch (e) {
+		     Ext.Msg.show({
+                title:'Внимание'
+                ,msg:'Произошла непредвиденная ошибка!'
+                ,buttons: Ext.Msg.OK
+                ,fn: Ext.emptyFn
+                ,animEl: 'elId'
+                ,icon: Ext.MessageBox.WARNING
+            });
+		    throw e;
+		}
 		if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
 			AppDesktop.getDesktop().createWindow(eval_result);
 		}
@@ -401,9 +413,12 @@ function sendRequest(url, desktop, params){
     	params: params,
         url: url,
         method: 'POST',
-        success: function(response, options){            
-            smart_eval(response.responseText);
-            mask.hide();
+        success: function(response, options){
+            try{             
+                smart_eval(response.responseText);
+            } finally { 
+                mask.hide();
+            }
         }, 
         failure: function(){            
             uiAjaxFailMessage.apply(this, arguments);
