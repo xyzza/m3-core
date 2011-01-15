@@ -121,9 +121,12 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
            ,success: function(form, action){
               scope.fireEvent('closed_ok', action.response.responseText);
               scope.close(true);
-              smart_eval(action.response.responseText);
-              mask.hide();
-              scope.disableToolbars(false);
+              try { 
+                  smart_eval(action.response.responseText);
+              } finally { 
+                  mask.hide();
+                  scope.disableToolbars(false);
+              }
            }
            ,failure: function (form, action){
               uiAjaxFailMessage.apply(scope, arguments);

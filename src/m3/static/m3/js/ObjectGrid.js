@@ -82,9 +82,12 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 			params: this.actionContextJson || {},
 			success: function(res, opt){
 				if (scope.fireEvent('afternewrequest', scope, res, opt)) {
-				    var child_win = scope.childWindowOpenHandler(res, opt);
-				    mask.hide();
-				    scope.disableToolbars(false);
+				    try { 
+				        var child_win = scope.childWindowOpenHandler(res, opt);
+				    } finally { 
+    				    mask.hide();
+    				    scope.disableToolbars(false);
+				    }
 					return child_win;
 				}
 				mask.hide();
@@ -149,9 +152,12 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 				params: Ext.applyIf(baseConf, this.actionContextJson || {}),
 				success: function(res, opt){
 					if (scope.fireEvent('aftereditrequest', scope, res, opt)) {
-						var child_win = scope.childWindowOpenHandler(res, opt);
-						mask.hide();
-						scope.disableToolbars(false);
+					    try { 
+						    var child_win = scope.childWindowOpenHandler(res, opt);
+						} finally { 
+    						mask.hide();
+    						scope.disableToolbars(false);
+						}
 						return child_win;
 					}
 					mask.hide();
@@ -222,9 +228,12 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		                   params: Ext.applyIf(baseConf, scope.actionContextJson || {}),
 		                   success: function(res, opt){
 		                	   if (scope.fireEvent('afterdeleterequest', scope, res, opt)) {
-		                		   var child_win =  scope.deleteOkHandler(res, opt);
-		                		   mask.hide();
-		                		   scope.disableToolbars(false);
+		                	       try { 
+		                		       var child_win =  scope.deleteOkHandler(res, opt);
+		                		   } finally { 
+    		                		   mask.hide();
+    		                		   scope.disableToolbars(false);
+    		                	   }
 		                		   return child_win;
 		                	   }
 		                	   mask.hide();
