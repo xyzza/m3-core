@@ -42,7 +42,6 @@ class RuntimeCacheMetaclass(type):
         klass = super(RuntimeCacheMetaclass, cls).__new__(cls, name, bases, attrs)
         
         klass._shared_state = dict(
-            loaded = {}, # словарь разрезов, по которым данные уже прогружены в систему
             handlers = [], # список хендлеров, которые используются для
             handler_run_rules = {},
             data = {}, # собственно те данные, которые лежат в кеше
@@ -104,22 +103,21 @@ class RuntimeCache(object):
         '''
         dims = self._normalize_dimensions(dimensions)
         
-        if self.loaded.has_key(dims):
+        if self.data.has_key(dims):
             return False
         
         try:
             self.write_lock.acquire()
-            if self.loaded.has_key(dims):
+            if self.data.has_key(dims):
                 return False
             for handler in self.handlers:
                 prepared_data = handler(self, dims)
                 if isinstance(prepared_data, dict):
                     for key,value in prepared_data.iteritems():
                         self.set(key, value)
-            self.loaded[dims] = True
         finally:
             self.write_lock.release()
-            
+
         return True
     
     def set(self, dimensions, value):
@@ -161,16 +159,14 @@ class RuntimeCache(object):
         
         try:
             self.write_lock.acquire()
-            self.loaded.pop(dims, None)
             self.data.pop(dims, None)
-            self.stat.full_drops = 1
+            self.stat.full_drops += 1
         finally:
             self.write_lock.release()
         
     def drop_all(self):
         try:
             self.write_lock.acquire()
-            self.loaded = {}
             self.data = {}
             self.stat.full_drops += 1
         finally:
