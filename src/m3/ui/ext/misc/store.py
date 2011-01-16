@@ -41,7 +41,7 @@ class ExtDataStore(BaseExtStore):
             res_tmp = []
             for subitem in item:
                 if isinstance(subitem, bool):
-                    res_tmp.append( escape(subitem).lover() )
+                    res_tmp.append( escape(subitem).lower() )
                 elif isinstance(subitem, int):
                     res_tmp.append( escape(subitem) )
                 else:
