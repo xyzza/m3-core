@@ -47,7 +47,7 @@ class ExtDataStore(BaseExtStore):
                 else:
                     res_tmp.append('"%s"' % escape(subitem) )
                     
-            res_tmp.append( '[%s]' % ','.join(res_tmp) )
+            res.append( '[%s]' % ','.join(res_tmp) )
         return ','.join(res)
             
     
