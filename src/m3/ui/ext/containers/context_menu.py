@@ -91,7 +91,7 @@ class ExtContextMenuItem(ExtUIComponent):
         self.init_component(*args, **kwargs)
         
     def render(self, container=None):
-        res = ['text:"%s"' % self.text]
+        res = ['text:"%s"' % self.text.replace('"', "&quot;")]
         if self.icon_cls:
             res.append('iconCls: "%s"' % self.icon_cls)
         if self.disabled:
