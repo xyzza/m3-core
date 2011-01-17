@@ -443,10 +443,14 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	,onEditBtn: function(){
 		assert( this.actionEditUrl, 'actionEditUrl is undefined' );
 		
+		// id выбранного элемента для редактирования
+		value_id = this.getValue();
+		assert( value_id, 'Value not selected but edit window called' );
+		
 		Ext.Ajax.request({
 			url: this.actionEditUrl
 			,method: 'POST'
-			,params: this.actionContextJson
+			,params: Ext.applyIf({id: value_id}, this.actionContextJson)
 			,success: function(response, opts){
 			    smart_eval(response.responseText);
 			}

@@ -39,10 +39,11 @@ class ExtDictSelectField(BaseExtTriggerField):
         super(ExtDictSelectField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-dict-select-field.js'
         
-        self.hide_trigger = True 
-        self.hide_clear_trigger = False
-        self.hide_edit_trigger = False
-        self.hide_dict_select_trigger = False
+        # Эти атрибуты отвечают за отображение кнопок действий в строке выбора:
+        self.hide_trigger = True              # Выпадающий список
+        self.hide_clear_trigger = False       # Очистка поля
+        self.hide_edit_trigger = False        # Редактирование выбранного элемента
+        self.hide_dict_select_trigger = False # Выбора из справочника
         
         self.min_chars = 2 # количество знаков, с которых начинаются запросы на autocomplete
         
