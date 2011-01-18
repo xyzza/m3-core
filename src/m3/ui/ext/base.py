@@ -213,7 +213,7 @@ class BaseExtComponent(object):
  
             # если в строке уже есть апостроф, то будет очень больно. 
             # поэтому replace
-            res = "'%s'" % self.__check_unicode( item ).replace("'", "\\'")  
+            res = "'%s'" % self.__check_unicode( item ).replace("'", "\\'").replace('\n', '\\n')  
             
         elif isinstance(item, bool):
             res = str(item).lower()
