@@ -77,4 +77,3 @@ class AssignedRole(models.Model):
     
     class Meta:
         db_table = 'm3_users_assignedrole'
-         
