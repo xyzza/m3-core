@@ -8,6 +8,7 @@ from m3.helpers import normalize
 
 from m3.ui.ext.base import BaseExtComponent
 from base_store import BaseExtStore
+from django.utils.html import escape
 
 class ExtDataStore(BaseExtStore):
     def __init__(self, data = None, *args, **kwargs):
@@ -45,7 +46,7 @@ class ExtDataStore(BaseExtStore):
                 elif isinstance(subitem, int):
                     res_tmp.append( str(subitem) )
                 else:
-                    res_tmp.append('"%s"' % normalize(subitem) )
+                    res_tmp.append('"%s"' % escape(subitem) )
                     
             res.append( '[%s]' % ','.join(res_tmp) )
         return ','.join(res)
