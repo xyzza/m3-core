@@ -28,11 +28,15 @@ class BaseModelBassedPaloDimension(object):
 
     @classmethod
     def create_store_model(cls):
+        '''
+        создание связанной модели для хранние идишники пало и информации о изменнии элементов целевой модели
+        созданеи ведеться путем наследования от BaseStoreRelatedModel и добавление instance = ForeignKey
+        '''
         fk = models.ForeignKey(cls.model, null=True)
         model_name = cls.__name__ + '_store' 
-        attrs = dict(__module__=cls.__module__)
+        attrs = dict(__module__=cls.__module__,\
+                     instance=fk)
         cls.store_model = type(model_name, (BaseStoreRelatedModel,), attrs)
-        cls.store_model._meta.fields.append(fk)
 #        fk.contribute_to_class(cls.store_model, 'instance')
         
 
@@ -77,9 +81,9 @@ class BaseModelBassedPaloDimension(object):
 class BaseStoreRelatedModel(models.Model):
     '''
     модель для хранения связанных атрибутов для элементов выбранной модели
-    модель генерируеться автоматически
+    наследники модели генерируеться автоматически
     '''
-    #instance = models.ForeignKey(Model) #этот атрибут сгенерируеться автоматически
+#    instance = models.ForeignKey('self') #этот атрибут сгенерируеться автоматически
     palo_id = models.IntegerField(null=True)
     processed = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
