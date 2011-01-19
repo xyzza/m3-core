@@ -69,7 +69,9 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 
 }
 .m3-form-invalid {
-  background: none repeat scroll 0 0 #ffffaa !important;
+    border-color: #B5B8C8 !important;
+    background-color: #FFFDE7 !important;
+    background-image: url(../images/required-field.png) !important;
 }
 
 .x-grid-with-col-lines .x-grid3-row td.x-grid3-cell {
@@ -115,5 +117,7 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 }
 
 .m3-grey-field{
-    background: none repeat scroll 0 0 #f3f3f3 !important;
+    border-color: #B5B8C8 !important;
+    background-color: #ECECEC !important;
+    background-image: url(../images/read-only-field.png) !important;
 }
