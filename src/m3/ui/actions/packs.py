@@ -379,14 +379,15 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         '''
         sort_order = [user_sort] if user_sort else self.list_sort_order
         filter_fields = self._default_filter()
-        query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
+        query = self.model.objects.all()
+        query = utils.apply_sort_order(query, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, filter_fields)
         if hasattr(self, 'modify_rows_query') and callable(self.modify_rows_query):
             query = self.modify_rows_query(query, request, context)
         total = query.count()
         if limit > 0:
             query = query[offset: offset + limit]
-        result = {'rows': list(query.all()), 'total': total}
+        result = {'rows': list(query), 'total': total}
         return result
     
     def get_rows(self, offset, limit, filter, user_sort=''):
