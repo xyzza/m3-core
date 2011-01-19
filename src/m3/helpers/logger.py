@@ -144,10 +144,7 @@ def send_mail_log(msg, level=''):
 
     if hasattr(settings, 'EMAIL_ERRORLOG_ADMIN') and getattr(settings, 'EMAIL_ERRORLOG_ADMIN') \
         and  hasattr(settings, 'EMAIL_ADDRESS_FROM') and getattr(settings, 'EMAIL_ADDRESS_FROM'):
-        
-        print getattr(settings, 'EMAIL_ERRORLOG_ADMIN')
-        print getattr(settings, 'EMAIL_ADDRESS_FROM')
-        
+
         emails_admin = getattr(settings, 'EMAIL_ERRORLOG_ADMIN')
         if isinstance(emails_admin, list):
             email_list = [emails_admin,]            
