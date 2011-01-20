@@ -9,11 +9,11 @@ from django.conf import urls
 from m3.ui.actions import ActionController
 from m3.contrib.m3_checkie import actions
 
-m3_checkie_controller = ActionController('/m3/check-browser')
+m3_checkie_controller = ActionController('/unsupported-browser')
 
 def register_urlpatterns():
     return urls.defaults.patterns('',
-        (r'^m3/check-browser', 'm3.contrib.m3_checkie.app_meta.controller'),
+        (r'^unsupported-browser', 'm3.contrib.m3_checkie.app_meta.controller'),
     )
     
 def controller(request):
@@ -21,5 +21,5 @@ def controller(request):
 
 def register_actions():
     m3_checkie_controller.packs.extend([
-        actions.CheckBrowserActionsPack
+        actions.CheckBrowserActionsPack,
     ])
