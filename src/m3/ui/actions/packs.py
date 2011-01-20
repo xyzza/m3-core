@@ -8,6 +8,7 @@ from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.actions import utils
 from m3.ui.ext.containers import ExtPagingBar
+from m3.ui.actions.results import ActionResult
 from m3.db import BaseObjectModel
 from m3.core.exceptions import RelatedError
 
@@ -189,6 +190,13 @@ class DictSaveAction(Action):
             obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.add_window)
         else:
             obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        
+        # Проверка корректности полей сохраняемого объекта    
+        result = self.parent.validate_row(obj, request)
+        if result:
+            assert isinstance(result, ActionResult)
+            return result
+        
         result = self.parent.save_row(obj)
         if isinstance(result, OperationResult) and result.success == True:
             # узкое место. после того, как мы переделаем работу экшенов,
@@ -223,14 +231,19 @@ class BaseDictionaryActions(ActionPack):
     title = ''
     # Список колонок состоящий из кортежей (имя json поля, имя колонки в окне)
     list_columns = []
-    # Окно для редактирования элемента справочника 
-    edit_window = add_window = None
-     
-    list_form   = ExtDictionaryWindow
-    select_form = ExtDictionaryWindow
+    
+    # Окно для редактирования элемента справочника:
+    add_window = None  # Нового
+    edit_window = None # Уже существующего
+    
+    # Класс отвечающие за отображение форм:
+    list_form   = ExtDictionaryWindow # Форма списка 
+    select_form = ExtDictionaryWindow # Форма выбора
+    
     # Настройки секретности. Если стоит истина, то в результат добавляется флаг секретности
     secret_json = False
     secret_form = False
+    
     # Ширина и высота окна
     width, height = 510, 400     
     
@@ -310,6 +323,14 @@ class BaseDictionaryActions(ActionPack):
         '''
         raise NotImplementedError()
     
+    def validate_row(self, obj, request):
+        '''
+        Метод отвечает за проверку корректности полей сохраняемого объекта. Если все в порядке,
+        то метод не возвращает ничего, иначе результат будет возвращен экшену.
+        Т.е. вернуть можно любой из поддерживаемых в results.py объектов. 
+        '''
+        pass
+    
     def save_row(self, obj):
         '''
         Метод, который выполняет сохранение записи справочника. На момент запуска метода 
@@ -358,14 +379,15 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         '''
         sort_order = [user_sort] if user_sort else self.list_sort_order
         filter_fields = self._default_filter()
-        query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
+        query = self.model.objects.all()
+        query = utils.apply_sort_order(query, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, filter_fields)
         if hasattr(self, 'modify_rows_query') and callable(self.modify_rows_query):
             query = self.modify_rows_query(query, request, context)
         total = query.count()
         if limit > 0:
             query = query[offset: offset + limit]
-        result = {'rows': list(query.all()), 'total': total}
+        result = {'rows': list(query), 'total': total}
         return result
     
     def get_rows(self, offset, limit, filter, user_sort=''):

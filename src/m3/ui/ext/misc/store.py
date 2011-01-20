@@ -4,10 +4,13 @@ Created on 3.3.2010
 
 @author: prefer
 '''
-from django.utils.html import escape
+from decimal import Decimal
+
+from m3.helpers import normalize
 
 from m3.ui.ext.base import BaseExtComponent
 from base_store import BaseExtStore
+
 
 class ExtDataStore(BaseExtStore):
     def __init__(self, data = None, *args, **kwargs):
@@ -41,11 +44,12 @@ class ExtDataStore(BaseExtStore):
             res_tmp = []
             for subitem in item:
                 if isinstance(subitem, bool):
-                    res_tmp.append( escape(subitem).lower() )
-                elif isinstance(subitem, int):
-                    res_tmp.append( escape(subitem) )
+                    res_tmp.append( str(subitem).lower() )
+                elif isinstance(subitem, int) or isinstance(subitem, Decimal) \
+                    or isinstance(subitem, float):
+                    res_tmp.append( str(subitem) )
                 else:
-                    res_tmp.append('"%s"' % escape(subitem) )
+                    res_tmp.append('"%s"' % normalize(subitem) )
                     
             res.append( '[%s]' % ','.join(res_tmp) )
         return ','.join(res)

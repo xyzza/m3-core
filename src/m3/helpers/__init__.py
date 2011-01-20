@@ -10,8 +10,10 @@ def normalize(str):
     '''
     Конвертирует строку в вид, понятный javascript'у
     '''
-    #assert issubclass(str, basestring) -- Бывают еще файлы
-    return str.replace('\r','\\r').replace('\n','\\n')
+    return str.replace('\r','\\r').\
+        replace('\n','\\n').\
+        replace('\"','\\"').\
+        replace("\'","\\'")
 
 
 def generate_client_id():
@@ -31,6 +33,7 @@ def get_img_size(src_size, dest_size):
     if height >= width:                     
         return (int(float(width)/height*src_height), src_height)                             
     return (src_width,  int(float(height)/width*src_width))
+
 
 def generate_id():
     '''

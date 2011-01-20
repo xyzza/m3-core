@@ -125,6 +125,7 @@ class BaseExtPanel(BaseExtContainer):
         self.top_bar = None
         self.bottom_bar = None
         self.footer_bar = None
+        self.border = True
 
     def t_render_top_bar(self):
         return self.top_bar.render()
@@ -138,6 +139,7 @@ class BaseExtPanel(BaseExtContainer):
     def render_base_config(self):
         super(BaseExtPanel, self).render_base_config()
         self._put_config_value('title', self.title)
+        self._put_config_value('border', self.border)
         if not self.title:
             self._put_config_value('header', self.header)
             

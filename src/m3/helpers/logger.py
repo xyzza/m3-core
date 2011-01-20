@@ -9,6 +9,8 @@ from django.conf import settings
 
 from django.http import HttpResponseServerError, HttpRequest
 from django.template.loader import render_to_string
+from django.core.mail import get_connection
+from django.core.mail.message import EmailMessage
 
 __all__ = ['init_logging', 'catch_error_500', 'info', 'error', 'debug', 'warning']
 
@@ -70,6 +72,9 @@ def error(msg, *args, **kwargs):
     log = logging.getLogger('error_logger')
     msg = get_session_info(kwargs.get('request', None)) + msg
     log.error(msg)
+    
+    # Отправка на почту
+    send_mail_log(msg, 'ERROR')
 
 def debug(msg, *args, **kwargs):
     '''
@@ -78,7 +83,7 @@ def debug(msg, *args, **kwargs):
     if settings.DEBUG:
         log = logging.getLogger('debug_logger')
         msg = get_session_info(kwargs.get('request', None)) + msg
-        log.debug(msg)
+        log.debug(msg)    
 
 def exception(msg='', *args, **kwargs):
     #Не желаемые ключи логирования
@@ -106,7 +111,11 @@ def exception(msg='', *args, **kwargs):
 
         exceptionVariables_str = ''.join(res)
         tb = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
-        log.error('\n'+msg+u''.join(tb)+exceptionVariables_str)
+        log.error('\n' + msg + u''.join(tb) + exceptionVariables_str)      
+        
+        # Отправка на почту
+        send_mail_log('\n' + msg + u''.join(tb) + exceptionVariables_str, 'EXC')
+      
     except:
         log.error('\n'+msg+u'Некоррертная работа логера!')
         pass
@@ -115,6 +124,8 @@ def warning(msg, *args, **kwargs):
     log = logging.getLogger('warning_logger')
     msg = get_session_info(kwargs.get('request', None)) + msg
     log.warning(msg)
+    
+    send_mail_log(msg, 'WARN')
 
 def catch_error_500(request, *args, **kwargs):
     '''
@@ -124,3 +135,30 @@ def catch_error_500(request, *args, **kwargs):
     exception(get_session_info(request), exc_info = True)
     return HttpResponseServerError(render_to_string("500.html"))
     
+    
+#===============================================================================
+def send_mail_log(msg, level=''):
+    '''
+    Дополнительное письмо с логом на почту администратора
+    '''
+
+    if hasattr(settings, 'EMAIL_ERRORLOG_ADMIN') and getattr(settings, 'EMAIL_ERRORLOG_ADMIN') \
+        and  hasattr(settings, 'EMAIL_ADDRESS_FROM') and getattr(settings, 'EMAIL_ADDRESS_FROM'):
+
+        emails_admin = getattr(settings, 'EMAIL_ERRORLOG_ADMIN')
+        if isinstance(emails_admin, list):
+            email_list = [emails_admin,]            
+        elif isinstance(emails_admin, basestring):
+            email_list = emails_admin.split(',')        
+            
+        email_from = getattr(settings, 'EMAIL_ADDRESS_FROM')
+        
+        conn = get_connection(auth_user = settings.EMAIL_HOST_USER,
+                      auth_password= settings.EMAIL_HOST_PASSWORD)
+        
+        d = {'body': msg, 'from_email': email_from, 'to': email_list,
+             'subject': 'Логер - %s' % level}
+        message = EmailMessage(**d)
+        message.content_subtype = "html"
+        conn.send_messages([message,])
+        

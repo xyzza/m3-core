@@ -284,7 +284,7 @@ Ext.override(Ext.PagingToolbar, {
  * (Скролятся только хидеры)
  */
 
-if  (Ext.isIE7) {
+if  (Ext.isIE7 || Ext.isIE6) {
     Ext.Panel.override({
         setAutoScroll: function() {
         if (this.rendered && this.autoScroll) {

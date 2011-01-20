@@ -12349,6 +12349,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			, get_addr_url: params.get_addr_url
 			, level: params.level
 			, addr_visible: params.addr_visible
+			, style: {overflow: 'hidden'}
 		}, baseConfig);
 		
 		Ext.Container.superclass.constructor.call(this, config);
@@ -13313,7 +13314,7 @@ Ext.override(Ext.PagingToolbar, {
  * (Скролятся только хидеры)
  */
 
-if  (Ext.isIE7) {
+if  (Ext.isIE7 || Ext.isIE6) {
     Ext.Panel.override({
         setAutoScroll: function() {
         if (this.rendered && this.autoScroll) {

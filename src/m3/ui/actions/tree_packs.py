@@ -15,6 +15,7 @@ from m3.ui.actions.packs import ListDeleteRowAction
 from m3.ui.ext.containers import ExtPagingBar
 from m3.db import BaseObjectModel
 from m3.core.exceptions import RelatedError
+from m3.ui.actions.results import ActionResult
 
 
 class TreeGetNodesAction(Action):
@@ -69,6 +70,11 @@ class TreeSaveNodeAction(Action):
         obj = self.parent.get_node(id)
         # Биндим форму к объекту
         win.form.to_object(obj)
+        result = self.parent.validate_node(obj, request)
+        if result:
+            assert isinstance(result, ActionResult)
+            return result
+        
         return self.parent.save_node(obj)
 
 class TreeDeleteNodeAction(Action):
@@ -105,6 +111,10 @@ class ListSaveRowAction(Action):
     url = '/row$'
     def run(self, request, context):
         obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        result = self.parent.validate_row(obj, request)
+        if result:
+            assert isinstance(result, ActionResult)
+            return result
         return self.parent.save_row(obj)
 
 class ListLastUsedAction(Action):
@@ -436,6 +446,9 @@ class BaseTreeDictionaryActions(ActionPack):
     def get_node(self, id):
         raise NotImplementedError()
     
+    def validate_node(self, obj, request):
+        pass
+    
     def save_node(self, obj, parent_id):
         raise NotImplementedError()
     
@@ -479,6 +492,9 @@ class BaseTreeDictionaryActions(ActionPack):
     
     def get_row(self, id):
         raise NotImplementedError()
+    
+    def validate_row(self, obj, request):
+        pass
     
     def save_row(self, obj, parent_id):
         raise NotImplementedError()
