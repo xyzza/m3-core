@@ -119,7 +119,7 @@ def exception(msg='', recursion=0,  *args, **kwargs):
         log.error(err_message)      
         
         # Отправка на почту
-        send_mail_log(err_message)
+        send_mail_log(err_message, e_type.__name__)
       
     except:        
         if recursion<10:
@@ -145,7 +145,7 @@ def catch_error_500(request, *args, **kwargs):
     
     
 #===============================================================================
-def send_mail_log(msg, level=''):
+def send_mail_log(msg, err_name='', level=''):
     '''
     Дополнительное письмо с логом на почту администратора
     '''
@@ -168,7 +168,7 @@ def send_mail_log(msg, level=''):
         uname = os.uname()
         msg = linebreaks(msg)
         d = {'body': msg, 'from_email': email_from, 'to': email_list,
-             'subject': 'Логер - %s - %s' % (uname[1], level,)}
+             'subject': 'Логер - %s - %s %s' % (uname[1], level, err_name)}
         message = EmailMessage(**d)
         message.content_subtype = "html"
         conn.send_messages([message,])
