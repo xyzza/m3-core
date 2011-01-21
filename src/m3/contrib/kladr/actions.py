@@ -32,27 +32,30 @@ class KLADRRowsAction(Action):
     
     def run(self, request, context):
         filter = request.REQUEST.get('filter')
-        fields = ['name','code','socr'];
-        words = filter.strip().split(' ')
-        # первым этапом найдем территории подходящие под фильтр в имени
-        condition = None
-        for word in words:
-            field_condition = None
-            for field_name in fields:
-                field = Q(**{field_name + '__icontains': word})
-                field_condition = field_condition | field if field_condition else field
-            condition = condition & field_condition if condition else field_condition
-        places = KladrGeo.objects.filter(condition).select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').order_by('level','name')[0:50]
-        # если не нашли, то будем искать с учетом родителей
-        if len(places) == 0:
+        if filter: # бывают случаи, когда фильтр приходит пустой
+            fields = ['name','code','socr'];
+            words = filter.strip().split(' ')
+            # первым этапом найдем территории подходящие под фильтр в имени
             condition = None
             for word in words:
                 field_condition = None
                 for field_name in fields:
-                    field = Q(**{field_name + '__icontains': word}) | Q(**{'parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__parent__' + field_name + '__icontains': word})
+                    field = Q(**{field_name + '__icontains': word})
                     field_condition = field_condition | field if field_condition else field
                 condition = condition & field_condition if condition else field_condition
             places = KladrGeo.objects.filter(condition).select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').order_by('level','name')[0:50]
+            # если не нашли, то будем искать с учетом родителей
+            if len(places) == 0:
+                condition = None
+                for word in words:
+                    field_condition = None
+                    for field_name in fields:
+                        field = Q(**{field_name + '__icontains': word}) | Q(**{'parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__parent__' + field_name + '__icontains': word})
+                        field_condition = field_condition | field if field_condition else field
+                    condition = condition & field_condition if condition else field_condition
+                places = KladrGeo.objects.filter(condition).select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').order_by('level','name')[0:50]
+        else:
+            places = []
         result = {'rows': list(places), 'total': len(places)}
         return PreJsonResult(result)
 
@@ -64,39 +67,42 @@ class StreetRowsAction(Action):
     
     def run(self, request, context):
         filter = request.REQUEST.get('filter')
-        place_code = request.REQUEST.get('place_code')
-        place_id = None
-        if place_code:
-            place = KladrGeo.objects.filter(code=place_code)
-            if place and len(place) == 1:
-                place_id = place[0].id
-        fields = ['name','code','socr'];
-        words = filter.strip().split(' ')
-        # первым этапом найдем территории подходящие под фильтр в имени
-        condition = None
-        for word in words:
-            field_condition = None
-            for field_name in fields:
-                field = Q(**{field_name + '__icontains': word})
-                field_condition = field_condition | field if field_condition else field
-            condition = condition & field_condition if condition else field_condition
-        if place_id:
-            places = KladrStreet.objects.filter(condition, parent = place_id).select_related('parent').order_by('name')[0:50]
-        else:
-            places = KladrStreet.objects.filter(condition).select_related('parent').order_by('name')[0:50]
-        # если не нашли, то будем искать с учетом родителей
-        if len(places) == 0:
+        if filter: # бывают случаи, когда фильтр приходит пустой
+            place_code = request.REQUEST.get('place_code')
+            place_id = None
+            if place_code:
+                place = KladrGeo.objects.filter(code=place_code)
+                if place and len(place) == 1:
+                    place_id = place[0].id
+            fields = ['name','code','socr'];
+            words = filter.strip().split(' ')
+            # первым этапом найдем территории подходящие под фильтр в имени
             condition = None
             for word in words:
                 field_condition = None
                 for field_name in fields:
-                    field = Q(**{field_name + '__icontains': word}) | Q(**{'parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__parent__' + field_name + '__icontains': word})
+                    field = Q(**{field_name + '__icontains': word})
                     field_condition = field_condition | field if field_condition else field
                 condition = condition & field_condition if condition else field_condition
             if place_id:
                 places = KladrStreet.objects.filter(condition, parent = place_id).select_related('parent').order_by('name')[0:50]
             else:
                 places = KladrStreet.objects.filter(condition).select_related('parent').order_by('name')[0:50]
+            # если не нашли, то будем искать с учетом родителей
+            if len(places) == 0:
+                condition = None
+                for word in words:
+                    field_condition = None
+                    for field_name in fields:
+                        field = Q(**{field_name + '__icontains': word}) | Q(**{'parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__parent__' + field_name + '__icontains': word})
+                        field_condition = field_condition | field if field_condition else field
+                    condition = condition & field_condition if condition else field_condition
+                if place_id:
+                    places = KladrStreet.objects.filter(condition, parent = place_id).select_related('parent').order_by('name')[0:50]
+                else:
+                    places = KladrStreet.objects.filter(condition).select_related('parent').order_by('name')[0:50]
+        else:
+            places = []
         result = {'rows': list(places), 'total': len(places)}
         return PreJsonResult(result)
 
@@ -104,6 +110,8 @@ def GetAddr(place, street = None, house = None, flat = None):
     """
     Формирует строку полного адреса по выбранным значениям КЛАДРа
     """
+    if not place: # бывают случаи, когда территория приходит пустой
+        return ''
     # Получаем населенный пункт
     if isinstance(place, (str, unicode)):
         qs = KladrGeo.objects.filter(code=place)
