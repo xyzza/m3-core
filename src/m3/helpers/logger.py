@@ -11,6 +11,7 @@ from django.http import HttpResponseServerError, HttpRequest
 from django.template.loader import render_to_string
 from django.core.mail import get_connection
 from django.core.mail.message import EmailMessage
+from django.utils.html import linebreaks
 
 __all__ = ['init_logging', 'catch_error_500', 'info', 'error', 'debug', 'warning']
 
@@ -85,22 +86,24 @@ def debug(msg, *args, **kwargs):
         msg = get_session_info(kwargs.get('request', None)) + msg
         log.debug(msg)    
 
-def exception(msg='', *args, **kwargs):
+def exception(msg='', recursion=0,  *args, **kwargs):
     #Не желаемые ключи логирования
     donot_parse_keys = ['win','request']
     
     log = logging.getLogger('error_logger')
-    msg = get_session_info(kwargs.get('request', None)) + 'Message: '+msg+'\n'
+    msg = get_session_info(kwargs.get('request', None)) + 'Message: ' + msg + '\n'
 
+    # FIXME: Отрефаторить нахер!!
     try:
-        exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
-        exceptionVariables = exceptionTraceback.tb_frame.f_locals
+        e_type, e_value, e_traceback = sys.exc_info()
+        e_vars = e_traceback.tb_frame.f_locals
         res = ['Variables:\n']
         
-        if exceptionTraceback.tb_frame.f_code.co_name != '<module>':
-            for key,val in exceptionVariables.items():
+        if e_traceback.tb_frame.f_code.co_name != '<module>':
+            for key, val in e_vars.items():
                 if key in donot_parse_keys:
                     continue
+                
                 res.append('%s: %s\n'.rjust(6)%(key,val))
                 if hasattr(val , '__dict__'):
                     for obj_item_key, obj_item_val in val.__dict__.items():
@@ -109,16 +112,21 @@ def exception(msg='', *args, **kwargs):
         else:
             res = []
 
-        exceptionVariables_str = ''.join(res)
-        tb = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
-        log.error('\n' + msg + u''.join(tb) + exceptionVariables_str)      
+        e_vars_str = ''.join(res)
+        tb = traceback.format_exception(e_type, e_value, e_traceback)
+        
+        err_message = '\n %s %s %s' % (msg, u''.join(tb), e_vars_str)
+        log.error(err_message)      
         
         # Отправка на почту
-        send_mail_log('\n' + msg + u''.join(tb) + exceptionVariables_str, 'EXC')
+        send_mail_log(err_message)
       
-    except:
-        log.error('\n'+msg+u'Некоррертная работа логера!')
-        pass
+    except:        
+        if recursion<10:
+            log.exception('\n Ошибка внутри логгера!', recursion+1)
+        else:
+            log.error('\n Некоррертная работа логера')
+            
 
 def warning(msg, *args, **kwargs):
     log = logging.getLogger('warning_logger')
@@ -156,8 +164,11 @@ def send_mail_log(msg, level=''):
         conn = get_connection(auth_user = settings.EMAIL_HOST_USER,
                       auth_password= settings.EMAIL_HOST_PASSWORD)
         
+        
+        uname = os.uname()
+        msg = linebreaks(msg)
         d = {'body': msg, 'from_email': email_from, 'to': email_list,
-             'subject': 'Логер - %s' % level}
+             'subject': 'Логер - %s - %s' % (uname[1], level,)}
         message = EmailMessage(**d)
         message.content_subtype = "html"
         conn.send_messages([message,])
