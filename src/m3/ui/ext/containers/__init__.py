@@ -12,12 +12,11 @@ from forms import ExtForm, ExtPanel, ExtTabPanel, ExtFieldSet
 from container_complex import ExtContainerTable
 from grids import (ExtGrid,
                    ExtGridColumn,
-        	   ExtPivotGrid,
+                   ExtPivotGrid,
                    ExtGridBooleanColumn,
                    ExtGridDateColumn,
                    ExtGridNumberColumn,
                    ExtAdvancedTreeGrid,
-
                    ExtGridCheckBoxSelModel,
                    ExtGridRowSelModel,
                    ExtGridCellSelModel,)
