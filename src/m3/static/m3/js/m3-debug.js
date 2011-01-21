@@ -12437,6 +12437,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		var data =  this.place.getStore().data.get(val);
 		if (data != undefined) {
 			data = data.data;
+		} else {
+			this.place.setValue('');
 		}
 		this.fireEvent('change_place', this, val, data);
 		if (this.addr_visible) {
@@ -12448,6 +12450,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		var data =  this.street.getStore().data.get(val);
 		if (data != undefined) {
 			data = data.data;
+		} else {
+			this.clearStreet();
 		}
 		this.fireEvent('change_street', this, val, data);
 		if (this.addr_visible) {
