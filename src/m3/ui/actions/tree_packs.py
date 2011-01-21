@@ -554,7 +554,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     # 1. Если в list_columns модели списка есть поле code, то устанавливается сортировка по возрастанию этого поля;
     # 2. Если в list_columns модели списка нет поля code, но есть поле name, то устанавливается сортировка по возрастанию поля name;
     # Пример list_sort_order = ['code', '-name']
-    list_sort_order = None
+    list_sort_order = []
     tree_sort_order = None
     
     def get_nodes(self, parent_id, filter, branch_id = None):
@@ -594,10 +594,11 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             else:
                 # отображаются данные с фильтрацией по значению parent_id
                 query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
-                
+             
+            list_sort_order = self._default_order()    
             # Подтягиваем группу, т.к. при сериализации она требуется
             query = query.select_related(self.list_parent_field)
-            query = utils.apply_sort_order(query, self.list_columns, self.list_sort_order)
+            query = utils.apply_sort_order(query, self.list_columns, list_sort_order)
             query = utils.apply_search_filter(query, filter, self.filter_fields)
             # Для работы пейджинга нужно передавать общее количество записей
             total = query.count()
@@ -609,6 +610,19 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             return result
         else:
             return self.get_nodes(parent_id, filter)
+       
+    def _default_order(self):
+        '''
+        Устанавливаем параметры сортировки по умолчанию 'code' и 'name' в случае, 
+        если у модели есть такие поля
+        '''
+        filter_order = self.list_sort_order                    
+        if not filter_order:
+            filter_order = []  
+            all_fields = [field.attname for field in self.list_model._meta.local_fields]          
+            filter_order.extend([field for field in ('code', 'name', 'id')\
+                                 if field in all_fields ])
+        return filter_order      
     
     def get_nodes_like_rows(self, filter, branch_id = None):
         '''
