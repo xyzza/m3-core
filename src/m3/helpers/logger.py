@@ -86,7 +86,7 @@ def debug(msg, *args, **kwargs):
         msg = get_session_info(kwargs.get('request', None)) + msg
         log.debug(msg)    
 
-def exception(msg='', recursion=0,  *args, **kwargs):
+def exception(msg='', *args, **kwargs):
     #Не желаемые ключи логирования
     donot_parse_keys = ['win','request']
     
@@ -122,10 +122,7 @@ def exception(msg='', recursion=0,  *args, **kwargs):
         send_mail_log(err_message, e_type.__name__)
       
     except:        
-        if recursion<10:
-            log.exception('\n Ошибка внутри логгера!', recursion+1)
-        else:
-            log.error('\n Некоррертная работа логера')
+        log.error('\n Некоррертная работа логера')
             
 
 def warning(msg, *args, **kwargs):
@@ -168,7 +165,7 @@ def send_mail_log(msg, err_name='', level=''):
         uname = os.uname()
         msg = linebreaks(msg)
         d = {'body': msg, 'from_email': email_from, 'to': email_list,
-             'subject': 'Логер - %s - %s %s' % (uname[1], level, err_name)}
+             'subject': u'Логер - %s - %s %s' % (uname[1], level, err_name)}
         message = EmailMessage(**d)
         message.content_subtype = "html"
         conn.send_messages([message,])
