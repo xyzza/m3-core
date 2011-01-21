@@ -2,7 +2,6 @@
 '''
 Управление кубом на сервере Palo Olap
 '''
-from dimension import PaloOlapError
 
 class PaloCube():
     def __init__(self, Connection, APIOutput):
@@ -305,13 +304,7 @@ class PaloCube():
                  'values': values,
                  'splash': Splash}
         Url = self.getCubeUrlRequest(CMD, Param)
-        try:
-            Res = self.getUrlResult(Url)
-        except Exception as err:
-            if err.code == 400:
-                raise PaloOlapError(err.read())
-            else:
-                raise err
+        Res = self.getUrlResult(Url)
         return Res.read()
         
     def clear(self, Coordinates):

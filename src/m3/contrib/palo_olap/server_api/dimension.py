@@ -2,15 +2,14 @@
 '''
 Управление размерностями куба на сервере Palo Olap
 '''
-class PaloOlapError(Exception):
-    r"""Исключение возникающее при работе с Palo Olap"""
-    pass
-
 ELEMENT_TYPE_NUMERIC = 1
 ELEMENT_TYPE_STRING = 2
 ELEMENT_TYPE_CONSOLIDATED = 4
 
 class PaloDimension():
+    '''
+    измерение (по сути обертка над апи для добавления, редактирования элементов
+    '''
     def __init__(self, Connection, APIOutput):
         APIOutput = APIOutput.split(';')
         self.Sid = Connection.Sid
@@ -30,10 +29,7 @@ class PaloDimension():
         self.__AttributeCubeID = APIOutput[8]
         self.__AttributeCubeName = self._getAttrCubeName()
         self.__Token = APIOutput[10]
-        self.__Elements = {}
-        self.__ElementsByID = {}
-        self.__ElementsIDList = []
-        self.__isLoaded = False
+        self.__maxId = None
 
     def getDataBaseID(self):
         '''
@@ -104,105 +100,30 @@ class PaloDimension():
         else:
             return False
     
-    def isLoaded(self):
-        '''
-        Признак загрузки размерности 
-        '''
-        return self.__isLoaded
-    
-    def loadElements(self):
-        '''
-        Загрузить элементы
-        '''
-        CMD = 'dimension/elements'
-        Url = self.getDimensionUrlRequest(CMD)
-        Res = self.getUrlResult(Url)
-        List = Res.read().split('\n')[:-1]
-        for Element in List:
-            id, name = Element.split(';')[:2]
-            try:
-                name = name[1:-1].decode('utf-8').replace('""','"')
-            except UnicodeDecodeError:
-                name = name[1:-1]
-            self.__Elements[name] = str(id)
-            self.__ElementsByID[str(id)] = name
-            self.__ElementsIDList.append(id)
-            #self.__ElementsAliasByID[str(ID)]['alias_name'] = 'alias_value'
-        self.__isLoaded = True
-            
-    def getElements(self):
-        '''
-        Получить элементы
-        '''
-        return self.__Elements
-    
-    def getElementsName(self):
-        '''
-        Получить имена элементов
-        '''
-        return self.__Elements.keys()
-
-    def getElementID(self, Name):
-        '''
-        Получить ID элемента по имени
-        '''
-        if Name in self.__Elements:
-            return self.__Elements[Name]
-        else:
-            return False
-        
-    def ElementsIDList(self):
-        '''
-        Получить ID элементов
-        '''
-        return self.__ElementsIDList
-    
-    def getElementsNameList(self):
-        '''
-        Получить список имен элементов
-        '''
-        return [self.__ElementsByID[ID] for ID in self.__ElementsIDList]
-
-    def getKeyDW(self):
-        '''
-        Получить ключ размерности
-        '''
-        return self.__Elements['KeyDW']
-        
-    def getKeyDWName(self):
-        '''
-        Имя ключа размерности
-        '''
-        return 'KeyDW'
-
-    def getElementName(self, ID):
-        '''
-        Получить имя элемента по ID
-        '''
-        return self.__ElementsByID[ID]
-
-    def ElementExists(self, Name):
-        '''
-        Проверка наличия элемента
-        '''
-        return Name in self.__Elements
-
-    def KeyDataWarehouseExists(self):
-        '''
-        Проверка, есть ли ключ размерности
-        '''
-        return 'KeyDW' in self.__Elements
-
-    def deleteElement(self, Name):
+    def deleteElement(self, id):
         '''
         Удаление элемента
         '''
         CMD = 'element/destroy'
-        Param = {'element': self.getElementID(Name)}
+        Param = {'element': id}
         Url = self.getDimensionUrlRequest(CMD, Param)
         self.getUrlResult(Url)
         
-    def MoveElement(self, Name, NewPosition):
+    def renameElement(self, id, new_name):
+        '''
+        Удаление элемента
+        '''
+        CMD = 'element/rename'
+        try:
+            new_name = new_name.encode('utf-8')
+        except UnicodeDecodeError:
+            pass
+        Param = {'element': id,
+                 'new_name': new_name}
+        Url = self.getDimensionUrlRequest(CMD, Param)
+        self.getUrlResult(Url)
+        
+    def moveElement(self, Name, NewPosition):
         '''
         Перемещение элемента в размерности
         '''
@@ -241,70 +162,23 @@ class PaloDimension():
         param = {'new_name': name,
                  'type': type
                  }
-        if type == ELEMENT_TYPE_CONSOLIDATED:
+        if type == ELEMENT_TYPE_CONSOLIDATED and children_ids:
             param['children'] = ','.join(['%s' % id for id in children_ids])
         Url = self.getDimensionUrlRequest(CMD, param)
-        try:
-            Res = self.getUrlResult(Url)
-        except Exception as err:
-            if err.code == 400:
-                raise PaloOlapError(err.read())
-            else:
-                raise err
+        Res = self.getUrlResult(Url)
         Element = Res.read().split('\n')[:-1][0]
         id, name = Element.split(';')[:2]
-        try:
-            name = name[1:-1].decode('utf-8')
-        except UnicodeDecodeError:
-            name = name[1:-1]
-        self.__Elements[name] = str(id)
-        self.__ElementsByID[str(id)] = name
-        self.__ElementsIDList.append(id)
-        return id
-    
-    def create_consolidate_element(self, name, childrens = None, children_ids = None):
-        '''
-        Создание сводного элемента размерности
-        '''
-        CMD = 'element/create'
-        try:
-            name = name.encode('utf-8')
-        except UnicodeDecodeError:
-            pass
-        list = [] 
-        if not children_ids:
-            for C in childrens:
-                if self.getElementID(C):
-                    list.append(self.getElementID(C))
-        else:
-            list = ['%s' % id for id in children_ids]
-        Param = {'new_name': name,
-                 'type': ELEMENT_TYPE_CONSOLIDATED,
-                 'children': ','.join(list)}
-        Url = self.getDimensionUrlRequest(CMD, Param)
-        try:
-            Res = self.getUrlResult(Url)
-        except Exception as err:
-            if err.code == 400:
-                raise PaloOlapError(err.read())
-            else:
-                raise err
-        Element = Res.read().split('\n')[:-1][0]
-        id, name = Element.split(';')[:2]
-        try:
-            name = name[1:-1].decode('utf-8')
-        except UnicodeDecodeError:
-            name = name[1:-1]
-        self.__Elements[name] = str(id)
-        self.__ElementsByID[str(id)] = name
-        self.__ElementsIDList.append(id)
-        return id
+        return int(id)
     
     def create_elements(self, names, type = ELEMENT_TYPE_NUMERIC):
         '''
         Массовое добавление элементов в размерность
         '''
+        assert len(names)!=0
         CMD = 'element/create_bulk'
+        first_name = names.pop(0)
+        start_id = self.create_element(first_name, type)
+        
         names = ','.join(names)
         try:
             names = names.encode('utf-8')
@@ -313,14 +187,8 @@ class PaloDimension():
         Param = {'name_elements': names,
                  'type': type}
         Url = self.getDimensionUrlRequest(CMD, Param)
-        try:
-            self.getUrlResult(Url)
-        except Exception as err:
-            if err.code == 400:
-                raise PaloOlapError(err.read())
-            else:
-                raise err
-        self.loadElements()
+        self.getUrlResult(Url)
+        return range(start_id, start_id+len(names)+1)
         
     def append_to_consolidate_element(self, element_id, children_ids):
         '''
@@ -331,7 +199,6 @@ class PaloDimension():
                  'children': ','.join(['%s' % id for id in children_ids])}
         Url = self.getDimensionUrlRequest(CMD, Param)
         self.getUrlResult(Url)
-        self.loadElements()
     
     def replace_consolidate_element(self, element_id, children_ids):
         '''
@@ -343,4 +210,4 @@ class PaloDimension():
                  'children': ','.join(['%s' % id for id in children_ids])}
         Url = self.getDimensionUrlRequest(CMD, Param)
         self.getUrlResult(Url)
-        self.loadElements()
+        

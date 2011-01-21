@@ -114,11 +114,7 @@ class PaloDataBase():
         ID = str(ID)
         Name = self.getDimensionNameByID(ID)
         Dim = self.__DimensionsList[Name]
-        if Dim.isLoaded():
-            return Dim
-        else:
-            Dim.loadElements()
-            return self.__DimensionsList[Name]
+        return Dim
 
     def dropDimension(self, Name):
         '''

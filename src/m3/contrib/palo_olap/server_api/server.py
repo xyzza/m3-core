@@ -5,8 +5,13 @@
 
 import urllib
 import urllib2
-import md5
+import hashlib
 from database import PaloDataBase
+from django.utils.encoding import force_unicode
+
+class PaloOlapError(Exception):
+    r"""Исключение возникающее при работе с Palo Olap"""
+    pass
 
 USE_PROXY = False
 
@@ -21,11 +26,30 @@ class PaloServer():
         self.ServerPort = self.Config.getPaloPort()
         self.ServerRoot = "http://%s:%s/" % (self.ServerHost, self.ServerPort)
         self.Client = urllib.FancyURLopener({'http': self.ProxyUrl}) if self.useProxy else urllib2
-        self.getUrlResult = urllib.FancyURLopener({'http': self.ProxyUrl}).open if self.useProxy else urllib2.urlopen
+#        self.getUrlResult = urllib.FancyURLopener({'http': self.ProxyUrl}).open if self.useProxy else urllib2.urlopen
         self.User = user if user else self.Config.getPaloUser()
-        self.Password = md5.new(password).hexdigest() if password else self.Config.getPaloPassword()
+        md5 = hashlib.md5()
+        md5.update(password)
+        self.Password = md5.hexdigest() if password else self.Config.getPaloPassword()
         self.UrlEncoder = urllib.urlencode
         self.__DBList = {}
+        
+    def getUrlResult(self, url, **kwargs):
+        if self.useProxy:
+            func = urllib.FancyURLopener({'http': self.ProxyUrl}).open  
+        else: 
+            func = urllib2.urlopen
+        try:
+            res = func(url, **kwargs)
+        except Exception, err:
+            if err.__class__.__name__ == 'HTTPError': #сложно точно по типу
+                msg = u'Error open %s (%s). \nResponse: %s' % (url, unicode(err), force_unicode(err.read()))
+                raise PaloOlapError(msg)
+            else:
+                raise err
+        return res
+            
+        
     
     def login(self):
         '''
@@ -39,6 +63,20 @@ class PaloServer():
         Res = self.getUrlResult(Url)
         self.Sid = Res.read().split(';')[0]
         return self.Sid
+
+    def get_or_create_db(self, db_name):
+        '''
+        создание или посиск существующей базы
+        '''
+        self.load_db_list()
+        if self.db_exists(db_name):
+            # получаем базу
+            db = self.get_db(db_name)
+        else:
+            # создаем базу
+            db = self.create_db(db_name)
+        return db
+        
 
     def load_db_list(self):
         '''
@@ -118,7 +156,10 @@ class PaloServerConfig(object):
         return self.__PaloUser
         
     def getPaloPassword(self):
-        return md5.new(self.__PaloPassword).hexdigest()        
+        md5 = hashlib.md5()
+        md5.update(self.__PaloPassword)
+        
+        return md5.hexdigest()        
     
     def getProxyUrl(self):
         return self.__ProxyUrl
