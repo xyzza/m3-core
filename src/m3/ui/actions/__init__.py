@@ -13,6 +13,7 @@ from django.utils.datastructures import MultiValueDict
 from django import http
 from django.contrib.auth.models import User
 
+from m3.helpers import logger
 from m3.helpers.datastructures import MutableList
 from m3.core.json import M3JSONEncoder
 from m3.core.exceptions import ApplicationLogicException
@@ -496,7 +497,13 @@ class ActionController(object):
         matched = self._url_patterns.get(path)
         if matched:
             stack, action = matched
-            result = self._invoke(request, action, stack)
+            
+            try:
+                result = self._invoke(request, action, stack)
+            except:
+                logger.exception(u'ActionController.process_request: перехвачена необработанная ошибка')
+                raise
+            
             if isinstance(result, ActionResult):
                 return result.get_http_response()
             return result
