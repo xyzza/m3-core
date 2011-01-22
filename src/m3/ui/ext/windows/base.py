@@ -64,6 +64,7 @@ class BaseExtWindow(ExtUIComponent):
         self.button_align = None
         self.help_topic = None
         self.read_only = False
+        self.close_action = None
         
     def t_render_layout_config(self):
         '''Рендерит конфиг, если указан layout'''
@@ -96,6 +97,9 @@ class BaseExtWindow(ExtUIComponent):
 
         if self.layout_config:
             self._put_config_value('layoutConfig', self.t_render_layout_config)
+
+        if self.close_action:
+            self._put_config_value('closeAction', self.close_action)
         
     def render_params(self):
         super(BaseExtWindow, self).render_params()
