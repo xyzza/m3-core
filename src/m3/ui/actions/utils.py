@@ -42,8 +42,8 @@ def create_search_filter(filter_text, fields):
         filter_text = u'Вася Пупкин'
     Получится условие WHERE:
         (name like 'Вася' AND name like 'Пупкин') OR (family like 'Вася' AND family like 'Пупкин') OR
-        ((name like 'Вася' and family like 'Пупкин') OR (name like 'Пупкин' and family like 'Вася')) 
-    
+        ((name like 'Вася' and family like 'Пупкин') OR (name like 'Пупкин' and family like 'Вася'))
+    В случае если нет полей для поиска и выражение Q не сформировалось возвращает None
     '''
     def create_filter(words,fields):
         #TODO: нужна оптимизация для исключения повторяющихся условий - сейчас условия повторяются
@@ -174,14 +174,18 @@ def safe_delete_record(model, id):
 def fetch_search_tree(model, filter, branch_id = None):
     '''
     По заданному фильтру filter и модели model формирует развернутое дерево с результатами поиска.
+    Если filter пустой, то получается полностью развернутое дерево.
     '''
     #branch_id - это элемент ограничивающий дерево, т.е. должны возвращаться только дочерние ему элементы
     # Сначала тупо получаем все узлы подходящие по фильтру
     if branch_id and hasattr(model,'get_descendants'):
         branch_node = model.objects.get(id = branch_id)
-        nodes = branch_node.get_descendants().filter(filter).select_related('parent')
+        nodes = branch_node.get_descendants().select_related('parent')
     else:
-        nodes = model.objects.filter(filter).select_related('parent')
+        nodes = model.objects.all().select_related('parent')
+        
+    if filter:
+        nodes = nodes.filter(filter)
     
     # Из каждого узла создаем полный путь до корня
     paths = []
