@@ -210,4 +210,21 @@ class PaloDimension():
                  'children': ','.join(['%s' % id for id in children_ids])}
         Url = self.getDimensionUrlRequest(CMD, Param)
         self.getUrlResult(Url)
+
+    def get_all_elements(self):
+        '''
+        вернуть все элементы в виде кортежа id, name
+        '''
+        CMD = 'dimension/elements'
+        Url = self.getDimensionUrlRequest(CMD)
+        Res = self.getUrlResult(Url)
+        List = Res.read().split('\n')[:-1]
+        res = []
+        for Element in List:
+            id, name = Element.split(';')[:2]
+            try:
+                name = name[1:-1].decode('utf-8').replace('""','"')
+            except UnicodeDecodeError:
+                name = name[1:-1]
+            res.append((id, name))
         

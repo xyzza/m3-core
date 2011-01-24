@@ -3,20 +3,23 @@ from django.db import models, connection
 import datetime
 import copy
 from m3.contrib.palo_olap.server_api.server import PaloServer
-from m3.contrib.palo_olap.server_api.dimension import ELEMENT_TYPE_CONSOLIDATED
+from m3.contrib.palo_olap.server_api.dimension import ELEMENT_TYPE_CONSOLIDATED, ELEMENT_TYPE_NUMERIC
 import threading
+from dimension import BasePaloDimension
 
-class BaseModelBassedPaloDimension(object):
+class ModelBassedPaloDimension(BasePaloDimension):
     '''
     класс для описания дименшена на основании модели
     '''
     model = None #моедель на основании котороу бедм стороить дименшен
-    name = None #имя дименшена (должно быть уникодовым)
-    all_name = u'Все' #имя для консолидированного элемента (все элементы)
+    all_name = None #имя для консолидированного элемента (все элементы) если ноне то сгенерируется автоматически
+    unknow_name = u'Неизвестно' #задает имя элемента НЕИЗВЕСТО если задать None то создавать не будет
     name_field = 'name' #поле в котором лежит имя или можно перекрыть функцию get_name которая будет возвращать имя в этом случае не забудь перекрыть функции get_not_unique_names
     check_unique_name = True #проверять уникальность имени (черещ процедуру get_not_unique_names
-    make_tree = False #надо ли создавать древовидную структуру (если до то надо определить get_parent(obj), get_childrens(obj) если модель не mptt 
-
+    make_tree = False #надо ли создавать древовидную структуру (если до то надо определить get_parent(obj), get_childrens(obj) если модель не mptt
+     
+    
+    _processed = False #обработано ли измерения (выгружены все свежие данные)
     _store_model = None #автогенерируемая модель для хранения доп атрибутов для элементов основно модели
     _consolidate_store_model = None #автогенерируемая модель для хранения консолидированных элементов модели
     _delete_lock = threading.Lock() #блокировка чтоб во время обработки никто не удалял измерение
@@ -24,13 +27,6 @@ class BaseModelBassedPaloDimension(object):
     _dim = None #PaloDimension with connect
     _not_unique_name = {}
     
-    def __init__(self, server_host, user, password, db_name):
-        self._server_host = server_host
-        self._user = user
-        self._password = password
-        self._db_name = db_name
-        self._dim = self.get_palo_dim()
-
     @classmethod
     def register(cls):
         '''
@@ -95,25 +91,11 @@ class BaseModelBassedPaloDimension(object):
         q = self._store_model.objects.filter(instance__in=children)
         return [o.palo_id for o in q]
         
-    def get_palo_dim(self):
-        '''
-        вернуть PaloDimension и подключение к серверу
-        '''
-        p = PaloServer(server_host=self._server_host, user=self._user, password=self._password)
-        p.login()
-        db = p.get_or_create_db(self._db_name)
-        
-        if db.dimension_exists(self.name):
-            dim = db.get_dimension(self.name)
-        else:
-            dim = db.create_dimension(self.name)
-        return dim
-
     def clear(self):
         '''
         чистим дименшен и все модели
         '''
-        self._dim.clear()
+        super(ModelBassedPaloDimension, self).clear()
         self._store_model.objects.all().delete()
         self._consolidate_store_model.objects.all().delete()
         
@@ -123,37 +105,37 @@ class BaseModelBassedPaloDimension(object):
         обработка измерения (загрузка в palo server)
         '''
 
-        if not self.name:
-            raise Exception(u'Не указано имя измерения для %s' % self.__class__.__name__)
-        if with_clear:
-            self.clear()
+        super(ModelBassedPaloDimension, self).process(with_clear)
         
         if self.check_unique_name:
             self._not_unique_name = self.get_not_unique_names()
         result = dict()
-        self.process_base_consolidate()
+        self.process_base_elements()
         result[u'Новых'] = self.process_new_items()
         result[u'Удаленных'] = self.process_deleted_items()
         result[u'Измененных'] = self.process_changed_items()
+        self._processed = True
         
         return result
     
-    def get_or_create_consolidate(self, name):
+    def get_or_create_consolidate_element(self, name, type = ELEMENT_TYPE_CONSOLIDATED):
         try:
             return self._consolidate_store_model.objects.get(name=name).palo_id
         except self._consolidate_store_model.DoesNotExist:
-            id = self._dim.create_element(self.all_name, ELEMENT_TYPE_CONSOLIDATED)
+            id = self._dim.create_element(name, type)
             st = self._consolidate_store_model()
             st.palo_id = id
             st.name = name
             st.save()
             return id
     
-    def process_base_consolidate(self):
+    def process_base_elements(self):
         '''
         создает или находит основные консолидайт эелменты "ВСЕ", "НЕ УКАЗАН"
         '''
-        self._all_id = self.get_or_create_consolidate(self.all_name)
+        self._all_id = self.get_or_create_consolidate_element(self.all_name or u'Все %s' % self.name.lower())
+        if self.unknow_name:
+            self._unknown_id = self.get_or_create_consolidate_element(self.unknow_name, ELEMENT_TYPE_NUMERIC)
     
     def get_name(self, obj):
         '''
@@ -244,6 +226,12 @@ class BaseModelBassedPaloDimension(object):
         '''
         return self._all_id
             
+    def get_unknown_element(self):
+        '''
+        возвращает пало ид консолидайт элемента "ВСЕ"
+        '''
+        return self._unknown_id
+    
     def get_palo_id(self, id):
         '''
         ковертирует ид моделив в пало ид
@@ -274,12 +262,13 @@ class BaseModelBassedPaloDimension(object):
                   '%s__processed' % st :False,
                   }
         query = query.select_related(st).filter(**filter)
-        table = connection.ops.quote_name(self._store_model._meta.db_table)
-        query = query.extra(select={'palo_id':'%s.palo_id'%table,
-                                    'olap_store_id':'%s.id'%table,})
-        if self.make_tree:
-            query = query.extra(select={'instance_parent_id':'%s.instance_parent_id'%table})
-            query = query.extra(select={'store_id':'%s.id'%table})
+        print query.query
+#        table = getattr(connection, 'ops').quote_name(self._store_model._meta.db_table)
+#        query = query.extra(select={'palo_id':'%s.palo_id'%table,
+#                                    'olap_store_id':'%s.id'%table,})
+#        if self.make_tree:
+#            query = query.extra(select={'instance_parent_id':'%s.instance_parent_id'%table})
+#            query = query.extra(select={'store_id':'%s.id'%table})
             
         changed_parents = list() #список идишников модели (не пола) у ктороых поменялись родители
 
