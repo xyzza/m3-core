@@ -136,7 +136,7 @@ class ListEditRowWindowAction(Action):
         
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
-            win.make_read_only()
+            win.make_read_only(access_off=True, exclude_list=['cancel_btn','close_btn'])
         
         return ExtUIScriptResult(base.get_edit_window(win))
     
