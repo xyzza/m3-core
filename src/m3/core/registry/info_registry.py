@@ -517,7 +517,8 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
         order.append(dim_attr)
         dims.append(dim_attr)
     order.append('info_date_begin')
-    query.order_by(order)
+    for field_name in order:
+        query = query.order_by(field_name)
     # начальное значение ключа = пусто
     last_key = get_key(dims, None)
     last_rec = None

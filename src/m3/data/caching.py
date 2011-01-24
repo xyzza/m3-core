@@ -93,9 +93,16 @@ class RuntimeCache(object):
         if dimensions:
             result = dimensions if isinstance(dimensions, tuple) else (dimensions,)
         return result
-                 
     
-    def _populate(self, dimensions):
+    def _need_populate(self, cleaned_dims, check_on_empty_only=False):
+        '''
+        Проверяет, нужно ли выполнять прогрузку кеша для указанных измерений
+        '''
+        if check_on_empty_only:
+            return not self.data
+        return not self.data.has_key(cleaned_dims)
+    
+    def _populate(self, dimensions, check_on_empty_only=False):
         '''
         Метод собирает информацию по кешируемым объектам.
         
@@ -103,12 +110,12 @@ class RuntimeCache(object):
         '''
         dims = self._normalize_dimensions(dimensions)
         
-        if self.data.has_key(dims):
+        if not self._need_populate(dims, check_on_empty_only):
             return False
         
         try:
             self.write_lock.acquire()
-            if self.data.has_key(dims):
+            if not self._need_populate(dims, check_on_empty_only):
                 return False
             for handler in self.handlers:
                 prepared_data = handler(self, dims)

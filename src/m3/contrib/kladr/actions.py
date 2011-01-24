@@ -236,7 +236,7 @@ class KLADRGetAddrAction(Action):
         street = request.REQUEST.get('street')
         house = request.REQUEST.get('house')
         flat = request.REQUEST.get('flat')
-        addr_cmp = request.REQUEST.get('addr_cmp')
+        addr_cmp = request.REQUEST.get('addr_cmp', '')
         addr_text = GetAddr(place, street, house, flat)
-        result = u'(function(){ Ext.getCmp("'+addr_cmp+'").setValue("'+addr_text+'");})()'
+        result = u'(function(){ Ext.getCmp("%s").setValue("%s");})()' % (addr_cmp, addr_text or '')
         return OperationResult(success=True, code = result)
