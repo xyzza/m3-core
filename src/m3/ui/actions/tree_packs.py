@@ -533,6 +533,9 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     # Признак возвращения всех узлов дерева
     ALL_ROWS = -1
     
+    # Поля для поиска по умолчанию.
+    DEFAULT_FILTER_FIELDS = ['code', 'name']
+    
     # Настройки для модели дерева
     tree_model = None # Сама модель дерева
     tree_filter_fields = [] # Поля по которым производится поиск в дереве
@@ -557,11 +560,20 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     list_sort_order = []
     tree_sort_order = None
     
+    def __init__(self):
+        super(BaseTreeDictionaryModelActions, self).__init__()
+        # Установка значений по умолчанию для поиска и сортировки
+        if self.list_model:
+            self.filter_fields = self._default_list_search_filter()
+            self.list_sort_order = self._default_order()
+        if self.tree_model:
+            self.tree_filter_fields = self._default_tree_search_filter()
+    
     def get_nodes(self, parent_id, filter, branch_id = None):
         # parent_id - это элемент, который раскрывается, поэтому для него фильтр ставить не надо, иначе фильтруем
         # branch_id - это элемент ограничивающий дерево, т.е. должны возвращаться только дочерние ему элементы
         if filter and not parent_id:
-            filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)            
+            filter_dict = utils.create_search_filter(filter, self.tree_filter_fields)
             nodes = utils.fetch_search_tree(self.tree_model, filter_dict, branch_id)
         else:
             if branch_id and hasattr(self.tree_model,'get_descendants'):
@@ -594,11 +606,10 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             else:
                 # отображаются данные с фильтрацией по значению parent_id
                 query = self.list_model.objects.filter(**{self.list_parent_field: parent_id})
-             
-            list_sort_order = self._default_order()    
+            
             # Подтягиваем группу, т.к. при сериализации она требуется
             query = query.select_related(self.list_parent_field)
-            query = utils.apply_sort_order(query, self.list_columns, list_sort_order)
+            query = utils.apply_sort_order(query, self.list_columns, self.list_sort_order)
             query = utils.apply_search_filter(query, filter, self.filter_fields)
             # Для работы пейджинга нужно передавать общее количество записей
             total = query.count()
@@ -610,7 +621,11 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             return result
         else:
             return self.get_nodes(parent_id, filter)
-       
+    
+    def _get_model_fieldnames(self, model):
+        """ Возвращает имена всех полей модели """ 
+        return [field.attname for field in model._meta.local_fields]
+    
     def _default_order(self):
         '''
         Устанавливаем параметры сортировки по умолчанию 'code' и 'name' в случае, 
@@ -619,10 +634,32 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         filter_order = self.list_sort_order                    
         if not filter_order:
             filter_order = []  
-            all_fields = [field.attname for field in self.list_model._meta.local_fields]          
+            all_fields = self._get_model_fieldnames(self.list_model)
             filter_order.extend([field for field in ('code', 'name', 'id')\
                                  if field in all_fields ])
-        return filter_order      
+        return filter_order
+    
+    def _default_tree_search_filter(self):
+        """ Если поля для поиска не заданы, то возвращает список из полей модели
+            по которым будет производиться поиск. По умолчанию берутся код и наименование """
+        if not self.tree_filter_fields:
+            assert self.tree_model, 'Tree model is not defined!'
+            for field_name in self._get_model_fieldnames(self.tree_model):
+                if field_name in self.DEFAULT_FILTER_FIELDS:
+                    self.tree_filter_fields.append(field_name)
+
+        return self.tree_filter_fields
+    
+    def _default_list_search_filter(self):
+        """ Если поля для поиска не заданы, то возвращает список из полей модели
+            по которым будет производиться поиск. По умолчанию берутся код и наименование """
+        if not self.filter_fields:
+            assert self.list_model, 'List model is not defined!'
+            for field_name in self._get_model_fieldnames(self.list_model):
+                if field_name in self.DEFAULT_FILTER_FIELDS:
+                    self.filter_fields.append(field_name)
+
+        return self.filter_fields
     
     def get_nodes_like_rows(self, filter, branch_id = None):
         '''
