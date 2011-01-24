@@ -28,6 +28,7 @@ class ExtAddrComponent(BaseExtContainer):
         self.street_field_name = 'street'
         self.house_field_name = 'house'
         self.flat_field_name = 'flat'
+        self.zipcode_field_name = 'zipcode'
         self.addr_field_name = 'addr'
         self.place_label = u'Населенный пункт'
         self.street_label = u'Улица'
@@ -54,11 +55,13 @@ class ExtAddrComponent(BaseExtContainer):
         self.street = ExtHiddenField(name = self.street_field_name, type = ExtHiddenField.STRING);
         self.house = ExtHiddenField(name = self.house_field_name, type = ExtHiddenField.STRING);
         self.flat = ExtHiddenField(name = self.flat_field_name, type = ExtHiddenField.STRING);
+        self.zipcode = ExtHiddenField(name = self.zipcode_field_name, type = ExtHiddenField.STRING);
         self._items.append(self.addr)
         self._items.append(self.place)
         self._items.append(self.street)
         self._items.append(self.house)
         self._items.append(self.flat)
+        self._items.append(self.zipcode)
         if self.view_mode == ExtAddrComponent.VIEW_1:
             self.height = 25
         elif self.view_mode == ExtAddrComponent.VIEW_2:
@@ -83,6 +86,7 @@ class ExtAddrComponent(BaseExtContainer):
         self._put_params_value('street_field_name', self.street_field_name)
         self._put_params_value('house_field_name', self.house_field_name)
         self._put_params_value('flat_field_name', self.flat_field_name)
+        self._put_params_value('zipcode_field_name', self.zipcode_field_name)
         self._put_params_value('addr_field_name', self.addr_field_name)
         self._put_params_value('place_label', self.place_label)
         self._put_params_value('street_label', self.street_label)
@@ -103,10 +107,32 @@ class ExtAddrComponent(BaseExtContainer):
         self._put_params_value('house_allow_blank', self.house_allow_blank)
         self._put_params_value('flat_value', (self.flat.value if self.flat and self.flat.value else ''))
         self._put_params_value('flat_allow_blank', self.flat_allow_blank)
+        self._put_params_value('zipcode_value', self.get_zipcode())
         self._put_params_value('addr_value', (self.addr.value if self.addr and self.addr.value else ''))
         self._put_params_value('get_addr_url', (self.pack.get_addr_action.absolute_url() if self.pack.get_addr_action else ''))
         self._put_params_value('kladr_url', (self.pack.get_places_action.absolute_url() if self.pack.get_places_action else ''))
         self._put_params_value('street_url', (self.pack.get_streets_action.absolute_url() if self.pack.get_streets_action else ''))
+    
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+        self.read_only = access_off
+    
+    def get_zipcode(self):
+        '''
+        получить индекс
+        на форме есть фиелд zipcode from_object может его заполнить если вдруг индекс мы храним в базе
+        если он пусто а поле адреса не пустое то возьмемем индекс как первые шесть цифр до пробела
+        '''
+        if self.zipcode and self.zipcode.value:
+            return self.zipcode.value
+        if self.addr:
+            addr = self.addr.value
+            if len(addr)>6:
+                try:
+                    return unicode(int(addr[:6]))
+                except ValueError:
+                    pass
+        return ''
+            
     
     def render_base_config(self):
         res = super(ExtAddrComponent, self).render_base_config()        

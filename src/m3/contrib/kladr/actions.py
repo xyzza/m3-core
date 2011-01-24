@@ -106,7 +106,7 @@ class StreetRowsAction(Action):
         result = {'rows': list(places), 'total': len(places)}
         return PreJsonResult(result)
 
-def GetAddr(place, street = None, house = None, flat = None):
+def GetAddr(place, street = None, house = None, flat = None, zipcode = None):
     """
     Формирует строку полного адреса по выбранным значениям КЛАДРа
     """
@@ -178,7 +178,7 @@ def GetAddr(place, street = None, house = None, flat = None):
             адрес = раделитель+раделитель+адрес
     '''
     addr_type = 0
-    curr_index = ''
+    curr_index = zipcode or ''
     addr_text = ''
     curr_level = 5
     if street:
@@ -236,7 +236,8 @@ class KLADRGetAddrAction(Action):
         street = request.REQUEST.get('street')
         house = request.REQUEST.get('house')
         flat = request.REQUEST.get('flat')
+        zipcode = request.REQUEST.get('zipcode')
         addr_cmp = request.REQUEST.get('addr_cmp', '')
-        addr_text = GetAddr(place, street, house, flat)
+        addr_text = GetAddr(place, street, house, flat, zipcode)
         result = u'(function(){ Ext.getCmp("%s").setValue("%s");})()' % (addr_cmp, addr_text or '')
         return OperationResult(success=True, code = result)

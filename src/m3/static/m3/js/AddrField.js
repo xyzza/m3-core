@@ -1,3 +1,4 @@
+
 /**
  * Панель редактирования адреса
  */
@@ -24,12 +25,16 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
     	record.code = params.place_value;
     	record.display_name = params.place_text;
 		place_store.loadData({total:1, rows:[record]});
-		
+		if (params.read_only) 
+			var field_cls = 'm3-grey-field' 
+		else
+			var field_cls = ''
 		this.place = new Ext.form.ComboBox({
 			name: params.place_field_name,
 			fieldLabel: params.place_label,
 			allowBlank: params.place_allow_blank,
             readOnly: params.read_only,
+            cls: field_cls,
 			hideTrigger: true,
 			minChars: 2,
 			emptyText: 'Введите населенный пункт...',
@@ -72,6 +77,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				fieldLabel: params.street_label,
 				allowBlank: params.street_allow_blank,
                 readOnly: params.read_only,
+                cls: field_cls,
 				hideTrigger: true,
 				minChars: 2,
 				emptyText: 'Введите улицу...',
@@ -82,7 +88,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				valueField: 'code',
 				mode: 'remote',
 				hiddenName: params.street_field_name,
-        valueNotFoundText: ''
+                valueNotFoundText: ''
 			});
 			this.street.setValue(params.street_value);
 			
@@ -91,12 +97,23 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					name: params.house_field_name,
                     allowBlank: params.house_allow_blank,
                     readOnly: params.read_only,
+                    cls: field_cls,
 					fieldLabel: params.house_label,
 					value: params.house_value,
 					emptyText: '',
 					width: 40
 				});
 				
+		        this.zipcode = new Ext.form.TextField({
+			        name: params.zipcode_field_name,
+			        value: params.zipcode_value,
+			        emptyText: 'индекс',
+			        readOnly: params.read_only,
+			        cls: field_cls,
+			        width: 55,
+			        maskRe: /[0-9]/
+			
+		        });
 				if (params.level > 3) {
 					this.flat = new Ext.form.TextField({
 						name: params.flat_field_name,
@@ -104,6 +121,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						value: params.flat_value,
                         allowBlank: params.flat_allow_blank,
                         readOnly: params.read_only,
+                        cls: field_cls,
 						emptyText: '',
 						width: 40
 					});
@@ -117,13 +135,19 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				fieldLabel: params.addr_label,
 				value: params.addr_value,
 				readOnly: true,
+				cls: field_cls,
 				height: 36
 			});
 		};
 		if (params.view_mode == 1){
 			// В одну строку
 			this.place.flex = 1;
-			var row_items = [this.place];
+			if (params.level > 2) {
+    			var row_items = [this.place, this.zipcode];
+    		} else {
+	    		var row_items = [this.place];
+	    	}
+	    		
 			if (params.level > 1) {
 				this.street.flex = 1;
 				this.street.fieldLabel = params.place_label;
@@ -168,8 +192,19 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		};
 		if (params.view_mode == 2){
 			// В две строки
-			this.place.anchor = '100%';
-			items.push(this.place);
+			if (params.level > 2) {
+			    this.place.flex = 1;
+			    var row = {
+				    xtype: 'compositefield'
+				    , anchor: '100%'
+				    , fieldLabel: params.place_label
+				    , items: [this.place, this.zipcode]
+			    };
+			    items.push(row);
+			} else {
+			    this.place.anchor = '100%';
+			    items.push(this.place);
+			}
 			if (params.level > 1) {
 				this.street.flex = 1;
 				var row_items = [this.street];
@@ -207,8 +242,19 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		};
 		if (params.view_mode == 3){
 			// В три строки
-			this.place.anchor = '100%';
-			items.push(this.place);
+			if (params.level > 2) {
+			    this.place.flex = 1;
+			    var row = {
+				    xtype: 'compositefield'
+				    , anchor: '100%'
+				    , fieldLabel: params.place_label
+				    , items: [this.place, this.zipcode]
+			    };
+			    items.push(row);
+			} else {
+			    this.place.anchor = '100%';
+			    items.push(this.place);
+			}
 			if (params.level > 1) {
 				this.street.anchor = '100%';
 				items.push(this.street);
@@ -264,6 +310,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			this.mon(this.street, 'change', this.onChangeStreet, this);
 			if (this.level > 2) {
 				this.mon(this.house, 'change', this.onChangeHouse, this);
+				this.mon(this.zipcode, 'change', this.onChangeZipcode, this);
 				if (this.level > 3) {
 					this.mon(this.flat, 'change', this.onChangeFlat, this);
 				}
@@ -311,6 +358,13 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
              */
 			'change_flat',
 			/**
+             * @event change_zipcode
+             * При изменении индекса
+             * @param {AddrField} this
+             * @param {zipcode} индекс
+             */
+			'change_zipcode',
+			/**
              * @event before_query_place
              * Перед запросом данных о населенном пункте
              * @param {AddrField} this
@@ -335,10 +389,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		if (this.flat != undefined) {
 			flat_num = this.flat.getValue();
 		}
+		var zipcode;
+		if (this.zipcode != undefined) {
+			zipcode = this.zipcode.getValue();
+		}
 		var addrCmp = this
 		Ext.Ajax.request({
 			url: this.get_addr_url,
-			params: Ext.applyIf({ place: place_id, street: street_id, house: house_num, flat: flat_num, addr_cmp: this.addr.id }, this.params),
+			params: Ext.applyIf({ place: place_id, street: street_id, house: house_num, flat: flat_num, zipcode: zipcode, addr_cmp: this.addr.id }, this.params),
 			success: function(response, opts){
 			    smart_eval(response.responseText);
 			    addrCmp.fireEvent('change');
@@ -356,6 +414,9 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		var data =  this.place.getStore().data.get(val);
 		if (data != undefined) {
 			data = data.data;
+		    if (data.zipcode) {
+		        this.zipcode.setValue(data.zipcode)
+		    }
 		} else {
 			this.place.setValue('');
 		}
@@ -369,6 +430,9 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		var data =  this.street.getStore().data.get(val);
 		if (data != undefined) {
 			data = data.data;
+		    if (data.zipcode) {
+		        this.zipcode.setValue(data.zipcode)
+		    }
 		} else {
 			this.clearStreet();
 		}
@@ -385,6 +449,12 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	}
 	, onChangeFlat: function(){
 		this.fireEvent('change_flat', this, this.flat.getValue());
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeZipcode: function(){
+		this.fireEvent('change_zipcode', this, this.zipcode.getValue());
 		if (this.addr_visible) {
 			this.getNewAddr();
 		}
