@@ -10,6 +10,7 @@ Created on 21.12.2010
 
 from django.db import transaction
 
+from m3.helpers import logger
 from m3.data.caching import RuntimeCache
 
 from exceptions import (DropM3AuditCacheException, 
@@ -61,4 +62,7 @@ class AuditManager(object):
         '''
         audit = self.get(audit_name, None)
         if audit:
-            audit.write(user=user, *args, **kwargs)
+            try:
+                audit.write(user=user, *args, **kwargs)
+            except:
+                logger.exception(u'Не удалось записать результаты аудита \'%s\'' % audit_name)
