@@ -178,7 +178,7 @@ class TreeEditNodeWindowAction(Action):
         
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
-            win.make_read_only()
+            win.make_read_only(access_off = True, exclude_list = ['close_btn','cancel_btn'])
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
     
