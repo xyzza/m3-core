@@ -9,6 +9,7 @@ Created on 17.12.2010
 
 from django.db import models
 from django.core import serializers
+from django.contrib.auth.models import User, AnonymousUser
 from manager import AuditManager
 
 
@@ -41,11 +42,15 @@ class BaseAuditModel(models.Model):
         '''
         Заполняет значения полей моделей на основе переданного пользователя
         '''
-        self.username = user.username
-        self.userid = user.id
-        self.user_fio = (user.first_name + ' ' + user.last_name).strip()
-        
-    
+        if isinstance(user, User):
+            self.username = user.username
+            self.userid = user.id  
+            self.user_fio = (user.first_name + ' ' + user.last_name).strip()
+        elif isinstance(user, AnonymousUser):
+            self.username = 'anonymous'
+            self.userid = 0
+            self.user_fio = u'<Анонимный пользователь>'
+
     
 class BaseModelChangeAuditModel(BaseAuditModel):
     '''
