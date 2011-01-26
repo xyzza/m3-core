@@ -498,11 +498,15 @@ class ActionController(object):
         if matched:
             stack, action = matched
             
-            try:
+            if settings.DEBUG:
+                # Записывает сообщение в логгер если включен тестовый режим
+                try:
+                    result = self._invoke(request, action, stack)
+                except:
+                    logger.exception(u'ActionController.process_request: перехвачена необработанная ошибка')
+                    raise
+            else:
                 result = self._invoke(request, action, stack)
-            except:
-                logger.exception(u'ActionController.process_request: перехвачена необработанная ошибка')
-                raise
             
             if isinstance(result, ActionResult):
                 return result.get_http_response()
