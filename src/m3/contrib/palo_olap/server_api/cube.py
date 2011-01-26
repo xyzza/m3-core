@@ -292,14 +292,14 @@ class PaloCube():
         self.save()
         return Res.read()
 
-    def replace_bulk(self, Coordinates, Values, Splash = 0):
+    def replace_bulk(self, paths, values, Splash = 0):
         '''
         Заменить данные множества ячеек
         '''
         #http://localhost:7777/cell/replace_bulk?sid=0000&database=1&cube=7&paths=1,1,1,1,1,1:2,2,2,2,2,2&values=123.00:-1&splash=1
         CMD = 'cell/replace_bulk'
-        paths = self.getAreaPath(Coordinates)
-        values = self.getValuePath(Values)
+#        paths = self.getAreaPath(Coordinates)
+#        values = self.getValuePath(Values)
         Param = {'paths': paths,
                  'values': values,
                  'splash': Splash}
