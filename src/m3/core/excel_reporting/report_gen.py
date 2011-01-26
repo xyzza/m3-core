@@ -146,6 +146,15 @@ class BaseReport:
             ofp = self._norm_path(ofp)
             obj["TEMPLATE_FILE_PATH"] = tfp
             obj["OUTPUT_FILE_PATH"]   = ofp
+
+            #Если пытаемся сохранить файл в несуществующую директорию, то попробуем ее предварительно создать
+            if os.path.exists(ofp) == False:
+                try:
+                    cat = os.path.split(ofp)[0]
+                    os.makedirs(cat)
+                except :
+                    raise ReportGeneratorError("Can't access to specified result file path ")
+
             # Тут генерится экселька
             make_report_from_object(obj)
         
