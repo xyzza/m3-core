@@ -129,7 +129,7 @@ class ActionContext(object):
             # request.REQUEST читается и в какой-то момент связь прекращается
             # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка 
             # IOError: request data read error
-            logger.warning(err)
+            logger.warning(str(err))
         
         # переносим обязательные параметры, которые не встретились в запросе
         for rule in rules if rules else []:
