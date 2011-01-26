@@ -148,9 +148,9 @@ class BaseReport:
             obj["OUTPUT_FILE_PATH"]   = ofp
 
             #Если пытаемся сохранить файл в несуществующую директорию, то попробуем ее предварительно создать
-            if os.path.exists(ofp) == False:
+            cat = os.path.split(ofp)[0]
+            if not os.path.exists(cat):
                 try:
-                    cat = os.path.split(ofp)[0]
                     os.makedirs(cat)
                 except :
                     raise ReportGeneratorError("Can't access to specified result file path ")
