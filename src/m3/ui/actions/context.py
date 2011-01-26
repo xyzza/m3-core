@@ -7,6 +7,7 @@
 
 import datetime
 import json
+from m3.helpers import logger
 
 class ActionContextDeclaration(object):
     '''
@@ -110,18 +111,25 @@ class ActionContext(object):
             for rule in rules:
                 params[rule.name] = [rule.type, False] # [тип параметра; признак того, что параметр включен в context]
         
-        # переносим параметры в контекст из запроса
-        for key in request.REQUEST:
-            value = request.REQUEST[key]
-            # Пустые параметры не конвертируем, т.к. они могут вызвать ошибку
-            if not value:
-                continue
-            # 
-            if params.has_key(key):
-                value = self.convert_value(value, params[key][0])    
-                # Флаг того, что параметр успешно расшифрован и добавлен в контекст
-                params[key][1] = True
-            setattr(self, key, value)
+        try:
+            # переносим параметры в контекст из запроса
+            for key in request.REQUEST:
+                value = request.REQUEST[key]
+                # Пустые параметры не конвертируем, т.к. они могут вызвать ошибку
+                if not value:
+                    continue
+                # 
+                if params.has_key(key):
+                    value = self.convert_value(value, params[key][0])    
+                    # Флаг того, что параметр успешно расшифрован и добавлен в контекст
+                    params[key][1] = True
+                setattr(self, key, value)
+        except IOError as err:
+            # В некоторых браузерах (предполагается что в ie) происходит следующие:
+            # request.REQUEST читается и в какой-то момент связь прекращается
+            # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка 
+            # IOError: request data read error
+            logger.warning(err)
         
         # переносим обязательные параметры, которые не встретились в запросе
         for rule in rules if rules else []:
