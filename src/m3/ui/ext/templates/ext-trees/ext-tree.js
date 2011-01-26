@@ -23,7 +23,7 @@ function(){
 	    ,animate: true
 	    {% if component.drag_drop and not component.read_only%} 
 		,enableDD: true 
-		,dropConfig: {allowContainerDrop: true }
+		,dropConfig: {allowContainerDrop: {{ component.allow_container_drop|lower }} }
 		{% endif %}
 	    ,containerScroll: true
 	    ,border: false
