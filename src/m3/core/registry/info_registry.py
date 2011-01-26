@@ -74,6 +74,13 @@ class OverlapError(Exception):
     r"""Исключение возникающее при наложении интервалов друг на друга."""
     pass
 
+class InvalidIntervalError(Exception):
+    '''
+    Исключение возникающее при неверно заданом интервале,
+    например если конечная дата меньше начальной.
+    '''
+    pass
+
 
 class BaseInfoModel(models.Model):
 
@@ -396,7 +403,7 @@ class BaseIntervalInfoModel(models.Model):
         self.info_date_end = normdate(self.period,self.info_date_end, False)
         
         if self.period != PERIOD_INFTY and (self.info_date_begin > self.info_date_end):
-            raise Exception('Interval is invalid!')
+            raise InvalidIntervalError("info_date_begin > info_date_end")
         
         # проверим на уникальность записи
         if self.period != PERIOD_INFTY:
