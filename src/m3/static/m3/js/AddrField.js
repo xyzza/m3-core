@@ -49,6 +49,16 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		});		
 		this.place.setValue(params.place_value);
 		
+        this.zipcode = new Ext.form.TextField({
+            name: params.zipcode_field_name,
+            value: params.zipcode_value,
+            emptyText: 'индекс',
+            readOnly: params.read_only,
+            cls: field_cls,
+            width: 55,
+            maskRe: /[0-9]/
+        });
+		
 		if (params.level > 1) {
 			var street_store = new Ext.data.JsonStore({
 				url: params.street_url,
@@ -104,16 +114,6 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					width: 40
 				});
 				
-		        this.zipcode = new Ext.form.TextField({
-			        name: params.zipcode_field_name,
-			        value: params.zipcode_value,
-			        emptyText: 'индекс',
-			        readOnly: params.read_only,
-			        cls: field_cls,
-			        width: 55,
-			        maskRe: /[0-9]/
-			
-		        });
 				if (params.level > 3) {
 					this.flat = new Ext.form.TextField({
 						name: params.flat_field_name,

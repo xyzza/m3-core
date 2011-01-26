@@ -1,11 +1,8 @@
 #coding:utf-8
 
-from django.db.models.query_utils import Q
-
 from m3.ui.ext.containers.base import BaseExtContainer
 from m3.ui.ext.fields.simple import ExtHiddenField
-from m3.ui.actions import Action, PreJsonResult, OperationResult
-from m3.contrib.kladr.models import KladrGeo, KladrStreet
+
 from actions import KLADRPack, kladr_controller
 
 class ExtAddrComponent(BaseExtContainer):
@@ -24,29 +21,34 @@ class ExtAddrComponent(BaseExtContainer):
     
     def __init__(self, *args, **kwargs):
         super(ExtAddrComponent, self).__init__(*args, **kwargs)
+        # Названия полей к которым биндится КЛАДР
         self.place_field_name = 'place'
         self.street_field_name = 'street'
         self.house_field_name = 'house'
         self.flat_field_name = 'flat'
         self.zipcode_field_name = 'zipcode'
         self.addr_field_name = 'addr'
+        
+        # Названия меток
         self.place_label = u'Населенный пункт'
         self.street_label = u'Улица'
         self.house_label = u'Дом/Корпус'
         self.flat_label = u'Квартира'
         self.addr_label = u'Адрес'
         
+        # Атрибуты определяющие необходимость заполенения полей
         self.place_allow_blank = True
         self.street_allow_blank = True
         self.house_allow_blank = True
         self.flat_allow_blank = True
+        
+        self.addr_visible = True
         self.read_only = False
+        self.level = ExtAddrComponent.FLAT
+        self.view_mode = ExtAddrComponent.VIEW_2
         
         self.pack = kladr_controller.find_pack(KLADRPack)
         #self.action_getaddr = self.pack.get_addr_action
-        self.level = ExtAddrComponent.FLAT
-        self.addr_visible = True
-        self.view_mode = ExtAddrComponent.VIEW_2
         self.init_component(*args, **kwargs)
         self.layout = 'form'
         self.template = 'ext-fields/ext-addr-field.js'
@@ -62,6 +64,8 @@ class ExtAddrComponent(BaseExtContainer):
         self._items.append(self.house)
         self._items.append(self.flat)
         self._items.append(self.zipcode)
+        
+        # Установка высоты - самый главный хак в этом коде!
         if self.view_mode == ExtAddrComponent.VIEW_1:
             self.height = 25
         elif self.view_mode == ExtAddrComponent.VIEW_2:
