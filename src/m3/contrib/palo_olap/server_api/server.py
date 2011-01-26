@@ -16,14 +16,14 @@ class PaloOlapError(Exception):
 USE_PROXY = False
 
 class PaloServer():
-    def __init__(self, server_host = False, user = False, password = False):
+    def __init__(self, server_host = False, user = False, password = False, server_port = 7777):
         
         self.Config = PaloServerConfig()
         
         self.useProxy = USE_PROXY
         self.ProxyUrl = self.Config.getProxyUrl() ##'http://wp1.gbleo.lan:80/'
         self.ServerHost = server_host if server_host else self.Config.getPaloHost()
-        self.ServerPort = self.Config.getPaloPort()
+        self.ServerPort = server_port if server_port else self.Config.getPaloPort()
         self.ServerRoot = "http://%s:%s/" % (self.ServerHost, self.ServerPort)
         self.Client = urllib.FancyURLopener({'http': self.ProxyUrl}) if self.useProxy else urllib2
 #        self.getUrlResult = urllib.FancyURLopener({'http': self.ProxyUrl}).open if self.useProxy else urllib2.urlopen

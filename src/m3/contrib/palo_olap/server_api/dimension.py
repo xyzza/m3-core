@@ -227,4 +227,5 @@ class PaloDimension():
             except UnicodeDecodeError:
                 name = name[1:-1]
             res.append((id, name))
+        return res
         

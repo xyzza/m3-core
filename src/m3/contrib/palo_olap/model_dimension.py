@@ -24,7 +24,6 @@ class ModelBassedPaloDimension(BasePaloDimension):
     _consolidate_store_model = None #автогенерируемая модель для хранения консолидированных элементов модели
     _delete_lock = threading.Lock() #блокировка чтоб во время обработки никто не удалял измерение
     _change_lock = threading.Lock() #блокировка чтоб во время обработки никто не изменил измерение
-    _dim = None #PaloDimension with connect
     _not_unique_name = {}
     
     @classmethod
@@ -45,18 +44,26 @@ class ModelBassedPaloDimension(BasePaloDimension):
         models.signals.pre_delete.connect(cls.pre_delete_model, sender=cls.model)
     
     @classmethod
+    def get_store_related_name(cls):
+        '''
+        получить атрибут related_name для связанной модели
+        '''
+        res = cls.__name__ + 'Store'
+        return res.lower()
+    
+    @classmethod
     def create_store_model(cls):
         '''
         создание связанной модели для хранние идишники пало и информации о изменнии элементов целевой модели
         созданеи ведеться путем наследования от BaseStoreRelatedModel и добавление instance = ForeignKey
         '''
-        model_name = cls.__name__ + '_store' 
+        model_name = cls.__name__ + 'Store' 
         attrs = dict()
         attrs['__module__'] =  cls.__module__
-        attrs['instance'] = models.ForeignKey(cls.model, null=True)
+        attrs['instance'] = models.OneToOneField(cls.model, null=True, related_name = cls.get_store_related_name())
         if cls.make_tree:
             #для древовидной структыры нам надо помнить родителя т.к. если эелмент переносят в другую ветку то из какой перенесли мы узнаем отсюда
-            attrs['instance_parent'] = models.ForeignKey(cls.model, null=True, related_name='instance_parent')  
+            attrs['instance_parent'] = models.ForeignKey(cls.model, null=True, related_name=cls.get_store_related_name() + '_parent')  
         cls._store_model = type(model_name, (BaseStoreRelatedModel,), attrs)
         
     @classmethod
@@ -65,7 +72,7 @@ class ModelBassedPaloDimension(BasePaloDimension):
         создание связанной модели для хранние идишники пало для консолидированных элементов
         созданеи ведеться путем наследования от BaseConsolidateStoreModel 
         '''
-        model_name = cls.__name__ + '_consolidate_store' 
+        model_name = cls.__name__ + 'ConsolidateStore' 
         attrs = dict(__module__=cls.__module__)
         cls._consolidate_store_model = type(model_name, (BaseConsolidateStoreModel,), attrs)
         
@@ -114,7 +121,7 @@ class ModelBassedPaloDimension(BasePaloDimension):
         result[u'Новых'] = self.process_new_items()
         result[u'Удаленных'] = self.process_deleted_items()
         result[u'Измененных'] = self.process_changed_items()
-        self._processed = True
+        self.after_process()
         
         return result
     
@@ -141,9 +148,12 @@ class ModelBassedPaloDimension(BasePaloDimension):
         '''
         возвращает имя элемента или по фиелду или по функции
         '''
-        name = getattr(obj,self.name_field)
+        name = getattr(obj,self.name_field)        
         if self._not_unique_name.has_key(name):
             name = self.regenerate_name(obj)
+        name = name.strip()
+        if name.find(',')>=-1:
+            name = u'"%s"' % name
         return name
     
     def get_not_unique_names(self):
@@ -157,7 +167,6 @@ class ModelBassedPaloDimension(BasePaloDimension):
         for o in query:
             res[o[self.name_field]] = o['cnt']
 
-        print res
         return res
     
     def regenerate_name(self, obj):
@@ -210,7 +219,7 @@ class ModelBassedPaloDimension(BasePaloDimension):
                 #ну вот всех добавили теперь обработаем добавление в косолидейшен элементы
                 for cons, childs in append_to_consolidate.items():
                     if cons is None:
-                        cons_id = self.get_all_consolidate_element()
+                        cons_id = self.get_all_consolidate_element_id()
                     else:
                         cons_id = cached_id.get(cons)
                         if not cons_id:
@@ -220,16 +229,17 @@ class ModelBassedPaloDimension(BasePaloDimension):
         finally:
             self.__class__._delete_lock.release()
             
-    def get_all_consolidate_element(self):
+    def get_all_consolidate_element_id(self):
         '''
         возвращает пало ид консолидайт элемента "ВСЕ"
         '''
         return self._all_id
             
-    def get_unknown_element(self):
+    def get_unknown_element_id(self):
         '''
         возвращает пало ид консолидайт элемента "ВСЕ"
         '''
+        assert self._processed
         return self._unknown_id
     
     def get_palo_id(self, id):
@@ -257,35 +267,28 @@ class ModelBassedPaloDimension(BasePaloDimension):
         '''
         start_proc_time = datetime.datetime.now()
         query = self.get_model_query()
-        st = self._store_model.__name__.lower()
+        st = self.get_store_related_name()
         filter = {'%s__palo_id__isnull' % st :False,
                   '%s__processed' % st :False,
                   }
         query = query.select_related(st).filter(**filter)
-        print query.query
-#        table = getattr(connection, 'ops').quote_name(self._store_model._meta.db_table)
-#        query = query.extra(select={'palo_id':'%s.palo_id'%table,
-#                                    'olap_store_id':'%s.id'%table,})
-#        if self.make_tree:
-#            query = query.extra(select={'instance_parent_id':'%s.instance_parent_id'%table})
-#            query = query.extra(select={'store_id':'%s.id'%table})
-            
+        
         changed_parents = list() #список идишников модели (не пола) у ктороых поменялись родители
 
         query = list(query)
         if query:
             for obj in query:
-                palo_id = obj.palo_id
+                palo_id = getattr(obj, st).palo_id
                 self._dim.renameElement(palo_id, self.get_name(obj))
                 if self.make_tree:
                     #запомним родителей которых надо пересчитывать
                     new_parent = self.get_parent(obj)
-                    old_parent = obj.instance_parent_id
+                    old_parent = getattr(obj, st).instance_parent_id
                     if new_parent <> old_parent:
                         #элемент перенесли запомним нового и старого родителя
                         changed_parents.append(new_parent) 
                         changed_parents.append(old_parent)
-                        st = self._store_model.objects.get(id=obj.olap_store_id)
+                        st = self._store_model.objects.get(id=getattr(obj, st).id)
                         st.instance_parent_id = new_parent
                         st.save() 
             #отметим что обработали    
@@ -342,7 +345,7 @@ class BaseStoreRelatedModel(models.Model):
     модель для хранения связанных атрибутов для элементов выбранной модели
     наследники модели генерируеться автоматически
     '''
-#    instance = models.ForeignKey('self') #этот атрибут сгенерируеться автоматически
+#    instance = models.OneToOneField('self', null=True, related_name=...) #этот атрибут сгенерируеться автоматически
     palo_id = models.IntegerField(null=True)
     processed = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
