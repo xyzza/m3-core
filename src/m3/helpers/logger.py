@@ -68,6 +68,9 @@ def info(msg, *args, **kwargs):
     log = logging.getLogger('info_logger')
     msg = get_session_info(kwargs.get('request', None)) + msg
     log.info(msg)
+    
+    # Отправка на почту
+    send_mail_log(msg, 'INFO')
 
 def error(msg, *args, **kwargs):
     log = logging.getLogger('error_logger')
@@ -161,8 +164,9 @@ def send_mail_log(msg, err_name='', level=''):
         conn = get_connection(auth_user = settings.EMAIL_HOST_USER,
                       auth_password= settings.EMAIL_HOST_PASSWORD)
         
-        
-        uname = os.uname()
+        # uname есть только по nix системами
+        uname = os.uname() if hasattr(os, 'uname') and callable(os.uname) else [None, 'win']
+         
         msg = linebreaks(msg)
         d = {'body': msg, 'from_email': email_from, 'to': email_list,
              'subject': u'Логер - %s - %s %s' % (uname[1], level, err_name)}
