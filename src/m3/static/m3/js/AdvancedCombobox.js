@@ -5,8 +5,6 @@
  */
 Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	constructor: function(baseConfig, params){
-		//console.log(baseConfig);
-		//console.log(params);
 		
 		/**
 		 * Инициализация значений
@@ -468,6 +466,10 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
         }
 		if(this.wrap){
             this.wrap.removeClass(this.wrapFocusClass);
+        }
+        // Очистка значения, если в автоподборе ничего не выбрано
+        if (!this.getValue() && this.lastQuery) {
+            this.setRawValue('');
         }
 	}
 });
