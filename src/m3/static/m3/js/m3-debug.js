@@ -11754,8 +11754,9 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
         }
         // Очистка значения, если в автоподборе ничего не выбрано
         if (!this.getValue() && this.lastQuery) {
-            this.setRawValue('');
+            this.setRawValue('');            
         }
+        this.validate();
 	}
 });
 
