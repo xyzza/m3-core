@@ -142,8 +142,7 @@ def catch_error_500(request, *args, **kwargs):
     '''
     exception(get_session_info(request), exc_info = True)
     return HttpResponseServerError(render_to_string("500.html"))
-    
-    
+        
 #===============================================================================
 def send_mail_log(msg, err_name='', level=''):
     '''
@@ -164,8 +163,9 @@ def send_mail_log(msg, err_name='', level=''):
         conn = get_connection(auth_user = settings.EMAIL_HOST_USER,
                       auth_password= settings.EMAIL_HOST_PASSWORD)
         
-        # uname есть только по nix системами
-        uname = os.uname() if hasattr(os, 'uname') and callable(os.uname) else [None, 'win']
+        # uname есть только по nix системами, на остальных смотрим переменную
+        # среды os.getenv('USERNAME')
+        uname = os.uname() if hasattr(os, 'uname') and callable(os.uname) else os.getenv('USERNAME')
          
         msg = linebreaks(msg)
         d = {'body': msg, 'from_email': email_from, 'to': email_list,

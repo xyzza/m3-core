@@ -245,8 +245,8 @@ class ExtTextArea(BaseExtField):
         return '/%s/' % self.mask_re
 
     def render_base_config(self):
-        if self.value:
-            self.value = normalize(self.value)
+        #if self.value:
+        #    self.value = normalize(self.value)
         
         super(ExtTextArea, self).render_base_config()
         self._put_config_value('maskRe', self.t_render_mask_re, self.mask_re)
