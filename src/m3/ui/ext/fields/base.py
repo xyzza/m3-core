@@ -92,6 +92,7 @@ class BaseExtField(ExtUIComponent):
         self.regex      = self.regex_text      = None
         self.tab_index = None
         self.invalid_class = 'm3-form-invalid'
+        self.invalid_text = None
    
     def t_render_label_style(self):
         return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
@@ -150,6 +151,7 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('tabIndex', self.tab_index)
         self._put_config_value('invalidClass', self.invalid_class)
         self._put_config_value('hideLabel', self.hide_label)
+        self._put_config_value('invalidText', self.invalid_text)
         
 
     
