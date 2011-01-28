@@ -125,8 +125,6 @@ class ReportGenerator{
 		
 		this.in_book = book;
 		this.root = json;
-		in_sheet = book.getSheetAt(0);
-		out_sheet = createShadowSheet();
 		
 		// Инициализация всяких констант ;)
 		initializeConstants();
@@ -601,13 +599,16 @@ class ReportGenerator{
 
 		outCell.setCellValue(cell_text);
 	}
-
+	
+	static final String SHEET_COPY_PREFIX = "m3_copy_";
+	
 	/**
 	 * Возвращает новый лист со скопированными глобальными параметрами
+	 * @param in_sheet лист с которого будет браться копия
 	 * @return
 	 */
-	public Sheet createShadowSheet(){
-		Sheet out_sheet = in_book.createSheet("RESULT");
+	public Sheet createShadowSheet(Sheet in_sheet){
+		Sheet out_sheet = in_book.createSheet(SHEET_COPY_PREFIX + in_sheet.getSheetName());
 		// Пока только ширины колонок
 		for (int i = 0; i < 256; i++){
 			int width = in_sheet.getColumnWidth(i);
@@ -901,21 +902,24 @@ class ReportGenerator{
 	 * Обрабатывает на странице теги повторяющихся строк и колонок. Это нужно например для заголовков длинных таблиц.
 	 * Теги определяются в комментариях #ПовторятьСтроку и #ПовторятьКолонку и закрываются на ##...
 	 * Важно! Таги должны быть заданы в первой строке или первой колонке! Интервал повторения один и непрерывный!
-	 * @param sheet Страница для обработки
+	 * @param repeat_cells Список из диапазонов повторяющихся ячеек
 	 */
-	public void setRepeatedArea(int destSheetIndex){
-		if (cell_repeat_tag_start != null){
-			RepeatedArea area = new RepeatedArea();
-			if (cell_repeat_tag_end != null){
-				// Есть завершающий тег, то повторять интервал между ними
-				area.start_row = cell_repeat_tag_start.getRowIndex();
-				area.end_row = cell_repeat_tag_end.getRowIndex();
-			}else{
-				// Если нет закрывающего тега, то повторять только одну строку
-				area.start_row = cell_repeat_tag_start.getRowIndex();
-				area.end_row = cell_repeat_tag_start.getRowIndex();
-			}
-			in_book.setRepeatingRowsAndColumns(destSheetIndex, area.start_col, area.end_col, area.start_row, area.end_row);
+	public void setRepeatedArea(ArrayList<RepeatCells> repeat_cells){
+		for (RepeatCells rc: repeat_cells){
+			if (rc.start_cell != null){
+				RepeatedArea area = new RepeatedArea();
+				if (rc.end_cell != null){
+					// Есть завершающий тег, то повторять интервал между ними
+					area.start_row = rc.start_cell.getRowIndex();
+					area.end_row = rc.end_cell.getRowIndex();
+				}else{
+					// Если нет закрывающего тега, то повторять только одну строку
+					area.start_row = rc.start_cell.getRowIndex();
+					area.end_row = rc.start_cell.getRowIndex();
+				}
+				int shi = in_book.getSheetIndex(rc.sheet);
+				in_book.setRepeatingRowsAndColumns(shi, area.start_col, area.end_col, area.start_row, area.end_row);
+			}	
 		}
 	}
 	
@@ -956,36 +960,67 @@ class ReportGenerator{
 	 * @throws Exception
 	 */
 	public void generate() throws Exception {
-		// Предварительная развертка горизонтальных регионов		
-		grow_horizontal_regions();
-		clean_unused_tags(in_sheet);
 		
-		merged_regions = getMergedRegions(in_sheet);
+		String active_sheet_name = in_book.getSheetName(in_book.getActiveSheetIndex());
+		ArrayList<RepeatCells> repeat_cells = new ArrayList<RepeatCells>();
 		
-		Range range = new Range();
-		range.start_row = in_sheet.getFirstRowNum();
-		range.end_row = in_sheet.getLastRowNum();
-		renderRange(root, range, range.start_row);
+		// Существующие листы нельзя запомнить как ссылки, индексы или количество - они меняются!
+		// Остается только уникальное имя листа
+		ArrayList<String> orig_sheets_names = new ArrayList<String>();
+		for (int sheet_index = 0; sheet_index < in_book.getNumberOfSheets(); sheet_index++){
+			orig_sheets_names.add(in_book.getSheetName(sheet_index));
+		}
 		
-		// Копируем область печати (больше не копируем - должна определяться сама при предв. просмотре в экселе)
-//		String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
+		// Обрабатываем каждый лист в книге
+		int sheet_count = in_book.getNumberOfSheets();
+		for (int sheet_index = 0; sheet_index < sheet_count; sheet_index++){
+			cell_repeat_tag_start = null;
+			cell_repeat_tag_end = null;
+			
+			in_sheet = in_book.getSheetAt(sheet_index);
+			out_sheet = createShadowSheet(in_sheet);
+			
+			// Предварительная развертка горизонтальных регионов
+			grow_horizontal_regions();
+			clean_unused_tags(in_sheet);
 		
-		// Подмена листов. Удаляем шаблонный лист и активируем результат
-		String name = in_sheet.getSheetName();
-		in_book.removeSheetAt(in_book.getSheetIndex(in_sheet));
-		in_book.setSheetName(in_book.getSheetIndex(out_sheet), name);
+			merged_regions = getMergedRegions(in_sheet);
 		
+			Range range = new Range();
+			range.start_row = in_sheet.getFirstRowNum();
+			range.end_row = in_sheet.getLastRowNum();
+			renderRange(root, range, range.start_row);
+			
+			repeat_cells.add(new RepeatCells(out_sheet, cell_repeat_tag_start, cell_repeat_tag_end));
+			
+			// Копируем область печати (больше не копируем - должна определяться сама при предв. просмотре в экселе)
+			//String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
+		}
+		
+		// Удаляем старые листы
+		for (String sh: orig_sheets_names){
+			in_book.removeSheetAt(in_book.getSheetIndex(sh));
+		}
+		
+		// Оставшимся листам возвращаем оригинальные имена удаляя постфикс
+		for (int sheet_index = 0; sheet_index < in_book.getNumberOfSheets(); sheet_index++){
+			String name = in_book.getSheetName(sheet_index);
+			name = name.substring(SHEET_COPY_PREFIX.length());			
+			in_book.setSheetName(sheet_index, name);
+		}
+		
+		// Устанавливаем повторяющиеся ячейки
+		setRepeatedArea(repeat_cells);
+		
+		// Возвращаем активность исходному листу
+		in_book.setActiveSheet(in_book.getSheetIndex(active_sheet_name));
+		in_book.setSelectedTab(in_book.getSheetIndex(active_sheet_name));
+
 //		if (area != null){
 //			int t = area.indexOf('!');
 //			area = area.substring(t + 1);
 //			in_book.setPrintArea(in_book.getSheetIndex(out_sheet), area);
 //		}
-		
-		setRepeatedArea(in_book.getSheetIndex(out_sheet));
-		
-		// Новую закладку делаем активной
-		in_book.setActiveSheet(in_book.getSheetIndex(out_sheet));
-		in_book.setSelectedTab(in_book.getSheetIndex(out_sheet));
 		
 	    // Пишем результат
 		String outfile = (String)root.get("OUTPUT_FILE_PATH");
@@ -1007,7 +1042,21 @@ class Range{
 }
 
 /*
- * Класс описывает прямоугольную область на страце
+ * В питоне вместо этого класса можно было применить tuple ;)
+ */
+class RepeatCells{
+	Sheet sheet;
+	Cell start_cell;
+	Cell end_cell;
+	public RepeatCells(Sheet sheet, Cell start, Cell end){
+		this.sheet = sheet;
+		this.start_cell = start;
+		this.end_cell = end;
+	}
+}
+
+/*
+ * Класс описывает прямоугольную область на странице
  */
 class SheetRegion{
 	int start_row;
