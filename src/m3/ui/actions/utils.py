@@ -6,6 +6,7 @@ import json
 
 from django.db.models.query_utils import Q
 from django.db import models, connection, transaction, IntegrityError
+from m3.helpers import logger
 
 def apply_sort_order(query, columns, sort_order):
     '''
@@ -256,8 +257,16 @@ def fetch_search_tree(model, filter, branch_id = None):
     return tree
     
 def extract_int(request, key):
-    ''' Извлекает целое число из запроса '''
-    value = request.REQUEST.get(key, None)
+    ''' Извлекает целое число из запроса '''            
+    try:
+        value = request.REQUEST.get(key, None)
+    except IOError as err:
+        # В некоторых браузерах (предполагается что в ie) происходит следующие:
+        # request.REQUEST читается и в какой-то момент связь прекращается
+        # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка 
+        # IOError: request data read error
+        logger.warning(str(err))
+    
     if value:
         return int(value)
     else:
