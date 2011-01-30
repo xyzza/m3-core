@@ -270,9 +270,13 @@ def extract_int(request, key):
         # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка 
         # IOError: request data read error
         logger.warning(str(err))
-    
     if value:
-        return int(value)
+        # если по каким-то причинам пришло не число, а что-то другое
+        try:
+            value = int(value)
+        except ValueError:
+            raise ApplicationLogicException('Произошла ошибка при конвертации.')    
+        return value
     else:
         return 0
     
