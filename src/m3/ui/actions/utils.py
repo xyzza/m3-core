@@ -2,6 +2,7 @@
 '''
 Вспомогательные функции используемые в паках
 '''
+from m3.core.exceptions import ApplicationLogicException
 import json
 
 from django.db.models.query_utils import Q
@@ -126,6 +127,9 @@ def bind_object_from_request_to_form(request, obj_factory, form):
     # Получаем объект по id
     id = extract_int(request, 'id')
     obj = obj_factory(id)
+    if obj is None:
+        raise ApplicationLogicException('Такого элемента не существует, возможно он был удален.\
+                                         Обновите содержимое.')
     # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
     create_new = True
     if isinstance(obj, dict) and obj.get('id') != None:
