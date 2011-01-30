@@ -17,7 +17,7 @@ from django import template as django_template
 from django.conf import settings
 
 from m3.ui.ext import render_template, render_component
-from m3.helpers import js, generate_client_id
+from m3.helpers import js, generate_client_id, normalize
 
 #===============================================================================
 class ExtUIScriptRenderer(object):
@@ -213,7 +213,7 @@ class BaseExtComponent(object):
  
             # если в строке уже есть апостроф, то будет очень больно. 
             # поэтому replace
-            res = "'%s'" % self.__check_unicode( item ).replace("'", "\\'").replace('\n', '\\n')  
+            res = "'%s'" % normalize( self.__check_unicode(item))
             
         elif isinstance(item, bool):
             res = str(item).lower()
