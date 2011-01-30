@@ -12,8 +12,8 @@ def normalize(str):
     '''
     return str.replace('\r','\\r').\
         replace('\n','\\n').\
-        replace('\"','\\"').\
-        replace("\'","\\'")
+        replace('"','\\"').\
+        replace("'","\\'")
 
 
 def generate_client_id():

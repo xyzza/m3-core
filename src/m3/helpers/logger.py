@@ -165,11 +165,12 @@ def send_mail_log(msg, err_name='', level=''):
         
         # uname есть только по nix системами, на остальных смотрим переменную
         # среды os.getenv('USERNAME')
-        uname = os.uname() if hasattr(os, 'uname') and callable(os.uname) else os.getenv('USERNAME')
+        # 2-ой параметр - имя системы 
+        uname = os.uname()[1] if hasattr(os, 'uname') and callable(os.uname) else os.getenv('USERNAME')
          
         msg = linebreaks(msg)
         d = {'body': msg, 'from_email': email_from, 'to': email_list,
-             'subject': u'Логер - %s - %s %s' % (uname[1], level, err_name)}
+             'subject': u'Логер - %s - %s %s' % (uname, level, err_name)}
         message = EmailMessage(**d)
         message.content_subtype = "html"
         conn.send_messages([message,])
