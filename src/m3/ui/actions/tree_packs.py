@@ -7,11 +7,11 @@ from django.db import transaction
 from django.dispatch import Signal
 
 from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult,\
-    ActionContextDeclaration
+    ActionContextDeclaration, ACD
 from m3.ui.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
-from m3.ui.actions.packs import ListDeleteRowAction
+from m3.ui.actions.packs import ListDeleteRowAction, MSG_DOESNOTEXISTS, ObjectNotFound
 from m3.ui.ext.containers import ExtPagingBar
 from m3.db import BaseObjectModel
 from m3.core.exceptions import RelatedError
@@ -51,9 +51,14 @@ class TreeGetNodeAction(Action):
     Вызывает функцию получения узла дерева (нужно для редактирования в карточке)
     '''
     url = '/node$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name=u'id группы справочника')]
+    
     def run(self, request, context):
-        id = utils.extract_int(request, 'id')
-        result = self.parent.get_node(id)
+        try:
+            result = self.parent.get_node(context.id)
+        except self.parent._group_nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
         return PreJsonResult(result)
 
 class TreeSaveNodeAction(Action):
@@ -61,13 +66,20 @@ class TreeSaveNodeAction(Action):
     Вызывает функцию сохранения узла дерева.
     '''
     url = '/save_node$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name=u'id группы справочника')]
+    
     def run(self, request, context):
         # Создаем форму для биндинга к ней
         win = self.parent.edit_node_window()
         win.form.bind_to_request(request)
+        
         # Получаем наш объект по id
-        id = utils.extract_int(request, 'id')
-        obj = self.parent.get_node(id)
+        try:
+            obj = self.parent.get_node(context.id)
+        except self.parent._group_nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
+        
         # Биндим форму к объекту
         win.form.to_object(obj)
         result = self.parent.validate_node(obj, request)
@@ -82,9 +94,15 @@ class TreeDeleteNodeAction(Action):
     Получает узел из запроса и откправляет его на удаление
     '''
     url = '/delete_node$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name=u'id группы справочника')]    
+    
     def run(self, request, context):
-        id = utils.extract_int(request, 'id')
-        obj = self.parent.get_node(id)
+        try:
+            obj = self.parent.get_node(context.id)
+        except self.parent._group_nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
+            
         return self.parent.delete_node(obj)
 
 class ListGetRowsAction(Action):
@@ -102,15 +120,28 @@ class ListGetRowsAction(Action):
 
 class ListGetRowAction(Action):
     url = '/item$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
+    
     def run(self, request, context):
-        id = utils.extract_int(request, 'id')
-        result = self.parent.get_row(id)
+        try:
+            result = self.parent.get_row(context.id)
+        except self.parent._nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
+        
         return PreJsonResult(result)
 
 class ListSaveRowAction(Action):
     url = '/row$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
+    
     def run(self, request, context):
-        obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        try:
+            obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        except self.parent._nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
+        
         result = self.parent.validate_row(obj, request)
         if result:
             assert isinstance(result, ActionResult)
@@ -127,9 +158,16 @@ class ListEditRowWindowAction(Action):
     Экшен создает окно для редактирования элемента справочника (списка)
     '''
     url = '/grid_edit_window$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
+    
     def run(self, request, context):
         base = self.parent
-        win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+        try:
+            win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+        except self.parent._nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
+            
         if not win.title:
             win.title = base.title
         win.form.url = base.save_row_action.get_absolute_url()
@@ -169,9 +207,16 @@ class TreeEditNodeWindowAction(Action):
     Экшен создает окно для редактирования узла дерева
     '''
     url = '/node_edit_window$'
+    def context_declaration(self):
+        return [ActionContextDeclaration(name='id', type=int, required=True, verbose_name=u'id группы справочника')]
+    
     def run(self, request, context):
         base = self.parent
-        win = utils.bind_object_from_request_to_form(request, base.get_node, base.edit_node_window)
+        try:
+            win = utils.bind_object_from_request_to_form(request, base.get_node, base.edit_node_window)
+        except base._group_nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
+        
         if not win.title:
             win.title = base.title
         win.form.url = base.save_node_action.get_absolute_url()
@@ -437,6 +482,10 @@ class BaseTreeDictionaryActions(ActionPack):
         self.delete_node_action      = TreeDeleteNodeAction()
         self.actions.extend([self.new_node_window_action, self.edit_node_window_action,
                              self.save_node_action, self.delete_node_action])
+        
+        # Исключение перехватываемое в экшенах, если объект или группа объектов не найдена
+        self._nofound_exception = ObjectNotFound 
+        self._group_nofound_exception = ObjectNotFound
     
     #========================== ДЕРЕВО ===========================
     
@@ -566,8 +615,11 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         if self.list_model:
             self.filter_fields = self._default_list_search_filter()
             self.list_sort_order = self._default_order()
+            self._nofound_exception = self.list_model.DoesNotExist
+        
         if self.tree_model:
             self.tree_filter_fields = self._default_tree_search_filter()
+            self._group_nofound_exception = self.tree_model.DoesNotExist
     
     def get_nodes(self, parent_id, filter, branch_id = None):
         # parent_id - это элемент, который раскрывается, поэтому для него фильтр ставить не надо, иначе фильтруем
@@ -693,10 +745,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         if id == 0:
             obj = model()
         else:
-            try:
-                obj = model.objects.get(id = id)
-            except model.DoesNotExist:
-                return None
+            obj = model.objects.get(id = id)
         return obj
     
     def get_node(self, id = 0):
