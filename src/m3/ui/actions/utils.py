@@ -278,12 +278,15 @@ def extract_int(request, key):
     ''' Извлекает целое число из запроса '''            
     try:
         value = request.REQUEST.get(key, None)
-    except IOError as err:
+    except IOError:
         # В некоторых браузерах (предполагается что в ie) происходит следующие:
         # request.REQUEST читается и в какой-то момент связь прекращается
         # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка 
         # IOError: request data read error
-        logger.warning(str(err))
+        
+        #logger.warning(str(err))
+        raise
+        
     if value:
         # если по каким-то причинам пришло не число, а что-то другое
         try:
