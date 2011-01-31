@@ -1,9 +1,9 @@
-#coding:utf-8
+﻿#coding:utf-8
 
 from django.db import transaction
 from django.conf import settings
 
-from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult
+from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult, ACD
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.actions import utils
@@ -13,6 +13,15 @@ from m3.db import BaseObjectModel
 from m3.core.exceptions import RelatedError
 
 from m3.contrib.m3_audit import AuditManager
+
+MSG_DOESNOTEXISTS = u'Запись справочника с id=%s не найдена в базе данных.<br/>' + \
+                    u'Возможно она была удалена. Пожалуйста, обновите таблицу.'
+
+
+class ObjectNotFound(Exception):
+    """ К виртуальным справочникам нельзя применить исключение DoesNotExists, 
+        поэтому если справочник не работает с моделью, то используется это исключение """
+    pass
 
 
 class DictListWindowAction(Action):
@@ -105,11 +114,18 @@ class DictEditWindowAction(Action):
     Редактирование элемента справочника
     '''
     url = '/edit-window$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
+    
     def run(self, request, context):
         base = self.parent
+        
         # Получаем объект по id
-        id = utils.extract_int(request, 'id')
-        obj = base.get_row(id)
+        try:
+            obj = base.get_row(context.id)
+        except base._nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
+        
         # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
         create_new = True
         if isinstance(obj, dict) and obj.get('id') != None:
@@ -174,9 +190,14 @@ class ListGetRowAction(Action):
     Действие, которое отвечает за возврат данных для одного отдельно-взятой записи справочника
     '''
     url = '/item$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
+    
     def run(self, request, context):
-        id = utils.extract_int(request, 'id')
-        result = self.parent.get_row(id)
+        try:
+            result = self.parent.get_row(context.id)
+        except self.parent._nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
         return PreJsonResult(result)
 
 class DictSaveAction(Action):
@@ -184,12 +205,17 @@ class DictSaveAction(Action):
     Действие выполняет сохранение записи справочника.
     '''
     url = '/save$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]    
+    
     def run(self, request, context):
-        id = utils.extract_int(request, 'id')
-        if not id and self.parent.add_window:
-            obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.add_window)
-        else:
-            obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        try:
+            if not context.id and self.parent.add_window:
+                obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.add_window)
+            else:
+                obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+        except self.parent._nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
         
         # Проверка корректности полей сохраняемого объекта    
         result = self.parent.validate_row(obj, request)
@@ -203,7 +229,8 @@ class DictSaveAction(Action):
             # имя параметра с идентификатором запси может уже называться не 
             # id
             if 'm3.contrib.m3_audit' in settings.INSTALLED_APPS:
-                AuditManager().write('dict-changes', user=request.user, model_object=obj, type='new' if not id else 'edit')
+                AuditManager().write('dict-changes', user=request.user, model_object=obj, \
+                                     type='new' if not context.id else 'edit')
             context.id = obj.id
         return result
     
@@ -214,7 +241,11 @@ class ListDeleteRowAction(Action):
         Удаляться одновременно могут несколько объектов. Их ключи приходят разделенные запятыми.
         '''
         ids = utils.extract_int_list(request, 'id')
-        objs = [self.parent.get_row(id) for id in ids]
+        try:
+            objs = [self.parent.get_row(id) for id in ids]
+        except self.parent._nofound_exception:
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % id)
+            
         result = self.parent.delete_row(objs)
         if (isinstance(result, OperationResult) and 
             result.success == True and 
@@ -274,6 +305,9 @@ class BaseDictionaryActions(ActionPack):
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
                         self.delete_action]
+        
+        # Исключение перехватываемое в экшенах, если объект не найден 
+        self._nofound_exception = ObjectNotFound
     
     #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================    
     def get_list_url(self):
@@ -373,6 +407,11 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     # Пример list_sort_order = ['code', '-name']
     list_sort_order = None
     
+    def __init__(self):
+        super(BaseDictionaryModelActions, self).__init__()
+        if self.model:
+            self._nofound_exception = self.model.DoesNotExist
+    
     def get_rows_modified(self, offset, limit, filter, user_sort='', request=None, context=None):
         '''
         Возвращает данные для грида справочника
@@ -414,10 +453,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         if id == 0:
             record = self.model()
         else:
-            try:
-                record = self.model.objects.get(id = id)
-            except self.model.DoesNotExist:
-                return None
+            record = self.model.objects.get(id = id)
         return record
     
     @transaction.commit_on_success
