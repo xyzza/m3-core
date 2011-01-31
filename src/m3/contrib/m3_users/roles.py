@@ -23,6 +23,7 @@ from m3.helpers import ui as ui_helpers
 from m3.db import safe_delete
 from m3.helpers import logger, urls
 from m3.ui.actions import ActionContextDeclaration, ControllerCache, ActionPack, Action
+from m3.ui.actions.context import ActionContext
 
 from users import SelectUsersListWindow
 
@@ -445,23 +446,24 @@ class DeleteAssignedUser(actions.Action):
     verbose_name = u'Удаление пользователя роли'
     def context_declaration(self):
         return [
-            actions.ActionContextDeclaration(name='assigneduser_id', type=int, required=True)
+            actions.ACD(name='assigneduser_id', type=ActionContext.ValuesList(), required=True)
         ]
         
     def run(self, request, context):
-        try:
-            assigned_user = models.AssignedRole.objects.get(id=context.assigneduser_id)
-        except:
-            return actions.OperationResult(success=False, message=u'Не удалось удалить запись. Указанный пользователь не найден.')
+        for assigneduser_id in context.assigneduser_id:
+            try:
+                assigned_user = models.AssignedRole.objects.get(id=assigneduser_id)
+            except models.AssignedRole.DoesNotExist:
+                return actions.OperationResult(success=False, message=u'Не удалось удалить запись. Указанный пользователь не найден.')
+            
+            try:
+                if not safe_delete(assigned_user):
+                    return actions.OperationResult.by_message(u'Не удалось удалить Запись.<br>На нее есть ссылки в базе данных.')
+            except:
+                logger.exception(u'Не удалось удалить привязку пользователя к роли')
+                return actions.OperationResult.by_message(u'Не удалось удалить запись. Подробности в логах системы.')    
         
-        try:
-            if not safe_delete(assigned_user):
-                return actions.OperationResult(success=False, message=u'Не удалось удалить Запись.<br>На нее есть ссылки в базе данных.')
-        except:
-            logger.exception(u'Не удалось удалить привязку пользователя к роли')
-            return actions.OperationResult(success=False, message=u'Не удалось удалить запись. Подробности в логах системы.')    
-        
-        return actions.OperationResult(success=True)
+        return actions.OperationResult()
         
 #===============================================================================
 # UI 
