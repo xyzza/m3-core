@@ -1,3 +1,772 @@
+Ext.namespace('Ext.ux.Ribbon');
+
+Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
+
+    titleId: null,
+
+    constructor: function(config){
+        this.titleId = new Array();
+
+        Ext.apply(config, {
+            baseCls: "x-plain ui-ribbon",
+            margins: "0 0 0 0",
+            // plugins: new Ext.ux.TabScrollerMenu({
+            //     maxText: 15,
+            //     pageSize: 5
+            // }),
+            //enableTabScroll: true,
+            plain: true,
+            border: false,
+            deferredRender: false,
+            layoutOnTabChange: true,
+            title: '',
+            //collapsible: true,
+            activeTab: 0,
+            listeners: {
+                beforetabchange: function(tp, ntb, ctb){
+                    tp.expand();
+                },
+                afterrender: {
+                    scope: this,
+                    fn: function(){
+                        //this.expand();
+                        //this.doLayout();
+                        if (this.titleId.length > 0){
+                            for (var key = 0; key < this.titleId.length; key++){
+                                r = Ext.get(this.titleId[key].id);
+                                if (r)
+                                r.on('click', this.titleId[key].fn);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        Ext.apply(this, Ext.apply(this.initialConfig, config));
+
+        if (config.items){
+            for (var i = 0; i < config.items.length; i++)
+            this.initRibbon(config.items[i], i);
+        }
+
+        Ext.ux.Ribbon.superclass.constructor.apply(this, arguments);
+        
+    },
+
+    initRibbon: function(item, index){
+        var tbarr = new Array();
+        for (var j = 0; j < item.ribbon.length; j++){
+            // for (var i = 0; i < item.ribbon[j].items.length; i++){
+            //                             if (item.ribbon[j].items[i].scale !== "small"){
+            //                                 item.ribbon[j].items[i].text = String(item.ribbon[j].items[i].text).replace(/[ +]/gi, "<br/>");
+            //                             }
+            //                         }
+            c = {
+                xtype: "buttongroup",
+                cls: "x-btn-group-ribbonstyle",
+                defaults: {
+                    scale: "small",
+                    iconAlign: "left",
+                    minWidth: 40
+                },
+                items: item.ribbon[j].items
+            };
+
+            title = item.ribbon[j].title || '';
+            topTitle = item.ribbon[j].topTitle || false;
+            onTitleClick = item.ribbon[j].onTitleClick || false;
+
+            if (onTitleClick){
+                titleId = 'ux-ribbon-' + Ext.id();
+                title = '<span id="' + titleId + '" style="cursor:pointer;">' + title + '</span>';
+                this.titleId.push({
+                    id: titleId,
+                    fn: onTitleClick
+                });
+            }
+            if (title !== ''){
+                if (!topTitle){
+                    Ext.apply(c, {
+                        footerCfg: {
+                            cls: "x-btn-group-header x-unselectable",
+                            tag: "span",
+                            html: title
+                        }
+                    });
+                } else{
+                    Ext.apply(c, {
+                        title: title
+                    });
+                }
+            }
+
+            cfg = item.ribbon[j].cfg || null;
+
+            if (cfg){
+                Ext.applyIf(c, item.ribbon[j].cfg);
+                if (cfg.defaults)
+                Ext.apply(c.defaults, cfg.defaults);
+            }
+
+            tbarr.push(c);
+        }
+
+        Ext.apply(item, {
+            baseCls: "x-plain",
+            tbar: tbarr
+        });
+    }
+});
+// Create the namespace
+Ext.ns('Ext.ux.plugins.grid');
+
+/**
+ * Ext.ux.plugins.grid.CellToolTips plugin for Ext.grid.GridPanel
+ *
+ * A GridPanel plugin that enables the creation of record based,
+ * per-column tooltips that can also be dynamically loaded via Ajax
+ * calls.
+ *
+ * Requires Animal's triggerElement override when using ExtJS 2.x
+ * (from <a href="http://extjs.com/forum/showthread.php?p=265259#post265259">http://extjs.com/forum/showthread.php?p=265259#post265259</a>)
+ * In ExtJS 3.0 this feature is arealy in the standard.
+ *
+ * Starting from version 1.1, CellToolTips also supports dynamic
+ * loading of tooltips via Ajax. Just specify the 'url' parameter
+ * in the respective column configuration for the CellToolTips,
+ * and the data for the tooltip will be loaded from there. By
+ * default, the record data for the current row will be passed
+ * to the request.
+ *
+ * If you want to supply different parameters, you can specify a
+ * function with the 'fn' parameter. This function gets the data
+ * object for the current row record. The object it returns will
+ * be used as the Ajax paremeters.
+ *
+ * An example configuration:
+ * <pre><code>
+	var tts = new Ext.ux.plugins.grid.CellToolTips([
+		{
+			// 'Standard' CellToolTip, the current row record is applied
+			// to the template.
+			field: 'company',
+			tpl:   '<b>Company: {company}</b><br />This is a local column tooltip'
+		},
+		{
+			// Simple Ajax CellToolTip, an Ajax request is dispatched with the
+			// current row record as its parameters, and after adding the property
+			// "ADDITIONAL" to the return data it is applied to the template.
+			field: 'price', 
+			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%<br />{ADDITIONAL}', 
+			url: 'json_ajaxtip1.php',
+			afterFn: function(data) { return Ext.apply({ ADDITIONAL: 'Test' }, data; }
+		},
+		{
+			// Advanced Ajax CellToolTip, the current row record is passed to the
+			// function in 'fn', its return values are passed to an Ajax call and
+			// the Ajax return data is applied to the template.
+			field: 'change', 
+			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%', 
+			fn: function(parms) {
+				parms.price = parms.price * 100;
+				return Ext.apply({},parms);
+			},
+			url: '/json_ajaxtip2.php'
+		}
+	]);
+	
+	var grid = new Ext.grid.GridPanel({
+		... normal config ...
+		,plugins:	[ tts ]
+		// Optional: filter which rows should have a tooltip:
+		,CellToolTipCondition: function( row, rec ) {
+			// don't show a tooltip for the first row or if
+			// the record has a property 'secret' set to true
+			if( row == 0 || rec.get('secret') == true ) {
+				return false;
+			}
+		}
+   </code></pre>
+ *
+ * A complete example can be found <a href="http://www.chrwinter.de/ext3/CellToolTips.html">here</a>.
+ *
+ * @author  BitPoet
+ * @date    July 08, 2009
+ * @version 1.3
+ *
+ * @class Ext.ux.plugins.grid.CellToolTips
+ * @extends Ext.util.Observable
+ */
+Ext.ux.plugins.grid.CellToolTips = function(config) {
+    var cfgTips;
+    if( Ext.isArray(config) ) {
+        cfgTips = config;
+        config = {};
+    } else {
+    	cfgTips = config.ajaxTips;
+    }
+    Ext.ux.plugins.grid.CellToolTips.superclass.constructor.call(this, config);
+    if( config.tipConfig ) {
+    	this.tipConfig = config.tipConfig;
+    }
+    this.ajaxTips = cfgTips;
+} // End of constructor
+
+// plugin code
+Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
+    version: 1.3,
+    /**
+     * Temp storage from the config object
+     *
+     * @private
+     */
+    ajaxTips: false,
+    
+    /**
+     * Tooltip Templates indexed by column id
+     *
+     * @private
+     */
+    tipTpls: false,
+
+    /**
+     * Tooltip data filter function for setting base parameters
+     *
+     * @private
+     */
+    tipFns: false,
+    
+    /**
+     * URLs for ajax backend
+     *
+     * @private
+     */
+    tipUrls: '',
+    
+    /**
+     * Tooltip configuration items
+     *
+     * @private
+     */
+    tipConfig: {},
+
+    /**
+     * Loading action
+     *
+     * @private
+     */
+    request: false,
+
+    /**
+     * Plugin initialization routine
+     *
+     * @param {Ext.grid.GridPanel} grid
+     */
+    init: function(grid) {
+        if( ! this.ajaxTips ) {
+            return;
+        }
+        this.tipTpls = {};
+        this.tipFns  = {};
+      	this.tipAfterFns = {};
+        this.tipUrls = {};
+        // Generate tooltip templates
+        Ext.each( this.ajaxTips, function(tip) {
+        	this.tipTpls[tip.field] = new Ext.XTemplate( tip.tpl );
+        	if( tip.url ) {
+        		this.tipUrls[tip.field] = tip.url;
+        	}
+       		if( tip.fn )
+       			this.tipFns[tip.field] = tip.fn;
+       		if( tip.afterFn )
+       			this.tipAfterFns[tip.field] = tip.afterFn;
+       		if (tip.tipConfig)
+			this.tipConfig = tip.tipConfig;
+
+        }, this);
+        // delete now superfluous config entry for ajaxTips
+        delete( this.ajaxTips );
+        grid.on( 'render', this.onGridRender.createDelegate(this) );
+    } // End of function init
+
+    /**
+     * Set/Add a template for a column
+     *
+     * @param {String} fld
+     * @param {String | Ext.XTemplate} tpl
+     */
+    ,setFieldTpl: function(fld, tpl) {
+        this.tipTpls[fld] = Ext.isObject(tpl) ? tpl : new Ext.XTemplate(tpl);
+    } // End of function setFieldTpl
+
+    /**
+     * Set up the tooltip when the grid is rendered
+     *
+     * @private
+     * @param {Ext.grid.GridPanel} grid
+     */
+    ,onGridRender: function(grid) 
+    {
+        if( ! this.tipTpls ) {
+            return;
+        }
+        // Create one new tooltip for the whole grid
+        Ext.apply(this.tipConfig, {
+            target:      grid.getView().mainBody,
+            delegate:    '.x-grid3-cell-inner',
+            renderTo:    document.body,
+            finished:	 false
+        });
+        Ext.applyIf(this.tipConfig, {
+            
+            //prefer M: В ie с запятой не будет работать. 
+            // monkey pathcing mode true
+            //trackMouse:  true,
+            trackMouse:  true
+    	});
+
+        this.tip = new Ext.ToolTip( this.tipConfig );
+        this.tip.ctt = this;
+        // Hook onto the beforeshow event to update the tooltip content
+        this.tip.on('beforeshow', this.beforeTipShow.createDelegate(this.tip, [this, grid], true));
+        this.tip.on('hide', this.hideTip);
+    } // End of function onGridRender
+
+    /**
+     * Replace the tooltip body by applying current row data to the template
+     *
+     * @private
+     * @param {Ext.ToolTip} tip
+     * @param {Ext.ux.plugins.grid.CellToolTips} ctt
+     * @param {Ext.grid.GridPanel} grid
+     */
+    ,beforeTipShow: function(tip, ctt, grid) {
+	// Get column id and check if a tip is defined for it
+	var colIdx = grid.getView().findCellIndex( tip.triggerElement );
+	var tipId = grid.getColumnModel().getDataIndex( colIdx );
+       	if( ! ctt.tipTpls[tipId] )
+       	    return false;
+    	if( ! tip.finished ) {
+	       	var isAjaxTip = (typeof ctt.tipUrls[tipId] == 'string');
+        	// Fetch the rows record from the store and apply the template
+        	var rowNum = grid.getView().findRowIndex( tip.triggerElement );
+        	var cellRec = grid.getStore().getAt( rowNum );
+	        if( grid.CellToolTipCondition && grid.CellToolTipCondition(rowNum, cellRec) === false ) {
+        	    return false;
+        	}
+        	// create a copy of the record and use its data, otherwise we might
+        	// accidentially modify the original record's values
+        	var data = cellRec.copy().data;
+        	if( isAjaxTip ) {
+        		ctt.loadDetails((ctt.tipFns[tipId]) ? ctt.tipFns[tipId](data) : data, tip, grid, ctt, tipId);
+        		tip.body.dom.innerHTML = 'Loading...';
+        	} else {
+			tip.body.dom.innerHTML = ctt.tipTpls[tipId].apply( (ctt.tipFns[tipId]) ? ctt.tipFns[tipId](cellRec.data) : cellRec.data );
+		}       		
+        } else {
+        	tip.body.dom.innerHTML = tip.ctt.tipTpls[tipId].apply( tip.tipdata );
+        }
+    } // End of function beforeTipShow
+    
+    /**
+     * Fired when the tooltip is hidden, resets the finished handler.
+     *
+     * @private
+     * @param {Ext.ToolTip} tip
+     */
+    ,hideTip: function(tip) {
+    	tip.finished = false;
+    }
+    
+    /**
+     * Loads the data to apply to the tip template via Ajax
+     *
+     * @private
+     * @param {object} data Parameters for the Ajax request
+     * @param {Ext.ToolTip} tip The tooltip object
+     * @param {Ext.grid.GridPanel} grid The grid
+     * @param {Ext.ux.plugins.grid.CellToolTips} ctt The CellToolTips object
+     * @param {String} tipid Id of the tooltip (= field name)
+     */
+    ,loadDetails: function(data, tip, grid, ctt, tipid) {
+    	Ext.Ajax.request({
+    		url:	ctt.tipUrls[tipid],
+    		params:	data,
+    		method: 'POST',
+    		success:	function(resp, opt) {
+    			tip.finished = true;
+    			tip.tipdata  = Ext.decode(resp.responseText);
+    			if( ctt.tipAfterFns[tipid] ) {
+    				tip.tipdata = ctt.tipAfterFns[tipid](tip.tipdata);
+    			}
+    			tip.show();
+    		}
+    	});
+    }
+
+}); // End of extend
+
+Ext.ns('Ext.ux');
+
+Ext.ux.Lightbox = (function(){
+    var els = {},
+        images = [],
+        activeImage,
+        initialized = false,
+        selectors = [];
+
+    return {
+        overlayOpacity: 0.85,
+        animate: true,
+        resizeSpeed: 8,
+        borderSize: 10,
+        labelImage: "Image",
+        labelOf: "of",
+
+        init: function() {
+            this.resizeDuration = this.animate ? ((11 - this.resizeSpeed) * 0.15) : 0;
+            this.overlayDuration = this.animate ? 0.2 : 0;
+
+            if(!initialized) {
+                Ext.apply(this, Ext.util.Observable.prototype);
+                Ext.util.Observable.constructor.call(this);
+                this.addEvents('open', 'close');
+                this.initMarkup();
+                this.initEvents();
+                initialized = true;
+            }
+        },
+
+        initMarkup: function() {
+            els.shim = Ext.DomHelper.append(document.body, {
+                tag: 'iframe',
+                id: 'ux-lightbox-shim'
+            }, true);
+            els.overlay = Ext.DomHelper.append(document.body, {
+                id: 'ux-lightbox-overlay'
+            }, true);
+            
+            var lightboxTpl = new Ext.Template(this.getTemplate());
+            els.lightbox = lightboxTpl.append(document.body, {}, true);
+
+            var ids =
+                ['outerImageContainer', 'imageContainer', 'image', 'hoverNav', 'navPrev', 'navNext', 'loading', 'loadingLink',
+                'outerDataContainer', 'dataContainer', 'data', 'details', 'caption', 'imageNumber', 'bottomNav', 'navClose'];
+
+            Ext.each(ids, function(id){
+                els[id] = Ext.get('ux-lightbox-' + id);
+            });
+
+            Ext.each([els.overlay, els.lightbox, els.shim], function(el){
+                el.setVisibilityMode(Ext.Element.DISPLAY)
+                el.hide();
+            });
+
+            var size = (this.animate ? 250 : 1) + 'px';
+            els.outerImageContainer.setStyle({
+                width: size,
+                height: size
+            });
+        },
+
+        getTemplate : function() {
+            return [
+                '<div id="ux-lightbox">',
+                    '<div id="ux-lightbox-outerImageContainer">',
+                        '<div id="ux-lightbox-imageContainer">',
+                            '<img id="ux-lightbox-image">',
+                            '<div id="ux-lightbox-hoverNav">',
+                                '<a href="#" id="ux-lightbox-navPrev"></a>',
+                                '<a href="#" id="ux-lightbox-navNext"></a>',
+                            '</div>',
+                            '<div id="ux-lightbox-loading">',
+                                '<a id="ux-lightbox-loadingLink"></a>',
+                            '</div>',
+                        '</div>',
+                    '</div>',
+                    '<div id="ux-lightbox-outerDataContainer">',
+                        '<div id="ux-lightbox-dataContainer">',
+                            '<div id="ux-lightbox-data">',
+                                '<div id="ux-lightbox-details">',
+                                    '<span id="ux-lightbox-caption"></span>',
+                                    '<span id="ux-lightbox-imageNumber"></span>',
+                                '</div>',
+                                '<div id="ux-lightbox-bottomNav">',
+                                    '<a href="#" id="ux-lightbox-navClose"></a>',
+                                '</div>',
+                            '</div>',
+                        '</div>',
+                    '</div>',
+                '</div>'
+            ];
+        },
+
+        initEvents: function() {
+            var close = function(ev) {
+                ev.preventDefault();
+                this.close();
+            };
+
+            els.overlay.on('click', close, this);
+            els.loadingLink.on('click', close, this);
+            els.navClose.on('click', close, this);
+
+            els.lightbox.on('click', function(ev) {
+                if(ev.getTarget().id == 'ux-lightbox') {
+                    this.close();
+                }
+            }, this);
+
+            els.navPrev.on('click', function(ev) {
+                ev.preventDefault();
+                this.setImage(activeImage - 1);
+            }, this);
+
+            els.navNext.on('click', function(ev) {
+                ev.preventDefault();
+                this.setImage(activeImage + 1);
+            }, this);
+        },
+
+        register: function(sel, group) {
+            if(selectors.indexOf(sel) === -1) {
+                selectors.push(sel);
+
+                Ext.fly(document).on('click', function(ev){
+                    var target = ev.getTarget(sel);
+
+                    if (target) {
+                        ev.preventDefault();
+                        this.open(target, sel, group);
+                    }
+                }, this);
+            }
+        },
+
+        open: function(image, sel, group) {
+            group = group || false;
+            this.setViewSize();
+            els.overlay.fadeIn({
+                duration: this.overlayDuration,
+                endOpacity: this.overlayOpacity,
+                callback: function() {
+                    images = [];
+
+                    var index = 0;
+                    if(!group) {
+                        images.push([image.href, image.title]);
+                    }
+                    else {
+                        var setItems = Ext.query(sel);
+                        Ext.each(setItems, function(item) {
+                            if(item.href) {
+                                images.push([item.href, item.title]);
+                            }
+                        });
+
+                        while (images[index][0] != image.href) {
+                            index++;
+                        }
+                    }
+
+                    // calculate top and left offset for the lightbox
+                    var pageScroll = Ext.fly(document).getScroll();
+
+                    var lightboxTop = pageScroll.top + (Ext.lib.Dom.getViewportHeight() / 10);
+                    var lightboxLeft = pageScroll.left;
+                    els.lightbox.setStyle({
+                        top: lightboxTop + 'px',
+                        left: lightboxLeft + 'px'
+                    }).show();
+
+                    this.setImage(index);
+                    
+                    this.fireEvent('open', images[index]);                                        
+                },
+                scope: this
+            });
+        },
+        
+        setViewSize: function(){
+            var viewSize = this.getViewSize();
+            els.overlay.setStyle({
+                width: viewSize[0] + 'px',
+                height: viewSize[1] + 'px'
+            });
+            els.shim.setStyle({
+                width: viewSize[0] + 'px',
+                height: viewSize[1] + 'px'
+            }).show();
+        },
+
+        setImage: function(index){
+            activeImage = index;
+                      
+            this.disableKeyNav();            
+            if (this.animate) {
+                els.loading.show();
+            }
+
+            els.image.hide();
+            els.hoverNav.hide();
+            els.navPrev.hide();
+            els.navNext.hide();
+            els.dataContainer.setOpacity(0.0001);
+            els.imageNumber.hide();
+
+            var preload = new Image();
+            preload.onload = (function(){
+                els.image.dom.src = images[activeImage][0];
+                this.resizeImage(preload.width, preload.height);
+            }).createDelegate(this);
+            preload.src = images[activeImage][0];
+        },
+
+        resizeImage: function(w, h){
+            var wCur = els.outerImageContainer.getWidth();
+            var hCur = els.outerImageContainer.getHeight();
+
+            var wNew = (w + this.borderSize * 2);
+            var hNew = (h + this.borderSize * 2);
+
+            var wDiff = wCur - wNew;
+            var hDiff = hCur - hNew;
+
+            var afterResize = function(){
+                els.hoverNav.setWidth(els.imageContainer.getWidth() + 'px');
+
+                els.navPrev.setHeight(h + 'px');
+                els.navNext.setHeight(h + 'px');
+
+                els.outerDataContainer.setWidth(wNew + 'px');
+
+                this.showImage();
+            };
+            
+            if (hDiff != 0 || wDiff != 0) {
+                els.outerImageContainer.shift({
+                    height: hNew,
+                    width: wNew,
+                    duration: this.resizeDuration,
+                    scope: this,
+                    callback: afterResize,
+                    delay: 50
+                });
+            }
+            else {
+                afterResize.call(this);
+            }
+        },
+
+        showImage: function(){
+            els.loading.hide();
+            els.image.fadeIn({
+                duration: this.resizeDuration,
+                scope: this,
+                callback: function(){
+                    this.updateDetails();
+                }
+            });
+            this.preloadImages();
+        },
+
+        updateDetails: function(){
+            var detailsWidth = els.data.getWidth(true) - els.navClose.getWidth() - 10;
+            els.details.setWidth((detailsWidth > 0 ? detailsWidth : 0) + 'px');
+            
+            els.caption.update(images[activeImage][1]);
+
+            els.caption.show();
+            if (images.length > 1) {
+                els.imageNumber.update(this.labelImage + ' ' + (activeImage + 1) + ' ' + this.labelOf + '  ' + images.length);
+                els.imageNumber.show();
+            }
+
+            els.dataContainer.fadeIn({
+                duration: this.resizeDuration/2,
+                scope: this,
+                callback: function() {
+                    var viewSize = this.getViewSize();
+                    els.overlay.setHeight(viewSize[1] + 'px');
+                    this.updateNav();
+                }
+            });
+        },
+
+        updateNav: function(){
+            this.enableKeyNav();
+
+            els.hoverNav.show();
+
+            // if not first image in set, display prev image button
+            if (activeImage > 0)
+                els.navPrev.show();
+
+            // if not last image in set, display next image button
+            if (activeImage < (images.length - 1))
+                els.navNext.show();
+        },
+
+        enableKeyNav: function() {
+            Ext.fly(document).on('keydown', this.keyNavAction, this);
+        },
+
+        disableKeyNav: function() {
+            Ext.fly(document).un('keydown', this.keyNavAction, this);
+        },
+
+        keyNavAction: function(ev) {
+            var keyCode = ev.getKey();
+
+            if (
+                keyCode == 88 || // x
+                keyCode == 67 || // c
+                keyCode == 27
+            ) {
+                this.close();
+            }
+            else if (keyCode == 80 || keyCode == 37){ // display previous image
+                if (activeImage != 0){
+                    this.setImage(activeImage - 1);
+                }
+            }
+            else if (keyCode == 78 || keyCode == 39){ // display next image
+                if (activeImage != (images.length - 1)){
+                    this.setImage(activeImage + 1);
+                }
+            }
+        },
+
+        preloadImages: function(){
+            var next, prev;
+            if (images.length > activeImage + 1) {
+                next = new Image();
+                next.src = images[activeImage + 1][0];
+            }
+            if (activeImage > 0) {
+                prev = new Image();
+                prev.src = images[activeImage - 1][0];
+            }
+        },
+
+        close: function(){
+            this.disableKeyNav();
+            els.lightbox.hide();
+            els.overlay.fadeOut({
+                duration: this.overlayDuration
+            });
+            els.shim.hide();
+            this.fireEvent('close', activeImage);
+        },
+
+        getViewSize: function() {
+            return [Ext.lib.Dom.getViewWidth(), Ext.lib.Dom.getViewHeight()];
+        }
+    }
+})();
+
+Ext.onReady(Ext.ux.Lightbox.init, Ext.ux.Lightbox);
 Ext.namespace("Ext.ux.grid");
 
 /**
@@ -652,1863 +1421,6 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		return filterPanel;
     }
 });
-
-Ext.ns('Ext.ux');
-
-Ext.ux.Lightbox = (function(){
-    var els = {},
-        images = [],
-        activeImage,
-        initialized = false,
-        selectors = [];
-
-    return {
-        overlayOpacity: 0.85,
-        animate: true,
-        resizeSpeed: 8,
-        borderSize: 10,
-        labelImage: "Image",
-        labelOf: "of",
-
-        init: function() {
-            this.resizeDuration = this.animate ? ((11 - this.resizeSpeed) * 0.15) : 0;
-            this.overlayDuration = this.animate ? 0.2 : 0;
-
-            if(!initialized) {
-                Ext.apply(this, Ext.util.Observable.prototype);
-                Ext.util.Observable.constructor.call(this);
-                this.addEvents('open', 'close');
-                this.initMarkup();
-                this.initEvents();
-                initialized = true;
-            }
-        },
-
-        initMarkup: function() {
-            els.shim = Ext.DomHelper.append(document.body, {
-                tag: 'iframe',
-                id: 'ux-lightbox-shim'
-            }, true);
-            els.overlay = Ext.DomHelper.append(document.body, {
-                id: 'ux-lightbox-overlay'
-            }, true);
-            
-            var lightboxTpl = new Ext.Template(this.getTemplate());
-            els.lightbox = lightboxTpl.append(document.body, {}, true);
-
-            var ids =
-                ['outerImageContainer', 'imageContainer', 'image', 'hoverNav', 'navPrev', 'navNext', 'loading', 'loadingLink',
-                'outerDataContainer', 'dataContainer', 'data', 'details', 'caption', 'imageNumber', 'bottomNav', 'navClose'];
-
-            Ext.each(ids, function(id){
-                els[id] = Ext.get('ux-lightbox-' + id);
-            });
-
-            Ext.each([els.overlay, els.lightbox, els.shim], function(el){
-                el.setVisibilityMode(Ext.Element.DISPLAY)
-                el.hide();
-            });
-
-            var size = (this.animate ? 250 : 1) + 'px';
-            els.outerImageContainer.setStyle({
-                width: size,
-                height: size
-            });
-        },
-
-        getTemplate : function() {
-            return [
-                '<div id="ux-lightbox">',
-                    '<div id="ux-lightbox-outerImageContainer">',
-                        '<div id="ux-lightbox-imageContainer">',
-                            '<img id="ux-lightbox-image">',
-                            '<div id="ux-lightbox-hoverNav">',
-                                '<a href="#" id="ux-lightbox-navPrev"></a>',
-                                '<a href="#" id="ux-lightbox-navNext"></a>',
-                            '</div>',
-                            '<div id="ux-lightbox-loading">',
-                                '<a id="ux-lightbox-loadingLink"></a>',
-                            '</div>',
-                        '</div>',
-                    '</div>',
-                    '<div id="ux-lightbox-outerDataContainer">',
-                        '<div id="ux-lightbox-dataContainer">',
-                            '<div id="ux-lightbox-data">',
-                                '<div id="ux-lightbox-details">',
-                                    '<span id="ux-lightbox-caption"></span>',
-                                    '<span id="ux-lightbox-imageNumber"></span>',
-                                '</div>',
-                                '<div id="ux-lightbox-bottomNav">',
-                                    '<a href="#" id="ux-lightbox-navClose"></a>',
-                                '</div>',
-                            '</div>',
-                        '</div>',
-                    '</div>',
-                '</div>'
-            ];
-        },
-
-        initEvents: function() {
-            var close = function(ev) {
-                ev.preventDefault();
-                this.close();
-            };
-
-            els.overlay.on('click', close, this);
-            els.loadingLink.on('click', close, this);
-            els.navClose.on('click', close, this);
-
-            els.lightbox.on('click', function(ev) {
-                if(ev.getTarget().id == 'ux-lightbox') {
-                    this.close();
-                }
-            }, this);
-
-            els.navPrev.on('click', function(ev) {
-                ev.preventDefault();
-                this.setImage(activeImage - 1);
-            }, this);
-
-            els.navNext.on('click', function(ev) {
-                ev.preventDefault();
-                this.setImage(activeImage + 1);
-            }, this);
-        },
-
-        register: function(sel, group) {
-            if(selectors.indexOf(sel) === -1) {
-                selectors.push(sel);
-
-                Ext.fly(document).on('click', function(ev){
-                    var target = ev.getTarget(sel);
-
-                    if (target) {
-                        ev.preventDefault();
-                        this.open(target, sel, group);
-                    }
-                }, this);
-            }
-        },
-
-        open: function(image, sel, group) {
-            group = group || false;
-            this.setViewSize();
-            els.overlay.fadeIn({
-                duration: this.overlayDuration,
-                endOpacity: this.overlayOpacity,
-                callback: function() {
-                    images = [];
-
-                    var index = 0;
-                    if(!group) {
-                        images.push([image.href, image.title]);
-                    }
-                    else {
-                        var setItems = Ext.query(sel);
-                        Ext.each(setItems, function(item) {
-                            if(item.href) {
-                                images.push([item.href, item.title]);
-                            }
-                        });
-
-                        while (images[index][0] != image.href) {
-                            index++;
-                        }
-                    }
-
-                    // calculate top and left offset for the lightbox
-                    var pageScroll = Ext.fly(document).getScroll();
-
-                    var lightboxTop = pageScroll.top + (Ext.lib.Dom.getViewportHeight() / 10);
-                    var lightboxLeft = pageScroll.left;
-                    els.lightbox.setStyle({
-                        top: lightboxTop + 'px',
-                        left: lightboxLeft + 'px'
-                    }).show();
-
-                    this.setImage(index);
-                    
-                    this.fireEvent('open', images[index]);                                        
-                },
-                scope: this
-            });
-        },
-        
-        setViewSize: function(){
-            var viewSize = this.getViewSize();
-            els.overlay.setStyle({
-                width: viewSize[0] + 'px',
-                height: viewSize[1] + 'px'
-            });
-            els.shim.setStyle({
-                width: viewSize[0] + 'px',
-                height: viewSize[1] + 'px'
-            }).show();
-        },
-
-        setImage: function(index){
-            activeImage = index;
-                      
-            this.disableKeyNav();            
-            if (this.animate) {
-                els.loading.show();
-            }
-
-            els.image.hide();
-            els.hoverNav.hide();
-            els.navPrev.hide();
-            els.navNext.hide();
-            els.dataContainer.setOpacity(0.0001);
-            els.imageNumber.hide();
-
-            var preload = new Image();
-            preload.onload = (function(){
-                els.image.dom.src = images[activeImage][0];
-                this.resizeImage(preload.width, preload.height);
-            }).createDelegate(this);
-            preload.src = images[activeImage][0];
-        },
-
-        resizeImage: function(w, h){
-            var wCur = els.outerImageContainer.getWidth();
-            var hCur = els.outerImageContainer.getHeight();
-
-            var wNew = (w + this.borderSize * 2);
-            var hNew = (h + this.borderSize * 2);
-
-            var wDiff = wCur - wNew;
-            var hDiff = hCur - hNew;
-
-            var afterResize = function(){
-                els.hoverNav.setWidth(els.imageContainer.getWidth() + 'px');
-
-                els.navPrev.setHeight(h + 'px');
-                els.navNext.setHeight(h + 'px');
-
-                els.outerDataContainer.setWidth(wNew + 'px');
-
-                this.showImage();
-            };
-            
-            if (hDiff != 0 || wDiff != 0) {
-                els.outerImageContainer.shift({
-                    height: hNew,
-                    width: wNew,
-                    duration: this.resizeDuration,
-                    scope: this,
-                    callback: afterResize,
-                    delay: 50
-                });
-            }
-            else {
-                afterResize.call(this);
-            }
-        },
-
-        showImage: function(){
-            els.loading.hide();
-            els.image.fadeIn({
-                duration: this.resizeDuration,
-                scope: this,
-                callback: function(){
-                    this.updateDetails();
-                }
-            });
-            this.preloadImages();
-        },
-
-        updateDetails: function(){
-            var detailsWidth = els.data.getWidth(true) - els.navClose.getWidth() - 10;
-            els.details.setWidth((detailsWidth > 0 ? detailsWidth : 0) + 'px');
-            
-            els.caption.update(images[activeImage][1]);
-
-            els.caption.show();
-            if (images.length > 1) {
-                els.imageNumber.update(this.labelImage + ' ' + (activeImage + 1) + ' ' + this.labelOf + '  ' + images.length);
-                els.imageNumber.show();
-            }
-
-            els.dataContainer.fadeIn({
-                duration: this.resizeDuration/2,
-                scope: this,
-                callback: function() {
-                    var viewSize = this.getViewSize();
-                    els.overlay.setHeight(viewSize[1] + 'px');
-                    this.updateNav();
-                }
-            });
-        },
-
-        updateNav: function(){
-            this.enableKeyNav();
-
-            els.hoverNav.show();
-
-            // if not first image in set, display prev image button
-            if (activeImage > 0)
-                els.navPrev.show();
-
-            // if not last image in set, display next image button
-            if (activeImage < (images.length - 1))
-                els.navNext.show();
-        },
-
-        enableKeyNav: function() {
-            Ext.fly(document).on('keydown', this.keyNavAction, this);
-        },
-
-        disableKeyNav: function() {
-            Ext.fly(document).un('keydown', this.keyNavAction, this);
-        },
-
-        keyNavAction: function(ev) {
-            var keyCode = ev.getKey();
-
-            if (
-                keyCode == 88 || // x
-                keyCode == 67 || // c
-                keyCode == 27
-            ) {
-                this.close();
-            }
-            else if (keyCode == 80 || keyCode == 37){ // display previous image
-                if (activeImage != 0){
-                    this.setImage(activeImage - 1);
-                }
-            }
-            else if (keyCode == 78 || keyCode == 39){ // display next image
-                if (activeImage != (images.length - 1)){
-                    this.setImage(activeImage + 1);
-                }
-            }
-        },
-
-        preloadImages: function(){
-            var next, prev;
-            if (images.length > activeImage + 1) {
-                next = new Image();
-                next.src = images[activeImage + 1][0];
-            }
-            if (activeImage > 0) {
-                prev = new Image();
-                prev.src = images[activeImage - 1][0];
-            }
-        },
-
-        close: function(){
-            this.disableKeyNav();
-            els.lightbox.hide();
-            els.overlay.fadeOut({
-                duration: this.overlayDuration
-            });
-            els.shim.hide();
-            this.fireEvent('close', activeImage);
-        },
-
-        getViewSize: function() {
-            return [Ext.lib.Dom.getViewWidth(), Ext.lib.Dom.getViewHeight()];
-        }
-    }
-})();
-
-Ext.onReady(Ext.ux.Lightbox.init, Ext.ux.Lightbox);
-Ext.ns('Ext.ux.grid');
-
-Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
-    lockText : 'Lock',
-    unlockText : 'Unlock',
-    rowBorderWidth : 1,
-    lockedBorderWidth : 1,
-
-    /*
-     * This option ensures that height between the rows is synchronized
-     * between the locked and unlocked sides. This option only needs to be used
-     * when the row heights aren't predictable.
-     */
-    syncHeights: false,
-
-    initTemplates : function(){
-        var ts = this.templates || {};
-
-        if (!ts.master) {
-            ts.master = new Ext.Template(
-                '<div class="x-grid3" hidefocus="true">',
-                    '<div class="x-grid3-locked">',
-                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{lstyle}">{lockedHeader}</div></div><div class="x-clear"></div></div>',
-                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{lstyle}">{lockedBody}</div><div class="x-grid3-scroll-spacer"></div></div>',
-                    '</div>',
-                    '<div class="x-grid3-viewport x-grid3-unlocked">',
-                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x-clear"></div></div>',
-                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x-grid3-focus" tabIndex="-1"></a></div>',
-                    '</div>',
-                    '<div class="x-grid3-resize-marker">&#160;</div>',
-                    '<div class="x-grid3-resize-proxy">&#160;</div>',
-                '</div>'
-            );
-        }
-        //kirov
-	    if(!ts.gcell){
-            ts.gcell = new Ext.XTemplate('<td class="x-grid3-hd x-grid3-gcell x-grid3-td-{id} ux-grid-hd-group-row-{row} {cls}" style="{style}">', '<div {tooltip} class="x-grid3-hd-inner x-grid3-hd-{id}" unselectable="on" style="{istyle}">', this.grid.enableHdMenu ? '<a class="x-grid3-hd-btn" href="#"></a>' : '', '{value}</div></td>');
-        }
-        this.templates = ts;
-        //kirov
-	    this.hrowRe = new RegExp("ux-grid-hd-group-row-(\\d+)", "");
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.initTemplates.call(this);
-    },
-
-    getEditorParent : function(ed){
-        return this.el.dom;
-    },
-
-    initElements : function(){
-        var E  = Ext.Element,
-            el = this.grid.getGridEl().dom.firstChild,
-            cs = el.childNodes;
-
-        this.el             = new E(el);
-        this.lockedWrap     = new E(cs[0]);
-        this.lockedHd       = new E(this.lockedWrap.dom.firstChild);
-        this.lockedInnerHd  = this.lockedHd.dom.firstChild;
-        this.lockedScroller = new E(this.lockedWrap.dom.childNodes[1]);
-        this.lockedBody     = new E(this.lockedScroller.dom.firstChild);
-        this.mainWrap       = new E(cs[1]);
-        this.mainHd         = new E(this.mainWrap.dom.firstChild);
-
-        if (this.grid.hideHeaders) {
-            this.lockedHd.setDisplayed(false);
-            this.mainHd.setDisplayed(false);
-        }
-
-        this.innerHd  = this.mainHd.dom.firstChild;
-        this.scroller = new E(this.mainWrap.dom.childNodes[1]);
-
-        if(this.forceFit){
-            this.scroller.setStyle('overflow-x', 'hidden');
-        }
-
-        this.mainBody     = new E(this.scroller.dom.firstChild);
-        this.focusEl      = new E(this.scroller.dom.childNodes[1]);
-        this.resizeMarker = new E(cs[2]);
-        this.resizeProxy  = new E(cs[3]);
-
-        this.focusEl.swallowEvent('click', true);
-    },
-
-    getLockedRows : function(){
-        return this.hasRows() ? this.lockedBody.dom.childNodes : [];
-    },
-
-    getLockedRow : function(row){
-        return this.getLockedRows()[row];
-    },
-
-    getCell : function(row, col){
-        var llen = this.cm.getLockedCount();
-        if(col < llen){
-            return this.getLockedRow(row).getElementsByTagName('td')[col];
-        }
-        return Ext.ux.grid.LockingHeaderGroupGridView.superclass.getCell.call(this, row, col - llen);
-    },
-
-    getHeaderCell : function(index){
-        var llen = this.cm.getLockedCount();
-        if(index < llen){
-            return this.lockedHd.dom.getElementsByTagName('td')[index];
-        }
-        //kirov
-        //return Ext.ux.grid.LockingHeaderGroupGridView.superclass.getHeaderCell.call(this, index - llen);
-        return this.mainHd.query(this.cellSelector)[index-llen];
-    },
-
-    addRowClass : function(row, cls){
-        var r = this.getLockedRow(row);
-        if(r){
-            this.fly(r).addClass(cls);
-        }
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.addRowClass.call(this, row, cls);
-    },
-
-    removeRowClass : function(row, cls){
-        var r = this.getLockedRow(row);
-        if(r){
-            this.fly(r).removeClass(cls);
-        }
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRowClass.call(this, row, cls);
-    },
-
-    removeRow : function(row) {
-        Ext.removeNode(this.getLockedRow(row));
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRow.call(this, row);
-    },
-
-    removeRows : function(firstRow, lastRow){
-        var bd = this.lockedBody.dom;
-        for(var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++){
-            Ext.removeNode(bd.childNodes[firstRow]);
-        }
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRows.call(this, firstRow, lastRow);
-    },
-
-    syncScroll : function(e){
-        var mb = this.scroller.dom;
-        this.lockedScroller.dom.scrollTop = mb.scrollTop;
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.syncScroll.call(this, e);
-    },
-
-    updateSortIcon : function(col, dir){
-        var sc = this.sortClasses,
-            lhds = this.lockedHd.select('td').removeClass(sc),
-            hds = this.mainHd.select('td').removeClass(sc),
-            llen = this.cm.getLockedCount(),
-            cls = sc[dir == 'DESC' ? 1 : 0];
-        if(col < llen){
-            lhds.item(col).addClass(cls);
-        }else{
-            hds.item(col - llen).addClass(cls);
-        }
-    },
-
-    updateAllColumnWidths : function(){
-        var tw = this.getTotalWidth(),
-            clen = this.cm.getColumnCount(),
-            lw = this.getLockedWidth(),
-            llen = this.cm.getLockedCount(),
-            ws = [], len, i;
-        this.updateLockedWidth();
-        for(i = 0; i < clen; i++){
-            ws[i] = this.getColumnWidth(i);
-            var hd = this.getHeaderCell(i);
-            hd.style.width = ws[i];
-        }
-        var lns = this.getLockedRows(), ns = this.getRows(), row, trow, j;
-        for(i = 0, len = ns.length; i < len; i++){
-            row = lns[i];
-            row.style.width = lw;
-            if(row.firstChild){
-                row.firstChild.style.width = lw;
-                trow = row.firstChild.rows[0];
-                for (j = 0; j < llen; j++) {
-                   trow.childNodes[j].style.width = ws[j];
-                }
-            }
-            row = ns[i];
-            row.style.width = tw;
-            if(row.firstChild){
-                row.firstChild.style.width = tw;
-                trow = row.firstChild.rows[0];
-                for (j = llen; j < clen; j++) {
-                   trow.childNodes[j - llen].style.width = ws[j];
-                }
-            }
-        }
-        //kirov
-        this.updateGroupStyles();
-        this.onAllColumnWidthsUpdated(ws, tw);
-        this.syncHeaderHeight();
-    },
-    //kirov
-    onColumnWidthUpdated: function(){
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.onColumnWidthUpdated.call(this, arguments);
-        this.updateGroupStyles.call(this);
-    },
-    //kirov
-    onAllColumnWidthsUpdated: function(){
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.onAllColumnWidthsUpdated.call(this, arguments);
-        this.updateGroupStyles.call(this);
-    },
-    //kirov
-    //onColumnHiddenUpdated: function(){
-    //    Ext.ux.grid.LockingHeaderGroupGridView.superclass.onColumnHiddenUpdated.call(this, arguments);
-    //    this.updateGroupStyles.call(this);
-    //},
-
-    updateColumnWidth : function(col, width){
-        var w = this.getColumnWidth(col),
-            llen = this.cm.getLockedCount(),
-            ns, rw, c, row;
-        this.updateLockedWidth();
-        if(col < llen){
-            ns = this.getLockedRows();
-            rw = this.getLockedWidth();
-            c = col;
-        }else{
-            ns = this.getRows();
-            rw = this.getTotalWidth();
-            c = col - llen;
-        }
-        var hd = this.getHeaderCell(col);
-        hd.style.width = w;
-        for(var i = 0, len = ns.length; i < len; i++){
-            row = ns[i];
-            row.style.width = rw;
-            if(row.firstChild){
-                row.firstChild.style.width = rw;
-                row.firstChild.rows[0].childNodes[c].style.width = w;
-            }
-        }
-        this.onColumnWidthUpdated(col, w, this.getTotalWidth());
-        this.syncHeaderHeight();
-    },
-
-    updateColumnHidden : function(col, hidden){
-        var llen = this.cm.getLockedCount(),
-            ns, rw, c, row,
-            display = hidden ? 'none' : '';
-        this.updateLockedWidth();
-        if(col < llen){
-            ns = this.getLockedRows();
-            rw = this.getLockedWidth();
-            c = col;
-        }else{
-            ns = this.getRows();
-            rw = this.getTotalWidth();
-            c = col - llen;
-        }
-        var hd = this.getHeaderCell(col);
-        hd.style.display = display;
-        for(var i = 0, len = ns.length; i < len; i++){
-            row = ns[i];
-            row.style.width = rw;
-            if(row.firstChild){
-                row.firstChild.style.width = rw;
-                row.firstChild.rows[0].childNodes[c].style.display = display;
-            }
-        }
-        this.onColumnHiddenUpdated(col, hidden, this.getTotalWidth());
-        delete this.lastViewWidth;
-        this.layout();
-    },
-
-    doRender : function(cs, rs, ds, startRow, colCount, stripe){
-        var ts = this.templates, ct = ts.cell, rt = ts.row, last = colCount-1,
-            tstyle = 'width:'+this.getTotalWidth()+';',
-            lstyle = 'width:'+this.getLockedWidth()+';',
-            buf = [], lbuf = [], cb, lcb, c, p = {}, rp = {}, r;
-        for(var j = 0, len = rs.length; j < len; j++){
-            r = rs[j]; cb = []; lcb = [];
-            var rowIndex = (j+startRow);
-            for(var i = 0; i < colCount; i++){
-                c = cs[i];
-                p.id = c.id;
-                p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
-                    (this.cm.config[i].cellCls ? ' ' + this.cm.config[i].cellCls : '');
-                p.attr = p.cellAttr = '';
-                p.value = c.renderer(r.data[c.name], p, r, rowIndex, i, ds);
-                p.style = c.style;
-                if(Ext.isEmpty(p.value)){
-                    p.value = '&#160;';
-                }
-                if(this.markDirty && r.dirty && Ext.isDefined(r.modified[c.name])){
-                    p.css += ' x-grid3-dirty-cell';
-                }
-                if(c.locked){
-                    lcb[lcb.length] = ct.apply(p);
-                }else{
-                    cb[cb.length] = ct.apply(p);
-                }
-            }
-            var alt = [];
-            if(stripe && ((rowIndex+1) % 2 === 0)){
-                alt[0] = 'x-grid3-row-alt';
-            }
-            if(r.dirty){
-                alt[1] = ' x-grid3-dirty-row';
-            }
-            rp.cols = colCount;
-            if(this.getRowClass){
-                alt[2] = this.getRowClass(r, rowIndex, rp, ds);
-            }
-            rp.alt = alt.join(' ');
-            rp.cells = cb.join('');
-            rp.tstyle = tstyle;
-            buf[buf.length] = rt.apply(rp);
-            rp.cells = lcb.join('');
-            rp.tstyle = lstyle;
-            lbuf[lbuf.length] = rt.apply(rp);
-        }
-        return [buf.join(''), lbuf.join('')];
-    },
-    processRows : function(startRow, skipStripe){
-        if(!this.ds || this.ds.getCount() < 1){
-            return;
-        }
-        var rows = this.getRows(),
-            lrows = this.getLockedRows(),
-            row, lrow;
-        skipStripe = skipStripe || !this.grid.stripeRows;
-        startRow = startRow || 0;
-        for(var i = 0, len = rows.length; i < len; ++i){
-            row = rows[i];
-            lrow = lrows[i];
-            row.rowIndex = i;
-            lrow.rowIndex = i;
-            if(!skipStripe){
-                row.className = row.className.replace(this.rowClsRe, ' ');
-                lrow.className = lrow.className.replace(this.rowClsRe, ' ');
-                if ((i + 1) % 2 === 0){
-                    row.className += ' x-grid3-row-alt';
-                    lrow.className += ' x-grid3-row-alt';
-                }
-            }
-            if(this.syncHeights){
-                var el1 = Ext.get(row),
-                    el2 = Ext.get(lrow),
-                    h1 = el1.getHeight(),
-                    h2 = el2.getHeight();
-
-                if(h1 > h2){
-                    el2.setHeight(h1);
-                }else if(h2 > h1){
-                    el1.setHeight(h2);
-                }
-            }
-        }
-        if(startRow === 0){
-            Ext.fly(rows[0]).addClass(this.firstRowCls);
-            Ext.fly(lrows[0]).addClass(this.firstRowCls);
-        }
-        Ext.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
-        Ext.fly(lrows[lrows.length - 1]).addClass(this.lastRowCls);
-    },
-
-    afterRender : function(){
-        if(!this.ds || !this.cm){
-            return;
-        }
-        var bd = this.renderRows() || ['&#160;', '&#160;'];
-        this.mainBody.dom.innerHTML = bd[0];
-        this.lockedBody.dom.innerHTML = bd[1];
-        this.processRows(0, true);
-        if(this.deferEmptyText !== true){
-            this.applyEmptyText();
-        }
-    },
-
-    renderUI : function(){
-        var header = this.renderHeaders();
-        var body = this.templates.body.apply({rows:'&#160;'});
-        var html = this.templates.master.apply({
-            body: body,
-            header: header[0],
-            ostyle: 'width:'+this.getOffsetWidth()+';',
-            bstyle: 'width:'+this.getTotalWidth()+';',
-            lockedBody: body,
-            lockedHeader: header[1],
-            lstyle: 'width:'+this.getLockedWidth()+';'
-        });
-        var g = this.grid;
-        g.getGridEl().dom.innerHTML = html;
-        this.initElements();
-        Ext.fly(this.innerHd).on('click', this.handleHdDown, this);
-        Ext.fly(this.lockedInnerHd).on('click', this.handleHdDown, this);
-        this.mainHd.on({
-            scope: this,
-            mouseover: this.handleHdOver,
-            mouseout: this.handleHdOut,
-            mousemove: this.handleHdMove
-        });
-        this.lockedHd.on({
-            scope: this,
-            mouseover: this.handleHdOver,
-            mouseout: this.handleHdOut,
-            mousemove: this.handleHdMove
-        });
-        this.scroller.on('scroll', this.syncScroll,  this);
-        if(g.enableColumnResize !== false){
-            this.splitZone = new Ext.grid.GridView.SplitDragZone(g, this.mainHd.dom);
-            this.splitZone.setOuterHandleElId(Ext.id(this.lockedHd.dom));
-            this.splitZone.setOuterHandleElId(Ext.id(this.mainHd.dom));
-        }
-        if(g.enableColumnMove){
-            this.columnDrag = new Ext.grid.GridView.ColumnDragZone(g, this.innerHd);
-            this.columnDrag.setOuterHandleElId(Ext.id(this.lockedInnerHd));
-            this.columnDrag.setOuterHandleElId(Ext.id(this.innerHd));
-            this.columnDrop = new Ext.grid.HeaderDropZone(g, this.mainHd.dom);
-        }
-        if(g.enableHdMenu !== false){
-            this.hmenu = new Ext.menu.Menu({id: g.id + '-hctx'});
-            this.hmenu.add(
-                {itemId: 'asc', text: this.sortAscText, cls: 'xg-hmenu-sort-asc'},
-                {itemId: 'desc', text: this.sortDescText, cls: 'xg-hmenu-sort-desc'}
-            );
-            if(this.grid.enableColLock !== false){
-                this.hmenu.add('-',
-                    {itemId: 'lock', text: this.lockText, cls: 'xg-hmenu-lock'},
-                    {itemId: 'unlock', text: this.unlockText, cls: 'xg-hmenu-unlock'}
-                );
-            }
-            if(g.enableColumnHide !== false){
-                this.colMenu = new Ext.menu.Menu({id:g.id + '-hcols-menu'});
-                this.colMenu.on({
-                    scope: this,
-                    beforeshow: this.beforeColMenuShow,
-                    itemclick: this.handleHdMenuClick
-                });
-                this.hmenu.add('-', {
-                    itemId:'columns',
-                    hideOnClick: false,
-                    text: this.columnsText,
-                    menu: this.colMenu,
-                    iconCls: 'x-cols-icon'
-                });
-            }
-            this.hmenu.on('itemclick', this.handleHdMenuClick, this);
-        }
-        if(g.trackMouseOver){
-            this.mainBody.on({
-                scope: this,
-                mouseover: this.onRowOver,
-                mouseout: this.onRowOut
-            });
-            this.lockedBody.on({
-                scope: this,
-                mouseover: this.onRowOver,
-                mouseout: this.onRowOut
-            });
-        }
-
-        if(g.enableDragDrop || g.enableDrag){
-            this.dragZone = new Ext.grid.GridDragZone(g, {
-                ddGroup : g.ddGroup || 'GridDD'
-            });
-        }
-        this.updateHeaderSortState();
-        //kirov
-        //Ext.apply(this.columnDrop, this.columnDropConfig);
-        //Ext.apply(this.splitZone, this.splitZoneConfig);
-    },
-    
-    //kirov
-    splitZoneConfig: {
-        allowHeaderDrag: function(e){
-            return !e.getTarget(null, null, true).hasClass('ux-grid-hd-group-cell');
-        }
-    },
-    //kirov
-    columnDropConfig: {
-        getTargetFromEvent: function(e){
-            var t = Ext.lib.Event.getTarget(e);
-            return this.view.findHeaderCell(t);
-        },
-
-        positionIndicator: function(h, n, e){
-            var data = this.getDragDropData.call(this, h, n, e);
-            if(data === false){
-                return false;
-            }
-            var px = data.px + this.proxyOffsets[0];
-            this.proxyTop.setLeftTop(px, data.r.top + this.proxyOffsets[1]);
-            this.proxyTop.show();
-            this.proxyBottom.setLeftTop(px, data.r.bottom);
-            this.proxyBottom.show();
-            return data.pt;
-        },
-
-        onNodeDrop: function(n, dd, e, data){
-            var h = data.header;
-            if(h != n){
-                var d = this.getDragDropData.call(this, h, n, e);
-                if(d === false){
-                    return false;
-                }
-                var cm = this.grid.colModel, right = d.oldIndex < d.newIndex, rows = cm.rows;
-                for(var row = d.row, rlen = rows.length; row < rlen; row++){
-                    var r = rows[row], len = r.length, fromIx = 0, span = 1, toIx = len;
-                    for(var i = 0, gcol = 0; i < len; i++){
-                        var group = r[i];
-                        if(d.oldIndex >= gcol && d.oldIndex < gcol + group.colspan){
-                            fromIx = i;
-                        }
-                        if(d.oldIndex + d.colspan - 1 >= gcol && d.oldIndex + d.colspan - 1 < gcol + group.colspan){
-                            span = i - fromIx + 1;
-                        }
-                        if(d.newIndex >= gcol && d.newIndex < gcol + group.colspan){
-                            toIx = i;
-                        }
-                        gcol += group.colspan;
-                    }
-                    var groups = r.splice(fromIx, span);
-                    rows[row] = r.splice(0, toIx - (right ? span : 0)).concat(groups).concat(r);
-                }
-                for(var c = 0; c < d.colspan; c++){
-                    var oldIx = d.oldIndex + (right ? 0 : c), newIx = d.newIndex + (right ? -1 : c);
-                    cm.moveColumn(oldIx, newIx);
-                    this.grid.fireEvent("columnmove", oldIx, newIx);
-                }
-                return true;
-            }
-            return false;
-        }
-    },
-    //kirov
-    updateGroupStyles: function(col){
-        var tables = this.lockedHd.query('.x-grid3-header-offset > table'), tw = this.getLockedWidth(), rows = this.rows;
-        var rowGroups = [];
-        for(var row = 0; row < tables.length; row++){
-            tables[row].style.width = tw;
-            if(row < rows.length){
-                var cells = tables[row].firstChild.firstChild.childNodes;
-                rowGroups[row] = 0;
-                for(var i = 0, gcol = 0; i < cells.length; i++){
-                    var group = rows[row][i];
-                    rowGroups[row] = rowGroups[row]+1;
-                    if((typeof col != 'number') || (col >= gcol && col < gcol + group.colspan)){
-                        var gs = this.getGroupStyle.call(this, group, gcol);
-                        cells[i].style.width = gs.width;
-                        cells[i].style.display = gs.hidden ? 'none' : '';
-                    }
-                    gcol += group.colspan;
-                }
-            }
-        }
-        var tables = this.mainHd.query('.x-grid3-header-offset > table'), tw = this.getTotalWidth(), rows = this.rows;
-        for(var row = 0; row < tables.length; row++){
-            tables[row].style.width = tw;
-            if(row < rows.length){
-                var cells = tables[row].firstChild.firstChild.childNodes;
-                for(var i = 0, gcol = this.cm.getLockedCount(); i < cells.length; i++){
-                    var group = rows[row][rowGroups[row]+i];
-                    if((typeof col != 'number') || (col >= gcol && col < gcol + group.colspan)){
-                        var gs = this.getGroupStyle.call(this, group, gcol);
-                        cells[i].style.width = gs.width;
-                        cells[i].style.display = gs.hidden ? 'none' : '';
-                    }
-                    gcol += group.colspan;
-                }
-            }
-        }
-    },
-    //kirov
-    getGroupRowIndex: function(el){
-        if(el){
-            var m = el.className.match(this.hrowRe);
-            if(m && m[1]){
-                return parseInt(m[1], 10);
-            }
-        }
-        return this.cm.rows.length;
-    },
-
-    layout : function(){
-        if(!this.mainBody){
-            return;
-        }
-        var g = this.grid;
-        var c = g.getGridEl();
-        var csize = c.getSize(true);
-        var vw = csize.width;
-        if(!g.hideHeaders && (vw < 20 || csize.height < 20)){
-            return;
-        }
-        this.syncHeaderHeight();
-        if(g.autoHeight){
-            this.scroller.dom.style.overflow = 'visible';
-            this.lockedScroller.dom.style.overflow = 'visible';
-            if(Ext.isWebKit){
-                this.scroller.dom.style.position = 'static';
-                this.lockedScroller.dom.style.position = 'static';
-            }
-        }else{
-            this.el.setSize(csize.width, csize.height);
-            var hdHeight = this.mainHd.getHeight();
-            var vh = csize.height - (hdHeight);
-        }
-        this.updateLockedWidth();
-        if(this.forceFit){
-            if(this.lastViewWidth != vw){
-                this.fitColumns(false, false);
-                this.lastViewWidth = vw;
-            }
-        }else {
-            this.autoExpand();
-            this.syncHeaderScroll();
-        }
-        this.onLayout(vw, vh);
-    },
-    //kirov
-    getGroupSpan: function(row, col){
-        if(row < 0){
-            return {
-                col: 0,
-                colspan: this.cm.getColumnCount()
-            };
-        }
-        var r = this.cm.rows[row];
-        if(r){
-            for(var i = 0, gcol = 0, len = r.length; i < len; i++){
-                var group = r[i];
-                if(col >= gcol && col < gcol + group.colspan){
-                    return {
-                        col: gcol,
-                        colspan: group.colspan
-                    };
-                }
-                gcol += group.colspan;
-            }
-            return {
-                col: gcol,
-                colspan: 0
-            };
-        }
-        return {
-            col: col,
-            colspan: 1
-        };
-    },
-
-    getOffsetWidth : function() {
-        return (this.cm.getTotalWidth() - this.cm.getTotalLockedWidth() + this.getScrollOffset()) + 'px';
-    },
-
-    renderHeaders : function(){
-        var cm = this.cm,
-            ts = this.templates,
-            ct = ts.hcell,
-            cb = [], lcb = [],
-            p = {},
-            len = cm.getColumnCount(),
-            last = len - 1;
-        for(var i = 0; i < len; i++){
-            p.id = cm.getColumnId(i);
-            p.value = cm.getColumnHeader(i) || '';
-            p.style = this.getColumnStyle(i, true);
-            p.tooltip = this.getColumnTooltip(i);
-            p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
-                (cm.config[i].headerCls ? ' ' + cm.config[i].headerCls : '');
-            if(cm.config[i].align == 'right'){
-                p.istyle = 'padding-right:16px';
-            } else {
-                delete p.istyle;
-            }
-            if(cm.isLocked(i)){
-                lcb[lcb.length] = ct.apply(p);
-            }else{
-                cb[cb.length] = ct.apply(p);
-            }
-        }
-        //kirov
-	    var ts = this.templates, headers0 = [], headers1 = [], cm = this.cm, rows = this.rows, tstyle = 'width:' + this.getTotalWidth() + ';';
-        for(var row = 0, rlen = rows.length; row < rlen; row++){
-            var r = rows[row], cells0 = [], cells1 = [];
-            for(var i = 0, gcol = 0, len = r.length; i < len; i++){
-                var group = r[i];
-                group.colspan = group.colspan || 1;
-                var id = this.getColumnId(group.dataIndex ? cm.findColumnIndex(group.dataIndex) : gcol), gs = this.getGroupStyle.call(this, group, gcol);
-                var cell = ts.gcell.apply({
-                    cls: 'ux-grid-hd-group-cell',
-                    id: id,
-                    row: row,
-                    style: 'width:' + gs.width + ';' + (gs.hidden ? 'display:none;' : '') + (group.align ? 'text-align:' + group.align + ';' : ''),
-                    tooltip: group.tooltip ? (Ext.QuickTips.isEnabled() ? 'ext:qtip' : 'title') + '="' + group.tooltip + '"' : '',
-                    istyle: group.align == 'right' ? 'padding-right:16px' : '',
-                    btn: this.grid.enableHdMenu && group.header,
-                    value: group.header || '&nbsp;'
-                });
-                if (cm.isLocked(group.dataIndex ? cm.findColumnIndex(group.dataIndex) : gcol))
-                    cells1[i] = cell;
-                else
-                    cells0[i] = cell;
-                gcol += group.colspan;
-            }
-            headers0[row] = ts.header.apply({
-                tstyle: tstyle,
-                cells: cells0.join('')
-            });
-            headers1[row] = ts.header.apply({
-                tstyle: tstyle,
-                cells: cells1.join('')
-            });
-        }
-        //kirov
-        headers0.push(ts.header.apply({cells: cb.join(''), tstyle:'width:'+this.getTotalWidth()+';'}));
-        headers1.push(ts.header.apply({cells: lcb.join(''), tstyle:'width:'+this.getLockedWidth()+';'}));
-        return [headers0.join(''),headers1.join('')];
-    },
-    //kirov
-    getGroupStyle: function(group, gcol){
-        var width = 0, hidden = true;
-        for(var i = gcol, len = gcol + group.colspan; i < len; i++){
-            if(!this.cm.isHidden(i)){
-                var cw = this.cm.getColumnWidth(i);
-                if(typeof cw == 'number'){
-                    width += cw;
-                }
-                hidden = false;
-            }
-        }
-        return {
-            width: (Ext.isBorderBox || (Ext.isWebKit && !Ext.isSafari2) ? width : Math.max(width - this.borderWidth, 0)) + 'px',
-            hidden: hidden
-        };
-    },
-    //kirov
-    findHeaderCell: function(el){
-        return el ? this.fly(el).findParent('td.x-grid3-hd', this.cellSelectorDepth) : false;
-    },
-    //kirov
-    findHeaderIndex: function(el){
-        var cell = this.findHeaderCell(el);
-        return cell ? this.getCellIndex(cell) : false;
-    },
-
-    updateHeaders : function(){
-        var hd = this.renderHeaders();
-        this.innerHd.firstChild.innerHTML = hd[0];
-        this.innerHd.firstChild.style.width = this.getOffsetWidth();
-        this.innerHd.firstChild.firstChild.style.width = this.getTotalWidth();
-        this.lockedInnerHd.firstChild.innerHTML = hd[1];
-        var lw = this.getLockedWidth();
-        this.lockedInnerHd.firstChild.style.width = lw;
-        this.lockedInnerHd.firstChild.firstChild.style.width = lw;
-    },
-
-    getResolvedXY : function(resolved){
-        if(!resolved){
-            return null;
-        }
-        var c = resolved.cell, r = resolved.row;
-        return c ? Ext.fly(c).getXY() : [this.scroller.getX(), Ext.fly(r).getY()];
-    },
-
-    syncFocusEl : function(row, col, hscroll){
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.syncFocusEl.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
-    },
-
-    ensureVisible : function(row, col, hscroll){
-        return Ext.ux.grid.LockingHeaderGroupGridView.superclass.ensureVisible.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
-    },
-
-    insertRows : function(dm, firstRow, lastRow, isUpdate){
-        var last = dm.getCount() - 1;
-        if(!isUpdate && firstRow === 0 && lastRow >= last){
-            this.refresh();
-        }else{
-            if(!isUpdate){
-                this.fireEvent('beforerowsinserted', this, firstRow, lastRow);
-            }
-            var html = this.renderRows(firstRow, lastRow),
-                before = this.getRow(firstRow);
-            if(before){
-                if(firstRow === 0){
-                    this.removeRowClass(0, this.firstRowCls);
-                }
-                Ext.DomHelper.insertHtml('beforeBegin', before, html[0]);
-                before = this.getLockedRow(firstRow);
-                Ext.DomHelper.insertHtml('beforeBegin', before, html[1]);
-            }else{
-                this.removeRowClass(last - 1, this.lastRowCls);
-                Ext.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html[0]);
-                Ext.DomHelper.insertHtml('beforeEnd', this.lockedBody.dom, html[1]);
-            }
-            if(!isUpdate){
-                this.fireEvent('rowsinserted', this, firstRow, lastRow);
-                this.processRows(firstRow);
-            }else if(firstRow === 0 || firstRow >= last){
-                this.addRowClass(firstRow, firstRow === 0 ? this.firstRowCls : this.lastRowCls);
-            }
-        }
-        this.syncFocusEl(firstRow);
-    },
-
-    getColumnStyle : function(col, isHeader){
-        var style = !isHeader ? this.cm.config[col].cellStyle || this.cm.config[col].css || '' : this.cm.config[col].headerStyle || '';
-        style += 'width:'+this.getColumnWidth(col)+';';
-        if(this.cm.isHidden(col)){
-            style += 'display:none;';
-        }
-        var align = this.cm.config[col].align;
-        if(align){
-            style += 'text-align:'+align+';';
-        }
-        return style;
-    },
-
-    getLockedWidth : function() {
-        return this.cm.getTotalLockedWidth() + 'px';
-    },
-
-    getTotalWidth : function() {
-        return (this.cm.getTotalWidth() - this.cm.getTotalLockedWidth()) + 'px';
-    },
-
-    getColumnData : function(){
-        var cs = [], cm = this.cm, colCount = cm.getColumnCount();
-        for(var i = 0; i < colCount; i++){
-            var name = cm.getDataIndex(i);
-            cs[i] = {
-                name : (!Ext.isDefined(name) ? this.ds.fields.get(i).name : name),
-                renderer : cm.getRenderer(i),
-                id : cm.getColumnId(i),
-                style : this.getColumnStyle(i),
-                locked : cm.isLocked(i)
-            };
-        }
-        return cs;
-    },
-
-    renderBody : function(){
-        var markup = this.renderRows() || ['&#160;', '&#160;'];
-        return [this.templates.body.apply({rows: markup[0]}), this.templates.body.apply({rows: markup[1]})];
-    },
-
-    refreshRow : function(record){
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.refreshRow.call(this, record);
-        var index = Ext.isNumber(record) ? record : this.ds.indexOf(record);
-        this.getLockedRow(index).rowIndex = index;
-    },
-
-    refresh : function(headersToo){
-        this.fireEvent('beforerefresh', this);
-        this.grid.stopEditing(true);
-        var result = this.renderBody();
-        this.mainBody.update(result[0]).setWidth(this.getTotalWidth());
-        this.lockedBody.update(result[1]).setWidth(this.getLockedWidth());
-        if(headersToo === true){
-            this.updateHeaders();
-            this.updateHeaderSortState();
-        }
-        this.processRows(0, true);
-        this.layout();
-        this.applyEmptyText();
-        this.fireEvent('refresh', this);
-    },
-
-    onDenyColumnLock : function(){
-
-    },
-
-    initData : function(ds, cm){
-        if(this.cm){
-            this.cm.un('columnlockchange', this.onColumnLock, this);
-        }
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.initData.call(this, ds, cm);
-        if(this.cm){
-            this.cm.on('columnlockchange', this.onColumnLock, this);
-        }
-    },
-
-    onColumnLock : function(){
-        this.refresh(true);
-    },
-
-    handleHdMenuClick : function(item){
-        var index = this.hdCtxIndex,
-            cm = this.cm,
-            id = item.getItemId(),
-            llen = cm.getLockedCount();
-        switch(id){
-            case 'lock':
-                if(cm.getColumnCount(true) <= llen + 1){
-                    this.onDenyColumnLock();
-                    return;
-                }
-                cm.setLocked(index, true);
-                if(llen != index){
-                    cm.moveColumn(index, llen);
-                    this.grid.fireEvent('columnmove', index, llen);
-                }
-            break;
-            case 'unlock':
-                if(llen - 1 != index){
-                    cm.setLocked(index, false, true);
-                    cm.moveColumn(index, llen - 1);
-                    this.grid.fireEvent('columnmove', index, llen - 1);
-                }else{
-                    cm.setLocked(index, false);
-                }
-            break;
-            default:
-                return Ext.ux.grid.LockingHeaderGroupGridView.superclass.handleHdMenuClick.call(this, item);
-        }
-        return true;
-    },
-
-    handleHdDown : function(e, t){
-        //kirov
-        //Ext.ux.grid.LockingHeaderGroupGridView.superclass.handleHdDown.call(this, e, t);
-        var el = Ext.get(t);
-        if(el.hasClass('x-grid3-hd-btn')){
-            e.stopEvent();
-            var hd = this.findHeaderCell(t);
-            Ext.fly(hd).addClass('x-grid3-hd-menu-open');
-            var index = this.getCellIndex(hd);
-            this.hdCtxIndex = index;
-            var ms = this.hmenu.items, cm = this.cm;
-            ms.get('asc').setDisabled(!cm.isSortable(index));
-            ms.get('desc').setDisabled(!cm.isSortable(index));
-            this.hmenu.on('hide', function(){
-                Ext.fly(hd).removeClass('x-grid3-hd-menu-open');
-            }, this, {
-                single: true
-            });
-            this.hmenu.show(t, 'tl-bl?');
-        }else if(el.hasClass('ux-grid-hd-group-cell') || Ext.fly(t).up('.ux-grid-hd-group-cell')){
-            e.stopEvent();
-        }
-
-        if(this.grid.enableColLock !== false){
-            if(Ext.fly(t).hasClass('x-grid3-hd-btn')){
-                var hd = this.findHeaderCell(t),
-                    index = this.getCellIndex(hd),
-                    ms = this.hmenu.items, cm = this.cm;
-                ms.get('lock').setDisabled(cm.isLocked(index));
-                ms.get('unlock').setDisabled(!cm.isLocked(index));
-            }
-        }
-    },
-    //kirov
-    handleHdOver: function(e, t){
-        var hd = this.findHeaderCell(t);
-        if(hd && !this.headersDisabled){
-            this.activeHdRef = t;
-            this.activeHdIndex = this.getCellIndex(hd);
-            var fly = this.fly(hd);
-            this.activeHdRegion = fly.getRegion();
-            if(!(this.cm.isMenuDisabled(this.activeHdIndex) || fly.hasClass('ux-grid-hd-group-cell'))){
-                fly.addClass('x-grid3-hd-over');
-                this.activeHdBtn = fly.child('.x-grid3-hd-btn');
-                if(this.activeHdBtn){
-                    this.activeHdBtn.dom.style.height = (hd.firstChild.offsetHeight - 1) + 'px';
-                }
-            }
-        }
-    },
-    //kirov
-    handleHdOut: function(e, t){
-        var hd = this.findHeaderCell(t);
-        if(hd && (!Ext.isIE || !e.within(hd, true))){
-            this.activeHdRef = null;
-            this.fly(hd).removeClass('x-grid3-hd-over');
-            hd.style.cursor = '';
-        }
-    },
-
-    syncHeaderHeight: function(){
-        this.innerHd.firstChild.firstChild.style.height = 'auto';
-        this.lockedInnerHd.firstChild.firstChild.style.height = 'auto';
-        var hd = this.innerHd.firstChild.firstChild.offsetHeight,
-            lhd = this.lockedInnerHd.firstChild.firstChild.offsetHeight,
-            height = (lhd > hd ? lhd : hd) + 'px';
-        this.innerHd.firstChild.firstChild.style.height = height;
-        this.lockedInnerHd.firstChild.firstChild.style.height = height;
-    },
-
-    updateLockedWidth: function(){
-        var lw = this.cm.getTotalLockedWidth(),
-            tw = this.cm.getTotalWidth() - lw,
-            csize = this.grid.getGridEl().getSize(true),
-            lp = Ext.isBorderBox ? 0 : this.lockedBorderWidth,
-            rp = Ext.isBorderBox ? 0 : this.rowBorderWidth,
-            vw = (csize.width - lw - lp - rp) + 'px',
-            so = this.getScrollOffset();
-        if(!this.grid.autoHeight){
-            var vh = (csize.height - this.mainHd.getHeight()) + 'px';
-            this.lockedScroller.dom.style.height = vh;
-            this.scroller.dom.style.height = vh;
-        }
-        this.lockedWrap.dom.style.width = (lw + rp) + 'px';
-        this.scroller.dom.style.width = vw;
-        this.mainWrap.dom.style.left = (lw + lp + rp) + 'px';
-        if(this.innerHd){
-            this.lockedInnerHd.firstChild.style.width = lw + 'px';
-            this.lockedInnerHd.firstChild.firstChild.style.width = lw + 'px';
-            this.innerHd.style.width = vw;
-            this.innerHd.firstChild.style.width = (tw + rp + so) + 'px';
-            this.innerHd.firstChild.firstChild.style.width = tw + 'px';
-        }
-        if(this.mainBody){
-            this.lockedBody.dom.style.width = (lw + rp) + 'px';
-            this.mainBody.dom.style.width = (tw + rp) + 'px';
-        }
-    }
-});
-
-Ext.ux.grid.LockingGroupColumnModel = Ext.extend(Ext.grid.ColumnModel, {
-    /**
-     * Returns true if the given column index is currently locked
-     * @param {Number} colIndex The column index
-     * @return {Boolean} True if the column is locked
-     */
-    isLocked : function(colIndex){
-        return this.config[colIndex].locked === true;
-    },
-
-    /**
-     * Locks or unlocks a given column
-     * @param {Number} colIndex The column index
-     * @param {Boolean} value True to lock, false to unlock
-     * @param {Boolean} suppressEvent Pass false to cause the columnlockchange event not to fire
-     */
-    setLocked : function(colIndex, value, suppressEvent){
-        if (this.isLocked(colIndex) == value) {
-            return;
-        }
-        this.config[colIndex].locked = value;
-        if (!suppressEvent) {
-            this.fireEvent('columnlockchange', this, colIndex, value);
-        }
-    },
-
-    /**
-     * Returns the total width of all locked columns
-     * @return {Number} The width of all locked columns
-     */
-    getTotalLockedWidth : function(){
-        var totalWidth = 0;
-        for (var i = 0, len = this.config.length; i < len; i++) {
-            if (this.isLocked(i) && !this.isHidden(i)) {
-                totalWidth += this.getColumnWidth(i);
-            }
-        }
-
-        return totalWidth;
-    },
-
-    /**
-     * Returns the total number of locked columns
-     * @return {Number} The number of locked columns
-     */
-    getLockedCount : function() {
-        var len = this.config.length;
-
-        for (var i = 0; i < len; i++) {
-            if (!this.isLocked(i)) {
-                return i;
-            }
-        }
-
-        //if we get to this point all of the columns are locked so we return the total
-        return len;
-    },
-
-    /**
-     * Moves a column from one position to another
-     * @param {Number} oldIndex The current column index
-     * @param {Number} newIndex The destination column index
-     */
-    moveColumn : function(oldIndex, newIndex){
-        var oldLocked = this.isLocked(oldIndex),
-            newLocked = this.isLocked(newIndex);
-
-        if (oldIndex < newIndex && oldLocked && !newLocked) {
-            this.setLocked(oldIndex, false, true);
-        } else if (oldIndex > newIndex && !oldLocked && newLocked) {
-            this.setLocked(oldIndex, true, true);
-        }
-
-        Ext.ux.grid.LockingGroupColumnModel.superclass.moveColumn.apply(this, arguments);
-    }
-});
-
-Ext.namespace('Ext.ux.Ribbon');
-
-Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
-
-    titleId: null,
-
-    constructor: function(config){
-        this.titleId = new Array();
-
-        Ext.apply(config, {
-            baseCls: "x-plain ui-ribbon",
-            margins: "0 0 0 0",
-            // plugins: new Ext.ux.TabScrollerMenu({
-            //     maxText: 15,
-            //     pageSize: 5
-            // }),
-            //enableTabScroll: true,
-            plain: true,
-            border: false,
-            deferredRender: false,
-            layoutOnTabChange: true,
-            title: '',
-            //collapsible: true,
-            activeTab: 0,
-            listeners: {
-                beforetabchange: function(tp, ntb, ctb){
-                    tp.expand();
-                },
-                afterrender: {
-                    scope: this,
-                    fn: function(){
-                        //this.expand();
-                        //this.doLayout();
-                        if (this.titleId.length > 0){
-                            for (var key = 0; key < this.titleId.length; key++){
-                                r = Ext.get(this.titleId[key].id);
-                                if (r)
-                                r.on('click', this.titleId[key].fn);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        Ext.apply(this, Ext.apply(this.initialConfig, config));
-
-        if (config.items){
-            for (var i = 0; i < config.items.length; i++)
-            this.initRibbon(config.items[i], i);
-        }
-
-        Ext.ux.Ribbon.superclass.constructor.apply(this, arguments);
-        
-    },
-
-    initRibbon: function(item, index){
-        var tbarr = new Array();
-        for (var j = 0; j < item.ribbon.length; j++){
-            // for (var i = 0; i < item.ribbon[j].items.length; i++){
-            //                             if (item.ribbon[j].items[i].scale !== "small"){
-            //                                 item.ribbon[j].items[i].text = String(item.ribbon[j].items[i].text).replace(/[ +]/gi, "<br/>");
-            //                             }
-            //                         }
-            c = {
-                xtype: "buttongroup",
-                cls: "x-btn-group-ribbonstyle",
-                defaults: {
-                    scale: "small",
-                    iconAlign: "left",
-                    minWidth: 40
-                },
-                items: item.ribbon[j].items
-            };
-
-            title = item.ribbon[j].title || '';
-            topTitle = item.ribbon[j].topTitle || false;
-            onTitleClick = item.ribbon[j].onTitleClick || false;
-
-            if (onTitleClick){
-                titleId = 'ux-ribbon-' + Ext.id();
-                title = '<span id="' + titleId + '" style="cursor:pointer;">' + title + '</span>';
-                this.titleId.push({
-                    id: titleId,
-                    fn: onTitleClick
-                });
-            }
-            if (title !== ''){
-                if (!topTitle){
-                    Ext.apply(c, {
-                        footerCfg: {
-                            cls: "x-btn-group-header x-unselectable",
-                            tag: "span",
-                            html: title
-                        }
-                    });
-                } else{
-                    Ext.apply(c, {
-                        title: title
-                    });
-                }
-            }
-
-            cfg = item.ribbon[j].cfg || null;
-
-            if (cfg){
-                Ext.applyIf(c, item.ribbon[j].cfg);
-                if (cfg.defaults)
-                Ext.apply(c.defaults, cfg.defaults);
-            }
-
-            tbarr.push(c);
-        }
-
-        Ext.apply(item, {
-            baseCls: "x-plain",
-            tbar: tbarr
-        });
-    }
-});
-// Create the namespace
-Ext.ns('Ext.ux.plugins.grid');
-
-/**
- * Ext.ux.plugins.grid.CellToolTips plugin for Ext.grid.GridPanel
- *
- * A GridPanel plugin that enables the creation of record based,
- * per-column tooltips that can also be dynamically loaded via Ajax
- * calls.
- *
- * Requires Animal's triggerElement override when using ExtJS 2.x
- * (from <a href="http://extjs.com/forum/showthread.php?p=265259#post265259">http://extjs.com/forum/showthread.php?p=265259#post265259</a>)
- * In ExtJS 3.0 this feature is arealy in the standard.
- *
- * Starting from version 1.1, CellToolTips also supports dynamic
- * loading of tooltips via Ajax. Just specify the 'url' parameter
- * in the respective column configuration for the CellToolTips,
- * and the data for the tooltip will be loaded from there. By
- * default, the record data for the current row will be passed
- * to the request.
- *
- * If you want to supply different parameters, you can specify a
- * function with the 'fn' parameter. This function gets the data
- * object for the current row record. The object it returns will
- * be used as the Ajax paremeters.
- *
- * An example configuration:
- * <pre><code>
-	var tts = new Ext.ux.plugins.grid.CellToolTips([
-		{
-			// 'Standard' CellToolTip, the current row record is applied
-			// to the template.
-			field: 'company',
-			tpl:   '<b>Company: {company}</b><br />This is a local column tooltip'
-		},
-		{
-			// Simple Ajax CellToolTip, an Ajax request is dispatched with the
-			// current row record as its parameters, and after adding the property
-			// "ADDITIONAL" to the return data it is applied to the template.
-			field: 'price', 
-			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%<br />{ADDITIONAL}', 
-			url: 'json_ajaxtip1.php',
-			afterFn: function(data) { return Ext.apply({ ADDITIONAL: 'Test' }, data; }
-		},
-		{
-			// Advanced Ajax CellToolTip, the current row record is passed to the
-			// function in 'fn', its return values are passed to an Ajax call and
-			// the Ajax return data is applied to the template.
-			field: 'change', 
-			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%', 
-			fn: function(parms) {
-				parms.price = parms.price * 100;
-				return Ext.apply({},parms);
-			},
-			url: '/json_ajaxtip2.php'
-		}
-	]);
-	
-	var grid = new Ext.grid.GridPanel({
-		... normal config ...
-		,plugins:	[ tts ]
-		// Optional: filter which rows should have a tooltip:
-		,CellToolTipCondition: function( row, rec ) {
-			// don't show a tooltip for the first row or if
-			// the record has a property 'secret' set to true
-			if( row == 0 || rec.get('secret') == true ) {
-				return false;
-			}
-		}
-   </code></pre>
- *
- * A complete example can be found <a href="http://www.chrwinter.de/ext3/CellToolTips.html">here</a>.
- *
- * @author  BitPoet
- * @date    July 08, 2009
- * @version 1.3
- *
- * @class Ext.ux.plugins.grid.CellToolTips
- * @extends Ext.util.Observable
- */
-Ext.ux.plugins.grid.CellToolTips = function(config) {
-    var cfgTips;
-    if( Ext.isArray(config) ) {
-        cfgTips = config;
-        config = {};
-    } else {
-    	cfgTips = config.ajaxTips;
-    }
-    Ext.ux.plugins.grid.CellToolTips.superclass.constructor.call(this, config);
-    if( config.tipConfig ) {
-    	this.tipConfig = config.tipConfig;
-    }
-    this.ajaxTips = cfgTips;
-} // End of constructor
-
-// plugin code
-Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
-    version: 1.3,
-    /**
-     * Temp storage from the config object
-     *
-     * @private
-     */
-    ajaxTips: false,
-    
-    /**
-     * Tooltip Templates indexed by column id
-     *
-     * @private
-     */
-    tipTpls: false,
-
-    /**
-     * Tooltip data filter function for setting base parameters
-     *
-     * @private
-     */
-    tipFns: false,
-    
-    /**
-     * URLs for ajax backend
-     *
-     * @private
-     */
-    tipUrls: '',
-    
-    /**
-     * Tooltip configuration items
-     *
-     * @private
-     */
-    tipConfig: {},
-
-    /**
-     * Loading action
-     *
-     * @private
-     */
-    request: false,
-
-    /**
-     * Plugin initialization routine
-     *
-     * @param {Ext.grid.GridPanel} grid
-     */
-    init: function(grid) {
-        if( ! this.ajaxTips ) {
-            return;
-        }
-        this.tipTpls = {};
-        this.tipFns  = {};
-      	this.tipAfterFns = {};
-        this.tipUrls = {};
-        // Generate tooltip templates
-        Ext.each( this.ajaxTips, function(tip) {
-        	this.tipTpls[tip.field] = new Ext.XTemplate( tip.tpl );
-        	if( tip.url ) {
-        		this.tipUrls[tip.field] = tip.url;
-        	}
-       		if( tip.fn )
-       			this.tipFns[tip.field] = tip.fn;
-       		if( tip.afterFn )
-       			this.tipAfterFns[tip.field] = tip.afterFn;
-       		if (tip.tipConfig)
-			this.tipConfig = tip.tipConfig;
-
-        }, this);
-        // delete now superfluous config entry for ajaxTips
-        delete( this.ajaxTips );
-        grid.on( 'render', this.onGridRender.createDelegate(this) );
-    } // End of function init
-
-    /**
-     * Set/Add a template for a column
-     *
-     * @param {String} fld
-     * @param {String | Ext.XTemplate} tpl
-     */
-    ,setFieldTpl: function(fld, tpl) {
-        this.tipTpls[fld] = Ext.isObject(tpl) ? tpl : new Ext.XTemplate(tpl);
-    } // End of function setFieldTpl
-
-    /**
-     * Set up the tooltip when the grid is rendered
-     *
-     * @private
-     * @param {Ext.grid.GridPanel} grid
-     */
-    ,onGridRender: function(grid) 
-    {
-        if( ! this.tipTpls ) {
-            return;
-        }
-        // Create one new tooltip for the whole grid
-        Ext.apply(this.tipConfig, {
-            target:      grid.getView().mainBody,
-            delegate:    '.x-grid3-cell-inner',
-            renderTo:    document.body,
-            finished:	 false
-        });
-        Ext.applyIf(this.tipConfig, {
-            
-            //prefer M: В ie с запятой не будет работать. 
-            // monkey pathcing mode true
-            //trackMouse:  true,
-            trackMouse:  true
-    	});
-
-        this.tip = new Ext.ToolTip( this.tipConfig );
-        this.tip.ctt = this;
-        // Hook onto the beforeshow event to update the tooltip content
-        this.tip.on('beforeshow', this.beforeTipShow.createDelegate(this.tip, [this, grid], true));
-        this.tip.on('hide', this.hideTip);
-    } // End of function onGridRender
-
-    /**
-     * Replace the tooltip body by applying current row data to the template
-     *
-     * @private
-     * @param {Ext.ToolTip} tip
-     * @param {Ext.ux.plugins.grid.CellToolTips} ctt
-     * @param {Ext.grid.GridPanel} grid
-     */
-    ,beforeTipShow: function(tip, ctt, grid) {
-	// Get column id and check if a tip is defined for it
-	var colIdx = grid.getView().findCellIndex( tip.triggerElement );
-	var tipId = grid.getColumnModel().getDataIndex( colIdx );
-       	if( ! ctt.tipTpls[tipId] )
-       	    return false;
-    	if( ! tip.finished ) {
-	       	var isAjaxTip = (typeof ctt.tipUrls[tipId] == 'string');
-        	// Fetch the rows record from the store and apply the template
-        	var rowNum = grid.getView().findRowIndex( tip.triggerElement );
-        	var cellRec = grid.getStore().getAt( rowNum );
-	        if( grid.CellToolTipCondition && grid.CellToolTipCondition(rowNum, cellRec) === false ) {
-        	    return false;
-        	}
-        	// create a copy of the record and use its data, otherwise we might
-        	// accidentially modify the original record's values
-        	var data = cellRec.copy().data;
-        	if( isAjaxTip ) {
-        		ctt.loadDetails((ctt.tipFns[tipId]) ? ctt.tipFns[tipId](data) : data, tip, grid, ctt, tipId);
-        		tip.body.dom.innerHTML = 'Loading...';
-        	} else {
-			tip.body.dom.innerHTML = ctt.tipTpls[tipId].apply( (ctt.tipFns[tipId]) ? ctt.tipFns[tipId](cellRec.data) : cellRec.data );
-		}       		
-        } else {
-        	tip.body.dom.innerHTML = tip.ctt.tipTpls[tipId].apply( tip.tipdata );
-        }
-    } // End of function beforeTipShow
-    
-    /**
-     * Fired when the tooltip is hidden, resets the finished handler.
-     *
-     * @private
-     * @param {Ext.ToolTip} tip
-     */
-    ,hideTip: function(tip) {
-    	tip.finished = false;
-    }
-    
-    /**
-     * Loads the data to apply to the tip template via Ajax
-     *
-     * @private
-     * @param {object} data Parameters for the Ajax request
-     * @param {Ext.ToolTip} tip The tooltip object
-     * @param {Ext.grid.GridPanel} grid The grid
-     * @param {Ext.ux.plugins.grid.CellToolTips} ctt The CellToolTips object
-     * @param {String} tipid Id of the tooltip (= field name)
-     */
-    ,loadDetails: function(data, tip, grid, ctt, tipid) {
-    	Ext.Ajax.request({
-    		url:	ctt.tipUrls[tipid],
-    		params:	data,
-    		method: 'POST',
-    		success:	function(resp, opt) {
-    			tip.finished = true;
-    			tip.tipdata  = Ext.decode(resp.responseText);
-    			if( ctt.tipAfterFns[tipid] ) {
-    				tip.tipdata = ctt.tipAfterFns[tipid](tip.tipdata);
-    			}
-    			tip.show();
-    		}
-    	});
-    }
-
-}); // End of extend
 
 /*
  * Ext JS Library 3.3.0
@@ -7760,6 +6672,1094 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
 });
 
 Ext.reg('calendarpanel', Ext.calendar.CalendarPanel);
+Ext.ns('Ext.ux.grid');
+
+Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
+    lockText : 'Lock',
+    unlockText : 'Unlock',
+    rowBorderWidth : 1,
+    lockedBorderWidth : 1,
+
+    /*
+     * This option ensures that height between the rows is synchronized
+     * between the locked and unlocked sides. This option only needs to be used
+     * when the row heights aren't predictable.
+     */
+    syncHeights: false,
+
+    initTemplates : function(){
+        var ts = this.templates || {};
+
+        if (!ts.master) {
+            ts.master = new Ext.Template(
+                '<div class="x-grid3" hidefocus="true">',
+                    '<div class="x-grid3-locked">',
+                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{lstyle}">{lockedHeader}</div></div><div class="x-clear"></div></div>',
+                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{lstyle}">{lockedBody}</div><div class="x-grid3-scroll-spacer"></div></div>',
+                    '</div>',
+                    '<div class="x-grid3-viewport x-grid3-unlocked">',
+                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x-clear"></div></div>',
+                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x-grid3-focus" tabIndex="-1"></a></div>',
+                    '</div>',
+                    '<div class="x-grid3-resize-marker">&#160;</div>',
+                    '<div class="x-grid3-resize-proxy">&#160;</div>',
+                '</div>'
+            );
+        }
+        //kirov
+	    if(!ts.gcell){
+            ts.gcell = new Ext.XTemplate('<td class="x-grid3-hd x-grid3-gcell x-grid3-td-{id} ux-grid-hd-group-row-{row} {cls}" style="{style}">', '<div {tooltip} class="x-grid3-hd-inner x-grid3-hd-{id}" unselectable="on" style="{istyle}">', this.grid.enableHdMenu ? '<a class="x-grid3-hd-btn" href="#"></a>' : '', '{value}</div></td>');
+        }
+        this.templates = ts;
+        //kirov
+	    this.hrowRe = new RegExp("ux-grid-hd-group-row-(\\d+)", "");
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.initTemplates.call(this);
+    },
+
+    getEditorParent : function(ed){
+        return this.el.dom;
+    },
+
+    initElements : function(){
+        var E  = Ext.Element,
+            el = this.grid.getGridEl().dom.firstChild,
+            cs = el.childNodes;
+
+        this.el             = new E(el);
+        this.lockedWrap     = new E(cs[0]);
+        this.lockedHd       = new E(this.lockedWrap.dom.firstChild);
+        this.lockedInnerHd  = this.lockedHd.dom.firstChild;
+        this.lockedScroller = new E(this.lockedWrap.dom.childNodes[1]);
+        this.lockedBody     = new E(this.lockedScroller.dom.firstChild);
+        this.mainWrap       = new E(cs[1]);
+        this.mainHd         = new E(this.mainWrap.dom.firstChild);
+
+        if (this.grid.hideHeaders) {
+            this.lockedHd.setDisplayed(false);
+            this.mainHd.setDisplayed(false);
+        }
+
+        this.innerHd  = this.mainHd.dom.firstChild;
+        this.scroller = new E(this.mainWrap.dom.childNodes[1]);
+
+        if(this.forceFit){
+            this.scroller.setStyle('overflow-x', 'hidden');
+        }
+
+        this.mainBody     = new E(this.scroller.dom.firstChild);
+        this.focusEl      = new E(this.scroller.dom.childNodes[1]);
+        this.resizeMarker = new E(cs[2]);
+        this.resizeProxy  = new E(cs[3]);
+
+        this.focusEl.swallowEvent('click', true);
+    },
+
+    getLockedRows : function(){
+        return this.hasRows() ? this.lockedBody.dom.childNodes : [];
+    },
+
+    getLockedRow : function(row){
+        return this.getLockedRows()[row];
+    },
+
+    getCell : function(row, col){
+        var llen = this.cm.getLockedCount();
+        if(col < llen){
+            return this.getLockedRow(row).getElementsByTagName('td')[col];
+        }
+        return Ext.ux.grid.LockingHeaderGroupGridView.superclass.getCell.call(this, row, col - llen);
+    },
+
+    getHeaderCell : function(index){
+        var llen = this.cm.getLockedCount();
+        if(index < llen){
+            return this.lockedHd.dom.getElementsByTagName('td')[index];
+        }
+        //kirov
+        //return Ext.ux.grid.LockingHeaderGroupGridView.superclass.getHeaderCell.call(this, index - llen);
+        return this.mainHd.query(this.cellSelector)[index-llen];
+    },
+
+    addRowClass : function(row, cls){
+        var r = this.getLockedRow(row);
+        if(r){
+            this.fly(r).addClass(cls);
+        }
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.addRowClass.call(this, row, cls);
+    },
+
+    removeRowClass : function(row, cls){
+        var r = this.getLockedRow(row);
+        if(r){
+            this.fly(r).removeClass(cls);
+        }
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRowClass.call(this, row, cls);
+    },
+
+    removeRow : function(row) {
+        Ext.removeNode(this.getLockedRow(row));
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRow.call(this, row);
+    },
+
+    removeRows : function(firstRow, lastRow){
+        var bd = this.lockedBody.dom;
+        for(var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++){
+            Ext.removeNode(bd.childNodes[firstRow]);
+        }
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRows.call(this, firstRow, lastRow);
+    },
+
+    syncScroll : function(e){
+        var mb = this.scroller.dom;
+        this.lockedScroller.dom.scrollTop = mb.scrollTop;
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.syncScroll.call(this, e);
+    },
+
+    updateSortIcon : function(col, dir){
+        var sc = this.sortClasses,
+            lhds = this.lockedHd.select('td').removeClass(sc),
+            hds = this.mainHd.select('td').removeClass(sc),
+            llen = this.cm.getLockedCount(),
+            cls = sc[dir == 'DESC' ? 1 : 0];
+        if(col < llen){
+            lhds.item(col).addClass(cls);
+        }else{
+            hds.item(col - llen).addClass(cls);
+        }
+    },
+
+    updateAllColumnWidths : function(){
+        var tw = this.getTotalWidth(),
+            clen = this.cm.getColumnCount(),
+            lw = this.getLockedWidth(),
+            llen = this.cm.getLockedCount(),
+            ws = [], len, i;
+        this.updateLockedWidth();
+        for(i = 0; i < clen; i++){
+            ws[i] = this.getColumnWidth(i);
+            var hd = this.getHeaderCell(i);
+            hd.style.width = ws[i];
+        }
+        var lns = this.getLockedRows(), ns = this.getRows(), row, trow, j;
+        for(i = 0, len = ns.length; i < len; i++){
+            row = lns[i];
+            row.style.width = lw;
+            if(row.firstChild){
+                row.firstChild.style.width = lw;
+                trow = row.firstChild.rows[0];
+                for (j = 0; j < llen; j++) {
+                   trow.childNodes[j].style.width = ws[j];
+                }
+            }
+            row = ns[i];
+            row.style.width = tw;
+            if(row.firstChild){
+                row.firstChild.style.width = tw;
+                trow = row.firstChild.rows[0];
+                for (j = llen; j < clen; j++) {
+                   trow.childNodes[j - llen].style.width = ws[j];
+                }
+            }
+        }
+        //kirov
+        this.updateGroupStyles();
+        this.onAllColumnWidthsUpdated(ws, tw);
+        this.syncHeaderHeight();
+    },
+    //kirov
+    onColumnWidthUpdated: function(){
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.onColumnWidthUpdated.call(this, arguments);
+        this.updateGroupStyles.call(this);
+    },
+    //kirov
+    onAllColumnWidthsUpdated: function(){
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.onAllColumnWidthsUpdated.call(this, arguments);
+        this.updateGroupStyles.call(this);
+    },
+    //kirov
+    //onColumnHiddenUpdated: function(){
+    //    Ext.ux.grid.LockingHeaderGroupGridView.superclass.onColumnHiddenUpdated.call(this, arguments);
+    //    this.updateGroupStyles.call(this);
+    //},
+
+    updateColumnWidth : function(col, width){
+        var w = this.getColumnWidth(col),
+            llen = this.cm.getLockedCount(),
+            ns, rw, c, row;
+        this.updateLockedWidth();
+        if(col < llen){
+            ns = this.getLockedRows();
+            rw = this.getLockedWidth();
+            c = col;
+        }else{
+            ns = this.getRows();
+            rw = this.getTotalWidth();
+            c = col - llen;
+        }
+        var hd = this.getHeaderCell(col);
+        hd.style.width = w;
+        for(var i = 0, len = ns.length; i < len; i++){
+            row = ns[i];
+            row.style.width = rw;
+            if(row.firstChild){
+                row.firstChild.style.width = rw;
+                row.firstChild.rows[0].childNodes[c].style.width = w;
+            }
+        }
+        this.onColumnWidthUpdated(col, w, this.getTotalWidth());
+        this.syncHeaderHeight();
+    },
+
+    updateColumnHidden : function(col, hidden){
+        var llen = this.cm.getLockedCount(),
+            ns, rw, c, row,
+            display = hidden ? 'none' : '';
+        this.updateLockedWidth();
+        if(col < llen){
+            ns = this.getLockedRows();
+            rw = this.getLockedWidth();
+            c = col;
+        }else{
+            ns = this.getRows();
+            rw = this.getTotalWidth();
+            c = col - llen;
+        }
+        var hd = this.getHeaderCell(col);
+        hd.style.display = display;
+        for(var i = 0, len = ns.length; i < len; i++){
+            row = ns[i];
+            row.style.width = rw;
+            if(row.firstChild){
+                row.firstChild.style.width = rw;
+                row.firstChild.rows[0].childNodes[c].style.display = display;
+            }
+        }
+        this.onColumnHiddenUpdated(col, hidden, this.getTotalWidth());
+        delete this.lastViewWidth;
+        this.layout();
+    },
+
+    doRender : function(cs, rs, ds, startRow, colCount, stripe){
+        var ts = this.templates, ct = ts.cell, rt = ts.row, last = colCount-1,
+            tstyle = 'width:'+this.getTotalWidth()+';',
+            lstyle = 'width:'+this.getLockedWidth()+';',
+            buf = [], lbuf = [], cb, lcb, c, p = {}, rp = {}, r;
+        for(var j = 0, len = rs.length; j < len; j++){
+            r = rs[j]; cb = []; lcb = [];
+            var rowIndex = (j+startRow);
+            for(var i = 0; i < colCount; i++){
+                c = cs[i];
+                p.id = c.id;
+                p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
+                    (this.cm.config[i].cellCls ? ' ' + this.cm.config[i].cellCls : '');
+                p.attr = p.cellAttr = '';
+                p.value = c.renderer(r.data[c.name], p, r, rowIndex, i, ds);
+                p.style = c.style;
+                if(Ext.isEmpty(p.value)){
+                    p.value = '&#160;';
+                }
+                if(this.markDirty && r.dirty && Ext.isDefined(r.modified[c.name])){
+                    p.css += ' x-grid3-dirty-cell';
+                }
+                if(c.locked){
+                    lcb[lcb.length] = ct.apply(p);
+                }else{
+                    cb[cb.length] = ct.apply(p);
+                }
+            }
+            var alt = [];
+            if(stripe && ((rowIndex+1) % 2 === 0)){
+                alt[0] = 'x-grid3-row-alt';
+            }
+            if(r.dirty){
+                alt[1] = ' x-grid3-dirty-row';
+            }
+            rp.cols = colCount;
+            if(this.getRowClass){
+                alt[2] = this.getRowClass(r, rowIndex, rp, ds);
+            }
+            rp.alt = alt.join(' ');
+            rp.cells = cb.join('');
+            rp.tstyle = tstyle;
+            buf[buf.length] = rt.apply(rp);
+            rp.cells = lcb.join('');
+            rp.tstyle = lstyle;
+            lbuf[lbuf.length] = rt.apply(rp);
+        }
+        return [buf.join(''), lbuf.join('')];
+    },
+    processRows : function(startRow, skipStripe){
+        if(!this.ds || this.ds.getCount() < 1){
+            return;
+        }
+        var rows = this.getRows(),
+            lrows = this.getLockedRows(),
+            row, lrow;
+        skipStripe = skipStripe || !this.grid.stripeRows;
+        startRow = startRow || 0;
+        for(var i = 0, len = rows.length; i < len; ++i){
+            row = rows[i];
+            lrow = lrows[i];
+            row.rowIndex = i;
+            lrow.rowIndex = i;
+            if(!skipStripe){
+                row.className = row.className.replace(this.rowClsRe, ' ');
+                lrow.className = lrow.className.replace(this.rowClsRe, ' ');
+                if ((i + 1) % 2 === 0){
+                    row.className += ' x-grid3-row-alt';
+                    lrow.className += ' x-grid3-row-alt';
+                }
+            }
+            if(this.syncHeights){
+                var el1 = Ext.get(row),
+                    el2 = Ext.get(lrow),
+                    h1 = el1.getHeight(),
+                    h2 = el2.getHeight();
+
+                if(h1 > h2){
+                    el2.setHeight(h1);
+                }else if(h2 > h1){
+                    el1.setHeight(h2);
+                }
+            }
+        }
+        if(startRow === 0){
+            Ext.fly(rows[0]).addClass(this.firstRowCls);
+            Ext.fly(lrows[0]).addClass(this.firstRowCls);
+        }
+        Ext.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
+        Ext.fly(lrows[lrows.length - 1]).addClass(this.lastRowCls);
+    },
+
+    afterRender : function(){
+        if(!this.ds || !this.cm){
+            return;
+        }
+        var bd = this.renderRows() || ['&#160;', '&#160;'];
+        this.mainBody.dom.innerHTML = bd[0];
+        this.lockedBody.dom.innerHTML = bd[1];
+        this.processRows(0, true);
+        if(this.deferEmptyText !== true){
+            this.applyEmptyText();
+        }
+    },
+
+    renderUI : function(){
+        var header = this.renderHeaders();
+        var body = this.templates.body.apply({rows:'&#160;'});
+        var html = this.templates.master.apply({
+            body: body,
+            header: header[0],
+            ostyle: 'width:'+this.getOffsetWidth()+';',
+            bstyle: 'width:'+this.getTotalWidth()+';',
+            lockedBody: body,
+            lockedHeader: header[1],
+            lstyle: 'width:'+this.getLockedWidth()+';'
+        });
+        var g = this.grid;
+        g.getGridEl().dom.innerHTML = html;
+        this.initElements();
+        Ext.fly(this.innerHd).on('click', this.handleHdDown, this);
+        Ext.fly(this.lockedInnerHd).on('click', this.handleHdDown, this);
+        this.mainHd.on({
+            scope: this,
+            mouseover: this.handleHdOver,
+            mouseout: this.handleHdOut,
+            mousemove: this.handleHdMove
+        });
+        this.lockedHd.on({
+            scope: this,
+            mouseover: this.handleHdOver,
+            mouseout: this.handleHdOut,
+            mousemove: this.handleHdMove
+        });
+        this.scroller.on('scroll', this.syncScroll,  this);
+        if(g.enableColumnResize !== false){
+            this.splitZone = new Ext.grid.GridView.SplitDragZone(g, this.mainHd.dom);
+            this.splitZone.setOuterHandleElId(Ext.id(this.lockedHd.dom));
+            this.splitZone.setOuterHandleElId(Ext.id(this.mainHd.dom));
+        }
+        if(g.enableColumnMove){
+            this.columnDrag = new Ext.grid.GridView.ColumnDragZone(g, this.innerHd);
+            this.columnDrag.setOuterHandleElId(Ext.id(this.lockedInnerHd));
+            this.columnDrag.setOuterHandleElId(Ext.id(this.innerHd));
+            this.columnDrop = new Ext.grid.HeaderDropZone(g, this.mainHd.dom);
+        }
+        if(g.enableHdMenu !== false){
+            this.hmenu = new Ext.menu.Menu({id: g.id + '-hctx'});
+            this.hmenu.add(
+                {itemId: 'asc', text: this.sortAscText, cls: 'xg-hmenu-sort-asc'},
+                {itemId: 'desc', text: this.sortDescText, cls: 'xg-hmenu-sort-desc'}
+            );
+            if(this.grid.enableColLock !== false){
+                this.hmenu.add('-',
+                    {itemId: 'lock', text: this.lockText, cls: 'xg-hmenu-lock'},
+                    {itemId: 'unlock', text: this.unlockText, cls: 'xg-hmenu-unlock'}
+                );
+            }
+            if(g.enableColumnHide !== false){
+                this.colMenu = new Ext.menu.Menu({id:g.id + '-hcols-menu'});
+                this.colMenu.on({
+                    scope: this,
+                    beforeshow: this.beforeColMenuShow,
+                    itemclick: this.handleHdMenuClick
+                });
+                this.hmenu.add('-', {
+                    itemId:'columns',
+                    hideOnClick: false,
+                    text: this.columnsText,
+                    menu: this.colMenu,
+                    iconCls: 'x-cols-icon'
+                });
+            }
+            this.hmenu.on('itemclick', this.handleHdMenuClick, this);
+        }
+        if(g.trackMouseOver){
+            this.mainBody.on({
+                scope: this,
+                mouseover: this.onRowOver,
+                mouseout: this.onRowOut
+            });
+            this.lockedBody.on({
+                scope: this,
+                mouseover: this.onRowOver,
+                mouseout: this.onRowOut
+            });
+        }
+
+        if(g.enableDragDrop || g.enableDrag){
+            this.dragZone = new Ext.grid.GridDragZone(g, {
+                ddGroup : g.ddGroup || 'GridDD'
+            });
+        }
+        this.updateHeaderSortState();
+        //kirov
+        //Ext.apply(this.columnDrop, this.columnDropConfig);
+        //Ext.apply(this.splitZone, this.splitZoneConfig);
+    },
+    
+    //kirov
+    splitZoneConfig: {
+        allowHeaderDrag: function(e){
+            return !e.getTarget(null, null, true).hasClass('ux-grid-hd-group-cell');
+        }
+    },
+    //kirov
+    columnDropConfig: {
+        getTargetFromEvent: function(e){
+            var t = Ext.lib.Event.getTarget(e);
+            return this.view.findHeaderCell(t);
+        },
+
+        positionIndicator: function(h, n, e){
+            var data = this.getDragDropData.call(this, h, n, e);
+            if(data === false){
+                return false;
+            }
+            var px = data.px + this.proxyOffsets[0];
+            this.proxyTop.setLeftTop(px, data.r.top + this.proxyOffsets[1]);
+            this.proxyTop.show();
+            this.proxyBottom.setLeftTop(px, data.r.bottom);
+            this.proxyBottom.show();
+            return data.pt;
+        },
+
+        onNodeDrop: function(n, dd, e, data){
+            var h = data.header;
+            if(h != n){
+                var d = this.getDragDropData.call(this, h, n, e);
+                if(d === false){
+                    return false;
+                }
+                var cm = this.grid.colModel, right = d.oldIndex < d.newIndex, rows = cm.rows;
+                for(var row = d.row, rlen = rows.length; row < rlen; row++){
+                    var r = rows[row], len = r.length, fromIx = 0, span = 1, toIx = len;
+                    for(var i = 0, gcol = 0; i < len; i++){
+                        var group = r[i];
+                        if(d.oldIndex >= gcol && d.oldIndex < gcol + group.colspan){
+                            fromIx = i;
+                        }
+                        if(d.oldIndex + d.colspan - 1 >= gcol && d.oldIndex + d.colspan - 1 < gcol + group.colspan){
+                            span = i - fromIx + 1;
+                        }
+                        if(d.newIndex >= gcol && d.newIndex < gcol + group.colspan){
+                            toIx = i;
+                        }
+                        gcol += group.colspan;
+                    }
+                    var groups = r.splice(fromIx, span);
+                    rows[row] = r.splice(0, toIx - (right ? span : 0)).concat(groups).concat(r);
+                }
+                for(var c = 0; c < d.colspan; c++){
+                    var oldIx = d.oldIndex + (right ? 0 : c), newIx = d.newIndex + (right ? -1 : c);
+                    cm.moveColumn(oldIx, newIx);
+                    this.grid.fireEvent("columnmove", oldIx, newIx);
+                }
+                return true;
+            }
+            return false;
+        }
+    },
+    //kirov
+    updateGroupStyles: function(col){
+        var tables = this.lockedHd.query('.x-grid3-header-offset > table'), tw = this.getLockedWidth(), rows = this.rows;
+        var rowGroups = [];
+        for(var row = 0; row < tables.length; row++){
+            tables[row].style.width = tw;
+            if(row < rows.length){
+                var cells = tables[row].firstChild.firstChild.childNodes;
+                rowGroups[row] = 0;
+                for(var i = 0, gcol = 0; i < cells.length; i++){
+                    var group = rows[row][i];
+                    rowGroups[row] = rowGroups[row]+1;
+                    if((typeof col != 'number') || (col >= gcol && col < gcol + group.colspan)){
+                        var gs = this.getGroupStyle.call(this, group, gcol);
+                        cells[i].style.width = gs.width;
+                        cells[i].style.display = gs.hidden ? 'none' : '';
+                    }
+                    gcol += group.colspan;
+                }
+            }
+        }
+        var tables = this.mainHd.query('.x-grid3-header-offset > table'), tw = this.getTotalWidth(), rows = this.rows;
+        for(var row = 0; row < tables.length; row++){
+            tables[row].style.width = tw;
+            if(row < rows.length){
+                var cells = tables[row].firstChild.firstChild.childNodes;
+                for(var i = 0, gcol = this.cm.getLockedCount(); i < cells.length; i++){
+                    var group = rows[row][rowGroups[row]+i];
+                    if((typeof col != 'number') || (col >= gcol && col < gcol + group.colspan)){
+                        var gs = this.getGroupStyle.call(this, group, gcol);
+                        cells[i].style.width = gs.width;
+                        cells[i].style.display = gs.hidden ? 'none' : '';
+                    }
+                    gcol += group.colspan;
+                }
+            }
+        }
+    },
+    //kirov
+    getGroupRowIndex: function(el){
+        if(el){
+            var m = el.className.match(this.hrowRe);
+            if(m && m[1]){
+                return parseInt(m[1], 10);
+            }
+        }
+        return this.cm.rows.length;
+    },
+
+    layout : function(){
+        if(!this.mainBody){
+            return;
+        }
+        var g = this.grid;
+        var c = g.getGridEl();
+        var csize = c.getSize(true);
+        var vw = csize.width;
+        if(!g.hideHeaders && (vw < 20 || csize.height < 20)){
+            return;
+        }
+        this.syncHeaderHeight();
+        if(g.autoHeight){
+            this.scroller.dom.style.overflow = 'visible';
+            this.lockedScroller.dom.style.overflow = 'visible';
+            if(Ext.isWebKit){
+                this.scroller.dom.style.position = 'static';
+                this.lockedScroller.dom.style.position = 'static';
+            }
+        }else{
+            this.el.setSize(csize.width, csize.height);
+            var hdHeight = this.mainHd.getHeight();
+            var vh = csize.height - (hdHeight);
+        }
+        this.updateLockedWidth();
+        if(this.forceFit){
+            if(this.lastViewWidth != vw){
+                this.fitColumns(false, false);
+                this.lastViewWidth = vw;
+            }
+        }else {
+            this.autoExpand();
+            this.syncHeaderScroll();
+        }
+        this.onLayout(vw, vh);
+    },
+    //kirov
+    getGroupSpan: function(row, col){
+        if(row < 0){
+            return {
+                col: 0,
+                colspan: this.cm.getColumnCount()
+            };
+        }
+        var r = this.cm.rows[row];
+        if(r){
+            for(var i = 0, gcol = 0, len = r.length; i < len; i++){
+                var group = r[i];
+                if(col >= gcol && col < gcol + group.colspan){
+                    return {
+                        col: gcol,
+                        colspan: group.colspan
+                    };
+                }
+                gcol += group.colspan;
+            }
+            return {
+                col: gcol,
+                colspan: 0
+            };
+        }
+        return {
+            col: col,
+            colspan: 1
+        };
+    },
+
+    getOffsetWidth : function() {
+        return (this.cm.getTotalWidth() - this.cm.getTotalLockedWidth() + this.getScrollOffset()) + 'px';
+    },
+
+    renderHeaders : function(){
+        var cm = this.cm,
+            ts = this.templates,
+            ct = ts.hcell,
+            cb = [], lcb = [],
+            p = {},
+            len = cm.getColumnCount(),
+            last = len - 1;
+        for(var i = 0; i < len; i++){
+            p.id = cm.getColumnId(i);
+            p.value = cm.getColumnHeader(i) || '';
+            p.style = this.getColumnStyle(i, true);
+            p.tooltip = this.getColumnTooltip(i);
+            p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
+                (cm.config[i].headerCls ? ' ' + cm.config[i].headerCls : '');
+            if(cm.config[i].align == 'right'){
+                p.istyle = 'padding-right:16px';
+            } else {
+                delete p.istyle;
+            }
+            if(cm.isLocked(i)){
+                lcb[lcb.length] = ct.apply(p);
+            }else{
+                cb[cb.length] = ct.apply(p);
+            }
+        }
+        //kirov
+	    var ts = this.templates, headers0 = [], headers1 = [], cm = this.cm, rows = this.rows, tstyle = 'width:' + this.getTotalWidth() + ';';
+        for(var row = 0, rlen = rows.length; row < rlen; row++){
+            var r = rows[row], cells0 = [], cells1 = [];
+            for(var i = 0, gcol = 0, len = r.length; i < len; i++){
+                var group = r[i];
+                group.colspan = group.colspan || 1;
+                var id = this.getColumnId(group.dataIndex ? cm.findColumnIndex(group.dataIndex) : gcol), gs = this.getGroupStyle.call(this, group, gcol);
+                var cell = ts.gcell.apply({
+                    cls: 'ux-grid-hd-group-cell',
+                    id: id,
+                    row: row,
+                    style: 'width:' + gs.width + ';' + (gs.hidden ? 'display:none;' : '') + (group.align ? 'text-align:' + group.align + ';' : ''),
+                    tooltip: group.tooltip ? (Ext.QuickTips.isEnabled() ? 'ext:qtip' : 'title') + '="' + group.tooltip + '"' : '',
+                    istyle: group.align == 'right' ? 'padding-right:16px' : '',
+                    btn: this.grid.enableHdMenu && group.header,
+                    value: group.header || '&nbsp;'
+                });
+                if (cm.isLocked(group.dataIndex ? cm.findColumnIndex(group.dataIndex) : gcol))
+                    cells1[i] = cell;
+                else
+                    cells0[i] = cell;
+                gcol += group.colspan;
+            }
+            headers0[row] = ts.header.apply({
+                tstyle: tstyle,
+                cells: cells0.join('')
+            });
+            headers1[row] = ts.header.apply({
+                tstyle: tstyle,
+                cells: cells1.join('')
+            });
+        }
+        //kirov
+        headers0.push(ts.header.apply({cells: cb.join(''), tstyle:'width:'+this.getTotalWidth()+';'}));
+        headers1.push(ts.header.apply({cells: lcb.join(''), tstyle:'width:'+this.getLockedWidth()+';'}));
+        return [headers0.join(''),headers1.join('')];
+    },
+    //kirov
+    getGroupStyle: function(group, gcol){
+        var width = 0, hidden = true;
+        for(var i = gcol, len = gcol + group.colspan; i < len; i++){
+            if(!this.cm.isHidden(i)){
+                var cw = this.cm.getColumnWidth(i);
+                if(typeof cw == 'number'){
+                    width += cw;
+                }
+                hidden = false;
+            }
+        }
+        return {
+            width: (Ext.isBorderBox || (Ext.isWebKit && !Ext.isSafari2) ? width : Math.max(width - this.borderWidth, 0)) + 'px',
+            hidden: hidden
+        };
+    },
+    //kirov
+    findHeaderCell: function(el){
+        return el ? this.fly(el).findParent('td.x-grid3-hd', this.cellSelectorDepth) : false;
+    },
+    //kirov
+    findHeaderIndex: function(el){
+        var cell = this.findHeaderCell(el);
+        return cell ? this.getCellIndex(cell) : false;
+    },
+
+    updateHeaders : function(){
+        var hd = this.renderHeaders();
+        this.innerHd.firstChild.innerHTML = hd[0];
+        this.innerHd.firstChild.style.width = this.getOffsetWidth();
+        this.innerHd.firstChild.firstChild.style.width = this.getTotalWidth();
+        this.lockedInnerHd.firstChild.innerHTML = hd[1];
+        var lw = this.getLockedWidth();
+        this.lockedInnerHd.firstChild.style.width = lw;
+        this.lockedInnerHd.firstChild.firstChild.style.width = lw;
+    },
+
+    getResolvedXY : function(resolved){
+        if(!resolved){
+            return null;
+        }
+        var c = resolved.cell, r = resolved.row;
+        return c ? Ext.fly(c).getXY() : [this.scroller.getX(), Ext.fly(r).getY()];
+    },
+
+    syncFocusEl : function(row, col, hscroll){
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.syncFocusEl.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
+    },
+
+    ensureVisible : function(row, col, hscroll){
+        return Ext.ux.grid.LockingHeaderGroupGridView.superclass.ensureVisible.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
+    },
+
+    insertRows : function(dm, firstRow, lastRow, isUpdate){
+        var last = dm.getCount() - 1;
+        if(!isUpdate && firstRow === 0 && lastRow >= last){
+            this.refresh();
+        }else{
+            if(!isUpdate){
+                this.fireEvent('beforerowsinserted', this, firstRow, lastRow);
+            }
+            var html = this.renderRows(firstRow, lastRow),
+                before = this.getRow(firstRow);
+            if(before){
+                if(firstRow === 0){
+                    this.removeRowClass(0, this.firstRowCls);
+                }
+                Ext.DomHelper.insertHtml('beforeBegin', before, html[0]);
+                before = this.getLockedRow(firstRow);
+                Ext.DomHelper.insertHtml('beforeBegin', before, html[1]);
+            }else{
+                this.removeRowClass(last - 1, this.lastRowCls);
+                Ext.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html[0]);
+                Ext.DomHelper.insertHtml('beforeEnd', this.lockedBody.dom, html[1]);
+            }
+            if(!isUpdate){
+                this.fireEvent('rowsinserted', this, firstRow, lastRow);
+                this.processRows(firstRow);
+            }else if(firstRow === 0 || firstRow >= last){
+                this.addRowClass(firstRow, firstRow === 0 ? this.firstRowCls : this.lastRowCls);
+            }
+        }
+        this.syncFocusEl(firstRow);
+    },
+
+    getColumnStyle : function(col, isHeader){
+        var style = !isHeader ? this.cm.config[col].cellStyle || this.cm.config[col].css || '' : this.cm.config[col].headerStyle || '';
+        style += 'width:'+this.getColumnWidth(col)+';';
+        if(this.cm.isHidden(col)){
+            style += 'display:none;';
+        }
+        var align = this.cm.config[col].align;
+        if(align){
+            style += 'text-align:'+align+';';
+        }
+        return style;
+    },
+
+    getLockedWidth : function() {
+        return this.cm.getTotalLockedWidth() + 'px';
+    },
+
+    getTotalWidth : function() {
+        return (this.cm.getTotalWidth() - this.cm.getTotalLockedWidth()) + 'px';
+    },
+
+    getColumnData : function(){
+        var cs = [], cm = this.cm, colCount = cm.getColumnCount();
+        for(var i = 0; i < colCount; i++){
+            var name = cm.getDataIndex(i);
+            cs[i] = {
+                name : (!Ext.isDefined(name) ? this.ds.fields.get(i).name : name),
+                renderer : cm.getRenderer(i),
+                id : cm.getColumnId(i),
+                style : this.getColumnStyle(i),
+                locked : cm.isLocked(i)
+            };
+        }
+        return cs;
+    },
+
+    renderBody : function(){
+        var markup = this.renderRows() || ['&#160;', '&#160;'];
+        return [this.templates.body.apply({rows: markup[0]}), this.templates.body.apply({rows: markup[1]})];
+    },
+
+    refreshRow : function(record){
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.refreshRow.call(this, record);
+        var index = Ext.isNumber(record) ? record : this.ds.indexOf(record);
+        this.getLockedRow(index).rowIndex = index;
+    },
+
+    refresh : function(headersToo){
+        this.fireEvent('beforerefresh', this);
+        this.grid.stopEditing(true);
+        var result = this.renderBody();
+        this.mainBody.update(result[0]).setWidth(this.getTotalWidth());
+        this.lockedBody.update(result[1]).setWidth(this.getLockedWidth());
+        if(headersToo === true){
+            this.updateHeaders();
+            this.updateHeaderSortState();
+        }
+        this.processRows(0, true);
+        this.layout();
+        this.applyEmptyText();
+        this.fireEvent('refresh', this);
+    },
+
+    onDenyColumnLock : function(){
+
+    },
+
+    initData : function(ds, cm){
+        if(this.cm){
+            this.cm.un('columnlockchange', this.onColumnLock, this);
+        }
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.initData.call(this, ds, cm);
+        if(this.cm){
+            this.cm.on('columnlockchange', this.onColumnLock, this);
+        }
+    },
+
+    onColumnLock : function(){
+        this.refresh(true);
+    },
+
+    handleHdMenuClick : function(item){
+        var index = this.hdCtxIndex,
+            cm = this.cm,
+            id = item.getItemId(),
+            llen = cm.getLockedCount();
+        switch(id){
+            case 'lock':
+                if(cm.getColumnCount(true) <= llen + 1){
+                    this.onDenyColumnLock();
+                    return;
+                }
+                cm.setLocked(index, true);
+                if(llen != index){
+                    cm.moveColumn(index, llen);
+                    this.grid.fireEvent('columnmove', index, llen);
+                }
+            break;
+            case 'unlock':
+                if(llen - 1 != index){
+                    cm.setLocked(index, false, true);
+                    cm.moveColumn(index, llen - 1);
+                    this.grid.fireEvent('columnmove', index, llen - 1);
+                }else{
+                    cm.setLocked(index, false);
+                }
+            break;
+            default:
+                return Ext.ux.grid.LockingHeaderGroupGridView.superclass.handleHdMenuClick.call(this, item);
+        }
+        return true;
+    },
+
+    handleHdDown : function(e, t){
+        //kirov
+        //Ext.ux.grid.LockingHeaderGroupGridView.superclass.handleHdDown.call(this, e, t);
+        var el = Ext.get(t);
+        if(el.hasClass('x-grid3-hd-btn')){
+            e.stopEvent();
+            var hd = this.findHeaderCell(t);
+            Ext.fly(hd).addClass('x-grid3-hd-menu-open');
+            var index = this.getCellIndex(hd);
+            this.hdCtxIndex = index;
+            var ms = this.hmenu.items, cm = this.cm;
+            ms.get('asc').setDisabled(!cm.isSortable(index));
+            ms.get('desc').setDisabled(!cm.isSortable(index));
+            this.hmenu.on('hide', function(){
+                Ext.fly(hd).removeClass('x-grid3-hd-menu-open');
+            }, this, {
+                single: true
+            });
+            this.hmenu.show(t, 'tl-bl?');
+        }else if(el.hasClass('ux-grid-hd-group-cell') || Ext.fly(t).up('.ux-grid-hd-group-cell')){
+            e.stopEvent();
+        }
+
+        if(this.grid.enableColLock !== false){
+            if(Ext.fly(t).hasClass('x-grid3-hd-btn')){
+                var hd = this.findHeaderCell(t),
+                    index = this.getCellIndex(hd),
+                    ms = this.hmenu.items, cm = this.cm;
+                ms.get('lock').setDisabled(cm.isLocked(index));
+                ms.get('unlock').setDisabled(!cm.isLocked(index));
+            }
+        }
+    },
+    //kirov
+    handleHdOver: function(e, t){
+        var hd = this.findHeaderCell(t);
+        if(hd && !this.headersDisabled){
+            this.activeHdRef = t;
+            this.activeHdIndex = this.getCellIndex(hd);
+            var fly = this.fly(hd);
+            this.activeHdRegion = fly.getRegion();
+            if(!(this.cm.isMenuDisabled(this.activeHdIndex) || fly.hasClass('ux-grid-hd-group-cell'))){
+                fly.addClass('x-grid3-hd-over');
+                this.activeHdBtn = fly.child('.x-grid3-hd-btn');
+                if(this.activeHdBtn){
+                    this.activeHdBtn.dom.style.height = (hd.firstChild.offsetHeight - 1) + 'px';
+                }
+            }
+        }
+    },
+    //kirov
+    handleHdOut: function(e, t){
+        var hd = this.findHeaderCell(t);
+        if(hd && (!Ext.isIE || !e.within(hd, true))){
+            this.activeHdRef = null;
+            this.fly(hd).removeClass('x-grid3-hd-over');
+            hd.style.cursor = '';
+        }
+    },
+
+    syncHeaderHeight: function(){
+        this.innerHd.firstChild.firstChild.style.height = 'auto';
+        this.lockedInnerHd.firstChild.firstChild.style.height = 'auto';
+        var hd = this.innerHd.firstChild.firstChild.offsetHeight,
+            lhd = this.lockedInnerHd.firstChild.firstChild.offsetHeight,
+            height = (lhd > hd ? lhd : hd) + 'px';
+        this.innerHd.firstChild.firstChild.style.height = height;
+        this.lockedInnerHd.firstChild.firstChild.style.height = height;
+    },
+
+    updateLockedWidth: function(){
+        var lw = this.cm.getTotalLockedWidth(),
+            tw = this.cm.getTotalWidth() - lw,
+            csize = this.grid.getGridEl().getSize(true),
+            lp = Ext.isBorderBox ? 0 : this.lockedBorderWidth,
+            rp = Ext.isBorderBox ? 0 : this.rowBorderWidth,
+            vw = (csize.width - lw - lp - rp) + 'px',
+            so = this.getScrollOffset();
+        if(!this.grid.autoHeight){
+            var vh = (csize.height - this.mainHd.getHeight()) + 'px';
+            this.lockedScroller.dom.style.height = vh;
+            this.scroller.dom.style.height = vh;
+        }
+        this.lockedWrap.dom.style.width = (lw + rp) + 'px';
+        this.scroller.dom.style.width = vw;
+        this.mainWrap.dom.style.left = (lw + lp + rp) + 'px';
+        if(this.innerHd){
+            this.lockedInnerHd.firstChild.style.width = lw + 'px';
+            this.lockedInnerHd.firstChild.firstChild.style.width = lw + 'px';
+            this.innerHd.style.width = vw;
+            this.innerHd.firstChild.style.width = (tw + rp + so) + 'px';
+            this.innerHd.firstChild.firstChild.style.width = tw + 'px';
+        }
+        if(this.mainBody){
+            this.lockedBody.dom.style.width = (lw + rp) + 'px';
+            this.mainBody.dom.style.width = (tw + rp) + 'px';
+        }
+    }
+});
+
+Ext.ux.grid.LockingGroupColumnModel = Ext.extend(Ext.grid.ColumnModel, {
+    /**
+     * Returns true if the given column index is currently locked
+     * @param {Number} colIndex The column index
+     * @return {Boolean} True if the column is locked
+     */
+    isLocked : function(colIndex){
+        return this.config[colIndex].locked === true;
+    },
+
+    /**
+     * Locks or unlocks a given column
+     * @param {Number} colIndex The column index
+     * @param {Boolean} value True to lock, false to unlock
+     * @param {Boolean} suppressEvent Pass false to cause the columnlockchange event not to fire
+     */
+    setLocked : function(colIndex, value, suppressEvent){
+        if (this.isLocked(colIndex) == value) {
+            return;
+        }
+        this.config[colIndex].locked = value;
+        if (!suppressEvent) {
+            this.fireEvent('columnlockchange', this, colIndex, value);
+        }
+    },
+
+    /**
+     * Returns the total width of all locked columns
+     * @return {Number} The width of all locked columns
+     */
+    getTotalLockedWidth : function(){
+        var totalWidth = 0;
+        for (var i = 0, len = this.config.length; i < len; i++) {
+            if (this.isLocked(i) && !this.isHidden(i)) {
+                totalWidth += this.getColumnWidth(i);
+            }
+        }
+
+        return totalWidth;
+    },
+
+    /**
+     * Returns the total number of locked columns
+     * @return {Number} The number of locked columns
+     */
+    getLockedCount : function() {
+        var len = this.config.length;
+
+        for (var i = 0; i < len; i++) {
+            if (!this.isLocked(i)) {
+                return i;
+            }
+        }
+
+        //if we get to this point all of the columns are locked so we return the total
+        return len;
+    },
+
+    /**
+     * Moves a column from one position to another
+     * @param {Number} oldIndex The current column index
+     * @param {Number} newIndex The destination column index
+     */
+    moveColumn : function(oldIndex, newIndex){
+        var oldLocked = this.isLocked(oldIndex),
+            newLocked = this.isLocked(newIndex);
+
+        if (oldIndex < newIndex && oldLocked && !newLocked) {
+            this.setLocked(oldIndex, false, true);
+        } else if (oldIndex > newIndex && !oldLocked && newLocked) {
+            this.setLocked(oldIndex, true, true);
+        }
+
+        Ext.ux.grid.LockingGroupColumnModel.superclass.moveColumn.apply(this, arguments);
+    }
+});
+
 /**
  * Содержит общие функции вызываемые из разных частей
  */
@@ -10575,6 +10575,731 @@ Ext.m3.AdvancedTreeGrid = Ext.extend(Ext.ux.maximgb.tg.GridPanel, {
 });
 
 /**
+ * Окно на базе Ext.m3.Window, которое включает такие вещи, как:
+ * 1) Submit формы, если она есть;
+ * 2) Навешивание функции на изменение поля, в связи с чем обновляется заголовок 
+ * окна;
+ * 3) Если поля формы были изменены, то по-умолчанию задается вопрос "Вы 
+ * действительно хотите отказаться от внесенных измений";
+ */
+
+Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
+	/**
+	 * Инициализация первонального фунционала
+	 * @param {Object} baseConfig Базовый конфиг компонента
+	 * @param {Object} params Дополнительные параметры 
+	 */
+	constructor: function(baseConfig, params){
+		
+		/**
+		 * id формы в окне, для сабмита
+		 */
+		this.formId = null;
+		
+		/**
+		 * url формы в окне дя сабмита
+		 */
+		this.formUrl = null;
+		
+		/**
+		 * Количество измененных полей
+		 */
+		this.changesCount = 0;
+		
+		/**
+		 * Оргинальный заголовок
+		 */
+		this.originalTitle = null;
+		
+		
+		if (params) {
+			if (params.form) {
+				if (params.form.id){
+					this.formId = params.form.id;
+				}
+				if (params.form.url){
+					this.formUrl = params.form.url;
+				}
+			}
+			
+
+		}
+
+		Ext.m3.EditWindow.superclass.constructor.call(this, baseConfig, params);
+	}
+	/**
+	 * Инициализация дополнительного функционала
+	 */
+	,initComponent: function(){
+		Ext.m3.EditWindow.superclass.initComponent.call(this);
+		
+		// Устанавливает функции на изменение значения
+		this.items.each(function(item){
+			this.setFieldOnChange(item, this);
+		}, this);
+	
+		this.addEvents(
+			/**
+			 * Генерируется сообщение до начала запроса на сохранение формы
+			 * Проще говоря до начала submit'a
+			 * Параметры:
+			 *   this - Сам компонент
+			 *   @param {Object} submit - sumbit-запрос для отправки на сервер
+			*/
+			'beforesubmit'
+			/**
+			 * Генерируется, если произошел запрос на закрытие окна
+			 * (через win.close()) при несохраненных изменениях, а пользователь
+			 * в диалоге, запрашивающем подтверждение закрытия без сохранения,
+			 * отказался закрывать окно.
+			 * Параметры:
+			 *   this - Сам компонент
+			 */
+			 ,'closing_canceled'
+			)
+	
+	}
+	/**
+	 * Получает форму по formId
+	 */
+	,getForm: function() {
+		assert(this.formId, 'Не задан formId для формы');
+		
+		return Ext.getCmp(this.formId).getForm();
+	}
+	/**
+	 * Сабмит формы
+	 * @param {Object} btn
+	 * @param {Object} e
+	 * @param {Object} baseParams
+	 */
+	,submitForm: function(btn, e, baseParams){
+		assert(this.formUrl, 'Не задан url для формы');
+
+		var form = Ext.getCmp(this.formId).getForm();
+		if (form && !form.isValid()) {
+			Ext.Msg.show({
+				title: 'Проверка формы',
+				msg: 'На форме имеются некорректно заполненные поля',
+				buttons: Ext.Msg.OK,
+				icon: Ext.Msg.WARNING
+			});
+			
+			return;
+		}
+				
+        var scope = this;
+		var mask = new Ext.LoadMask(this.body, {msg:'Сохранение...'});
+		var submit = {
+            url: this.formUrl
+           ,submitEmptyText: false
+           ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
+           ,success: function(form, action){
+              scope.fireEvent('closed_ok', action.response.responseText);
+              scope.close(true);
+              try { 
+                  smart_eval(action.response.responseText);
+              } finally { 
+                  mask.hide();
+                  scope.disableToolbars(false);
+              }
+           }
+           ,failure: function (form, action){
+              uiAjaxFailMessage.apply(scope, arguments);
+              mask.hide();
+              scope.disableToolbars(false);
+           }
+        };
+        
+        if (scope.fireEvent('beforesubmit', submit)) {
+            this.disableToolbars(true);
+        	mask.show();
+        	form.submit(submit);
+        }
+	}
+	
+	 /**
+	  * Функция на изменение поля
+	  * @param {Object} sender
+	  * @param {Object} newValue
+	  * @param {Object} oldValue
+	  */
+	,onChangeFieldValue: function (sender, newValue, oldValue, window) {
+
+		if (sender.originalValue !== newValue) {
+			if (!sender.isModified) {
+				window.changesCount++;
+			}
+			sender.isModified = true;
+		} else {
+			if (sender.isModified){
+				window.changesCount--;
+			}
+					
+			sender.isModified = false;
+		};
+		
+		window.updateTitle();
+		sender.updateLabel();
+    }
+	/**
+	 * Рекурсивная установка функции на изменение поля
+	 * @param {Object} item
+	 */
+	,setFieldOnChange: function (item, window){
+		if (item) {
+			if (item instanceof Ext.form.Field && item.isEdit) {
+				item.on('change', function(scope, newValue, oldValue){
+					window.onChangeFieldValue(scope, newValue, oldValue, window);
+				});
+			};
+			if (item.items) {
+				if (!(item.items instanceof Array)) {	
+					item.items.each(function(it){					
+            			window.setFieldOnChange(it, window);
+        			});
+				} else {
+					for (var i = 0; i < item.items.length; i++) {
+						window.setFieldOnChange(item.items[i], window);
+					};
+				}
+			};
+			// оказывается есть еще и заголовочные элементы редактирования
+			if (item.titleItems) {
+				for (var i = 0; i < item.titleItems.length; i++) {
+					window.setFieldOnChange(item.titleItems[i], window);
+				};
+			};
+		};
+	}
+	
+	/**
+	 * Обновление заголовка окна
+	 */
+	,updateTitle: function(){
+		// сохраним оригинальное значение заголовка
+		if (this.title !== this.originalTitle && this.originalTitle === null) {
+			this.originalTitle = this.title;
+		};
+
+		if (this.changesCount !== 0) {
+			this.setTitle('*'+this.originalTitle);
+		} else {
+			this.setTitle(this.originalTitle);
+		}
+	}
+	/**
+	 * Перегрузка закрытия окна со вставкой пользовательского приложения
+	 * @param {Bool} forceClose Приндтельное (без вопросов) закрытие окна
+	 * 
+	 * Если forceClose != true и пользователь в ответ на диалог
+	 * откажется закрывать окно, возбуждается событие 'closing_canceled'
+	 */
+	,close: function (forceClose) {
+
+		if (this.changesCount !== 0 && !forceClose ) {
+			var scope = this;
+			Ext.Msg.show({
+				title: "Внимание",
+				msg: "Данные были изменены! Cохранить изменения?",
+				buttons: Ext.Msg.YESNOCANCEL,
+				fn: function(buttonId, text, opt){
+					if (buttonId === 'yes') {
+						this.submitForm();
+					} else if (buttonId === 'no') {
+					    Ext.m3.EditWindow.superclass.close.call(scope);					  
+					} else {
+					   scope.fireEvent('closing_canceled');  
+					}
+				},
+				animEl: 'elId',
+				icon: Ext.MessageBox.QUESTION,
+				scope: this				
+			});
+
+			return;
+		};
+		Ext.m3.EditWindow.superclass.close.call(this);
+	}
+    ,disableToolbars: function(disabled){
+        var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
+                       this.getBottomToolbar()]
+        for (var i=0; i<toolbars.length; i++){
+            if (toolbars[i]){
+                toolbars[i].setDisabled(disabled);
+            }
+        }
+    }
+})
+
+
+
+/**
+ * Панель редактирования адреса
+ */
+Ext.m3.AddrField = Ext.extend(Ext.Container, {
+	constructor: function(baseConfig, params){
+		 
+		var items = params.items || [];
+		
+		var place_store = new Ext.data.JsonStore({
+			url: params.kladr_url,
+			idProperty: 'code',
+			root: 'rows',
+			totalProperty: 'total',
+			fields: [{name: 'code'},
+				{name: 'display_name'},
+				{name: 'socr'},
+				{name: 'zipcode'},
+				{name: 'gni'},
+				{name: 'uno'},
+				{name: 'okato'}
+			]
+		});
+		var record = new Ext.data.Record();
+    	record.code = params.place_value;
+    	record.display_name = params.place_text;
+		place_store.loadData({total:1, rows:[record]});
+		if (params.read_only) 
+			var field_cls = 'm3-grey-field' 
+		else
+			var field_cls = ''
+		this.place = new Ext.form.ComboBox({
+			name: params.place_field_name,
+			fieldLabel: params.place_label,
+			allowBlank: params.place_allow_blank,
+            readOnly: params.read_only,
+            cls: field_cls,
+			hideTrigger: true,
+			minChars: 2,
+			emptyText: 'Введите населенный пункт...',
+			queryParam: 'filter',
+			store: place_store,
+			resizable: true,
+			displayField: 'display_name',
+			valueField: 'code',
+			mode: 'remote',
+			hiddenName: params.place_field_name,
+			valueNotFoundText: ''
+		});		
+		this.place.setValue(params.place_value);
+		
+        this.zipcode = new Ext.form.TextField({
+            name: params.zipcode_field_name,
+            value: params.zipcode_value,
+            emptyText: 'индекс',
+            readOnly: params.read_only,
+            cls: field_cls,
+            width: 55,
+            maskRe: /[0-9]/
+        });
+		
+		if (params.level > 1) {
+			var street_store = new Ext.data.JsonStore({
+				url: params.street_url,
+				idProperty: 'code',
+				root: 'rows',
+				totalProperty: 'total',
+				fields: [{name: 'code'},
+					{name: 'display_name'},
+					{name: 'socr'},
+					{name: 'zipcode'},
+					{name: 'gni'},
+					{name: 'uno'},
+					{name: 'okato'}
+				]
+			});
+			var record = new Ext.data.Record();
+			record.code = params.street_value;
+			record.display_name = params.street_text;
+			street_store.loadData({
+				total: 1,
+				rows: [record]
+			});
+			
+			this.street = new Ext.form.ComboBox({
+				name: params.street_field_name,
+				fieldLabel: params.street_label,
+				allowBlank: params.street_allow_blank,
+                readOnly: params.read_only,
+                cls: field_cls,
+				hideTrigger: true,
+				minChars: 2,
+				emptyText: 'Введите улицу...',
+				queryParam: 'filter',
+				store: street_store,
+				resizable: true,
+				displayField: 'display_name',
+				valueField: 'code',
+				mode: 'remote',
+				hiddenName: params.street_field_name,
+                valueNotFoundText: ''
+			});
+			this.street.setValue(params.street_value);
+			
+			if (params.level > 2) {
+				this.house = new Ext.form.TextField({
+					name: params.house_field_name,
+                    allowBlank: params.house_allow_blank,
+                    readOnly: params.read_only,
+                    cls: field_cls,
+					fieldLabel: params.house_label,
+					value: params.house_value,
+					emptyText: '',
+					width: 40
+				});
+				
+				if (params.level > 3) {
+					this.flat = new Ext.form.TextField({
+						name: params.flat_field_name,
+						fieldLabel: params.flat_label,
+						value: params.flat_value,
+                        allowBlank: params.flat_allow_blank,
+                        readOnly: params.read_only,
+                        cls: field_cls,
+						emptyText: '',
+						width: 40
+					});
+				}
+			}
+		};
+		if (params.addr_visible) {
+			this.addr = new Ext.form.TextArea({
+				name: params.addr_field_name,
+				anchor: '100%',
+				fieldLabel: params.addr_label,
+				value: params.addr_value,
+				readOnly: true,
+				cls: field_cls,
+				height: 36
+			});
+		};
+		if (params.view_mode == 1){
+			// В одну строку
+			this.place.flex = 1;
+			if (params.level > 2) {
+    			var row_items = [this.place, this.zipcode];
+    		} else {
+	    		var row_items = [this.place];
+	    	}
+	    		
+			if (params.level > 1) {
+				this.street.flex = 1;
+				this.street.fieldLabel = params.place_label;
+				row_items.push({
+						xtype: 'label'
+						,style: {padding:'3px'}
+    					,text: params.street_label+':'
+					}
+					, this.street
+				);
+				if (params.level > 2) {
+					this.house.fieldLabel = params.place_label;
+					row_items.push({
+							xtype: 'label'
+							,style: {padding:'3px'}
+	    					,text: params.house_label+':'
+						}
+						, this.house
+					);
+					if (params.level > 3) {
+						this.flat.fieldLabel = params.place_label;
+						row_items.push({
+								xtype: 'label'
+								,style: {padding:'3px'}
+		    					,text: params.flat_label+':'
+							}
+							, this.flat
+						);
+					}
+				}
+			}
+			var row = {
+				xtype: 'compositefield'
+				, anchor: '100%'
+				, fieldLabel: params.place_label
+				, items: row_items
+			};
+			items.push(row);
+			if (params.addr_visible) {
+				items.push(this.addr);
+			}
+		};
+		if (params.view_mode == 2){
+			// В две строки
+			if (params.level > 2) {
+			    this.place.flex = 1;
+			    var row = {
+				    xtype: 'compositefield'
+				    , anchor: '100%'
+				    , fieldLabel: params.place_label
+				    , items: [this.place, this.zipcode]
+			    };
+			    items.push(row);
+			} else {
+			    this.place.anchor = '100%';
+			    items.push(this.place);
+			}
+			if (params.level > 1) {
+				this.street.flex = 1;
+				var row_items = [this.street];
+				if (params.level > 2) {
+					this.house.fieldLabel = params.street_label;
+					row_items.push({
+							xtype: 'label'
+							,style: {padding:'3px'}
+	    					,text: params.house_label+':'
+						}
+						, this.house
+					);
+					if (params.level > 3) {
+						this.flat.fieldLabel = params.street_label;
+						row_items.push({
+								xtype: 'label'
+								,style: {padding:'3px'}
+		    					,text: params.flat_label+':'
+							}
+							, this.flat
+						);
+					}
+				};
+				var row = {
+					xtype: 'compositefield'
+					, anchor: '100%'
+					, fieldLabel: params.street_label
+					, items: row_items
+				};
+				items.push(row);
+			}
+			if (params.addr_visible) {
+				items.push(this.addr);
+			}
+		};
+		if (params.view_mode == 3){
+			// В три строки
+			if (params.level > 2) {
+			    this.place.flex = 1;
+			    var row = {
+				    xtype: 'compositefield'
+				    , anchor: '100%'
+				    , fieldLabel: params.place_label
+				    , items: [this.place, this.zipcode]
+			    };
+			    items.push(row);
+			} else {
+			    this.place.anchor = '100%';
+			    items.push(this.place);
+			}
+			if (params.level > 1) {
+				this.street.anchor = '100%';
+				items.push(this.street);
+				if (params.level > 2) {
+					var row_items = [{
+						xtype: 'container'
+						, layout: 'form'
+						, items: this.house 
+            , style: {overflow: 'hidden'} 
+					}];
+					if (params.level > 3) {
+						row_items.push({
+							xtype: 'container'
+							, layout: 'form'
+							, style: {padding: '0px 0px 0px 5px', overflow: 'hidden'}
+							, items: this.flat
+						});
+					}
+					var row = new Ext.Container({
+						anchor: '100%'
+						, layout: 'column'
+						, items: row_items
+            , style: {overflow: 'hidden'} 
+					});
+					items.push(row);
+				}
+			};
+			if (params.addr_visible) {
+				items.push(this.addr);
+			}
+		};
+						
+		var config = Ext.applyIf({
+			items: items
+			, get_addr_url: params.get_addr_url
+			, level: params.level
+			, addr_visible: params.addr_visible
+			, style: {overflow: 'hidden'}
+		}, baseConfig);
+		
+		Ext.Container.superclass.constructor.call(this, config);
+	}
+	, beforeStreetQuery: function(qe) {
+		this.street.getStore().baseParams.place_code = this.place.value;		
+	}
+	, clearStreet: function() {		
+    	this.street.setValue('');		
+	}
+	, initComponent: function(){
+		Ext.m3.AddrField.superclass.initComponent.call(this);		
+		this.mon(this.place, 'change', this.onChangePlace, this);
+		if (this.level > 1) {
+			this.mon(this.street, 'change', this.onChangeStreet, this);
+			if (this.level > 2) {
+				this.mon(this.house, 'change', this.onChangeHouse, this);
+				this.mon(this.zipcode, 'change', this.onChangeZipcode, this);
+				if (this.level > 3) {
+					this.mon(this.flat, 'change', this.onChangeFlat, this);
+				}
+			}
+		};
+		this.mon(this.place, 'beforequery', this.beforePlaceQuery, this);
+		if (this.level > 1) {
+			this.mon(this.place, 'change', this.clearStreet, this);
+			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
+		};
+		this.addEvents(
+            /**
+             * @event change
+             * При изменении адресного поля целиком. 
+             */
+		    'change',
+			/**
+             * @event change_place
+             * При изменении населенного пункта 
+             * @param {AddrField} this
+             * @param {Place_code} Код нас. пункта по КЛАДР
+             * @param {Store} Строка с информацией о данных КЛАДРа по выбранному пункту
+             */
+			'change_place',
+			/**
+             * @event change_street
+             * При изменении улицы 
+             * @param {AddrField} this
+             * @param {Street_code} Код улицы по КЛАДР
+             * @param {Store} Строка с информацией о данных КЛАДРа по выбранной улице
+             */
+			'change_street',
+			/**
+             * @event change_house
+             * При изменении дома 
+             * @param {AddrField} this
+             * @param {House} Номер дома             
+             */
+			'change_house',
+			/**
+             * @event change_flat
+             * При изменении квартиры 
+             * @param {AddrField} this
+             * @param {Flat} Номер квартиры             
+             */
+			'change_flat',
+			/**
+             * @event change_zipcode
+             * При изменении индекса
+             * @param {AddrField} this
+             * @param {zipcode} индекс
+             */
+			'change_zipcode',
+			/**
+             * @event before_query_place
+             * Перед запросом данных о населенном пункте
+             * @param {AddrField} this
+             * @param {Event} Событие              
+             */
+			'before_query_place');
+	}	
+	, getNewAddr: function (){
+		var place_id;
+		if (this.place != undefined) {
+			place_id = this.place.getValue();
+		}
+		var street_id;
+		if (this.street != undefined) {
+			street_id = this.street.getValue();
+		}
+		var house_num;
+		if (this.house != undefined) {
+			house_num = this.house.getValue();
+		}
+		var flat_num;
+		if (this.flat != undefined) {
+			flat_num = this.flat.getValue();
+		}
+		var zipcode;
+		if (this.zipcode != undefined) {
+			zipcode = this.zipcode.getValue();
+		}
+		var addrCmp = this
+		Ext.Ajax.request({
+			url: this.get_addr_url,
+			params: Ext.applyIf({ place: place_id, street: street_id, house: house_num, flat: flat_num, zipcode: zipcode, addr_cmp: this.addr.id }, this.params),
+			success: function(response, opts){
+			    smart_eval(response.responseText);
+			    addrCmp.fireEvent('change');
+			    },
+			failure: function(){Ext.Msg.show({ title:'', msg: 'Не удалось получить адрес.<br>Причина: сервер временно недоступен.', buttons:Ext.Msg.OK, icon: Ext.Msg.WARNING });}
+		});
+    }
+	, setNewAddr: function(newAddr){
+		if (this.addr != undefined) {
+			this.addr.value = newAddr;
+		}
+	}
+	, onChangePlace: function(){
+		var val = this.place.getValue();
+		var data =  this.place.getStore().data.get(val);
+		if (data != undefined) {
+			data = data.data;
+		    if (data.zipcode) {
+		        this.zipcode.setValue(data.zipcode)
+		    }
+		} else {
+			this.place.setValue('');
+		}
+		this.fireEvent('change_place', this, val, data);
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeStreet: function(){
+		var val = this.street.getValue();
+		var data =  this.street.getStore().data.get(val);
+		if (data != undefined) {
+			data = data.data;
+		    if (data.zipcode) {
+		        this.zipcode.setValue(data.zipcode)
+		    }
+		} else {
+			this.clearStreet();
+		}
+		this.fireEvent('change_street', this, val, data);
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeHouse: function(){
+		this.fireEvent('change_house', this, this.house.getValue());
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeFlat: function(){
+		this.fireEvent('change_flat', this, this.flat.getValue());
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeZipcode: function(){
+		this.fireEvent('change_zipcode', this, this.zipcode.getValue());
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, beforePlaceQuery: function(qe) {
+		this.fireEvent('before_query_place', this, qe);
+	}
+})
+
+/**
  * Объектное дерево, включает в себя тулбар с кнопками добавить (в корень и дочерний элемент), редактировать и удалить
  * @param {Object} config
  */
@@ -10597,6 +11322,11 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 		
 		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
 	}
+	,initComponent: function(){
+		Ext.m3.AdvancedTreeGrid.superclass.initComponent.call(this);
+		var store = this.getStore();
+		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});	
+    	}
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
@@ -10732,6 +11462,92 @@ function showHelpWindow(url){
 
     window.open(url);
 }
+
+/**
+ * Компонент поля даты. 
+ * Добавлена кнопа установки текущий даты
+ */
+Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
+	constructor: function(baseConfig, params){
+//		console.log(baseConfig);
+//		console.log(params);
+
+		// Базовый конфиг для тригеров
+		this.baseTriggers = [
+			{
+				iconCls: 'x-form-date-trigger'
+				,handler: null
+				,hide:null
+			},
+			{
+				iconCls: 'x-form-current-date-trigger'
+				,handler: null
+				,hide:null
+			}
+		];
+		
+		this.hideTriggerToday = false;
+	
+
+		if (params.hideTriggerToday) {
+			this.hideTriggerToday = true;
+		};
+		
+		Ext.m3.AdvancedDataField.superclass.constructor.call(this, baseConfig);
+	}
+	,initComponent: function(){
+		Ext.m3.AdvancedDataField.superclass.initComponent.call(this);
+
+        this.triggerConfig = {
+            tag:'span', cls:'x-form-twin-triggers', cn:[]};
+
+		Ext.each(this.baseTriggers, function(item, index, all){
+			this.triggerConfig.cn.push(
+				{tag: "img", src: Ext.BLANK_IMAGE_URL, cls: "x-form-trigger " + item.iconCls}
+			);
+		}, this);
+
+		this.initBaseTrigger()
+	},
+	initTrigger : function(){
+		
+        var ts = this.trigger.select('.x-form-trigger', true);
+        var triggerField = this;
+        ts.each(function(t, all, index){
+			
+            var triggerIndex = 'Trigger'+(index+1);
+            t.hide = function(){
+                var w = triggerField.wrap.getWidth();
+                this.dom.style.display = 'none';
+                triggerField.el.setWidth(w-triggerField.trigger.getWidth());
+                this['hidden' + triggerIndex] = true;
+            };
+            t.show = function(){
+                var w = triggerField.wrap.getWidth();
+                this.dom.style.display = '';
+                triggerField.el.setWidth(w-triggerField.trigger.getWidth());
+                this['hidden' + triggerIndex] = false;
+            };
+
+            if( this.baseTriggers[index].hide ){
+                t.dom.style.display = 'none';
+                this['hidden' + triggerIndex] = true;
+            }
+            this.mon(t, 'click', this.baseTriggers[index].handler, this, {preventDefault:true});
+            t.addClassOnOver('x-form-trigger-over');
+            t.addClassOnClick('x-form-trigger-click');
+        }, this);
+		
+        this.triggers = ts.elements;
+    }
+	,initBaseTrigger: function(){
+		this.baseTriggers[0].handler = this.onTriggerClick;
+		this.baseTriggers[1].handler = function(){ this.setValue( new Date() ); };
+		this.baseTriggers[1].hide = this.hideTriggerToday;
+	}
+
+});
+
 
 /**
  * Объектный грид, включает в себя тулбар с кнопками добавить, редактировать и удалить
@@ -11759,817 +12575,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
         this.validate();
 	}
 });
-
-/**
- * Панель редактирования адреса
- */
-Ext.m3.AddrField = Ext.extend(Ext.Container, {
-	constructor: function(baseConfig, params){
-		 
-		var items = params.items || [];
-		
-		var place_store = new Ext.data.JsonStore({
-			url: params.kladr_url,
-			idProperty: 'code',
-			root: 'rows',
-			totalProperty: 'total',
-			fields: [{name: 'code'},
-				{name: 'display_name'},
-				{name: 'socr'},
-				{name: 'zipcode'},
-				{name: 'gni'},
-				{name: 'uno'},
-				{name: 'okato'}
-			]
-		});
-		var record = new Ext.data.Record();
-    	record.code = params.place_value;
-    	record.display_name = params.place_text;
-		place_store.loadData({total:1, rows:[record]});
-		if (params.read_only) 
-			var field_cls = 'm3-grey-field' 
-		else
-			var field_cls = ''
-		this.place = new Ext.form.ComboBox({
-			name: params.place_field_name,
-			fieldLabel: params.place_label,
-			allowBlank: params.place_allow_blank,
-            readOnly: params.read_only,
-            cls: field_cls,
-			hideTrigger: true,
-			minChars: 2,
-			emptyText: 'Введите населенный пункт...',
-			queryParam: 'filter',
-			store: place_store,
-			resizable: true,
-			displayField: 'display_name',
-			valueField: 'code',
-			mode: 'remote',
-			hiddenName: params.place_field_name,
-			valueNotFoundText: ''
-		});		
-		this.place.setValue(params.place_value);
-		
-        this.zipcode = new Ext.form.TextField({
-            name: params.zipcode_field_name,
-            value: params.zipcode_value,
-            emptyText: 'индекс',
-            readOnly: params.read_only,
-            cls: field_cls,
-            width: 55,
-            maskRe: /[0-9]/
-        });
-		
-		if (params.level > 1) {
-			var street_store = new Ext.data.JsonStore({
-				url: params.street_url,
-				idProperty: 'code',
-				root: 'rows',
-				totalProperty: 'total',
-				fields: [{name: 'code'},
-					{name: 'display_name'},
-					{name: 'socr'},
-					{name: 'zipcode'},
-					{name: 'gni'},
-					{name: 'uno'},
-					{name: 'okato'}
-				]
-			});
-			var record = new Ext.data.Record();
-			record.code = params.street_value;
-			record.display_name = params.street_text;
-			street_store.loadData({
-				total: 1,
-				rows: [record]
-			});
-			
-			this.street = new Ext.form.ComboBox({
-				name: params.street_field_name,
-				fieldLabel: params.street_label,
-				allowBlank: params.street_allow_blank,
-                readOnly: params.read_only,
-                cls: field_cls,
-				hideTrigger: true,
-				minChars: 2,
-				emptyText: 'Введите улицу...',
-				queryParam: 'filter',
-				store: street_store,
-				resizable: true,
-				displayField: 'display_name',
-				valueField: 'code',
-				mode: 'remote',
-				hiddenName: params.street_field_name,
-                valueNotFoundText: ''
-			});
-			this.street.setValue(params.street_value);
-			
-			if (params.level > 2) {
-				this.house = new Ext.form.TextField({
-					name: params.house_field_name,
-                    allowBlank: params.house_allow_blank,
-                    readOnly: params.read_only,
-                    cls: field_cls,
-					fieldLabel: params.house_label,
-					value: params.house_value,
-					emptyText: '',
-					width: 40
-				});
-				
-				if (params.level > 3) {
-					this.flat = new Ext.form.TextField({
-						name: params.flat_field_name,
-						fieldLabel: params.flat_label,
-						value: params.flat_value,
-                        allowBlank: params.flat_allow_blank,
-                        readOnly: params.read_only,
-                        cls: field_cls,
-						emptyText: '',
-						width: 40
-					});
-				}
-			}
-		};
-		if (params.addr_visible) {
-			this.addr = new Ext.form.TextArea({
-				name: params.addr_field_name,
-				anchor: '100%',
-				fieldLabel: params.addr_label,
-				value: params.addr_value,
-				readOnly: true,
-				cls: field_cls,
-				height: 36
-			});
-		};
-		if (params.view_mode == 1){
-			// В одну строку
-			this.place.flex = 1;
-			if (params.level > 2) {
-    			var row_items = [this.place, this.zipcode];
-    		} else {
-	    		var row_items = [this.place];
-	    	}
-	    		
-			if (params.level > 1) {
-				this.street.flex = 1;
-				this.street.fieldLabel = params.place_label;
-				row_items.push({
-						xtype: 'label'
-						,style: {padding:'3px'}
-    					,text: params.street_label+':'
-					}
-					, this.street
-				);
-				if (params.level > 2) {
-					this.house.fieldLabel = params.place_label;
-					row_items.push({
-							xtype: 'label'
-							,style: {padding:'3px'}
-	    					,text: params.house_label+':'
-						}
-						, this.house
-					);
-					if (params.level > 3) {
-						this.flat.fieldLabel = params.place_label;
-						row_items.push({
-								xtype: 'label'
-								,style: {padding:'3px'}
-		    					,text: params.flat_label+':'
-							}
-							, this.flat
-						);
-					}
-				}
-			}
-			var row = {
-				xtype: 'compositefield'
-				, anchor: '100%'
-				, fieldLabel: params.place_label
-				, items: row_items
-			};
-			items.push(row);
-			if (params.addr_visible) {
-				items.push(this.addr);
-			}
-		};
-		if (params.view_mode == 2){
-			// В две строки
-			if (params.level > 2) {
-			    this.place.flex = 1;
-			    var row = {
-				    xtype: 'compositefield'
-				    , anchor: '100%'
-				    , fieldLabel: params.place_label
-				    , items: [this.place, this.zipcode]
-			    };
-			    items.push(row);
-			} else {
-			    this.place.anchor = '100%';
-			    items.push(this.place);
-			}
-			if (params.level > 1) {
-				this.street.flex = 1;
-				var row_items = [this.street];
-				if (params.level > 2) {
-					this.house.fieldLabel = params.street_label;
-					row_items.push({
-							xtype: 'label'
-							,style: {padding:'3px'}
-	    					,text: params.house_label+':'
-						}
-						, this.house
-					);
-					if (params.level > 3) {
-						this.flat.fieldLabel = params.street_label;
-						row_items.push({
-								xtype: 'label'
-								,style: {padding:'3px'}
-		    					,text: params.flat_label+':'
-							}
-							, this.flat
-						);
-					}
-				};
-				var row = {
-					xtype: 'compositefield'
-					, anchor: '100%'
-					, fieldLabel: params.street_label
-					, items: row_items
-				};
-				items.push(row);
-			}
-			if (params.addr_visible) {
-				items.push(this.addr);
-			}
-		};
-		if (params.view_mode == 3){
-			// В три строки
-			if (params.level > 2) {
-			    this.place.flex = 1;
-			    var row = {
-				    xtype: 'compositefield'
-				    , anchor: '100%'
-				    , fieldLabel: params.place_label
-				    , items: [this.place, this.zipcode]
-			    };
-			    items.push(row);
-			} else {
-			    this.place.anchor = '100%';
-			    items.push(this.place);
-			}
-			if (params.level > 1) {
-				this.street.anchor = '100%';
-				items.push(this.street);
-				if (params.level > 2) {
-					var row_items = [{
-						xtype: 'container'
-						, layout: 'form'
-						, items: this.house 
-            , style: {overflow: 'hidden'} 
-					}];
-					if (params.level > 3) {
-						row_items.push({
-							xtype: 'container'
-							, layout: 'form'
-							, style: {padding: '0px 0px 0px 5px', overflow: 'hidden'}
-							, items: this.flat
-						});
-					}
-					var row = new Ext.Container({
-						anchor: '100%'
-						, layout: 'column'
-						, items: row_items
-            , style: {overflow: 'hidden'} 
-					});
-					items.push(row);
-				}
-			};
-			if (params.addr_visible) {
-				items.push(this.addr);
-			}
-		};
-						
-		var config = Ext.applyIf({
-			items: items
-			, get_addr_url: params.get_addr_url
-			, level: params.level
-			, addr_visible: params.addr_visible
-			, style: {overflow: 'hidden'}
-		}, baseConfig);
-		
-		Ext.Container.superclass.constructor.call(this, config);
-	}
-	, beforeStreetQuery: function(qe) {
-		this.street.getStore().baseParams.place_code = this.place.value;		
-	}
-	, clearStreet: function() {		
-    	this.street.setValue('');		
-	}
-	, initComponent: function(){
-		Ext.m3.AddrField.superclass.initComponent.call(this);		
-		this.mon(this.place, 'change', this.onChangePlace, this);
-		if (this.level > 1) {
-			this.mon(this.street, 'change', this.onChangeStreet, this);
-			if (this.level > 2) {
-				this.mon(this.house, 'change', this.onChangeHouse, this);
-				this.mon(this.zipcode, 'change', this.onChangeZipcode, this);
-				if (this.level > 3) {
-					this.mon(this.flat, 'change', this.onChangeFlat, this);
-				}
-			}
-		};
-		this.mon(this.place, 'beforequery', this.beforePlaceQuery, this);
-		if (this.level > 1) {
-			this.mon(this.place, 'change', this.clearStreet, this);
-			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
-		};
-		this.addEvents(
-            /**
-             * @event change
-             * При изменении адресного поля целиком. 
-             */
-		    'change',
-			/**
-             * @event change_place
-             * При изменении населенного пункта 
-             * @param {AddrField} this
-             * @param {Place_code} Код нас. пункта по КЛАДР
-             * @param {Store} Строка с информацией о данных КЛАДРа по выбранному пункту
-             */
-			'change_place',
-			/**
-             * @event change_street
-             * При изменении улицы 
-             * @param {AddrField} this
-             * @param {Street_code} Код улицы по КЛАДР
-             * @param {Store} Строка с информацией о данных КЛАДРа по выбранной улице
-             */
-			'change_street',
-			/**
-             * @event change_house
-             * При изменении дома 
-             * @param {AddrField} this
-             * @param {House} Номер дома             
-             */
-			'change_house',
-			/**
-             * @event change_flat
-             * При изменении квартиры 
-             * @param {AddrField} this
-             * @param {Flat} Номер квартиры             
-             */
-			'change_flat',
-			/**
-             * @event change_zipcode
-             * При изменении индекса
-             * @param {AddrField} this
-             * @param {zipcode} индекс
-             */
-			'change_zipcode',
-			/**
-             * @event before_query_place
-             * Перед запросом данных о населенном пункте
-             * @param {AddrField} this
-             * @param {Event} Событие              
-             */
-			'before_query_place');
-	}	
-	, getNewAddr: function (){
-		var place_id;
-		if (this.place != undefined) {
-			place_id = this.place.getValue();
-		}
-		var street_id;
-		if (this.street != undefined) {
-			street_id = this.street.getValue();
-		}
-		var house_num;
-		if (this.house != undefined) {
-			house_num = this.house.getValue();
-		}
-		var flat_num;
-		if (this.flat != undefined) {
-			flat_num = this.flat.getValue();
-		}
-		var zipcode;
-		if (this.zipcode != undefined) {
-			zipcode = this.zipcode.getValue();
-		}
-		var addrCmp = this
-		Ext.Ajax.request({
-			url: this.get_addr_url,
-			params: Ext.applyIf({ place: place_id, street: street_id, house: house_num, flat: flat_num, zipcode: zipcode, addr_cmp: this.addr.id }, this.params),
-			success: function(response, opts){
-			    smart_eval(response.responseText);
-			    addrCmp.fireEvent('change');
-			    },
-			failure: function(){Ext.Msg.show({ title:'', msg: 'Не удалось получить адрес.<br>Причина: сервер временно недоступен.', buttons:Ext.Msg.OK, icon: Ext.Msg.WARNING });}
-		});
-    }
-	, setNewAddr: function(newAddr){
-		if (this.addr != undefined) {
-			this.addr.value = newAddr;
-		}
-	}
-	, onChangePlace: function(){
-		var val = this.place.getValue();
-		var data =  this.place.getStore().data.get(val);
-		if (data != undefined) {
-			data = data.data;
-		    if (data.zipcode) {
-		        this.zipcode.setValue(data.zipcode)
-		    }
-		} else {
-			this.place.setValue('');
-		}
-		this.fireEvent('change_place', this, val, data);
-		if (this.addr_visible) {
-			this.getNewAddr();
-		}
-	}
-	, onChangeStreet: function(){
-		var val = this.street.getValue();
-		var data =  this.street.getStore().data.get(val);
-		if (data != undefined) {
-			data = data.data;
-		    if (data.zipcode) {
-		        this.zipcode.setValue(data.zipcode)
-		    }
-		} else {
-			this.clearStreet();
-		}
-		this.fireEvent('change_street', this, val, data);
-		if (this.addr_visible) {
-			this.getNewAddr();
-		}
-	}
-	, onChangeHouse: function(){
-		this.fireEvent('change_house', this, this.house.getValue());
-		if (this.addr_visible) {
-			this.getNewAddr();
-		}
-	}
-	, onChangeFlat: function(){
-		this.fireEvent('change_flat', this, this.flat.getValue());
-		if (this.addr_visible) {
-			this.getNewAddr();
-		}
-	}
-	, onChangeZipcode: function(){
-		this.fireEvent('change_zipcode', this, this.zipcode.getValue());
-		if (this.addr_visible) {
-			this.getNewAddr();
-		}
-	}
-	, beforePlaceQuery: function(qe) {
-		this.fireEvent('before_query_place', this, qe);
-	}
-})
-
-/**
- * Окно на базе Ext.m3.Window, которое включает такие вещи, как:
- * 1) Submit формы, если она есть;
- * 2) Навешивание функции на изменение поля, в связи с чем обновляется заголовок 
- * окна;
- * 3) Если поля формы были изменены, то по-умолчанию задается вопрос "Вы 
- * действительно хотите отказаться от внесенных измений";
- */
-
-Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
-	/**
-	 * Инициализация первонального фунционала
-	 * @param {Object} baseConfig Базовый конфиг компонента
-	 * @param {Object} params Дополнительные параметры 
-	 */
-	constructor: function(baseConfig, params){
-		
-		/**
-		 * id формы в окне, для сабмита
-		 */
-		this.formId = null;
-		
-		/**
-		 * url формы в окне дя сабмита
-		 */
-		this.formUrl = null;
-		
-		/**
-		 * Количество измененных полей
-		 */
-		this.changesCount = 0;
-		
-		/**
-		 * Оргинальный заголовок
-		 */
-		this.originalTitle = null;
-		
-		
-		if (params) {
-			if (params.form) {
-				if (params.form.id){
-					this.formId = params.form.id;
-				}
-				if (params.form.url){
-					this.formUrl = params.form.url;
-				}
-			}
-			
-
-		}
-
-		Ext.m3.EditWindow.superclass.constructor.call(this, baseConfig, params);
-	}
-	/**
-	 * Инициализация дополнительного функционала
-	 */
-	,initComponent: function(){
-		Ext.m3.EditWindow.superclass.initComponent.call(this);
-		
-		// Устанавливает функции на изменение значения
-		this.items.each(function(item){
-			this.setFieldOnChange(item, this);
-		}, this);
-	
-		this.addEvents(
-			/**
-			 * Генерируется сообщение до начала запроса на сохранение формы
-			 * Проще говоря до начала submit'a
-			 * Параметры:
-			 *   this - Сам компонент
-			 *   @param {Object} submit - sumbit-запрос для отправки на сервер
-			*/
-			'beforesubmit'
-			/**
-			 * Генерируется, если произошел запрос на закрытие окна
-			 * (через win.close()) при несохраненных изменениях, а пользователь
-			 * в диалоге, запрашивающем подтверждение закрытия без сохранения,
-			 * отказался закрывать окно.
-			 * Параметры:
-			 *   this - Сам компонент
-			 */
-			 ,'closing_canceled'
-			)
-	
-	}
-	/**
-	 * Получает форму по formId
-	 */
-	,getForm: function() {
-		assert(this.formId, 'Не задан formId для формы');
-		
-		return Ext.getCmp(this.formId).getForm();
-	}
-	/**
-	 * Сабмит формы
-	 * @param {Object} btn
-	 * @param {Object} e
-	 * @param {Object} baseParams
-	 */
-	,submitForm: function(btn, e, baseParams){
-		assert(this.formUrl, 'Не задан url для формы');
-
-		var form = Ext.getCmp(this.formId).getForm();
-		if (form && !form.isValid()) {
-			Ext.Msg.show({
-				title: 'Проверка формы',
-				msg: 'На форме имеются некорректно заполненные поля',
-				buttons: Ext.Msg.OK,
-				icon: Ext.Msg.WARNING
-			});
-			
-			return;
-		}
-				
-        var scope = this;
-		var mask = new Ext.LoadMask(this.body, {msg:'Сохранение...'});
-		var submit = {
-            url: this.formUrl
-           ,submitEmptyText: false
-           ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
-           ,success: function(form, action){
-              scope.fireEvent('closed_ok', action.response.responseText);
-              scope.close(true);
-              try { 
-                  smart_eval(action.response.responseText);
-              } finally { 
-                  mask.hide();
-                  scope.disableToolbars(false);
-              }
-           }
-           ,failure: function (form, action){
-              uiAjaxFailMessage.apply(scope, arguments);
-              mask.hide();
-              scope.disableToolbars(false);
-           }
-        };
-        
-        if (scope.fireEvent('beforesubmit', submit)) {
-            this.disableToolbars(true);
-        	mask.show();
-        	form.submit(submit);
-        }
-	}
-	
-	 /**
-	  * Функция на изменение поля
-	  * @param {Object} sender
-	  * @param {Object} newValue
-	  * @param {Object} oldValue
-	  */
-	,onChangeFieldValue: function (sender, newValue, oldValue, window) {
-
-		if (sender.originalValue !== newValue) {
-			if (!sender.isModified) {
-				window.changesCount++;
-			}
-			sender.isModified = true;
-		} else {
-			if (sender.isModified){
-				window.changesCount--;
-			}
-					
-			sender.isModified = false;
-		};
-		
-		window.updateTitle();
-		sender.updateLabel();
-    }
-	/**
-	 * Рекурсивная установка функции на изменение поля
-	 * @param {Object} item
-	 */
-	,setFieldOnChange: function (item, window){
-		if (item) {
-			if (item instanceof Ext.form.Field && item.isEdit) {
-				item.on('change', function(scope, newValue, oldValue){
-					window.onChangeFieldValue(scope, newValue, oldValue, window);
-				});
-			};
-			if (item.items) {
-				if (!(item.items instanceof Array)) {	
-					item.items.each(function(it){					
-            			window.setFieldOnChange(it, window);
-        			});
-				} else {
-					for (var i = 0; i < item.items.length; i++) {
-						window.setFieldOnChange(item.items[i], window);
-					};
-				}
-			};
-			// оказывается есть еще и заголовочные элементы редактирования
-			if (item.titleItems) {
-				for (var i = 0; i < item.titleItems.length; i++) {
-					window.setFieldOnChange(item.titleItems[i], window);
-				};
-			};
-		};
-	}
-	
-	/**
-	 * Обновление заголовка окна
-	 */
-	,updateTitle: function(){
-		// сохраним оригинальное значение заголовка
-		if (this.title !== this.originalTitle && this.originalTitle === null) {
-			this.originalTitle = this.title;
-		};
-
-		if (this.changesCount !== 0) {
-			this.setTitle('*'+this.originalTitle);
-		} else {
-			this.setTitle(this.originalTitle);
-		}
-	}
-	/**
-	 * Перегрузка закрытия окна со вставкой пользовательского приложения
-	 * @param {Bool} forceClose Приндтельное (без вопросов) закрытие окна
-	 * 
-	 * Если forceClose != true и пользователь в ответ на диалог
-	 * откажется закрывать окно, возбуждается событие 'closing_canceled'
-	 */
-	,close: function (forceClose) {
-
-		if (this.changesCount !== 0 && !forceClose ) {
-			var scope = this;
-			Ext.Msg.show({
-				title: "Внимание",
-				msg: "Данные были изменены! Cохранить изменения?",
-				buttons: Ext.Msg.YESNOCANCEL,
-				fn: function(buttonId, text, opt){
-					if (buttonId === 'yes') {
-						this.submitForm();
-					} else if (buttonId === 'no') {
-					    Ext.m3.EditWindow.superclass.close.call(scope);					  
-					} else {
-					   scope.fireEvent('closing_canceled');  
-					}
-				},
-				animEl: 'elId',
-				icon: Ext.MessageBox.QUESTION,
-				scope: this				
-			});
-
-			return;
-		};
-		Ext.m3.EditWindow.superclass.close.call(this);
-	}
-    ,disableToolbars: function(disabled){
-        var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
-                       this.getBottomToolbar()]
-        for (var i=0; i<toolbars.length; i++){
-            if (toolbars[i]){
-                toolbars[i].setDisabled(disabled);
-            }
-        }
-    }
-})
-
-
-/**
- * Компонент поля даты. 
- * Добавлена кнопа установки текущий даты
- */
-Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
-	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
-
-		// Базовый конфиг для тригеров
-		this.baseTriggers = [
-			{
-				iconCls: 'x-form-date-trigger'
-				,handler: null
-				,hide:null
-			},
-			{
-				iconCls: 'x-form-current-date-trigger'
-				,handler: null
-				,hide:null
-			}
-		];
-		
-		this.hideTriggerToday = false;
-	
-
-		if (params.hideTriggerToday) {
-			this.hideTriggerToday = true;
-		};
-		
-		Ext.m3.AdvancedDataField.superclass.constructor.call(this, baseConfig);
-	}
-	,initComponent: function(){
-		Ext.m3.AdvancedDataField.superclass.initComponent.call(this);
-
-        this.triggerConfig = {
-            tag:'span', cls:'x-form-twin-triggers', cn:[]};
-
-		Ext.each(this.baseTriggers, function(item, index, all){
-			this.triggerConfig.cn.push(
-				{tag: "img", src: Ext.BLANK_IMAGE_URL, cls: "x-form-trigger " + item.iconCls}
-			);
-		}, this);
-
-		this.initBaseTrigger()
-	},
-	initTrigger : function(){
-		
-        var ts = this.trigger.select('.x-form-trigger', true);
-        var triggerField = this;
-        ts.each(function(t, all, index){
-			
-            var triggerIndex = 'Trigger'+(index+1);
-            t.hide = function(){
-                var w = triggerField.wrap.getWidth();
-                this.dom.style.display = 'none';
-                triggerField.el.setWidth(w-triggerField.trigger.getWidth());
-                this['hidden' + triggerIndex] = true;
-            };
-            t.show = function(){
-                var w = triggerField.wrap.getWidth();
-                this.dom.style.display = '';
-                triggerField.el.setWidth(w-triggerField.trigger.getWidth());
-                this['hidden' + triggerIndex] = false;
-            };
-
-            if( this.baseTriggers[index].hide ){
-                t.dom.style.display = 'none';
-                this['hidden' + triggerIndex] = true;
-            }
-            this.mon(t, 'click', this.baseTriggers[index].handler, this, {preventDefault:true});
-            t.addClassOnOver('x-form-trigger-over');
-            t.addClassOnClick('x-form-trigger-click');
-        }, this);
-		
-        this.triggers = ts.elements;
-    }
-	,initBaseTrigger: function(){
-		this.baseTriggers[0].handler = this.onTriggerClick;
-		this.baseTriggers[1].handler = function(){ this.setValue( new Date() ); };
-		this.baseTriggers[1].hide = this.hideTriggerToday;
-	}
-
-});
-
-
 Ext.ns('Ext.ux.form');
 
 Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {

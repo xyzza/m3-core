@@ -21,6 +21,11 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 		
 		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
 	}
+	,initComponent: function(){
+		Ext.m3.AdvancedTreeGrid.superclass.initComponent.call(this);
+		var store = this.getStore();
+		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});	
+    	}
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
