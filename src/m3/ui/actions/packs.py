@@ -15,7 +15,7 @@ from m3.core.exceptions import RelatedError
 from m3.contrib.m3_audit import AuditManager
 
 MSG_DOESNOTEXISTS = u'Запись справочника с id=%s не найдена в базе данных.<br/>' + \
-                    u'Возможно она была удалена. Пожалуйста, обновите таблицу.'
+                    u'Возможно, она была удалена. Пожалуйста, обновите таблицу.'
 
 
 class ObjectNotFound(Exception):
