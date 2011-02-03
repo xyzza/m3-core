@@ -96,7 +96,7 @@ def get_pack_by_url(url):
 #===============================================================================
 # Кеш, используемый для хранения соответствия экшенов
 #===============================================================================
-class ActionsNameCache(caching.RuntimeCache):
+class ActionsNameCache(caching.IntegralRuntimeCache):
     '''
     Кеш, используемый для хранения соответствия имен экшенов и паков 
     соответствующим пакам
@@ -113,7 +113,7 @@ class ActionsNameCache(caching.RuntimeCache):
 
         return {}
 
-class PacksNameCache(caching.RuntimeCache):
+class PacksNameCache(caching.IntegralRuntimeCache):
     '''
     Кеш, используемый для хранения соответствия имен экшенов и паков 
     соответствующим пакам
