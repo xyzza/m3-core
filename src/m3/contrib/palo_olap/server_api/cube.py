@@ -292,7 +292,7 @@ class PaloCube():
         self.save()
         return Res.read()
 
-    def replace_bulk(self, paths, values, Splash = 0):
+    def replace_bulk(self, paths, values, Splash = 0, add = 0):
         '''
         Заменить данные множества ячеек
         '''
@@ -302,20 +302,32 @@ class PaloCube():
 #        values = self.getValuePath(Values)
         Param = {'paths': paths,
                  'values': values,
-                 'splash': Splash}
+                 'splash': Splash,
+                 'add': add,
+                 }
         Url = self.getCubeUrlRequest(CMD, Param)
         Res = self.getUrlResult(Url)
         return Res.read()
         
-    def clear(self, Coordinates):
+    def clear(self, Path):
         '''
         Очистить область
         '''
         CMD = 'cube/clear'
-        Path = self.getAreaPath(Coordinates)
+        #Path = self.getAreaPath(Coordinates)
         if Path == False:
             return False
-        Param = {'area': Path}
+        Param = {'area':'"%s"' %  Path}
+        Url = self.getCubeUrlRequest(CMD, Param)
+        Res = self.getUrlResult(Url)
+        return Res.read()
+
+    def clear_all(self):
+        '''
+        Очистить все
+        '''
+        CMD = 'cube/clear'
+        Param = {'complete':1}
         Url = self.getCubeUrlRequest(CMD, Param)
         Res = self.getUrlResult(Url)
         return Res.read()

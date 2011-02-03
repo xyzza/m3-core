@@ -72,10 +72,12 @@ class PaloDataBase():
         Загрузить размерности
         '''
         CMD = 'database/dimensions'
-        Param = {'show_attribute': 1}
+        Param = {'show_attribute': 1,
+                 'show_system': 1}
         Url = self.getDatabaseUrlRequest(CMD, Param)
         Res = self.getUrlResult(Url)
-        for Row in Res.read().split('\n')[:-1]:
+        res = Res.read()
+        for Row in res.split('\n')[:-1]:
             DimObj = PaloDimension(self, Row)
             self.__DimensionsList[DimObj.getName()] = DimObj
             self.__DimensionsDictionary[str(DimObj.get_id())] = DimObj.getName()
@@ -88,11 +90,12 @@ class PaloDataBase():
         Param = {'show_attribute': 1}
         Url = self.getDatabaseUrlRequest(CMD, Param)
         Res = self.getUrlResult(Url)
-        for Row in Res.read().split('\n')[:-1]:
-            if int(Row.split(';')[4]) > 0:
-                CubeObj = PaloCube(self, Row)
-                self.__CubesList[CubeObj.getName()] = CubeObj
-                self.__CubesDictionary[str(CubeObj.get_id())] = CubeObj.getName()
+        res = Res.read()
+        for Row in res.split('\n')[:-1]:
+#            if int(Row.split(';')[4]) > 0:
+            CubeObj = PaloCube(self, Row)
+            self.__CubesList[CubeObj.getName()] = CubeObj
+            self.__CubesDictionary[str(CubeObj.get_id())] = CubeObj.getName()
     
     def get_dimension(self, dimension_name):
         '''

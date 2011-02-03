@@ -159,6 +159,7 @@ class PaloDimension():
             name = name.encode('utf-8')
         except UnicodeDecodeError:
             pass
+        name = name.strip()
         param = {'new_name': name,
                  'type': type
                  }
@@ -170,14 +171,32 @@ class PaloDimension():
         id, name = Element.split(';')[:2]
         return int(id)
     
+        
+    
     def create_elements(self, names, type = ELEMENT_TYPE_NUMERIC):
         '''
         Массовое добавление элементов в размерность
         '''
+        def norm_name(name):
+            name = name.strip()
+            need_q = False
+            if name.find(',')>-1:
+                name = name.replace('",', '" ,') #заменим недопустимые сиволы
+                need_q = True
+            for wrong in [';']:
+                if name.find(wrong)>-1:
+                    need_q = True
+            for bad in ['\n', '\r', '\t']:
+                name = name.replace(bad, '')
+            if need_q:
+                name = '"%s"' % name
+            
+            return name
         assert len(names)!=0
         CMD = 'element/create_bulk'
         first_name = names.pop(0)
         start_id = self.create_element(first_name, type)
+        names = map(norm_name, names)
         
         names = ','.join(names)
         try:
@@ -187,7 +206,7 @@ class PaloDimension():
         Param = {'name_elements': names,
                  'type': type}
         Url = self.getDimensionUrlRequest(CMD, Param)
-        self.getUrlResult(Url)
+        res = self.getUrlResult(Url)
         return range(start_id, start_id+len(names)+1)
         
     def append_to_consolidate_element(self, element_id, children_ids):
@@ -208,6 +227,17 @@ class PaloDimension():
         Param = {'element': element_id,
                  'type': ELEMENT_TYPE_CONSOLIDATED,
                  'children': ','.join(['%s' % id for id in children_ids])}
+        Url = self.getDimensionUrlRequest(CMD, Param)
+        self.getUrlResult(Url)
+
+    def replace_element(self, element_id, type = ELEMENT_TYPE_NUMERIC):
+        '''
+        Замена значений эелмента (смена типа)
+        '''
+        CMD = 'element/replace'
+        Param = {'element': element_id,
+                 'type': type
+                 }
         Url = self.getDimensionUrlRequest(CMD, Param)
         self.getUrlResult(Url)
 
