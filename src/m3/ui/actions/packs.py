@@ -9,7 +9,7 @@ from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.actions import utils
 from m3.ui.ext.containers import ExtPagingBar
 from m3.ui.actions.results import ActionResult
-from m3.db import BaseObjectModel
+from m3.db import BaseObjectModel, safe_delete
 from m3.core.exceptions import RelatedError
 
 from m3.contrib.m3_audit import AuditManager
@@ -478,7 +478,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
                         except RelatedError, e:
                             message = e.args[0]
                     else:
-                        if not utils.safe_delete_record(self.model, obj.id):
+                        if not safe_delete(obj):
                             message = u'Не удалось удалить элемент %s. Возможно на него есть ссылки.' % obj.id
                             break
             return OperationResult.by_message(message)

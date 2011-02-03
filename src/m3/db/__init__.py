@@ -10,17 +10,32 @@ def safe_delete(model):
     Функция выполняющая "безопасное" удаление записи из БД.
     В случае, если удаление не удалось по причине нарушения целостности,
     то возвращается false. Иначе, true
-    
-    @deprecated: Нужно пользоваться safe_delete из BaseObjectModel
+    к тому же функция пересчитывает MPTT индексы дерева
+    т.к. стандартный пересчет запускается при вызове model_instance.delete() 
     '''
     models.signals.pre_delete.send(sender=model.__class__, instance=model)
     try:
-        cursor = connection.cursor()
-        sql = "DELETE FROM %s WHERE id = %s" % (model.__class__._meta.db_table, model.id)
+        cursor = connection.cursor() #@UndefinedVariable
+        sql = "DELETE FROM %s WHERE id = %s" % (connection.ops.quote_name(model._meta.db_table), model.id) #@UndefinedVariable
         cursor.execute(sql)
         transaction.commit_unless_managed()
-    except IntegrityError:
-        return False
+    except Exception, e:
+        # Встроенный в Django IntegrityError не генерируется. Кидаются исключения 
+        # специфичные для каждого драйвера БД. Но по спецификации PEP 249 все они
+        # называются IntegrityError
+        if e.__class__.__name__ == 'IntegrityError':
+            return False
+        raise
+
+    #добавим пересчет mptt дерева (т.к. стандартный пересчет вешается на метод self.delete()
+    if hasattr(model, '_tree_manager') and callable(getattr(model._tree_manager, '_close_gap', None)):
+        #это видимо mptt моедль
+        opts = model._meta
+        tree_width = (getattr(model, opts.right_attr) -
+                      getattr(model, opts.left_attr) + 1)
+        target_right = getattr(model, opts.right_attr)
+        tree_id = getattr(model, opts.tree_id_attr)
+        model._tree_manager._close_gap(tree_width, target_right, tree_id)        
     
     models.signals.post_delete.send(sender=model.__class__, instance=model)
     return True
@@ -89,17 +104,7 @@ class BaseObjectModel(models.Model):
         В случае, если запись не удалось удалисть по причине нарушения
         целостности, возвращается False, иначе True.
         """
-        models.signals.pre_delete.send(sender=self.__class__, instance=self)
-        try:
-            cursor = connection.cursor()
-            sql = "DELETE FROM %s WHERE id = %s" % (connection.ops.quote_name(self._meta.db_table), self.id)
-            cursor.execute(sql)
-            transaction.commit_unless_managed()
-        except IntegrityError:
-            return False
-        else:
-            models.signals.post_delete.send(sender=self.__class__, instance=self)
-            return True
+        safe_delete(self)
 
     def get_related_objects(self):
         """
