@@ -308,22 +308,18 @@ class ModelBassedPaloDimension(BasePaloDimension):
         assert self._processed
         return self._unknown_id
     
-    def check_virtual_consolidate_element(self, obj, store=None):
+    def check_virtual_consolidate_element(self, obj):
         '''
         процедура занимает проверкой виртуальной древовидности элемента
         '''
         assert self.make_virtual_consolidate_element
-        if not store:
-            store = getattr(obj, self.get_store_related_name())
-        print 'check_virtual_consolidate_element', obj.name
+        store = getattr(obj, self.get_store_related_name())
         if self.need_virtual_consolidate_element(obj):
             #нужен виртуальный элмент
             if store.consolidate_palo_id is None:
                 #блин, до этого этот элемент не имел консолидайта
                 self.create_virtual_consolidate_element(obj, store) 
-            return store.consolidate_palo_id
         else:
-            print '1'
             if store.consolidate_palo_id is not None:
                 #блин, до этого этот элемент имел консолидайта а теперь не должен
                 self.delete_virtual_consolidate_element(obj, store)
@@ -346,7 +342,7 @@ class ModelBassedPaloDimension(BasePaloDimension):
         st = getattr(obj, self.get_store_related_name())
             
         if self.make_virtual_consolidate_element and need_consolidate:
-            self.check_virtual_consolidate_element(obj, st)
+            self.check_virtual_consolidate_element(obj)
             if st.consolidate_palo_id is not None:
                 return st.consolidate_palo_id
                     
@@ -361,7 +357,6 @@ class ModelBassedPaloDimension(BasePaloDimension):
         '''
         assert store.palo_id is not None
         assert store.consolidate_palo_id is None
-        print 'recreate', obj.name
         store.consolidate_palo_id = store.palo_id
         self._dim.renameElement(store.consolidate_palo_id, self.get_name_for_consolidate(obj, False))
         store.palo_id = self._dim.create_element(self.get_name_for_consolidate(obj, True))
@@ -375,7 +370,6 @@ class ModelBassedPaloDimension(BasePaloDimension):
         точнее удлаить вирутальный элемент и сделать элемент просто элементом
         (идишники в сторо двигаются)
         '''
-        print 'delete_virtual_consolidate_element', obj.name
         assert store.palo_id is not None
         assert store.consolidate_palo_id is not None
         self._dim.deleteElement(store.palo_id)
@@ -398,7 +392,6 @@ class ModelBassedPaloDimension(BasePaloDimension):
                 if getattr(obj, 'consolidate_palo_id', None) is not None:
                     #удалим вирутальный элемент тоже
                     self._dim.deleteElement(obj.consolidate_palo_id)
-                print 'process_deleted_items',  obj.instance_parent_id
                 if self.make_virtual_consolidate_element and self.make_tree and obj.instance_parent_id:
                     self.check_virtual_consolidate_element(obj.instance_parent)
                     
@@ -424,6 +417,9 @@ class ModelBassedPaloDimension(BasePaloDimension):
         if query:
             for obj in query:
                 palo_id = getattr(obj, st).palo_id
+                if self.make_virtual_consolidate_element:
+                    self.check_virtual_consolidate_element(obj)
+                    palo_id = getattr(obj, st).palo_id
                 if self.make_virtual_consolidate_element and self.need_virtual_consolidate_element(obj):
                     consolidate_palo_id = getattr(obj, st).consolidate_palo_id
                     self._dim.renameElement(palo_id, self.get_name_for_consolidate(obj, True))
@@ -444,7 +440,6 @@ class ModelBassedPaloDimension(BasePaloDimension):
             #отметим что обработали    
             q = self._store_model.objects.filter(palo_id__isnull=False, processed=False, last_action_time__lte=start_proc_time)
             q.update(processed=True)
-            print changed_parents
             for id in changed_parents:
                 self.refresh_childrens(id)
         return len(query)

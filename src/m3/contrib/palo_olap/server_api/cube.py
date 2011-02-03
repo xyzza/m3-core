@@ -154,8 +154,13 @@ class PaloCube():
         Загрузка размерностей
         '''
         for ID in self.__DimensionsIDList:
-            self.__DimensionsList[ID] = self.getDimensionByID(ID)
-            self.__DimensionsListByName[self.getDimensionByID(ID).getName()] = ID
+            try:
+                self.__DimensionsList[ID] = self.getDimensionByID(ID)
+                self.__DimensionsListByName[self.getDimensionByID(ID).getName()] = ID
+            except KeyError:
+                #иногда системные кубы ссылются на какие-то системные димешены которых нет в базе 
+                #TODO: надо разобраться может включить что-то
+                pass
             
             
     def getRules(self):

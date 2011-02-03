@@ -2,7 +2,7 @@
 
 from m3.contrib.palo_olap.model_dimension import ModelBassedPaloDimension
 import datetime
-
+from m3.contrib.palo_olap.view_manager import ViewManager
 class SingletonMeta(type):
     def __init__(self, name, bases, dict):
         super(SingletonMeta, self).__init__(name, bases, dict)
@@ -18,7 +18,8 @@ class PaloCube(object):
     __metaclass__ = SingletonMeta #наш класс быдет синглетоном
 
     name = None #имя куба (должно быть уникодовым)
-    dimensions = [] #список измерений 
+    dimensions = [] #список измерений
+    standart_views = {} #словарь с преднастроенными вьшками (создаются отчеты имя = ключ тело = xml из таблицы palo_view 
     _processed = False #обработан ли куб
     _processed_time = None #время последнего общета куба
     _db = None #родительская база в которой мы находимся
@@ -96,6 +97,18 @@ class PaloCube(object):
     def after_process(self):
         self._processed = True
         self._processed_time = datetime.datetime.now()
+        self.create_standart_views()
+        
+    def get_palo_cube_id(self):
+        '''
+        вернуть код дименшена в пало сервере
+        '''
+        assert self._processed
+        return self._cube.get_id()
+
+    def create_standart_views(self):
+        for name, xml in self.standart_views.items():
+            ViewManager.sync_view(name, xml, self._db.get_palo_db().get_id(), self.get_palo_cube_id())
     
     def start_bulk(self):
         '''
