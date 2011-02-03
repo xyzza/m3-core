@@ -1,6 +1,7 @@
 #coding:utf-8
 
 from m3.contrib.palo_olap.model_dimension import ModelBassedPaloDimension
+import datetime
 
 class SingletonMeta(type):
     def __init__(self, name, bases, dict):
@@ -19,6 +20,7 @@ class PaloCube(object):
     name = None #имя куба (должно быть уникодовым)
     dimensions = [] #список измерений 
     _processed = False #обработан ли куб
+    _processed_time = None #время последнего общета куба
     _db = None #родительская база в которой мы находимся
     _cube = None #куб пало
     _bulked = False #признак того что идет пакетная загрузка
@@ -29,6 +31,20 @@ class PaloCube(object):
             raise Exception(u'%s уже иницилизирован для базы %s' % (self.__class__.__name__, self._db))
         self._db = db
 
+    @property
+    def processed(self):
+        '''
+        обработан ли он в принцепе
+        '''
+        return self._processed
+
+    @property
+    def processed_time(self):
+        '''
+        когда последний раз обрабатывался
+        '''
+        return self._processed_time
+    
     def get_palo_cube(self):
         '''
         вернуть PaloCube и подключение к серверу
@@ -50,7 +66,7 @@ class PaloCube(object):
         '''
         чистим дименшен и все модели
         '''
-        self._cube.clear(['*' for d in self.dimensions])
+        self._cube.clear_all()
     
     def process(self, with_clear=False):
         '''
@@ -61,8 +77,7 @@ class PaloCube(object):
         #проверим все дименшены
         for dim in self.dimensions:
             dim = dim() #превратим в инстанс наш синглетоновый дименшен
-            if not dim.processed:
-                dim.process(with_clear)
+            dim.process(with_clear)
         if not self._cube:
             #создадим дименшен в пало
             self._cube = self.get_palo_cube()
@@ -80,23 +95,24 @@ class PaloCube(object):
     
     def after_process(self):
         self._processed = True
+        self._processed_time = datetime.datetime.now()
     
     def start_bulk(self):
         '''
         начиваем пакетную вставку данных
         '''
-        self._bulk_coords = []
-        self._bulk_values = []
+        self._bulk_coords = {}
         self._bulked = True
     
     def end_bulk(self):
         '''
         завершение пакетной операции и запись всего накопленного в пало
         '''
-        assert len(self._bulk_coords) == len(self._bulk_values)
+        assert self._bulked
         assert self._bulk_coords
-        paths = ':'.join(self._bulk_coords)
-        values = ':'.join(self._bulk_values)
+
+        paths = ':'.join(self._bulk_coords.keys())
+        values = ':'.join(map(unicode, self._bulk_coords.values()))
         self._cube.replace_bulk(paths, values)
         self._bulked = False
         
@@ -138,8 +154,11 @@ class PaloCube(object):
         '''
         assert self._bulked
         coordinates = self._extarct_all_coordinates(kwargs)
-        self._bulk_coords.append(','.join(coordinates))
-        self._bulk_values.append(value)
+        key = ','.join(coordinates)
+        if self._bulk_coords.has_key(key):
+            self._bulk_coords[key] += value
+        else:
+            self._bulk_coords[key] = value
         
         
         

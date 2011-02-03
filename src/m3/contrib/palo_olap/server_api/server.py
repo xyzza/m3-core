@@ -43,7 +43,13 @@ class PaloServer():
             res = func(url, **kwargs)
         except Exception, err:
             if err.__class__.__name__ == 'HTTPError': #сложно точно по типу
-                msg = u'Error open %s (%s). \nResponse: %s' % (url, unicode(err), force_unicode(err.read()))
+                response = force_unicode(err.read(500))
+                if url.find('/server/login')==-1 and response.find('invalid session')>-1:
+                    self.login()
+                    return self.getUrlResult(url)
+                     
+                msg = u'Error %s open %s . \nResponse: %s' % (force_unicode(err), url[:500], response)
+                print response
                 raise PaloOlapError(msg)
             else:
                 raise err
