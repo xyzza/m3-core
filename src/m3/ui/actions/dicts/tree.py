@@ -17,7 +17,7 @@ from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.actions.packs import ListDeleteRowAction
 from m3.ui.ext.containers import ExtPagingBar
-from m3.db import BaseObjectModel
+from m3.db import BaseObjectModel, safe_delete
 from m3.core.exceptions import RelatedError
 from m3.ui.actions.results import ActionResult
 
@@ -756,7 +756,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
                         except RelatedError, e:
                             message = e.args[0]
                     else:
-                        if not utils.safe_delete_record(self.model, obj.id):
+                        if not safe_delete(obj):
                             message = u'Не удалось удалить элемент %s. Возможно на него есть ссылки.' % obj.id
                             break
             return OperationResult.by_message(message)
@@ -788,7 +788,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             message = u'Нельзя удалить группу содержащую в себе другие группы.'
         elif self.list_model and self.list_model.objects.filter(**{self.list_parent_field: obj}).count() > 0:
             message = u'Нельзя удалить группу содержащую в себе элементы.'
-        elif not utils.safe_delete_record(self.tree_model, obj.id):
+        elif not safe_delete(obj):
             message = u'Не удалось удалить группу. Возможно на неё есть ссылки.'
             
         return OperationResult.by_message(message)

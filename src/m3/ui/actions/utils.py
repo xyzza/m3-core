@@ -162,33 +162,25 @@ def bind_request_form_to_object(request, obj_factory, form):
 def safe_delete_record(model, id=None):
     '''
     Безопасное удаление записи в базе. В отличие от джанговского ORM не удаляет каскадно.
-    Возвращает True в случае успеха, иначе False 
+    Возвращает True в случае успеха, иначе False
+    @deprecated нужно использовать BaseModel.safe_delete() или m3.db.safe_delete(obj) 
     '''
+    import warnings
+    warnings.warn('ui.actions.utils.safe_delete_record(Model, id) must by replaced with m3.db.safe_delete(obj)', DeprecationWarning)
+    
+    from m3.db import safe_delete
     assert (isinstance(model, models.Model) or issubclass(model, models.Model))
     assert (isinstance(id, int) or isinstance(id, long) or id is None)
+
     if isinstance(model, models.Model):
-        models.signals.pre_delete.send(sender=model.__class__, instance=model)
+        obj = model
     else:
-        models.signals.pre_delete.send(sender=model, instance=id) #наверно лучше передать id чем вирутальный model(id=id)
-    try:
-        cursor = connection.cursor() #@UndefinedVariable
-        id = id if id is not None else model.id
-        sql = "DELETE FROM %s WHERE id = %s" % (connection.ops.quote_name(model._meta.db_table), id)
-        cursor.execute(sql)
-        transaction.commit_unless_managed()
-    except Exception, e:
-        # Встроенный в Django IntegrityError не генерируется. Кидаются исключения 
-        # специфичные для каждого драйвера БД. Но по спецификации PEP 249 все они
-        # называются IntegrityError
-        if e.__class__.__name__ == 'IntegrityError':
-            return False
-        raise
-    if isinstance(model, models.Model):
-        models.signals.post_delete.send(sender=model.__class__, instance=model)
-    else:
-        models.signals.post_delete.send(sender=model, instance=id) #наверно лучше передать id чем вирутальный model(id=id)
-    
-    return True
+        try:
+            obj = model.objects.get(pk=id)
+        except model.DoesNotExist:
+            #не нашли значит уже удалили
+            return True
+    return safe_delete(obj)
 
 def fetch_search_tree(model, filter, branch_id = None):
     '''
