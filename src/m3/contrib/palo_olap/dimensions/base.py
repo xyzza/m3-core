@@ -128,9 +128,9 @@ class PaloDimension(BasePaloDimension):
             data.append(self.get_all_consolidate_element_name())
         return data
 
-    def get_id(self, name):
+    def get_palo_id(self, name):
         assert self._processed
-        if name not in (self._get_data()):
+        if not self._elements.has_key(name):
             raise Exception(u'Нельзя получить ид для "%s" элемент не входит в словарь данных %s' % (name, self.__class__.__name__))
         return self._elements.get(name)
     
@@ -147,9 +147,8 @@ class PaloDimension(BasePaloDimension):
         '''
         palo_id = self.get_all_consolidate_element_id()
         childs = []
-        for name, id in self._elements.items():
-            if name != self.get_all_consolidate_element_name():
-                childs.append(id)
+        for name in self.get_data():
+            childs.append(self.get_palo_id(name))
         self._dim.replace_consolidate_element(palo_id, childs)
         
     
@@ -170,6 +169,7 @@ class PaloDimension(BasePaloDimension):
                 self._elements[name] = id
         for name in self._get_data():
             if name not in self._elements.keys():
+                print name
                 id = self._dim.create_element(name)
                 self._elements[name] = id
                 inserted += 1

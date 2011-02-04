@@ -1,6 +1,5 @@
 #coding:utf-8
 
-from m3.contrib.palo_olap.model_dimension import ModelBassedPaloDimension
 import datetime
 from m3.contrib.palo_olap.view_manager import ViewManager
 class SingletonMeta(type):
@@ -173,47 +172,4 @@ class PaloCube(object):
         else:
             self._bulk_coords[key] = value
         
-        
-        
-class PaloCubeQueryHelpers(object):
-    '''
-    методы помогающие строить query для извелечени данных для куба и работать с ним
-    '''
-    @classmethod
-    def add_dimension_stores_related(cls, cube, query):
-        '''
-        добавляет все релатед таблицы дименшенов используемых для куба
-        '''
-        for dim in cube.dimensions:
-            if isinstance(dim, ModelBassedPaloDimension):
-                query = query.select_related(dim.get_store_related_name())
-        return query
-
-    @classmethod
-    def add_dimension_stores_filter(cls, cube, query):
-        '''
-        добавляет фильтры по всем релатед таблицам дименшенов используемых для куба
-        '''
-        for dim in cube.dimensions:
-            if issubclass(dim, ModelBassedPaloDimension):
-                filter = dict()
-                filter['%s__palo_id__isnull' % dim.get_store_related_name()] = False
-                query = query.filter(**filter)
-        return query
-    
-    @classmethod
-    def extract_dimension_coordinates(cls, cube, obj):
-        '''
-        добавляет фильтры по всем релатед таблицам дименшенов используемых для куба
-        '''
-        res = dict()
-        for dim in cube.dimensions:
-            if issubclass(dim, ModelBassedPaloDimension):
-                store = getattr(obj, dim.get_store_related_name())
-                if store:
-                    val = store.palo_id
-                else:
-                    val = dim().get_unknown_element_id()
-                res[dim.alias or dim.__name__] = val
-                    
-        return res
+                
