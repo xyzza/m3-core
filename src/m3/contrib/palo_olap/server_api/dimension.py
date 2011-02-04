@@ -196,14 +196,14 @@ class PaloDimension():
         CMD = 'element/create_bulk'
         first_name = names.pop(0)
         start_id = self.create_element(first_name, type)
-        names = map(norm_name, names)
+        names = [norm_name(obj) for obj in names]        
         
-        names = ','.join(names)
+        str_names = ','.join(names)
         try:
-            names = names.encode('utf-8')
+            str_names = str_names.encode('utf-8')
         except UnicodeDecodeError:
             pass
-        Param = {'name_elements': names,
+        Param = {'name_elements': str_names,
                  'type': type}
         Url = self.getDimensionUrlRequest(CMD, Param)
         res = self.getUrlResult(Url)
