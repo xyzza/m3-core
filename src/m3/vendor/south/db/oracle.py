@@ -1,15 +1,16 @@
+#coding: utf-8
 import os.path
 import re
 import cx_Oracle
 
-from django.db import connection, models
+from django.db import connection, models, utils
 from django.db.backends.util import truncate_name
 from django.core.management.color import no_style
 from django.db.backends.oracle.base import get_sequence_name
 from django.db.models.fields import NOT_PROVIDED
 from south.db import generic
 
-print " ! WARNING: South's Oracle support is still alpha."
+print " ! WARNING: South's Oracle support is still beta."
 print " !          Be wary of posible bugs."
 
 class DatabaseOperations(generic.DatabaseOperations):    
@@ -18,8 +19,8 @@ class DatabaseOperations(generic.DatabaseOperations):
     """
     backend_name = 'oracle'
 
-    alter_string_set_type =     'ALTER TABLE %(table_name)s MODIFY "%(column)s" %(type)s %(nullity)s;'
-    alter_string_set_default =  'ALTER TABLE %(table_name)s MODIFY "%(column)s" DEFAULT %(default)s;'
+    alter_string_set_type =     'ALTER TABLE %(table_name)s MODIFY %(column)s %(type)s %(nullity)s;'
+    alter_string_set_default =  'ALTER TABLE %(table_name)s MODIFY %(column)s DEFAULT %(default)s;'
     add_column_string =         'ALTER TABLE %s ADD %s;'
     delete_column_string =      'ALTER TABLE %s DROP COLUMN %s;'
 
@@ -33,11 +34,15 @@ class DatabaseOperations(generic.DatabaseOperations):
     }
     table_names_cache = set()
 
-    def adj_column_sql(self, col):
-        col = re.sub('(?P<constr>CHECK \(.*\))(?P<any>.*)(?P<default>DEFAULT [0|1])', 
+    def adj_column_sql(self, col, field):
+        col = re.sub('(?P<constr>CHECK \(.*\))(?P<any>.*)(?P<default>DEFAULT \d+)', 
                      lambda mo: '%s %s%s'%(mo.group('default'), mo.group('constr'), mo.group('any')), col) #syntax fix for boolean field only
         col = re.sub('(?P<not_null>NOT NULL) (?P<default>DEFAULT.+)',
                      lambda mo: '%s %s'%(mo.group('default'), mo.group('not_null')), col) #fix order  of DEFAULT and NOT NULL
+        # kirov
+        if field.null:
+            col = re.sub('(?P<any>.*) (?P<null>NULL)',
+                        lambda mo: '%s'%(mo.group('any')), col) #fix NULL
         return col
 
     def check_m2m(self, table_name):
@@ -75,8 +80,21 @@ class DatabaseOperations(generic.DatabaseOperations):
             if self.check_meta(name): #replication of Django flow for models where Meta.db_table is set by user
                 name = name.upper()
         tn = truncate_name(name, connection.ops.max_name_length())
-
+        # kirov
+        if tn.upper() in connection.ops.KEY_WORDS_MAP.keys():
+            tn = connection.ops.KEY_WORDS_MAP[tn.upper()]
+        
+        if tn[0:1] != '"':
+            tn = '"%s"' % tn
         return upper and tn.upper() or tn.lower()
+    
+    #kirov
+    def unquote_name(self, name):
+        if name and name[0:1]== '"' and name[len(name)-1:len(name)]== '"':
+            return name[1:len(name)-1]
+        else:
+            return name
+        
 
     def create_table(self, table_name, fields): 
         qn = self.quote_name(table_name, upper = False)
@@ -85,14 +103,16 @@ class DatabaseOperations(generic.DatabaseOperations):
         autoinc_sql = ''
 
         for field_name, field in fields:
-            col = self.column_sql(qn_upper, field_name, field)
+            # kirov заменил qn_upper на table_name
+            col = self.column_sql(table_name, field_name, field)
             if not col:
                 continue
-            col = self.adj_column_sql(col)
+            col = self.adj_column_sql(col, field) #kirov
 
             columns.append(col)
             if isinstance(field, models.AutoField):
-                autoinc_sql = connection.ops.autoinc_sql(self.check_meta(table_name) and table_name or qn, field_name)
+                # kirov заменил qn на table_name в вырежении self.check_meta(table_name) and table_name or qn
+                autoinc_sql = connection.ops.autoinc_sql(self.check_meta(table_name) and table_name or table_name, field_name)
 
         sql = 'CREATE TABLE %s (%s);' % (qn_upper, ', '.join([col for col in columns]))
         self.execute(sql)
@@ -134,14 +154,15 @@ class DatabaseOperations(generic.DatabaseOperations):
         if field.null:
             params['nullity'] = ''
         sqls = [self.alter_string_set_type % params]
-
+        
         if not field.null and field.has_default():
             params['default'] = field.get_default()
-
+        
         sqls.append(self.alter_string_set_default % params)
 
         #UNIQUE constraint
-        unique_constraint = list(self._constraints_affecting_columns(qn, [qn_col]))
+        #kirov убрал qn
+        unique_constraint = list(self._constraints_affecting_columns(table_name, [qn_col]))
 
         if field.unique and not unique_constraint:
             self.create_unique(qn, [qn_col])
@@ -156,11 +177,15 @@ class DatabaseOperations(generic.DatabaseOperations):
             except cx_Oracle.DatabaseError, exc:
                 if str(exc).find('ORA-01442') == -1:
                     raise
+            except utils.DatabaseError, exc:
+                if str(exc).find('ORA-01442') == -1:
+                    raise
 
     def add_column(self, table_name, name, field, keep_default=True):
         qn = self.quote_name(table_name, upper = False)
-        sql = self.column_sql(qn, name, field)
-        sql = self.adj_column_sql(sql)
+        # kirov заменил qn на tablename
+        sql = self.column_sql(table_name, name, field)
+        sql = self.adj_column_sql(sql, field)
 
         if sql:
             params = (
@@ -182,7 +207,7 @@ class DatabaseOperations(generic.DatabaseOperations):
         """
         This particular override stops us sending DEFAULTs for BooleanField.
         """
-        if isinstance(field, models.BooleanField) and field.has_default():
+        if isinstance(field, (models.BooleanField, models.NullBooleanField)) and field.has_default():
             field.default = int(field.to_python(field.get_default()))
         return field
 
@@ -195,6 +220,8 @@ class DatabaseOperations(generic.DatabaseOperations):
         if self.dry_run:
             raise ValueError("Cannot get constraints for columns during a dry run.")
         columns = set(columns)
+        # kirov добавил unquote_name
+        table_name = self.unquote_name(qn(table_name))
         rows = self.execute("""
             SELECT user_cons_columns.constraint_name, user_cons_columns.column_name
             FROM user_constraints
@@ -203,7 +230,7 @@ class DatabaseOperations(generic.DatabaseOperations):
                  user_constraints.constraint_name = user_cons_columns.constraint_name
             WHERE user_constraints.table_name = '%s' AND
                   user_constraints.constraint_type = '%s'
-        """ % (qn(table_name), self.constraits_dict[type]))
+        """ % (table_name, self.constraits_dict[type]))
         # Load into a dict
         mapping = {}
         for constraint, column in rows:
@@ -213,3 +240,11 @@ class DatabaseOperations(generic.DatabaseOperations):
         for constraint, itscols in mapping.items():
             if itscols == columns:
                 yield constraint
+
+    # kirov
+    def rename_column(self, table_name, old, new):
+        if old == new:
+            return []
+        self.execute('ALTER TABLE %s RENAME COLUMN %s TO %s;' % (
+            self.quote_name(table_name), self.quote_name(old), self.quote_name(new),
+        ))

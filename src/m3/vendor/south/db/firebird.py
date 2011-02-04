@@ -259,7 +259,7 @@ class DatabaseOperations(generic.DatabaseOperations):
         """
         This particular override stops us sending DEFAULTs for BooleanField.
         """
-        if isinstance(field, models.BooleanField) and field.has_default():
+        if isinstance(field, (models.BooleanField, models.NullBooleanField)) and field.has_default():
             field.default = int(field.to_python(field.get_default()))
         return field
     
