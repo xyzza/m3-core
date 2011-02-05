@@ -58,7 +58,8 @@ class UserMapper(object):
             pu.lastname = ''
         m = hashlib.md5()
         m.update(password)
-        pu.password = base64.b16encode(m.digest())
+        
+        pu.password = base64.b64encode(m.digest())
         pu.save()
         
         #назначим группу
@@ -70,10 +71,10 @@ class UserMapper(object):
             #нет аккаунта создадим
             pa = PaloAccount()
             pa.user = pu
-            pu.login = 'admin'
-            pu.password = 'admin'
-            pu.connection = PaloConnection.objects.get(name='Palo')
-            pu.save()
+            pa.login = 'admin'
+            pa.password = 'admin'
+            pa.connection = PaloConnection.objects.get(name='Palo')
+            pa.save()
         
         #создадим связь
         UserMap.objects.get_or_create(user=user, palo_user=pu)
