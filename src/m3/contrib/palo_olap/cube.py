@@ -72,26 +72,40 @@ class PaloCube(object):
         '''
         обработка измерения (загрузка в palo server)
         '''
+        def format_dim_result(res, dim):
+            msg = u'<br/>Обработка измерения %s завершена.' % dim.name
+            t = ''
+            for k,v in res.items():
+                if t!= '': t+=', '
+                t += u'%s:%s' % (k,v)
+            if t:
+                msg += '(%s)' % t
+            return msg
+
         if not self.name:
-            raise Exception(u'Не указано имя измерения для %s' % self.__class__.__name__)
+            raise Exception(u'Не указано имя куба для %s' % self.__class__.__name__)
         #проверим все дименшены
+        res = u''
         for dim in self.dimensions:
             dim = dim() #превратим в инстанс наш синглетоновый дименшен
-            dim.process(with_clear)
+            p = dim.process(with_clear)
+            res += format_dim_result(p, dim)
         if not self._cube:
             #создадим дименшен в пало
             self._cube = self.get_palo_cube()
     
         self.clear()
-        self.load_data()
+        cnt = self.load_data()
+        res += u'<br/>Обработка куба %s завершена. Элементов: %i' % (self.name, cnt)
         self.after_process()
+        return res
         
     def load_data(self):
         '''
         самый главный метод загружает данные
         на этом этапе уже все есть надо только строить квари и записывать
         '''
-        pass
+        return 0
     
     def after_process(self):
         self._processed = True
@@ -106,8 +120,8 @@ class PaloCube(object):
         return self._cube.get_id()
 
     def create_standart_views(self):
-        for name, xml in self.standart_views.items():
-            ViewManager.sync_view(name, xml, self._db.get_palo_db().get_id(), self.get_palo_cube_id())
+        for view in self.standart_views:
+            ViewManager.sync_view_for_cube(view, self)
     
     def start_bulk(self):
         '''

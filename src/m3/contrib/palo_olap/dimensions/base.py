@@ -86,7 +86,7 @@ class BasePaloDimension(object):
         '''
         обработка измерения (загрузка в palo server)
         '''
-        print u'Обработка измерения %s %s' % (self.__class__.__name__, with_clear) 
+        #print u'Обработка измерения %s %s' % (self.__class__.__name__, with_clear) 
 
         if not self.name:
             raise Exception(u'Не указано имя измерения для %s' % self.__class__.__name__)

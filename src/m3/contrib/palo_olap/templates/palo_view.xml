@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?palocubeview version="0.1"?>
+<view id="{{view_id}}" name="Заявки" cube="{{cube_id}}">
+<property id="expressionNodes" value="0">
+</property>
+<axis id="cols" name="column" >
+{%for dim in cols%}
+    <axis_hierarchy dimension_id="{{dim.id}}" hierarchy_id="{{dim.id}}" >
+        <selected_elements>0</selected_elements>
+    </axis_hierarchy>
+{%endfor%}    
+</axis>
+<axis id="rows" name="row" >
+{%for dim in rows%}
+    <axis_hierarchy dimension_id="{{dim.id}}" hierarchy_id="{{dim.id}}" >
+        <selected_elements>0</selected_elements>
+    </axis_hierarchy>
+{%endfor%}    
+</axis>
+<axis id="selected" name="selection" >
+{%for dim in selected%}
+    <axis_hierarchy dimension_id="{{dim.id}}" hierarchy_id="{{dim.id}}" >
+        <selected_elements>0</selected_elements>
+    </axis_hierarchy>
+{%endfor%}    
+</axis>
+<axis id="hierarchy-repository" name="hierarchy-repository" >
+<property id="com.tensegrity.palo.cubview.axis.preferredwidth" value="0" />
+</axis>
+</view>
