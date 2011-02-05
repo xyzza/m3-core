@@ -246,7 +246,6 @@ class PaloCube():
                     if not id_elem == False:
                         ElementsID.append(str(id_elem))
                     else:
-                        print i, ID, Dim, element
                         ElementsID = []
                         break
             if ElementsID:

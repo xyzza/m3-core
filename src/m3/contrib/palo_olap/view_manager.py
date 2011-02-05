@@ -86,7 +86,6 @@ class ViewDifinition(object):
             
             
         data['selected'] = get_dim_list_info(selected)
-        print data
             
         
         xml_def = get_template('palo_view.xml')

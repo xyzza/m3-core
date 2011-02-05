@@ -49,7 +49,6 @@ class PaloServer():
                     return self.getUrlResult(url)
                      
                 msg = u'Error %s open %s . \nResponse: %s' % (force_unicode(err), url[:500], response)
-                print response
                 raise PaloOlapError(msg)
             else:
                 raise err

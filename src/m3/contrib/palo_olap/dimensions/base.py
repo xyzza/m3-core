@@ -169,7 +169,6 @@ class PaloDimension(BasePaloDimension):
                 self._elements[name] = id
         for name in self._get_data():
             if name not in self._elements.keys():
-                print name
                 id = self._dim.create_element(name)
                 self._elements[name] = id
                 inserted += 1
