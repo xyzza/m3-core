@@ -232,9 +232,10 @@ class ExtForm(BaseExtPanel):
             if has_attr:
                 if len(names) == 1:
                     if isinstance(obj, dict):
-                        return obj[names[0]]         
+                        return obj[names[0]]
                     else:
-                        return getattr(obj, names[0])
+                        value = getattr(obj, names[0])
+                        return value() if callable(value) else value
                 else:
                     nested = getattr(obj, names[0]) if not isinstance(obj, dict) else obj[names[0]]
                     return get_value(nested, names[1:])
