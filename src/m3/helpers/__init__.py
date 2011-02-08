@@ -1,10 +1,14 @@
-#coding: utf-8
+#!coding: utf-8
 '''
 Общие хелперы 
 '''
 
+import re
 from uuid import uuid4
 
+def is_valid_email(value):
+    ptn = re.compile(r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)",re.IGNORECASE)
+    return ptn.match(value)
 
 def normalize(str):
     '''
@@ -15,13 +19,11 @@ def normalize(str):
         replace('"','\\"').\
         replace("'","\\'")
 
-
 def generate_client_id():
     '''
     Генерирует уникальный id для визуального компонента.
     '''
     return 'cmp_' + str(uuid4())[0:8]
-
 
 def get_img_size(src_size, dest_size):
     '''
