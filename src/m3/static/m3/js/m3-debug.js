@@ -7823,7 +7823,7 @@ function smart_eval(text){
 		} catch (e) {
 		     Ext.Msg.show({
                 title:'Внимание'
-                ,msg:'Произошла непредвиденная ошибка!'
+                 ,msg:'Произошла непредвиденная ошибка!:<br/>'+e
                 ,buttons: Ext.Msg.OK
                 ,fn: Ext.emptyFn
                 ,animEl: 'elId'
