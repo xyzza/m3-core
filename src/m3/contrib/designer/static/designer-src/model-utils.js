@@ -45,7 +45,7 @@ ModelUtils = Ext.apply(Object,{
             node.properties = {};
             Ext.apply(node.properties, model.attributes.properties);
             node.type = model.attributes.type;
-            node.id = model.attributes.id;
+            node.id = model.attributes.properties.id;
             if (model.hasChildNodes()) {
                 node.items = [];
                 for (var i = 0; i < model.childNodes.length; i++){
