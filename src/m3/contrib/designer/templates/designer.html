@@ -37,7 +37,11 @@
                 Ext.QuickTips.init();
 
                 var starter = new Bootstrapper();
-                starter.start('{{data_url}}', '{{save_url}}');
+                new Ext.Viewport({
+                    layout:'fit',
+                    items:[starter.init('{{data_url}}', '{{save_url}}')]
+                })
+                starter.loadModel();
             });
 
         </script>

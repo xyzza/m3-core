@@ -42,8 +42,9 @@ ModelUtils = Ext.apply(Object,{
 
         var doRecursion = function(model) {
             var node = {};
+            node.properties = {};
             Ext.apply(node.properties, model.attributes.properties);
-            Ext.apply(node.type, model.attributes.type);
+            node.type = model.attributes.type;
             if (model.hasChildNodes()) {
                 node.items = [];
                 for (var i = 0; i < model.childNodes.length; i++){
