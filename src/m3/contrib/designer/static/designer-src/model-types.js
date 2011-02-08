@@ -219,6 +219,10 @@ ModelTypeLibrary = Ext.apply(Object, {
                 dataIndex:{
                     defaultValue:'Foo',
                     isInitProperty:true
+                },
+                menuDisabled: {
+                    defaultValue:true,
+                    isInitProperty:true
                 }
             },
             treeIconCls:'designer-grid-column',
@@ -244,6 +248,35 @@ ModelTypeLibrary = Ext.apply(Object, {
             },
             isContainer:true,
             treeIconCls:'designer-icon-page'
+        },
+        arrayStore:{
+            properties : {
+                name: {
+                    defaultValue:'New array store',
+                    isInitProperty:true
+                },
+                storeId: {
+                    defaultValue:'New store',
+                    isInitProperty:true
+                },
+                idIndex : {
+                    defaultValue:0,
+                    isInitProperty:true
+                },
+                fields: {
+                    defaultValue:'undefined',
+                    propertyType:'object'
+                },
+                data: {
+                    defaultValue:'undefined',
+                    propertyType:'object'
+                }
+            },
+            treeIconCls:'icon-database',
+            toolboxData: {
+                text:'Array store',
+                category:'Data'
+            }
         }
     },
     /**

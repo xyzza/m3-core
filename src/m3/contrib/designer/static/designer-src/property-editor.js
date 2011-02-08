@@ -94,10 +94,18 @@ PropertyWindow = Ext.extend(Ext.Window, {
                         customEditors:{
                             'layout': this._get_combo_editor('layout'),
                             'layoutConfig': this._get_code_editor(),
-                            'labelAlign':this._get_combo_editor('labelAlign')
+                            'labelAlign':this._get_combo_editor('labelAlign'),
+                            'fields': this._get_code_editor(),
+                            'data' : this._get_code_editor()
                         },
                         customRenderers:{
                             layoutConfig: function() {
+                                return '{Object}';
+                            },
+                            fields: function() {
+                                return '{Object}';
+                            },
+                            data: function() {
                                 return '{Object}';
                             }
                         }

@@ -71,10 +71,21 @@ ModelUIPresentaitionBuilder = function() {
                 );
         },
         gridPanel:function(model, cfg) {
-
-            var store = new Ext.data.Store({
-                autoDestroy:true
-            });
+            var store = undefined;
+            //попробуем найти стор
+            for (var i = 0; i < model.childNodes.length; i++) {
+                if (model.childNodes[i].attributes.type == 'arrayStore') {
+                    store = new Ext.data.ArrayStore(
+                                Ext.apply({},model.childNodes[i].attributes.properties)
+                            );
+                }
+            }
+            //или создадим пустой
+            if (!store) {
+                store = new Ext.data.Store({
+                    autoDestroy:true
+                });
+            }
 
             var columns = [];
 
@@ -93,7 +104,8 @@ ModelUIPresentaitionBuilder = function() {
                 columns.push({
                     id:'fake',
                     header:'Fake column',
-                    dataIndex:'fake'
+                    dataIndex:'fake',
+                    menuDisabled:true
                 });
             }
 
