@@ -130,7 +130,9 @@ def check_okpo(okpo):
         return False
     
     COEF1 = range(1, 11)
-    COEF2 = (3,13)
+    COEF1.extend(range(1,10))
+    COEF2 = range(3, 11)
+    COEF2.extend(range(1,11))
     checksum1 = checksum(okpo[:okpo_len-1], COEF1[:okpo_len-1])
     checknumber1 = checksum1 % 11
     if checknumber1 < 10:
