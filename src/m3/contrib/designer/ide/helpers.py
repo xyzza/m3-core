@@ -215,7 +215,8 @@ def get_classess(path):
             d = {'text': item.name,
                  'leaf': True,
                  'iconCls':  Icons.PAGE_WHITE_C,
-                 'class_name':  item.name}
+                 'class_name':  item.name,
+                 'path': path}
             res.append(d)
     
     

@@ -11,7 +11,7 @@ from m3.ui.ext import windows
 from m3.ui.ext import panels
 from m3.ui.ext import controls
 from m3.ui.ext import containers
-from m3.ui.actions import Action
+from m3.ui.actions import Action, ControllerCache
 
 class GearEditWindow(windows.ExtEditWindow):
     '''
@@ -47,7 +47,9 @@ class GearEditWindow(windows.ExtEditWindow):
     
     def _set_submit_action(self, value):
         """ Из переданного типа экшена пытается получить адрес для формы """
-        if isinstance(value, Action):
+        if isinstance(value, str):
+            self.form.url = ControllerCache.get_action_url(value)
+        elif isinstance(value, Action):
             self.form.url = value.get_absolute_url()
         elif issubclass(value, Action):
             self.form.url = value.absolute_url()

@@ -14,7 +14,10 @@ def workspace(request):
     '''
     Отдается основной шаблон. Точка входа.
     '''
-    return render_to_response('master.html')
+    return render_to_response('master.html', {
+        'data_url' : '/designer/fake',
+        'save_url' : '/designer/save'
+    })
 
 def get_project_files(request):
     '''
