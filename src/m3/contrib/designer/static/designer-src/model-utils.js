@@ -13,7 +13,7 @@ ModelUtils = Ext.apply(Object,{
         //Опять же важное замечание - id ноды в дереве компнентов на экране и id модельки равны друг другу
         var iconCls = ModelTypeLibrary.getTypeIconCls(model.attributes.type);
         return new Ext.tree.TreeNode({
-                text:model.attributes.properties.name,
+                text:model.attributes.properties.id,
                 id:model.id,
                 expanded:true,
                 allowDrop:model.isContainer(),
@@ -45,6 +45,7 @@ ModelUtils = Ext.apply(Object,{
             node.properties = {};
             Ext.apply(node.properties, model.attributes.properties);
             node.type = model.attributes.type;
+            node.id = model.attributes.id;
             if (model.hasChildNodes()) {
                 node.items = [];
                 for (var i = 0; i < model.childNodes.length; i++){

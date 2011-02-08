@@ -26,7 +26,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:'New panel',
                     isInitProperty:true
                 },
-                name:{
+                id:{
                     defaultValue:'New panel',
                     isInitProperty:true
                 },
@@ -67,7 +67,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:'New fieldset',
                     isInitProperty:true
                 },
-                name:{
+                id:{
                     defaultValue:'New fieldset',
                     isInitProperty:true
                 },
@@ -104,7 +104,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:'New tab panel',
                     isInitProperty:true
                 },
-                name:{
+                id:{
                     defaultValue:'New tab panel',
                     isInitProperty:true
                 },
@@ -124,7 +124,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                 fieldLabel:{
                     defaultValue:''
                 },
-                name:{
+                id:{
                     defaultValue:'New text field',
                     isInitProperty:true
                 },
@@ -143,7 +143,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                 fieldLabel:{
                     defaultValue:''
                 },
-                name:{
+                id:{
                     defaultValue:'New text field',
                     isInitProperty:true
                 },
@@ -183,7 +183,7 @@ ModelTypeLibrary = Ext.apply(Object, {
         gridPanel:{
             isContainer: true,
             properties: {
-                name:{
+                id:{
                     defaultValue:'Grid panel',
                     isInitProperty:true
                 },
@@ -233,7 +233,7 @@ ModelTypeLibrary = Ext.apply(Object, {
         },
         window:{
             properties: {
-                name:{
+                id:{
                     defaultValue:'Ext window',
                     isInitProperty:true
                 },
@@ -251,7 +251,7 @@ ModelTypeLibrary = Ext.apply(Object, {
         },
         arrayStore:{
             properties : {
-                name: {
+                id: {
                     defaultValue:'New array store',
                     isInitProperty:true
                 },
