@@ -77,11 +77,11 @@ ModelUIPresentaitionBuilder = function() {
         },
         comboBox:function(model, cfg) {
             var store = new Ext.data.ArrayStore({
-            autoDestroy:true,
-            idIndex:0,
-            fields:['name'],
-            data:['foo','bar']
-        });
+                autoDestroy:true,
+                idIndex:0,
+                fields:['name'],
+                data:['foo','bar']
+            });
             var result = new Ext.form.ComboBox({
                 store:store,
                 displayField:'name',
@@ -171,6 +171,7 @@ ModelUIPresentaitionBuilder = function() {
             cfg.id = model.id;
             if (ModelTypeLibrary.isTypeContainer(model.attributes.type)) {
                 cfg.cls = 'designContainer designComponent';
+                cfg.items = [];
             }
             else {
                 cfg.cls = 'designComponent';

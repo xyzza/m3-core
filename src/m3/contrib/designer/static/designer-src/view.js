@@ -58,7 +58,7 @@ DesignView = Ext.extend(BaseView, {
         var recursion = function(container, model) {
             var newComponent = this._createComponent( model );
             if (newComponent){
-                container.add( newComponent );
+                container.items.add( newComponent );
             }
             if (model.isContainer() && model.childNodes && model.childNodes.length > 0) {
                 for (var i=0; i < model.childNodes.length; i++) {
