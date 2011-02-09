@@ -75,21 +75,6 @@ def check_inn(inn):
         return inn12(inn)
     else:
         return False    
-    
-def check_strah(base_strah):
-    '''
-    1. Вычисляется контрольная сумма по первым 9-ти цифрам со следующими весовыми 
-    коэффициентами: (9,8,7,6,5,4,3,2,1).
-    2. Вычисляется контрольное число как остаток от деления контрольной суммы на 101
-    3. Контрольное число сравнивается с двумя последними цифрами номера страхования 
-    свидетельства ПФ. В случае их равенства номер страхования свидетельства ПФ 
-    считается правильным.
-    '''
-    assert isinstance(base_strah, basestring), 'strah must be string'
-    COEF = (9,8,7,6,5,4,3,2,1)
-    strah_str = ''.join(base_strah.split(' ')[:-1])
-    strah = checksum(strah_str, COEF)%101
-    return strah == int(base_strah[-2:])
 
 def check_okpo(okpo):
     '''
