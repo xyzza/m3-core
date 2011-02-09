@@ -117,8 +117,11 @@ AppController = Ext.extend(Object, {
     */
    highlightElement:function(id) {
        this.removeHighlight();
-       Ext.fly(id).addClass('selectedElement');
-       this._lastHighlightedId = id;
+       var flyEl = Ext.fly(id);
+       if (flyEl) {
+           flyEl.addClass('selectedElement');
+           this._lastHighlightedId = id;
+       }
    },
    /*
     * Убрать подстветку
