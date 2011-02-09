@@ -54,7 +54,8 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         for (var s in source) {
             if ((source[s] != defaults[s]) || ( model.attributes.properties.hasOwnProperty(s)) ) {
                 if (ModelTypeLibrary.isPropertyObject(model.attributes.type, s)) {
-                    model.attributes.properties[s] = Ext.util.JSON.decode(source[s])
+                    model.attributes.properties[s] = Ext.isEmpty(source[s]) ? undefined :
+                            Ext.util.JSON.decode(source[s])
                 }
                 else {
                     model.attributes.properties[s] = source[s];
@@ -72,10 +73,6 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
  */
 
 PropertyWindow = Ext.extend(Ext.Window, {
-    listEditors:{
-        'layout':['auto','fit','form','hbox','vbox','border','absolute'],
-        'labelAlign':['left','top']
-    },
     /**
      * Параметры конфига:
      * cfg.source = {} - то что редактируется проперти гридом
@@ -88,27 +85,16 @@ PropertyWindow = Ext.extend(Ext.Window, {
     },
     initComponent: function(cfg) {
         this.addEvents('save');
+
+        var customEditors = {};
+        var customRenderers = {};
+        this._setup_grid_customs(customEditors, customRenderers)
+
         this._grid = new Ext.grid.PropertyGrid({
                         autoHeight: true,
                         source: this.source,
-                        customEditors:{
-                            'layout': this._get_combo_editor('layout'),
-                            'layoutConfig': this._get_code_editor(),
-                            'labelAlign':this._get_combo_editor('labelAlign'),
-                            'fields': this._get_code_editor(),
-                            'data' : this._get_code_editor()
-                        },
-                        customRenderers:{
-                            layoutConfig: function() {
-                                return '{Object}';
-                            },
-                            fields: function() {
-                                return '{Object}';
-                            },
-                            data: function() {
-                                return '{Object}';
-                            }
-                        }
+                        customEditors:customEditors,
+                        customRenderers:customRenderers
                     });
 
         Ext.apply(this, {
@@ -128,9 +114,21 @@ PropertyWindow = Ext.extend(Ext.Window, {
     show:function( ) {
         PropertyWindow.superclass.show.call(this);
     },
+    _setup_grid_customs:function(customEditorsCfg, customRenderersCfg) {
+        for (var p in this.source) {
+            var type = ModelTypeLibrary.getPropertyType(this.model.attributes.type, p);
+            if (type == 'object') {
+                customEditorsCfg[p] = this._get_code_editor();
+                customRenderersCfg[p] = function() { return '{Object}'; }
+            }
+            else if (type == 'enum') {
+                customEditorsCfg[p] = this._get_combo_editor(p);
+            }
+        }
+    },
     _get_combo_editor:function(propertyName) {
         var data = [];
-        var ar = this.listEditors[propertyName];
+        var ar = ModelTypeLibrary.getEnumValues(propertyName); 
         for (var i=0;i<ar.length;i++) {
             data.push([ar[i]]);
         }

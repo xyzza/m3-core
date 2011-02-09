@@ -43,8 +43,8 @@ def designer(request):
 def designer_fake_data(request):
     result = {
             'properties': {
-                'name':'Ext window',
-                'title':'Trololo',
+                'id':'Ext window',
+                'title':'Ma teh window',
                 'layout':'fit',
             },
             'type':'window',

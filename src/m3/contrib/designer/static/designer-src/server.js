@@ -17,7 +17,7 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
     constructor: function(cfg){
         Ext.apply(this, cfg);
         ServerStorage.superclass.constructor.call(this);
-        this.addEvents('load');
+        this.addEvents('load','save');
     },
     loadModel:function(){
         this.mask = new Ext.LoadMask(this.maskEl, {
@@ -26,6 +26,8 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
         this.mask.show();
         Ext.Ajax.request({
             url:this.loadUrl,
+            //TODO поставить POST!
+            method:'GET',
             params:{
                path: this.pathFile,
                className: this.className

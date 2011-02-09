@@ -16,7 +16,8 @@ ModelTypeLibrary = Ext.apply(Object, {
                 },
                 layout:{
                     defaultValue:'auto',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    propertyType:'enum'
                 },
                 layoutConfig :{
                     defaultValue:'undefined',
@@ -44,7 +45,8 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:100
                 },
                 labelAlign:{
-                    defaultValue:'left'
+                    defaultValue:'left',
+                    propertyType:'enum'
                 },
                 padding:{
                     defaultValue:'undefined'
@@ -61,7 +63,8 @@ ModelTypeLibrary = Ext.apply(Object, {
             properties:{
                 layout:{
                     defaultValue:'form',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    propertyType:'enum'
                 },
                 title:{
                     defaultValue:'New fieldset',
@@ -85,7 +88,8 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:100
                 },
                 labelAlign:{
-                    defaultValue:'left'
+                    defaultValue:'left',
+                    propertyType:'enum'
                 },
                 padding:{
                     defaultValue:'undefined'
@@ -139,6 +143,7 @@ ModelTypeLibrary = Ext.apply(Object, {
             treeIconCls:'designer-icon-text'
         },
         comboBox: {
+            //FIXME комбобоксеке не работают
             properties: {
                 fieldLabel:{
                     defaultValue:''
@@ -239,7 +244,8 @@ ModelTypeLibrary = Ext.apply(Object, {
                 },
                 layout:{
                     defaultValue:'fit',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    propertyType:'enum'
                 },
                 title: {
                     defaultValue:'New window',
@@ -278,6 +284,10 @@ ModelTypeLibrary = Ext.apply(Object, {
                 category:'Data'
             }
         }
+    },
+    enumConfig: {
+        layout:['auto','fit','form','hbox','vbox','border','absolute'],
+        labelAlign:['left','top']
     },
     /**
      * Возвращает объект со свойствами заполнеными дефолтными значениями по типу модели
@@ -329,6 +339,25 @@ ModelTypeLibrary = Ext.apply(Object, {
         else
         {
             return false;
+        }
+    },
+    /*
+    * Возвращает списко значений перечисления(типичный пример - layout)
+    */
+    getEnumValues: function(enumName) {
+        return this.enumConfig[enumName];    
+    },
+    /*
+    * Тип свойства модели - простое(string, number, boolean - трактуется по типу дефолтного значения),
+    * перечисление(enum) или объектное(object) - метод используется при редактировании в свойств компонентов
+    * в PropertyGrid'е
+    */
+    getPropertyType:function(modelTypeName, propertyName) {
+        if (this.typesConfig[modelTypeName]['properties'][propertyName].hasOwnProperty('propertyType')) {
+            return this.typesConfig[modelTypeName]['properties'][propertyName]['propertyType']
+        }
+        else {
+            return typeof this.typesConfig[modelTypeName]['properties'][propertyName]['defaultValue'];
         }
     },
     /*
