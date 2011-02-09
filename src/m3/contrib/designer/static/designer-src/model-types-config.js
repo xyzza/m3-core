@@ -413,6 +413,21 @@ Ext.apply(ModelTypeLibrary,{
             },
             treeIconCls:'designer-icon-number'
         },
+        htmlEditor: {
+            parent:'baseField',
+            properties : {
+                id: {
+                    defaultValue:'New html editor',
+                    isInitProperty:true
+                }
+
+            },
+            toolboxData: {
+                category:'Fields',
+                text:'Html editor'
+            },
+            treeIconCls:'designer-htmleditor'
+        },
         comboBox: {
             //FIXME комбобоксеке не работают
             properties: {

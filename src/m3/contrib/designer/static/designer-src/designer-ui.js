@@ -38,6 +38,13 @@ ModelUIPresentaitionBuilder = function() {
                     })
                 );
         },
+        htmlEditor:function(model,cfg) {
+            return new Ext.form.HtmlEditor(
+                    Ext.apply(cfg,{
+                        readOnly:true
+                    })
+                );
+        },
         textArea:function(model, cfg){
             return new Ext.form.TextArea(
                     Ext.apply(cfg,{
