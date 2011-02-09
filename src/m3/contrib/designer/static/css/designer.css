@@ -47,7 +47,3 @@
 .selectedElement {
     border: 2px solid #710AF0
 }
-
-.selectedElement * .x-panel-body {
-    border: 2px solid #710AF0
-}

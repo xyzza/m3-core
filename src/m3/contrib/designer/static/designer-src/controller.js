@@ -15,7 +15,10 @@
  */
 
 AppController = Ext.extend(Object, {
-   constructor: function(config) {
+   //здесь храниться id последнего подсвеченного dom элемента
+   _lastHighlightedId: undefined,
+
+    constructor: function(config) {
        Ext.apply(this, config);
    },
    init: function(documentCfg) {
@@ -33,11 +36,14 @@ AppController = Ext.extend(Object, {
        this._initToolbox(this.toolbox);
        //иницируем ДД с тулбокса на превью
        this._initDesignDD(this.designPanel);
+       //запустим обработку мышиных событий на панели дизайнера
+       this._initDesignMouseEvents(this.designPanel);
 
        //обработчики событий
        this.tree.on('beforenodedrop', this.onBeforeNodeDrop.createDelegate(this));
        this.tree.on('nodedrop', this.onTreeNodeDrop.createDelegate(this));
        this.tree.on('dblclick', this.onTreeNodeDblClick.createDelegate(this));
+       this.tree.on('click', this.onTreeNodeClick.createDelegate(this));
        this._editorManager.on('modelUpdate', this.onModelUpdate.createDelegate(this));
 
 
@@ -90,9 +96,37 @@ AppController = Ext.extend(Object, {
                }
            });
    },
+   /*
+   * Вешаемся на клики по панели. При ординарно щелчке подсвечиваем ближайший редактируемый элемент
+   * При двойном открываем окно редактирования
+   */
+   _initDesignMouseEvents: function(panel) {
+       var el = panel.getEl();
+       el.on('dblclick', this.onDomDblClick.createDelegate(this));
+       el.on('click', this.onDomClick.createDelegate(this));
+   },
+   /*
+   * Заполняем тулбокс компонентами
+   */
    _initToolbox:function(toolbox) {
             var root = toolbox.getRootNode();
             root.appendChild(ModelTypeLibrary.getToolboxData() );
+   },
+   /*
+    * Подствека в превью дизайнера компонента с id
+    */
+   highlightElement:function(id) {
+       this.removeHighlight();
+       Ext.fly(id).addClass('selectedElement');
+       this._lastHighlightedId = id;
+   },
+   /*
+    * Убрать подстветку
+    */
+   removeHighlight:function() {
+       if (!Ext.isEmpty(this._lastHighlightedId)) {
+           Ext.fly(this._lastHighlightedId).removeClass('selectedElement');
+       }  
    },
     /*
     * Просто все перерисовываем
@@ -115,6 +149,8 @@ AppController = Ext.extend(Object, {
        //дерева в неподходящий момент внутри treeSorter'а
 
        //TODO похоже баг при сортировке не исправлен! Надо попробовать двигать в beforeDrop или на колбэке к нему
+
+       this.removeHighlight();
 
        this._treeView.suspendModelListening();
        this._designView.suspendModelListening();
@@ -147,6 +183,7 @@ AppController = Ext.extend(Object, {
    * Обработка дропа в дизайнер с тулбокса
    */
    domNodeDrop:function(target, dd, e, data ) {
+       this.removeHighlight();
        var componentNode = data.node;
        var model = this._model.findModelById(target.id);
 
@@ -160,6 +197,22 @@ AppController = Ext.extend(Object, {
    */
    getTransferObject:function() {
        return ModelUtils.buildTransferObject(this._model);
+   },
+   onDomDblClick: function(event, target, obj) {
+       var el = event.getTarget('.designComponent');
+       if (el) {
+           var model = this._model.findModelById(el.id);
+           this._editorManager.editModel(model);
+       }
+   },
+   onDomClick: function(event, target, obj) {
+       var el = event.getTarget('.designComponent');
+       if (el) {
+           this.highlightElement(el.id);
+       }
+   },
+   onTreeNodeClick:function(node, e) {
+       this.highlightElement(node.id);
    },
    onBeforeNodeDrop:function(dropEvent) {
         if (dropEvent.target.isRoot) {

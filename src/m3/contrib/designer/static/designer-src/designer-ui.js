@@ -110,7 +110,7 @@ ModelUIPresentaitionBuilder = function() {
             }
 
             return new Ext.grid.GridPanel( Ext.apply(cfg, {
-                cls:'designContainer',
+                cls:'designContainer designComponent',
                 id:model.id,
                 store: store,
                 colModel:new Ext.grid.ColumnModel({
@@ -128,7 +128,10 @@ ModelUIPresentaitionBuilder = function() {
             var cfg = Ext.apply({}, model.attributes.properties);
             cfg.id = model.id;
             if (ModelTypeLibrary.isTypeContainer(model.attributes.type)) {
-                cfg.cls = 'designContainer';
+                cfg.cls = 'designContainer designComponent';
+            }
+            else {
+                cfg.cls = 'designComponent';
             }
             if (mapObject.hasOwnProperty(model.attributes.type)) {
                 return mapObject[model.attributes.type](model, cfg);
