@@ -93,9 +93,7 @@ ModelUIPresentaitionBuilder = function() {
             //поиск колонок
             for (var i = 0; i < model.childNodes.length; i++) {
                 if (model.childNodes[i].attributes.type == 'gridColumn') {
-                      var newColumn = new Ext.grid.Column(
-                              Ext.apply({},model.childNodes[i].attributes.properties)
-                              );
+                      var newColumn = Ext.apply({},model.childNodes[i].attributes.properties);
                       columns.push(newColumn);
                 }
             }

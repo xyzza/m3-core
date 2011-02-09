@@ -219,7 +219,8 @@ Ext.apply(ModelTypeLibrary,{
         gridColumn:{
             properties: {
                 id:{
-                    defaultValue:'grid column',
+                    //ATTENTION - пробелы в id ведут к багу при наведении мышки на хедер
+                    defaultValue:'gridColumn',
                     isInitProperty:true
                 },
                 name:{

@@ -99,7 +99,7 @@ AppController = Ext.extend(Object, {
            });
    },
    /*
-   * Вешаемся на клики по панели. При ординарно щелчке подсвечиваем ближайший редактируемый элемент
+   * Вешаемся на клики по панели. При ординарном щелчке подсвечиваем ближайший редактируемый элемент
    * При двойном открываем окно редактирования
    */
    _initDesignMouseEvents: function(panel) {
@@ -115,7 +115,7 @@ AppController = Ext.extend(Object, {
             root.appendChild(ModelTypeLibrary.getToolboxData() );
    },
    /*
-    * Подствека в превью дизайнера компонента с id
+    * Подствека в превью дизайнера компонента для элемента с id
     */
    highlightElement:function(id) {
        this.removeHighlight();
