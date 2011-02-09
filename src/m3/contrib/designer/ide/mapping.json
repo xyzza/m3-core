@@ -16,6 +16,7 @@
 		,"title": "title"
 		,"layout": "layout"	
 		,"width": "width"
+		,"padding":"padding"
 	}		
 },{
 	"class": {
@@ -28,11 +29,12 @@
 	}		
 },{
 	"class": {
-		"field": "ExtStringField"	
+		"textField": "ExtStringField"	
 	},
 	"config": {
 		"name": "name"
-		,"title": "title"
+		,"fieldLabel": "label"
 		,"width": "width"	
+		,"anchor":"anchor"
 	}
 }]
