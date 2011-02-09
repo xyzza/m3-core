@@ -509,10 +509,7 @@ class ExtUIComponent(BaseExtComponent):
         self.anchor = None
         
         # CSS класс, который будет добавлен к компоненту
-        self.cls = None
-        
-        # Атрибуты специфичные для form layout
-        self.label_width = self.label_align = self.label_pad = None
+        self.cls = None               
                 
         # Использовать ли автоскрол 
         self.auto_scroll = False
@@ -543,10 +540,7 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('maxWidth', self.max_width)
         self._put_config_value('minWidth', self.min_width)
         self._put_config_value('name', self.name)
-        self._put_config_value('anchor', self.anchor)
-        self._put_config_value('labelWidth', self.label_width)
-        self._put_config_value('labelAlign', self.label_align)
-        self._put_config_value('labelPad', self.label_pad)
+        self._put_config_value('anchor', self.anchor)        
         self._put_config_value('cls', self.cls)
         self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
                         

@@ -43,7 +43,7 @@ def designer(request):
 
 def designer_fake_data(request):
     '''
-    Вьюшка для показа формы
+    Вьюшка для показа формы (fake)
     '''
 
     result = {
@@ -56,6 +56,22 @@ def designer_fake_data(request):
             'id':0
         }
 
+    return HttpResponse(content_type='application/json', 
+                        content = json.dumps(result))
+
+def designer_data(request):
+    '''
+    Вьюшка для показа формы
+    '''
+
+    class_name = request.GET.get('className')
+    path = request.GET.get('path')
+    
+    assert class_name, 'Class name is undefined'
+    assert path, 'Path to source file is undefined'
+    
+    result = Parser(path, class_name).to_designer() 
+    
     return HttpResponse(content_type='application/json', 
                         content = json.dumps(result))
 

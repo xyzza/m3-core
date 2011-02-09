@@ -40,8 +40,7 @@ class ExtStringField(BaseExtField):
     @end_designer
     '''
     def __init__(self, *args, **kwargs):
-        super(ExtStringField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-string-field.js' # FIXME: Можно заккоментировать
+        super(ExtStringField, self).__init__(*args, **kwargs)        
         
         #
         self.enable_key_events = False # Разрешает перехват нажатий клавиш
@@ -234,8 +233,7 @@ class ExtNumberField(BaseExtField):
         self._put_config_value('minValue', self.min_value)
         self._put_config_value('maxValue', self.max_value)
         self._put_config_value('maxText', self.max_text)
-        self._put_config_value('minText', self.min_text)
-        self._put_config_value('minText', self.min_text)
+        self._put_config_value('minText', self.min_text)        
         self._put_config_value('selectOnFocus', self.select_on_focus)
         
     def render(self):

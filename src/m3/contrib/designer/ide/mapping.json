@@ -1,4 +1,132 @@
-[{
+[
+// Базовый класс для всех классов
+{
+	"class": {
+		"Observable": ""	
+	},
+	"config": {
+		"listeners": "listeners"
+		,"name": "name"
+	}		
+},
+
+// Базовый класс для ui
+{
+	"class": {
+		"component": ""	
+	},
+	"config": {
+		"cls": "cls"
+		,"html": "html"
+		,"style": "style"
+		,"hidden": "hidden"
+		,"disabled": "disabled"
+		
+		,"anchor": "anchor"
+		,"flex": "flex"
+		,"height": "height"
+		,"width": "width"
+		,"region": "region"
+		,"x": "x"
+		,"y": "y"
+		
+		,"maxHeight": "max_height"
+		,"minHeight": "min_height"
+		,"maxWidth": "max_width"
+		,"minWidth": "min_width"
+		
+		,"autoScroll": "auto_scroll"
+		
+	},
+	"parent": "Observable"
+},
+
+// Контейнер
+{
+	"class": {
+		"container": "ExtContainer"	
+	},
+	"config": {
+		"layout": "layout"
+		,"layoutConfig": "layout_config"	
+	},
+	"parent": "component"		
+},
+
+// Тулбар
+{
+	"class": {
+		"Toolbar": "ExtToolBar"
+	},
+	"config": {
+	},
+	"parent": "container"
+},
+
+// Пэйджинг бар
+{
+	"class": {
+		"PagingToolbar": "ExtPagingBar"
+	},
+	"config": {
+		"pageSize": "page_size"
+		,"displayMsg": "display_message"
+		,"emptyMsg": "empty_message"
+		,"displayInfo": "display_info"		
+	},
+	"parent": "Toolbar"
+},
+
+// Базовый класс для панелей
+{
+	"class": {
+		"basePanel": ""
+	},
+	"config": {
+		"title":"title"
+		,"header":"header"
+		,"border":"border"
+		,"iconCls":"icon_cls"
+	},
+	"parent": "container"
+},
+
+// Панель
+{
+	"class": {
+		"panel": "ExtPanel"
+	},
+	"config": {
+		"padding":"padding"
+		,"collapsible":"collapsible"
+		,"baseCls": "base_cls"
+		,"split":"split"
+		,"autoLoad":"auto_load"
+		,"collapseMode":"collapse_mode"
+		,"collapsed":"collapsed"		
+		,"bodyBorder":"body_border"
+	},
+	"parent": "basePanel"
+},
+
+// Форма
+{
+	"class": {
+		"formPanel": "ExtForm"
+	},
+	"config": {
+		"padding":"padding"
+		,"labelWidth":"label_width"
+		,"labelPad":"label_pad"
+		,"labelAlign":"label_align"
+		,"fileUpload":"file_upload"
+		,"url":"url"
+	},
+	"parent": "basePanel"
+},
+
+// Окно
+{
 	"class": {
 		"window": "ExtWindow"	
 	},
@@ -6,37 +134,154 @@
 		"name": "name"
 		,"title": "title"
 		,"layout": "layout"	
-		,"width":"width"
-		,"height":"height"
-	}		
-},{
-	"class": {
-		"panel": "ExtPanel"	
-	},
-	"config": {
-		"name": "name"
-		,"title": "title"
-		,"layout": "layout"	
 		,"width": "width"
-		,"padding":"padding"
-	}		
-},{
+		,"height": "height"
+	},
+	"parent": "basePanel"
+},
+
+// Окно редактирования
+{
 	"class": {
-		"form": "ExtForm"	
+		"window": "ExtEditWindow"	
+	},
+	"config": {},
+	"parent": "window"
+},
+
+// Базовый конфиг для полей
+{
+	"class": {
+		"field": "BaseExtField"	
 	},
 	"config": {
-		"name": "name"
-		,"title": "title"
-		,"layout": "layout"	
-	}		
-},{
+		"readOnly": "read_only"
+		,"fieldLabel": "label"
+		,"value":"value"
+		,"labelStyle":"label_style"
+		,"isEdit":"is_edit"
+		,"allowBlank":"allow_blank"
+		,"vtype":"vtype"
+		,"emptyText": "empty_text"
+		,"minLength": "min_length"
+		,"minLengthText": "min_length_text"
+		,"maxLength": "max_length"
+		,"maxLengthText": "max_length_text"
+		,"regex":"regex"
+		,"regexText":"regex_text"
+		,"tabIndex":"tab_index"
+		,"invalidClass": "invalid_class"
+		,"hideLabel":"hide_label"
+		,"invalidText":"invalid_text"
+		,"plugins": "plugins"		
+	}
+},
+
+// Текстовое поле
+{
 	"class": {
 		"textField": "ExtStringField"	
 	},
 	"config": {
-		"name": "name"
-		,"fieldLabel": "label"
-		,"width": "width"	
-		,"anchor":"anchor"
+		"inputType":"input_type"
+		,"maskRe":"mask_re"
+		,"selectOnFocus":"select_on_focus"
+		,"enableKeyEvents":"enable_key_events"		
 	}
-}]
+	,"parent": "field"
+},
+
+// Поле даты 
+{
+	"class": {
+		"dateField": "ExtDateField"	
+	},
+	"config": {
+		"format":"format"
+		,"startDay":"start_day"	
+	}
+	,"parent": "textField"
+},
+
+
+// Поле для ввода числа
+{
+	"class": {
+		"numberField": "ExtNumberField"	
+	},
+	"config": {
+		"decimalSeparator":"decimal_separator"
+		,"allowDecimals":"allow_decimals"	
+		,"allowNegative":"allow_negative"
+		,"decimalPrecision":"decimal_precision"
+		,"minValue":"min_value"
+		,"maxValue":"max_value"
+		,"maxText":"max_text"
+		,"minText":"min_text"
+	}
+	,"parent": "textField"
+},
+
+// Скрытое поле
+{
+	"class": {
+		"hiddenField": "ExtHiddenField"	
+	},
+	"config": {}
+	,"parent": "field"
+},
+
+// Text area
+{
+	"class": {
+		"textArea": "ExtTextArea"	
+	},
+	"config": {}
+	,"parent": "textField"
+},
+
+// Check box
+{
+	"class": {
+		"checkBox": "ExtCheckBox"	
+	},
+	"config": {
+		"checked":"checked"
+		,"boxLabel":"box_label"
+	}
+	,"parent": "field"
+},
+
+// Контрол времени
+{
+	"class": {
+		"timeField": "ExtTimeField"	
+	},
+	"config": {
+		"format":"format"
+		,"increment":"increment"
+		,"maxValue":"max_value"
+		,"minValue":"min_value"
+	}
+	,"parent": "textField"
+},
+
+// HTML редактор
+{
+	"class": {
+		"htmlEditor": "ExtHTMLEditor"	
+	},
+	"config": {}
+	,"parent": "field"
+},
+
+// Поле только для отображения
+{
+	"class": {
+		"displayField": "ExtDisplayField"	
+	},
+	"config": {}
+	,"parent": "field"
+}
+
+]

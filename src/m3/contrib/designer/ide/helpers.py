@@ -6,6 +6,9 @@ import json
 import codegen
 import shutil # Для копирования файлов
 
+# Для тестов 
+import pprint
+
 # Для тестов обернуто в try
 try:
     from m3.helpers.icons import Icons
@@ -47,6 +50,9 @@ class Parser(object):
         # Старый исходный код модуля
         self.old_source_code = ''
         
+        #
+        self.base_class = 'BaseExtWindow'
+        
     def to_designer(self):
         '''
         Отвечает за преобразования py-кода в json, понятный m3-дизайнеру.
@@ -54,14 +60,17 @@ class Parser(object):
         '''
         source_code = open(self.path).read()
         node_module = ast.parse(source_code)
-        func = self._get_func_initialize(node_module, self.class_name)
+        class_node, func_node = self._get_func_initialize(node_module, self.class_name)
         
-        assert func, 'Function name "%s" is not define in class "%s"' % \
+        self.base_class = self._get_base_class(class_node)
+        
+        
+        assert func_node, 'Function name "%s" is not define in class "%s"' % \
                         (Parser.GENERATED_FUNC, self.class_name,)
         
         self.nested_cmp = {}
         self.config_cmp = {}
-        for node in func.body:
+        for node in func_node.body:
             if isinstance(node, ast.Assign):
                 # Составление структуры конфигов и типов компонентов
                 parent, attr, value = self._get_config_component(node)
@@ -73,7 +82,12 @@ class Parser(object):
                 self.nested_cmp.setdefault(parent, []).append(child)
                         
         return self._get_json()        
-                
+
+    def _get_base_class(self, class_node):
+        '''
+        Получает базовый класс
+        '''
+        return class_node.bases[0].id
 
     def _get_json(self, key='self', a_property_dict=None):
         '''
@@ -87,7 +101,7 @@ class Parser(object):
         '''
         res_dict = a_property_dict if isinstance(a_property_dict, dict) else {}                
                
-        l = []
+        tmp_list = []
         if self.nested_cmp and self.nested_cmp.get(key):
             for item in self.nested_cmp[key]:
 
@@ -98,10 +112,10 @@ class Parser(object):
                 else:
                     property_dict.update( self._get_json_config(item ) )    
 
-                l.append(property_dict)
+                tmp_list.append(property_dict)
         
         res_dict.update(self._get_json_config(key))    
-        res_dict.update({'items': l})
+        res_dict.update({'items': tmp_list})
         return res_dict
     
     def _get_json_config(self, key):
@@ -111,23 +125,30 @@ class Parser(object):
         properties, py_name = self._get_properties(key)                
         return {'type': py_name, 'id':key, 'properties': properties}
 
+    def _build_conf(self):
+        '''
+        Собирает конфиг маппинга рекурсивно обходя родительские компоненты
+        '''
+
+
     def _get_properties(self, key):
         '''
         Возвращает кортеж: свойства контрола, имя контрола в натации дизайнера
         (extjs)
         '''        
         conf = self.config_cmp[key].copy()
-        
+
         if conf.get('py_name'):
             py_name = conf.pop('py_name')            
         else:
-            py_name = 'ExtWindow' # FIXME: Здесь должно быть имя класса
+            py_name = self.base_class
         
         extjs_name = self._get_extjs_class(py_name)
+        assert extjs_name, 'Mapping for class "%s" is not define' % py_name
         
         properties = dict(id= key) 
-        for k, v in conf.items():
-            extjs_attr = self._get_json_attr(k, extjs_name)
+        for k, v in conf.items():            
+            extjs_attr = self._get_json_attr(k, extjs_name)            
             assert extjs_attr, 'Mapping object "%s" for "%s" is not define' % (k, extjs_name,)
             properties[extjs_attr] = v
             
@@ -215,7 +236,9 @@ class Parser(object):
         module_node = ast.parse(self.old_source_code)
         
         # Нахождение нужной функции GENERATED_FUNC
-        func_node = self._get_func_initialize(module_node, self.class_name)     
+        class_node, func_node = self._get_func_initialize(module_node, self.class_name)
+        
+        self._set_class_name(class_node, json_dict['type'])
         
         # Старая док строка не должна потеряться
         if func_node and isinstance(func_node.body, list) and len(func_node.body) > 0 \
@@ -226,9 +249,18 @@ class Parser(object):
         func_node.body = nodes                       
 
         # Бакап файла на всякий пожарный случай и cохранение нового файла
-        source_code = codegen.to_source(module_node)
-        print source_code
+        source_code = codegen.to_source(module_node)        
         self._write_to_file(source_code)
+        
+    def _set_class_name(self, node, extjs_type):
+        '''
+        Устанавливает соответсвующее имя класса наследника
+        '''
+        for item in self._get_mapping():
+            k, v = item['class'].items()[0]
+            if k ==  extjs_type:
+                node.bases = [ast.Name( str(v), 1)] 
+                break
         
     def _write_to_file(self, source_code):
         '''
@@ -286,9 +318,9 @@ class Parser(object):
         '''
         nodes = nodes or []
         d = d or self.dict_instances        
-        for k, v in d.items(): # Вызывается 1 раз, т.к. 1 ключ
+        for k, v in d.items(): # Вызывается 1 раз, т.к. 1 ключ #FIXME
             for item in v: # Обход списка вложенных контролов               
-                for ik, _ in item.items(): # Вызывается 1 раз, для получения внутреннего ключа
+                for ik, _ in item.items(): # Вызывается 1 раз, для получения внутреннего ключа #FIXME
                     
                     # Вот такая ебическая конструкция
                     # Привыкаем, блеать, к лиспу (с) greatfuckingadvice
@@ -389,7 +421,7 @@ class Parser(object):
         @param type_obj: Тип объекта (window, panel, etc.)
         '''         
         for item in self._get_mapping():
-            if item['class'].has_key(type_obj):
+            if item['class'].has_key(type_obj): # FIXME: Здесь нужно собирать все компоненты иерархически по item['class']
                 return item['config']
     
     
@@ -418,8 +450,10 @@ class Parser(object):
             if isinstance(node, ast.ClassDef) and node.name == class_name:                
                 for nested_node in node.body:    
                     if isinstance(nested_node, ast.FunctionDef) and nested_node.name == Parser.GENERATED_FUNC:
-                        return nested_node
-                        
+                        return node, nested_node
+                else:
+                    raise Exception('Autogenerated function "%s" is not defined in class "%s"' % 
+                                    (Parser.GENERATED_FUNC, class_name)    )      
         
 def get_files(path):
     '''
@@ -496,10 +530,27 @@ def restores(data):
                 pass # Итак останется в unicode
         
 
-# Словарь сопоставлений контролов в дизайнере к контролам в питоне
-mapping_list = json.loads(open( 
-            os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').read())
+def update_with_inheritance(m_list, parent=None, config=None):
+    '''
+    Обновляет маппинг объектов с учетом наследование, тоесть дозополняет
+    свойствами объекты из унаследованных классов "parent"
+    '''        
+    
+    for item in m_list:
+        if parent and item.get('class').keys()[0] == parent:            
+            config.update(item['config'])             
+            break
+        elif not parent and item.get('parent'):
+            update_with_inheritance(m_list, item.get('parent'), item['config'])
 
+# Для избавления от комментов делим файл на строки
+raw_js = open(os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').readlines()
+
+# Словарь сопоставлений контролов в дизайнере к контролам в питоне
+mapping_list = json.loads('\n'.join(filter(lambda x: not '//' in x, raw_js)))
+
+# Рекурсивное добавление свойств у классов наследников
+update_with_inheritance(mapping_list)
 
 #===============================================================================
 def test_from_designer():

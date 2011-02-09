@@ -136,13 +136,24 @@ class BaseExtPanel(BaseExtContainer):
     '''
     def __init__(self, *args, **kwargs):
         super(BaseExtPanel, self).__init__(*args, **kwargs)
+        
+        # Заголовок
         self.title = None
+        
         self.header = False
+        
         self.icon_cls = None
+        
         self.top_bar = None
+        
         self.bottom_bar = None
+        
         self.footer_bar = None
+        
+        # @deprecated: Нет в документации extjs 3.3.1
         self.dd_group = None
+        
+        # Будет ли граница
         self.border = True
 
     def t_render_top_bar(self):
@@ -165,7 +176,7 @@ class BaseExtPanel(BaseExtContainer):
             self._put_config_value('header', self.header)
             
         self._put_config_value('iconCls', self.icon_cls)
-        self._put_config_value('ddGroup', self.dd_group)
+        self._put_config_value('ddGroup', self.dd_group) # TODO: см. конструктор
         self._put_config_value('tbar', self.t_render_top_bar, 
                                       self.top_bar)
         self._put_config_value('bbar', self.t_render_bottom_bar, 

@@ -13,10 +13,7 @@ id: '{{ component.client_id }}'
 {% if component.max_width %} ,boxMaxWidth: {{ component.max_width }} {% endif %}
 {% if component.min_width %} ,boxMinWidth: {{ component.min_width }} {% endif %}
 {% if component.anchor %} ,anchor: '{{ component.anchor|safe }}' {% endif %}
-// Атрибуты form layout
-{% if component.label_width  %} ,labelWidth: {{ component.label_width }} {% endif %}
-{% if component.label_align  %} ,labelAlign: '{{ component.label_align }}' {% endif %}
-{% if component.label_pad  %} ,labelPad: {{ component.label_pad }} {% endif %}
+
 // Атрибуты vbox/hbox layout
 {% if component.flex %} ,flex: {{ component.flex }} {% endif %}
 {% if component.cls %} ,cls: '{{ component.cls }}' {% endif %}
