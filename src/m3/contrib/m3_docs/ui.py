@@ -109,15 +109,16 @@ class DocumentTypeEditWindow(ExtEditWindow):
         self.toolbox.drag_drop = True
         self.toolbox.dd_group = 'designerDDGroup'
         section = ExtTreeNode()
+        section.icon_cls = 'designer-icon-fieldset'
         section.set_items(name = u'Секция', type = 'section' )
         self.toolbox.nodes.append(section)
 
-        text_node = ExtTreeNode()
-        text_node.set_items(name = u'Текст', type = 'text' )
+        text_node = ExtTreeNode(icon_cls = 'designer-icon-text')
+        text_node.set_items(name = u'Текстовое поле', type = 'text' )
         self.toolbox.nodes.append(text_node)
 
-        number_node = ExtTreeNode()
-        number_node.set_items(name = u'Число', type = 'number' )
+        number_node = ExtTreeNode(icon_cls = 'designer-icon-number')
+        number_node.set_items(name = u'Числовое поле', type = 'number' )
         self.toolbox.nodes.append(number_node)
         
         return self.toolbox

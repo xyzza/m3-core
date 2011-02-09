@@ -120,12 +120,29 @@ ComponentTreeView = Ext.extend(BaseView, {
         root.removeAll(true);
 
         var recursion = function(parent, model) {
+            //TODO нормально сделать построение нод
+            var iconCls = '';
+            switch (model.attributes.type){
+                case 'document':
+                    iconCls = 'designer-icon-page';
+                break;
+                case 'section':
+                    iconCls = 'designer-icon-fieldset';
+                break;
+                case 'text':
+                    iconCls = 'designer-icon-text';
+                break;
+                case 'number':
+                    iconCls = 'designer-icon-number';
+                break;
+            }
             var newNode = new Ext.tree.TreeNode({
                 name:model.attributes.name,
                 modelObj:model,
                 expanded:true,
                 allowDrop:model.isContainer(),
-                orderIndex:model.attributes.orderIndex+'' || '0'
+                orderIndex:model.attributes.orderIndex+'' || '0',
+                iconCls: iconCls
             });
             parent.appendChild(newNode);
 
@@ -287,37 +304,22 @@ AppController = Ext.extend(Object, {
    },
    moveTreeNode:function(drop, target, point) {
         var source = drop.attributes.modelObj;
-        var target = target.attributes.modelObj;
-
+        var targetNode = target.attributes.modelObj;
        //Изменение положения ноды это фактически две операции - удаление и аппенд к новому родителю
-       //поэтому прежде чем двигать отключим обновление UI, так иначе получим js ошибки при перерисовке
+       //поэтому прежде чем двигать отключим обновление UI, так как иначе получим js ошибки при перерисовке
        //дерева в неподходящий момент
-       
        this._treeView.suspendModelListening();
        this._designView.suspendModelListening();
-       
-       this._moveModelComponent(source, target, point);
-//
-//       if(point == 'append') {
-//           target.appendChild(source);
-//       }
-//       else if (point == 'above') {
-//           var parent = target.parentNode;
-//           parent.insertBefore(source, target);
-//       }
-//       else if (point == 'below') {
-//           target.parentNode.insertBefore(source, target.nextSibling);
-//       }
 
+       this._moveModelComponent(source, targetNode, point);
+       
        this._treeView.resumeModelListening();
        this._designView.resumeModelListening();
-       this._designView.refresh();
-
+       this.refreshView();
        return false;
    },
    _moveModelComponent:function( source, target, point) {
        if(point == 'append') {
-           debugger;
            target.appendChild(source);
        }
        else if (point == 'above') {
@@ -358,15 +360,14 @@ AppController = Ext.extend(Object, {
 
        Ext.util.CSS.createStyleSheet(
                '.selectedElement {' +
-                    'border: 1px dotted blue;'+
-                    'background-color:#FF89D9;' +
+                    'border: 2px solid #710AF0;'+
                '}','selectedElem');
 
        //selectedElement вешается на все подряд, но панельки составные из хедера, футера etc
        //поэтому перебиваем цвет у body
        Ext.util.CSS.createStyleSheet(
                '.selectedElement * .x-panel-body {' +
-                    'background-color:#FF89D9' +
+                   'border: 2px solid #710AF0;' +
                '}'
                ,'selectedPanelBody');
        
@@ -472,8 +473,12 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
         //Смотрим на события изменения в дереве и обновляем orderIndex.
         //Он нам нужен для хранения на сервере верного
         //порядка расположения компонентов на форме
-        this.on('append', function(tree, self, node, index) { node.attributes.orderIndex = index; } );
-        this.on('move', function(tree, self, oldParent, newParent, index ) { self.attributes.orderIndex = index ;} );
+        this.on('append', function(tree, self, node, index) {
+            node.attributes.orderIndex = index;
+        } );
+        this.on('move', function(tree, self, oldParent, newParent, index ) {
+            self.attributes.orderIndex = index ;
+        });
         this.on('remove', function(tree, parent, node) {
             var next  = node.nextSibling;
             while(next) {

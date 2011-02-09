@@ -20,4 +20,8 @@
 	{% if component.has_children %}
 	,'children': {{ component.t_render_children|safe }}	
 	{% endif %}
+    
+    {% if component.icon_cls %}
+	,'iconCls': '{{ component.icon_cls|safe }}'
+	{% endif %}
 }

@@ -198,6 +198,7 @@ class ExtTreeNode(ExtUIComponent):
         super(ExtTreeNode, self).__init__(*args, **kwargs)
         self.template = 'ext-trees/ext-tree-node.js'
         self.text = None
+        self.icon_cls = None
         self.leaf = False
         self.has_children = False
         #self.node_id = '' # используется client_id
