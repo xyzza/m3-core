@@ -1,17 +1,35 @@
 /**
- * Класс представления. Принцип работы - классы наследники повешены на события обновления модели,
+ * Классы представления. Принцип работы - классы наследники повешены на события обновления модели,
  * когда модель обновляется контроллером, представление перерисовывается без внешнего участия
  * Это MVC епте.
  */
 
 BaseView = Ext.extend(Object, {
+    _modelEventsActive:true,
     constructor: function(model) {
         this._model = model;
-        this._model.on('append', this.refresh.createDelegate(this));
-        this._model.on('insert', this.refresh.createDelegate(this));
-        this._model.on('move', this.refresh.createDelegate(this));
-        this._model.on('remove', this.refresh.createDelegate(this));
+        this._model.on('append', this._beforeRefresh.createDelegate(this));
+        this._model.on('insert', this._beforeRefresh.createDelegate(this));
+        this._model.on('move', this._beforeRefresh.createDelegate(this));
+        this._model.on('remove', this._beforeRefresh.createDelegate(this));
 
+    },
+    /**
+     * После вызова метода ивенты модели не обрабатываюцца
+     */
+    suspendModelListening:function() {
+        this._modelEventsActive = false;
+    },
+    /**
+     * Посе вызова метода ивенты обрабатываюцца
+     */
+    resumeModelListening:function() {
+        this._modelEventsActive = true;
+    },
+    _beforeRefresh:function() {
+        if (this._modelEventsActive) {
+            this.refresh();
+        }
     },
     refresh:function(){
         //оверрайдиццо в дочерних классах
@@ -90,6 +108,12 @@ ComponentTreeView = Ext.extend(BaseView, {
     constructor: function(tree, model) {
         this._tree = tree;
         ComponentTreeView.superclass.constructor.call(this, model);
+
+        new Ext.tree.TreeSorter(this._tree, {
+            folderSort:true,
+            dir:'asc',
+            property:'orderIndex'
+        });
     },
     refresh:function() {
         var root = this._tree.root;
@@ -100,7 +124,8 @@ ComponentTreeView = Ext.extend(BaseView, {
                 name:model.attributes.name,
                 modelObj:model,
                 expanded:true,
-                allowDrop:model.isContainer()
+                allowDrop:model.isContainer(),
+                orderIndex:model.attributes.orderIndex+'' || '0'
             });
             parent.appendChild(newNode);
 
@@ -264,15 +289,44 @@ AppController = Ext.extend(Object, {
         var source = drop.attributes.modelObj;
         var target = target.attributes.modelObj;
 
-       //TODO при таком подходе выкидывается js ошибка, нужно разобраться
-       //да и вообще с сортировкой предстоит разбираться
+       //Изменение положения ноды это фактически две операции - удаление и аппенд к новому родителю
+       //поэтому прежде чем двигать отключим обновление UI, так иначе получим js ошибки при перерисовке
+       //дерева в неподходящий момент
+       
+       this._treeView.suspendModelListening();
+       this._designView.suspendModelListening();
+       
+       this._moveModelComponent(source, target, point);
+//
+//       if(point == 'append') {
+//           target.appendChild(source);
+//       }
+//       else if (point == 'above') {
+//           var parent = target.parentNode;
+//           parent.insertBefore(source, target);
+//       }
+//       else if (point == 'below') {
+//           target.parentNode.insertBefore(source, target.nextSibling);
+//       }
 
-       //TODO рассмотреть другие случаи значения point('above' и 'below')
-       if(point == 'append') {
-           target.appendChild(source);
-           return true;
-       }
+       this._treeView.resumeModelListening();
+       this._designView.resumeModelListening();
+       this._designView.refresh();
+
        return false;
+   },
+   _moveModelComponent:function( source, target, point) {
+       if(point == 'append') {
+           debugger;
+           target.appendChild(source);
+       }
+       else if (point == 'above') {
+           var parent = target.parentNode;
+           parent.insertBefore(source, target);
+       }
+       else if (point == 'below') {
+           target.parentNode.insertBefore(source, target.nextSibling);
+       }
    },
    domNodeDrop:function(target, dd, e, data ) {
        var componentNode = data.node;
@@ -290,7 +344,7 @@ AppController = Ext.extend(Object, {
                    newModelConfig.name = 'Новая секция';
            break;
            case 'text':
-                   newModelConfig.name = 'Новая текстовый редактор';
+                   newModelConfig.name = 'Новый текстовый редактор';
            break;
            case 'number':
                    newModelConfig.name = 'Новый редактор чисел';
@@ -394,6 +448,47 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
             return this.root;
         }
         return this.root.findChild('id',id, true);
+    },
+    /**
+     * Сортирует коллекции items дерева в соответствии в orderIndex атрибутами
+     */
+    initOrderIndexes:function() {
+        var sortFn = function(node1, node2) {
+            if (node1.attributes.orderIndex > node2.attributes.orderIndex ) {
+                return 1;
+            }
+            else if (node1.attributes.orderIndex == node2.attributes.orderIndex) {
+                return 0;
+            }
+            else if (node1.attributes.orderIndex < node2.attributes.orderIndex) {
+                return -1;
+            }
+        };
+
+        this.root.cascade(function(node){
+            node.sort( sortFn );
+        } );
+
+        //Смотрим на события изменения в дереве и обновляем orderIndex.
+        //Он нам нужен для хранения на сервере верного
+        //порядка расположения компонентов на форме
+        this.on('append', function(tree, self, node, index) { node.attributes.orderIndex = index; } );
+        this.on('move', function(tree, self, oldParent, newParent, index ) { self.attributes.orderIndex = index ;} );
+        this.on('remove', function(tree, parent, node) {
+            var next  = node.nextSibling;
+            while(next) {
+                next.attributes.orderIndex--;
+                next = next.nextSibling;
+            }
+        });
+        this.on('insert', function(tree, parent, node, refNode) {
+            node.attributes.orderIndex = refNode.attributes.orderIndex;
+            var next = node.nextSibling;
+            while (next) {
+                next.attributes.orderIndex++;
+                next = next.nextSibling;
+            }
+        });
     }
 });
 
@@ -428,7 +523,9 @@ DocumentModel.initFromJson = function(jsonObj) {
         }
     }
 
-    return new DocumentModel(root);
+    var result = new DocumentModel(root);
+    result.initOrderIndexes();
+    return result;
 };
 
 
@@ -443,38 +540,21 @@ var fake = {
         {
             type:'section',
             name:'Тупо секция',
-            isContainer:true,
+            orderIndex:0,
             items:[
                 {
                     type:'text',
-                    name:'Это строка',
-                    isContainer:false
+                    orderIndex:1,
+                    name:'Это строка'
                 },
                 {
                     type:'number',
-                    name:'Это число',
-                    isContainer:false
+                    orderIndex:0,
+                    name:'Это число'
                 }]
         }
     ]
 };
-
-var fake2 = {
-    type:'document',
-    name:'Документ',
-    items:[
-                {
-                    type:'text',
-                    name:'Это строка',
-                    isContainer:false
-                },
-                {
-                    type:'number',
-                    name:'Это число',
-                    isContainer:false
-                }]
-};
-
 
 var previewPanel = Ext.getCmp('{{ component.preview_panel.client_id }}');
 var componentTree = Ext.getCmp('{{ component.tree.client_id }}');
@@ -500,6 +580,7 @@ function treeNodeDeleteClick(item) {
 }
 
 function treeBeforeNodeDrop(dropEvent){
+    //TODO перенести обработку ивента внутрь контроллера
     //Здесь я подозреваю нужно проверять на валидность перемещения
     if (dropEvent.target.isRoot) {
         //рут не отображается, и в него нельзя перетаскивать
