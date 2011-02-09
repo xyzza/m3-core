@@ -4,6 +4,7 @@ import ast
 import os
 import json
 import codegen
+import shutil # Для копирования файлов
 
 # Для тестов обернуто в try
 try:
@@ -24,6 +25,12 @@ class Parser(object):
     # Имя функция, которая будет сгенерирована
     GENERATED_FUNC = 'initialize'
     
+    # Название папки для бакапа
+    BACKUP_DIR_NAME = '.form-buckup'
+    
+    # Сколько бакупных файлов хранить
+    BACKUP_FILES_MAXIMUM = 10
+    
     def __init__(self, path, class_name):
         '''
         @param path: Путь до py файла
@@ -36,6 +43,9 @@ class Parser(object):
         # Пример:
         # {'self':[{'simple_panel':[...]},{'simple_form':[...]}]}
         self.dict_instances = {}
+        
+        # Старый исходный код модуля
+        self.old_source_code = ''
     
     def to_designer(self):
         '''
@@ -63,7 +73,8 @@ class Parser(object):
         nodes.extend( self._gen_nested_components() )        
 
         # Преобразование модуля в AST дерево
-        module_node = ast.parse(open(self.path).read())
+        self.old_source_code = open(self.path).read()
+        module_node = ast.parse(self.old_source_code)
         
         # Нахождение нужной функции GENERATED_FUNC
         func_node = self._get_func_initialize(module_node, self.class_name)     
@@ -75,15 +86,51 @@ class Parser(object):
             
         # Замена старого содержимого на новое сгенерированное 
         func_node.body = nodes
-        
-        
+                
         print codegen.to_source(module_node)
 
-        # Бакап файла на всякий пожарный случай
+        # Бакап файла на всякий пожарный случай и cохранение нового файла
+        source_code = codegen.to_source(module_node)
+        self._write_to_file(source_code)
         
-        # Сохранение нового файла
+    def _write_to_file(self, source_code):
+        '''
+        Запись в файл сгенерированного кода
+        '''
+        # 1. Создание директории, если нет
+        # 2. Рекурсивное переименование всех имеющихся бакупных файлов в
+        # файлы вида: .old.1, old.2, old.3
+        # 3. Сохранение старого исходного кода с расширением old
+        # 4. Перезапись файла новым содержимым
+        
+        dir = os.path.dirname(self.path)
+        dir_backup = os.path.join(dir, Parser.BACKUP_DIR_NAME)
+        if not os.path.isdir(dir_backup):
+            os.mkdir(dir_backup)
+        else:
+            # Могут быть бакупные файлы, обход по времени последнего изменения
+            for file_name in sorted(os.listdir(dir_backup), 
+                                key=lambda f: os.stat(  os.path.join(dir_backup, f) ).st_mtime):
+                file_path = os.path.join(dir_backup, file_name)
+                                                 
+                i = file_path.split('.')[-1]
+                try:
+                    int(i)
+                except ValueError:
+                    os.rename(file_path, '%s.%d' % (file_path, 0) )
+                else:
+                    if int(i)+1 > Parser.BACKUP_FILES_MAXIMUM:
+                        os.remove(file_path) 
+                    else:                       
+                        file_name_parts = file_path.split('.')
+                        without_end = file_name_parts[:-1]
+                        os.rename(file_path, '%s.%d' % ('.'.join(without_end), int(i)+1) )
+                    
+        new_path = os.path.join(dir_backup, os.path.basename(self.path))        
+        shutil.copyfile(self.path, new_path + '.old')
+                    
+        open(self.path, 'w').write(source_code)
 
-        
     def _gen_nested_components(self, d=None, nodes=None):
         '''
         Генерирует список узлов AST вложенных компонент вида:
