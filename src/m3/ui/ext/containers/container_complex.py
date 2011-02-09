@@ -10,18 +10,35 @@ from containers import ExtContainer
 from m3.ui.ext.base import ExtUIComponent
 
 class ExtContainerTable(BaseExtContainer):
+    '''
+    Контейнерный компонент. Имеет в себе табличную настройку (строки и колонки) 
+    и позволяет в ячейках указывать произвольные контролы, которые будут помещены
+    в ExtContainer с layput=form
+    '''
     _DEFAULT_HEIGHT = 36
     
     def __init__(self, columns = 0, rows = 0, *args, **kwargs):
+        '''
+        @param columns: Количество колонок
+        @param rows: Количество строк
+        '''
         super(ExtContainerTable, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-container.js'
+        self.template = 'ext-containers/ext-container.js' # FIXME: переписать на питоновский рендеринг
+        
+        # Заголовок
         self.title = None
+        
         self.__columns_count = 0
         self.__rows_count = 0
         self.__table = []
         self.__rows_height = {}
+        
+        # Количество колонок
         self.columns_count = columns
+        
+        # Количество строк
         self.rows_count = rows
+        
         self.init_component(*args, **kwargs)
         
     def _init_properties(self):
@@ -116,6 +133,11 @@ class ExtContainerTable(BaseExtContainer):
         self.__table = [list(range(self.__columns_count)) for col in range(self.__rows_count)]
         
     def set_item(self, row, col, cmp, colspan=1, **kwargs):
+        '''
+        Устанавливает контрол *cmp* в ячейку с колонкой *col* и строкой *row*
+        @param *colspan*: сколько строк будет занимать компонент
+        @param **kwargs: свойства контейнера
+        '''
         assert isinstance(cmp, ExtUIComponent)
         assert isinstance(colspan, int)
         cont = ExtContainer(layout = 'form', flex=colspan, style=dict(padding="0px"))
@@ -130,20 +152,36 @@ class ExtContainerTable(BaseExtContainer):
             self.__table[row][col+1:col+colspan] = [None,]*(colspan-1)
         
     def set_row_height(self, row, height):
+        '''
+        Устанавливает ширину и высоту ячейки
+        @param row: Индекс ячейки
+        @param height: Высота
+        '''
         assert isinstance(height, int), 'Height must be INT'
         assert isinstance(row, int), 'Row num must be INT'
         assert 0 <= row <= self.rows_count, 'Row num %d must be in range 0 to %d' % (row, self.rows_count)
         self.__rows_height[row] = height
         
     def set_default_row_height(self, row):
+        '''
+        Выставляет умолчательные (_DEFAULT_HEIGHT) параметры ширины и высоты ячейки
+        @param row: Индекс Ячейки 
+        '''
         assert isinstance(row, int), 'Row num must be INT'
         assert 0 <= row <= self.rows_count, 'Row num must be in range 0 to %d' % self.rows_count
         self.__rows_height[row] = ExtContainerTable._DEFAULT_HEIGHT
         
     def set_rows_height(self, height):
+        '''
+        Устанавливает у всех строк высоту
+        @param height: Высота
+        '''
         assert isinstance(height, int), 'Height must be INT'
         for row in range(self.rows_count): 
             self.__rows_height[row] = height
             
     def set_default_rows_height(self):
+        '''
+        Устанавливает умолчательные параметры у всех ячеек
+        '''
         self.set_rows_height(ExtContainerTable._DEFAULT_HEIGHT)

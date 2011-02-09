@@ -35,9 +35,15 @@ class ExtListView(BaseExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtListView, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-list-view.js'
+        self.template = 'ext-containers/ext-list-view.js' #TODO: Отрефакторить под внутриклассовый рендеринг
+        
+        # Множественный выбор
         self.multi_select = False
+        
+        # Если набор записей будет пуст, то содержимое этого поля будет отображаться 
+        # на этом месте
         self.empty_text = None
+
         self.__store = None
         self._items = []
         self.init_component(*args, **kwargs)
@@ -53,15 +59,31 @@ class ExtListView(BaseExtPanel):
         return self.__store.render([column.data_index for column in self.columns])
     
     def add_column(self, **kwargs):
+        '''
+        Добавляет дефолтную колонку
+        @param kwargs: Параметры колонки
+        '''
         self.columns.append(ExtGridColumn(**kwargs))
     
     def add_bool_column(self, **kwargs):
+        '''
+        Добавляет булевую колонку
+        @param kwargs: Параметры колонки
+        '''
         self.columns.append(ExtGridBooleanColumn(**kwargs))
         
     def add_number_column(self, **kwargs):
+        '''
+        Добавляет числовую колонку 
+        @param kwargs: Параметры колонки
+        '''
         self.columns.append(ExtGridNumberColumn(**kwargs))
         
     def add_date_column(self, **kwargs):
+        '''
+        Добавляет колонку даты
+        @param kwargs: Параметры колонки
+        '''
         self.columns.append(ExtGridDateColumn(**kwargs))
         
     @property
