@@ -275,15 +275,15 @@ def check_snils(base_snils):
     '''
     assert isinstance(base_snils, basestring), 'snils must be string'
     list_of_snils_digits = base_snils[:-3].split('-')
-    COEF = base_snils[-2:]
+    COEF = int(base_snils[-2:])
     snils_str =  ''.join(list_of_snils_digits)
     snils = checksum(snils_str, range(len(snils_str),0, -1))
     if snils < 100:
         check_number = snils
-    elif snils == 100 or 101:
-        check_number = 00
+    elif snils == 100 or snils == 101:
+        check_number = 0
     elif snils > 101:
         check_number = snils % 101
-    else:
-        False
-    return COEF == str(check_number)
+        if check_number == 100:
+            check_number = 0
+    return COEF == check_number
