@@ -58,6 +58,12 @@ DesignView = Ext.extend(BaseView, {
         var recursion = function(container, model) {
             var newComponent = this._createComponent( model );
             if (newComponent){
+                //Тут используется недокументированая возможность экста
+                //правильно было бы добавлять компоненты используя container.add(component)
+                //или же с помощью ленивой инициализции и xtype. Но при использовании
+                //container.add() - при отображении списков комбоксов вылезала ошибка. До конца в ее природе
+                //я не разобрался, но при добавляении в коллекцию итемсов все ок работает
+                //так же частью хака является явное создание коллекции итемс в конфиге контейнеров в designer-ui.js
                 container.items.add( newComponent );
             }
             if (model.isContainer() && model.childNodes && model.childNodes.length > 0) {

@@ -76,28 +76,29 @@ ModelUIPresentaitionBuilder = function() {
             return new Ext.form.TimeField(cfg);    
         },
         comboBox:function(model, cfg) {
-            var store = new Ext.data.ArrayStore({
-                autoDestroy:true,
-                idIndex:0,
-                fields:['name'],
-                data:['foo','bar']
-            });
-            var result = new Ext.form.ComboBox({
-                store:store,
-                displayField:'name',
-                mode:'local',
-                triggerAction:'all',
-                editable:false,
-                selectOnFocus:true,
-                fieldLabel:'fukken test',
-                lazyInit:false,
-                value:'foo'
-            });
-            return result;
-
-//            return new Ext.form.ComboBox(
-//                    cfg
-//                    );
+            var store = undefined;
+            //попробуем найти стор
+            for (var i = 0; i < model.childNodes.length; i++) {
+                if (model.childNodes[i].attributes.type == 'arrayStore') {
+                    store = new Ext.data.ArrayStore(
+                                Ext.apply({},model.childNodes[i].attributes.properties)
+                            );
+                }
+            }
+            //или создадим пустой
+            if (!store) {
+                store = new Ext.data.Store({
+                    autoDestroy:true
+                });
+            }
+            return new Ext.form.ComboBox(
+                    Ext.apply( cfg , {
+                        store:store,
+                        mode:'local'
+                    }));
+        },
+        triggerField:function(model, cfg) {
+            return new Ext.form.TriggerField(cfg);
         },
         tabPanel:function(model, cfg) {
             return new Ext.TabPanel(

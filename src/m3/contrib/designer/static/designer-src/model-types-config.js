@@ -223,6 +223,9 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:false
                 }
             },
+            childTypesRestrictions:{
+                disallowed:['arrayStore','gridColumn']
+            },
             toolboxData: {
                 category:'Containers',
                 text:'Form panel'
@@ -429,44 +432,83 @@ Ext.apply(ModelTypeLibrary,{
             treeIconCls:'designer-htmleditor'
         },
         comboBox: {
-            //FIXME комбобоксеке не работают
+            isContainer:true,
+            parent:'triggerField',
             properties: {
-                fieldLabel:{
-                    defaultValue:''
-                },
                 id:{
-                    defaultValue:'New text field',
+                    defaultValue:'New combobox',
                     isInitProperty:true
-                },
-                anchor:{
-                    defaultValue:'auto'
                 },
                 triggerAction:{
                     defaultValue:'all',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    propertyType:'enum'
                 },
                 valueField:{
-                    defaultValue:'myId',
+                    defaultValue:'value',
                     isInitProperty:true
                 },
                 displayField:{
                     defaultValue:'displayText',
                     isInitProperty:true
                 },
-                store:{
-                    defaultValue: new Ext.data.ArrayStore({
-                                id: 0,
-                                fields: [
-                                    'myId',
-                                    'displayText'
-                                ],
-                                data: [[1, 'item1'], [2, 'item2']]
-                            }),
+                mode: {
+                    defaultValue:'local',
+                    propertyType:'enum',
                     isInitProperty:true
+                },
+                hiddenName: {
+                    defaultValue:'undefined'
+                },
+                typeAhead: {
+                    defaultValue:false
+                },
+                queryParam: {
+                    defaultValue:'query'
+                },
+                pageSize: {
+                    defaultValue:0
+                },
+                maxHeight: {
+                    defaultValue: 300
+                },
+                minChars: {
+                    defaultValue:0
+                },
+                forceSelection: {
+                    defaultValue:false
+                },
+                valueNotFoundText:{
+                    defaultValue:'undefined'
                 }
+            },
+            childTypesRestrictions:{
+                allowed:['arrayStore'],
+                single:['arrayStore']
             },
             toolboxData:{
                 text:'Combo box',
+                category:'Fields'
+            },
+            treeIconCls:'designer-icon-combo'
+        },
+        triggerField: {
+            parent:'textField',
+            properties: {
+                id: {
+                    defaultValue:'New trigger field',
+                    isInitProperty:true
+                },
+                editable: {
+                    defaultValue:true,
+                    isInitProperty:true
+                },
+                hideTrigger : {
+                    defaultValue:false
+                }
+            },
+            toolboxData:{
+                text:'Trigger field',
                 category:'Fields'
             },
             treeIconCls:'designer-icon-combo'
