@@ -48,6 +48,9 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:'undefined'
                 }
             },
+            childTypesRestrictions:{
+                disallowed:['arrayStore','gridColumn']
+            },
             toolboxData:{
                 text:'Panel',
                 category:'Containers'
@@ -91,6 +94,9 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:'undefined'
                 }
             },
+            childTypesRestrictions:{
+                disallowed:['arrayStore','gridColumn']
+            },
             toolboxData:{
                 text:'Field set',
                 category:'Containers'
@@ -112,6 +118,9 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:0,
                     isInitProperty:true
                 }
+            },
+            childTypesRestrictions:{
+                allowed:['panel', 'gridPanel']
             },
             toolboxData:{
                 text:'Tab panel',
@@ -196,6 +205,10 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:''
                 }
             },
+            childTypesRestrictions:{
+                allowed:['gridColumn','arrayStore'],
+                single:['arrayStore']
+            },
             treeIconCls:'designer-grid-panel',
             toolboxData:{
                 text:'Grid panel',
@@ -247,6 +260,9 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:'New window',
                     isInitProperty:true
                 }
+            },
+            childTypesRestrictions:{
+                disallowed:['arrayStore','gridColumn']
             },
             isContainer:true,
             treeIconCls:'designer-icon-page'

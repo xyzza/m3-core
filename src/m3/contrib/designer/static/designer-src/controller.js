@@ -72,6 +72,7 @@ AppController = Ext.extend(Object, {
                // исполнения onNodeDrop. И, увы, дроп зона не наследует Observable
                // Да, чуваки, ООП в жабаскрипте это вам не хрен собачий
                processDropResults : this.domNodeDrop.createDelegate(this),
+               validateDrop: this.validateDomDrop.createDelegate(this),
 
                getTargetFromEvent: function(e) {
                    //сюда попадают мышиные DOM события, будем пытаться найти ближайший допустимый
@@ -89,7 +90,8 @@ AppController = Ext.extend(Object, {
                },
                onNodeOver:function(target, dd, e, data) {
                    //здесь штука чтобы показать значок 'Можно дропать' на экране
-                   return Ext.dd.DropZone.prototype.dropAllowed;
+                   return this.validateDrop(target, dd, e, data) ? Ext.dd.DropZone.prototype.dropAllowed:
+                           Ext.dd.DropZone.prototype.dropNotAllowed;
                },
                onNodeDrop:function(target, dd, e, data) {
                    this.processDropResults(target, dd, e, data);
@@ -128,7 +130,14 @@ AppController = Ext.extend(Object, {
     */
    removeHighlight:function() {
        if (!Ext.isEmpty(this._lastHighlightedId)) {
-           Ext.fly(this._lastHighlightedId).removeClass('selectedElement');
+           var flyEl = Ext.fly(this._lastHighlightedId);
+           if (flyEl) {
+               flyEl.removeClass('selectedElement');
+           }
+           else {
+               //ситуация когда подсветка была на элемента, который удалили
+               this._lastHighlightedId = undefined;
+           }
        }  
    },
     /*
@@ -190,10 +199,19 @@ AppController = Ext.extend(Object, {
        var componentNode = data.node;
        var model = this._model.findModelById(target.id);
 
+       if (!model.checkRestrictions(componentNode.attributes.type)) {
+           return;
+       }
+
        var newModelNodeConfig = {};
        newModelNodeConfig.properties = ModelTypeLibrary.getTypeInitProperties(componentNode.attributes.type);
        newModelNodeConfig.type = componentNode.attributes.type;
        model.appendChild( new ComponentModel(newModelNodeConfig) );
+   },
+   validateDomDrop:function(target, dd, e, data) {
+       var parent = this._model.findModelById(target.id);
+       var child = data.node.attributes.type;
+       return parent.checkRestrictions(child);
    },
    /*
    * Возвращает объект для отправки на сервер

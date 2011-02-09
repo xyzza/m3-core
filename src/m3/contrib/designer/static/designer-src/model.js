@@ -15,6 +15,49 @@ ComponentModel = Ext.extend(Ext.data.Node, {
     },
     isContainer: function() {
         return ModelTypeLibrary.isTypeContainer(this.attributes.type);
+    },
+    checkRestrictions: function(childType) {
+        var restrictions = ModelTypeLibrary.getTypeRestrictions(this.attributes.type);
+        //ограничения не заданы. Считаем что все можно. Те разруливание происходит только по признаку
+        //isContainer
+        if (!restrictions) {
+            return true;
+        }
+
+        //проверка на допустимость, если ограничения такого типа не заданы - считаем что все можно
+        var allowedCheck = !(restrictions.allowed);
+        if (!allowedCheck) {
+            for (var i = 0;i< restrictions.allowed.length;i++) {
+                allowedCheck = childType == restrictions.allowed[i];
+                if (allowedCheck) {
+                    break;
+                }
+            }
+        }
+
+        //проверка на недопустимость
+        var disallowedCheck = !(restrictions.disallowed);
+        if (!Ext.isEmpty(restrictions.disallowed)) {
+            for (var i = 0;i< restrictions.disallowed.length;i++) {
+                disallowedCheck = childType != restrictions.disallowed[i];
+                if (!disallowedCheck) {
+                    break;
+                }
+            }
+        }
+
+        //проверка на уникальность - в гриде один стор может быть например
+        var singleCheck = true;
+        if (!Ext.isEmpty(restrictions.single) && (restrictions.single.indexOf(childType) != -1)) {
+            for (var i=0; i < this.childNodes.length;i++) {
+                if (this.childNodes[i].attributes.type == childType) {
+                    singleCheck = false;
+                    break;
+                }
+            }
+        }
+
+        return allowedCheck && disallowedCheck && singleCheck;
     }
 });
 

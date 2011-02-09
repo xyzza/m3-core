@@ -6,10 +6,16 @@
  * Класс хранит в себе информацию о возможных типах компонентов, доступных им свойст, отображение в тулбоксе
  */
 
-ModelTypeLibrary = Ext.apply(Object, {
+ModelTypeLibrary = Ext.apply({}, {
     enumConfig: {
         layout:['auto','fit','form','hbox','vbox','border','absolute'],
         labelAlign:['left','top']
+    },
+    /*
+    * Возаращает ограничения для переданого типа
+    */
+    getTypeRestrictions:function(type) {
+        return this.typesConfig[type]['childTypesRestrictions'];
     },
     /**
      * Возвращает объект со свойствами заполнеными дефолтными значениями по типу модели
