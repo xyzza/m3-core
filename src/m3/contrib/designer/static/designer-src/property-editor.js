@@ -100,7 +100,7 @@ PropertyWindow = Ext.extend(Ext.Window, {
         Ext.apply(this, {
             height:400,
             width:400,
-            title:'Редактирование компонента',
+            title:'Редактирование компонента: ' + this.model.attributes.properties.id,
             layout:'fit',
             items:[this._grid],
             buttons:[
