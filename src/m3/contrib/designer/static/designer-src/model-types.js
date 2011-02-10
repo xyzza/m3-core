@@ -13,7 +13,8 @@ ModelTypeLibrary = Ext.apply({}, {
         labelAlign:['left','top'],
         region:['north','south','center','east','west'],
         mode:['local','remote'],
-        triggerAction:['query','all']
+        triggerAction:['query','all'],
+        parentDockType:['tbar','bbar','fbar','(none)']
     },
     /*
     * Возвращает массив из объектов со свойствами типа и его типов родителей. Внутренний метод предназначеный

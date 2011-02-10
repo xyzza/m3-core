@@ -160,8 +160,11 @@ ModelUIPresentaitionBuilder = function() {
                     columns:columns
                 })
             }));
+        },
+        toolbar:function(model,cfg) {
+            return new Ext.Toolbar(cfg);    
         }
-    }
+    };
 
     return {
         /**

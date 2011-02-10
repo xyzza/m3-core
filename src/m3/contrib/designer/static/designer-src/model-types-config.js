@@ -136,6 +136,10 @@ Ext.apply(ModelTypeLibrary,{
                 },
                 padding:{
                     defaultValue:'undefined'
+                },
+                header: {
+                    defaultValue:false,
+                    isInitProperty:true
                 }
             },
             childTypesRestrictions:{
@@ -549,6 +553,28 @@ Ext.apply(ModelTypeLibrary,{
                 category:'Fields'
             }
         },
+        /*
+        * Тулбары
+        */
+        toolbar: {
+            parent:'container',
+            properties: {
+                id: {
+                    defaultValue: 'new_toolbar',
+                    isInitProperty:true
+                },
+                parentDockType: {
+                    defaultValue:'tbar',
+                    isInitProperty:true,
+                    propertyType:'enum'
+                }
+            },
+            toolboxData:{
+                category:'Toolbar',
+                text:'Toolbar'
+            }
+        },
+
         gridPanel:{
             parent:'panel',
             isContainer: true,
