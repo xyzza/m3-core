@@ -77,6 +77,20 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
         }
         return this.root.findChild('id',id, true);
     },
+    /*
+    * Поиск кол-ва моделей определенного типа
+    */
+    countModelsByType:function(type) {
+        var counter = 0;
+
+        this.root.cascade( function(node) {
+            if (this.attributes.type == type) {
+                counter++;
+            }
+        } );
+
+        return counter;
+    },
     /**
      * Сортирует коллекции items дерева в соответствии в orderIndex атрибутами
      */

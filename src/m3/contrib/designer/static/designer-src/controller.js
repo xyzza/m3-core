@@ -205,6 +205,8 @@ AppController = Ext.extend(Object, {
 
        var newModelNodeConfig = {};
        newModelNodeConfig.properties = ModelTypeLibrary.getTypeInitProperties(componentNode.attributes.type);
+       var nameIndex = this._model.countModelsByType(componentNode.attributes.type);
+       newModelNodeConfig.properties.id = newModelNodeConfig.properties.id + '_' + (nameIndex+1) ;
        newModelNodeConfig.type = componentNode.attributes.type;
        model.appendChild( new ComponentModel(newModelNodeConfig) );
    },

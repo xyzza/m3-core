@@ -91,7 +91,7 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:''
                 },
                 id: {
-                    defaultValue:'new_container',
+                    defaultValue:'container',
                     isInitProperty:true
                 }
             },
@@ -113,7 +113,7 @@ Ext.apply(ModelTypeLibrary,{
                     isInitProperty:true
                 },
                 id:{
-                    defaultValue:'new_panel',
+                    defaultValue:'panel',
                     isInitProperty:true
                 },
                 collapsible: {
@@ -165,7 +165,7 @@ Ext.apply(ModelTypeLibrary,{
                     isInitProperty:true
                 },
                 id:{
-                    defaultValue:'new_fieldset',
+                    defaultValue:'fieldset',
                     isInitProperty:true
                 }
             },
@@ -183,7 +183,7 @@ Ext.apply(ModelTypeLibrary,{
             isContainer:true,
             properties:{
                 id:{
-                    defaultValue:'new_tab_panel',
+                    defaultValue:'tab_panel',
                     isInitProperty:true
                 },
                 activeTab:{
@@ -209,7 +209,7 @@ Ext.apply(ModelTypeLibrary,{
             isContainer:true,
             properties : {
                 id : {
-                    defaultValue:'new_form_panel',
+                    defaultValue:'form_panel',
                     isInitProperty:true
                 },
                 layout: {
@@ -270,7 +270,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'textField',
             properties:{
                 id:{
-                    defaultValue:'new_text_area',
+                    defaultValue:'text_area',
                     isInitProperty:true
                 }
             },
@@ -284,7 +284,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id: {
-                    defaultValue:'new_check_box',
+                    defaultValue:'check_box',
                     isInitProperty:true
                 },
                 checked: {
@@ -304,7 +304,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id:{
-                    defaultValue:'new_date_field',
+                    defaultValue:'date_field',
                     isInitProperty:true
                 },
                 startDay : {
@@ -321,7 +321,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id:{
-                    defaultValue:'new_time_field',
+                    defaultValue:'time_field',
                     isInitProperty:true
                 },
                 format : {
@@ -341,7 +341,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties:{
                 id:{
-                    defaultValue:'new_string_field',
+                    defaultValue:'string_field',
                     isInitProperty:true
                 },
                  allowBlank :{
@@ -382,7 +382,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'textField',
             properties:{
                 id:{
-                    defaultValue:'new_number_field',
+                    defaultValue:'number_field',
                     isInitProperty:true
                 },
                 decimalSeparator:{
@@ -424,7 +424,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties : {
                 id: {
-                    defaultValue:'new_html_editor',
+                    defaultValue:'html_editor',
                     isInitProperty:true
                 }
 
@@ -440,7 +440,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'triggerField',
             properties: {
                 id:{
-                    defaultValue:'new_combobox',
+                    defaultValue:'combobox',
                     isInitProperty:true
                 },
                 triggerAction:{
@@ -521,7 +521,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id : {
-                    defaultValue:'new_display_field',
+                    defaultValue:'display_field',
                     isInitProperty:true
                 },
                 value : {
@@ -538,7 +538,7 @@ Ext.apply(ModelTypeLibrary,{
         hiddenField: {
             properties: {
                 id : {
-                    defaultValue:'new_hidden_field',
+                    defaultValue:'hidden_field',
                     isInitProperty:true
                 },
                 name : {
@@ -560,7 +560,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'container',
             properties: {
                 id: {
-                    defaultValue: 'new_toolbar',
+                    defaultValue: 'toolbar',
                     isInitProperty:true
                 },
                 parentDockType: {
@@ -614,7 +614,7 @@ Ext.apply(ModelTypeLibrary,{
                     isInitProperty:true
                 },
                 header:{
-                    defaultValue:'new_column',
+                    defaultValue:'column',
                     isInitProperty:true
                 },
                 dataIndex:{
@@ -658,7 +658,7 @@ Ext.apply(ModelTypeLibrary,{
         arrayStore:{
             properties : {
                 id: {
-                    defaultValue:'new_array_store',
+                    defaultValue:'array_store',
                     isInitProperty:true
                 },
                 storeId: {
