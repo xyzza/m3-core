@@ -14,9 +14,12 @@ def workspace(request):
     '''
     Отдается основной шаблон. Точка входа.
     '''
+    path_project = os.getenv('PROJECT_FOR_DESIGNER', None)
+    base_name = os.path.basename(path_project)
     return render_to_response('master.html', {
         'data_url' : '/designer/fake',
-        'save_url' : '/designer/save'
+        'save_url' : '/designer/save',
+        'project_name': base_name
     })
 
 def get_project_files(request):
@@ -29,7 +32,7 @@ def get_project_files(request):
         return HttpResponse(content_type='application/json', 
                         content = json.dumps(ui_classess))
     
-    path_project = os.getenv('PROJECT_FOR_DESIGNER', None)        
+    path_project = os.getenv('PROJECT_FOR_DESIGNER', None)
     files = get_files(os.path.abspath(path_project))
     return HttpResponse(content_type='application/json', 
                         content = json.dumps(files))

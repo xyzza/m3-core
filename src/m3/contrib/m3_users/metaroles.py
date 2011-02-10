@@ -17,6 +17,7 @@ from django.utils.importlib import import_module
 
 from m3.helpers import logger
 from m3.ui.actions.packs import BaseDictionaryActions
+from m3.helpers.datastructures import TypedList
 
 
 class UserMetarole(object):
@@ -27,8 +28,8 @@ class UserMetarole(object):
         # код метароли пользователя
         self.code = metarole_code
         self.name = metarole_name
-        self.included_metaroles = []
-        
+        self.included_metaroles = TypedList(type=UserMetarole)
+    
     def get_owner_metaroles(self):
         '''
         Возвращает список метаролей в которые входит наша метароль. Проще говоря список родителей,
@@ -39,6 +40,10 @@ class UserMetarole(object):
             if (role != self) and (self in role.included_metaroles):
                 result.append(role)
         return result
+    
+    def __str__(self):
+        """ Более наглядное представление для отладки """
+        return u'%s: %s at %s' % (self.code, self.name, id(self)) 
         
 class MetaroleManager(object):
     '''

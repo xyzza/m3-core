@@ -48,9 +48,12 @@
 	},
 	"config": {
 		"layout": "layout"
-		,"layoutConfig": "layout_config"	
+		,"layoutConfig": "layout_config"
+		,"labelWidth":"label_width"
+		,"labelAlign":"label_align"
+		,"labelPad":"label_pad"
 	},
-	"parent": "component"		
+	"parent": "component"
 },
 
 // Тулбар

@@ -65,13 +65,13 @@
 					        region: 'west'
 					        ,collapsible: true
 					        //,collapseMode:'mini'
-					        ,title: 'Project Viewer'
+					        ,title: 'Структура проекта'
 					        ,split: true
 					        ,width: 300
 					        ,maxWidth: 300
 					        ,minWidth: 200
 					        ,layout: 'fit'
-					        ,items: [tree]
+					        ,items: [ createTreeView('{{ project_name }}') ]
 					    }, 
 					    tabPanel]
 					});		                
