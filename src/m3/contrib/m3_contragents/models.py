@@ -11,8 +11,9 @@ import mptt
 from m3.db import (BaseObjectModel,
                    BaseEnumerate)
 
-
-
+#===============================================================================
+# Собственно, сами контрагенты
+#===============================================================================
 class ContragentTypeEnum(BaseEnumerate):
     '''
     Перечисление типов контрагентов
@@ -63,6 +64,7 @@ class Contragent(BaseObjectModel):
     
     u_inn = models.CharField(max_length=10, null=True, blank=True)
     u_kpp = models.CharField(max_length=10, null=True, blank=True)
+    u_filial = models.CharField(max_length=20, null=True, blank=True)
     
     u_okved = models.CharField(max_length=10, null=True, blank=True) # Общероссийский классификатор видов экономической деятельности
     u_ogrn  = models.CharField(max_length=13, null=True, blank=True) # Основной государственный регистрационный номер
@@ -84,3 +86,62 @@ class Contragent(BaseObjectModel):
     
     class Meta:
         db_table = 'm3_contragents'
+        
+#===============================================================================
+# Контакты контрагента
+#===============================================================================
+class ContragentContact(BaseObjectModel):
+    '''
+    Модель контактов контрагента, которые используются при оформлении
+    '''
+    contragent = models.ForeignKey(Contragent)
+    # признак первичного контакта
+    primary = models.BooleanField(default=False)
+    
+    # название контакта (например, ФИО лица)
+    name = models.CharField(max_length=300, null=True, blank=True)
+    # комментарий к контакту (например, здесь можно указать должность или любую заметку)
+    comment = models.TextField(null=True, blank=True)
+    
+    # как контакт будет представлен в почтовой рассылке
+    send_to = models.CharField(max_length=300, null=True, blank=True)
+    
+    phone = models.CharField(max_length=100, null=True, blank=True)
+    fax = models.CharField(max_length=100, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'm3_contragent_contacts'
+        
+        
+#===============================================================================
+# Адреса контрагента
+#===============================================================================
+class AddressType(BaseEnumerate):
+    '''
+    Перечисление типов адресов
+    '''
+    FACT = 1 # Фактического проживания
+    UR   = 2 # Юридический адрес
+    POST = 4 # Почтовый адрес
+    TEMP = 8 # Временный адрес
+    
+    values = {FACT: u'Фактический адрес',
+              UR : u'Юридический адрес',
+              POST: u'Почтовый адрес',
+              TEMP: u'Временный адрес'}
+    
+
+class ContragentAddress(BaseObjectModel):
+    '''
+    Модель хранения адресной информации контрагента 
+    '''
+    contragent = models.ForeignKey(Contragent)
+    comment = models.TextField(null=True, blank=True)
+    
+    geo = models.CharField(max_length=13, null=True, blank=True)
+    street = models.CharField(max_length=17, null=True, blank=True)
+    address = models.CharField(max_length=300, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'm3_contragent_addresses'
