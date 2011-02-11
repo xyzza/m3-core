@@ -2,7 +2,7 @@
 
 from m3.contrib.kladr import models
 
-def geo_rows_query(parent = None, filter):
+def geo_rows_query(parent = None, filter = None):
     '''
     Возвращает QuerySet для отбора записей из подсправочника KladrGeo
     '''

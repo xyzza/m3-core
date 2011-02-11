@@ -105,7 +105,8 @@ class XMLResult(ActionResult):
     Результат в формате xml, данные которого напрямую передаются в HttpResponse
     '''
     def get_http_response(self):
-        return http.HttpResponse(self.data,mimetype='application/xml')
+        return http.HttpResponse(self.data,mimetype='application/xml',
+                                 content_type='text/xml; charset=utf-8')
 
 
 class ExtAdvancedTreeGridDataQueryResult(ActionResult):

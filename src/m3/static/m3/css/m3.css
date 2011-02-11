@@ -74,6 +74,13 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
     background-image: url(../images/required-field.png) !important;
 }
 
+/*Стиль для неверно заполненного композитного поля. В эксте он обрабатывается
+ иначе*/
+.m3-composite-field-invalid{
+    background-color: #DFE8F6;
+}
+/*============================================================*/
+
 .x-grid-with-col-lines .x-grid3-row td.x-grid3-cell {
     border-right-color: #D0D0D0;
 }
