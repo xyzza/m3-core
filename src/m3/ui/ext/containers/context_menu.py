@@ -12,25 +12,6 @@ from m3.ui.ext.misc import ExtConnection
 class ExtContextMenu(BaseExtContainer):
     '''
     Контекстное меню 
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Menu"
-    ,ext_class: "Ext.menu.Menu"
-    ,xtype: "menu"
-    ,attr: [{
-        ext_attr: "items"
-        ,py_attr: "items" 
-    },{
-        ext_attr: "displayMsg"
-        ,py_attr: "display_message"
-        ,default_value: "Показано записей {0} - {1} из {2}"
-    },{
-        ext_attr: "empty_message"
-        ,py_attr: "emptyText"
-        ,default_value: "Нет записей"
-    }]}
-    @end_designer
     '''
     __SEPARATOR = '"-"'
     
@@ -88,8 +69,7 @@ class ExtContextMenu(BaseExtContainer):
 #===============================================================================        
 class ExtContextMenuItem(ExtUIComponent):
     '''
-    Элементы контекстного меню 
-    
+    Элементы контекстного меню     
     '''
     def __init__(self, *args, **kwargs):
         super(ExtContextMenuItem, self).__init__(*args, **kwargs)

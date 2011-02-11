@@ -15,23 +15,6 @@ from m3.ui.ext.containers import (ExtGridColumn,
 class ExtListView(BaseExtPanel):
     '''
     Класс list view в соответствии с Ext.list.ListView
-    
-    @version: 0.1
-    @begin_designer
-    {title: "List view"
-    ,ext_class: "Ext.ListView"
-    ,xtype: "listview"
-    ,attr: [{
-        ext_attr: "multiSelect"
-        ,py_attr: "multi_select" 
-    },{
-        ext_attr: "emptyText"
-        ,py_attr: "empty_text"
-    },{
-        ext_attr: "columns"
-        ,py_attr: "columns"
-    }]}
-    @end_designer
     '''
     def __init__(self, *args, **kwargs):
         super(ExtListView, self).__init__(*args, **kwargs)

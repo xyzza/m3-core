@@ -56,8 +56,6 @@ ALL_SYMBOLS.update(BINOP_SYMBOLS)
 ALL_SYMBOLS.update(CMPOP_SYMBOLS)
 ALL_SYMBOLS.update(UNARYOP_SYMBOLS)
 
-SPEC_SYMBOL = '©' # A prefer
-
 def to_source(node, indent_with=' ' * 4, add_line_information=False):
     """This function can convert a node tree back into python sourcecode.
     This is useful for debugging purposes, especially if you're dealing with
@@ -198,7 +196,16 @@ class SourceGenerator(NodeVisitor):
 
     def visit_Expr(self, node):
         self.newline(node)
-        self.generic_visit(node)
+        
+        # A prefer 13.04.11
+        # Предположим, если выражениями являюся строки - это док. строки
+        if isinstance(node.value, Str):
+            self.write("'''")
+            self.write(node.value.s)
+            self.write("'''")
+        else:
+        # <-        
+            self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
         self.newline(extra=1)
@@ -415,9 +422,7 @@ class SourceGenerator(NodeVisitor):
         # self.write(repr(node.s))
         # --->
         if isinstance(node.s, unicode):
-            self.write(node.s)
-        elif SPEC_SYMBOL in node.s:
-            self.write(node.s)
+            self.write(node.s)        
         else:            
             self.write(repr(node.s))        
 

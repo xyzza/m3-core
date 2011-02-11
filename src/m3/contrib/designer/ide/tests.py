@@ -1,9 +1,6 @@
 #coding: utf-8
 
-from m3.ui.ext.windows import ExtWindow
-from m3.ui.ext.containers.forms import ExtPanel
-from m3.ui.ext.fields.simple import ExtStringField
-
+from m3.ui.ext.all_components import *
 
 class TestOne(ExtWindow):
     '''©
@@ -48,3 +45,7 @@ class TestOne(ExtWindow):
 
     def ata(self):
         pass
+    
+    
+def t():
+    '''asd'''

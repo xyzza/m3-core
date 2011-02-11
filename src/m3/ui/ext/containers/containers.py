@@ -14,18 +14,6 @@ from m3.ui.ext.controls import ExtButton
 class ExtContainer(BaseExtContainer):
     '''
     Класс, имитирующий работу Ext.Container
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Container"
-    ,ext_class: "Ext.Container"
-    ,xtype: "container"
-    ,attr: [{
-        ext_attr: "items"
-        ,py_attr: "items" 
-    }]}
-    @end_designer
-    
     '''
     def __init__(self, *args, **kwargs):
         super(ExtContainer, self).__init__(*args, **kwargs)

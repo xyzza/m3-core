@@ -193,13 +193,7 @@ class Parser(object):
         '''
         Получает значение исходя из типа узла
         '''
-        if isinstance(node, ast.Num):
-            return node.n
-        elif isinstance(node, ast.Str):
-            return node.s
-        elif isinstance(node, ast.Name):
-            # Булевый тип
-            return node.id == 'True'
+        return ast.literal_eval(node)
 
     def _get_config_component(self, node):
         '''
@@ -211,7 +205,7 @@ class Parser(object):
         attr - width
         value - 100        
         '''
-        assert isinstance(node, ast.Assign)#        
+        assert isinstance(node, ast.Assign)
         if isinstance(node.value, ast.Call):
             # Создание экземпляра            
             # instanse, attr, class name
@@ -435,10 +429,9 @@ class Parser(object):
         @param type_obj: Тип объекта (window, panel, etc.)
         '''         
         for item in self._get_mapping():
-            if item['class'].has_key(type_obj): # FIXME: Здесь нужно собирать все компоненты иерархически по item['class']
+            if item['class'].has_key(type_obj):
                 return item['config']
-    
-    
+        
     def _get_mapping(self):
         '''
         Получение объекта маппинга
@@ -456,6 +449,17 @@ class Parser(object):
             return ast.Num(value)
         elif isinstance(value, basestring):
             return ast.Str(value)
+        elif isinstance(value, dict):
+            return ast.Dict( [ self._get_node_value(str(k))  for k in value.keys()],
+                             [ self._get_node_value(v) for v in value.values()] )
+            
+        elif isinstance(value, tuple):
+            return ast.Tuple([self._get_node_value(item) for item in value], 1)
+               
+        elif isinstance(value, list):
+            return ast.List([self._get_node_value(item) for item in value], 1)                    
+        
+        raise ValueError("Type '%s' value '%s' is not supported" % (type(value), value) )
         
     def _get_func_initialize(self, node_module, class_name):
         '''
