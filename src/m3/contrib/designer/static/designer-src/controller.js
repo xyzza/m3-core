@@ -238,7 +238,7 @@ AppController = Ext.extend(Object, {
        }
    },
    onTreeNodeClick:function(node, e) {
-       this.highlightElement(node.id);
+       this.highlightElement('cmp-'+node.id);
    },
    onBeforeNodeDrop:function(dropEvent) {
         if (dropEvent.target.isRoot) {

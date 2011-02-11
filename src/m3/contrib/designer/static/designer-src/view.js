@@ -99,6 +99,9 @@ ComponentTreeView = Ext.extend(BaseView, {
         new Ext.tree.TreeSorter(this._tree, {
             folderSort:true,
             dir:'asc',
+            //sortType:function(node) {
+            //    return parseInt(node.attributes.orderIndex,10);
+            //}//,
             property:'orderIndex'
         });
     },

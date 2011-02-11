@@ -127,7 +127,8 @@ ModelUIPresentaitionBuilder = function() {
                                 model.attributes.activeTabId : model.attributes.properties.activeTab,
                         listeners:{
                             tabchange:function(panel, tab) {
-                                var tabPanelModel = model.ownerTree.findModelById(panel.id);
+                                var modelId = ModelUtils.parseModelId(panel.id);
+                                var tabPanelModel = model.ownerTree.findModelById(modelId);
                                 tabPanelModel.attributes.activeTabId = tab.id;
                             }
                         }
@@ -173,7 +174,7 @@ ModelUIPresentaitionBuilder = function() {
             return  Ext.apply(cfg, {
                 xtype:'grid',
                 cls:'designContainer designComponent',
-                id:model.id,
+                id:'cmp-'+model.id,
                 store: store,
                 colModel:new Ext.grid.ColumnModel({
                     columns:columns
