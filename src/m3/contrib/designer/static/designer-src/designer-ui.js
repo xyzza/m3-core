@@ -205,7 +205,7 @@ ModelUIPresentaitionBuilder = function() {
 
     return {
         /**
-         * Возвращает ExtComponent или какой нибудь его наследник
+         * Возвращает конфиг
          */
         build:function(model) {
             var cfg = Ext.apply({}, model.attributes.properties);

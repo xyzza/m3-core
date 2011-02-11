@@ -95,15 +95,6 @@ ComponentTreeView = Ext.extend(BaseView, {
     constructor: function(tree, model) {
         this._tree = tree;
         ComponentTreeView.superclass.constructor.call(this, model);
-
-        new Ext.tree.TreeSorter(this._tree, {
-            folderSort:true,
-            dir:'asc',
-            //sortType:function(node) {
-            //    return parseInt(node.attributes.orderIndex,10);
-            //}//,
-            property:'orderIndex'
-        });
     },
     refresh:function() {
         var root = this._tree.root;
