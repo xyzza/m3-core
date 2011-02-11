@@ -45,7 +45,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			valueField: 'code',
 			mode: 'remote',
 			hiddenName: params.place_field_name,
-			valueNotFoundText: ''
+			valueNotFoundText: '',
+            invalidClass: params.invalid_class
 		});		
 		this.place.setValue(params.place_value);
 		
@@ -98,7 +99,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				valueField: 'code',
 				mode: 'remote',
 				hiddenName: params.street_field_name,
-                valueNotFoundText: ''
+                valueNotFoundText: '',
+                invalidClass: params.invalid_class
 			});
 			this.street.setValue(params.street_value);
 			
@@ -111,7 +113,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					fieldLabel: params.house_label,
 					value: params.house_value,
 					emptyText: '',
-					width: 40
+					width: 40,
+                    invalidClass: params.invalid_class
 				});
 				
 				if (params.level > 3) {
@@ -123,11 +126,12 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
                         readOnly: params.read_only,
                         cls: field_cls,
 						emptyText: '',
-						width: 40
+						width: 40,
+                        invalidClass: params.invalid_class
 					});
 				}
 			}
-		};
+		}
 		if (params.addr_visible) {
 			this.addr = new Ext.form.TextArea({
 				name: params.addr_field_name,
@@ -138,7 +142,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				cls: field_cls,
 				height: 36
 			});
-		};
+		}
 		if (params.view_mode == 1){
 			// В одну строку
 			this.place.flex = 1;
@@ -184,12 +188,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				, anchor: '100%'
 				, fieldLabel: params.place_label
 				, items: row_items
+                , invalidClass: params.invalid_composite_field_class
+
 			};
 			items.push(row);
 			if (params.addr_visible) {
 				items.push(this.addr);
 			}
-		};
+		}
 		if (params.view_mode == 2){
 			// В две строки
 			if (params.level > 2) {
@@ -199,6 +205,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				    , anchor: '100%'
 				    , fieldLabel: params.place_label
 				    , items: [this.place, this.zipcode]
+                    , invalidClass: params.invalid_composite_field_class
 			    };
 			    items.push(row);
 			} else {
@@ -227,19 +234,20 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 							, this.flat
 						);
 					}
-				};
+				}
 				var row = {
 					xtype: 'compositefield'
 					, anchor: '100%'
 					, fieldLabel: params.street_label
 					, items: row_items
+                    , invalidClass: params.invalid_composite_field_class
 				};
 				items.push(row);
 			}
 			if (params.addr_visible) {
 				items.push(this.addr);
 			}
-		};
+		}
 		if (params.view_mode == 3){
 			// В три строки
 			if (params.level > 2) {
@@ -249,6 +257,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				    , anchor: '100%'
 				    , fieldLabel: params.place_label
 				    , items: [this.place, this.zipcode]
+                    , invalidClass: params.invalid_composite_field_class
 			    };
 			    items.push(row);
 			} else {
@@ -262,8 +271,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					var row_items = [{
 						xtype: 'container'
 						, layout: 'form'
-						, items: this.house 
-            , style: {overflow: 'hidden'} 
+						, items: this.house
+                        , style: {overflow: 'hidden'}
 					}];
 					if (params.level > 3) {
 						row_items.push({
@@ -277,15 +286,15 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						anchor: '100%'
 						, layout: 'column'
 						, items: row_items
-            , style: {overflow: 'hidden'} 
+                        , style: {overflow: 'hidden'}
 					});
 					items.push(row);
 				}
-			};
+			}
 			if (params.addr_visible) {
 				items.push(this.addr);
 			}
-		};
+		}
 						
 		var config = Ext.applyIf({
 			items: items
@@ -315,21 +324,21 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					this.mon(this.flat, 'change', this.onChangeFlat, this);
 				}
 			}
-		};
+		}
 		this.mon(this.place, 'beforequery', this.beforePlaceQuery, this);
 		if (this.level > 1) {
 			this.mon(this.place, 'change', this.clearStreet, this);
 			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
-		};
+		}
 		this.addEvents(
             /**
              * @event change
-             * При изменении адресного поля целиком. 
+             * При изменении адресного поля целиком.
              */
 		    'change',
 			/**
              * @event change_place
-             * При изменении населенного пункта 
+             * При изменении населенного пункта
              * @param {AddrField} this
              * @param {Place_code} Код нас. пункта по КЛАДР
              * @param {Store} Строка с информацией о данных КЛАДРа по выбранному пункту
@@ -337,7 +346,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			'change_place',
 			/**
              * @event change_street
-             * При изменении улицы 
+             * При изменении улицы
              * @param {AddrField} this
              * @param {Street_code} Код улицы по КЛАДР
              * @param {Store} Строка с информацией о данных КЛАДРа по выбранной улице
@@ -345,16 +354,16 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			'change_street',
 			/**
              * @event change_house
-             * При изменении дома 
+             * При изменении дома
              * @param {AddrField} this
-             * @param {House} Номер дома             
+             * @param {House} Номер дома
              */
 			'change_house',
 			/**
              * @event change_flat
-             * При изменении квартиры 
+             * При изменении квартиры
              * @param {AddrField} this
-             * @param {Flat} Номер квартиры             
+             * @param {Flat} Номер квартиры
              */
 			'change_flat',
 			/**
@@ -368,7 +377,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
              * @event before_query_place
              * Перед запросом данных о населенном пункте
              * @param {AddrField} this
-             * @param {Event} Событие              
+             * @param {Event} Событие
              */
 			'before_query_place');
 	}	
@@ -462,4 +471,4 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	, beforePlaceQuery: function(qe) {
 		this.fireEvent('before_query_place', this, qe);
 	}
-})
+});

@@ -17,7 +17,12 @@ class ExtAddrComponent(BaseExtContainer):
     VIEW_0 = 0 # хитрый режим (пока не будем делать), когда отображается только адрес, а его редактирование отдельным окном
     VIEW_1 = 1 # в одну строку + адрес
     VIEW_2 = 2 # в две строки + адрес, только для level > PLACE
-    VIEW_3 = 3 # в три строки + адрес, только для level > STREET        
+    VIEW_3 = 3 # в три строки + адрес, только для level > STREET
+
+    INVALID_CLASS = 'm3-form-invalid' #Название хтмл-класса м3,
+    # который отвечает за стиль отображения неверно заполненных полей
+    INVALID_COMPOSITE_FIELD_CLASS = 'm3-composite-field-invalid' #Название класса,
+    # отвечающего за прорисовку неверно заполненных композитных полей
     
     def __init__(self, *args, **kwargs):
         super(ExtAddrComponent, self).__init__(*args, **kwargs)
@@ -36,11 +41,16 @@ class ExtAddrComponent(BaseExtContainer):
         self.flat_label = u'Квартира'
         self.addr_label = u'Адрес'
         
-        # Атрибуты определяющие необходимость заполенения полей
+        # Атрибуты, определяющие необходимость заполнения полей
         self.place_allow_blank = True
         self.street_allow_blank = True
         self.house_allow_blank = True
         self.flat_allow_blank = True
+
+        #Названия инвалидных классов
+        self.invalid_class = ExtAddrComponent.INVALID_CLASS
+        self.invalid_composite_field_class = ExtAddrComponent\
+        .INVALID_COMPOSITE_FIELD_CLASS
         
         self.addr_visible = True
         self.read_only = False
@@ -52,12 +62,12 @@ class ExtAddrComponent(BaseExtContainer):
         self.init_component(*args, **kwargs)
         self.layout = 'form'
         self.template = 'ext-fields/ext-addr-field.js'
-        self.addr = ExtHiddenField(name = self.addr_field_name, type = ExtHiddenField.STRING);
-        self.place = ExtHiddenField(name = self.place_field_name, type = ExtHiddenField.STRING);
-        self.street = ExtHiddenField(name = self.street_field_name, type = ExtHiddenField.STRING);
-        self.house = ExtHiddenField(name = self.house_field_name, type = ExtHiddenField.STRING);
-        self.flat = ExtHiddenField(name = self.flat_field_name, type = ExtHiddenField.STRING);
-        self.zipcode = ExtHiddenField(name = self.zipcode_field_name, type = ExtHiddenField.STRING);
+        self.addr = ExtHiddenField(name = self.addr_field_name, type = ExtHiddenField.STRING)
+        self.place = ExtHiddenField(name = self.place_field_name, type = ExtHiddenField.STRING)
+        self.street = ExtHiddenField(name = self.street_field_name, type = ExtHiddenField.STRING)
+        self.house = ExtHiddenField(name = self.house_field_name, type = ExtHiddenField.STRING)
+        self.flat = ExtHiddenField(name = self.flat_field_name, type = ExtHiddenField.STRING)
+        self.zipcode = ExtHiddenField(name = self.zipcode_field_name, type = ExtHiddenField.STRING)
         self._items.append(self.addr)
         self._items.append(self.place)
         self._items.append(self.street)
@@ -116,8 +126,10 @@ class ExtAddrComponent(BaseExtContainer):
         self._put_params_value('get_addr_url', (self.pack.get_addr_action.absolute_url() if self.pack.get_addr_action else ''))
         self._put_params_value('kladr_url', (self.pack.get_places_action.absolute_url() if self.pack.get_places_action else ''))
         self._put_params_value('street_url', (self.pack.get_streets_action.absolute_url() if self.pack.get_streets_action else ''))
+        self._put_params_value('invalid_class', self.invalid_class)
+        self._put_params_value('invalid_composite_field_class', self.invalid_composite_field_class)
     
-    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+    def make_read_only(self, access_off=True, exclude_list=(), *args, **kwargs):
         self.read_only = access_off
     
     def get_zipcode(self):
