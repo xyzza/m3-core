@@ -109,6 +109,8 @@ def log_file_parse(log_file):
                 info_lines.append(
                 {'date': line[1:FULL_DATE_LENGHT],
                 'message':' '.join(line.split()[POSITION_AFTER_DATE_TIME:])})
+        #Более новые записи в начало
+        info_lines.reverse()
         return info_lines or []
     elif ERROR in file_name:
         error_lines = []
@@ -138,6 +140,8 @@ def log_file_parse(log_file):
             message_dict['full'] = "".join(full_error_text[:])
             message_dict['message'] = "; ".join(message_list[:])
             error_lines.append(message_dict.copy())
+        #Более новые записи в начало
+        error_lines.reverse()
         return error_lines or []
     return []
 
