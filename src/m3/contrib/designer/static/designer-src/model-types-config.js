@@ -64,6 +64,32 @@ Ext.apply(ModelTypeLibrary,{
                 }
             }
         },
+
+        /*
+        * Простые компоненты
+        */
+
+        button: {
+            parent:'component',
+            properties: {
+                id:{
+                    defaultValue:'new_button',
+                    isInitProperty:true
+                },
+                text:{
+                    defaultValue:'New button',
+                    isInitProperty:true
+                },
+                iconCls:{
+                    defaultValue:''
+                }
+            },
+            toolboxData:{
+                category:'Standart',
+                text:'Button'
+            }
+        },
+
         /*
         * Контейнеры
         */
@@ -557,6 +583,7 @@ Ext.apply(ModelTypeLibrary,{
         * Тулбары
         */
         toolbar: {
+            isContainer:true,
             parent:'container',
             properties: {
                 id: {
@@ -567,6 +594,10 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:'tbar',
                     isInitProperty:true,
                     propertyType:'enum'
+                },
+                layout: {
+                    defaultValue:'toolbar',
+                    isInitProperty:true
                 }
             },
             toolboxData:{
@@ -574,7 +605,42 @@ Ext.apply(ModelTypeLibrary,{
                 text:'Toolbar'
             }
         },
-
+        tbfill: {
+            properties: {
+                id: {
+                    defaultValue: 'toolbar_fill',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                category:'Toolbar',
+                text:'Toolbar fill'
+            }
+        },
+        tbseparator: {
+            properties: {
+                id: {
+                    defaultValue: 'toolbar_separator',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                category:'Toolbar',
+                text:'Toolbar separator'
+            }
+        },
+        tbspacer: {
+            properties: {
+                id: {
+                    defaultValue: 'toolbar_spacer',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                category:'Toolbar',
+                text:'Toolbar spacer'
+            }
+        },
         gridPanel:{
             parent:'panel',
             isContainer: true,
@@ -596,7 +662,7 @@ Ext.apply(ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                allowed:['gridColumn','arrayStore'],
+                allowed:['gridColumn','arrayStore', 'toolbar'],
                 single:['arrayStore']
             },
             treeIconCls:'designer-grid-panel',

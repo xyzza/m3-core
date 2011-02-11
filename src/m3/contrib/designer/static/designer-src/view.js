@@ -55,25 +55,31 @@ DesignView = Ext.extend(BaseView, {
     refresh: function(){
         this._container.removeAll();
 
-        var recursion = function(container, model) {
-            var newComponent = this._createComponent( model );
-            if (newComponent){
-                //Тут используется недокументированая возможность экста
-                //правильно было бы добавлять компоненты используя container.add(component)
-                //или же с помощью ленивой инициализции и xtype. Но при использовании
-                //container.add() - при отображении списков комбоксов вылезала ошибка. До конца в ее природе
-                //я не разобрался, но при добавляении в коллекцию итемсов все ок работает
-                //так же частью хака является явное создание коллекции итемс в конфиге контейнеров в designer-ui.js
-                container.items.add( newComponent );
-            }
+        var recursion = function(model) {
+            var newComponentCfg = this._createComponent( model );
+
             if (model.isContainer() && model.childNodes && model.childNodes.length > 0) {
                 for (var i=0; i < model.childNodes.length; i++) {
-                    recursion.call(this, newComponent,  model.childNodes[i] );
+                    if (!(model.childNodes[i].attributes.properties.parentDockType &&
+                            model.childNodes[i].attributes.properties.parentDockType != '(none)')) {
+                        var newChild = recursion.call(this, model.childNodes[i]);
+                        if (newChild) {
+                            newComponentCfg.items.push(newChild);
+                        }
+                    }
+                    else {
+                        newComponentCfg[model.childNodes[i].attributes.properties.parentDockType] =
+                                (recursion.call(this, model.childNodes[i]) );
+                    }
                 }
             }
+
+            return newComponentCfg;
         };
 
-        recursion.call(this, this._container, this._model.root);
+
+        var childCfg = recursion.call(this, this._model.root);
+        this._container.add(childCfg);
         this._container.doLayout(true, true);
     },
     _createComponent:function(model) {

@@ -16,64 +16,81 @@ ModelUIPresentaitionBuilder = function() {
 
     var mapObject =
     {
+        button:function(model,cfg){
+            return Ext.apply(cfg,{
+                xtype:'button'
+            });
+        },
         window:function(model, cfg) {
-            return new Ext.Panel(cfg);
+            return Ext.apply(cfg, {
+                xtype:'panel'
+            });
         },
         panel:function(model, cfg) {
-            return new Ext.Panel(cfg);
+            return Ext.apply(cfg, {
+                xtype:'panel'
+            });
         },
         container:function(model, cfg) {
-            return new Ext.Container(cfg);    
+            return Ext.apply(cfg,{
+                xtype:'container'
+            });
         },
         fieldSet:function(model, cfg) {
-            return new Ext.form.FieldSet(cfg);    
+            return Ext.apply(cfg,{
+                xtype:'fieldset'
+            });
         },
         formPanel:function(model, cfg) {
-            return new Ext.form.FormPanel(cfg);
+            return Ext.apply(cfg,{
+                xtype:'form'
+            });
+
         },
         textField:function(model, cfg) {
-            return new Ext.form.TextField(
-                    Ext.apply(cfg,{
-                        readOnly:true
-                    })
-                );
+            return Ext.apply(cfg, {
+                xtype:'textfield',
+                readonly:true
+            });
         },
         htmlEditor:function(model,cfg) {
-            return new Ext.form.HtmlEditor(
-                    Ext.apply(cfg,{
-                        readOnly:true
-                    })
-                );
+            return Ext.apply(cfg,{
+                        readOnly:true,
+                        xtype:'htmleditor'
+                    });
         },
         textArea:function(model, cfg){
-            return new Ext.form.TextArea(
-                    Ext.apply(cfg,{
-                        readOnly:true
-                    })
-                );
+            return Ext.apply(cfg, {
+                xtype:'textarea',
+                readonly:'true'
+            });
         },
         checkBox:function(model, cfg){
-            return new Ext.form.Checkbox(
-                    Ext.apply(cfg,{
-                        readOnly:true
-                    })
-                );
+            return Ext.apply(cfg,{
+               readOnly:true,
+               xtype:'checkbox'
+            });
         },
         numberField:function(model, cfg){
-            return new Ext.form.NumberField(
-                    Ext.apply(cfg,{
-                        readOnly:true
-                    })
-                );
+            return Ext.apply(cfg,{
+                        readOnly:true,
+                        xtype:'numberfield'
+                    });
         },
         displayField:function(model, cfg) {
-            return new Ext.form.DisplayField(cfg);    
+            return Ext.apply(cfg,{
+                xtype:'displayfield'
+            });
         },
         dateField:function(model, cfg){
-            return new Ext.form.DateField(cfg);
+            return Ext.apply(cfg,{
+                xtype:'datefield'
+            });
         },
         timeField :function(model, cfg) {
-            return new Ext.form.TimeField(cfg);    
+            return Ext.apply(cfg,{
+                xtype:'timefield'
+            });
         },
         comboBox:function(model, cfg) {
             var store = undefined;
@@ -91,18 +108,20 @@ ModelUIPresentaitionBuilder = function() {
                     autoDestroy:true
                 });
             }
-            return new Ext.form.ComboBox(
-                    Ext.apply( cfg , {
+            return Ext.apply( cfg , {
                         store:store,
-                        mode:'local'
-                    }));
+                        mode:'local',
+                        xtype:'combo'
+                    });
         },
         triggerField:function(model, cfg) {
-            return new Ext.form.TriggerField(cfg);
+            return Ext.apply(cfg,{
+                xtype:'trigger'
+            });
         },
         tabPanel:function(model, cfg) {
-            return new Ext.TabPanel(
-                    Ext.apply(cfg,{
+            return Ext.apply(cfg,{
+                        xtype:'tabpanel',
                         deferredRender:false,
                         activeTab: model.attributes.activeTabId ?
                                 model.attributes.activeTabId : model.attributes.properties.activeTab,
@@ -112,8 +131,7 @@ ModelUIPresentaitionBuilder = function() {
                                 tabPanelModel.attributes.activeTabId = tab.id;
                             }
                         }
-                    })
-                );
+                    });
         },
         gridPanel:function(model, cfg) {
             var store = undefined;
@@ -152,17 +170,35 @@ ModelUIPresentaitionBuilder = function() {
                 });
             }
 
-            return new Ext.grid.GridPanel( Ext.apply(cfg, {
+            return  Ext.apply(cfg, {
+                xtype:'grid',
                 cls:'designContainer designComponent',
                 id:model.id,
                 store: store,
                 colModel:new Ext.grid.ColumnModel({
                     columns:columns
                 })
-            }));
+            });
         },
         toolbar:function(model,cfg) {
-            return new Ext.Toolbar(cfg);    
+            return Ext.apply(cfg,{
+                xtype:'toolbar'
+            });
+        },
+        tbfill:function(model,cfg) {
+            return Ext.apply(cfg,{
+                xtype:'tbfill'
+            });
+        },
+        tbseparator:function(model,cfg) {
+            return Ext.apply(cfg,{
+                xtype:'tbseparator'
+            });
+        },
+        tbspacer:function(model,cfg) {
+            return Ext.apply(cfg,{
+                xtype:'tbspacer'
+            });
         }
     };
 
