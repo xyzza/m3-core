@@ -208,7 +208,7 @@ ModelUIPresentaitionBuilder = function() {
          */
         build:function(model) {
             var cfg = Ext.apply({}, model.attributes.properties);
-            cfg.id = model.id;
+            cfg.id = 'cmp-' + model.id;
             if (ModelTypeLibrary.isTypeContainer(model.attributes.type)) {
                 cfg.cls = 'designContainer designComponent';
                 cfg.items = [];

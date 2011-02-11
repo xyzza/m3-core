@@ -86,7 +86,7 @@ Bootstrapper = Ext.extend(Object, {
         var eastWrapper = new Ext.Panel({
             region:'east',
             width:250,
-            //split:true,
+            split:true,
             layout:'vbox',
             layoutConfig:{
                 align:'stretch'

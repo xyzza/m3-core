@@ -197,7 +197,8 @@ AppController = Ext.extend(Object, {
    domNodeDrop:function(target, dd, e, data ) {
        this.removeHighlight();
        var componentNode = data.node;
-       var model = this._model.findModelById(target.id);
+       var modelId = ModelUtils.parseModelId(target.id);
+       var model = this._model.findModelById(modelId);
 
        if (!model.checkRestrictions(componentNode.attributes.type)) {
            return;
@@ -211,7 +212,8 @@ AppController = Ext.extend(Object, {
        model.appendChild( new ComponentModel(newModelNodeConfig) );
    },
    validateDomDrop:function(target, dd, e, data) {
-       var parent = this._model.findModelById(target.id);
+       var modelId = ModelUtils.parseModelId(target.id);
+       var parent = this._model.findModelById(modelId);
        var child = data.node.attributes.type;
        return parent.checkRestrictions(child);
    },
@@ -224,7 +226,8 @@ AppController = Ext.extend(Object, {
    onDomDblClick: function(event, target, obj) {
        var el = event.getTarget('.designComponent');
        if (el) {
-           var model = this._model.findModelById(el.id);
+           var modelId = ModelUtils.parseModelId(el.id);
+           var model = this._model.findModelById(modelId);
            this._editorManager.editModel(model);
        }
    },

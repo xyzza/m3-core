@@ -6,6 +6,12 @@
  * Объект включает в себя набор утилитных функций для преобразования модели во что-то другое
  */
 ModelUtils = Ext.apply({},{
+    /*
+    * Возвращает id модели по id визуального компонента
+     */
+    parseModelId:function(cmpId) {
+        return cmpId.substring(4, cmpId.length);
+    },
     /**
      * Возвращает TreeNode по модели
      */
