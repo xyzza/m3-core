@@ -599,3 +599,7 @@ class SourceGenerator(NodeVisitor):
         self.write(':')
         self.body(node.body)
     
+    def visit_StringSpaces(self, node):        
+        self.newline(node)
+        self.write('')
+        

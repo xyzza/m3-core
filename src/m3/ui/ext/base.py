@@ -162,8 +162,7 @@ class BaseExtComponent(object):
         pass
     
     def get_script(self):
-        '''
-        @deprecated: Использовать метод render
+        '''        
         Генерация скрипта для отправки на клиентское рабочее место.
         '''
         return self.renderer.get_script()

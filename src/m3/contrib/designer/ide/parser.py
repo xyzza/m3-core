@@ -13,6 +13,7 @@ import shutil # Для копирования файлов
 # Для тестов 
 import pprint
 
+from advanced_ast import StringSpaces
 
 class Parser(object):
     '''
@@ -74,6 +75,12 @@ class Parser(object):
         for node in func_node.body:
             if isinstance(node, ast.Assign):
                 # Составление структуры конфигов и типов компонентов
+                
+                # Игнорирование значений, которые просто прописываются в объект
+                # self.panel_1 = panel_1
+                if  isinstance(node.value, ast.Name) and node.value.id in self.config_cmp:
+                    continue
+                
                 parent, attr, value = self._get_config_component(node)
                 self.config_cmp.setdefault(parent, {})[attr] = value
                 
@@ -338,13 +345,17 @@ class Parser(object):
         
         @return: nodes - Возвращает набор узлов
         '''
-        nodes = nodes or []
+        nodes = nodes or [StringSpaces()]
         d = d or self.dict_instances        
         for k, v in d.items(): # Вызывается 1 раз, т.к. 1 ключ #FIXME
             #print v
             #print self.dict_instances  
             for item in v: # Обход списка вложенных контролов               
                 for ik, _ in item.items(): # Вызывается 1 раз, для получения внутреннего ключа #FIXME
+                    
+                    print k
+                    print ik
+                    
                     
                     # Вот такая ебическая конструкция
                     # Привыкаем, блеать, к лиспу (с) greatfuckingadvice
@@ -356,7 +367,7 @@ class Parser(object):
                                             '_items', ast.Load()),
                                         'append' , ast.Load()),
                                 [ast.Name(ik, ast.Load()), ], [], None, None)
-                            )
+                            )                                        
                     nodes.append(node)
                         
                     self._gen_nested_components(item, nodes)
@@ -386,14 +397,30 @@ class Parser(object):
         if type_obj.has_key('items'):
             for item in type_obj['items']:
                 d = {item['id']: []}             
-                li.append(d)
+                li.append(d)                               
                 
+                nodes.append(StringSpaces())
                 nodes.append( self._gen_instanse(item) )
-                nodes.extend( self._gen_base_properties(item) )                    
+                nodes.extend( self._gen_base_properties(item) )
+                nodes.append( self._add_cmp_in_self(item['id']) )
                 
                 self._gen_child_properties(item, nodes, dict_instanses=d)
 
         return nodes
+    
+    def _add_cmp_in_self(self, variable):
+        '''
+        Добавляет в self компонент
+        '''
+        return ast.Assign(
+                        [ast.Attribute(
+                                ast.Name('self', ast.Load()), 
+                                str(variable), 
+                                ast.Load()
+                            )], 
+                        ast.Name(variable, ast.Load())
+                    )
+        
     
     def _gen_instanse(self, obj):
         '''
@@ -695,3 +722,5 @@ def test_to_designer():
     pprint.pprint( js ) 
     
     print 'Parser.to_designer - ok'
+    
+    
