@@ -187,14 +187,11 @@ class DesktopShortcut(DesktopLauncher):
             p = ControllerCache.find_pack(pack)
             if not p:
                 raise DesktopException('Pack %s not found in ControllerCache' % pack)
-            # Если это справочник
-            if isinstance(p, (BaseDictionaryActions, BaseTreeDictionaryActions)):
-                self.url = p.get_list_url()
-                # Если не задано имя ярлыка, то название берем из справочника
-                if not kwargs.get('name'):
-                    self.name = p.title
-            else:
-                raise DesktopException('I do not know how to handle this type of ActionPack: %s' % pack)
+
+            self.url = p.get_list_url()
+            # Если не задано имя ярлыка, то название берем из справочника
+            if not kwargs.get('name'):
+                self.name = p.title
 
 
 class DesktopLoader(object):
