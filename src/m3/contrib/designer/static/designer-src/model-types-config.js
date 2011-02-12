@@ -36,7 +36,7 @@ Ext.apply(ModelTypeLibrary,{
                     propertyType:'enum'
                 },
                 flex:{
-                    defaultValue:''
+                    defaultValue:0
                 },
                 maxHeight:{
                     defaultValue:0
