@@ -68,12 +68,11 @@ Ext.apply(ModelTypeLibrary,{
         /*
         * Простые компоненты
         */
-
         button: {
             parent:'component',
             properties: {
                 id:{
-                    defaultValue:'new_button',
+                    defaultValue:'button',
                     isInitProperty:true
                 },
                 text:{
@@ -82,6 +81,9 @@ Ext.apply(ModelTypeLibrary,{
                 },
                 iconCls:{
                     defaultValue:''
+                },
+                handler: {
+                    defaultValue:'undefined'
                 }
             },
             toolboxData:{
@@ -89,7 +91,23 @@ Ext.apply(ModelTypeLibrary,{
                 text:'Button'
             }
         },
-
+        label: {
+            parent:'component',
+            properties: {
+                id:{
+                    defaultValue:'label',
+                    isInitProperty:true
+                },
+                text: {
+                    defaultValue:'New label',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                category:'Standart',
+                text:'Label'
+            }
+        },
         /*
         * Контейнеры
         */
@@ -639,6 +657,22 @@ Ext.apply(ModelTypeLibrary,{
             toolboxData:{
                 category:'Toolbar',
                 text:'Toolbar spacer'
+            }
+        },
+        tbtext: {
+            properties: {
+                id: {
+                    defaultValue: 'toolbar_text',
+                    isInitProperty:true
+                },
+                text: {
+                    defaultValue:'Toolbar text',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                category:'Toolbar',
+                text:'Toolbar text item'
             }
         },
         gridPanel:{

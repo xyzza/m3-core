@@ -21,6 +21,11 @@ ModelUIPresentaitionBuilder = function() {
                 xtype:'button'
             });
         },
+        label:function(model,cfg) {
+            return Ext.apply(cfg,{
+                xtype:'label'
+            });
+        },
         window:function(model, cfg) {
             return Ext.apply(cfg, {
                 xtype:'panel'
@@ -199,6 +204,11 @@ ModelUIPresentaitionBuilder = function() {
         tbspacer:function(model,cfg) {
             return Ext.apply(cfg,{
                 xtype:'tbspacer'
+            });
+        },
+        tbtext:function(model,cfg) {
+            return Ext.apply(cfg,{
+                xtype:'tbtext'
             });
         }
     };
