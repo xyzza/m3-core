@@ -110,11 +110,12 @@ function onClickNode(node) {
 	var attr =  node.attributes;	            	
 	
 	var starter = new Bootstrapper();
-	var panel = starter.init(
-				'/designer/data', 
-				'/designer/save', 
-				attr['path'], 
-				attr['class_name']);
+	var panel = starter.init({
+				dataUrl:'/designer/data',
+				saveUrl:'/designer/save',
+				path:attr['path'],
+				className:attr['class_name'],
+                previewUrl:'/designer/preview'});
 				   	 
    	panel.setTitle(attr['class_name']); 
 	tabPanel.add( panel );

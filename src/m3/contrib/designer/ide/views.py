@@ -19,7 +19,8 @@ def workspace(request):
     return render_to_response('master.html', {
         'data_url' : '/designer/fake',
         'save_url' : '/designer/save',
-        'project_name': base_name
+        'project_name': base_name,
+        'preview_url':'/designer/preview'
     })
 
 def get_project_files(request):
@@ -40,9 +41,16 @@ def get_project_files(request):
 def designer(request):
     return render_to_response('designer.html', {
         'data_url' : '/designer/fake',
-        'save_url' : '/designer/save'
+        'save_url' : '/designer/save',
+        'code_preview_url' : '/designer/preview'
     })
 
+def designer_preview(request):
+    data = request.POST.get('data')
+    js = json.loads(data)
+    restores(js['model'])
+    py_code = Parser('','').from_designer_preview(js['model'])
+    return HttpResponse(content=py_code)
 
 def designer_fake_data(request):
     '''

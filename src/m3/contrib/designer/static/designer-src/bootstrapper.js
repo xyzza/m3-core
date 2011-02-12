@@ -7,7 +7,7 @@
  */
 
 Bootstrapper = Ext.extend(Object, {
-    init: function(dataUrl, saveUrl, path, className) {
+    init: function(cfg) {
 
         var designPanel = new Ext.Panel({
             layout:'fit',
@@ -75,10 +75,11 @@ Bootstrapper = Ext.extend(Object, {
 
          var storage = new ServerStorage({
             id:0,
-            loadUrl:dataUrl,
-            saveUrl:saveUrl,
-            pathFile: path,
-            className: className,
+            loadUrl:cfg.dataUrl,
+            saveUrl:cfg.saveUrl,
+            pathFile: cfg.path,
+            className: cfg.className,
+            previewUrl:cfg.previewUrl, 
             maskEl:Ext.getBody()
         });
 		this.storage = storage;
@@ -109,8 +110,11 @@ Bootstrapper = Ext.extend(Object, {
                     }
                 }),
                 new Ext.Button({
-                    text:'Отмена',
-                    iconCls:'icon-cancel'
+                    text:'Предварительный просмотр кода',
+                    iconCls:'icon-page-white-put',
+                    handler: function() {
+                        storage.previewCode(application.getTransferObject());
+                    }
                 })
             ]
         });
@@ -123,6 +127,11 @@ Bootstrapper = Ext.extend(Object, {
         storage.on('save', function() {
             Ext.Msg.alert('Сохранение формы','Данные успешно сохранены');
         });        
+
+        storage.on('preview', function(responseText) {
+           var previewWindow = new PyCodeWindow();
+            previewWindow.show(responseText);
+        });
 
         function onTreeNodeDeleteClick(item) {
             application.onTreeNodeDeleteClick(item.parentMenu.contextNode);

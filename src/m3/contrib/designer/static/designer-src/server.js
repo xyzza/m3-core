@@ -8,6 +8,7 @@
  *  id:507 - id документа
  *  loadUrl:'foo.bar',  - url для загрузки данных
  *  saveUrl:'foo.bar', - url для сохранения данных
+ *  previewUrl:'foo.bar' - url возвращающий py код
  *  maskEl: Ext.getBody() - элемент куда вешать маску
  * }
  */
@@ -17,7 +18,7 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
     constructor: function(cfg){
         Ext.apply(this, cfg);
         ServerStorage.superclass.constructor.call(this);
-        this.addEvents('load','save');
+        this.addEvents('load','save','preview');
     },
     loadModel:function(){
         this.mask = new Ext.LoadMask(this.maskEl, {
@@ -53,6 +54,20 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
             failure:this._onSaveFailure.createDelegate(this)
         });
     },
+    previewCode:function(dataObj) {
+        this.mask = new Ext.LoadMask(this.maskEl, {
+            msg:'Получаем код...'
+        });
+        this.mask.show();
+        Ext.Ajax.request({
+            url:this.previewUrl,
+            params:{
+                data:Ext.util.JSON.encode( dataObj )
+            },
+            success:this._onPreviewSuccess.createDelegate(this),
+            failure:this._onPreviewFailure.createDelegate(this)
+        });
+    },
     _onLoadSuccess:function(response, opts) {
         var obj = Ext.util.JSON.decode(response.responseText);
         this.mask.hide();
@@ -70,5 +85,14 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
     _onSaveFailure:function(response, opts) {
         this.mask.hide();
         uiAjaxFailMessage(response,opts);
+    },
+    _onPreviewSuccess:function(response, opts) {
+        this.mask.hide();
+        this.fireEvent('preview',response.responseText);
+    },
+    _onPreviewFailure:function(response, opts) {
+        this.mask.hide();
+        uiAjaxFailMessage(response,opts);
     }
+
 });
