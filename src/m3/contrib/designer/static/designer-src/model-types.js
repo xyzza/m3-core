@@ -140,7 +140,7 @@ ModelTypeLibrary = Ext.apply({}, {
         for (var type in this.typesConfig){
            if (!this.typesConfig[type].hasOwnProperty('toolboxData')) {
                 continue;
-           };
+           }
 
            var currentType = this.typesConfig[type];
 

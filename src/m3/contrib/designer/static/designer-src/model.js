@@ -62,7 +62,6 @@ ComponentModel = Ext.extend(Ext.data.Node, {
 });
 
 DocumentModel = Ext.extend(Ext.data.Tree, {
-    deletedItemsBag:[],//здесь храняться удаленные пользователем компоненты
     constructor:function(root) {
         DocumentModel.superclass.constructor.call(this, root);
         this.on('remove', this._onRemove);
@@ -160,7 +159,6 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
             };
 
             var item = doRecursion(node);
-            this.deletedItemsBag.push(item);
         }
     }
 });

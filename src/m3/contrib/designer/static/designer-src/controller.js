@@ -160,8 +160,6 @@ AppController = Ext.extend(Object, {
        //поэтому прежде чем двигать отключим обновление UI, так как иначе получим js ошибки при перерисовке
        //дерева в неподходящий момент внутри treeSorter'а
 
-       //TODO похоже баг при сортировке не исправлен! Надо попробовать двигать в beforeDrop или на колбэке к нему
-
        this.removeHighlight();
 
        this._treeView.suspendModelListening();
@@ -221,7 +219,7 @@ AppController = Ext.extend(Object, {
    * Возвращает объект для отправки на сервер
    */
    getTransferObject:function() {
-       return ModelUtils.buildTransferObject(this._model);
+       return ModelTransfer.serialize(this._model);
    },
    onDomDblClick: function(event, target, obj) {
        var el = event.getTarget('.designComponent');
