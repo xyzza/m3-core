@@ -17,7 +17,7 @@
 AppController = Ext.extend(Object, {
    //здесь храниться id последнего подсвеченного dom элемента
    _lastHighlightedId: undefined,
-   _lastQuicPropertyId: undefined,
+   _lastQuickPropertyId: undefined,
 
     constructor: function(config) {
        Ext.apply(this, config);
@@ -237,10 +237,10 @@ AppController = Ext.extend(Object, {
            var modelId = ModelUtils.parseModelId(el.id);
            var model = this._model.findModelById(modelId);
            //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
-           var win = Ext.getCmp(self._lastQuicPropertyId)
-           if (win) win.close()
+           var win = Ext.getCmp(self._lastQuickPropertyId);
+           if (win) win.close();
            
-           self._lastQuicPropertyId = this._editorManager.quickEditModel(model);
+           self._lastQuickPropertyId = this._editorManager.quickEditModel(model);
        }
    },
    onTreeNodeClick:function(node, e) {

@@ -65,7 +65,7 @@ ModelTypeLibrary = Ext.apply({}, {
         for (var i = 0; i <= chain.length; i++) {
             var currentType = chain[i];
             for (var j in currentType) {
-                if (currentType[j]['isQuckEditable'])
+                if (currentType[j]['isQuickEditable'])
                     cfg[j] = currentType[j]['defaultValue'];
             }
         }

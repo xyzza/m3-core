@@ -33,7 +33,7 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
             source:cfg,
             model:model
         });
-        window.anchorToId(model.id)
+        window.anchorToId(model.id);
         window.on('save', this.saveModel.createDelegate(this));
         window.show();
         return window.id
@@ -111,14 +111,14 @@ QuickPropertyWindow = Ext.extend(Ext.Window, {
     },
     initComponent: function(cfg) {
         var customEditors = {};
-        var modelitems = [];
+        var modelItems = [];
 
         this._setup_panel_customs(customEditors);
 
-        for (i in customEditors) modelitems.push(customEditors[i])
+        for (var i in customEditors) modelItems.push(customEditors[i])
 
         Ext.apply(this, {
-            items: modelitems
+            items: modelItems
         });
 
         QuickPropertyWindow.superclass.initComponent.call(this);

@@ -15,15 +15,15 @@ Ext.apply(ModelTypeLibrary,{
                 },
                 disabled:{
                     defaultValue:false,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 height:{
                     defaultValue:0,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 width:{
                     defaultValue:0,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 x:{
                     defaultValue:0
@@ -37,7 +37,7 @@ Ext.apply(ModelTypeLibrary,{
                 region:{
                     defaultValue:'',
                     propertyType:'enum',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 flex:{
                     defaultValue:0
@@ -56,7 +56,7 @@ Ext.apply(ModelTypeLibrary,{
                 },
                 name:{
                     defaultValue:'',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 anchor:{
                     defaultValue:''
@@ -106,7 +106,7 @@ Ext.apply(ModelTypeLibrary,{
                 text: {
                     defaultValue:'New label',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -125,7 +125,7 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:'auto',
                     isInitProperty:true,
                     propertyType:'enum',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 layoutConfig :{
                     defaultValue:'undefined',
@@ -133,12 +133,12 @@ Ext.apply(ModelTypeLibrary,{
                 },
                 labelWidth:{
                     defaultValue:0,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 labelAlign:{
                     defaultValue:'left',
                     propertyType:'enum',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 labelPad:{
                     defaultValue:''
@@ -146,7 +146,7 @@ Ext.apply(ModelTypeLibrary,{
                 id: {
                     defaultValue:'container',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -165,12 +165,12 @@ Ext.apply(ModelTypeLibrary,{
                 title:{
                     defaultValue:'New panel',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 id:{
                     defaultValue:'panel',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 collapsible: {
                     defaultValue:false
@@ -192,7 +192,7 @@ Ext.apply(ModelTypeLibrary,{
                 },
                 padding:{
                     defaultValue:'undefined',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 header: {
                     defaultValue:false,
@@ -216,17 +216,17 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:'form',
                     isInitProperty:true,
                     propertyType:'enum',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 title:{
                     defaultValue:'New fieldset',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 id:{
                     defaultValue:'fieldset',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             childTypesRestrictions:{
@@ -245,7 +245,7 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'tab_panel',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 activeTab:{
                     defaultValue:0,
@@ -272,17 +272,17 @@ Ext.apply(ModelTypeLibrary,{
                 id : {
                     defaultValue:'form_panel',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 layout: {
                     defaultValue:'form',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 title: {
                     defaultValue:'',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 url: {
                     defaultValue:''
@@ -308,11 +308,11 @@ Ext.apply(ModelTypeLibrary,{
             properties:{
                 fieldLabel:{
                     defaultValue:'',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 value: {
                     defaultValue:'',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 labelStyle:{
                     defaultValue:''
@@ -338,7 +338,7 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'text_area',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -353,13 +353,14 @@ Ext.apply(ModelTypeLibrary,{
                 id: {
                     defaultValue:'check_box',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 checked: {
                     defaultValue:false
                 },
                 boxLabel: {
-                    defaultValue:''
+                    defaultValue:'',
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -374,7 +375,7 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'date_field',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 startDay : {
                     defaultValue:0
@@ -392,15 +393,15 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'time_field',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 format : {
                     defaultValue:'g:i A',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 increment: {
                     defaultValue:15,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -415,11 +416,11 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'string_field',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                  allowBlank :{
                     defaultValue:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                  vtype: {
                     defaultValue:''
@@ -458,18 +459,18 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'number_field',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 decimalSeparator:{
                     defaultValue:'.'
                 },
                 allowDecimal: {
                     defaultValue:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 allowNegative: {
                     defaultValue:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 decimalPrecision: {
                     defaultValue:2
@@ -503,7 +504,7 @@ Ext.apply(ModelTypeLibrary,{
                 id: {
                     defaultValue:'html_editor',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
 
             },
@@ -520,18 +521,18 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'combobox',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 triggerAction:{
                     defaultValue:'all',
                     isInitProperty:true,
                     propertyType:'enum',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 valueField:{
                     defaultValue:'value',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 displayField:{
                     defaultValue:'displayText',
@@ -583,7 +584,7 @@ Ext.apply(ModelTypeLibrary,{
                 id: {
                     defaultValue:'New trigger field',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 editable: {
                     defaultValue:true,
@@ -605,12 +606,12 @@ Ext.apply(ModelTypeLibrary,{
                 id : {
                     defaultValue:'display_field',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 value : {
                     defaultValue:'New display field',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -624,15 +625,15 @@ Ext.apply(ModelTypeLibrary,{
                 id : {
                     defaultValue:'hidden_field',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 name : {
                     defaultValue:'',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 value: {
                     defaultValue:'',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -654,7 +655,8 @@ Ext.apply(ModelTypeLibrary,{
                 parentDockType: {
                     defaultValue:'tbar',
                     isInitProperty:true,
-                    propertyType:'enum'
+                    propertyType:'enum',
+                    isQuickEditable: true
                 },
                 layout: {
                     defaultValue:'toolbar',
@@ -725,12 +727,12 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'grid_panel',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 title: {
                     defaultValue:'New grid',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 autoExpandColumn: {
                     defaultValue:''
@@ -738,7 +740,7 @@ Ext.apply(ModelTypeLibrary,{
                 layout: {
                     defaultValue:undefined,
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             childTypesRestrictions:{
@@ -758,17 +760,17 @@ Ext.apply(ModelTypeLibrary,{
                     //ATTENTION - пробелы в id ведут к багу при наведении мышки на хедер
                     defaultValue:'gridColumn',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 header:{
                     defaultValue:'column',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 dataIndex:{
                     defaultValue:'Foo',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 menuDisabled: {
                     defaultValue:true,
@@ -787,18 +789,18 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'window',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 layout:{
                     defaultValue:'fit',
                     isInitProperty:true,
                     propertyType:'enum',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 title: {
                     defaultValue:'New window',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 }
             },
             childTypesRestrictions:{
@@ -812,7 +814,7 @@ Ext.apply(ModelTypeLibrary,{
                 id: {
                     defaultValue:'array_store',
                     isInitProperty:true,
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 storeId: {
                     defaultValue:'New store',
@@ -825,7 +827,7 @@ Ext.apply(ModelTypeLibrary,{
                 fields: {
                     defaultValue:'undefined',
                     propertyType:'object',
-                    isQuckEditable: true
+                    isQuickEditable: true
                 },
                 data: {
                     defaultValue:'undefined',
