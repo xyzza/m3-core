@@ -21,7 +21,7 @@ ModelTransfer = Ext.apply({},{
             return 'store';
         },
         toolbar:function(model) {
-            if (model.attributes.properties.parentDockType = '(none)') {
+            if (model.attributes.properties.parentDockType == '(none)') {
                 return undefined;
             }
             else {
