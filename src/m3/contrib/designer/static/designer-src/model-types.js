@@ -54,6 +54,23 @@ ModelTypeLibrary = Ext.apply({}, {
         }
         return cfg;
     },
+    /**
+     * Возвращает объект со свойствами доступными для быстрого редактирования, с учетом наследования типов
+     * Фактически копипаст с getTypeDefaultProperties, есть возможность объединения
+     */
+    getQuickEditProperties:function(type) {
+        var chain = this._buildInheritanceChain(type);
+
+        var cfg = {};
+        for (var i = 0; i <= chain.length; i++) {
+            var currentType = chain[i];
+            for (var j in currentType) {
+                if (currentType[j]['isQuckEditable'])
+                    cfg[j] = currentType[j]['defaultValue'];
+            }
+        }
+        return cfg;
+    },
     /*
     * Возвращает конфиг объекта с атрибутами, нужными для его создания и заполнеными дефолтными значениями
     */
@@ -127,7 +144,7 @@ ModelTypeLibrary = Ext.apply({}, {
             return prop['propertyType'];
         }
         else {
-            return typeof prop['propertyType'];
+            return typeof prop['defaultValue'];
         }
     },
     /*

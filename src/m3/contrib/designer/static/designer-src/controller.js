@@ -17,6 +17,7 @@
 AppController = Ext.extend(Object, {
    //здесь храниться id последнего подсвеченного dom элемента
    _lastHighlightedId: undefined,
+   _lastQuicPropertyId: undefined,
 
     constructor: function(config) {
        Ext.apply(this, config);
@@ -122,7 +123,7 @@ AppController = Ext.extend(Object, {
        var flyEl = Ext.fly(id);
        if (flyEl) {
            flyEl.addClass('selectedElement');
-           this._lastHighlightedId = id;
+            this._lastHighlightedId = id;
        }
    },
    /*
@@ -233,6 +234,13 @@ AppController = Ext.extend(Object, {
        var el = event.getTarget('.designComponent');
        if (el) {
            this.highlightElement(el.id);
+           var modelId = ModelUtils.parseModelId(el.id);
+           var model = this._model.findModelById(modelId);
+           //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
+           var win = Ext.getCmp(self._lastQuicPropertyId)
+           if (win) win.close()
+           
+           self._lastQuicPropertyId = this._editorManager.quickEditModel(model);
        }
    },
    onTreeNodeClick:function(node, e) {

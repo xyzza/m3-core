@@ -139,7 +139,6 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
     saveModel:function(eventObj) {
         // в ивент обжекте приходят объект модели и объект source из грида
         // далее копируются свойства из сурса в атрибуты модели
-        
         for (var i in eventObj.model.attributes) {
             if (eventObj.source.hasOwnProperty(i) )
             {

@@ -179,7 +179,7 @@ ModelUIPresentaitionBuilder = function() {
             return  Ext.apply(cfg, {
                 xtype:'grid',
                 cls:'designContainer designComponent',
-                id:'cmp-'+model.id,
+                id: ModelUtils.parseModelIdToDomId(model.id),
                 store: store,
                 colModel:new Ext.grid.ColumnModel({
                     columns:columns
@@ -219,7 +219,7 @@ ModelUIPresentaitionBuilder = function() {
          */
         build:function(model) {
             var cfg = Ext.apply({}, model.attributes.properties);
-            cfg.id = 'cmp-' + model.id;
+            cfg.id = ModelUtils.parseModelIdToDomId(model.id);
             if (ModelTypeLibrary.isTypeContainer(model.attributes.type)) {
                 cfg.cls = 'designContainer designComponent';
                 cfg.items = [];
