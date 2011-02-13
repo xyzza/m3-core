@@ -7,8 +7,21 @@
  */
 
 ModelTransfer = Ext.apply({},{
-
+    doToolbarWorkaround:function(property, componentNode){
+        //Ладно, кто бы что не говорил тулбары архитектурно некрасивы в 3 эксте кто бы что не говорил, я счетаю
+        if (componentNode.attributes.type == 'toolbar' && (property == 'tbar' ||
+                property == 'fbar' || property == 'bbar' )) {
+            componentNode.attributes.properties.parentDockType = property;
+        }
+        else {
+            componentNode.attributes.properties.parentDockType = '(none)';
+        }
+    },
     childPropertyObjects:{
+        mapedToPropertiesTypes:['store','tbar','fbar','bbar'],
+        isPropertyMapedType:function(property) {
+            return this.mapedToPropertiesTypes.indexOf(property) > 0;
+        },
         getTypeProperty:function(model) {
             if (this.hasOwnProperty(model.attributes.type)) {
                 return this[model.attributes.type](model);
@@ -54,6 +67,65 @@ ModelTransfer = Ext.apply({},{
 
         result.model = doRecursion.call(this,model.root);
 
+        return result;
+    },
+    _cleanConfig:function(jsonObj) {
+        //Удаляеца items из объекта. Значение id присваиваецо атрибуту serverId,
+        //тк внутри js код используются внутренний id'шники
+        var config = {
+            properties:{
+            }
+        };
+        Ext.apply(config.properties, jsonObj);
+        config.type = jsonObj.type;
+        Ext.destroyMembers(config, 'items');
+        Ext.destroyMembers(config.properties,'type');
+        for (var p in jsonObj) {
+            if (this.childPropertyObjects.isPropertyMapedType(p)) {
+                Ext.destroyMembers(config,p);
+            }
+        }
+        return config;
+    },
+    deserialize:function(jsonObj) {
+        //обходит json дерево и строт цивилизованое дерево с нодами, событьями и проч
+        var root = new ComponentModel(this._cleanConfig(jsonObj));
+
+        var callBack = function(jsonObj) {
+            var newNode = new ComponentModel(this._cleanConfig(jsonObj));
+
+            for (var p in jsonObj) {
+                if (this.childPropertyObjects.isPropertyMapedType(p)) {
+                    var child = callBack.call(this, jsonObj[p]);
+                    newNode.appendChild(child);
+                    this.doToolbarWorkaround(p, child)
+                }
+            }
+
+            if (jsonObj.items) {
+                for (var i = 0; i < jsonObj.items.length; i++) {
+                    newNode.appendChild(callBack.call(this, jsonObj.items[i]));
+                }
+            }
+            return newNode;
+        };
+
+        if (jsonObj.items) {
+            for (var i = 0; i < jsonObj.items.length; i++) {
+                root.appendChild(callBack.call(this,root, jsonObj.items[i]))
+            }
+        }
+
+        for (var p in jsonObj) {
+            if (this.childPropertyObjects.isPropertyMapedType(p)) {
+                var child = callBack.call(this, jsonObj[p]);
+                root.appendChild(child);
+                this.doToolbarWorkaround(p, child);
+            }
+        }
+
+        var result = new DocumentModel(root);
+        result.initOrderIndexes();
         return result;
     }
 });

@@ -21,9 +21,9 @@ AppController = Ext.extend(Object, {
     constructor: function(config) {
        Ext.apply(this, config);
    },
-   init: function(documentCfg) {
+   init: function(formCfg) {
        //создаем модель
-       this._model = DocumentModel.initFromJson(documentCfg);
+       this._model = ModelTransfer.deserialize(formCfg);
        //создаем объекты представления модели
        this._treeView = new ComponentTreeView(this.tree, this._model);
        this._designView = new DesignView(this.designPanel, this._model);

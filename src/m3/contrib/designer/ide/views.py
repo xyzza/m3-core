@@ -58,13 +58,21 @@ def designer_fake_data(request):
     '''
 
     result = {
-            'properties': {
-                'id':'Ext window',
-                'title':'Ma teh window',
-                'layout':'fit',
-            },
+            'title':'Ma teh window',
+            'layout':'fit',
             'type':'window',
-            'id':0
+            'id':'self',
+            'tbar': {
+                'type':'toolbar',
+                'id' : 'toolbar',
+                'items': [ {
+                        'type':'button',
+                        'id':'bla',
+                        'text':'freaking button'
+                    }
+                ]
+            }
+
         }
 
     return HttpResponse(content_type='application/json', 

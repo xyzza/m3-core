@@ -64,7 +64,6 @@ ComponentModel = Ext.extend(Ext.data.Node, {
 DocumentModel = Ext.extend(Ext.data.Tree, {
     constructor:function(root) {
         DocumentModel.superclass.constructor.call(this, root);
-        this.on('remove', this._onRemove);
     },
     /**
      * Поиск модели по id. Это именно поиск с обходом. Может быть в дальнейшем стоит разобраться
@@ -134,71 +133,5 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
                 next = next.nextSibling;
             }
         });
-    },
-    /*
-    * Обработчик при удалении дочернего компонента
-     */
-    _onRemove:function(tree, parent, node) {
-        //будем сохранять только те компоненты, что существуют на сервере
-        //в делетед итемс кладутся только данные, те если положить сам объект ComponentModel
-        //то после опреации remove из него будут почищены дочерние свойства
-        if (node.attributes.serverId) {
-            var doRecursion = function(item) {
-                var newNode = {
-                    id:item.attributes.id,
-                    type:item.attributes.type
-                };
-
-                if (item.isContainer()) {
-                    newNode.items = [];
-                    for (var i=0;i<item.childNodes.length;i++) {
-                        newNode.items.push(doRecursion(item.childNodes[i]))
-                    }
-                }
-                return newNode;
-            };
-
-            var item = doRecursion(node);
-        }
     }
 });
-
-/**
- * "Статические" методы - по json передаваемому с сервера строит древовидную модель
- * @param jsonObj - сериализованая модель
- */
-DocumentModel._cleanConfig = function(jsonObj) {
-    //Удаляеца items из объекта. Значение id присваиваецо атрибуту serverId,
-    //тк внутри js код используются внутренний id'шники
-    var config = Ext.apply({}, jsonObj);
-    Ext.destroyMembers(config, 'items');
-    if (jsonObj.hasOwnProperty('id')) {
-        config.serverId = jsonObj.id;
-    }
-    return config;
-};
-
-DocumentModel.initFromJson = function(jsonObj) {
-    //обходит json дерево и строт цивилизованое дерево с нодами, событьями и проч
-    var root = new ComponentModel(DocumentModel._cleanConfig(jsonObj));
-
-    var callBack = function(node, jsonObj) {
-        var newNode = new ComponentModel(DocumentModel._cleanConfig(jsonObj));
-        node.appendChild(newNode);
-        if (!jsonObj.items)
-            return;
-        for (var i = 0; i < jsonObj.items.length; i++) {
-            callBack(newNode, jsonObj.items[i])
-        }
-    };
-
-    if (jsonObj.items) {
-        for (var i = 0; i < jsonObj.items.length; i++) {
-            callBack(root, jsonObj.items[i])
-        }
-    }
-
-    var result = new DocumentModel(root);
-    result.initOrderIndexes();
-    return result;
-};
