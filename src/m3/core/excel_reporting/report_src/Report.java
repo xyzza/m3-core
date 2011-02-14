@@ -2,7 +2,7 @@
  * Excel report generator for platform BARS M3
  * Author: Safiullin Vadim
  * License: BSD
- * Version: 0.3 development in progress
+ * Version: 0.6 development in progress
  */
 
 import java.io.FileInputStream;
@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -89,6 +90,7 @@ class ReportGenerator{
 	static final String TAG_REPEAT_START = "#ПОВТОРЯТЬСТРОКУ";
 	static final String TAG_REPEAT_END = "##ПОВТОРЯТЬСТРОКУ";
 	static final String TAG_AUTOHIGHT = "#АВТОВЫСОТА";
+	static final String TAG_MERGE = "#ОБЪЕДИНИТЬ";
 	
 	public static ReportGenerator createFromFiles(String encoding, String JSON_filename)
 	throws IOException, InvalidFormatException, ParseException{
@@ -110,7 +112,12 @@ class ReportGenerator{
 	Workbook in_book;
 	JSONObject root;
 	Sheet in_sheet, out_sheet;
+	
+	// Список объединенных регионов на листе
 	ArrayList<CellRangeAddress> merged_regions;
+	
+	// Словарь с номерами и регионами на листе, которые нужно объединить после рендеринга
+	Map<Integer, ExpandingArea> cellsToMegre = new HashMap<Integer, ExpandingArea>();
 	
 	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
 	// Они запоминаются и используются в дальнейшем
@@ -142,26 +149,48 @@ class ReportGenerator{
 	/**
 	 * Вызывается из копирования ячейки, чтобы запомнить позиции ячеек помеченных специальными тегами.
 	 * Сделать это можно только тут, т.к. новые ячейки имеют другие координаты
+	 * Сам метод является своебразным изощренным костылем
 	 * @param oldCell старая ячейка содержащая комментарий
 	 * @param newCell новая ячейка
-	 */
-	private void saveSpecialCellPositions(Cell oldCell, Cell newCell){
+	 * @throws Exception 
+	 */	
+	private void saveSpecialCellPositions(Cell oldCell, Cell newCell) throws Exception{
 		Comment comment = oldCell.getCellComment();
-		if (comment!=null){
+		if (comment != null){
 			String text = comment.getString().getString().toUpperCase();
 			if (text.equals(TAG_REPEAT_START))
 				cell_repeat_tag_start = newCell;
+			
 			else if (text.equals(TAG_REPEAT_END))
 				cell_repeat_tag_end = newCell;
+			
+			else if (text.substring(0, TAG_MERGE.length()).equals(TAG_MERGE)){
+				// Извлекаем из тега номер области
+				String num = text.substring(TAG_MERGE.length() + 1);
+				Integer key = null;
+				try{
+					key = Integer.parseInt(num);
+				}catch (Exception e){
+					throw new Exception("Number in merge tag '" + text + "' is not correct");
+				}
+				ExpandingArea values = cellsToMegre.get(key);
+				if (values == null){
+					values = new ExpandingArea();
+					cellsToMegre.put(key, values);
+				}
+				values.addCell(newCell);
+			}
 		}
+
 	}
 	
 	/**
 	 * Копирование ячейки 1 к 1
 	 * @param oldCell
 	 * @param newCell
+	 * @throws Exception 
 	 */
-	private void copyCell(Cell oldCell, Cell newCell){
+	private void copyCell(Cell oldCell, Cell newCell) throws Exception{
 		saveSpecialCellPositions(oldCell, newCell);
         newCell.setCellStyle(oldCell.getCellStyle());
 
@@ -676,8 +705,9 @@ class ReportGenerator{
 	 * @param end_row Конечная строка интервала сдвига
 	 * @param start_col Колонка с которой начинается сдвиг (включительно)
 	 * @param offset Количество смещаемых колонок
+	 * @throws Exception 
 	 */
-	private void horizontalShift(Sheet sheet, int start_row, int end_row, int start_col, int offset){
+	private void horizontalShift(Sheet sheet, int start_row, int end_row, int start_col, int offset) throws Exception{
 		for (int row_num = start_row; row_num <= end_row; row_num++){
 			Row current_row = sheet.getRow(row_num);
 			if (current_row == null)
@@ -722,8 +752,9 @@ class ReportGenerator{
 	 * @param destSheet Целевая страница на которую пишем ячейки
 	 * @param row_offset Номер строки с которая начинается запись региона
 	 * @param col_offset Номер колонки с которой начинается запись региона
+	 * @throws Exception 
 	 */
-	private void copyRegion(SheetRegion sourceRegion, Sheet sourceSheet, Sheet destSheet, int row_offset, int col_offset){
+	private void copyRegion(SheetRegion sourceRegion, Sheet sourceSheet, Sheet destSheet, int row_offset, int col_offset) throws Exception{
 		// Для каждой строки в регионе
 		for (int row_num = sourceRegion.start_row; row_num <= sourceRegion.end_row; row_num++){
 			Row current_row = sourceSheet.getRow(row_num);
@@ -794,7 +825,7 @@ class ReportGenerator{
 		int start_scan_row = 0;
 		for(;;){
 			// Ищем начальный тег горизонтального региона
-			Cell start_cell = Scan(in_sheet, start_scan_row, -1, -1, -1, "%", false, 1);
+			Cell start_cell = Scan(in_sheet, start_scan_row, -1, -1, -1, "%", false, TagMatchMode.FIRST);
 			if (start_cell == null)
 				break;
 			
@@ -808,7 +839,7 @@ class ReportGenerator{
 			String tag = start_cell.getStringCellValue();
 			
 			// Ищем конечный тег горизонтального региона
-			Cell end_cell = Scan(in_sheet, tag_region.start_row, -1, tag_region.start_col, tag_region.start_col, "%" + tag, false, 0);
+			Cell end_cell = Scan(in_sheet, tag_region.start_row, -1, tag_region.start_col, tag_region.start_col, "%" + tag, false, TagMatchMode.STRICT);
 			if (end_cell == null)
 				throw new Exception("End of region " + tag + " not found");
 			tag_region.end_row = end_cell.getRowIndex() - 1;
@@ -837,12 +868,8 @@ class ReportGenerator{
 		}
 	}
 	
-	private Cell Scan(Sheet sheet, SheetRegion region, String token, boolean in_comments, int mode){
-		return Scan(sheet, region.start_row, region.end_row, region.start_col, region.end_col, token, in_comments, mode);
-	}
-	
 	private Cell Scan(Sheet sheet, int start_row, int end_row, int start_col, int end_col, 
-					  String token, boolean in_comments, int mode){
+					  String token, boolean in_comments, TagMatchMode mode){
 		// Подготовка интервалов
 		int srow = start_row;
 		if (start_row < 0)
@@ -884,12 +911,10 @@ class ReportGenerator{
 				}
 				
 				// Сравнение зависит от режима
-				// 0 - полное регистронезависимое соответствие
-				// 1 - с начала строки (как правило поиск начала тега)
-				if (mode == 0){
+				if (mode == TagMatchMode.STRICT){
 					if (text.toUpperCase().equals(token.toUpperCase()))
 						return cell;
-				}else if (mode == 1){
+				}else if (mode == TagMatchMode.FIRST){
 					if (text.substring(0, token.length()).equals(token))
 						return cell;
 				}
@@ -907,7 +932,7 @@ class ReportGenerator{
 	public void setRepeatedArea(ArrayList<RepeatCells> repeat_cells){
 		for (RepeatCells rc: repeat_cells){
 			if (rc.start_cell != null){
-				RepeatedArea area = new RepeatedArea();
+				Area area = new Area();
 				if (rc.end_cell != null){
 					// Есть завершающий тег, то повторять интервал между ними
 					area.start_row = rc.start_cell.getRowIndex();
@@ -976,14 +1001,15 @@ class ReportGenerator{
 		for (int sheet_index = 0; sheet_index < sheet_count; sheet_index++){
 			cell_repeat_tag_start = null;
 			cell_repeat_tag_end = null;
+			cellsToMegre.clear();
 			
 			in_sheet = in_book.getSheetAt(sheet_index);
 			out_sheet = createShadowSheet(in_sheet);
 			
 			// Предварительная развертка горизонтальных регионов
 			grow_horizontal_regions();
-			clean_unused_tags(in_sheet);
-		
+			
+			// Заполняем исходные смежные регионы
 			merged_regions = getMergedRegions(in_sheet);
 		
 			Range range = new Range();
@@ -991,7 +1017,17 @@ class ReportGenerator{
 			range.end_row = in_sheet.getLastRowNum();
 			renderRange(root, range, range.start_row);
 			
+			// Объединение собранных во время рендеринга ячеек с тегом TAG_MERGE
+			for(Entry<Integer, ExpandingArea> entry: cellsToMegre.entrySet()){
+				ExpandingArea area = entry.getValue();
+				CellRangeAddress cra = new CellRangeAddress(area.start_row, area.end_row, area.start_col, area.end_col);
+				out_sheet.addMergedRegion(cra);
+			}
+			
+			// Установка повторяющихся строк. Как правило это шапка таблицы, одинковая для всех страниц
 			repeat_cells.add(new RepeatCells(out_sheet, cell_repeat_tag_start, cell_repeat_tag_end));
+			
+			clean_unused_tags(out_sheet);
 			
 			// Копируем область печати (больше не копируем - должна определяться сама при предв. просмотре в экселе)
 			//String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
@@ -1078,13 +1114,54 @@ class SheetRegion{
 }
 
 /*
- * Хранит повторяемую область для печати
+ * Хранит координаты области на листе.
  */
-class RepeatedArea{
+class Area{
 	int start_row = -1;
 	int end_row = -1;
 	int start_col = -1;
 	int end_col = -1;
+}
+
+/*
+ * Позволяет расширять область ячейками
+ */
+class ExpandingArea extends Area{
+	boolean initialized = false;
+	
+	public CellRangeAddress toCellRangeAddress() {
+		CellRangeAddress addr = new CellRangeAddress(start_row, end_row, start_col, end_col);
+		return addr;
+	}
+	
+	public void addCell(Cell cell){
+		// Расширяющаяся вселенная
+		int col = cell.getColumnIndex();
+		int row = cell.getRowIndex();
+		//System.out.println("Col:" + col + " Row:" + row);
+		if (!initialized){
+			start_col = col;
+			end_col = col;
+			start_row = row;
+			end_row = row;
+			initialized = true;
+		}else{
+			if ((row > end_row) || (col > end_col)){
+				end_col = col;
+				end_row = row;
+			}else if ((row < start_row) || (col < start_col)){
+				start_col = col;
+				start_row = row;
+			}
+		}
+	}
+}
+
+/*
+ * Перечисление определяющее режим поиска тегов
+ */
+enum TagMatchMode{
+	STRICT, FIRST
 }
 
 //TODO: Копирование рисунков
