@@ -77,7 +77,11 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
     }
 	,initBaseTrigger: function(){
 		this.baseTriggers[0].handler = this.onTriggerClick;
-		this.baseTriggers[1].handler = function(){ this.setValue( new Date() ); };
+		this.baseTriggers[1].handler = function(){ 
+			var today = new Date();
+			this.setValue( today );
+			this.fireEvent('select', this, today);
+		};
 		this.baseTriggers[1].hide = this.hideTriggerToday;
 	}
 
