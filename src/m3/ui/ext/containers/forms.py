@@ -612,6 +612,7 @@ class ExtTabPanel(BaseExtPanel):
     @version: 0.1
     @begin_designer
     {title: "Tab panel"
+    ,activeTab: 0
     ,ext_class: "Ext.TabPanel"
     ,xtype: "tabpanel"
     ,attr: [{
@@ -626,6 +627,7 @@ class ExtTabPanel(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-tab-panel.js'
+        self.active_tab = 0
         self.enable_tab_scroll = True
         self.border = True
         self.body_border = True
@@ -646,7 +648,7 @@ class ExtTabPanel(BaseExtPanel):
     @property
     def items(self):
         return self._items
-    
+
 #===============================================================================    
 class ExtFieldSet(ExtPanel):
     '''

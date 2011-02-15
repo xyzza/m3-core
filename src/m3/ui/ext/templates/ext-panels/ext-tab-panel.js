@@ -4,7 +4,7 @@ new Ext.TabPanel({
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
 	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
     {% if component.deferred_render != None %},deferredRender: {{ component.deferred_render|lower }} {% endif %}
-    ,activeTab:0
+    ,activeTab: {% if component.active_tab %}{{ component.active_tab }}{% else %}0{% endif %}
 	,autoWidth: true
     {% if component.enable_tab_scroll %}
     ,enableTabScroll: true
