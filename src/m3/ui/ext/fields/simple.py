@@ -159,6 +159,9 @@ class ExtNumberField(BaseExtField):
         ext_attr: "minValue"
         ,py_attr: "min_value"
     },{
+        ext_attr: "decimalSeparator"
+        ,py_attr: "decimal_separator"
+    },{
         ext_attr: "minText"
         ,py_attr: "min_text"
     }]}
@@ -168,6 +171,7 @@ class ExtNumberField(BaseExtField):
         super(ExtNumberField, self).__init__(*args, **kwargs)
         #self.template = 'ext-fields/ext-number-field.js'
         # Свойства валидации специфичные для чисел
+        self.decimal_separator = None
         self.allow_decimals = True
         self.allow_negative = True
         self.decimal_precision = None
@@ -180,7 +184,8 @@ class ExtNumberField(BaseExtField):
         
     def render_base_config(self):
         super(ExtNumberField, self).render_base_config()
-        self._put_config_value('allowDecimals', self.allow_decimals)
+        self._put_config_value('decimalSeparator', self.decimal_separator)
+        self._put_config_value('allowDecimals', self.allow_decimals)        
         self._put_config_value('allowNegative', self.allow_negative)
         self._put_config_value('decimalPrecision', self.decimal_precision)
         self._put_config_value('minValue', self.min_value)
