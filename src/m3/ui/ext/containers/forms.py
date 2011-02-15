@@ -358,7 +358,8 @@ class ExtForm(BaseExtPanel):
             val = item.value
             if isinstance(item, ExtNumberField):
                 # для языков, где decimal разделяются не точкой
-                val = val.replace(item.decimal_separator, '.')            
+                if item.decimal_separator: 
+                    val = val.replace(item.decimal_separator, '.')            
                 if val:
                     try:
                         val = int(val)
