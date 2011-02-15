@@ -32,11 +32,11 @@ Ext.onReady(function(){
 	  ,listeners: {
 	
 	    'beforeshow': function (){
-	      renderTo = Ext.get(this.renderTo); 
-	      if ( renderTo ) {
-	        if (renderTo.getHeight() < this.getHeight() ) 
-	          this.setHeight( renderTo.getHeight() );
-	      }
+                var renderTo = Ext.get(this.renderTo); 
+                if ( renderTo ) {
+                    if (renderTo.getHeight() < this.getHeight() ) 
+                        this.setHeight( renderTo.getHeight() );
+                }
 				
 				if (this.parentWindow) {
 					
