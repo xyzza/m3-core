@@ -16,11 +16,11 @@ from django.conf import settings
 
 from m3.ui.ext.fields.base import BaseExtField
 from m3.ui.ext.fields import (ExtNumberField, 
-                                     ExtStringField, 
-                                     ExtDateField,
-                                     ExtCheckBox, ExtComboBox, ExtTimeField,
-                                     ExtHiddenField,
-                                     ExtFileUploadField,ExtImageUploadField)
+                              ExtStringField, 
+                              ExtDateField,
+                              ExtCheckBox, ExtComboBox, ExtTimeField,
+                              ExtHiddenField,
+                              ExtFileUploadField,ExtImageUploadField)
 # В качестве значений списка TypedList атрибутов могут выступать объекты:
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent
@@ -397,6 +397,8 @@ class ExtForm(BaseExtPanel):
             '''
             val = item.value
             if isinstance(item, ExtNumberField):
+                # для языков, где decimal разделяются не точкой
+                val = val.replace(item.decimal_separator, '.')            
                 if val:
                     try:
                         val = int(val)

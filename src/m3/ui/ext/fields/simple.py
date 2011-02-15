@@ -202,8 +202,16 @@ class ExtNumberField(BaseExtField):
         
         base_config = self._get_config_str()
         return 'new Ext.form.NumberField({%s})' % base_config
+
+#===============================================================================
+
+class ExtRuNumberField(ExtNumberField):
+    def __init__(self, *args, **kwargs):
+        super(ExtRuNumberField, self).__init__(*args, **kwargs)
+        self.decimal_separator = ','
         
-#===============================================================================        
+#===============================================================================
+
 class ExtHiddenField(BaseExtField):
     ''' 
     Скрытое поле, которое не видно пользователю на форме, но хранит значение
