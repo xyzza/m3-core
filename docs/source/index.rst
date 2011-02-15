@@ -1,30 +1,29 @@
-.. M3 documentation master file, created by
-   sphinx-quickstart on Wed Dec  1 09:48:42 2010.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-Welcome to M3's documentation!
+Документация по платформе m3
 ==============================
 
-Contents:
+Здесь должно быть описание платформы, основные моменты
 
 .. toctree::
    :maxdepth: 2
 
-Indices and tables
+   contrib.rst
+   core.rst
+   data.rst
+   db.rst
+   helpers.rst
+   static.rst
+   actions.rst
+   ui.rst
+   vendor.rst
+   workflow.rst
+
+
+Индексы
 ==================
- 
+
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
-m3.ui.actions.packs
-===================
-
-    Здесь могут быть картинки и прочая документация к action packs
-    
-.. automodule:: m3.ui.actions.packs
-  :members:
   
 
