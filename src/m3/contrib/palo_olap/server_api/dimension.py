@@ -183,6 +183,8 @@ class PaloDimension():
             if name.find(',')>-1:
                 name = name.replace('",', '" ,') #заменим недопустимые сиволы
                 need_q = True
+            if name[-1] == '"':
+                name = name+'.'
             for wrong in [';']:
                 if name.find(wrong)>-1:
                     need_q = True
@@ -190,14 +192,12 @@ class PaloDimension():
                 name = name.replace(bad, '')
             if need_q:
                 name = '"%s"' % name
-            
             return name
         assert len(names)!=0
         CMD = 'element/create_bulk'
         first_name = names.pop(0)
         start_id = self.create_element(first_name, type)
-        names = [norm_name(obj) for obj in names]        
-        
+        names = [norm_name(obj) for obj in names]
         str_names = ','.join(names)
         try:
             str_names = str_names.encode('utf-8')
