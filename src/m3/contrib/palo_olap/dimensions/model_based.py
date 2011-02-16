@@ -16,6 +16,7 @@ class ModelBasedPaloDimension(BasePaloDimension):
     '''
     model = None #моедель на основании котороу бедм стороить дименшен
     unknow_name = u'Неизвестно' #задает имя элемента НЕИЗВЕСТО если задать None то создавать не будет
+    need_unknow_element = False #нужно ли создавать элемент "Неизвестно"
     name_field = 'name' #поле в котором лежит имя или можно перекрыть функцию get_name которая будет возвращать имя в этом случае не забудь перекрыть функции get_not_unique_names
     check_unique_name = True #проверять уникальность имени (черещ процедуру get_not_unique_names
     sort_fields = [name_field] #порядок сортировки список полей которые передадауться а query.order-by
@@ -167,7 +168,7 @@ class ModelBasedPaloDimension(BasePaloDimension):
         '''
         if self.need_all_consolidate_element:
             self._all_id = self.get_or_create_consolidate_element(self.get_all_consolidate_element_name())
-        if self.unknow_name:
+        if self.need_unknow_element:
             self._unknown_id = self.get_or_create_consolidate_element(self.unknow_name, ELEMENT_TYPE_NUMERIC)
     
     def get_name(self, obj):

@@ -124,7 +124,7 @@ class PaloDimension(BasePaloDimension):
         но мы запотимся о памяти и просто вставим элемент в лист
         '''
         data = self.get_data()
-        if not self.get_all_consolidate_element_name() in data:
+        if self.need_all_consolidate_element and not self.get_all_consolidate_element_name() in data:
             data.append(self.get_all_consolidate_element_name())
         return data
 
