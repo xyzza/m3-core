@@ -141,6 +141,7 @@ class PaloCube(object):
         values = ':'.join(map(unicode, self._bulk_coords.values()))
         self._cube.replace_bulk(paths, values)
         self._bulked = False
+        self._bulk_coords = {}
         
     def _find_coordinate(self, dim, params):
         '''

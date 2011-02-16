@@ -1,5 +1,6 @@
 #coding:utf-8
 import datetime
+import copy
 from m3.contrib.palo_olap.server_api.dimension import ELEMENT_TYPE_CONSOLIDATED, ELEMENT_TYPE_NUMERIC
 
 class SingletonMeta(type):
@@ -123,7 +124,7 @@ class PaloDimension(BasePaloDimension):
         для сохраннеия общности пришлось бы копировать список ([self.get_all_consolidate_element_name(), ].extend(self.get_data())
         но мы запотимся о памяти и просто вставим элемент в лист
         '''
-        data = self.get_data()
+        data = copy.copy(self.get_data())
         if self.need_all_consolidate_element and not self.get_all_consolidate_element_name() in data:
             data.append(self.get_all_consolidate_element_name())
         return data

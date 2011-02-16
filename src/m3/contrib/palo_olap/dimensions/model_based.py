@@ -18,6 +18,7 @@ class ModelBasedPaloDimension(BasePaloDimension):
     unknow_name = u'Неизвестно' #задает имя элемента НЕИЗВЕСТО если задать None то создавать не будет
     need_unknow_element = False #нужно ли создавать элемент "Неизвестно"
     name_field = 'name' #поле в котором лежит имя или можно перекрыть функцию get_name которая будет возвращать имя в этом случае не забудь перекрыть функции get_not_unique_names
+    name_attr = None #атрибут объекта для получения наименования, отличается от name_field тем, что не используется для фильтрации
     check_unique_name = True #проверять уникальность имени (черещ процедуру get_not_unique_names
     sort_fields = [name_field] #порядок сортировки список полей которые передадауться а query.order-by
 
@@ -175,9 +176,11 @@ class ModelBasedPaloDimension(BasePaloDimension):
         '''
         возвращает имя элемента или по фиелду или по функции
         '''
-        name = getattr(obj,self.name_field)        
+        name = getattr(obj, self.name_attr if self.name_attr else self.name_field)
+        if callable(name):
+            name = name()
         if self._not_unique_name.has_key(name):
-            name = self.regenerate_name(obj)
+            name = self.regenerate_name(obj, name)
         return name
     
     def get_not_unique_names(self):
@@ -208,11 +211,11 @@ class ModelBasedPaloDimension(BasePaloDimension):
 
         return res
     
-    def regenerate_name(self, obj):
+    def regenerate_name(self, obj, name):
         '''
         регенерирует имя для элемента у которого имя оказалось в списке дублей
         '''
-        return '%s (%i)' % (getattr(obj, self.name_field), obj.id)
+        return '%s (%i)' % (name, obj.id)
 
     def get_model_query(self):
         '''
