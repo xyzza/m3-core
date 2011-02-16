@@ -490,6 +490,7 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
     on_overlap_error: действие при возникновении ошибки перекрытия диапазонов записей
     0 - вызвать exception
     1 - изменить интервал записи с ранней датой начала
+    2 - выдать список ID глючных элементов, которые пропущены (после исправления придется еще раз запускать пересчет)
     ''' 
     
     def eq_keys(dims, key1, key2):
@@ -516,6 +517,7 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
     query = cls.objects
     order = []
     dims = []
+    error_ids = []
     period = cls.period
     for dim_field in cls.dimentions:
         dim_attr = dim_field
@@ -550,7 +552,12 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
                 if on_overlap_error == 1:
                     last_rec.info_date_end = normdate(period, shift_date(period, rec.info_date_begin, -1), False)
                 else:
-                    raise OverlapError()
+                    # если ведем лог ошибочных записей, то продолжим
+                    if on_overlap_error == 2:
+                        error_ids.append(rec.id)
+                        continue
+                    else:
+                        raise OverlapError()
             
             last_rec.info_date_next = rec.info_date_begin
             last_rec._save()
@@ -561,3 +568,5 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
     if last_rec:
         last_rec.info_date_next = normdate(period, datetime.max, False)
         last_rec._save()
+    if error_ids and on_overlap_error == 2:
+        return error_ids
