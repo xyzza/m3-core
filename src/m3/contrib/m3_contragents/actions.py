@@ -25,10 +25,13 @@ class ContragentActionPack(actions.ActionPack):
         super(ContragentActionPack, self).__init__()
         self.actions.extend([DataContragentContactAction(),
                              SaveContragentContactAction(),
+                             DeleteContragentContactAction(),
                              DataContragentAddressAction(),
                              SaveContragentAddressAction(),
+                             DeleteContragentAddressAction(),
                              DataContragentBankDetailsAction(),
-                             SaveContragentBankDetailsAction()])
+                             SaveContragentBankDetailsAction(),
+                             DeleteContragentBankDetailsAction(),])
         
         
 #===============================================================================
@@ -77,6 +80,20 @@ class SaveContragentContactAction(actions.Action):
         pass
         
 
+class DeleteContragentContactAction(actions.Action):
+    '''
+    Удаление контакта контрагента
+    '''
+    url = '/contacts-delete'
+    shortname = 'm3-contragents-contacts-delete'
+    
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_contact_id', type=int, required=True),]
+    
+    def run(self, request, context):
+        message = u'' if api.delete_contragent_contact(context.contragent_contact_id) else u'Не удалось удалить запись о контакте. На нее есть ссылки в базе данных'
+        return actions.OperationResult.by_message(message)
+    
 #===============================================================================
 # Работа с адресами контрагента
 #===============================================================================
@@ -118,6 +135,19 @@ class SaveContragentAddressAction(actions.Action):
         # TODO: написать форму с данными адресов 
         pass
     
+class DeleteContragentAddressAction(actions.Action):
+    '''
+    Удаление контакта контрагента
+    '''
+    url = '/address-delete'
+    shortname = 'm3-contragents-address-delete'
+    
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_address_id', type=int, required=True),]
+    
+    def run(self, request, context):
+        message = u'' if api.delete_contragent_address(context.contragent_address_id) else u'Не удалось удалить запись об адресе. На нее есть ссылки в базе данных'
+        return actions.OperationResult.by_message(message)
     
 #===============================================================================
 # Работа с адресами контрагента
@@ -159,3 +189,17 @@ class SaveContragentBankDetailsAction(actions.Action):
         
         # TODO: написать форму с данными адресов 
         pass
+    
+class DeleteContragentBankDetailsAction(actions.Action):
+    '''
+    Удаление банковских реквизитов контрагента
+    '''
+    url = '/bank-details-delete'
+    shortname = 'm3-contragents-bank-details-delete'
+    
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_bank_detail_id', type=int, required=True),]
+    
+    def run(self, request, context):
+        message = u'' if api.delete_contragent_bank_detail(context.contragent_bank_detail_id) else u'Не удалось удалить запись о банковских реквизитах. На нее есть ссылки в базе данных'
+        return actions.OperationResult.by_message(message)
