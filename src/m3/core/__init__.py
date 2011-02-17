@@ -4,3 +4,4 @@
 Пакеты базовой части платформы.
 '''
 
+from exceptions import ApplicationLogicException
