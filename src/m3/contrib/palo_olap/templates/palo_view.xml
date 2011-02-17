@@ -6,21 +6,21 @@
 <axis id="cols" name="column" >
 {%for dim in cols%}
     <axis_hierarchy dimension_id="{{dim.id}}" hierarchy_id="{{dim.id}}" >
-        <selected_elements>0</selected_elements>
+        <selected_elements>{{dim.selected_id}}</selected_elements>
     </axis_hierarchy>
 {%endfor%}    
 </axis>
 <axis id="rows" name="row" >
 {%for dim in rows%}
     <axis_hierarchy dimension_id="{{dim.id}}" hierarchy_id="{{dim.id}}" >
-        <selected_elements>0</selected_elements>
+        <selected_elements>{{dim.selected_id}}</selected_elements>
     </axis_hierarchy>
 {%endfor%}    
 </axis>
 <axis id="selected" name="selection" >
 {%for dim in selected%}
     <axis_hierarchy dimension_id="{{dim.id}}" hierarchy_id="{{dim.id}}" >
-        <selected_elements>0</selected_elements>
+        <selected_elements>{{dim.selected_id}}</selected_elements>
     </axis_hierarchy>
 {%endfor%}    
 </axis>

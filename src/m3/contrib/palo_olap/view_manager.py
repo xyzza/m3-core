@@ -66,6 +66,10 @@ class ViewDifinition(object):
                 dim = dim() #превратим в синглетов
                 d = {}
                 d['id']=dim.get_palo_dimension_id()
+                if dim.need_all_consolidate_element:
+                    d['selected_id'] = dim.get_all_consolidate_element_id()
+                else:
+                    d['selected_id'] = 0 #TODO: что-то надо брать по умолчанию не понятно
                 res.append(d)
             return res
             

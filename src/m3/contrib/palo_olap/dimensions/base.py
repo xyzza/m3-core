@@ -44,7 +44,7 @@ class BasePaloDimension(object):
         '''
         возвращает имя для консолидайт элемента "ВСЕ"
         '''
-        return self.all_name or u'Все %s' % self.name.lower()    
+        return self.all_name or u'Все'    
 
     @property
     def processed(self):
