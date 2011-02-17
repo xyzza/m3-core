@@ -205,7 +205,7 @@ def get_contragent_contacts(contragent):
     Возвращает список контактной информации по указанному контрагенту
     '''
     return ContragentContact.objects.filter(contragent=contragent).order_by('-primary', 'id')
-
+       
 
 def get_contragent_addresses(contragent):
     '''
@@ -213,8 +213,67 @@ def get_contragent_addresses(contragent):
     '''
     return ContragentAddress.objects.filter(contragent=contragent).order_by('address_type', 'id')
 
+
 def get_contragent_bank_details(contragent):
     '''
     Возвращает список банковских реквизитов контрагента
     '''
-    return ContragentBankDetail.objects.filter(contragent=contragent).order_by('id')
+    return ContragentBankDetail.objects.filter(contragent=contragent)\
+                                       .select_related('bank_contragent')\
+                                       .order_by('id')
+
+
+#===============================================================================
+# Удаление информации по связанным с контрагентом таблицам из БД
+# (контакты, адреса, банковские реквизиты)
+#===============================================================================
+def _delete_contragent_detail(detail, model):
+    '''
+    Удаление записи о записи из таблицы с атрибутами контрагента. 
+    
+    Возвращает False в случае, если объект не был удален из базы данных по 
+    причине наличия ссылок на него. Во всех остальных случаях возвращается True
+    либо выдается исключительная ситуация.
+    '''
+    if not detail:
+        return True
+    
+    if isinstance(detail, int):
+        try:
+            object_to_delete = model.objects.get(pk=detail)
+        except model.DoesNotExist:
+            return True
+    else:
+        object_to_delete = detail
+        
+    return object_to_delete.safe_delete()
+
+def delete_contragent_contact(contact):
+    '''
+    Удаление записи о записи контакта контрагента из базы данных. 
+    
+    Возвращает False в случае, если объект не был удален из базы данных по 
+    причине наличия ссылок на него. Во всех остальных случаях возвращается True
+    либо выдается исключительная ситуация.
+    '''
+    return _delete_contragent_detail(contact, ContragentContact)
+    
+def delete_contragent_address(address):
+    '''
+    Удаление записи о записи адреса контрагента из базы данных. 
+    
+    Возвращает False в случае, если объект не был удален из базы данных по 
+    причине наличия ссылок на него. Во всех остальных случаях возвращается True
+    либо выдается исключительная ситуация.
+    '''
+    return _delete_contragent_detail(address, ContragentAddress)
+
+def delete_contragent_bank_detail(bank_detail):
+    '''
+    Удаление записи о записи банковских реквизитов из базы данных. 
+    
+    Возвращает False в случае, если объект не был удален из базы данных по 
+    причине наличия ссылок на него. Во всех остальных случаях возвращается True
+    либо выдается исключительная ситуация.
+    '''
+    return _delete_contragent_detail(bank_detail, ContragentBankDetail)

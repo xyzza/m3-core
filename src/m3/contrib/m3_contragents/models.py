@@ -92,7 +92,7 @@ class Contragent(BaseObjectModel):
 #===============================================================================
 # Банковские реквизиты
 #===============================================================================
-class ContragentBankDetail(models.Model):
+class ContragentBankDetail(BaseObjectModel):
     '''
     Модель хранения банковских реквизитов контрагента
     '''
@@ -105,6 +105,14 @@ class ContragentBankDetail(models.Model):
     rschet = models.CharField(max_length=20, null=True, blank=True)
     kschet = models.CharField(max_length=20, null=True, blank=True)
     lschet = models.CharField(max_length=100, null=True, blank=True)
+    
+    def bank(self):
+        '''
+        Возвращает имя банка, на основе пары полей bank_name и bank_contragent
+        '''
+        return self.bank_contragent.name() if self.bank_contragent else self.bank_name
+    
+    bank.json_encode = True 
     
     class Meta:
         db_table = 'm3_contragent_bankdetails'
