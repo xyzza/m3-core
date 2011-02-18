@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from django.core.mail import get_connection
 from django.core.mail.message import EmailMessage
 from django.utils.html import linebreaks
+from django.utils.encoding import force_unicode
 
 __all__ = ['init_logging', 'catch_error_500', 'info', 'error', 'debug', 'warning']
 
@@ -100,32 +101,32 @@ def exception(msg='', *args, **kwargs):
     try:
         e_type, e_value, e_traceback = sys.exc_info()
         e_vars = e_traceback.tb_frame.f_locals
-        res = ['Variables:\n']
+        res = [u'Variables:\n']
         
         if e_traceback.tb_frame.f_code.co_name != '<module>':
             for key, val in e_vars.items():
                 if key in donot_parse_keys:
                     continue
-                
-                res.append('%s: %s\n'.rjust(6)%(key,val))
+
+                res.append(u'%s: %s\n'.rjust(6)%(key,val))
                 if hasattr(val , '__dict__'):
                     for obj_item_key, obj_item_val in val.__dict__.items():
                         if obj_item_key[0] !='_':
-                            res.append('%s: %s\n'.rjust(12)%(obj_item_key, obj_item_val))
+                            res.append(u'%s: %s\n'.rjust(12) % (obj_item_key, force_unicode(obj_item_val)) )
         else:
             res = []
 
         e_vars_str = ''.join(res)
         tb = traceback.format_exception(e_type, e_value, e_traceback)
         
-        err_message = '\n %s %s %s' % (msg, u''.join(tb), e_vars_str)
+        err_message = u'\n %s %s %s' % (msg, u''.join(tb), e_vars_str)
         log.error(err_message)      
         
         # Отправка на почту
         send_mail_log(err_message, e_type.__name__)
       
     except:        
-        log.error('\n Некоррертная работа логера')
+        log.error(u'\n Некоррертная работа логера')
             
 
 def warning(msg, *args, **kwargs):
