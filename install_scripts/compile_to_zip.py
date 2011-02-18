@@ -135,10 +135,10 @@ if __name__ == '__main__':
         for file in distfiles.files.keys():
             linuxed_filename = file.replace('\\','/')
             if file[-3:].lower() == '.py':
-                if not '/migrations/' in linuxed_filename and not '/m3/vendor/' in linuxed_filename:
+                if not '/migrations/' in linuxed_filename and not '/vendor/' in linuxed_filename:
                     continue
             if file[-4:].lower() == '.pyc':
-                if '/migrations/' in linuxed_filename or '/m3/vendor/' in linuxed_filename:
+                if '/migrations/' in linuxed_filename or '/vendor/' in linuxed_filename:
                     continue
             zip.write(file, file[len(tempdir)+1:])
         zip.close()
