@@ -8,8 +8,9 @@ Created on 17.09.2010
 import threading
 
 from django.conf import settings
-
 from django.utils.importlib import import_module
+
+from m3.helpers import logger
 
 class ExtensionPoint:
     '''
@@ -88,25 +89,61 @@ class ExtensionManager:
         finally:
             self._write_lock.release()
     
+    def _validate_extension_point(self, extension_point):
+        '''
+        Проверяет точку расширения на возможность регистрации
+        в менеджере 
+        '''
+        return (extension_point and
+                isinstance(extension_point, ExtensionPoint) and
+                extension_point.name and
+                extension_point.name.strip() and
+                isinstance(extension_point.default_listener, ExtensionListener) and
+                not self.extensions.has_key(extension_point.name))
+    
     def register_point(self, extension_point):
         '''
         Добавляет точку расширения
         '''
-        if  not extension_point or \
-            not isinstance(extension_point, ExtensionPoint) or \
-            not extension_point.name or \
-            not extension_point.name.strip() or \
-            not isinstance(extension_point.default_listener, ExtensionListener) or \
-            self.extensions.has_key(extension_point.name):
-                # передали неправильное определение точки расширения
-                # ничего не делаем
-                return
+        if not self._validate_extension_point(extension_point):
+            return
         
         point_key = extension_point.name.strip()
         self.extensions[point_key] = extension_point
         self.listeners[point_key] = [extension_point.default_listener,]
     
-    append_point = register_point # для совместимости 
+    append_point = register_point # для совместимости
+    
+    def register_point_external(self, extension_point):
+        '''
+        Метод регистрации точки расширения, который должен использоваться
+        извне.
+        
+        Данный метод отличается от register_point тем, что при его
+        использовании выставляются внутренние локи, что потенциально
+        может привести к падению производительности системы.
+        
+        Поэтому, если не лень, используйте не декоратор @extension_point,
+        а пишите определение точки расширения в app_meta. Да прибудет с вами
+        сила, чтоле. 
+        '''
+        if not self._validate_extension_point(extension_point):
+            return 
+        
+        self._write_lock.acquire()
+        try:
+            self.register_point(extension_point) 
+        except:
+            logger.exception(u'Не удалось зарегистрировать точку расширения \'%s\'' % extension_point.name)
+        finally:
+            self._write_lock.release()
+            
+    def check_point_exists(self, extension_point_name):
+        '''
+        Проверяет, существует ли во внутреннем кеше определение
+        точки расширения с указанным именем
+        '''
+        return self.extensions.has_key(extension_point_name)
     
     def register_handler(self, extension_name, listener):
         '''
@@ -171,3 +208,30 @@ class ExtensionManager:
         '''
         self._populate()
         return self.listeners.get(extension_name, [])
+    
+    
+#===============================================================================
+# Декораторы для работы с точками расширения
+#===============================================================================
+def extension_point(name=''):
+    '''
+    Декортатор, с помощью которого определяется точка расширения.
+    
+    Данный декоратор должен использоваться над дефолтным хендлером
+    точки расширения с указанным именем name
+    
+    @param name: имя точки расширения 
+    '''
+    def inner(f):
+        def wrapper(*args, **kwargs):
+            return ExtensionManager().execute(name, *args, **kwargs)
+        # формируем определение точки расширения
+        if not ExtensionManager().check_point_exists(name):
+            # пытаемся добавить точку расширения
+            ExtensionManager().register_point_external(ExtensionPoint(name=name,default_listener=ExtensionHandler(f)))
+        return wrapper
+    return inner
+            
+    
+    
+    
