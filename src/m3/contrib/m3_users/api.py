@@ -14,6 +14,8 @@ from django.db import transaction
 from helpers import get_assigned_metaroles_query
 from metaroles import get_metarole
 
+from m3.db.api import get_object_by_id
+
 import models
 
 def get_user_metaroles(user):
@@ -64,3 +66,13 @@ def clear_user_roles(user):
     Убирает все роли у пользователя
     '''
     models.AssignedRole.objects.filter(user=user).delete()
+    
+    
+def get_user_by_id(user_id):
+    '''
+    Возвращает экземпляр пользователя (auth.User) по указанному идентификатору.
+    
+    В случае, если вдруг в user_id передан реальный пользователь, то
+    он и возвращается.
+    '''
+    return get_object_by_id(auth_models.User, user_id)
