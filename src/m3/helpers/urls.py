@@ -50,6 +50,13 @@ def get_pack(pack_name):
     pack_data = PacksNameCache().get(pack_name, None)
     return pack_data[0] if pack_data else None
 
+def get_pack_instance(pack_name):
+    '''
+    Получает экземпляр набора экшенов по имени из контроллеров
+    '''
+    pack_data = PacksNameCache().get(pack_name, None)
+    return pack_data[2] if pack_data else None
+
 def get_action(action_name):
     '''
     Возвращает полный класс экшена, объявленного с указанным
@@ -179,18 +186,18 @@ def inner_name_cache_handler(for_actions=True):
                 
                 key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
                 url = cleaned_action.__class__.absolute_url()
-                result[key] = (cleaned_action.__class__, url,)
+                result[key] = (cleaned_action.__class__, url, cleaned_action)
                 
                 shortname = get_shortname(cleaned_action)
                 if shortname:
-                    result[shortname] = (cleaned_action.__class__, url,)
+                    result[shortname] = (cleaned_action.__class__, url, cleaned_action)
         else:
             cleaned_pack = get_instance(pack)
             key = cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__
             url = cleaned_pack.__class__.absolute_url()
-            result[key] = (cleaned_pack.__class__, url)
+            result[key] = (cleaned_pack.__class__, url, cleaned_pack)
             shortname = get_shortname(cleaned_pack)
             if shortname:
-                result[shortname] = (cleaned_pack.__class__, url)
+                result[shortname] = (cleaned_pack.__class__, url, cleaned_pack)
             
     return result
