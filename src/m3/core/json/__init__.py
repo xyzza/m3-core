@@ -90,7 +90,11 @@ class M3JSONEncoder(json.JSONEncoder):
             if len(attribute) > 3 and attribute.endswith('_id'):
                 try:
                     field_name = attribute[0:len(attribute)-3]
-                    cleaned_dict[field_name + '_ref_name'] = getattr(getattr(obj, field_name), 'name')
+                    if getattr(getattr(obj, field_name), 'name'):
+                        if callable(getattr(getattr(obj, field_name), 'name')):
+                            cleaned_dict[field_name + '_ref_name'] = getattr(getattr(obj, field_name), 'name')()
+                        else:
+                            cleaned_dict[field_name + '_ref_name'] = getattr(getattr(obj, field_name), 'name')
                 except:
                     pass
             if len(attribute) > 6 and attribute.endswith('_cache'):
