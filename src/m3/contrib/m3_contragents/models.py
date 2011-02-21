@@ -40,7 +40,10 @@ class ContragentGroup(BaseObjectModel):
     # владелец группы контрагентов (это можно использовать для
     # организации подчиненности контрагентов
     owner = models.ForeignKey('m3_contragents.Contragent', null=True, blank=True)
-    
+
+    #ссылка на родительский элемент
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
+
     class Meta:
         db_table = 'm3_contragent_groups'
 
