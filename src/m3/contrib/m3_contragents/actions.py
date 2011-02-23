@@ -10,6 +10,7 @@ from m3.ui import actions
 
 import api
 import models
+import ui
 
 #===============================================================================
 # Набор действий по работе с контрагентами
@@ -23,12 +24,17 @@ class ContragentActionPack(actions.ActionPack):
     
     def __init__(self):
         super(ContragentActionPack, self).__init__()
-        self.actions.extend([DataContragentContactAction(),
+        self.actions.extend([ContragentContactListWindowAction(),
+                             DataContragentContactAction(),
                              SaveContragentContactAction(),
                              DeleteContragentContactAction(),
+                             
+                             ContragentAddressListWindowAction(),
                              DataContragentAddressAction(),
                              SaveContragentAddressAction(),
                              DeleteContragentAddressAction(),
+                             
+                             ContragentBankDetailListWindowAction(),
                              DataContragentBankDetailsAction(),
                              SaveContragentBankDetailsAction(),
                              DeleteContragentBankDetailsAction(),])
@@ -37,6 +43,28 @@ class ContragentActionPack(actions.ActionPack):
 #===============================================================================
 # Работа с контактной информацией
 #===============================================================================
+
+class ContragentContactListWindowAction(actions.Action):
+    '''
+    Запрос на получение окна со списком контактной информации по контрагенту 
+    '''
+    url = '/contacts-window'
+    shortname = 'm3-contragents-contacts-window'
+    
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_id', type=int, required=True)]
+    
+    def run(self, request, context):
+        
+        contragent = api.get_contragent_by_id(context.contragent_id)
+        if not contragent:
+            return actions.OperationResult(success=False, message=u'Указанный контрагент не найден в базе данных. Показ окна со списком контактов невозможен.')
+        
+        window = ui.ContragentContactsWindow()
+        window.title += ' [%s]' % contragent.name() 
+        
+        return actions.ExtUIScriptResult(data=window)
+
 class DataContragentContactAction(actions.Action):
     '''
     Получение списка контактов контрагента
@@ -97,6 +125,29 @@ class DeleteContragentContactAction(actions.Action):
 #===============================================================================
 # Работа с адресами контрагента
 #===============================================================================
+
+class ContragentAddressListWindowAction(actions.Action):
+    '''
+    Запрос на получение окна со списком адресов по контрагенту 
+    '''
+    url = '/address-window'
+    shortname = 'm3-contragents-address-window'
+    
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_id', type=int, required=True)]
+    
+    def run(self, request, context):
+        
+        contragent = api.get_contragent_by_id(context.contragent_id)
+        if not contragent:
+            return actions.OperationResult(success=False, message=u'Указанный контрагент не найден в базе данных. Показ окна со списком адресов невозможен.')
+        
+        window = ui.ContragentAddressesWindow()
+        window.title += ' [%s]' % contragent.name() 
+        
+        return actions.ExtUIScriptResult(data=window)
+
+
 class DataContragentAddressAction(actions.Action):
     '''
     Получение списка адресов контрагента
@@ -152,6 +203,28 @@ class DeleteContragentAddressAction(actions.Action):
 #===============================================================================
 # Работа с адресами контрагента
 #===============================================================================
+
+class ContragentBankDetailListWindowAction(actions.Action):
+    '''
+    Запрос на получение окна со списком адресов по контрагенту 
+    '''
+    url = '/bank-details-window'
+    shortname = 'm3-contragents-bank-details-window'
+    
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_id', type=int, required=True)]
+    
+    def run(self, request, context):
+        
+        contragent = api.get_contragent_by_id(context.contragent_id)
+        if not contragent:
+            return actions.OperationResult(success=False, message=u'Указанный контрагент не найден в базе данных. Показ окна со списком банковских реквизитов невозможен.')
+        
+        window = ui.ContragentBankDetailsWindow()
+        window.title += ' [%s]' % contragent.name() 
+        
+        return actions.ExtUIScriptResult(data=window)
+
 class DataContragentBankDetailsAction(actions.Action):
     '''
     Получение списка адресов контрагента

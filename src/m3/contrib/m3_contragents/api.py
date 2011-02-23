@@ -160,6 +160,12 @@ class FContragentProxy(BaseContragentProxy):
 # Методы доставания данных из базы данных
 #===============================================================================
 def get_contragent_by_id(contragent_id):
+    '''
+    Возвращает объект контрагента по указанному идентификатору в базе данных.
+    
+    В случае, если такого контрагента в БД не существует, то возвращается 
+    значение None.
+    '''
     result = None
     if contragent_id and isinstance(contragent_id, int):
         try:

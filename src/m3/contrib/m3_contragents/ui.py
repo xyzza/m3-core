@@ -8,6 +8,7 @@ Created on 03.02.2011
 from m3.helpers import urls
 
 from m3.ui.ext import panels
+from m3.ui.ext import windows
 
 
 class ContragentContactsGrid(panels.ExtObjectGrid):
@@ -15,6 +16,8 @@ class ContragentContactsGrid(panels.ExtObjectGrid):
     Класс контрола "Список контактов контрагента"
     ''' 
     def __init__(self, *args, **kwargs):
+        
+        super(ContragentContactsGrid, self).__init__(*args, **kwargs)
         
         self.title = u'Контакты'
         
@@ -31,11 +34,13 @@ class ContragentContactsGrid(panels.ExtObjectGrid):
         self.init_component(*args, **kwargs)
         
         
-class ContragentAddressGrid(panels.ExtObjectGrid):
+class ContragentAddressesGrid(panels.ExtObjectGrid):
     '''
     Класс контрола "Список адресов контрагента"
     ''' 
     def __init__(self, *args, **kwargs):
+        
+        super(ContragentAddressesGrid, self).__init__(*args, **kwargs)
         
         self.title = u'Адреса'
         
@@ -50,11 +55,13 @@ class ContragentAddressGrid(panels.ExtObjectGrid):
         self.init_component(*args, **kwargs)
         
         
-class ContragentBankDetailGrid(panels.ExtObjectGrid):
+class ContragentBankDetailsGrid(panels.ExtObjectGrid):
     '''
     Класс контрола "Список банковских реквизитов контрагента"
     ''' 
     def __init__(self, *args, **kwargs):
+        
+        super(ContragentBankDetailsGrid, self).__init__(*args, **kwargs)
         
         self.title = u'Банковские реквизиты'
         
@@ -69,3 +76,78 @@ class ContragentBankDetailGrid(panels.ExtObjectGrid):
         self.add_column(header=u'Лиц. счет', data_index='lschet', width=100)
         
         self.init_component(*args, **kwargs)
+        
+        
+        
+#===============================================================================
+# Окна для детализированной информации
+#===============================================================================
+
+class ContragentContactsWindow(windows.ExtWindow):
+    '''
+    Окно показа информации по контактам контрагента
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ContragentContactsWindow, self).__init__(*args, **kwargs)
+        
+        self.title = u'Контакты'
+        
+        self.width = 700
+        self.height = 400
+        
+        self.layout = 'fit'
+        
+        self.grid_contacts = ContragentContactsGrid()
+        
+        self.items.append(self.grid_contacts)
+        
+    
+class ContragentAddressesWindow(windows.ExtWindow):
+    '''
+    Окно показа информации по контактам контрагента
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ContragentAddressesWindow, self).__init__(*args, **kwargs)
+        
+        self.title = u'Адреса'
+        
+        self.width = 700
+        self.height = 400
+        
+        self.layout = 'fit'
+        
+        self.grid_addresses = ContragentAddressesGrid()
+        
+        self.items.append(self.grid_addresses)
+        
+        
+class ContragentBankDetailsWindow(windows.ExtWindow):
+    '''
+    Окно показа информации по банковским реквизитам контрагента
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ContragentBankDetailsWindow, self).__init__(*args, **kwargs)
+        
+        self.title = u' '
+        
+        self.width = 700
+        self.height = 400
+        
+        self.layout = 'fit'
+        
+        self.grid_bank_details = ContragentBankDetailsGrid()
+        
+        self.items.append(self.grid_bank_details)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
