@@ -1052,7 +1052,8 @@ Ext.extend(Ext.app.App, Ext.util.Observable, {
     getModule : function(name){
     	var ms = this.modules;
     	for(var i = 0, len = ms.length; i < len; i++){
-    		if(ms[i].id == name || ms[i].appType == name){
+            //ZIgi 23.02.11
+    		if(ms[i] && ( ms[i].id == name || ms[i].appType == name)){
     			return ms[i];
 			}
         }
