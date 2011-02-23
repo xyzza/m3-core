@@ -30,6 +30,19 @@ def get_user_metaroles(user):
     
     return result
 
+def user_has_metarole(user, metarole):
+    '''
+    Возвращает True в случае, если пользователю user назначена
+    метароль metarole.
+    
+    @param user: пользователь, для которого проверяется наличие метароли
+    @param metarole: строковый код проверяемой метароли 
+    '''
+    for metarole_code in get_assigned_metaroles_query(user):
+        if metarole_code == metarole:
+            return True
+    return False
+
 
 def get_user_roles(user):
     '''
