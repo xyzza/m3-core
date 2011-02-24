@@ -262,6 +262,7 @@ class DesktopLoader(object):
             '''
             Добавляет элементы к интерфейсу в зависимости от метароли
             '''
+            
             items_for_role = cls._cache.get(metarole_code, {})
             for place, items in items_for_role.items():
                 if place == cls.DESKTOP:
@@ -321,16 +322,21 @@ class DesktopLoader(object):
         def insert_item(existed_list, item):
             # Если добавляемый элемент группа, то нужно проверить есть ли у нас уже такая группа
             # Если нет - добавляем, иначе нужно зайти в нее и продолжить проверку вниз по дереву
+
             if isinstance(item, DesktopLaunchGroup):
+
                 collision_item = find_by_name(existed_list, item.name)
+
                 if collision_item == None:
                     # Раз нет переcений по имени, то можно добавлять
+
                     existed_list.append(item)
                 else:
                     for it in item.subitems:
                         insert_item(collision_item.subitems, it)
             else:
-                existed_list.append(item)
+                if item not in existed_list:
+                    existed_list.append(item)
         
         def insert_for_role(metarole, el, processed_metaroles=[]):
             if metarole in processed_metaroles:
@@ -347,11 +353,12 @@ class DesktopLoader(object):
             
             # Не достаточно добавить элементы только в одну метароль, т.к. она может входить внутрь
             # другой метароли. Так что нужно пробежаться по ролям которые включают в себя нашу роль.
+
             for role in metarole.get_owner_metaroles():
                 insert_for_role(role, element, processed_metaroles)
         
         #===============================================
         assert place >= 0 and place <=3
         assert isinstance(metarole, UserMetarole)
-
+        
         insert_for_role(metarole, element)
