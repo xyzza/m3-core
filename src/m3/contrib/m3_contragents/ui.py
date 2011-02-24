@@ -22,9 +22,9 @@ class ContragentContactsGrid(panels.ExtObjectGrid):
         self.title = u'Контакты'
         
         self.row_id_name = 'contragent_contact_id'
-        self.action_new = self.action_edit = urls.get_url('m3-contragents-contacts-save')
-        self.action_data = urls.get_url('m3-contragents-contacts-data')
-        self.action_delete = urls.get_url('m3-contragents-contacts-delete')
+        self.action_new = self.action_edit = urls.get_action('m3-contragents-contacts-save')
+        self.action_data = urls.get_action('m3-contragents-contacts-data')
+        self.action_delete = urls.get_action('m3-contragents-contacts-delete')
         
         self.add_column(header=u'Наименование', data_index='name', width=200)
         self.add_column(header=u'Телефон', data_index='phone', width=100)
@@ -45,9 +45,9 @@ class ContragentAddressesGrid(panels.ExtObjectGrid):
         self.title = u'Адреса'
         
         self.row_id_name = 'contragent_address_id'
-        self.action_new = self.action_edit = urls.get_url('m3-contragents-address-save')
-        self.action_data = urls.get_url('m3-contragents-address-data')
-        self.action_delete = urls.get_url('m3-contragents-address-delete')
+        self.action_new = self.action_edit = urls.get_action('m3-contragents-address-save')
+        self.action_data = urls.get_action('m3-contragents-address-data')
+        self.action_delete = urls.get_action('m3-contragents-address-delete')
         
         self.add_column(header=u'Адрес', data_index='name', width=400)
         self.add_column(header=u'Тип', data_index='phone', width=100)
@@ -66,9 +66,9 @@ class ContragentBankDetailsGrid(panels.ExtObjectGrid):
         self.title = u'Банковские реквизиты'
         
         self.row_id_name = 'contragent_bank_detail_id'
-        self.action_new = self.action_edit = urls.get_url('m3-contragents-bank-details-save')
-        self.action_data = urls.get_url('m3-contragents-bank-details-data')
-        self.action_delete = urls.get_url('m3-contragents-bank-details-delete')
+        self.action_new = self.action_edit = urls.get_action('m3-contragents-bank-details-save')
+        self.action_data = urls.get_action('m3-contragents-bank-details-data')
+        self.action_delete = urls.get_action('m3-contragents-bank-details-delete')
         
         self.add_column(header=u'Банк', data_index='bank', width=200)
         self.add_column(header=u'Расч. счет', data_index='rschet', width=100)
