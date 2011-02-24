@@ -415,8 +415,11 @@ class BaseTreeDictionaryActions(ActionPack):
         self.row_action   = ListGetRowAction()
         self.nodes_like_rows_action = TreeGetNodesLikeRows()
         self.last_used_action = ListLastUsedAction()
-        self.actions.extend([self.nodes_action, self.node_action, self.rows_action,
-                             self.row_action, self.last_used_action,
+        self.actions.extend([self.nodes_action, 
+                             self.node_action, 
+                             self.rows_action,
+                             self.row_action, 
+                             self.last_used_action,
                              self.nodes_like_rows_action])
         
         # Окна самого справочника
@@ -429,8 +432,10 @@ class BaseTreeDictionaryActions(ActionPack):
         self.edit_grid_window_action = ListEditRowWindowAction()
         self.save_row_action         = ListSaveRowAction()
         self.delete_row_action       = ListDeleteRowAction()
-        self.actions.extend([self.new_grid_window_action, self.edit_grid_window_action,
-                             self.save_row_action, self.delete_row_action])
+        self.actions.extend([self.new_grid_window_action, 
+                             self.edit_grid_window_action,
+                             self.save_row_action, 
+                             self.delete_row_action])
         
         # Драг&Дроп
         self.drag_tree = TreeDragAndDropAction()
@@ -442,8 +447,10 @@ class BaseTreeDictionaryActions(ActionPack):
         self.edit_node_window_action = TreeEditNodeWindowAction()
         self.save_node_action        = TreeSaveNodeAction()
         self.delete_node_action      = TreeDeleteNodeAction()
-        self.actions.extend([self.new_node_window_action, self.edit_node_window_action,
-                             self.save_node_action, self.delete_node_action])
+        self.actions.extend([self.new_node_window_action, 
+                             self.edit_node_window_action,
+                             self.save_node_action, 
+                             self.delete_node_action])
     
     #========================== ДЕРЕВО ===========================
     
