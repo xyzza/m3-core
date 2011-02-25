@@ -7,6 +7,7 @@ Created on 08.02.2011
 
 from m3.helpers import validation
 from m3.helpers import queries
+from m3.db.api import get_object_by_id
 from models import (ContragentTypeEnum,
                     Contragent,
                     ContragentGroup,
@@ -14,7 +15,8 @@ from models import (ContragentTypeEnum,
                     ContragentAddress,
                     ContragentBankDetail,)
 from exceptions import (ContragentDoesNotExist,
-                        SaveContragentException,)
+                        SaveContragentException,
+                        WrongContragentTypeException,)
 
 #===============================================================================
 # Контрагент - юридическое лицо
@@ -44,7 +46,22 @@ class BaseContragentProxy(object):
     
     def __init__(self, *args, **kwargs):
         self.clear()
+    
+    @classmethod
+    def get_proxy(cls, contragent_type):
+        '''
+        Возвращает класс прокси-объекта, соответствующий 
+        указанному типу контрагента
+        '''
         
+        map = {ContragentTypeEnum.UL: UContragentProxy,
+               ContragentTypeEnum.FL: FContragentProxy,}
+        
+        if not map.has_key(contragent_type):
+            raise WrongContragentTypeException()
+        
+        return map[contragent_type]
+    
     def clear(self):
         '''
         Приводит состояние объекта в первоначальное состояние.
@@ -71,7 +88,14 @@ class BaseContragentProxy(object):
         '''
         Выполняет заполнение объекта на основе переданных данных
         '''
-        pass
+        raw_contragent = get_object_by_id(Contragent, contragent_id)
+        if not raw_contragent:
+            # @_@, но вроде так будет правильнее
+            raise Contragent.DoesNotExist
+        for ((ctype, proxy_name), model_name) in self.proxy_model_field_mapping.items():
+            if ctype == raw_contragent.contragent_type:
+                setattr(self, proxy_name, getattr(raw_contragent, model_name))
+                
     
     def _prepare_save(self, contragent):
         '''
@@ -129,7 +153,7 @@ class UContragentProxy(BaseContragentProxy):
         '''
         if (not self.is_new() and 
             contragent.contragent_type != ContragentTypeEnum.UL):
-            raise SaveContragentException(u'Попытка сохранить объект UContragentProxy для ')
+            raise SaveContragentException(u'Попытка сохранить объект UContragentProxy для указанного типа контрагента')
         
         super(UContragentProxy, self)._prepare_save(contragent)
         
@@ -155,6 +179,14 @@ class FContragentProxy(BaseContragentProxy):
         self.inn = ''
         self.snils = ''
         
+    def _prepare_save(self, contragent):
+        '''
+        '''
+        if (not self.is_new() and 
+            contragent.contragent_type != ContragentTypeEnum.UL):
+            raise SaveContragentException(u'Попытка сохранить объект FContragentProxy для указанного типа контрагента')
+        
+        super(FContragentProxy, self)._prepare_save(contragent)
         
 #===============================================================================
 # Методы доставания данных из базы данных

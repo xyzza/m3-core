@@ -18,3 +18,10 @@ class SaveContragentException(Exception):
     попытке неудачного сохранения объекта контрагента
     '''
     pass
+
+class WrongContragentTypeException(Exception):
+    '''
+    Исключительная ситуация, которая выбрасывается при попытке использовать
+    в системе
+    '''
+    pass
