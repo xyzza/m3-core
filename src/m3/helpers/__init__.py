@@ -7,6 +7,8 @@ import re
 from uuid import uuid4
 
 def is_valid_email(value):
+    if (value is None):
+        return
     ptn = re.compile(r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)",re.IGNORECASE)
     return ptn.match(value)
 
