@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Excel report generator for platform BARS M3
  * Author: Safiullin Vadim
  * License: BSD
@@ -118,6 +118,7 @@ class ReportGenerator{
 	
 	// Словарь с номерами и регионами на листе, которые нужно объединить после рендеринга
 	Map<Integer, ExpandingArea> cellsToMegre = new HashMap<Integer, ExpandingArea>();
+	ArrayList<CellWrap> lazyMergedCells = new ArrayList<CellWrap>();
 	
 	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
 	// Они запоминаются и используются в дальнейшем
@@ -173,15 +174,32 @@ class ReportGenerator{
 				}catch (Exception e){
 					throw new Exception("Number in merge tag '" + text + "' is not correct");
 				}
-				ExpandingArea values = cellsToMegre.get(key);
-				if (values == null){
-					values = new ExpandingArea();
-					cellsToMegre.put(key, values);
-				}
-				values.addCell(newCell);
+				
+				// Нельзя сразу же добавить ячейку в смежную область. Это можно сделать только при копировании
+				// из исходного листа в результирующий, потому что только на нём известны окончательные 
+				// координаты ячейки.
+				// Но поскольку мы не можем скопировать комментарий при горизонтальной развертке, приходится
+				// добавлять ячейки с тегом TAG_MERGE в список, чтобы знать кого объединять при вертикальной развертке.
+				if (oldCell.getSheet() == newCell.getSheet())
+					lazyMergedCells.add(new CellWrap(newCell, key));
+				else
+					lazyMergedCells.add(new CellWrap(oldCell, key));
 			}
 		}
-
+		
+		// Если копируемая ячейка находится не в оригинальном листе, то её координаты можно считать окончательными.
+		// Тогда проверяем, нет ли её в списке смежных ячеек, и если есть, добавляем в смежную область.
+		//TODO: Избавиться от перебора
+		if (oldCell.getSheet() != newCell.getSheet())
+			for (CellWrap cw: lazyMergedCells)
+				if (cw.cell == oldCell){
+					ExpandingArea values = cellsToMegre.get(cw.num);
+					if (values == null){
+						values = new ExpandingArea();
+						cellsToMegre.put(cw.num, values);
+					}
+					values.addCell(newCell);
+				}
 	}
 	
 	/**
@@ -1002,6 +1020,7 @@ class ReportGenerator{
 			cell_repeat_tag_start = null;
 			cell_repeat_tag_end = null;
 			cellsToMegre.clear();
+			lazyMergedCells.clear();
 			
 			in_sheet = in_book.getSheetAt(sheet_index);
 			out_sheet = createShadowSheet(in_sheet);
@@ -1091,7 +1110,7 @@ class RepeatCells{
 	}
 }
 
-/*
+/**
  * Класс описывает прямоугольную область на странице
  */
 class SheetRegion{
@@ -1113,7 +1132,7 @@ class SheetRegion{
 	}
 }
 
-/*
+/**
  * Хранит координаты области на листе.
  */
 class Area{
@@ -1123,7 +1142,7 @@ class Area{
 	int end_col = -1;
 }
 
-/*
+/**
  * Позволяет расширять область ячейками
  */
 class ExpandingArea extends Area{
@@ -1146,18 +1165,28 @@ class ExpandingArea extends Area{
 			end_row = row;
 			initialized = true;
 		}else{
-			if ((row > end_row) || (col > end_col)){
-				end_col = col;
-				end_row = row;
-			}else if ((row < start_row) || (col < start_col)){
-				start_col = col;
-				start_row = row;
-			}
+			start_row = Math.min(row, start_row);
+			end_row = Math.max(row, end_row);
+			start_col = Math.min(col, start_col);
+			end_col = Math.max(col, end_col);
 		}
 	}
 }
 
-/*
+/**
+ * Хранит дополнительные параметры ячейки
+ */
+class CellWrap{
+	public Cell cell;
+	public int num;
+	
+	public CellWrap(Cell cell, int num){
+		this.cell = cell;
+		this.num = num;
+	}
+}
+
+/**
  * Перечисление определяющее режим поиска тегов
  */
 enum TagMatchMode{
