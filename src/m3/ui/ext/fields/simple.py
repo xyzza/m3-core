@@ -205,10 +205,10 @@ class ExtNumberField(BaseExtField):
 
 #===============================================================================
 
-# class ExtRuNumberField(ExtNumberField):
-#     def __init__(self, *args, **kwargs):
-#         super(ExtRuNumberField, self).__init__(*args, **kwargs)
-#         self.decimal_separator = ','
+class ExtRuNumberField(ExtNumberField):
+    def __init__(self, *args, **kwargs):
+        super(ExtRuNumberField, self).__init__(*args, **kwargs)
+        self.decimal_separator = ','
         
 #===============================================================================
 
