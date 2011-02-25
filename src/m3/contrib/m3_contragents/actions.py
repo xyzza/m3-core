@@ -98,7 +98,7 @@ class SaveContragentContactAction(actions.Action):
             not context.contragent_contact_id):
             raise ApplicationLogicException(u'Не указан контрагент для сохранения нового контакта')
         
-        if context.contact_id:
+        if context.contragent_contact_id:
             contact = models.ContragentContact.objects.get(pk=context.contragent_contact_id)
         else:
             contact = models.ContragentContact()
