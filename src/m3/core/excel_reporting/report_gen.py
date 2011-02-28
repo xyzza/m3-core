@@ -50,16 +50,28 @@ class ReportJSONEncoder(simplejson.JSONEncoder):
     Для этого определяем свои правила сериализации типов (по аналогии с джанговским)
     """
     # Немецкий формат (не менять! я жестко прописал java генераторе)
-    DATE_FORMAT = "%d.%m.%Y"
     TIME_FORMAT = "%H:%M:%S"
+
+    def _strftime_less_1900(self, dt):
+        """ 
+        Превращает дату dt в строку формата <%d.%m.%Y>, 
+        т.к. штатный питонячий strftime не понимает даты меньше 1900 года
+        """
+        day = str(dt.day).zfill(2)
+        month = str(dt.month).zfill(2)
+        year = str(dt.year).zfill(4)
+        return '%s.%s.%s' % (day, month, year)
 
     def default(self, o):
         if isinstance(o, datetime.datetime):
-            return "#m3dt#" + o.strftime("%s %s" % (self.DATE_FORMAT, self.TIME_FORMAT))
+            # Пример: #m3dt#21.12.1990 21:12:33
+            return "#m3dt#%s %s" % (self._strftime_less_1900(o), o.strftime(self.TIME_FORMAT))
         elif isinstance(o, datetime.date):
-            return "#m3dd#" + o.strftime(self.DATE_FORMAT)
+            # Пример: #m3dd#21.12.1920
+            return "#m3dd#%s" % self._strftime_less_1900(o)
         elif isinstance(o, datetime.time):
-            return "#m3tt#" + o.strftime(self.TIME_FORMAT)
+            # Пример: #m3tt#21:12:33
+            return "#m3tt#%s" % o.strftime(self.TIME_FORMAT)
         elif isinstance(o, decimal.Decimal):
             return str(o)
         else:
@@ -100,7 +112,7 @@ def make_report_from_json_string(json_str):
         encoding_name = 'utf-8'
     process = sub.Popen(['java', '-jar', JAR_FULL_PATH, encoding_name], 
                         stdin = sub.PIPE, stdout = sub.PIPE, stderr = sub.PIPE)
-    result_out, result_err = process.communicate(input = json_str.encode(encoding_name))
+    _, result_err = process.communicate(input = json_str.encode(encoding_name))
     __check_process(encoding_name, process, result_err)
     
     
