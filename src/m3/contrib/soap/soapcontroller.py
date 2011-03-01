@@ -104,6 +104,12 @@ class SOAPAction(Action):
         '''
         if settings.DEBUG:
             logger.debug('!!!!!----ERROR----!!!!!')
+        #попробуем отдать эту ошибку sentry (служба логирования ошибок)
+        try:
+            from sentry.client.models import get_client 
+            get_client().create_from_exception()
+        except:
+            pass
         logger.error(f.AsSOAP())
         return self.sendXML(f.AsSOAP(), 500, **kw)
 
