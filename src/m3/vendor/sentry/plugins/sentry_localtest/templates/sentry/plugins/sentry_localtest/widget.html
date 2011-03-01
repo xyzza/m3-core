@@ -1,0 +1,37 @@
+{% load sentry_helpers %}
+
+{#TODO:Make page change before submit, Reason is page components are not loaded  #}
+{#Submit button(formSubmit) must be last #}
+
+<h2>Local test</h2>
+<form id="localTestForm" method="post" action="" target="_blank" style="width: 250px" >
+    <label id="Label1" style="vertical-align:top">Server adress:port</label><br />
+    <input id="Target" name="Text1" type="text" style="width: 100%;" /><br />
+    <input id="formSubmit" name="Submit" type="submit" value="submit" disabled="true" style="float:right"/>
+</form>
+<script>
+    var url = "",
+        localserverlocation = "http://localhost:8000",
+        localTestForm = $("#localTestForm"),
+        inputBlock = $("#localTestForm #Target");
+
+    /**
+     *
+     * @param url
+     * @param params
+     */
+    jQuery(function() {
+        var postItems = parseItems(inputBlock),
+            submitButton = localTestForm.find('input:last')
+        //disable submit button if no post elements
+        if (postItems){
+            submitButton.attr('disabled', false);
+        }
+        var urlArray = parsemyUrl(url);
+        inputBlock.val(localserverlocation);
+        submitButton.click(function(){
+            localTestForm.attr('action', inputBlock.val()+urlArray[2]);
+        })
+    })
+
+</script>
