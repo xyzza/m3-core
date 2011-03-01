@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#coding: utf-8
 
 import logging.handlers
 import os
@@ -112,21 +112,25 @@ def exception(msg='', *args, **kwargs):
                 if hasattr(val , '__dict__'):
                     for obj_item_key, obj_item_val in val.__dict__.items():
                         if obj_item_key[0] !='_':
-                            res.append(u'%s: %s\n'.rjust(12) % (obj_item_key, force_unicode(obj_item_val)) )
+                            res.append(u'%s: %s\n'.rjust(12) % (obj_item_key, force_unicode(obj_item_val)))
         else:
             res = []
 
         e_vars_str = ''.join(res)
         tb = traceback.format_exception(e_type, e_value, e_traceback)
         
-        err_message = u'\n %s %s %s' % (msg, u''.join(tb), e_vars_str)
+        err_message = u'\n %s %s %s' % (force_unicode(msg), force_unicode(u''.join(tb)), force_unicode(e_vars_str))
         log.error(err_message)      
         
         # Отправка на почту
         send_mail_log(err_message, e_type.__name__)
       
     except:        
-        log.error(u'\n Некоррертная работа логера')
+        #log.error(u'Некоррертная работа логера')
+        try:
+            exception(u'Некорректная работа логера')
+        except:
+            log.error(u'Невозможно вывести сообщение об исключительной ситуации')
             
 
 def warning(msg, *args, **kwargs):

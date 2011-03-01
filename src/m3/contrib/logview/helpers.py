@@ -46,7 +46,7 @@ def get_log_content(filename):
     '''
     Возвращает содержимое файла с именем filename из директории для логов
     '''
-    filepath = os.path.join(settings.MIS_LOG_PATH, filename)
+    filepath = os.path.join(settings.LOG_PATH, filename)
     filedata = None
     try:
         log_file = codecs.open(filepath, 'rb', 'utf-8')
@@ -63,7 +63,7 @@ def log_files_list(start_date_str = None, end_date_str = None, to_email = None):
     '''
     log_files = []
     today = datetime.date.today()
-    path_to_logs = settings.MIS_LOG_PATH
+    path_to_logs = settings.LOG_PATH
     for file_item in os.listdir(path_to_logs):
         full_path = os.path.join(path_to_logs, file_item)
         creation_date = file_creation_time(full_path)

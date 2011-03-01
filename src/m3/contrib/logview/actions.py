@@ -19,6 +19,7 @@ class LogsAction(Action):
     Выводит наименование имеющихся файлов логирования
     '''
     url = '/logs'
+    shortname='logview.main-window'
     
     def run(self, request, context):
         window_params = {

@@ -149,10 +149,9 @@ class ExtensionManager:
         '''
         Добавляет листенер точки расширения с именем extension_name
         '''
-        if  not self.extensions.has_key(extension_name) or \
-            not listener or \
-            not isinstance(listener, ExtensionListener) or \
-            not listener.handler:
+        if (not listener or 
+            not isinstance(listener, ExtensionListener) or 
+            not listener.handler):
                 # передали неправильное определение листенера
                 # ничего не делаем
                 return
@@ -231,7 +230,3 @@ def extension_point(name=''):
             ExtensionManager().register_point_external(ExtensionPoint(name=name,default_listener=ExtensionHandler(f)))
         return wrapper
     return inner
-            
-    
-    
-    
