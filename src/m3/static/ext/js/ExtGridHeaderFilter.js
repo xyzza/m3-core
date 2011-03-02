@@ -554,16 +554,26 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	configureField: function(filterField)
 	{
 	  this.filterFields[filterField.filterName] = filterField;
-    if(!Ext.isEmpty(this.filters[filterField.filterName]))
-    {
-      this.setFieldValue(filterField,this.filters[filterField.filterName]);
-      this.applyFilter(filterField, false);            
-    }
-    else if(filterField.value)
-    {
-      filterField.setValue(filterField.value);
-      this.applyFilter(filterField, false);
-    }
+        if(!Ext.isEmpty(this.filters[filterField.filterName]))
+        {
+          this.setFieldValue(filterField,this.filters[filterField.filterName]);
+          this.applyFilter(filterField, false);            
+        }
+        else if(filterField.value)
+        {
+          filterField.setValue(filterField.value);
+          this.applyFilter(filterField, false);
+        }
+        if (!filterField.hasListener('change')) {
+            filterField.on('change', this.applyFilters, this);
+            filterField.on('specialkey', function(el,ev) {
+                ev.stopPropagation();
+                if(ev.getKey() == ev.ENTER) 
+                {
+                  this.applyFilters();
+                }
+            }, this);
+        }
 	},
 	
   createFilterPanel: function(colCfg, grid)
