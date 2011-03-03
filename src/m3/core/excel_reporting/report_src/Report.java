@@ -91,6 +91,7 @@ class ReportGenerator{
 	static final String TAG_REPEAT_END = "##ПОВТОРЯТЬСТРОКУ";
 	static final String TAG_AUTOHIGHT = "#АВТОВЫСОТА";
 	static final String TAG_MERGE = "#ОБЪЕДИНИТЬ";
+	static final String TAG_MATRIX = "#МАТРИЦА";
 	
 	public static ReportGenerator createFromFiles(String encoding, String JSON_filename)
 	throws IOException, InvalidFormatException, ParseException{
@@ -119,6 +120,9 @@ class ReportGenerator{
 	// Словарь с номерами и регионами на листе, которые нужно объединить после рендеринга
 	Map<Integer, ExpandingArea> cellsToMegre = new HashMap<Integer, ExpandingArea>();
 	ArrayList<CellWrap> lazyMergedCells = new ArrayList<CellWrap>();
+	
+	// Список ячеек с тегом TAG_MATRIX
+	ArrayList<CellWrap> matrixCells = new ArrayList<CellWrap>();
 	
 	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
 	// Они запоминаются и используются в дальнейшем
@@ -158,12 +162,21 @@ class ReportGenerator{
 	private void saveSpecialCellPositions(Cell oldCell, Cell newCell) throws Exception{
 		Comment comment = oldCell.getCellComment();
 		if (comment != null){
-			String text = comment.getString().getString().toUpperCase();
+			String raw_text = comment.getString().getString().trim();
+			String text = raw_text.toUpperCase();
 			if (text.equals(TAG_REPEAT_START))
 				cell_repeat_tag_start = newCell;
 			
 			else if (text.equals(TAG_REPEAT_END))
 				cell_repeat_tag_end = newCell;
+			
+			else if (text.substring(0, TAG_MATRIX.length()).equals(TAG_MATRIX)){
+				CellWrap cw = new CellWrap(newCell);
+				// Извлекаем имя переменной, хранящей матрицу
+				String varName = raw_text.substring(raw_text.lastIndexOf(" ") + 1);
+				cw.set("variable_name", varName);
+				matrixCells.add(cw);
+			}
 			
 			else if (text.substring(0, TAG_MERGE.length()).equals(TAG_MERGE)){
 				// Извлекаем из тега номер области
@@ -180,10 +193,15 @@ class ReportGenerator{
 				// координаты ячейки.
 				// Но поскольку мы не можем скопировать комментарий при горизонтальной развертке, приходится
 				// добавлять ячейки с тегом TAG_MERGE в список, чтобы знать кого объединять при вертикальной развертке.
-				if (oldCell.getSheet() == newCell.getSheet())
-					lazyMergedCells.add(new CellWrap(newCell, key));
-				else
-					lazyMergedCells.add(new CellWrap(oldCell, key));
+				if (oldCell.getSheet() == newCell.getSheet()){
+					CellWrap cw = new CellWrap(newCell);
+					cw.set("region_index", key);
+					lazyMergedCells.add(cw);
+				}else{
+					CellWrap cw = new CellWrap(oldCell);
+					cw.set("region_index", key);
+					lazyMergedCells.add(cw);
+				}
 			}
 		}
 		
@@ -193,10 +211,11 @@ class ReportGenerator{
 		if (oldCell.getSheet() != newCell.getSheet())
 			for (CellWrap cw: lazyMergedCells)
 				if (cw.cell == oldCell){
-					ExpandingArea values = cellsToMegre.get(cw.num);
+					int regionIndex = (Integer)cw.get("region_index");
+					ExpandingArea values = cellsToMegre.get(regionIndex);
 					if (values == null){
 						values = new ExpandingArea();
-						cellsToMegre.put(cw.num, values);
+						cellsToMegre.put(regionIndex, values);
 					}
 					values.addCell(newCell);
 				}
@@ -548,6 +567,35 @@ class ReportGenerator{
 	static final Pattern TAG_REGEX_REPLACE = Pattern.compile("(?=[^\\@]|^)\\$.+?\\$(?=[^\\@]|$)");
 	static final Pattern TAG_REGEX_NOREPLACE = Pattern.compile("[\\@].+?[\\@]");
 	
+	private void setCellValue(Cell outCell, Object value) throws Exception {
+		String str_value = value.toString();
+		if (value.getClass() == String.class){
+			// Строка может быть не просто строка, а специальный тип
+			String inner_type = getTypeTagFromString(str_value);
+			if (inner_type != null){
+				str_value = str_value.substring(6);
+				if (inner_type.equals("dd")){
+					Date d = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
+					outCell.setCellValue(d);
+				}else if (inner_type.equals("tt")){
+					Date d = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
+					outCell.setCellValue(d);
+				}else if (inner_type.equals("dt")){
+					Date d = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(str_value);
+					outCell.setCellValue(d);
+				}else
+					throw new Exception("Unknown M3 type token " + str_value);
+			}else
+				outCell.setCellValue(str_value);
+		}else if (value.getClass() == Long.class){
+			outCell.setCellValue(Long.parseLong(str_value));
+		}else if (value.getClass() == Double.class){
+			outCell.setCellValue(Double.parseDouble(str_value));
+		}else if (value.getClass() == Boolean.class){
+			outCell.setCellValue(Boolean.parseBoolean(str_value));
+		}
+	}
+	
 	/**
 	 * Поиск и обработка тега ЗАМЕНА в ячейке 
 	 * @param outCell 
@@ -599,34 +647,9 @@ class ReportGenerator{
 		if (keys.size() == 1){
 			String token = keys.keySet().toArray()[0].toString();
 			Object value = keys.get(token);
-			String str_value = value.toString();
 			
 			if (cell_text.length() == token.length()){
-				if (value.getClass() == String.class){
-					// Строка может быть не просто строка, а специальный тип
-					String inner_type = getTypeTagFromString(str_value);
-					if (inner_type != null){
-						str_value = str_value.substring(6);
-						if (inner_type.equals("dd")){
-							Date d = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
-							outCell.setCellValue(d);
-						}else if (inner_type.equals("tt")){
-							Date d = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.GERMANY).parse(str_value);
-							outCell.setCellValue(d);
-						}else if (inner_type.equals("dt")){
-							Date d = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(str_value);
-							outCell.setCellValue(d);
-						}else
-							throw new Exception("Unknown M3 type token " + str_value);
-					}else
-						outCell.setCellValue(str_value);
-				}else if (value.getClass() == Long.class){
-					outCell.setCellValue(Long.parseLong(str_value));
-				}else if (value.getClass() == Double.class){
-					outCell.setCellValue(Double.parseDouble(str_value));
-				}else if (value.getClass() == Boolean.class){
-					outCell.setCellValue(Boolean.parseBoolean(str_value));
-				}
+				setCellValue(outCell, value);
 				return;
 			}
 		}
@@ -804,10 +827,10 @@ class ReportGenerator{
 						int delta_y = row_offset - sourceRegion.start_row;
 						int delta_x = col_offset - sourceRegion.start_col;
 						CellRangeAddress new_nreg = new CellRangeAddress(
-								reg.getFirstRow() + delta_y,
-								reg.getLastRow() + delta_y,
-								reg.getFirstColumn() + delta_x,
-								reg.getLastColumn() + delta_x);
+							reg.getFirstRow() + delta_y,
+							reg.getLastRow() + delta_y,
+							reg.getFirstColumn() + delta_x,
+							reg.getLastColumn() + delta_x);
 						destSheet.addMergedRegion(new_nreg);
 					}
 				}
@@ -999,6 +1022,40 @@ class ReportGenerator{
 	}
 	
 	/**
+	 * Обрабатывает заранее найденные ячейки с тегом TAG_MATRIX и проецирует на ячейки значения из матрицы
+	 * @param outSheet Результирующий лист
+	 * @param root JSON данные в которых ищется матрица
+	 * @param matrixCells Ячейки с доп. параметрами
+	 * @throws Exception 
+	 * @throws  
+	 */
+	private void imposeMatrix(Sheet outSheet, JSONObject root, ArrayList<CellWrap> matrixCells) throws Exception{
+		for (CellWrap cw: matrixCells){
+			// Извлекаем матрицу по имени переменной
+			String key = (String)cw.get("variable_name");
+			JSONArray rowArray = (JSONArray)root.get(key);
+			if (rowArray == null)
+				continue;
+		
+			// Проецирование значений
+			int rowNum = cw.cell.getRowIndex();
+			for (Object row: rowArray){				
+				int colNum = cw.cell.getColumnIndex();
+				
+				JSONArray currentRow = (JSONArray)row;
+				for (Object value: currentRow){
+					Cell outCell = safeGetCell(outSheet, rowNum, colNum);
+					setCellValue(outCell, value);
+					
+					colNum++;
+				}
+				
+				rowNum++;
+			}
+		}
+	}
+	
+	/**
 	 * Генерация отчета.
 	 * @throws Exception
 	 */
@@ -1017,10 +1074,12 @@ class ReportGenerator{
 		// Обрабатываем каждый лист в книге
 		int sheet_count = in_book.getNumberOfSheets();
 		for (int sheet_index = 0; sheet_index < sheet_count; sheet_index++){
+			// Очистка глобальных переменных!
 			cell_repeat_tag_start = null;
 			cell_repeat_tag_end = null;
 			cellsToMegre.clear();
 			lazyMergedCells.clear();
+			matrixCells.clear();
 			
 			in_sheet = in_book.getSheetAt(sheet_index);
 			out_sheet = createShadowSheet(in_sheet);
@@ -1035,6 +1094,8 @@ class ReportGenerator{
 			range.start_row = in_sheet.getFirstRowNum();
 			range.end_row = in_sheet.getLastRowNum();
 			renderRange(root, range, range.start_row);
+			
+			imposeMatrix(out_sheet, root, matrixCells);
 			
 			// Объединение собранных во время рендеринга ячеек с тегом TAG_MERGE
 			for(Entry<Integer, ExpandingArea> entry: cellsToMegre.entrySet()){
@@ -1174,15 +1235,25 @@ class ExpandingArea extends Area{
 }
 
 /**
- * Хранит дополнительные параметры ячейки
+ * Хранит дополнительные параметры ячейки в словаре.
  */
 class CellWrap{
 	public Cell cell;
-	public int num;
+	private HashMap<String, Object> dict = new HashMap<String, Object>();
 	
-	public CellWrap(Cell cell, int num){
+	public CellWrap(Cell cell){
 		this.cell = cell;
-		this.num = num;
+	}
+	
+	public Object get(String key) throws AssertionError{
+		Object obj = dict.get(key);
+		if (obj == null)
+			throw new AssertionError("Something wrong!");
+		return obj;
+	}
+	
+	public void set(String key, Object value){
+		dict.put(key, value);
 	}
 }
 
