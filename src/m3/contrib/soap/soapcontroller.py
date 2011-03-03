@@ -19,18 +19,25 @@ from django.conf import settings
 class PostNotSpecified(Exception):
     pass
 
+class SoapLogicalException(Exception):
+    '''
+    логическая ошибка обращения к webservic'у
+    логироваться в sentry не будет
+    '''
+    pass
+
 class SOAPAction(Action):
     '''
     Действие обработки запроса к веб-сервису
     '''
     _zsiService = None
-    
+
     def __init__(self, zsiServiceClass, url):
         super(Action, self).__init__()
         #self._zsiService = zsiServiceClass('webservices/needs')
         self._zsiService = zsiServiceClass()
         self.url = url
-        
+
     def getWSDL(self, request):
         '''
         Получение файла с описанием интерфейса взаимодействия (WSDL-файла)
@@ -43,8 +50,8 @@ class SOAPAction(Action):
             serviceUrl = u'http://%s%s' % (request.get_host(), self.get_absolute_url())
         #print serviceUrl
         soapAddress = '<soap:address location="%s"/>' % serviceUrl
-        wsdlre = re.compile('\<soap:address[^\>]*>',re.IGNORECASE)
-        wsdl = re.sub(wsdlre,soapAddress,wsdl)
+        wsdlre = re.compile('\<soap:address[^\>]*>', re.IGNORECASE)
+        wsdl = re.sub(wsdlre, soapAddress, wsdl)
         return wsdl
 
     def dispatch(self, ps, SendResponse, SendFault, post, action, nsdict={}, **kw):
@@ -60,35 +67,35 @@ class SOAPAction(Action):
             method = self._zsiService.getOperation(ps, action)
         except Exception, e:
             return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
-    
+
         try:
             request, result = method(ps)
         except Exception, e:
             return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
-    
+
         # Verify if Signed
         self._zsiService.verify(ps)
-    
+
         # If No response just return.
         if result is None:
             return SendResponse('', **kw)
-    
+
         sw = SoapWriter(nsdict=nsdict)
         try:
             sw.serialize(result)
         except Exception, e:
             return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
-    
-    
+
+
         # Create Signatures
         self._zsiService.sign(sw)
-    
+
         try:
             soapdata = str(sw)
             return SendResponse(soapdata, **kw)
         except Exception, e:
             return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
-    
+
     def sendXML(self, text, code=200, **kw):
         '''
         Посылка данных (XML)
@@ -97,7 +104,7 @@ class SOAPAction(Action):
             logger.debug('Response %s' % self.url)
             logger.debug(force_unicode(text))
         return HttpResponse(text, 'text/xml', code)
-        
+
     def sendFault(self, f, **kw):
         '''
         Посылка ошибки
@@ -105,11 +112,14 @@ class SOAPAction(Action):
         if settings.DEBUG:
             logger.debug('!!!!!----ERROR----!!!!!')
         #попробуем отдать эту ошибку sentry (служба логирования ошибок)
-        try:
-            from sentry.client.models import get_client 
-            get_client().create_from_exception()
-        except:
-            pass
+        exc_info = sys.exc_info()
+        if exc_info[0] != SoapLogicalException:
+            #логируем только не логические ошибки
+            try:
+                from sentry.client.models import get_client
+                get_client().create_from_exception(exc_info)
+            except:
+                pass
         logger.error(f.AsSOAP())
         return self.sendXML(f.AsSOAP(), 500, **kw)
 
@@ -121,10 +131,10 @@ class SOAPAction(Action):
         if settings.DEBUG:
             logger.debug('Request %s' % self.url)
             logger.debug(force_unicode(request.raw_post_data))
-        
+
         if request.method != 'POST':
             if request.GET.has_key('wsdl') or request.GET.has_key('WSDL'):
-                return self.sendXML(self.getWSDL(request)) 
+                return self.sendXML(self.getWSDL(request))
             return self.sendXML(Fault(Fault.Client, 'Must use POST'))
 
         #for k,v in request.META.iteritems(): print k, '=', v
@@ -136,7 +146,7 @@ class SOAPAction(Action):
         if soapAction:
             soapAction = soapAction.strip('\'"')
         post = post.strip('\'"')
-        
+
         environ = request.environ
         ct = environ['CONTENT_TYPE']
         try:
@@ -150,7 +160,7 @@ class SOAPAction(Action):
                 ps = ParsedSoap(request.raw_post_data)
         except ParseException, e:
             return self.sendFault(FaultFromZSIException(e))
-        
+
         #kw['request'] = request
         return self.dispatch(ps, self.sendXML, self.sendFault, post=post, action=soapAction)
 
