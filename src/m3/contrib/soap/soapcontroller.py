@@ -162,6 +162,7 @@ class SOAPAction(Action):
             return self.sendFault(FaultFromZSIException(e))
 
         #kw['request'] = request
+        ps.request = request #чтоб передать запрос в обработчик акшена
         return self.dispatch(ps, self.sendXML, self.sendFault, post=post, action=soapAction)
 
 
