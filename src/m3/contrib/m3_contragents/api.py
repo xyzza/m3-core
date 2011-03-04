@@ -30,7 +30,7 @@ class BaseContragentProxy(object):
     UL = ContragentTypeEnum.UL
     FL = ContragentTypeEnum.FL
     
-    proxy_model_field_mapping = {(UL, 'short_name'): 'u_shortname',
+    proxy_model_field_mapping = {(UL, 'short_name'): 'u_short_name',
                                  (UL, 'full_name'): 'u_full_name',
                                  (UL, 'inn'): 'u_inn',
                                  (UL, 'kpp'): 'u_kpp',
@@ -133,7 +133,7 @@ class UContragentProxy(BaseContragentProxy):
     Прокси-объект, который за работу с контрагентом, как с юридическим лицом
     '''        
         
-    def clean(self):
+    def clear(self):
         '''
         Очистка состояния объекта контрагента-юридического лица
         '''
@@ -151,8 +151,9 @@ class UContragentProxy(BaseContragentProxy):
     def _prepare_save(self, contragent):
         '''
         '''
-        if (not self.is_new() and 
-            contragent.contragent_type != ContragentTypeEnum.UL):
+        if self.is_new():
+            contragent.contragent_type = ContragentTypeEnum.UL 
+        elif (contragent.contragent_type != ContragentTypeEnum.UL):
             raise SaveContragentException(u'Попытка сохранить объект UContragentProxy для указанного типа контрагента')
         
         super(UContragentProxy, self)._prepare_save(contragent)
@@ -182,10 +183,11 @@ class FContragentProxy(BaseContragentProxy):
     def _prepare_save(self, contragent):
         '''
         '''
-        if (not self.is_new() and 
-            contragent.contragent_type != ContragentTypeEnum.UL):
+        if self.is_new():
+            contragent.contragent_type = ContragentTypeEnum.FL 
+        elif (contragent.contragent_type != ContragentTypeEnum.FL):
             raise SaveContragentException(u'Попытка сохранить объект FContragentProxy для указанного типа контрагента')
-        
+                
         super(FContragentProxy, self)._prepare_save(contragent)
         
 #===============================================================================
