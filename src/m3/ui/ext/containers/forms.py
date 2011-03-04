@@ -356,11 +356,11 @@ class ExtForm(BaseExtPanel):
             и конвертирует его в соответствии с типом item'a
             '''
             val = item.value
-            if isinstance(item, ExtNumberField):
-                # для языков, где decimal разделяются не точкой
-                if item.decimal_separator: 
-                    val = val.replace(item.decimal_separator, '.')            
+            if isinstance(item, ExtNumberField):            
                 if val:
+                    # для языков, где decimal разделяются не точкой
+                    if item.decimal_separator: 
+                        val = val.replace(item.decimal_separator, '.')
                     try:
                         val = int(val)
                     except ValueError:
