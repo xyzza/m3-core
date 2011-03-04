@@ -115,7 +115,7 @@ class ReportGenerator{
 	Sheet in_sheet, out_sheet;
 	
 	// Список объединенных регионов на листе
-	ArrayList<CellRangeAddress> merged_regions;
+	CellRangeList merged_regions;
 	
 	// Словарь с номерами и регионами на листе, которые нужно объединить после рендеринга
 	Map<Integer, ExpandingArea> cellsToMegre = new HashMap<Integer, ExpandingArea>();
@@ -728,13 +728,16 @@ class ReportGenerator{
 	 * @param sheet
 	 * @return
 	 */
-	private ArrayList<CellRangeAddress> getMergedRegions(Sheet sheet){
-		ArrayList<CellRangeAddress> merged_cells = new ArrayList<CellRangeAddress>();
+	private CellRangeList getMergedRegions(Sheet sheet){
+		CellRangeList merged_cells = new CellRangeList();
 		for (int i = 0; ; i++){
 			CellRangeAddress addr = sheet.getMergedRegion(i);
-			if (addr != null)
+			if (addr != null){
 				merged_cells.add(addr);
-			else
+				// Для отладки
+				//System.out.format("Merged region (row, col): (%d, %d)-(%d, %d) \n",
+				//	addr.getFirstRow(), addr.getFirstColumn(), addr.getLastRow(), addr.getLastColumn());
+			} else
 				break;
 		}
 		return merged_cells;
@@ -1030,6 +1033,7 @@ class ReportGenerator{
 	 * @throws  
 	 */
 	private void imposeMatrix(Sheet outSheet, JSONObject root, ArrayList<CellWrap> matrixCells) throws Exception{
+		merged_regions = getMergedRegions(out_sheet);
 		for (CellWrap cw: matrixCells){
 			// Извлекаем матрицу по имени переменной
 			String key = (String)cw.get("variable_name");
@@ -1042,12 +1046,29 @@ class ReportGenerator{
 			for (Object row: rowArray){				
 				int colNum = cw.cell.getColumnIndex();
 				
+				CellRangeAddress lastMergedRegion = null;
 				JSONArray currentRow = (JSONArray)row;
 				for (Object value: currentRow){
+										
 					Cell outCell = safeGetCell(outSheet, rowNum, colNum);
 					setCellValue(outCell, value);
 					
-					colNum++;
+					// Шаг на новую колонку производится с учетом смежных регионов. В один и тот же регион
+					// нельзя писать несколько раз, т.к. будет видна только первая ячейка. Поэтому, если мы
+					// находимся на смежной области, то нужно переместиться на новую область, либо на обычную ячейку.
+					while (true){
+						colNum++;
+						CellRangeAddress cra = merged_regions.isInRanges(colNum, rowNum);
+						if (cra != null){
+							if (cra == lastMergedRegion){
+								colNum++;
+							}else{
+								lastMergedRegion = cra;
+								break;
+							}
+						}else
+							break;
+					}
 				}
 				
 				rowNum++;
@@ -1095,14 +1116,14 @@ class ReportGenerator{
 			range.end_row = in_sheet.getLastRowNum();
 			renderRange(root, range, range.start_row);
 			
-			imposeMatrix(out_sheet, root, matrixCells);
-			
 			// Объединение собранных во время рендеринга ячеек с тегом TAG_MERGE
 			for(Entry<Integer, ExpandingArea> entry: cellsToMegre.entrySet()){
 				ExpandingArea area = entry.getValue();
 				CellRangeAddress cra = new CellRangeAddress(area.start_row, area.end_row, area.start_col, area.end_col);
 				out_sheet.addMergedRegion(cra);
 			}
+			
+			imposeMatrix(out_sheet, root, matrixCells);
 			
 			// Установка повторяющихся строк. Как правило это шапка таблицы, одинковая для всех страниц
 			repeat_cells.add(new RepeatCells(out_sheet, cell_repeat_tag_start, cell_repeat_tag_end));
@@ -1262,6 +1283,22 @@ class CellWrap{
  */
 enum TagMatchMode{
 	STRICT, FIRST
+}
+
+/**
+ * Список из родных для POI смежных регионов, с возможностью поиска 
+ * пересечений по всем элементам списка
+ * @author Vadim
+ */
+@SuppressWarnings("serial")
+class CellRangeList extends ArrayList<CellRangeAddress>{
+	public CellRangeAddress isInRanges(int colNum, int rowNum){
+		for (CellRangeAddress cra: this){
+			if (cra.isInRange(rowNum, colNum))
+				return cra;
+		}
+		return null;
+	}
 }
 
 //TODO: Копирование рисунков
