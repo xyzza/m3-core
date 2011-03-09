@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -122,7 +123,7 @@ class ReportGenerator{
 	ArrayList<CellWrap> lazyMergedCells = new ArrayList<CellWrap>();
 	
 	// Список ячеек с тегом TAG_MATRIX
-	ArrayList<CellWrap> matrixCells = new ArrayList<CellWrap>();
+	Map<Cell, CellWrap> matrixCells = new HashMap<Cell, CellWrap>();
 	
 	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
 	// Они запоминаются и используются в дальнейшем
@@ -175,7 +176,9 @@ class ReportGenerator{
 				// Извлекаем имя переменной, хранящей матрицу
 				String varName = raw_text.substring(raw_text.lastIndexOf(" ") + 1);
 				cw.set("variable_name", varName);
-				matrixCells.add(cw);
+				// Словарь используется чтобы не допустить повторное копирование матрицы при развертке региона
+				if (!matrixCells.containsKey(oldCell))
+					matrixCells.put(oldCell, cw);
 			}
 			
 			else if (text.substring(0, TAG_MERGE.length()).equals(TAG_MERGE)){
@@ -1032,7 +1035,7 @@ class ReportGenerator{
 	 * @throws Exception 
 	 * @throws  
 	 */
-	private void imposeMatrix(Sheet outSheet, JSONObject root, ArrayList<CellWrap> matrixCells) throws Exception{
+	private void imposeMatrix(Sheet outSheet, JSONObject root, Collection<CellWrap> matrixCells) throws Exception{
 		merged_regions = getMergedRegions(out_sheet);
 		for (CellWrap cw: matrixCells){
 			// Извлекаем матрицу по имени переменной
@@ -1042,11 +1045,18 @@ class ReportGenerator{
 				continue;
 		
 			// Проецирование значений
-			int rowNum = cw.cell.getRowIndex();
-			for (Object row: rowArray){				
+			CellRangeAddress lastMergedRow = null;
+			int rowNum = cw.cell.getRowIndex() - 1;
+			for (Object row: rowArray){
 				int colNum = cw.cell.getColumnIndex();
+				CellRangeAddress curRegion = null;
+				do{
+					rowNum++;
+					curRegion = merged_regions.isInRanges(colNum, rowNum);	
+				}while (curRegion!=null & curRegion == lastMergedRow);
+				lastMergedRow = curRegion;
 				
-				CellRangeAddress lastMergedRegion = null;
+				CellRangeAddress lastMergedCol = null;
 				JSONArray currentRow = (JSONArray)row;
 				for (Object value: currentRow){
 										
@@ -1056,22 +1066,13 @@ class ReportGenerator{
 					// Шаг на новую колонку производится с учетом смежных регионов. В один и тот же регион
 					// нельзя писать несколько раз, т.к. будет видна только первая ячейка. Поэтому, если мы
 					// находимся на смежной области, то нужно переместиться на новую область, либо на обычную ячейку.
-					while (true){
+					do{
 						colNum++;
-						CellRangeAddress cra = merged_regions.isInRanges(colNum, rowNum);
-						if (cra != null){
-							if (cra == lastMergedRegion){
-								colNum++;
-							}else{
-								lastMergedRegion = cra;
-								break;
-							}
-						}else
-							break;
-					}
+						curRegion = merged_regions.isInRanges(colNum, rowNum);
+					}while (curRegion!=null & curRegion == lastMergedCol);
+					lastMergedCol = curRegion;
 				}
-				
-				rowNum++;
+					
 			}
 		}
 	}
@@ -1123,7 +1124,7 @@ class ReportGenerator{
 				out_sheet.addMergedRegion(cra);
 			}
 			
-			imposeMatrix(out_sheet, root, matrixCells);
+			imposeMatrix(out_sheet, root, matrixCells.values());
 			
 			// Установка повторяющихся строк. Как правило это шапка таблицы, одинковая для всех страниц
 			repeat_cells.add(new RepeatCells(out_sheet, cell_repeat_tag_start, cell_repeat_tag_end));
