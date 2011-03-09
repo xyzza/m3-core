@@ -6,8 +6,8 @@ from m3.core.exceptions import ApplicationLogicException
 import json
 
 from django.db.models.query_utils import Q
-from django.db import models, connection, transaction, IntegrityError
-from m3.helpers import logger
+from django.db import models, connection, transaction
+
 
 def apply_sort_order(query, columns, sort_order):
     '''

@@ -10,16 +10,16 @@ packs
 ---------
 
 
-Описание паков
-    
-.. automodule:: m3.ui.actions.packs
-  :members:
-
 logview
 -------
 
 tree_packs
 ----------
+
+Описание иерархических паков
+    
+.. automodule:: m3.ui.actions.tree_packs
+  :members:
 
 utils
 --------
