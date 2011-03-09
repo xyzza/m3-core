@@ -120,7 +120,7 @@ def make_html_report_from_object(obj):
     pass
  
  
-class BaseReport:
+class BaseReport(object):
     ''' Базовый класс для создания отчетов '''
     
     # Определяет путь к файлу шаблона относительно папки шаблонов
