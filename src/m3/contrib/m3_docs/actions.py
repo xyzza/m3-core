@@ -1,7 +1,7 @@
 #coding:utf-8
 from django.http import  HttpResponse
 from m3.contrib.m3_docs.models import DocumentType, DocumentTypeGroup
-from m3.contrib.m3_docs.ui import SimpleDocumentTypeEditWindow
+from m3.contrib.m3_docs.ui import SimpleDocumentTypeEditWindow, DocumentTypeEditWindow
 from m3.ui.actions import Action, ActionPack
 from m3.ui.actions.tree_packs import BaseTreeDictionaryModelActions
 
@@ -20,7 +20,7 @@ class DocumentTypePack(BaseTreeDictionaryModelActions):
     tree_columns = [('name', u'Группы типов документов', 300)]
     list_columns = [('name', u'Типы документов')]
     edit_node_window = SimpleDocumentTypeEditWindow
-    edit_window = SimpleDocumentTypeEditWindow
+    edit_window = DocumentTypeEditWindow
     
     def get_list_window(self, win):
         win.maximized = True

@@ -54,6 +54,7 @@ class DocumentField(BaseObjectModel):
     allow_blank = models.BooleanField(default = True) # обязательно для заполнения
     regexp = models.CharField(max_length= 300, null = True, blank = True ) # проверка значений для текстовых полей
     decimal_precision = models.PositiveIntegerField(null = True) # ограничение знаков после запятой для числовых полей
+    order_index = models.IntegerField(null = False) # порядковое положение поля
     meta = models.TextField() # значения для выбора из списка, возможно потом что-нибудь еще будет там лежать
 
     class Meta:
@@ -66,7 +67,8 @@ class DocumentSection(BaseObjectModel):
     '''
     document_type = models.ForeignKey(DocumentType, null = False, related_name='sections')
     name = models.CharField(max_length = 200, null = False, blank = False)
-    multiple = models.BooleanField(default = False) #возможно ли повторение секции
+    multiple = models.BooleanField(default = False) # возможно ли повторение секции в пределах документа
+    order_index = models.IntegerField(null = False) # порядковый индекс секции
 
     class Meta:
         db_table = 'm3_docs_doc_section'
