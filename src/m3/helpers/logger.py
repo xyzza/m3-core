@@ -92,7 +92,11 @@ def debug(msg, *args, **kwargs):
 
 def exception(msg='', *args, **kwargs):
     #Не желаемые ключи логирования
-    donot_parse_keys = ['win','request']
+    black_list = ['win'
+                  # Запрос браузера
+                  ,'request'
+                  # Запрос в БД (sql)
+                  ,'query']
     
     log = logging.getLogger('error_logger')
     msg = get_session_info(kwargs.get('request', None)) + 'Message: ' + msg + '\n'
@@ -105,14 +109,16 @@ def exception(msg='', *args, **kwargs):
         
         if e_traceback.tb_frame.f_code.co_name != '<module>':
             for key, val in e_vars.items():
-                if key in donot_parse_keys:
+                if key in black_list:
                     continue
 
-                res.append(u'%s: %s\n'.rjust(6)%(key,val))
+                res.append(u'%s: %s\n'.rjust(6)\
+                           %(key, force_unicode(val) if isinstance(val, basestring) else val))
                 if hasattr(val , '__dict__'):
-                    for obj_item_key, obj_item_val in val.__dict__.items():
-                        if obj_item_key[0] !='_':
-                            res.append(u'%s: %s\n'.rjust(12) % (obj_item_key, force_unicode(obj_item_val)))
+                    for obj_key, obj_val in val.__dict__.items():
+                        if obj_key[0] !='_' and obj_key not in black_list:
+                            res.append(u'%s: %s\n'.rjust(12)\
+                                       % (obj_key, force_unicode(obj_val) if isinstance(obj_val, basestring) else obj_val))
         else:
             res = []
 
