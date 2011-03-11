@@ -79,6 +79,7 @@ class DocumentTypeEditWindow(ExtEditWindow):
         self.tree = ExtTree(region = 'east', width = 300)
         self.tree.add_column(header = u'Структура документа', data_index = 'name')
         self.tree.handler_click = 'test'
+        self.tree.handler_dblclick = 'treeNodeDblClick'
         root = ExtTreeNode()
         root.set_items(name = u'Секция 1')
         self.tree.nodes.append(root)
