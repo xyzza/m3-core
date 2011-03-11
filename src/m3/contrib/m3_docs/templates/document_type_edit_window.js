@@ -11,40 +11,46 @@ ModelDesignView = Ext.extend(Object, {
     },
     refresh: function(){
         this._container.removeAll();
-        Ext.each( this._model.items, function(el) {
-            this._container.add(this._createField(el));
-        }, this);
-        
+
+        var recursion = function(container, model) {
+            var newComponent = this._createComponent( model );
+            container.add( newComponent );
+            if (model.isContainer && model.items && model.items.length > 0) {
+                for (var i=0; i < model.items.length; i++) {
+                    recursion.call(this, newComponent,  model.items[i] );
+                }
+            };
+        };
+        for (var i=0; i < this._model.items.length; i++) {
+            recursion.call(this, this._container, this._model.items[i]);
+        }
         this._container.doLayout();
     },
-    _refreshElement:function(el) {
-        if (el.type != 'document' && el.type != 'section') {
-            return this._createField(el);
-        }
-        else if (el.type == 'section') {
-            //this.
-        }
-    },
-    _createField:function(fieldModel) {
-        var config = {
-            fieldLabel : fieldModel.name
-        };
-        
-        var cls = null;
-        switch(fieldModel.type)
+    _createComponent:function(model) {
+        // Очень тупой вариант создания контролов. Потом для этого следует написать
+        // класс типа фабрики
+
+        switch(model.type)
         {
             case 'text': 
-                cls = Ext.form.TextField;
+                return new Ext.form.TextField({
+                    fieldLabel:model.name,
+                    anchor:'95%'
+
+                });
             break;
             case 'number':
-                cls = Ext.form.NumberField;
+                return new Ext.form.NumberField({
+                    fieldLabel:model.name,
+                    anchor:'95%'
+                });
+            break;
+            case 'section':
+                 return new Ext.form.FieldSet({
+                     title:model.name
+                 });
             break;
         }
-        
-        return new cls(config);
-    },
-    _createSection:function(sectionModel) {
-        //return new Ext.form.FieldSet()
     }
 });
 
@@ -163,17 +169,14 @@ AppController = Ext.extend(Object, {
        this._treeView = new ModelTreeView(this.tree, this.model);
        this._designView = new ModelDesignView(this.container, this.model);
        this._editWindow = new PropertyWindow();
-
        this._editWindow.on('save',this.saveComponent, this);
-
        this.refreshView();
    },
-    refreshView:function() {
+   refreshView:function() {
        this._treeView.refresh();
        this._designView.refresh();
    },
    addControl:function(parentTreeNode) {
-       //debugger;
        this.currentParent = parentTreeNode;
        this._editWindow.show();
    },
@@ -191,24 +194,26 @@ AppController = Ext.extend(Object, {
 
 
 var fake = {
-    cls:'document',
+    type:'document',
+    name:'Документ',
     items:[
         {
-            cls:'section',
+            type:'section',
             id:33,
             name:'Тупо секция',
+            isContainer:true,
             items:[
                 {
                     id:1,
-                    cls:'field',
                     type:'text',
-                    name:'Это строка'
+                    name:'Это строка',
+                    isContainer:false
                 },
                 {
                     id:2,
-                    cls:'field',
                     type:'number',
-                    name:'Это число'
+                    name:'Это число',
+                    isContainer:false
                 }]
         }
     ]
@@ -221,38 +226,34 @@ var fake2 = {
                 {
                     id:1,
                     type:'text',
-                    name:'Это строка'
+                    name:'Это строка',
+                    isContainer:false
                 },
                 {
                     id:2,
                     type:'number',
-                    name:'Это число'
+                    name:'Это число',
+                    isContainer:false
                 }]
 };
 
 
 var previewPanel = Ext.getCmp('{{ component.preview_panel.client_id }}');
 var componentTree = Ext.getCmp('{{ component.tree.client_id }}');
-//var refresher = new ModelDesignView(previewPanel, fake2);
-
-//var propertyWindow = new PropertyWindow();
 
 var application = new AppController({
     tree:componentTree,
-    model:fake2,
+    model:fake,
     container:previewPanel
 });
 
 application.init();
 
 function test(){
-    //previewPanel.removeAll();
-    //previewPanel.doLayout();
 }
 
 function treeNodeAddClick(item) {
     //application.addControl(item.parentMenu.contextNode);
-    //propertyWindow.show();
 }
 
 function treeNodeDblClick(item) {
