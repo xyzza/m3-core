@@ -19,7 +19,7 @@ ModelDesignView = Ext.extend(Object, {
                 for (var i=0; i < model.items.length; i++) {
                     recursion.call(this, newComponent,  model.items[i] );
                 }
-            };
+            }
         };
         for (var i=0; i < this._model.items.length; i++) {
             recursion.call(this, this._container, this._model.items[i]);
@@ -177,12 +177,23 @@ AppController = Ext.extend(Object, {
        this._designView.refresh();
    },
    addControl:function(parentTreeNode) {
+       //debugger;
        this.currentParent = parentTreeNode;
        this._editWindow.show();
    },
    saveComponent:function(obj) {
-       if (this.currentParent.modelObj){
-           this.currentParent.modelObj.items.push(obj);
+       //debugger;
+
+       //тут нужны преобразования соответсвтующие
+
+       if (obj.type == 'section') {
+           obj.isContainer = true;
+           obj.items = [];
+       }
+
+       //debugger;
+       if (this.currentParent.attributes.modelObj){
+           this.currentParent.attributes.modelObj.items.push(obj);
        }
        else {
            this.model.items.push(obj);
@@ -253,7 +264,7 @@ function test(){
 }
 
 function treeNodeAddClick(item) {
-    //application.addControl(item.parentMenu.contextNode);
+    application.addControl(item.parentMenu.contextNode);
 }
 
 function treeNodeDblClick(item) {
