@@ -238,7 +238,7 @@ def FaultFromException(ex, inheader, tb=None, actor=None):
     try:
         exceptionName = ":".join([ex.__module__, ex.__class__.__name__])
     except: pass
-    elt = ZSIFaultDetail(string=exceptionName + "\n" + str(ex), trace=tracetext)
+    elt = ZSIFaultDetail(string=exceptionName + "\n" + unicode(ex), trace=tracetext)
     if inheader:
         detail, headerdetail = None, elt
     else:
