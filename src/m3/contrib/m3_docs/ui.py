@@ -1,6 +1,7 @@
 #coding:utf-8
 from m3.helpers.icons import Icons
 from m3.ui.ext.containers.containers import ExtToolBar
+from m3.ui.ext.containers.context_menu import ExtContextMenu
 from m3.ui.ext.containers.forms import ExtForm, ExtPanel
 from m3.ui.ext.containers.trees import ExtTree, ExtTreeNode
 from m3.ui.ext.controls.buttons import ExtButton
@@ -51,13 +52,12 @@ class DocumentTypeEditWindow(ExtEditWindow):
         self.buttons.extend((save_btn, cancel_btn,))
 
     def _init_main_form_panel(self):
-        self.form = ExtForm()
+        self.form = ExtForm(region = 'north', height = 70, padding = 5)
         # Строчка далее - хрестоматийный пример понятие workaround aka "костыль"
         # self.form это пропертя с сеттером, где идет сразу добавление формы в коллекцию итемсов окна
         # Помните, дети, сайд эффекты при использовании пропертей ведут к минусам в профессиональную карму
+        self.form.style['padding'] = '5px'
         self.items.remove(self.form)
-        self.form.region = 'north'
-        self.form.height = 70
         self.name_field = ExtStringField(name = 'name', label = u'Наименование', allow_blank = False)
         self.id_field = ExtHiddenField(name = 'id')
         self.code_field = ExtStringField(name = 'code', label = u'Код')
@@ -66,9 +66,9 @@ class DocumentTypeEditWindow(ExtEditWindow):
         return self.form
 
     def _init_preview_panel(self):
-        self.preview_panel = ExtPanel(region = 'center', layout = 'form')
+        self.preview_panel = ExtPanel(region = 'center', layout = 'form', padding = 5, label_width = 200 )
         self.preview_panel.items.append(
-            ExtStringField(label='nnnnnn')
+            ExtStringField(label='nnnnnn',anchor = '95%')
         )
         return self.preview_panel
 
@@ -77,16 +77,22 @@ class DocumentTypeEditWindow(ExtEditWindow):
 
     def _init_tree_panel(self):
         self.tree = ExtTree(region = 'east', width = 300)
-        self.tree.add_column(header = 'fofofo', data_index = 'name')
+        self.tree.add_column(header = u'Структура документа', data_index = 'name')
         self.tree.handler_click = 'test'
         root = ExtTreeNode()
-        root.set_items(name = 'fofofofo')
-        root.text = 'bla'
+        root.set_items(name = u'Секция 1')
         self.tree.nodes.append(root)
 
         self.tree.top_bar = ExtToolBar()
         add_btn = ExtButton(text = u'Добавить', icon_cls = Icons.M3_ADD, handler = 'addBtnClick')
         delete_btn = ExtButton(text = u'Удалить', icon_cls = Icons.M3_DELETE, handler = 'deleteBtnClick')
         self.tree.top_bar.items.extend([add_btn, delete_btn])
+
+        #Меню
+
+        node_menu = ExtContextMenu()
+        node_menu.add_item(text = u'Добавить', handler = 'treeNodeAddClick', icon_cls = Icons.M3_ADD)
+        node_menu.add_item(text = u'Удалить', handler = 'treeNodeDeleteClick', icon_cls = Icons.M3_DELETE)
+        self.tree.handler_contextmenu = node_menu
 
         return self.tree
