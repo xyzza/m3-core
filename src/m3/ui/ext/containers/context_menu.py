@@ -88,10 +88,16 @@ class ExtContextMenuItem(ExtUIComponent):
         self.icon_cls = None
         self.menu = None
         self.custom_handler = False
+        # этим параметром можно задавать тип элемента меню: menucheckitem, 
+        # menutextitem, datemenu и т.п. В конфиге это задается через xtype. 
+        # Если задать неправильно, то может быть ошибка!
+        self.custom_itemtype = None
         self.init_component(*args, **kwargs)
         
     def render(self, container=None):
         res = ['text:"%s"' % self.text.replace('"', "&quot;")]
+        if self.custom_itemtype:
+            res.append('xtype: "%s"' % self.custom_itemtype)
         if self.icon_cls:
             res.append('iconCls: "%s"' % self.icon_cls)
         if self.disabled:
