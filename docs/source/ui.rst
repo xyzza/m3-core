@@ -30,19 +30,8 @@
 Описание классов
 ================
 
-
-* 1
- * 2
-
-.. autoclass:: m3.ui.ext.windows.base.BaseExtWindow
-    :members:
-    :undoc-members:
-    :inherited-members:
-    :show-inheritance:
-     
-    .. attribute:: max_threads
-  
-      Gives  
+* :doc:`ui/BaseExtComponent`
+   * :doc:`ui/ExtUIComponent` 
   
   
   
