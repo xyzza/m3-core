@@ -4,7 +4,7 @@
  * При вызове метода refresh() старое содержимое контейнера удаляется и заполняется новосоздаными элементами UI
  * по модели
  */
-ModelDesignView = Ext.extend(Object, {
+DesignView = Ext.extend(Object, {
     constructor: function(container, model) {
         this._model = model;
         this._container = container;
@@ -14,15 +14,20 @@ ModelDesignView = Ext.extend(Object, {
 
         var recursion = function(container, model) {
             var newComponent = this._createComponent( model );
-            container.add( newComponent );
-            if (model.isContainer && model.items && model.items.length > 0) {
-                for (var i=0; i < model.items.length; i++) {
-                    recursion.call(this, newComponent,  model.items[i] );
+            if (newComponent){
+                container.add( newComponent );
+            }
+            if (model.isContainer() && model.childNodes && model.childNodes.length > 0) {
+                for (var i=0; i < model.childNodes.length; i++) {
+                    recursion.call(this, newComponent,  model.childNodes[i] );
                 }
             }
         };
-        for (var i=0; i < this._model.items.length; i++) {
-            recursion.call(this, this._container, this._model.items[i]);
+
+        //recursion.call(this, this._container, this._model.root);
+
+        for (var i=0; i < this._model.root.childNodes.length; i++) {
+            recursion.call(this, this._container, this._model.root.childNodes[i]);
         }
         this._container.doLayout();
     },
@@ -34,20 +39,20 @@ ModelDesignView = Ext.extend(Object, {
         {
             case 'text': 
                 return new Ext.form.TextField({
-                    fieldLabel:model.name,
+                    fieldLabel:model.attributes.name,
                     anchor:'95%'
 
                 });
             break;
             case 'number':
                 return new Ext.form.NumberField({
-                    fieldLabel:model.name,
+                    fieldLabel:model.attributes.name,
                     anchor:'95%'
                 });
             break;
             case 'section':
                  return new Ext.form.FieldSet({
-                     title:model.name
+                     title:model.attributes.name
                  });
             break;
         }
@@ -58,7 +63,7 @@ ModelDesignView = Ext.extend(Object, {
 * Обновляет содержимое дерева
  */
 
-ModelTreeView = Ext.extend(Object, {
+ComponentTreeView = Ext.extend(Object, {
     constructor: function(tree, model) {
         this._tree = tree;
         this._model = model;
@@ -66,20 +71,22 @@ ModelTreeView = Ext.extend(Object, {
     refresh:function() {
         var root = this._tree.root;
         root.removeAll(true);
+
         var recursion = function(parent, model) {
             var newNode = new Ext.tree.TreeNode({
-                name:model.name,
+                name:model.attributes.name,
                 modelObj:model
             });
             parent.appendChild(newNode);
 
-            if (model.items && model.items.length > 0) {
-                for (var i=0; i < model.items.length; i ++) {
-                    recursion(newNode, model.items[i]);
+            if (model.childNodes && model.childNodes.length > 0) {
+                for (var i=0; i < model.childNodes.length; i ++) {
+                    recursion(newNode, model.childNodes[i]);
                 }
             }
         };
-        recursion(root, this._model);
+
+        recursion(root, this._model.root);
 
         this._tree.expandAll();
     }
@@ -166,8 +173,10 @@ AppController = Ext.extend(Object, {
    },
 
    init: function() {
-       this._treeView = new ModelTreeView(this.tree, this.model);
-       this._designView = new ModelDesignView(this.container, this.model);
+       this._model = FormModel.initFromJson(this.initJson);
+       
+       this._treeView = new ComponentTreeView(this.tree, this._model);
+       this._designView = new DesignView(this.container, this._model);
        this._editWindow = new PropertyWindow();
        this._editWindow.on('save',this.saveComponent, this);
        this.refreshView();
@@ -203,6 +212,59 @@ AppController = Ext.extend(Object, {
 
 });
 
+/**
+ *  Внутрення модель представления структуры документа. Для простоты реализации
+ * наследуемся от классов Ext.data.Tree и Ext.data.Node, предоставляющих уже реалзованые функции
+ * работы с деревом и его вершинами.
+ */
+
+ComponentModel = Ext.extend(Ext.data.Node, {
+    constructor: function(config) {
+        this.type = config.type || 'undefined';
+        ComponentModel.superclass.constructor.call(this,config);
+    },
+    isContainer: function() {
+        return this.type == 'section' ? true : false;
+    }
+});
+
+FormModel = Ext.extend(Ext.data.Tree, {
+   
+});
+
+/**
+ * "Статические" методы - по json передаваемому с сервера строит древовидную модель
+ * @param jsonObj - сериалозваная модель
+ */
+FormModel._cleanConfig = function(jsonObj) {
+    // просто удаляет items из json объекта
+    var config = Ext.apply({}, jsonObj);
+    Ext.destroyMembers(config, 'items');
+    return config;
+};
+
+FormModel.initFromJson = function(jsonObj) {
+    //обходит json дерево и строт цивилизованое дерево с нодами, событьями и проч
+    var root = new ComponentModel(FormModel._cleanConfig(jsonObj));
+
+    var callBack = function(node, jsonObj) {
+        var newNode = new ComponentModel(FormModel._cleanConfig(jsonObj));
+        node.appendChild(newNode);
+        if (!jsonObj.items)
+            return;
+        for (var i = 0; i < jsonObj.items.length; i++) {
+            callBack(newNode, jsonObj.items[i])
+        }
+    };
+
+    if (jsonObj.items) {
+        for (var i = 0; i < jsonObj.items.length; i++) {
+            callBack(root, jsonObj.items[i])
+        }
+    }
+
+    return new FormModel(root);
+};
 
 var fake = {
     type:'document',
@@ -255,7 +317,8 @@ var componentTree = Ext.getCmp('{{ component.tree.client_id }}');
 var application = new AppController({
     tree:componentTree,
     model:fake,
-    container:previewPanel
+    container:previewPanel,
+    initJson:fake
 });
 
 application.init();
