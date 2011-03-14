@@ -79,11 +79,12 @@ class ReportJSONEncoder(simplejson.JSONEncoder):
 
 
 def make_report_from_object(obj, dump_to_file = None):
-    '''
-    Вызывает генератор отчета и передает ему объект с исходными данными
-    @param obj: Объект с данными
-    @param dump_to_file: Файл в который записывается результат сериализации (для отладки)
-    '''
+    """
+    Вызывает генератор отчета и передает ему объект с исходными данными *obj*. Для отладки
+    можно вывести сериализованные данные из объекта *obj* в utf-8 файл *dump_to_file*.
+    Может пригодиться если разметка в шаблоне содержит ошибки или объект с данными 
+    имеет неверную структуру.
+    """
     assert isinstance(obj, dict)
     
     indent = 4 if dump_to_file != None else 0;
@@ -100,8 +101,8 @@ def make_report_from_object(obj, dump_to_file = None):
 
 def make_report_from_json_string(json_str):
     '''
-    Вызавает генератор отчета и передает ему в качестве исходных данных JSON строку.
-    @param json_str: Строка JSON
+    Вызавает генератор отчета и передает ему в качестве исходных данных JSON строку *json_str*.
+    Может использоваться, если нужно сгенерировать отчет по сериализованным вручную данным.
     '''
     # При передаче данных через стандартные потоки ввода/вывода
     # важно кодировать/декодировать в кодировку консоли
@@ -121,7 +122,10 @@ def make_html_report_from_object(obj):
  
  
 class BaseReport(object):
-    ''' Базовый класс для создания отчетов '''
+    """
+    Базовый класс для создания отчетов. Обеспечивает сборку данных,
+    сериализацию и отправку в генератор отчетов. 
+    """
     
     # Определяет путь к файлу шаблона относительно папки шаблонов
     template_name = ''
@@ -139,7 +143,10 @@ class BaseReport(object):
         return path
     
     def make_report(self, *args, **kwargs):
-        ''' Запускает формирование отчета '''
+        """
+        Запускает формирование отчета. Позволяет передавать произвольные параметры,
+        которые потом передаются в метод collect.
+        """
         obj = self.collect(*args, **kwargs)
         if not isinstance(obj, dict):
             raise ReportGeneratorError("Collected data must be packed in the dictionary")
@@ -179,15 +186,18 @@ class BaseReport(object):
             
     def get_html_result(self, params):
         '''
-        Рендерит HTML отчет на основе контекста собраннаго в make_report и дополнительных
+        Рендерит HTML отчет на основе контекста собраннаго в *make_report* и дополнительных
         параметров **params. Возвращает HTML строку.
         '''
         assert isinstance(params, dict)
         self._cont.update(params)
         return self._temp.render(self._cont)
     
-    def collect(self):
-        ''' Функция отвечающая за формирование данных '''
+    def collect(self, *args, **kwargs):
+        """
+        Функция отвечающая за формирование данных. Должна быть перекрыта.
+        Возвращаемое ей значение считается результатом.  
+        """
         raise NotImplemented("The function of data collection should be overrided in child classes")
     
 
