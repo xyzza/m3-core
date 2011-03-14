@@ -132,11 +132,7 @@ def exception(msg='', *args, **kwargs):
         send_mail_log(err_message, e_type.__name__)
       
     except:        
-        #log.error(u'Некоррертная работа логера')
-        try:
-            exception(u'Некорректная работа логера')
-        except:
-            log.error(u'Невозможно вывести сообщение об исключительной ситуации')
+        log.error(u'Некоррертная работа логера')        
             
 
 def warning(msg, *args, **kwargs):
