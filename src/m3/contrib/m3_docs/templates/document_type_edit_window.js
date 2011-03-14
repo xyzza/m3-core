@@ -96,7 +96,8 @@ ComponentTreeView = Ext.extend(BaseView, {
             var newNode = new Ext.tree.TreeNode({
                 name:model.attributes.name,
                 modelObj:model,
-                expanded:true
+                expanded:true,
+                allowDrop:model.isContainer()
             });
             parent.appendChild(newNode);
 
@@ -250,8 +251,24 @@ AppController = Ext.extend(Object, {
                parent.appendChild(newNode);
                break;
        }
-   }
+   },
+   moveTreeNode:function(drop, target, point) {
+        var source = drop.attributes.modelObj;
+        var target = target.attributes.modelObj;
 
+       //TODO при таком подходе выкидывается js ошибка, нужно разобраться
+       //да и вообще с сортировкой предстоит разбираться
+
+       if(point == 'append') {
+
+           this._treeView._tree.suspendEvents();
+           target.appendChild(source);
+           this._treeView._tree.resumeEvents();
+           
+           return true;
+       }
+       return false;
+   }
 });
 
 /**
@@ -266,7 +283,7 @@ ComponentModel = Ext.extend(Ext.data.Node, {
         ComponentModel.superclass.constructor.call(this,config);
     },
     isContainer: function() {
-        return this.type == 'section';
+        return this.type == 'section' || this.type == 'document';
     }
 });
 
@@ -370,33 +387,44 @@ var application = new AppController({
 
 application.init();
 
-function test(){
-}
-
 function treeNodeAddClick(item) {
     application.createModel(item.parentMenu.contextNode);
 }
 
 function treeNodeDblClick(item) {
-    application.createModel(item.parentMenu.contextNode);
+    //application.createModel(item.parentMenu.contextNode);
 }
 
 function treeNodeDeleteClick(item) {
     application.deleteModel(item.parentMenu.contextNode);
 }
 
+function treeBeforeNodeDrop(dropEvent){
+    //Здесь я подозреваю нужно проверять на валидность перемещения
+    if (dropEvent.target.isRoot) {
+        //рут не отображается, и в него нельзя перетаскивать
+        return false;
+    }
+    if (dropEvent.target.attributes.modelObj.type == 'document' && (dropEvent.point =='above' ||
+            dropEvent.point =='below')) {
+        //а это суррагатный рут "Документ"
+        return false;
+    }
+    return true;
+}
+
+function treeNodeDrop(dropEvent) {
+    //А вот тут фактическое перемещение
+    //Его нужно делать здесь, потому что по факту нода уже переместилась,
+    //Но после обновления модели, дерево снова перерисуется. Вобщем если двигать в событии
+    //before - получится полная ерунда
+    application.moveTreeNode(dropEvent.dropNode, dropEvent.target, dropEvent.point);
+}
+
 function addBtnClick() {
     application.createModel(componentTree.root);
-//    var p = previewPanel;
-//
-//    var simple = new Ext.form.TextField({
-//        fieldLabel: 'teh test'
-//    });
-//
-//    p.add(simple);
-//    p.doLayout();
 }
 
 function deleteBtnClick() {
-    //refresher.refresh();
+    alert('Not implemented yet')
 }
