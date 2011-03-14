@@ -8,6 +8,10 @@ BaseView = Ext.extend(Object, {
     constructor: function(model) {
         this._model = model;
         this._model.on('append', this.refresh.createDelegate(this));
+        this._model.on('insert', this.refresh.createDelegate(this));
+        this._model.on('move', this.refresh.createDelegate(this));
+        this._model.on('remove', this.refresh.createDelegate(this));
+
     },
     refresh:function(){
         //нужно оверрайдить
@@ -91,7 +95,8 @@ ComponentTreeView = Ext.extend(BaseView, {
         var recursion = function(parent, model) {
             var newNode = new Ext.tree.TreeNode({
                 name:model.attributes.name,
-                modelObj:model
+                modelObj:model,
+                expanded:true
             });
             parent.appendChild(newNode);
 
@@ -102,7 +107,6 @@ ComponentTreeView = Ext.extend(BaseView, {
             }
         };
         recursion(root, this._model.root);
-        this._tree.expandAll();
     }
 });
 
@@ -225,6 +229,10 @@ AppController = Ext.extend(Object, {
    refreshView:function() {
        this._treeView.refresh();
        this._designView.refresh();
+   },
+   deleteModel:function(treeNode) {
+       var model = treeNode.attributes.modelObj;
+       model.remove(true);
    },
    createModel:function(parentTreeNode) {
        var parentModel = parentTreeNode.attributes.modelObj;
@@ -374,7 +382,7 @@ function treeNodeDblClick(item) {
 }
 
 function treeNodeDeleteClick(item) {
-    //var n = item.parentMenu.contextNode; объект ноды по которой кликнули
+    application.deleteModel(item.parentMenu.contextNode);
 }
 
 function addBtnClick() {
