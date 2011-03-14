@@ -1,13 +1,31 @@
 /**
+ * Класс представления. Принцип работы - они повешены на события обновления модели,
+ * когда модель обновляется контроллером, представление перерисовывается по модели
+ * MVC епте
+ */
+
+BaseView = Ext.extend(Object, {
+    constructor: function(model) {
+        this._model = model;
+        this._model.on('append', this.refresh.createDelegate(this));
+    },
+    refresh:function(){
+        //нужно оверрайдить
+    }
+});
+
+
+/**
  *  Класс преназначен для синхронизации модели и экранного превью. В конструктор передается
  * экземпляр Ext.Container(к примеру это могут быть Ext.Panel или Ext.Window) и экземпляер модели
  * При вызове метода refresh() старое содержимое контейнера удаляется и заполняется новосоздаными элементами UI
  * по модели
  */
-DesignView = Ext.extend(Object, {
+
+DesignView = Ext.extend(BaseView, {
     constructor: function(container, model) {
-        this._model = model;
         this._container = container;
+        DesignView.superclass.constructor.call(this, model);
     },
     refresh: function(){
         this._container.removeAll();
@@ -23,8 +41,6 @@ DesignView = Ext.extend(Object, {
                 }
             }
         };
-
-        //recursion.call(this, this._container, this._model.root);
 
         for (var i=0; i < this._model.root.childNodes.length; i++) {
             recursion.call(this, this._container, this._model.root.childNodes[i]);
@@ -63,10 +79,10 @@ DesignView = Ext.extend(Object, {
 * Обновляет содержимое дерева
  */
 
-ComponentTreeView = Ext.extend(Object, {
+ComponentTreeView = Ext.extend(BaseView, {
     constructor: function(tree, model) {
         this._tree = tree;
-        this._model = model;
+        ComponentTreeView.superclass.constructor.call(this, model);
     },
     refresh:function() {
         var root = this._tree.root;
@@ -85,9 +101,7 @@ ComponentTreeView = Ext.extend(Object, {
                 }
             }
         };
-
         recursion(root, this._model.root);
-
         this._tree.expandAll();
     }
 });
@@ -96,10 +110,45 @@ ComponentTreeView = Ext.extend(Object, {
  *  Преднастроеное окно со свойствами объекта. Используется для создания новых элементов модели,
  * и редактирования существующих.
  */
+
+PropertyGridAdapter = Ext.extend(Object, {
+
+//    vocabulary: {
+//        'id':'id',
+//        'name':'Наименование',
+//        'type':'Тип'
+//    },
+    newProxy: function() {
+        return {
+            id:0,
+            name:'',
+            type:'text'
+        };
+
+//        return this.toRussian( {
+//            id:0,
+//            name:'',
+//            type:'text'
+//        });
+    }
+//    toRussian: function(obj) {
+//        var newObj = {};
+//        for (var v in obj) {
+//            newObj[ this.vocabulary[v] ] = obj[v];
+//        }
+//        return newObj;
+//    },
+//    fromRussian:function(obj) {
+//
+//    }
+
+});
+
+
 PropertyWindow = Ext.extend(Ext.Window, {
     initComponent: function() {
+        this._proxyAdapter = new PropertyGridAdapter();
         this.addEvents('save');
-
         this._grid = new Ext.grid.PropertyGrid({
                         autoHeight: true,
                         source: {
@@ -124,43 +173,35 @@ PropertyWindow = Ext.extend(Ext.Window, {
         
         PropertyWindow.superclass.initComponent.apply(this, arguments);
     },
-    show:function( modelObj ) {
-        var modelProxy;
-        if (modelObj){
-            modelProxy = {
-                id : modelObj.id,
-                name: modelObj.name,
-                type: modelObj.type
-            }
-        }
-        else {
-            modelProxy = {
-                id:0,
-                name:'',
-                type:'text'
-            }
-        }
-
+    createModel:function(context, type) {
+        var modelProxy = this._proxyAdapter.newProxy();
         this._grid.setSource(modelProxy);
+        context.operation = 'append';
+        this.context = context;
+        PropertyWindow.superclass.show.call(this);
+        this.show();
+
+    },
+    show:function( ) {
         PropertyWindow.superclass.show.call(this);
     },
     _onSave:function() {
-        //debugger;
-        this.fireEvent('save', this._grid.getSource());
+        this.context.proxy = this._grid.getSource();
+        this.fireEvent('save', this.context);
+        this.context = null;
         this.hide();
     },
     _onClose:function() {
-        //debugger;
         this.hide();
     }
 });
 
-
-
-/*
+/* Класс контроллера приложения. Является клеем между другими частями приложения, чтобы не
+* писать 100500 строк в обработчиках событий UI и оставить приложение переносимым. При создании экземпляра
+* должен быть передан конфиг следующего вида:
 *
 * config = {
-*   model = ...,
+*   initJson = ...,
 *   tree = ...,
 *   container = ...,
 * }
@@ -178,36 +219,29 @@ AppController = Ext.extend(Object, {
        this._treeView = new ComponentTreeView(this.tree, this._model);
        this._designView = new DesignView(this.container, this._model);
        this._editWindow = new PropertyWindow();
-       this._editWindow.on('save',this.saveComponent, this);
+       this._editWindow.on('save',this.saveModel, this);
        this.refreshView();
    },
    refreshView:function() {
        this._treeView.refresh();
        this._designView.refresh();
    },
-   addControl:function(parentTreeNode) {
-       //debugger;
-       this.currentParent = parentTreeNode;
-       this._editWindow.show();
+   createModel:function(parentTreeNode) {
+       var parentModel = parentTreeNode.attributes.modelObj;
+       var contextObj = {
+           parent : parentModel
+       };
+       
+       this._editWindow.createModel(contextObj);
    },
-   saveComponent:function(obj) {
-       //debugger;
-
-       //тут нужны преобразования соответсвтующие
-
-       if (obj.type == 'section') {
-           obj.isContainer = true;
-           obj.items = [];
+   saveModel:function(context) {
+       switch(context.operation){
+           case 'append':
+               var newNode = new ComponentModel(context.proxy);
+               var parent = context.parent;
+               parent.appendChild(newNode);
+               break;
        }
-
-       //debugger;
-       if (this.currentParent.attributes.modelObj){
-           this.currentParent.attributes.modelObj.items.push(obj);
-       }
-       else {
-           this.model.items.push(obj);
-       }
-       this.refreshView();
    }
 
 });
@@ -224,7 +258,7 @@ ComponentModel = Ext.extend(Ext.data.Node, {
         ComponentModel.superclass.constructor.call(this,config);
     },
     isContainer: function() {
-        return this.type == 'section' ? true : false;
+        return this.type == 'section';
     }
 });
 
@@ -234,7 +268,7 @@ FormModel = Ext.extend(Ext.data.Tree, {
 
 /**
  * "Статические" методы - по json передаваемому с сервера строит древовидную модель
- * @param jsonObj - сериалозваная модель
+ * @param jsonObj - сериализованая модель
  */
 FormModel._cleanConfig = function(jsonObj) {
     // просто удаляет items из json объекта
@@ -266,6 +300,11 @@ FormModel.initFromJson = function(jsonObj) {
     return new FormModel(root);
 };
 
+
+// Просто json для отладки
+//
+//
+//
 var fake = {
     type:'document',
     name:'Документ',
@@ -327,11 +366,11 @@ function test(){
 }
 
 function treeNodeAddClick(item) {
-    application.addControl(item.parentMenu.contextNode);
+    application.createModel(item.parentMenu.contextNode);
 }
 
 function treeNodeDblClick(item) {
-    application.addControl(item.parentMenu.contextNode);
+    application.createModel(item.parentMenu.contextNode);
 }
 
 function treeNodeDeleteClick(item) {
@@ -339,7 +378,7 @@ function treeNodeDeleteClick(item) {
 }
 
 function addBtnClick() {
-    application.addControl(componentTree.root);
+    application.createModel(componentTree.root);
 //    var p = previewPanel;
 //
 //    var simple = new Ext.form.TextField({
