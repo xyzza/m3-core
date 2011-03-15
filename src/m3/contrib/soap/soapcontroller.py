@@ -7,7 +7,7 @@ from ZSI.writer import SoapWriter
 from ZSI.resolvers import MIMEResolver
 
 from django.http import HttpResponse
-from django.db.transaction import commit_on_success
+from django.db.transaction import commit_on_success, autocommit
 from django.utils.encoding import force_unicode
 from django.core.cache import cache
 
@@ -143,7 +143,7 @@ class SOAPAction(Action):
         logger.error(f.AsSOAP())
         return self.sendXML(f.AsSOAP(), 500, **kw)
 
-    @commit_on_success
+    @autocommit
     def run(self, request, context):
         '''
         Обработка запроса к веб-сервису
