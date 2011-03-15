@@ -1,9 +1,9 @@
-.. _ExtUIComponent:
+.. _BaseExtControl:
 
-ExtUIComponent
+BaseExtControl
 ================================================
 
-.. autoclass:: m3.ui.ext.base.ExtUIComponent
+.. autoclass:: m3.ui.ext.controls.base.BaseExtControl
     :members:
     :undoc-members:
     :inherited-members:

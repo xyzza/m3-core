@@ -1,9 +1,9 @@
-.. _ExtUIComponent:
+.. _ExtButton:
 
-ExtUIComponent
+ExtButton
 ================================================
 
-.. autoclass:: m3.ui.ext.base.ExtUIComponent
+.. autoclass:: m3.ui.ext.controls.buttons.ExtButton
     :members:
     :undoc-members:
     :inherited-members:

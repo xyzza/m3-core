@@ -3,10 +3,6 @@
 BaseExtComponent
 ================================================
 
-Какие дополнительные пакеты присутствуют в m3
-
-
-
 .. autoclass:: m3.ui.ext.base.BaseExtComponent
     :members:
     :undoc-members:
@@ -15,4 +11,4 @@ BaseExtComponent
      
     .. attribute:: max_threads
   
-      Gives  
+      Gives
