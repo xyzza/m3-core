@@ -58,11 +58,10 @@ class SelectUsersListWindow(windows.ExtWindow):
         self.template_globals = 'm3-users/select-users-window.js'
         
         self.grid = panels.ExtObjectGrid(sm=panels.ExtGridCheckBoxSelModel())
-        self.grid.add_column(header = u'Логин', data_index = 'username', width=100)
+        self.grid.add_column(header = u'Логин', data_index = 'username', width=150)
         self.grid.add_column(header = u'Фамилия', data_index = 'last_name', width=150)
         self.grid.add_column(header = u'Имя', data_index = 'first_name', width=150)
-        self.grid.add_column(header = u'E-mail', data_index = 'email', width=200)
-        self.grid.allow_paging = False
+        self.grid.add_column(header = u'E-mail', data_index = 'email', width=150)
         
         self.items.append(self.grid)
         
