@@ -1,7 +1,7 @@
 /**
- * Класс представления. Принцип работы - они повешены на события обновления модели,
- * когда модель обновляется контроллером, представление перерисовывается по модели
- * MVC епте
+ * Класс представления. Принцип работы - классы наследники повешены на события обновления модели,
+ * когда модель обновляется контроллером, представление перерисовывается без внешнего участия
+ * Это MVC епте.
  */
 
 BaseView = Ext.extend(Object, {
@@ -14,10 +14,9 @@ BaseView = Ext.extend(Object, {
 
     },
     refresh:function(){
-        //нужно оверрайдить
+        //оверрайдиццо в дочерних классах
     }
 });
-
 
 /**
  *  Класс преназначен для синхронизации модели и экранного превью. В конструктор передается
@@ -60,19 +59,23 @@ DesignView = Ext.extend(BaseView, {
             case 'text': 
                 return new Ext.form.TextField({
                     fieldLabel:model.attributes.name,
-                    anchor:'95%'
+                    anchor:'95%',
+                    id:model.id
 
                 });
             break;
             case 'number':
                 return new Ext.form.NumberField({
                     fieldLabel:model.attributes.name,
-                    anchor:'95%'
+                    anchor:'95%',
+                    id:model.id
                 });
             break;
             case 'section':
                  return new Ext.form.FieldSet({
-                     title:model.attributes.name
+                     title:model.attributes.name,
+                     cls:'designContainer',
+                     id:model.id
                  });
             break;
         }
@@ -80,7 +83,7 @@ DesignView = Ext.extend(BaseView, {
 });
 
 /*
-* Обновляет содержимое дерева
+* Обновляет содержимое дерева по модели
  */
 
 ComponentTreeView = Ext.extend(BaseView, {
@@ -216,13 +219,18 @@ PropertyWindow = Ext.extend(Ext.Window, {
 AppController = Ext.extend(Object, {
    constructor: function(config) {
        Ext.apply(this, config);
+       this._initDesignDD(this.designPanel);
+       this._initCSSRules();
    },
 
    init: function() {
        this._model = FormModel.initFromJson(this.initJson);
-       
        this._treeView = new ComponentTreeView(this.tree, this._model);
-       this._designView = new DesignView(this.container, this._model);
+       this._designView = new DesignView(this.designPanel, this._model);
+       //синхронизируем id у панели - общего контейнера и рута модели
+       //требуется для работы драг дропа с тулбокса в корень
+       this._model.root.setId( this.designPanel.id);
+
        this._editWindow = new PropertyWindow();
        this._editWindow.on('save',this.saveModel, this);
        this.refreshView();
@@ -259,15 +267,98 @@ AppController = Ext.extend(Object, {
        //TODO при таком подходе выкидывается js ошибка, нужно разобраться
        //да и вообще с сортировкой предстоит разбираться
 
+       //TODO рассмотреть другие случаи значения point('above' и 'below')
        if(point == 'append') {
-
-           this._treeView._tree.suspendEvents();
            target.appendChild(source);
-           this._treeView._tree.resumeEvents();
-           
            return true;
        }
        return false;
+   },
+   domNodeDrop:function(target, dd, e, data ) {
+       var componentNode = data.node;
+       var model = this._model.findModelById(target.id);
+
+       //TODO сделать умно
+       //Ну, тут тупейшее создание новых компонентов. Пока тупейшее
+
+       var newModelConfig = {
+           type:componentNode.attributes.type
+       };
+
+       switch(componentNode.attributes.type) {
+           case 'section':
+                   newModelConfig.name = 'Новая секция';
+           break;
+           case 'text':
+                   newModelConfig.name = 'Новая текстовый редактор';
+           break;
+           case 'number':
+                   newModelConfig.name = 'Новый редактор чисел';
+           break;
+       }
+       model.appendChild( new ComponentModel(newModelConfig) );
+   },
+   _initCSSRules:function() {
+       //Когда-нибудь это все обзаведеться нормальными файлами с реусрсами. А пока будем таким вот образом
+       //добавлять CSS'ки в документ
+
+       Ext.util.CSS.createStyleSheet(
+               '.selectedElement {' +
+                    'border: 1px dotted blue;'+
+                    'background:#FF89D9;' +
+               '}','selectedElem');
+       
+   },
+   _initDesignDD:function() {
+       /**
+        * Принцип действия драг энд дропа с тулбокса - тулбокс и превью дизайнера объеденины
+        * в одну ddGroup. На DOM элемент панели дизайнера вешается Ext.dd.DropZone
+        * Это класс которые перехватывает дом события и решает можно ли выполнить Drop операцию,
+        * и что в ней делать если вдруг можно
+        */
+
+       //Для того чтобы понимать что в DOM дереве является контенером(читай наследник Ext.Container)
+       //в который можно добавлять новый компоненты(читай Ext.Component)
+       //используется фейковый CSS класс .designContainer
+       //Когда создаем экстовые компоненты - незабываем навешивать эту штуку
+
+       //Здесь ручками присоеденим класс к родительской панели, чтобы она тоже участвовала в процессе
+       this.designPanel.getEl().addClass('designContainer');
+
+       this.designPanel.dropZone = new Ext.dd.DropZone( this.designPanel.getEl(), {
+               ddGroup:'designerDDGroup',
+
+               // Джедайский прием. Проброс функции инстанса аппконтроллера,
+               // путем создания объекта указателя на функцию со сменой объекта исполнения,
+               // нужно это потому что объект который порождает дроп зону будет недоступен на момент
+               // исполнения onNodeDrop. И, увы, дроп зона не наследует Observable
+               // Да, чуваки, ООП в жабаскрипте это вам не хрен собачий
+               processDropResults : this.domNodeDrop.createDelegate(this),
+
+               getTargetFromEvent: function(e) {
+                   //сюда попадают мышиные DOM события, будем пытаться найти ближайший допустимый
+                   //контейнер. getTarget ищет по селектору или в текущей вершине, или в вершнах предках, но
+                   //не в наследниках. Те функция вернет или null и функции ниже ничего не будут делать,
+                   //или target'ом станет ближайший найденый контейнер(вернее DOM вершина которую этот конейтер
+                   //олицетворяет)
+                   return e.getTarget('.designContainer');
+               },
+               onNodeEnter: function(target, dd, e, data) {
+                   //TODO не хочет подсвечиваться рутовый контейнер
+                   Ext.fly(target).addClass('selectedElement');
+               },
+               onNodeOut:function(target, dd, e, data){
+                   Ext.fly(target).removeClass('selectedElement');
+               },
+               onNodeOver:function(target, dd, e, data) {
+                   //здесь штука чтобы показать значок 'Можно дропать' на экране
+                   //TODO если как в документации делать куча js ошибок вылезает
+                   //return Ext.dd.DropZone.prototype.dropAllowed;
+               },
+               onNodeDrop:function(target, dd, e, data) {
+                   this.processDropResults(target, dd, e, data);
+               }
+           });
    }
 });
 
@@ -288,7 +379,16 @@ ComponentModel = Ext.extend(Ext.data.Node, {
 });
 
 FormModel = Ext.extend(Ext.data.Tree, {
-   
+    /**
+     * Поиск модели по id. Это именно поиск с обходом. Может быть в дальнейшем стоит разобраться
+     * со словарем nodeHash внутри дерева и его использовать для поиска по id(но это вряд ли, деревья маленькие)
+     */
+    findModelById:function(id) {
+        if (this.root.id == id ){
+            return this.root;
+        }
+        return this.root.findChild('id',id, true);
+    }
 });
 
 /**
@@ -336,18 +436,15 @@ var fake = {
     items:[
         {
             type:'section',
-            id:33,
             name:'Тупо секция',
             isContainer:true,
             items:[
                 {
-                    id:1,
                     type:'text',
                     name:'Это строка',
                     isContainer:false
                 },
                 {
-                    id:2,
                     type:'number',
                     name:'Это число',
                     isContainer:false
@@ -361,13 +458,11 @@ var fake2 = {
     name:'Документ',
     items:[
                 {
-                    id:1,
                     type:'text',
                     name:'Это строка',
                     isContainer:false
                 },
                 {
-                    id:2,
                     type:'number',
                     name:'Это число',
                     isContainer:false
@@ -380,8 +475,7 @@ var componentTree = Ext.getCmp('{{ component.tree.client_id }}');
 
 var application = new AppController({
     tree:componentTree,
-    model:fake,
-    container:previewPanel,
+    designPanel:previewPanel,
     initJson:fake
 });
 

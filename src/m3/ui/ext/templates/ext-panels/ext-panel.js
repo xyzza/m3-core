@@ -14,6 +14,7 @@ new Ext.Panel({
 	{% if component.collapsible %} ,collapsible: true {% endif %} 
 	{% if component.padding %} ,padding: '{{ component.padding }}' {% endif %}
 	{% if component.anchor %}, anchor: '{{component.anchor}}' {% endif %}
+    {% if component.dd_group %}, ddGroup: '{{component.dd_group}}' {% endif %}
     , border: {{component.border|lower}}
     , bodyBorder: {{component.body_border|lower}}        
 	,autoScroll: true

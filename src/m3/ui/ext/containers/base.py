@@ -125,6 +125,7 @@ class BaseExtPanel(BaseExtContainer):
         self.top_bar = None
         self.bottom_bar = None
         self.footer_bar = None
+        self.dd_group = None
         self.border = True
 
     def t_render_top_bar(self):
@@ -144,6 +145,7 @@ class BaseExtPanel(BaseExtContainer):
             self._put_config_value('header', self.header)
             
         self._put_config_value('iconCls', self.icon_cls)
+        self._put_config_value('ddGroup', self.dd_group)
         self._put_config_value('tbar', self.t_render_top_bar, 
                                       self.top_bar)
         self._put_config_value('bbar', self.t_render_bottom_bar, 

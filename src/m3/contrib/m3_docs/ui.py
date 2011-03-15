@@ -1,6 +1,6 @@
 #coding:utf-8
 from m3.helpers.icons import Icons
-from m3.ui.ext.containers.containers import ExtToolBar
+from m3.ui.ext.containers.containers import ExtToolBar, ExtContainer
 from m3.ui.ext.containers.context_menu import ExtContextMenu
 from m3.ui.ext.containers.forms import ExtForm, ExtPanel
 from m3.ui.ext.containers.trees import ExtTree, ExtTreeNode
@@ -67,34 +67,58 @@ class DocumentTypeEditWindow(ExtEditWindow):
 
     def _init_preview_panel(self):
         self.preview_panel = ExtPanel(region = 'center', layout = 'form', padding = 5, label_width = 200 )
-        self.preview_panel.items.append(
-            ExtStringField(label='nnnnnn',anchor = '95%')
-        )
+        self.preview_panel.dd_group = 'designerDDGroup'
         return self.preview_panel
 
     def _init_east_panel(self):
-        return self._init_tree_panel()
+        east_wrapper = ExtContainer(layout='vbox', region='east', width = 300)
+        east_wrapper.layout_config['align'] = 'stretch'
+        component_tree = self._init_component_tree()
+        component_tree.flex = 1
+        toolbox = self._init_toolbox_tree()
+        toolbox.height = 180
+        east_wrapper.items.extend([component_tree, toolbox])
+        return east_wrapper
 
-    def _init_tree_panel(self):
-        self.tree = ExtTree(region = 'east', width = 300)
+    def _init_component_tree(self):
+        self.tree = ExtTree()
         self.tree.add_column(header = u'Структура документа', data_index = 'name')
         self.tree.handler_dblclick = 'treeNodeDblClick'
         self.tree.handler_beforedrop = 'treeBeforeNodeDrop'
         self.tree.handler_drop = 'treeNodeDrop'
+        self.tree.drag_drop = True
         root = ExtTreeNode()
         root.set_items(name = u'Root')
         self.tree.nodes.append(root)
-        self.tree.drag_drop = True
         self.tree.top_bar = ExtToolBar()
         add_btn = ExtButton(text = u'Добавить', icon_cls = Icons.M3_ADD, handler = 'addBtnClick')
         delete_btn = ExtButton(text = u'Удалить', icon_cls = Icons.M3_DELETE, handler = 'deleteBtnClick')
         self.tree.top_bar.items.extend([add_btn, delete_btn])
 
         #Меню
-
         node_menu = ExtContextMenu()
         node_menu.add_item(text = u'Добавить', handler = 'treeNodeAddClick', icon_cls = Icons.M3_ADD)
         node_menu.add_item(text = u'Удалить', handler = 'treeNodeDeleteClick', icon_cls = Icons.M3_DELETE)
         self.tree.handler_contextmenu = node_menu
 
         return self.tree
+
+    def _init_toolbox_tree(self):
+        self.toolbox = ExtTree()
+        self.toolbox.add_column(header = u'Инструменты', data_index = 'name')
+        self.toolbox.drag_drop = True
+        self.toolbox.dd_group = 'designerDDGroup'
+        section = ExtTreeNode()
+        section.set_items(name = u'Секция', type = 'section' )
+        self.toolbox.nodes.append(section)
+
+        text_node = ExtTreeNode()
+        text_node.set_items(name = u'Текст', type = 'text' )
+        self.toolbox.nodes.append(text_node)
+
+        number_node = ExtTreeNode()
+        number_node.set_items(name = u'Число', type = 'number' )
+        self.toolbox.nodes.append(number_node)
+        
+        return self.toolbox
+        

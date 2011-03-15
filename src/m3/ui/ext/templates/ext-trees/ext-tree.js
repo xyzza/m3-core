@@ -17,6 +17,7 @@ function(){
 		{% if component.top_bar %} ,tbar: {{ component.t_render_top_bar|safe }} {% endif %}
 		{% if component.buttom_bar %} ,bbar: {{ component.t_render_buttom_bar|safe }} {% endif %}
 		{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
+        {% if component.dd_group %} ,ddGroup: '{{ component.dd_group }}' {% endif %}
 		
 	    ,useArrows: true
 	    ,autoScroll: false
