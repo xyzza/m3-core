@@ -148,6 +148,9 @@ class BaseExtComponent(object):
         pass
     
     def get_script(self):
+        '''
+        Генерация скрипта для отправки на клиентское рабочее место.
+        '''
         return self.renderer.get_script()
     
     def init_component(self, *args, **kwargs):

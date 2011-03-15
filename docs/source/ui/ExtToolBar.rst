@@ -1,9 +1,9 @@
-.. _ExtUIComponent:
+.. _ExtToolBar:
 
-ExtUIComponent
+ExtToolBar
 ================================================
 
-.. autoclass:: m3.ui.ext.base.ExtUIComponent
+.. autoclass:: m3.ui.ext.containers.containers.ExtToolBar
     :members:
     :undoc-members:
     :inherited-members:

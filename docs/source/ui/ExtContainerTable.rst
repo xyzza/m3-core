@@ -1,9 +1,9 @@
-.. _ExtUIComponent:
+.. _ExtContainerTable:
 
-ExtUIComponent
+ExtContainerTable
 ================================================
 
-.. autoclass:: m3.ui.ext.base.ExtUIComponent
+.. autoclass:: m3.ui.ext.containers.container_complex.ExtContainerTable
     :members:
     :undoc-members:
     :inherited-members:

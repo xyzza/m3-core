@@ -1,9 +1,9 @@
-.. _ExtUIComponent:
+.. _ExtPagingBar:
 
-ExtUIComponent
+ExtPagingBar
 ================================================
 
-.. autoclass:: m3.ui.ext.base.ExtUIComponent
+.. autoclass:: m3.ui.ext.containers.containers.ExtPagingBar
     :members:
     :undoc-members:
     :inherited-members:
