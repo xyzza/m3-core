@@ -1,8 +1,10 @@
 {# new Ext.tree.AsyncTreeNode -- нельзя использовать, так как работает некорректно с вложеной иерархией #} 
 {
-	'expanded': '{{ component.expanded|lower }}'
-	,'id': '{{ component.client_id }}'
-    
+	expanded: {{ component.expanded|lower }}
+	,id: '{{ component.client_id }}'
+	{% if component.can_check %}
+		,checked: {{ component.checked|lower }}
+	{% endif %}
 	{% for k, v in component.items.items %}
 		,{{ k }}:'{{ v }}'	
 	{%endfor%}
@@ -16,6 +18,6 @@
 	{% endif %}
 	
 	{% if component.has_children %}
-	,'children': {{ component.t_render_children|safe }}
+	,'children': {{ component.t_render_children|safe }}	
 	{% endif %}
 }

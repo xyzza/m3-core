@@ -254,6 +254,12 @@ class ActionPack(object):
     # Общий код права доступа будет иметь вид: /users#edit
     # Как обрабатывается этот список - смотри в has_sub_permission
     sub_permissions = {}
+    
+    # Логический путь набора действий в прикладной системе.
+    # Используется только для отображения и группировке наборов с одинаковым путем.
+    # Также может использоваться для создания меню.
+    # Например, путь может быть: "Справочники\Общие" или "Реестры"
+    path = None
 
     def __init__(self):
         # Список действий зарегистрированных на исполнение в данном пакете
@@ -322,6 +328,10 @@ class ActionPack(object):
         соответствующим Action'ом
         '''
         pass
+    
+    @classmethod
+    def get_verbose_name(cls):
+        return cls.title if hasattr(cls, 'title') and cls.title else cls.verbose_name if cls.verbose_name else cls.__name__
 
 class ActionController(object):
     '''
