@@ -105,7 +105,7 @@ class BaseObjectModel(models.Model):
         В случае, если запись не удалось удалисть по причине нарушения
         целостности, возвращается False, иначе True.
         """
-        safe_delete(self)
+        return safe_delete(self)
 
     def get_related_objects(self):
         """
