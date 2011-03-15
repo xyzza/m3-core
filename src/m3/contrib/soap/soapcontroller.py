@@ -43,16 +43,20 @@ class SOAPAction(Action):
         '''
         Получение файла с описанием интерфейса взаимодействия (WSDL-файла)
         '''
-        wsdl = self._zsiService._wsdl
-        #тут надо также учитывать протокол!
-        if request.is_secure():
-            serviceUrl = u'https://%s%s' % (request.get_host(), self.get_absolute_url())
-        else:
-            serviceUrl = u'http://%s%s' % (request.get_host(), self.get_absolute_url())
-        #print serviceUrl
-        soapAddress = '<soap:address location="%s"/>' % serviceUrl
-        wsdlre = re.compile('\<soap:address[^\>]*>', re.IGNORECASE)
-        wsdl = re.sub(wsdlre, soapAddress, wsdl)
+        key = self._zsiService.__class__.__name__ + 'wsdl'
+        wsdl = cache.get(key)
+        if not wsdl:
+            wsdl = self._zsiService._wsdl
+            #тут надо также учитывать протокол!
+            if request.is_secure():
+                serviceUrl = u'https://%s%s' % (request.get_host(), self.get_absolute_url())
+            else:
+                serviceUrl = u'http://%s%s' % (request.get_host(), self.get_absolute_url())
+            #print serviceUrl
+            soapAddress = '<soap:address location="%s"/>' % serviceUrl
+            wsdlre = re.compile('\<soap:address[^\>]*>', re.IGNORECASE)
+            wsdl = re.sub(wsdlre, soapAddress, wsdl)
+            cache.set(key, wsdl)
         return wsdl
 
     def dispatch(self, ps, SendResponse, SendFault, post, action, nsdict={}, **kw):
