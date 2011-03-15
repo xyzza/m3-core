@@ -48,13 +48,14 @@ def queryset_limiter(queryset, start=0, limit=0):
     total - общее кол-во записей в queryset'e
     '''
     
-    assert isinstance(queryset, QuerySet), 'queryset must be instance of django.db.models.query.QuerySet' 
+    assert (isinstance(queryset, QuerySet) or getattr(queryset, '__iter__')), \
+    'queryset must be either instance of django.db.models.query.QuerySet or iterable' 
     
     if start < 0:
         start = 0
     if limit < 0:
         limit = 0
-    total = queryset.count()
+    total = queryset.count() if isinstance(queryset, QuerySet) else len(queryset)
     rows = queryset[start:start+limit]
     return (rows, total,)
 
@@ -104,7 +105,7 @@ class BaseObjectModel(models.Model):
         В случае, если запись не удалось удалисть по причине нарушения
         целостности, возвращается False, иначе True.
         """
-        safe_delete(self)
+        return safe_delete(self)
 
     def get_related_objects(self):
         """

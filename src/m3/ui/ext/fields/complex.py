@@ -21,8 +21,7 @@ from m3.helpers.datastructures import TypedList
 #===============================================================================
 class ExtDictSelectField(BaseExtTriggerField):
     '''
-    Поле с выбором из справочника
-    
+    Поле с выбором из справочника    
     '''
     class ExtTrigger(BaseExtComponent):
         def __init__(self, *args, **kwargs):

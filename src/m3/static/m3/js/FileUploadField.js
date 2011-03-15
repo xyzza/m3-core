@@ -310,7 +310,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         return this.value.split('/').reverse()[0];
     }
     ,isFileExtensionOK: function(){
-        var fileExtension = this.fileInput.dom.files[0].fileName.split('.');
+        var fileExtension = this.fileInput.dom.value.split('.');
         if (fileExtension.length > 0){
             //Поиск на существование элемента внутри массива
             return this.possibleFileExtensions.split(',')

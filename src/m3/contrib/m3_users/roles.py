@@ -4,6 +4,7 @@ Created on 11.06.2010
 
 @author: akvarats
 '''
+from django.db.models.query import QuerySet
 import inspect
 
 from django.db import transaction
@@ -20,7 +21,7 @@ from m3.ui.ext.containers.grids import ExtGridCheckBoxSelModel
 from m3.ui.ext.panels.trees import ExtObjectTree
 
 from m3.helpers import ui as ui_helpers
-from m3.db import safe_delete
+from m3.db import safe_delete, queryset_limiter
 from m3.helpers import logger, urls
 from m3.ui.actions import ActionContextDeclaration, ControllerCache, ActionPack, Action
 from m3.ui.actions.context import ActionContext
@@ -206,11 +207,16 @@ class UsersForRoleAssignmentData(actions.Action):
     def context_declaration(self):
         return [
             actions.ActionContextDeclaration(name='userrole_id', type=int, required=True),
-            actions.ActionContextDeclaration(name='filter', type=str, required=True, default=u'')
+            actions.ActionContextDeclaration(name='filter', type=str, required=True, default=u''),
+            actions.ActionContextDeclaration(name='start', type=int, required=True),
+            actions.ActionContextDeclaration(name='limit', type=int, required=True)
         ]
     
     def run(self, request, context):
-        return actions.ExtGridDataQueryResult(helpers.get_unassigned_users(context.userrole_id, context.filter))
+        users = helpers.get_unassigned_users(context.userrole_id, context.filter)
+        rows, total = queryset_limiter(users, context.start, context.limit)
+        return actions.PreJsonResult({'rows': rows, 'total': total})
+        #return actions.ExtGridDataQueryResult(helpers.get_unassigned_users(context.userrole_id, context.filter))
         
 class GetRolePermissionAction(actions.Action):
     '''

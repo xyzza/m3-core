@@ -18,6 +18,13 @@
    vendor.rst
    workflow.rst
 
+Изменения в m3
+==============
+
+.. toctree::
+    :maxdepth: 2
+    
+    changes
 
 Индексы
 ==================
@@ -25,5 +32,3 @@
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-  
-

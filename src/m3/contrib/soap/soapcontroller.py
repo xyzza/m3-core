@@ -7,8 +7,9 @@ from ZSI.writer import SoapWriter
 from ZSI.resolvers import MIMEResolver
 
 from django.http import HttpResponse
-from django.db.transaction import commit_on_success
+from django.db.transaction import commit_on_success, autocommit
 from django.utils.encoding import force_unicode
+from django.core.cache import cache
 
 from m3.ui.actions import ActionController, Action, ActionPack
 from m3.helpers import logger
@@ -42,16 +43,20 @@ class SOAPAction(Action):
         '''
         Получение файла с описанием интерфейса взаимодействия (WSDL-файла)
         '''
-        wsdl = self._zsiService._wsdl
-        #тут надо также учитывать протокол!
-        if request.is_secure():
-            serviceUrl = u'https://%s%s' % (request.get_host(), self.get_absolute_url())
-        else:
-            serviceUrl = u'http://%s%s' % (request.get_host(), self.get_absolute_url())
-        #print serviceUrl
-        soapAddress = '<soap:address location="%s"/>' % serviceUrl
-        wsdlre = re.compile('\<soap:address[^\>]*>', re.IGNORECASE)
-        wsdl = re.sub(wsdlre, soapAddress, wsdl)
+        key = self._zsiService.__class__.__name__ + 'wsdl'
+        wsdl = cache.get(key)
+        if not wsdl:
+            wsdl = self._zsiService._wsdl
+            #тут надо также учитывать протокол!
+            if request.is_secure():
+                serviceUrl = u'https://%s%s' % (request.get_host(), self.get_absolute_url())
+            else:
+                serviceUrl = u'http://%s%s' % (request.get_host(), self.get_absolute_url())
+            #print serviceUrl
+            soapAddress = '<soap:address location="%s"/>' % serviceUrl
+            wsdlre = re.compile('\<soap:address[^\>]*>', re.IGNORECASE)
+            wsdl = re.sub(wsdlre, soapAddress, wsdl)
+            cache.set(key, wsdl)
         return wsdl
 
     def dispatch(self, ps, SendResponse, SendFault, post, action, nsdict={}, **kw):
@@ -65,36 +70,51 @@ class SOAPAction(Action):
 
         try:
             method = self._zsiService.getOperation(ps, action)
+            #вытащим имя функции для доставания ключа кэширования
+            get_cache_info = getattr(self._zsiService, method.__name__ + '_cache_info', None)
         except Exception, e:
             return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
 
-        try:
-            request, result = method(ps)
-        except Exception, e:
-            return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
+        soapdata = None
+        cache_key = None
 
-        # Verify if Signed
-        self._zsiService.verify(ps)
+        if callable(get_cache_info):
+            #наш метод подерживает кэширования
+            try:
+                cache_info = get_cache_info(ps)
+                cache_key = u'%s:%s' % (action, force_unicode(cache_info['key']))
+                soapdata = cache.get(cache_key)
+            except Exception, e:
+                return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
+        if not soapdata:
+            #net resulta v cache budem formirovat
+            try:
+                request, result = method(ps)
+            except Exception, e:
+                return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
 
-        # If No response just return.
-        if result is None:
-            return SendResponse('', **kw)
-
-        sw = SoapWriter(nsdict=nsdict)
-        try:
-            sw.serialize(result)
-        except Exception, e:
-            return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
+            # Verify if Signed
+            self._zsiService.verify(ps)
 
 
-        # Create Signatures
-        self._zsiService.sign(sw)
+            sw = SoapWriter(nsdict=nsdict)
+            try:
+                sw.serialize(result)
+            except Exception, e:
+                return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
 
-        try:
-            soapdata = str(sw)
-            return SendResponse(soapdata, **kw)
-        except Exception, e:
-            return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
+
+            # Create Signatures
+            self._zsiService.sign(sw)
+
+            try:
+                soapdata = str(sw)
+                if cache_key:
+                    cache.set(cache_key, soapdata)
+            except Exception, e:
+                return SendFault(FaultFromException(e, 0, sys.exc_info()[2]), **kw)
+
+        return SendResponse(soapdata, **kw)
 
     def sendXML(self, text, code=200, **kw):
         '''
@@ -123,7 +143,7 @@ class SOAPAction(Action):
         logger.error(f.AsSOAP())
         return self.sendXML(f.AsSOAP(), 500, **kw)
 
-    @commit_on_success
+    @autocommit
     def run(self, request, context):
         '''
         Обработка запроса к веб-сервису
