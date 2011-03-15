@@ -21,8 +21,8 @@ function addPermission(grid, res, opt) {
 		var count = store.getCount();
 		for(var i = 0, len = sels.length; i < len; i++){
 			var record = sels[i];
-			if (!store.getById(record.data.url)) {
-				var rec = new store.recordType({id: null, "permission_code":record.data.url, "verbose_name": record.data.name, "disabled": false}, record.data.url);
+			if (!store.getById(record.attributes.url)) {
+				var rec = new store.recordType({id: null, "permission_code":record.attributes.url, "verbose_name": record.attributes.fullname, "disabled": false}, record.attributes.url);
 				store.add(rec);
 			}
 		}
