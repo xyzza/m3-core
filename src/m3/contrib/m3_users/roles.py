@@ -17,15 +17,12 @@ from m3.ui.ext import panels
 from m3.ui.ext import fields
 from m3.ui.ext import controls
 from m3.ui.ext.panels.grids import ExtObjectGrid
-from m3.ui.ext.containers.grids import ExtGridCheckBoxSelModel
-from m3.ui.ext.panels.trees import ExtObjectTree
-
 from m3.helpers import ui as ui_helpers
 from m3.db import safe_delete, queryset_limiter
 from m3.helpers import logger, urls
 from m3.ui.actions import ActionContextDeclaration, ControllerCache, ActionPack, Action
 from m3.ui.actions.context import ActionContext
-
+from m3.ui.ext.containers import ExtTree, ExtTreeNode
 from users import SelectUsersListWindow
 
 import helpers
@@ -60,7 +57,7 @@ class RolesActions(actions.ActionPack):
             DeleteAssignedUser(), # удаление связанного с ролью пользователя
             GetRolePermissionAction(), # получение списка прав доступа роли
             AddRolePermission(), # выбор прав доступа для добавления в роль
-            GetAllPermissions(), # получение дерева всех прав доступа
+            #GetAllPermissions(), # получение дерева всех прав доступа
         ]
 
 #===============================================================================
@@ -243,78 +240,120 @@ class GetRolePermissionAction(actions.Action):
                 if sub_code: 
                     pack = urls.get_pack_by_url(act_code)
                     if pack:
-                        #pack_name = pack.title if hasattr(pack, 'title') and pack.title else pack.verbose_name if pack.verbose_name else pack.__class__.__name__
+                        pack_name = pack.get_verbose_name()
                         if sub_code and sub_code in pack.sub_permissions.keys():
                             #perm.verbose_name = "%s. %s" % (pack_name,pack.sub_permissions[sub_code])
-                            perm.verbose_name = pack.sub_permissions[sub_code]
+                            perm.verbose_name = "%s - %s" % (pack_name, pack.sub_permissions[sub_code])
             else:
-                perm.verbose_name = act.verbose_name if act.verbose_name else act.__class__.__name__
+                if act.parent:
+                    pack_name = act.parent.get_verbose_name()
+                else:
+                    pack_name = ''
+                perm.verbose_name = '%s - %s' % (pack_name, act.verbose_name if act.verbose_name else act.__class__.__name__)
                 if sub_code and sub_code in act.sub_permissions.keys():
-                    perm.verbose_name = act.sub_permissions[sub_code]
+                    perm.verbose_name = '%s - %s' % (pack_name, act.sub_permissions[sub_code])
             res.append(perm)
         return actions.ExtGridDataQueryResult(res)
+
+def get_all_permission_tree():
+    class PermProxy(ExtTreeNode):
+        def __init__(self, id, parent=None, name='', url='', can_select = True, fullname = None):
+            super(PermProxy, self).__init__()
+            self.parent = parent
+            if parent:
+                parent.add_children(self)
+            self.name = name
+            self.items['name'] = name
+            self.items['url'] = url
+            self.items['fullname'] = fullname if fullname else name
+            self.can_check = can_select
     
-class GetAllPermissions(actions.Action):
-    '''
-    Получение дерева прав доступа
-    '''
-    url = '/permission-tree'
+    def find_node(node_name, parent_node, res):
+        for item in res:
+            if item.parent == parent_node and item.name.upper() == node_name.upper():
+                return item
+        return None
     
-    def run(self, request, context):
-        class PermProxy:
-            def __init__(self, id, parent=None, name='', url='', can_select = True):
-                self.parent = parent
-                self.name = name
-                self.url = url
-                self.id = id
-                self.can_select = can_select
-        def add_nodes(parent_node, action_set, res):
-            # если передали Набор действий, то у него надо взять Действия и подчиненные Наборы
-            if isinstance(action_set, ActionPack):
-                name = action_set.title if hasattr(action_set, 'title') and action_set.title else action_set.verbose_name if action_set.verbose_name else action_set.__class__.__name__
-                item = PermProxy(len(res)+1, parent_node, name, action_set.absolute_url(), False)
-                res.append(item)
-                count = len(res)
-                # обработаем действия
-                for act in action_set.actions:
-                    # добавляем если надо проверять права или есть подчиненные права
-                    add_nodes(item, act, res)
-                # обработаем подчиненные права
-                # добавляем если надо проверять права или есть подчиненные права
-                if action_set.need_check_permission and action_set.sub_permissions:
-                    for key, value in action_set.sub_permissions.items():
-                        child4 = PermProxy(len(res)+1, item, value, action_set.get_sub_permission_code(key), True)
-                        res.append(child4)
-                # обработаем подчиненные Наборы
-                for pack in action_set.subpacks:
-                    add_nodes(item, pack, res)
-                # удалим элемент, если небыло дочерних
-                if len(res)-count == 0:
-                    res.remove(item)
-            # если передали Действие
-            elif isinstance(action_set, Action):
-                if action_set.need_check_permission or action_set.sub_permissions:
-                    if inspect.isclass(action_set):
-                        action_set = action_set()
-                    name = action_set.verbose_name if action_set.verbose_name else action_set.__class__.__name__
-                    item = PermProxy(len(res)+1, parent_node, name, action_set.absolute_url(), action_set.need_check_permission)
-                    res.append(item)
-                    # у действия берем подчиненные права
-                    for key, value in action_set.sub_permissions.items():
-                        child3 = PermProxy(len(res)+1, item, value, action_set.get_sub_permission_code(key), True)
-                        res.append(child3)
-        res = []
-        # пройдемся по контроллерам
-        for ctrl in ControllerCache.get_controllers():
-            root = PermProxy(len(res)+1, None, ctrl.verbose_name if ctrl.verbose_name else ctrl.__class__.__name__, ctrl.url, False)
-            res.append(root)
+    def add_path(path, res):
+        '''
+        Добавление пути набора действий в дерево
+        '''
+        parent_node = None
+        if path:
+            items = path.strip().replace("/","\\").split("\\")
+            for name in items:
+                node = find_node(name, parent_node, res)
+                if not node:
+                    node = PermProxy(len(res)+1, parent_node, name, '', False)
+                    res.append(node)
+                parent_node = node
+        return parent_node
+    
+    def add_nodes(parent_node, action_set, res, ctrl):
+        # если передали Набор действий, то у него надо взять Действия и подчиненные Наборы
+        if isinstance(action_set, ActionPack):
+            # найдем и создадим путь, по которому набор будет отображаться в дереве
+            path = action_set.path if hasattr(action_set, 'path') and action_set.path else ctrl.verbose_name if ctrl.verbose_name else ctrl.__class__.__name__
+            start_count = len(res)
+            parent_node = add_path(path, res)
+            # получим отображаемое имя набора 
+            name = action_set.get_verbose_name()
+            item = PermProxy(len(res)+1, parent_node, name, action_set.absolute_url(), False)
+            res.append(item)
             count = len(res)
-            # пройдемся по верхним наборам действий
-            for pack in ctrl.get_top_actions():
-                add_nodes(root, pack, res)
+            # обработаем действия
+            for act in action_set.actions:
+                # добавляем если надо проверять права или есть подчиненные права
+                add_nodes(item, act, res, ctrl)
+            # обработаем подчиненные права
+            # добавляем если надо проверять права или есть подчиненные права
+            if action_set.need_check_permission and action_set.sub_permissions:
+                pack_name = action_set.get_verbose_name()
+                for key, value in action_set.sub_permissions.items():
+                    fullname = '%s - %s' % (pack_name, value)
+                    child4 = PermProxy(len(res)+1, item, value, action_set.get_sub_permission_code(key), True, fullname)
+                    res.append(child4)
+            # обработаем подчиненные Наборы
+            for pack in action_set.subpacks:
+                add_nodes(item, pack, res, ctrl)
+            # удалим созданные элементы, если небыло дочерних
             if len(res)-count == 0:
-                res.remove(root)
-        return actions.ExtAdvancedTreeGridDataQueryResult(res)
+                #res.remove(item)
+                while len(res) > start_count:
+                    item = res.pop()
+                    if item.parent:
+                        item.parent.children.remove(item)
+        # если передали Действие
+        elif isinstance(action_set, Action):
+            if action_set.need_check_permission or action_set.sub_permissions:
+                if inspect.isclass(action_set):
+                    action_set = action_set()
+                if action_set.parent:
+                    pack = action_set.parent
+                    pack_name = pack.get_verbose_name()
+                else:
+                    pack_name = ''
+                name = action_set.verbose_name if action_set.verbose_name else action_set.__class__.__name__
+                fullname = '%s - %s' % (pack_name, name)
+                item = PermProxy(len(res)+1, parent_node, name, action_set.absolute_url(), action_set.need_check_permission, fullname)
+                res.append(item)
+                # у действия берем подчиненные права
+                for key, value in action_set.sub_permissions.items():
+                    fullname = '%s - %s' % (pack_name, value)
+                    child3 = PermProxy(len(res)+1, item, value, action_set.get_sub_permission_code(key), True, fullname)
+                    res.append(child3)
+    res = []
+    # пройдемся по контроллерам
+    for ctrl in ControllerCache.get_controllers():
+        # пройдемся по верхним наборам действий
+        for pack in ctrl.get_top_actions():
+            add_nodes(None, pack, res, ctrl)
+    # преобразуем список в дерево (оставим только корневые элементы)
+    nodes = []
+    for item in res:
+        if not item.parent:
+            nodes.append(item)
+    return nodes
 
 #===============================================================================
 # OPERATIONS
@@ -549,9 +588,9 @@ class RolesEditWindow(windows.ExtEditWindow):
         self.grid.row_id_name = 'permission_code'
         self.grid.store.id_property = 'permission_code'
         self.grid.store.auto_save = False
-        self.grid.add_column(header=u'Действие', data_index='permission_code', width=100)
-        self.grid.add_column(header=u'Наименование', data_index='verbose_name', width=100)
-        self.grid.add_bool_column(header=u'Запрет', data_index='disabled', width=50, text_false = u'Нет', text_true = u'Да')
+        #self.grid.add_column(header=u'Действие', data_index='permission_code', width=100)
+        self.grid.add_column(header=u'Действие', data_index='verbose_name', width=100)
+        #self.grid.add_bool_column(header=u'Запрет', data_index='disabled', width=50, text_false = u'Нет', text_true = u'Да')
         self.items.append(self.grid)
         
         self.buttons.extend([
@@ -616,20 +655,14 @@ class SelectPermissionWindow(windows.ExtEditWindow):
         self.height = 500
         self.maximizable = True
         self.layout = 'fit'
-        self.tree = ExtObjectTree()
+        self.tree = ExtTree()
         self.tree.add_column(header=u'Имя', data_index = 'name', width=140)
         self.tree.master_column_id = 'name'
-        self.tree.auto_expand_column = 'name'
-        self.tree.add_column(header=u'Адрес', data_index = 'url', width=140)
-        self.tree.top_bar.button_refresh.text = None
-        self.tree.row_id_name = 'id'
-        self.tree.top_bar.hidden = True
-        self.tree.sm = ExtGridCheckBoxSelModel()
-        self.tree.action_data = GetAllPermissions
+        self.tree.nodes = get_all_permission_tree()
         self.items.append(self.tree)
         self.buttons.append(controls.ExtButton(text=u'Выбрать', handler='''function select(btn, e, baseParams) {
             var tree = Ext.getCmp('%s');
-            var records = tree.getSelectionModel().getSelections();
+            var records = tree.getChecked();
             win.fireEvent('closed_ok', records);
             win.close(true);
         }''' % self.tree.client_id))

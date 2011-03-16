@@ -203,6 +203,8 @@ class ExtTreeNode(ExtUIComponent):
         #self.node_id = '' # используется client_id
         self.expanded = False
         self.auto_check = False
+        self.checked = False
+        self.can_check = False
         self.children = TypedList(type=ExtTreeNode)
         self.__items = {}
         self.init_component(*args, **kwargs)
