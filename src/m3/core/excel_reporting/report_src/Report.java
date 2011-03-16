@@ -146,7 +146,7 @@ class ReportGenerator{
 	private void initializeConstants() {
 		// Это потому что я не умею определять HashMap сразу
 		COLOR_MAP.put("КРАСНЫЙ", IndexedColors.RED.getIndex());
-		COLOR_MAP.put("ЗАЛЕНЫЙ", IndexedColors.GREEN.getIndex());
+		COLOR_MAP.put("ЗЕЛЕНЫЙ", IndexedColors.GREEN.getIndex());
 		COLOR_MAP.put("ЖЕЛТЫЙ", IndexedColors.YELLOW.getIndex());
 		COLOR_MAP.put("ЧЕРНЫЙ", IndexedColors.BLACK.getIndex());
 		COLOR_MAP.put("СИНИЙ", IndexedColors.BLUE.getIndex());
