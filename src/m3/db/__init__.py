@@ -77,6 +77,20 @@ class BaseEnumerate(object):
         ''' Используется как источник данных в ArrayStore и DataStore ExtJS '''
         return cls.values.items()
 
+    @classmethod
+    def get_constant_value_by_name(cls, name):
+        '''
+        Возвращает значение атрибута константы, которая используется в
+        качестве ключа к словарю values
+        '''
+        if not isinstance(name, str):
+            raise TypeError("'name' must be a string")
+
+        if not name:
+            raise ValueError("'name' must not be empty")
+        
+        return cls.__dict__[name]
+
 
 class BaseObjectModel(models.Model):
     """
