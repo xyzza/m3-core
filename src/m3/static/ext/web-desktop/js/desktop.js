@@ -178,7 +178,12 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
         }
 
         this.fireEvent("beforeshow", this);
-        this.showAt(this.el.getAlignToXY(el, pos || this.defaultAlign), parentMenu, false);
+        var posArray = this.el.getAlignToXY(el, pos || this.defaultAlign)
+        //kir add 15.03.2011
+        // Если taskbar находится вверху, делается переназначение положения.
+        posArray[1] = posArray[1] < 0 ? el.getHeight() : posArray[1]
+        this.showAt(posArray ,parentMenu, false);
+
         var tPanelWidth = 100;
         var box = this.menuBWrap.getBox();
         this.menuPanel.setWidth(box.width-tPanelWidth);
@@ -734,6 +739,7 @@ Ext.extend(Ext.ux.TaskBar.TaskButton, Ext.Button, {
             if(!this.cmenu.el){
                 this.cmenu.render();
             }
+            //TODO: Правильное отображение положения контекстного меню
             var xy = e.getXY();
             xy[1] -= this.cmenu.el.getHeight();
             this.cmenu.showAt(xy);
