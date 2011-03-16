@@ -359,8 +359,7 @@ AppController = Ext.extend(Object, {
                },
                onNodeOver:function(target, dd, e, data) {
                    //здесь штука чтобы показать значок 'Можно дропать' на экране
-                   //TODO если как в документации делать куча js ошибок вылезает
-                   //return Ext.dd.DropZone.prototype.dropAllowed;
+                   return Ext.dd.DropZone.prototype.dropAllowed;
                },
                onNodeDrop:function(target, dd, e, data) {
                    this.processDropResults(target, dd, e, data);
