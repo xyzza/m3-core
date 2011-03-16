@@ -224,7 +224,7 @@ AppController = Ext.extend(Object, {
    },
 
    init: function() {
-       this._model = FormModel.initFromJson(this.initJson);
+       this._model = DocumentModel.initFromJson(this.initJson);
        this._treeView = new ComponentTreeView(this.tree, this._model);
        this._designView = new DesignView(this.designPanel, this._model);
        //синхронизируем id у панели - общего контейнера и рута модели
@@ -305,8 +305,16 @@ AppController = Ext.extend(Object, {
        Ext.util.CSS.createStyleSheet(
                '.selectedElement {' +
                     'border: 1px dotted blue;'+
-                    'background:#FF89D9;' +
+                    'background-color:#FF89D9;' +
                '}','selectedElem');
+
+       //selectedElement вешается на все подряд, но панельки составные из хедера, футера etc
+       //поэтому перебиваем цвет у body
+       Ext.util.CSS.createStyleSheet(
+               '.selectedElement * .x-panel-body {' +
+                    'background-color:#FF89D9' +
+               '}'
+               ,'selectedPanelBody');
        
    },
    _initDesignDD:function() {
@@ -344,7 +352,6 @@ AppController = Ext.extend(Object, {
                    return e.getTarget('.designContainer');
                },
                onNodeEnter: function(target, dd, e, data) {
-                   //TODO не хочет подсвечиваться рутовый контейнер
                    Ext.fly(target).addClass('selectedElement');
                },
                onNodeOut:function(target, dd, e, data){
@@ -378,7 +385,7 @@ ComponentModel = Ext.extend(Ext.data.Node, {
     }
 });
 
-FormModel = Ext.extend(Ext.data.Tree, {
+DocumentModel = Ext.extend(Ext.data.Tree, {
     /**
      * Поиск модели по id. Это именно поиск с обходом. Может быть в дальнейшем стоит разобраться
      * со словарем nodeHash внутри дерева и его использовать для поиска по id(но это вряд ли, деревья маленькие)
@@ -395,19 +402,19 @@ FormModel = Ext.extend(Ext.data.Tree, {
  * "Статические" методы - по json передаваемому с сервера строит древовидную модель
  * @param jsonObj - сериализованая модель
  */
-FormModel._cleanConfig = function(jsonObj) {
+DocumentModel._cleanConfig = function(jsonObj) {
     // просто удаляет items из json объекта
     var config = Ext.apply({}, jsonObj);
     Ext.destroyMembers(config, 'items');
     return config;
 };
 
-FormModel.initFromJson = function(jsonObj) {
+DocumentModel.initFromJson = function(jsonObj) {
     //обходит json дерево и строт цивилизованое дерево с нодами, событьями и проч
-    var root = new ComponentModel(FormModel._cleanConfig(jsonObj));
+    var root = new ComponentModel(DocumentModel._cleanConfig(jsonObj));
 
     var callBack = function(node, jsonObj) {
-        var newNode = new ComponentModel(FormModel._cleanConfig(jsonObj));
+        var newNode = new ComponentModel(DocumentModel._cleanConfig(jsonObj));
         node.appendChild(newNode);
         if (!jsonObj.items)
             return;
@@ -422,7 +429,7 @@ FormModel.initFromJson = function(jsonObj) {
         }
     }
 
-    return new FormModel(root);
+    return new DocumentModel(root);
 };
 
 
