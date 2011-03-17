@@ -10,8 +10,7 @@ from django.utils.datastructures import SortedDict
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from base import BaseExtPanel
 
-#===============================================================================
-#
+
 #===============================================================================
 class ExtPivotGrid(BaseExtPanel):
     '''
@@ -20,7 +19,7 @@ class ExtPivotGrid(BaseExtPanel):
 
     def __init__(self,*args, **kwargs):
         super(ExtPivotGrid, self).__init__(*args,**kwargs)
-        self.template = 'ext-grids/ext-pivot-grid.js'
+        self.template = 'ext-grids/ext-pivot-grid.js' #FIXME: Не нужно
         self.__store = None
         self.aggregator = None
         self.renderer = None
@@ -143,8 +142,8 @@ class ExtPivotGrid(BaseExtPanel):
             axe.orientation
         ) for axe in self.top_axis])
 
+
 #===============================================================================
-# Компонент таблица, или grid
 class ExtGrid(BaseExtPanel):
     '''
     Таблица
@@ -178,36 +177,61 @@ class ExtGrid(BaseExtPanel):
     }]}
     @end_designer
     '''
+    
+    # TODO: Реализовать человеческий MVC грид
+    
     def __init__(self, *args, **kwargs):
         super(ExtGrid, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-grid.js'
+        self.template = 'ext-grids/ext-grid.js' # FIXME: Не нужный атрибут
         self._items = []
         self.__store = None
+        
+        # Будет ли редактироваться
         self.editor = False
+        
+        # Объект маскирования, который будет отображаться при загрузке
         self.load_mask = False
+        
+        
         self.drag_drop = False
         self.drag_drop_group = None
+        
+        # Разворачивать колонки грида по всей ширине (True)
         self.force_fit = True
+        
         # selection model
         self.__sm = None
-        # view
+                
         self.__view = None
+        
         # Колонка для авторасширения
         self.auto_expand_column = None
+
         # устанавливается True, если sm=CheckBoxSelectionModel. Этот флаг нужен
         # чтобы знать когда нужен дополнительный column
         self.__checkbox = False
-        # перечень плугинов
+
+        # перечень плагинов
         self.plugins = []
+        
         # модель колонок
         self.__cm = None
+        
         self.col_model = ExtGridDefaultColumnModel()
-        self._view_config = {}
-        self.show_preview = False
+        
+        # Конфигурация для уровня view
+        self._view_config = {}        
+        self.show_preview = False        
         self.enable_row_body = False
         self.get_row_class = None
-        self.column_lines = True # признак отображения вертикальных линий в гриде
-        self.read_only = False #Если True не рендерим drag and drop, выключаем editor
+        
+        # признак отображения вертикальных линий в гриде
+        self.column_lines = True 
+        
+        #Если True не рендерим drag and drop, выключаем editor
+        self.read_only = False 
+        
+        # Метка. Использовать только если задан layout=form
         self.label = None
 
         self.init_component(*args, **kwargs)
@@ -217,6 +241,7 @@ class ExtGrid(BaseExtPanel):
         self.banded_columns = SortedDict()
 
     def t_render_plugins(self):
+        # FIXME: Вынести в lambda функцию
         return '[%s]' % ','.join(self.plugins)
 
     def t_render_banded_columns(self):
@@ -239,18 +264,33 @@ class ExtGrid(BaseExtPanel):
         return self.__store.render([column.data_index for column in self.columns])
 
     def add_column(self, **kwargs):
+        '''
+        Добавляет стандартную колонку
+        '''
         self.columns.append(ExtGridColumn(**kwargs))
 
     def add_bool_column(self, **kwargs):
+        '''
+        Добавляет булевую колонку
+        '''
         self.columns.append(ExtGridBooleanColumn(**kwargs))
 
     def add_check_column(self, **kwargs):
+        '''
+        Добавляет колонку для выбора значения
+        '''
         self.columns.append(ExtGridCheckColumn(**kwargs))
 
     def add_number_column(self, **kwargs):
+        '''
+        Добавляет числовую колонку
+        '''
         self.columns.append(ExtGridNumberColumn(**kwargs))
 
     def add_date_column(self, **kwargs):
+        '''
+        Добавляет колонку с датой
+        '''
         self.columns.append(ExtGridDateColumn(**kwargs))
 
     def add_banded_column(self, column, level, colspan):
@@ -413,6 +453,7 @@ class ExtGrid(BaseExtPanel):
             self._view_config['enableRowBody'] = self.enable_row_body
         if self.get_row_class:
             self._view_config['getRowClass'] = self.get_row_class
+        
         self._put_config_value('stripeRows', True)
         self._put_config_value('stateful', True)
         self._put_config_value('loadMask', self.load_mask)
@@ -466,7 +507,6 @@ class ExtGrid(BaseExtPanel):
 #===============================================================================
 # Оси к пивот гриду
 #===============================================================================
-
 class ExtPivotGridAxis(ExtUIComponent):
     DEFAULT_HEADER_WIDTH = 100
 
@@ -481,25 +521,53 @@ class ExtPivotGridAxis(ExtUIComponent):
 
 
 #===============================================================================
-# Колонки к гриду
 class BaseExtGridColumn(ExtUIComponent):
+    
+    # Умолчательная ширина колонок
     GRID_COLUMN_DEFAULT_WIDTH = 100
+    
+    # Рендерер для цен и сумм
     THOUSAND_CURRENCY_RENDERER = 'thousandCurrencyRenderer'
 
     def __init__(self, *args, **kwargs):
         super(BaseExtGridColumn, self).__init__(*args, **kwargs)
+        
+        # Заголовок
         self.header = None
+        
+        # Возможность сортировки
         self.sortable = False
+        
+        # Уникальное название колонки в пределах column model
         self.data_index = None
+        
+        # Расположение
         self.align = None
+        
+        # Ширина
         self.width = BaseExtGridColumn.GRID_COLUMN_DEFAULT_WIDTH
+        
+        # Редакор, если колонка может быть редактируемой
         self.editor = None
+        
+        # Список рендереров колонки
         self._column_renderer = []
+        
+        # Всплывающая подсказка
         self.tooltip = None
+        
+        # Признак того, скрыта ли колонка или нет
         self.hidden = False
+        
+        # Признак не активности
         self.read_only = False
+        
+        # TODO: В версии 3.3 нет такого свойства
         self.colspan = None
+        
+        # Запрет на изменение ширины колонки
         self.fixed = False
+        
         # дополнительные атрибуты колонки
         self.extra = {}
 
@@ -585,8 +653,7 @@ class BaseExtGridColumn(ExtUIComponent):
 #===============================================================================
 class ExtGridColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
-        super(ExtGridColumn, self).__init__(*args, **kwargs)
-        #self.template = 'ext-grids/ext-grid-column.js'
+        super(ExtGridColumn, self).__init__(*args, **kwargs)        
         self.init_component(*args, **kwargs)
 
     def render(self):
@@ -603,7 +670,7 @@ class ExtGridColumn(BaseExtGridColumn):
 class ExtGridBooleanColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridBooleanColumn, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-bool-column.js'
+        self.template = 'ext-grids/ext-bool-column.js' #TODO: Отрефакторить под внутриклассовый рендеринг
         self.text_false = None
         self.text_true = None
         self.text_undefined = None
@@ -613,14 +680,14 @@ class ExtGridBooleanColumn(BaseExtGridColumn):
 class ExtGridCheckColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridCheckColumn, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-check-column.js'
+        self.template = 'ext-grids/ext-check-column.js' #TODO: Отрефакторить под внутриклассовый рендеринг
         self.init_component(*args, **kwargs)
 
 #===============================================================================
 class ExtGridNumberColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridNumberColumn, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-number-column.js'
+        self.template = 'ext-grids/ext-number-column.js' #TODO: Отрефакторить под внутриклассовый рендеринг
         self.format = None
         self.init_component(*args, **kwargs)
 
@@ -628,7 +695,7 @@ class ExtGridNumberColumn(BaseExtGridColumn):
 class ExtGridDateColumn(BaseExtGridColumn):
     def __init__(self, *args, **kwargs):
         super(ExtGridDateColumn, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-date-column.js'
+        self.template = 'ext-grids/ext-date-column.js' #TODO: Отрефакторить под внутриклассовый рендеринг
         try:
             self.format = settings.DATE_FORMAT.replace('%', '')
         except:
@@ -643,6 +710,9 @@ class BaseExtGridSelModel(BaseExtComponent):
 
 #===============================================================================
 class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
+    '''
+    Модель для грида с возможностью выбора ячейки
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtGridCheckBoxSelModel, self).__init__(*args, **kwargs)
         self.single_select = False
@@ -654,6 +724,9 @@ class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
 
 #===============================================================================
 class ExtGridRowSelModel(BaseExtGridSelModel):
+    '''
+    Модель для грида с выбором строк
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtGridRowSelModel, self).__init__(*args, **kwargs)
         self.single_select = False
@@ -665,6 +738,9 @@ class ExtGridRowSelModel(BaseExtGridSelModel):
 
 #===============================================================================
 class ExtGridCellSelModel(BaseExtGridSelModel):
+    '''
+    Модель для грида с выбором ячеек
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtGridCellSelModel, self).__init__(*args, **kwargs)
         self.init_component(*args, **kwargs)
@@ -674,9 +750,13 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
 
 #===============================================================================
 class ExtGridDefaultColumnModel(BaseExtComponent):
+    '''
+    Модель колонок для грида по-умолчанию
+    '''
+    # TODO: Этот класс, т.к. ссылка на грид порождает цикличную связь
     def __init__(self, *args, **kwargs):
         super(ExtGridDefaultColumnModel, self).__init__(*args, **kwargs)
-        self.grid = None
+        self.grid = None 
         self.init_component(*args, **kwargs)
 
     def render(self):
@@ -684,6 +764,10 @@ class ExtGridDefaultColumnModel(BaseExtComponent):
 
 #===============================================================================
 class ExtGridLockingColumnModel(BaseExtComponent):
+    '''
+    Модель колонок для грида блокрирования 
+    '''
+    # TODO: Этот класс, т.к. ссылка на грид порождает цикличную связь
     def __init__(self, *args, **kwargs):
         super(ExtGridLockingColumnModel, self).__init__(*args, **kwargs)
         self.grid = None
@@ -694,6 +778,7 @@ class ExtGridLockingColumnModel(BaseExtComponent):
 
 #===============================================================================
 class ExtGridLockingHeaderGroupColumnModel(BaseExtComponent):
+    # TODO: Этот класс, т.к. ссылка на грид порождает цикличную связь
     def __init__(self, *args, **kwargs):
         super(ExtGridLockingHeaderGroupColumnModel, self).__init__(*args, **kwargs)
         self.grid = None
@@ -711,7 +796,7 @@ class ExtAdvancedTreeGrid(ExtGrid):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtAdvancedTreeGrid, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-advanced-treegrid.js'
+        self.template = 'ext-grids/ext-advanced-treegrid.js' # FIXME: Данный атрибут можно удалить
         self.url = None
         self.master_column_id = None
 
@@ -720,6 +805,8 @@ class ExtAdvancedTreeGrid(ExtGrid):
 
         # Свойства для внутеннего bottom bara:
         self.use_bbar = False
+        
+        # Количество записей
         self.bbar_page_size = 10
 
         self.init_component(*args, **kwargs)
@@ -763,7 +850,7 @@ class ExtAdvancedTreeGrid(ExtGrid):
 # Компоненты view для грида
 class ExtGridGroupingView(BaseExtComponent):
     '''
-    Компонент используемый при группировке
+    Компонент используемый для группировки
     '''
     def __init__(self, *args, **kwargs):
         super(ExtGridGroupingView, self).__init__(*args, **kwargs)

@@ -9,6 +9,7 @@ from base import BaseExtContainer
 from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.controls import ExtButton
 
+
 #===============================================================================
 class ExtContainer(BaseExtContainer):
     '''
@@ -65,6 +66,7 @@ class ExtContainer(BaseExtContainer):
                             
         return 'new %s' % res if not self._is_function_render else res
     
+    
 #===============================================================================    
 class ExtToolBar(BaseExtContainer):
     '''
@@ -101,22 +103,41 @@ class ExtToolBar(BaseExtContainer):
         return '[%s]' % ','.join(res)
         
     def add_fill(self):
+        '''
+        Переносит все последующие компоненты направо
+        '''
         self.items.append(ExtStaticToolBarItem('"->"'))
                 
     def add_separator(self):
+        '''
+        Добавляет разделитель
+        '''
         self.items.append(ExtStaticToolBarItem('"-"'))
                 
     def add_spacer(self, width=2):
+        '''
+        Добавляет дополнительное расстояние с шириной width
+        @param width: расстояние
+        '''
         self.items.append(ExtStaticToolBarItem("{xtype: 'tbspacer', width: %d}" % width))
                 
     def add_text_item(self, text_item):
+        '''
+        Добавляет текст
+        @text_item: текст
+        '''
         self.items.append(ExtStaticToolBarItem('"%s"' % text_item))
         
     def add_menu(self, **kwargs):
+        '''
+        Добавляет меню
+        @param **kwargs: конфиг для меню 
+        '''
         self.items.append(ExtToolbarMenu(**kwargs))
           
     @property
     def items(self):
+        # Список вложенных компонентов
         return self._items
     
     def render_base_config(self):
@@ -147,9 +168,14 @@ class ExtToolBar(BaseExtContainer):
         
         return 'new %s' % res if not self._is_function_render else res
     
-#===============================================================================
-# Преднастроенные элементы в тулбаре
+    
+#=============================================================================== 
 class ExtStaticToolBarItem(ExtUIComponent):
+    '''
+    Преднастроенные элементы в тулбаре
+    @TODO: Для чего нужнен отдельный класс, если задача может решится методами
+    тулбара?
+    '''
     def __init__(self, static_value = '', *args, **kwargs):
         super(ExtStaticToolBarItem, self).__init__(*args, **kwargs)
         self.static_value = static_value
@@ -162,18 +188,26 @@ class ExtStaticToolBarItem(ExtUIComponent):
         # Описание в базовом классе ExtUiComponent.
         pass
 
+
 #===============================================================================
 class ExtTextToolBarItem(ExtUIComponent):
+    '''
+    Текстовый элемент в тулбаре
+    @TODO: Для чего нужнен отдельный класс, если задача может решится методами
+    тулбара?
+    '''
     def __init__(self, static_value = '', *args, **kwargs):
         super(ExtTextToolBarItem, self).__init__(*args, **kwargs)
         self.text = None
         self.init_component(*args, **kwargs)
+        
     def render(self):
         return "{xtype: 'tbtext', text: '%s'}" % self.text
     
     def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUiComponent.
         pass
+        
         
 #===============================================================================    
 class ExtPagingBar(BaseExtContainer):   
@@ -265,8 +299,7 @@ class ExtToolbarMenu(ExtUIComponent):
             
         return '{%s}' % res
     
-    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
-        # Обрабатываем исключения.
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):        
         access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
         if self.menu:
             self.menu.make_read_only(access_off, exclude_list, *args, **kwargs)
@@ -293,9 +326,13 @@ class ExtButtonGroup(BaseExtContainer):
         self.init_component(*args, **kwargs)  
     
     def add_button(self, **kwargs):
+        '''
+        Добавляет кнопку на компонент
+        '''
         self.buttons.append(ExtButton(**kwargs))
     
     def t_render_buttons(self):
+        # FIXME: Использовать внутриклассовый рендеринг компонентов
         return '[%s]' % self.t_render_items()
    
     @property

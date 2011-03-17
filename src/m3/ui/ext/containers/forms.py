@@ -21,13 +21,13 @@ from m3.ui.ext.fields import (ExtNumberField,
                               ExtCheckBox, ExtComboBox, ExtTimeField,
                               ExtHiddenField,
                               ExtFileUploadField,ExtImageUploadField)
-# В качестве значений списка TypedList атрибутов могут выступать объекты:
+
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.fields.complex import ExtDictSelectField
 from m3.helpers import get_img_size, logger
 from m3.helpers.datastructures import TypedList
-#from m3.ui.actions.packs import BaseDictionaryActions
+
 
 #===============================================================================
 class ExtForm(BaseExtPanel):
@@ -58,11 +58,21 @@ class ExtForm(BaseExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtForm, self).__init__(*args, **kwargs)
-        self.template = 'ext-panels/ext-form.js'
+        self.template = 'ext-panels/ext-form.js' # TODO: отрефакторить под внутриклассовый рендеринг
+        
+        # Свой layout
         self.layout = 'form'
+        
+        # Отступ от внешнего контрола
         self.padding = None
+        
+        # url для сабмита
         self.url = None
+        
+        # Будут ли загружаться файлы
         self.file_upload = False
+        
+        # @deprecated: См 467. Необязательно использовать непосредственно атрибут экземпляра 
         self.object = None
         
         # поле, которое будет под фокусом ввода после рендеринга формы
@@ -78,7 +88,7 @@ class ExtForm(BaseExtPanel):
             list = []   
         if isinstance(item, BaseExtField):
             list.append(item)
-            #print list
+            
         elif hasattr(item, 'items'):
             for it in item.items:
                 self._get_all_fields(it, list)       
@@ -108,25 +118,7 @@ class ExtForm(BaseExtPanel):
         '''
         Метод выполнения прямого связывания данных атрибутов объекта object и 
         полей текущей формы
-        '''
-        
-#        неправильно обходить объект, надо обходить форму 
-#        def _parse_obj(obj, prefix=''):
-#            '''
-#            Разбивает объект на словарь, ключи которого имена полей(имена 
-#            вложенных объектов записываются через '.'), 
-#            а значения - значения соответсвующих полей объекта
-#            '''
-#            attrs = {}
-#            object_fields = obj if isinstance(obj, dict) else obj.__dict__
-#            for key, value in object_fields.items():
-#                #TODO как определить, что класс встроенный
-#                if not hasattr(value, '__dict__') and not isinstance(value, dict):
-#                    attrs[prefix+str(key)] = value
-#                else:
-#                    pre_prefix = prefix+'.' if prefix else ''
-#                    attrs.update(_parse_obj(value, pre_prefix+str(key)+'.'))
-#            return attrs
+        '''     
         
         def is_secret_token(value):
             ''' 
@@ -258,14 +250,6 @@ class ExtForm(BaseExtPanel):
                 if new_val != None:
                     _assign_value(new_val, field)
         
-        
-        #неправильно сначала обходить объект, надо обходить форму 
-        #fields = _parse_obj(object)
-        #if fields:
-        #    for item in self._get_all_fields(self):
-        #        # заполним атрибуты только те, которые не в списке исключаемых
-        #        if not item.name in exclusion:
-        #
 
     #TODO необходимо добавить проверку на возникновение exception'ов
     def to_object(self, object, exclusion = []):
@@ -454,7 +438,7 @@ class ExtForm(BaseExtPanel):
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
-        self.object = object        
+        self.object = object # FIXME: Необязательно использовать атрибут экземпляра       
         all_fields = self._get_all_fields(self)
         for field in all_fields:
             if not field.name:
@@ -519,24 +503,46 @@ class ExtPanel(BaseExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)
-        self.template = 'ext-panels/ext-panel.js'
+        self.template = 'ext-panels/ext-panel.js' #TODO: Отрефакторить под внутриклассовый рендеринг
+        
+        # Отступ от внешних границ
         self.padding = None
+        
+        # Возможность сворачивать панель
         self.collapsible = False
+        
+        # Будет ли граница
         self.border = True
+        
+        # Показывать ли внутреннюю границу у элемента
         self.body_border = True
 
-        # TODO: для чего нужен следующий атрибут?
-        # Похоже он бы в прошлых версиях и его убрали в 3.3
-        # Остается поддерживать для полной совместимости
+        # @deprecated: TODO: для чего нужен следующий атрибут?
+        # Похоже он был в прошлых версиях и его убрали в 3.3
+        # Остается поддерживать для полной совместимости        
         self.split = False
+        
+        # @deprecated: TODO: этого атрибута нет в 3.3
         self.collapse_mode = None
+        
+        # Возможность сворачивать
         self.collapsible = False
+        
+        # True - компонент изначально свернут
         self.collapsed = False
         
+        # Базовый CSS класс, по умолчанию 'x-panel'
         self.base_cls = ''
+        
+        # @deprecated: TODO: этого атрибута нет в 3.3
         self.body_cls = ''
+        
+        # FIXME: Определен в родительском компоненте ExtUIComponent
         self.anchor = ''
+        
+        # Автозагрузка контента
         self.auto_load = None
+        
         self.init_component(*args, **kwargs)
     
     def render_base_config(self):
@@ -562,12 +568,11 @@ class ExtPanel(BaseExtPanel):
 #===============================================================================
 class ExtTitlePanel(ExtPanel):
     '''
-    Расширенная панель с возможностью добавления контролов в заголовок.
-    
+    Расширенная панель с возможностью добавления контролов в заголовок.    
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTitlePanel, self).__init__(*args, **kwargs)
-        self.template = "ext-panels/ext-title-panel.js"
+        self.template = "ext-panels/ext-title-panel.js" #TODO: Отрефакторить под внутриклассовый рендеринг 
         self.__title_items = TypedList(type=ExtUIComponent, on_after_addition=
             self._on_title_after_addition, on_before_deletion=
             self._on_title_before_deletion, on_after_deletion=
@@ -575,7 +580,7 @@ class ExtTitlePanel(ExtPanel):
         self.init_component(*args, **kwargs)
 
     def _update_header_state(self):
-        # Заголовок может быть только в том случае, если есть текстовое значени,
+        # Заголовок может быть только в том случае, если есть текстовое значение,
         # либо имеются компоненты
         self.header = self.title or (not self.title and len(self.__title_items))
 
@@ -605,6 +610,7 @@ class ExtTitlePanel(ExtPanel):
     def title_items(self):
         return self.__title_items
 
+
 #===============================================================================
 class ExtTabPanel(BaseExtPanel):
     '''
@@ -627,12 +633,23 @@ class ExtTabPanel(BaseExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
-        self.template = 'ext-panels/ext-tab-panel.js'
+        self.template = 'ext-panels/ext-tab-panel.js' #TODO: Отрефакторить под внутриклассовый рендеринг
+        
+        # Активная вкладка
         self.active_tab = 0
+        
+        # Активный скрол у табов
         self.enable_tab_scroll = True
+        
+        # Граница
         self.border = True
+        
+        # Внутренняя граница
         self.body_border = True
+        
+        # Если True, то применяется lazy рендеринг табов
         self.deferred_render = None
+        
         self._items = TypedList(type=ExtPanel)
         self.init_component(*args, **kwargs)
 
@@ -645,10 +662,10 @@ class ExtTabPanel(BaseExtPanel):
     def tabs(self):
         return self._items
 
-    # FIXME: Почему два одинаковых свойства??
     @property
     def items(self):
         return self._items
+
 
 #===============================================================================    
 class ExtFieldSet(ExtPanel):
@@ -669,12 +686,13 @@ class ExtFieldSet(ExtPanel):
     }]}
     @end_designer
     '''
-    checkboxToggle = False
-    collapsible = False
+    
+    checkboxToggle = False # TODO: Зачем нужны эти свойства?
+    collapsible = False # TODO: Зачем нужны эти свойства?
     
     def __init__(self, *args, **kwargs):
         super(ExtFieldSet, self).__init__(*args, **kwargs)
-        self.template = 'ext-panels/ext-fieldset.js'
+        self.template = 'ext-panels/ext-fieldset.js' #TODO: Отрефакторить под внутриклассовый рендеринг
         self.checkboxToggle = False
         self.collapsed = False
         self.init_component(*args, **kwargs)

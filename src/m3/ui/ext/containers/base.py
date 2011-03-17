@@ -9,37 +9,49 @@ from m3.ui.ext.base import ExtUIComponent
 from m3.helpers.datastructures import TypedList
 
 class BaseExtContainer(ExtUIComponent):
+    '''
+    Базовый класс для контейнерных компонентов
+    
+    @version: 0.1
+    @begin_designer
+    {abstract: true
+    ,attr: [{
+        ext_attr: "layout"
+        ,py_attr: "layout" 
+    },{
+        ext_attr: "layoutConfig"
+        ,py_attr: "layout_config" 
+        ,attr: {
+             ext_attr: "forceFit"
+            ,py_attr: "force_fit" 
+        }
+    }]}
+    @end_designer
+    '''
     def __init__(self, *args, **kwargs):
-        '''
-        Базовый класс для контейнерных компонентов
-        
-        @version: 0.1
-        @begin_designer
-        {abstract: true
-        ,attr: [{
-            ext_attr: "layout"
-            ,py_attr: "layout" 
-        },{
-            ext_attr: "layoutConfig"
-            ,py_attr: "layout_config" 
-            ,attr: {
-                 ext_attr: "forceFit"
-                ,py_attr: "force_fit" 
-            }
-        }]}
-        @end_designer
-        '''
         super(BaseExtContainer, self).__init__(*args, **kwargs)
+        
+        # layout - атрибут, регламентирующий каким-образом отображать контрол
         self.layout = None
+        
+        # Конфигурация, специфичная для каждого layout
         self.layout_config = {}
+        
+        # Типизированный список контролов, находящихся в данном компоненте
         self._items = TypedList(type = ExtUIComponent)
         
     def t_render_items(self):
-        ''' Дефолтный рендеринг вложенных объектов'''
+        ''' 
+        @deprecated: Рекомендуется использовать render_base_config
+        Дефолтный рендеринг вложенных объектов
+        '''
         return '[%s]' % ','.join([item.render() for item in self._items])
         
     def find_by_name(self, name):
-        '''Осуществляет поиск экземпляра во вложенных объектах по имени экземпляра'''
+        '''
+        Осуществляет поиск экземпляра во вложенных объектах по имени экземпляра и
+        возвращает его, если тот был найден
+        '''
         for item in self.items:   
             if hasattr(item, 'name') and name == getattr(item, 'name'):
                 return item
@@ -50,10 +62,15 @@ class BaseExtContainer(ExtUIComponent):
                     return res
                 
     def t_render_layout_config(self):
-        '''Рендерит конфиг, если указан layout'''
+        '''
+        @deprecated: Рекомендуется использовать render_base_config
+        Рендерит конфиг, если указан layout
+        '''
         return '{%s}' % ','.join(['%s:"%s"' % (k, v) for k, v in self.layout_config.items()])
     
-    def pre_render(self):
+    def pre_render(self):        
+        #Вызывается до рендеринга контрола
+        
         super(BaseExtContainer, self).pre_render()
         
         # выставляем action_context у дочерних элементов
@@ -128,12 +145,15 @@ class BaseExtPanel(BaseExtContainer):
         self.border = True
 
     def t_render_top_bar(self):
+        #TODO: Использовать lambda функцию в render_base_config
         return self.top_bar.render()
     
     def t_render_bottom_bar(self):
+        #TODO: Использовать lambda функцию в render_base_config
         return self.bottom_bar.render()
     
     def t_render_footer_bar(self):
+        #TODO: Использовать lambda функцию в render_base_config
         return self.footer_bar.render()
     
     def render_base_config(self):
@@ -150,7 +170,11 @@ class BaseExtPanel(BaseExtContainer):
                                       self.bottom_bar)
         self._put_config_value('fbar', self.t_render_footer_bar,
                                       self.footer_bar)
+        
     def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+        #FIXME: нельзя использовать в качестве умолчательных параметров
+        # изменяемые типы. Это может привести к неприятным side эффектам
+        
         # Описание в базовом классе ExtUiComponent.
         # вызываем родительский метод для итемов.
         # Обрабатываем исключения.

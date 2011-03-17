@@ -6,9 +6,6 @@ Created on 15.03.2010
 '''
 from m3.ui.ext.base import ExtUIComponent
 from base import BaseExtContainer
-
-# Меню может привязываться к:
-#from m3.ui.ext.containers import ExtGrid, ExtTree
 from m3.ui.ext.misc import ExtConnection
 
 #===============================================================================
@@ -36,20 +33,34 @@ class ExtContextMenu(BaseExtContainer):
     @end_designer
     '''
     __SEPARATOR = '"-"'
+    
     def __init__(self, *args, **kwargs):
         super(ExtContextMenu, self).__init__(*args, **kwargs)
-        self.template = 'ext-containers/ext-context-menu.js'
+        self.template = 'ext-containers/ext-context-menu.js' #FIXME: Отрефакторить под внутриклассовый рендеринг
+        
+        # Список элементов меню
         self._items = []
+                
+        # TODO: В методе ExtContextMenuItem.render параметр container не используется
+        # Но может передоваться
         self.container = None
+        
         self.init_component(*args, **kwargs)
 
     def add_item(self, **kwargs):
+        '''
+        Добавляет элемент с параметрами **kwargs
+        '''
         self.items.append(ExtContextMenuItem(**kwargs))
         
     def add_separator(self):
+        '''
+        Добавляет разделитель
+        '''
         self.items.append(ExtContextMenuSeparator())
     
     def t_render_items(self):
+        # FIXME: После отрефакторевания шаблона необходимо убрать префикс t_*
         res = []
         for item in self.items:
             if item == ExtContextMenu.__SEPARATOR:
@@ -82,19 +93,35 @@ class ExtContextMenuItem(ExtUIComponent):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtContextMenuItem, self).__init__(*args, **kwargs)
+        
+        # Текст для отображения
         self.text = None
+        
+        # Идентификатор внутри меню
         self.item_id = None
+        
+        # Функция-обработчик
         self.handler = None
+        
+        # CSS класс иконок 
         self.icon_cls = None
+        
+        # Ссылка на меню, если имеется вложенное меню
         self.menu = None
+        
+        # FIXME: Что-то сомнительное. См. функцию render
         self.custom_handler = False
+        
+        # TODO: Написать и использовать отдельные классы: menucheckitem, etc.
         # этим параметром можно задавать тип элемента меню: menucheckitem, 
         # menutextitem, datemenu и т.п. В конфиге это задается через xtype. 
         # Если задать неправильно, то может быть ошибка!
         self.custom_itemtype = None
+        
         self.init_component(*args, **kwargs)
         
     def render(self, container=None):
+        # FIXME: container не используется
         res = ['text:"%s"' % self.text.replace('"', "&quot;")]
         if self.custom_itemtype:
             res.append('xtype: "%s"' % self.custom_itemtype)
@@ -118,6 +145,7 @@ class ExtContextMenuItem(ExtUIComponent):
                     res.append('handler: %s' % self.handler)
         return '{%s}' % ','.join(res)
     
+    
     def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         # Описание в базовом классе ExtUiComponent.
         # Обрабатываем исключения.
@@ -125,10 +153,13 @@ class ExtContextMenuItem(ExtUIComponent):
         # Выключаем\включаем компоненты.
         self.disabled = access_off
 
+
 #===============================================================================    
 class ExtContextMenuSeparator(ExtUIComponent):
     '''
     Разделитель элементов в меню
+    @deprecated: В контекстном меню есть специальный метод и отдельный класс 
+    в данном случае не нужен
     '''
     def __init__(self, *args, **kwargs):
         super(ExtContextMenuSeparator, self).__init__(*args, **kwargs)

@@ -22,6 +22,8 @@ from m3.helpers import js, generate_client_id, normalize
 #===============================================================================
 class ExtUIScriptRenderer(object):
     '''
+    @deprecated: Использовать метод render конечного компонента 
+    
     Класс, отвечающий за рендер файла скрипта, который
     будет отправлен клиенту. 
     '''
@@ -33,6 +35,8 @@ class ExtUIScriptRenderer(object):
         self.component = None
     
     def render(self):
+        '''
+        '''
         result = ''
         try:
             result = self.component.render()
@@ -65,8 +69,14 @@ class BaseExtComponent(object):
     Базовый класс для всех компонентов пользовательского интерфейса
     '''
     def __init__(self, *args, **kwargs):
+        # Каждый компонент может иметь шаблон, в котором он будет рендериться
         self.template = ''
+        
+        # @deprecated: Только окно (наследник BaseExtWindow) 
+        # может иметь данный атрибут 
         self.template_globals = ''
+        
+        # Уникальный идентификатор компонента        
         self.client_id =  generate_client_id()
         
         # action context of the component (normally, this is
@@ -76,15 +86,19 @@ class BaseExtComponent(object):
         # рендерер, используемый для вывода соответствующего компонента
         self.renderer = ExtUIScriptRenderer()
         
-        # Обработчики
+        # Словарь обработчиков на события
         self._listeners = {}
     
-        # Список словарей с конфигурацией компонента
+        # Список словарей с основной конфигурацией компонента
         self._config_list = []
+        
+        # Список словарей с дополнительной конфигурацией компонента
         self._param_list = []
         
         # Если True, то рендерится как функция, без префикса new
         self._is_function_render = False
+        
+        # Имя компонента в нотации ExtJs (Например Ext.form.Panel)
         self._ext_name = None
         
         # квалифицирующее имя контрола (в пределах некоторого базового компонента)
@@ -149,13 +163,15 @@ class BaseExtComponent(object):
     
     def get_script(self):
         '''
+        @deprecated: Использовать метод render
         Генерация скрипта для отправки на клиентское рабочее место.
         '''
         return self.renderer.get_script()
     
     def init_component(self, *args, **kwargs):
         '''
-            Заполняет атрибуты экземпляра значениями в kwargs
+        Заполняет атрибуты экземпляра значениями в kwargs, 
+        если они проинициализированы ранее 
         '''
         for k, v in kwargs.items():
             assert k in dir(self) and not callable(getattr(self,k)), \
@@ -165,16 +181,24 @@ class BaseExtComponent(object):
 
     #deprecated:              
     def t_render_listeners(self):
-        ''' Инкапсуляция над _listeners. Используется из шаблонов! '''
+        '''
+        @deprecated: Если рендеринг не в шаблоне, 
+        то при вызове render_base_config информация о подписчиках на события 
+        уже будут в конфиге
+                 
+        Инкапсуляция над _listeners. Используется из шаблонов! '''
         return dict([(k,v) for k, v in self._listeners.items() if v!=None])
     
     def t_render_simple_listeners(self):
+        '''
+        @deprecated: Конфиг должен рендериться в render_base_config
+        '''
         return '{%s}' % ','.join(['%s:%s' % (k,v) for k, v in self._listeners.items() 
                if not isinstance(v, BaseExtComponent) and v!=None])
 
     def render_base_config(self):
         '''
-        Рендерит базовый конфиг
+        Рендерит базовый конфиг (Конфигурация extjs контрола)
         '''
         self._put_config_value('id', self.client_id)
         if self._listeners:
@@ -183,7 +207,8 @@ class BaseExtComponent(object):
     
     def render_params(self):
         '''
-        Рендерит дополнительные параметры
+        Рендерит дополнительные параметры (Как правило используется для разработки
+        собственных контролов на базе контрола extjs)
         '''
         pass
     
@@ -250,8 +275,8 @@ class BaseExtComponent(object):
         
     def _put_config_value(self, extjs_name, item, condition=True):
         """
-        Добавляет значение в конфиг компонента Sencha для последующей передачи в конструктор JS
-        @param extjs_name: Оригинальное название атрибута в Sencha
+        Добавляет значение в конфиг компонента ExtJs для последующей передачи в конструктор JS
+        @param extjs_name: Оригинальное название атрибута в ExtJs
         @param item: Значение атрибута в М3
         @param condition: Условие добавления в конфиг. Бывает полезно чтобы не использовать лишний if
         """
@@ -444,30 +469,64 @@ class BaseExtComponent(object):
 #===============================================================================
 class ExtUIComponent(BaseExtComponent):
     '''
-        Базовый класс для компонентов визуального интерфейса
+    Базовый класс для компонентов визуального интерфейса
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtUIComponent, self).__init__(*args, **kwargs)
+        
+        # Произвольные css стили для контрола
         self.style = {}
+        
+        # Будет ли отображаться
         self.hidden = False
+        
+        # Будет ли активен
         self.disabled = False
+        
+        # Высота и ширина
         self.height = self.width = None
+        
+        # Координаты по оси Х и Y для абсолютного позиционирования
         self.x = self.y = None
+        
+        # html содержимое
         self.html = None
+        
+        # Расположение компонента при использовании layout=border 
         self.region = None
-        self.flex = None # Для *box layout
+        
+        # Количество занимаемых ячеек для layout=*box (vbox или hbox)
+        self.flex = None 
+        
+        # Максимальные и минимальные ширины и высоты
         self.max_height = self.min_height = self.max_width = self.min_width = None
+        
+        # Наименование
         self.name = None
+        
+        # Якорь
         self.anchor = None
+        
+        # CSS класс, который будет добавлен к компоненту
         self.cls = None
+        
         # Атрибуты специфичные для form layout
         self.label_width = self.label_align = self.label_pad = None
+                
+        # Использовать ли автоскрол 
         self.auto_scroll = False
         
     def t_render_style(self):
+        '''
+        @deprecated: Использовать рендеринг в render_base_config
+        '''
         return '{%s}' % ','.join(['"%s":"%s"' % (k, v) for k, v in self.style.items()])
     
     def render_base_config(self):
+        '''
+        Рендер базового конфига объекта
+        '''
         super(ExtUIComponent, self).render_base_config()
         self._put_config_value('style', self.t_render_style, self.style)
         self._put_config_value('hidden', self.hidden, self.hidden)
@@ -490,8 +549,7 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('labelPad', self.label_pad)
         self._put_config_value('cls', self.cls)
         self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
-        #return res
-        
+                        
     def pre_make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         '''
         Выполняется перед методом make_read_only, определяет находится ли
@@ -515,7 +573,7 @@ class ExtUIComponent(BaseExtComponent):
         которые не надо выключать.
         Позволяет сделать компонент недоступным для изменения.
         Обязательно должен быть переопределен в наследуемых классах.
-        При вызове метода без параметров используется параметр по умолчанию
+        При вызове метода без параметров, используется параметр по-умолчанию
         access_off=True, в этом случае метод делает компонент, и все контролы 
         расположенные на нем неизменяемыми. 
         make_read_only(False) соответственно делает компонент доступным для 
