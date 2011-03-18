@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'M3'
-copyright = u'2010, БАРС Груп'
+copyright = u'2011, БАРС Груп'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -231,7 +231,7 @@ man_pages = [
 epub_title = u'M3'
 epub_author = u'БАРС Груп'
 epub_publisher = u'БАРС Груп'
-epub_copyright = u'2010, БАРС Груп'
+epub_copyright = u'2011, БАРС Груп'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
