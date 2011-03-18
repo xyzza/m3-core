@@ -15,7 +15,71 @@ from m3.data.caching import ModelObjectStorageFactory
 from api import (register_imported_model,
                  get_ikey)
 
+#===============================================================================
+# Класс-описатель 
+#===============================================================================
+class ReplicatedObjectsPackage(object):
+    '''
+    Пакет объектов, которые подлежат репликации
+    '''
+    def __init__(self):
+        self.objects = []
+        self.keys_map = {}
+        self.replicated_objects = []
+        
+    def append(self, obj, external_key):
+        '''
+        Добавляет объект с его внешним ключом к списоку объектов
+        '''
+        if not obj in self.objects:
+            self.objects.append(obj)
+        
+        self.keys_map[obj] = external_key
+        
+    def get_objects(self):
+        '''
+        Возвращает плоский список объектов для сохранения
+        '''
+        return self.objects
+    
+    def iter_objects(self):
+        '''
+        Возвращает элементы пакета в виде кортежа (объект, значение внешнего ключа)
+        '''
+        for obj in self.objects:
+            yield (obj, self.get_key(obj))
+        
+    def get_key(self, obj, default=''):
+        '''
+        Возвращает внешний ключ, соответствующий указанному объекту.
+        
+        В случае если объекта нет в пакете, то возвращается либо указанное значение
+        по умолчанию, либо пустая строка.
+        '''
+        return self.keys_map.get(obj, default)
+    
+    def mark_replicated(self, obj):
+        '''
+        Помечает объект в пакете, как уже реплицированный. Данный метод полезен
+        в случае, если сохранение объектов происходит в нестандартных местах
+        системы 
+        '''
+        self.replicated_objects.append(obj)
+        
+    
+    def already_replicated(self, obj):
+        '''
+        Возвращает True в случае, если объект был 
+        '''
+        return obj in self.replicated_objects
+        
+        
+# для целей сокращения записи
+ROP = ReplicatedObjectsPackage
 
+#===============================================================================
+# Классы, управляющие выполнением операций по импорту-экспорту данных
+#===============================================================================
 class BaseDataExchange(object):
     '''
     Класс, отвечающий за проведение операции передачи данных от источника к 
@@ -144,7 +208,7 @@ class ModelReplicationStorage(BaseReplicationStorage):
         # фабрика кешей объектов, которые используются при операциях над данными. 
         self.cache_factory = None
         
-    def get_replica(self, key, object_type=None, *args, **kwargs):
+    def get_replica(self, key, object_type=None, default=None, *args, **kwargs):
         '''
         Получает реплицированный объект из базы данных
         '''
@@ -152,13 +216,15 @@ class ModelReplicationStorage(BaseReplicationStorage):
         if ikey and object_type:
             return get_object_by_id(object_type, ikey)
         
-        return None
+        # объект в модели репликации не найден, возвращаем указанное значение
+        # по умолчанию
+        return default
     
     def get_replica_id(self, key, object_type=None, *args, **kwargs):
         '''
         Возвращает идентификатор реплицированного объекта. Отличается от
         get_replica тем, что возвращается просто идентификатор объекта
-        без указания  
+        (а не сам реплицированный объект).
         '''
         return get_ikey(key, object_type) 
         
@@ -288,25 +354,3 @@ class BaseDataTarget(object):
         '''
         pass
     
-class ModelDataTarget(BaseDataTarget):
-    
-    def __init__(self):
-        super(ModelDataTarget, self).__init__()
-        
-    def write(self, objects):
-        '''
-        Выполняет сохранение переданных(-ой) моделей(-и) в базу данных.
-        
-        Управление транзакциями должно происходить на уровне выше.
-        '''
-        if (isinstance(objects, list) or
-            isinstance(objects, tuple)):
-            for object in objects:
-                object.save()
-        elif isinstance(objects, dict):
-            for object in objects.values():
-                object.save()
-        elif isinstance(objects, models.Model):
-            objects.save()
-            
-        return objects
