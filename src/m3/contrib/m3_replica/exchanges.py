@@ -60,7 +60,7 @@ class SimpleModelImport(BaseDataExchange):
         
         self.model = model
         self.field_map = field_map or {}
-        self.ekey_index = ekey_index or 0
+        self.ekey_index = ekey_index
         self.replica_map = replica_map or {}
         super(SimpleModelImport, self).__init__(source=data_source,
                                                 target=target or ModelDataTarget(),
