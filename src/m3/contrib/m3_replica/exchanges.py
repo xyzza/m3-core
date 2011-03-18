@@ -25,7 +25,7 @@ class SimpleModelImport(BaseDataExchange):
     линейных моделей
     '''
     
-    def __init__(self, model, data_source, field_map, ekey_index, 
+    def __init__(self, model, data_source, field_map, ekey_index=0, 
                  target=ModelDataTarget(),
                  replica_storage=None, replica_map={}):
         '''
