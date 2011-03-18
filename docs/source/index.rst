@@ -8,6 +8,7 @@
    :maxdepth: 2
 
    contrib.rst
+   contrib/m3_replica.rst
    core.rst
    data.rst
    db.rst
