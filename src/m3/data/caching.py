@@ -188,3 +188,212 @@ class IntegralRuntimeCache(RuntimeCache):
     '''
     def _need_populate(self, cleaned_dims):
         return not self.data
+    
+    
+#===============================================================================
+# Кеши, которые работают не как синглтоны. Их экземпляры имеют свое состояние.
+# Данные кеши используются в процессе 
+#===============================================================================
+
+class ObjectStorage(object):
+    '''
+    Класс кешей, объекты которых не являются синглтонами 
+    '''
+    def __init__(self):
+        self.data = {}
+        self.handlers = []
+        
+    def register_handler(self, handler):
+        '''
+        Регистрирует обработчик заполнения кешированных данных. 
+        ''' 
+        # TODO: в качестве возможности будущего расширения функционала данного класса
+        # можно предусмотреть возможность указания хендлеров сборки кеша
+        # для отдельных значений измерений. Для хранения маппинга хендлеров
+        # и измерений предусмотрен словарь handler_run_rules
+        
+        assert callable(handler), u'Обработчик заполнения кеша должен быть callable'
+        
+        # TODO: не совсем понятно, нужно ли ставить lock в данном случае
+        try:
+            self.write_lock.acquire()
+            if handler not in self.handlers:
+                self.handlers.append(handler)
+        finally:
+            self.write_lock.release()
+  
+    def handler_registered(self, handler):
+        '''
+        Проверяет, если ли в списке обработчиков кеша указанный хендлер
+        '''
+        return handler in self.handlers
+    
+    def _normalize_dimensions(self, dimensions):
+        '''
+        Выполняет нормализацию переданных измерений
+        '''
+        result = ()
+        if dimensions:
+            result = dimensions if isinstance(dimensions, tuple) else (dimensions,)
+        return result
+    
+    def _need_populate(self, cleaned_dims):
+        '''
+        Проверяет, нужно ли выполнять прогрузку кеша для указанных измерений
+        '''
+        return not self.data.has_key(cleaned_dims)
+    
+    def _populate(self, dimensions):
+        '''
+        Метод собирает информацию по кешируемым объектам.
+        
+        Возвращает True, если populate реально состоялся
+        '''
+        dims = self._normalize_dimensions(dimensions)
+        
+        if not self._need_populate(dims):
+            return False
+        
+        try:
+            self.write_lock.acquire()
+            if not self._need_populate(dims):
+                return False
+            for handler in self.handlers:
+                prepared_data = handler(self, dims)
+                if isinstance(prepared_data, dict):
+                    for key,value in prepared_data.iteritems():
+                        self.set(key, value)
+        finally:
+            self.write_lock.release()
+
+        return True
+    
+    def set(self, dimensions, value):
+        '''
+        Устанавливает значение в кеше
+        '''
+        self.data[self._normalize_dimensions(dimensions)] = value
+        
+    def get(self, dimensions, default=None):
+        '''
+        Возвращает значение из кеша
+        '''
+        dims = self._normalize_dimensions(dimensions)
+        self._populate(dims)
+        return self.data.get(dims, default)
+    
+    def has_data(self, dimensions):
+        '''
+        Возвращает True в случае, если в кеше есть данные для указанных
+        измерений
+        '''
+        dims = self._normalize_dimensions(dimensions)
+        return self.data.has_key(dims)
+    
+    def get_size(self):
+        '''
+        Возвращает количество объектов, помещенных в кеш
+        '''
+        return len(self.data)
+    
+    def drop(self, dimensions):
+        '''
+        Метод сброса кеша по измерению
+        '''
+        dims = self._normalize_dimensions(dimensions)
+        
+        try:
+            self.write_lock.acquire()
+            self.data.pop(dims, None)
+        finally:
+            self.write_lock.release()
+        
+    def drop_all(self):
+        try:
+            self.write_lock.acquire()
+            self.data = {}
+        finally:
+            self.write_lock.release()
+            
+    def clear_stat(self):
+        self.stat = CacheStat()
+
+
+class IntegralObjectStorage(RuntimeCache):
+    '''
+    Кеш данных, которые собирает все данные однократно и не пересобирает их после этого.
+    (пока не произойдет сброс кеша)
+    '''
+    def _need_populate(self, cleaned_dims):
+        return not self.data
+
+
+class ModelObjectStorage(IntegralObjectStorage):
+    '''
+    Хранилище объектов, которые считывает все записи в моделях указанных типов.
+    
+    Ключом данных является идентификатор объекта.
+    '''
+    def __init__(self, model=None):
+        super(ModelObjectStorage, self).__init__()
+        self.model = model
+
+    def handler(self, cache, dimensions):
+        '''
+        Обработчик кеша. Выполняется чтение всех данных из указанной в конструкторе
+        модели.
+        '''
+        self.drop_all()
+        if self.model:
+            objects = self.model.objects.all()
+            for object in objects:
+                self.set(object.id, object)
+                
+                
+#===============================================================================
+# Класс "Фабрика объектных хранилищ"
+#===============================================================================
+class ModelObjectStorageFactory(object):
+    '''
+    Класс, отвечающий за организацию прозрачного интерфейса доступа к 
+    объектным хранилищам по различным типам моделей.
+    
+    Класс является thread-unsafe
+    '''
+    def __init__(self):
+        self.storages = {}
+        
+    def get_storage(self, model):
+        '''
+        Получение объекта класса ModelObjectStorage для указанного типа модели.
+        
+        @param model: класс моделей, для которых выполняется построение
+                      объектного хранилища. 
+        
+        В случае, если значение параметр model не является классом наследником
+        django.db.Model, то выбрасывается исключение TypeError 
+        '''
+        if (not model or 
+            not hasattr(model, 'objects')):
+            raise TypeError(u'Для построения объектного хранилища ожидается класс-наследник django.db.Model')
+        
+        if self.storages.has_key(model):
+            result = self.storages[model]
+        else:
+            result = ModelObjectStorage(model=model)
+            self.storages[model] = result
+            
+        return result
+    
+    def drop(self):
+        '''
+        Очищает внутренние структуры фабрики
+        '''
+        for storage in self.storages.values():
+            storage.drop_all()
+
+
+
+
+
+
