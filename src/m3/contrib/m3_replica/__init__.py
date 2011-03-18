@@ -4,6 +4,9 @@
 прикоадных приложений.
 '''
 
-from exchanges import SimpleModelImport
+from exchanges import (SimpleModelImport,
+                       ContragentModelImport,)
 
-from engine import DjangoSQLDataSource
+from engine import (DjangoSQLDataSource,
+                    ModelReplicationStorage,
+                    ReplicatedObjectsPackage,)

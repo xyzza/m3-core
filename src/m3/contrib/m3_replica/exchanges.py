@@ -8,9 +8,14 @@ Created on 03.03.2011
 from django.db import models
 from django.utils.encoding import force_unicode
 
+from m3.contrib.m3_contragents import Contragent
+
 from engine import (BaseDataExchange,
-                    ModelDataTarget,
-                    ModelReplicationStorage,)
+                    ModelReplicationStorage,
+                    ReplicatedObjectsPackage,)
+
+from targets import (ModelDataTarget,
+                     ContragentModelDataTarget,)
 
 from api import register_imported_model
 
@@ -20,7 +25,9 @@ class SimpleModelImport(BaseDataExchange):
     линейных моделей
     '''
     
-    def __init__(self, model, data_source, field_map, ekey_index, replica_map={}):
+    def __init__(self, model, data_source, field_map, ekey_index, 
+                 target=ModelDataTarget(),
+                 replica_storage=None, replica_map={}):
         '''
         Инициализирует механизм синхронизации простых моделей.
         
@@ -56,7 +63,8 @@ class SimpleModelImport(BaseDataExchange):
         self.ekey_index = ekey_index or 0
         self.replica_map = replica_map or {}
         super(SimpleModelImport, self).__init__(source=data_source,
-                                                target=ModelDataTarget())
+                                                target=target or ModelDataTarget(),
+                                                replica_storage=replica_storage or ModelReplicationStorage())
     
     def _get_replicated_object(self, model, external_key):
         '''
@@ -142,17 +150,86 @@ class SimpleModelImport(BaseDataExchange):
         for field in self.model._meta.fields:
             if self.field_map.has_key(field.name):
                 value = self._convert_value(field, source_row[self.field_map[field.name]])
-                print value
                 setattr(obj, field.name, value)
         
         return obj
     
-    def post_write(self, source_row, written_object):
+    def post_write(self, source_row, written_objects):
         '''
         Добавляем регистрацию записанной в приемник данных модели с целью
         запоминания соответствия внутреннего и внешних ключей
         '''
-        if source_row and written_object:
-            ekey = self._get_ekey(source_row)
-            if ekey:
-                register_imported_model(written_object, ekey) 
+        
+        if source_row and written_objects:
+            if isinstance(written_objects, ReplicatedObjectsPackage):
+                for obj, external_key in written_objects.iter_objects():
+                    register_imported_model(obj, external_key)
+            else: 
+                # значение внешнего ключа
+                ekey = self._get_ekey(source_row)
+                if ekey:
+                    if isinstance(written_objects, list):
+                        for obj in written_objects:
+                            register_imported_model(obj, ekey)                
+                
+class ContragentModelImport(SimpleModelImport):
+    '''
+    Класс, который отвечает за загрузку моделей, которые имеют ссылки на 
+    таблицы контрагентов. Загрузка таких моделей требует определенных
+    телодвижений с целью сохранения не только самих бизнес-сущностей,
+    но и связанных с ними записями моделей контрагентов
+    '''
+    # TODO: на данный момент класс позволяет загружать только юридические
+    # лица. Необходимо его доработать для того, чтобы происходило
+    # автоматическое определение типа контрагента и его корректное сохранение. 
+    
+    def __init__(self, model, data_source, field_map, contragent_field_map,
+                 ekey_index=0, replica_storage=None, replica_map={},
+                 contragent_field = 'contragent',):
+        '''
+        В дополнение к конструктору базового класса добавляется словарь 
+        соответствия прочитанных значений из источника данных в модели 
+        контрагента (contragent_field_map).
+        
+        Также, необходимо указать, как в бизнес-модели назвается поле-ссылка
+        на контрагента.
+        '''
+        super(ContragentModelImport, self).__init__(model=model,
+                                                    data_source=data_source,
+                                                    target=ContragentModelDataTarget(),
+                                                    field_map=field_map,
+                                                    ekey_index=ekey_index,
+                                                    replica_storage=replica_storage,
+                                                    replica_map=replica_map)
+        
+        self.contragent_field_map = contragent_field_map
+        self.contragent_field = 'contragent'  
+        
+    def handle(self, source_row):
+        '''
+        Модифицируем поведение при преобразовании данных с целью
+        '''
+        # сначала обрабатываем стооку из источника данных по стандартной схеме.
+        obj = super(ContragentModelImport, self).handle(source_row)
+        contragent = None
+        if not obj.id:
+            # объект загружается впервые, и мы должны создать для него
+            # запись в контрагентах
+            contragent = Contragent()
+        else:
+            # пытаемся достать значение из текущего импортируемого объекта
+            
+            # TODO: здесь будет много запросов в базу данных вследствие
+            # ленивой загрузки данных. для оптимизации в дальнейшем необходимо
+            # будет использовать кеши из ReplicationStorage  
+            contragent = getattr(obj, self.contragent_field, None)
+             
+        if contragent:
+            # заполняем объект контрагента согласно строки
+            for field in Contragent._meta.fields:
+                if self.contragent_field_map.has_key(field.name):
+                    value = self._convert_value(field, source_row[self.contragent_field_map[field.name]])
+                    setattr(contragent, field.name, value)
+        
+        # возвращаем контрагента и связанный с ним объект предметной области
+        return [contragent, obj]
