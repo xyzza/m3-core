@@ -113,6 +113,10 @@ class DocumentTypeEditWindow(ExtEditWindow):
         number_node = ExtTreeNode(icon_cls = 'designer-icon-number')
         number_node.set_items(name = u'Числовое поле', type = 'number' )
         self.toolbox.nodes.append(number_node)
-        
+
+        date_node = ExtTreeNode(icon_cls = 'designer-icon-datefield')
+        date_node.set_items(name = u'Дата', type = 'date')
+        self.toolbox.nodes.append(date_node)
+
         return self.toolbox
         

@@ -69,34 +69,7 @@ DesignView = Ext.extend(BaseView, {
         this._container.doLayout();
     },
     _createComponent:function(model) {
-        // Очень тупой вариант создания контролов. Потом для этого следует написать
-        // класс типа фабрики
-
-        switch(model.type)
-        {
-            case 'text': 
-                return new Ext.form.TextField({
-                    fieldLabel:model.attributes.name,
-                    anchor:'95%',
-                    id:model.id
-
-                });
-            break;
-            case 'number':
-                return new Ext.form.NumberField({
-                    fieldLabel:model.attributes.name,
-                    anchor:'95%',
-                    id:model.id
-                });
-            break;
-            case 'section':
-                 return new Ext.form.FieldSet({
-                     title:model.attributes.name,
-                     cls:'designContainer',
-                     id:model.id
-                 });
-            break;
-        }
+        return modelFacility.buildExtUIComponent(model);
     }
 });
 
@@ -120,31 +93,7 @@ ComponentTreeView = Ext.extend(BaseView, {
         root.removeAll(true);
 
         var recursion = function(parent, model) {
-            //TODO нормально сделать построение нод
-            var iconCls = '';
-            switch (model.attributes.type){
-                case 'document':
-                    iconCls = 'designer-icon-page';
-                break;
-                case 'section':
-                    iconCls = 'designer-icon-fieldset';
-                break;
-                case 'text':
-                    iconCls = 'designer-icon-text';
-                break;
-                case 'number':
-                    iconCls = 'designer-icon-number';
-                break;
-            }
-            var newNode = new Ext.tree.TreeNode({
-                name:model.attributes.name,
-                modelObj:model,
-                id:model.id,
-                expanded:true,
-                allowDrop:model.isContainer(),
-                orderIndex:model.attributes.orderIndex+'' || '0',
-                iconCls: iconCls
-            });
+            var newNode = modelFacility.buildTreeNode(model);
             parent.appendChild(newNode);
 
             if (model.childNodes && model.childNodes.length > 0) {
@@ -173,77 +122,13 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
      * Конфиуграция доступных свойств для каждого типа компонента. Первый уровень вложенности - типы компонентов
      * Второй уровень - доступные свойства каждого типа
      */
-    //TODO этот конфиг где то отдельно должен лежать
-    typesConfig:{
-        text:{
-            name:{
-                allowBlank:false,
-                defaultValue:'Новый компонент'
-            },
-            allowBlank:{
-                allowBlank:true,
-                defaultValue:true
-            },
-            regexp:{
-                allowBlank:true,
-                defaultValue:''
-            }
-        },
-        number:{
-            name:{
-                editorType:'string',
-                allowBlank:false,
-                defaultValue:'Новый компонент'
-            },
-            decimalPrecision:{
-                allowBlank:true,
-                defaultValue:2
-            },
-            allowBlank:{
-                allowBlank:true,
-                defaultValue:true
-            }
-        },
-        section:{
-            name:{
-                editorType:'string',
-                allowBlank:false,
-                defaultValue:'Новый компонент'
-            }
-        },
-        document:{
-            name:{
-                editorType:'string',
-                allowBlank:false,
-                defaultValue:'Новый компонент'
-            }
-        }
-    },
-
     constructor:function() {
         PropertyEditorManager.superclass.constructor.call(this);
         this.addEvents('modelUpdate');
     },
     editModel:function(model) {
         //конфиг объект для PropertyGrid'а
-        var cfg = {};
-
-        //пояснение для тех кто не достиг дзена - в js объекты и ассоциативные массивы(словари) одно и тоже
-        //И более того, с помощью цикла for можно итерировать по свойствам массива(читай - получить все ключи словаря)
-
-        //заполняем сначала свойства дефолтными значениями
-        var currentType = this.typesConfig[model.attributes.type];
-        for (var i in currentType) {
-            cfg[i] = currentType[i]['defaultValue'];
-        };
-
-        //теперь заполняем значениями которые есть у модели
-        for (var k in model.attributes) {
-            if (cfg.hasOwnProperty(k)) {
-                cfg[k] = model.attributes[k];
-            }
-        };
-
+        var cfg = modelFacility.getTypeDefaultProperties(model.attributes.type);
         var window = new PropertyWindow({
             source:cfg,
             model:model
@@ -372,7 +257,7 @@ AppController = Ext.extend(Object, {
        //обработчики событий
        this.tree.on('beforenodedrop', this.onBeforeNodeDrop.createDelegate(this));
        this.tree.on('nodedrop', this.onTreeNodeDrop.createDelegate(this));
-       this.tree.on('dblclick', this.onTreeNodeDblClick.createDelegate(this))
+       this.tree.on('dblclick', this.onTreeNodeDblClick.createDelegate(this));
        this._editorManager.on('modelUpdate', this.onModelUpdate.createDelegate(this));
 
 
@@ -446,28 +331,9 @@ AppController = Ext.extend(Object, {
                }
            });
    },
-
    refreshView:function() {
        this._treeView.refresh();
        this._designView.refresh();
-   },
-   createModel:function(parentTreeNode) {
-       //TODO перенести сюда создание новых нод после дропа
-//       var parentModel = parentTreeNode.attributes.modelObj;
-//       var contextObj = {
-//           parent : parentModel
-//       };
-//
-//       this._editWindow.createModel(contextObj);
-   },
-   saveModel:function(context) {
-//       switch(context.operation){
-//           case 'append':
-//               var newNode = new ComponentModel(context.proxy);
-//               var parent = context.parent;
-//               parent.appendChild(newNode);
-//               break;
-//       }
    },
    moveTreeNode:function(drop, target, point) {
         var source = drop.attributes.modelObj;
@@ -507,24 +373,8 @@ AppController = Ext.extend(Object, {
        var componentNode = data.node;
        var model = this._model.findModelById(target.id);
 
-       //TODO сделать умно
-       //Ну, тут тупейшее создание новых компонентов. Пока тупейшее
-
-       var newModelConfig = {
-           type:componentNode.attributes.type
-       };
-
-       switch(componentNode.attributes.type) {
-           case 'section':
-                   newModelConfig.name = 'Новая секция';
-           break;
-           case 'text':
-                   newModelConfig.name = 'Новый текстовый редактор';
-           break;
-           case 'number':
-                   newModelConfig.name = 'Новый редактор чисел';
-           break;
-       }
+       var newModelConfig = modelFacility.getTypeDefaultProperties(componentNode.attributes.type);
+       newModelConfig.type = componentNode.attributes.type;
        model.appendChild( new ComponentModel(newModelConfig) );
    },
    onBeforeNodeDrop:function(dropEvent) {
@@ -532,12 +382,9 @@ AppController = Ext.extend(Object, {
             //рут не отображается, и в него нельзя перетаскивать
             return false;
         }
-        if (this._model.findModelById(dropEvent.target.id ).type == 'document' && (dropEvent.point =='above' ||
-                dropEvent.point =='below')) {
-            //а это суррагатный рут "Документ"
-            return false;
-        }
-        return true;
+        return !(this._model.findModelById(dropEvent.target.id).type == 'document' && (dropEvent.point == 'above' ||
+                dropEvent.point == 'below'));
+
    },
    onTreeNodeDrop: function(dropEvent) {
        this.moveTreeNode(dropEvent.dropNode, dropEvent.target, dropEvent.point);
@@ -666,6 +513,182 @@ DocumentModel.initFromJson = function(jsonObj) {
     return result;
 };
 
+/**
+ * Класс включает в себя набор утилитных функций для преобразования модели во что-то другое
+ */
+ModelFacility = Ext.extend(Object,{
+
+    typesConfig:{
+        text:{
+            properties:{
+                name:{
+                    allowBlank:false,
+                    defaultValue:'Новый текстовый редактор'
+                },
+                allowBlank:{
+                    allowBlank:true,
+                    defaultValue:true
+                },
+                regexp:{
+                    allowBlank:true,
+                    defaultValue:''
+                }
+            },
+            toolboxData:{
+                iconCls:'',
+                text:''
+            }
+        },
+        number:{
+            properties:{
+                name:{
+                    editorType:'string',
+                    allowBlank:false,
+                    defaultValue:'Новый редактор чисел'
+                },
+                decimalPrecision:{
+                    allowBlank:true,
+                    defaultValue:2
+                },
+                allowBlank:{
+                    allowBlank:true,
+                    defaultValue:true
+                }
+            },
+            toolboxData:{
+                iconCls:'',
+                text:''
+            }
+        },
+        section:{
+            properties:{
+                name:{
+                    allowBlank:false,
+                    defaultValue:'Новая секция'
+                }
+            },
+            toolboxData:{
+                iconCls:'',
+                text:''
+            }
+        },
+        date: {
+            properties:{
+                name:{
+                    defaultValue:'Новый редактор даты',
+                    allowBlank:false
+                },
+                allowBlank:{
+                    defaultValue:true
+                }
+            },
+            toolboxData:{
+                iconCls:'',
+                text:''
+            }
+        },
+        document:{
+            properties: {
+                name:{
+                    allowBlank:false,
+                    defaultValue:'Новый документ'
+                }
+            }
+        }
+    },
+
+
+    /**
+     * Возвращает ExtComponent или какой нибудь его наследник
+     */
+    buildExtUIComponent:function(model) {
+        //Важное замечание номер раз - каждому экстовому компоненту присваевается id = id модели
+        //это требуется для того чтобы ставить в соответсвие DOM элементы и экстовые компоненты
+        //Важное замечание номер два - у контейнеров следует навешивать cls 'designContainer'
+        //он нужен для визуального dd на форму при лукапе по DOM'у
+        switch(model.attributes.type)
+            {
+                case 'text':
+                    return new Ext.form.TextField({
+                        fieldLabel:model.attributes.name,
+                        anchor:'95%',
+                        id:model.id
+
+                    });
+                break;
+                case 'number':
+                    return new Ext.form.NumberField({
+                        fieldLabel:model.attributes.name,
+                        anchor:'95%',
+                        id:model.id
+                    });
+                break;
+                case 'section':
+                     return new Ext.form.FieldSet({
+                         title:model.attributes.name,
+                         cls:'designContainer',
+                         id:model.id
+                     });
+                break;
+                case 'date':
+                        return new Ext.form.DateField({
+                            fieldLabel:model.attributes.name,
+                            anchor:'95%',
+                            id:model.id
+                        });
+                break;
+            }
+    },
+    /**
+     * Возвращает TreeNode по модели
+     */
+    buildTreeNode:function(model) {
+        //Опять же важное замечание - id ноды в дереве компнентов на экране и id модельки равны друг другу
+        var iconCls = '';
+            switch (model.attributes.type){
+                case 'document':
+                    iconCls = 'designer-icon-page';
+                break;
+                case 'section':
+                    iconCls = 'designer-icon-fieldset';
+                break;
+                case 'text':
+                    iconCls = 'designer-icon-text';
+                break;
+                case 'number':
+                    iconCls = 'designer-icon-number';
+                break;
+                case 'date':
+                    iconCls = 'designer-icon-datefield';
+            }
+            return new Ext.tree.TreeNode({
+                name:model.attributes.name,
+                modelObj:model,
+                id:model.id,
+                expanded:true,
+                allowDrop:model.isContainer(),
+                orderIndex:model.attributes.orderIndex+'' || '0',
+                iconCls: iconCls
+            });
+    },
+    /**
+     * Возвращает объект со свойствами заполнеными дефолтными значениями по типу модели
+     *
+     */
+    getTypeDefaultProperties:function(type) {
+        //пояснение для тех кто не достиг дзена - в js объекты и ассоциативные массивы(словари) одно и тоже
+        //И более того, с помощью цикла for можно итерировать по свойствам массива(читай - получить все ключи словаря)
+        var currentType = this.typesConfig[type]['properties'];
+        var cfg = {};
+        for (var i in currentType) {
+            cfg[i] = currentType[i]['defaultValue'];
+        }
+        return cfg;
+    }
+});
+
+//делаем глобальный инстанс и не выпендриваемся
+modelFacility = new ModelFacility();
 
 // Просто json для отладки
 //
