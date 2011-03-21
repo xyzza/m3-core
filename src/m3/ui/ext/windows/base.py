@@ -29,43 +29,95 @@ class BaseExtWindow(ExtUIComponent):
 
     def __init__(self, *args, **kwargs):
         super(BaseExtWindow, self).__init__(*args, **kwargs)
-        self.template = 'ext-windows/ext-window.js'
+        self.template = 'ext-windows/ext-window.js' # FIXME: Закомментить
+        
+        # Шаблон, который будет отрендерен после основного
         self.template_globals = ''
+        
+        # TODO: убрать т.к. не используется
         self.renderer = ExtWindowRenderer()
+        
+        # TODO: убрать, т.к. не используется
         self.renderer.window = self
 
+        # Название 
         self._ext_name = 'Ext.m3.Window'
 
-        # параметры окна
+        # Шрина окна
         self.width = 400
+        
+        # Высота окна
         self.height = 300
+        
+        # Заголовок
         self.title = None
+        
+        # Типизированный список вложенных компонентов
         self.__items = TypedList(type=ExtUIComponent)
+        
+        # Типизированный список кнопок
         self.__buttons = TypedList(type=ExtButton)
 
+        # layout extjs. См. документацию
         self.layout = None
+        
+        # Признаки модальности, Окно развернуто на весь экран, Окно свернуто
         self.modal = self.maximized = self.minimized = False
+        
+        # Возможность закрывать, разворачивать, сворачивать окно
         self.closable = self.maximizable = self.minimizable = None
+        
+        # По умолчанию отсту внутри границ 5 px
         self.body_style = 'padding:5px;'
+        
+        # CSS класс для иконки в вершине окна
         self.icon_cls = None
+        
+        # Набор тулбаров
         self.top_bar = None
         self.bottom_bar = None
         self.footer_bar = None
+        
+        # Признак границы
         self.border = True
+        
+        # Возможность перетаскивать окно
         self.draggable = True
+        
+        # Возможность изменять размеры окна
         self.resizable = True
+        
+        # Ссылка на родительское окно
         self.parent_window_id = ''
+        
+        # Список обработчиков на клавиши 
         self.keys = []
+        
+        # Признак автоматической загрузки содержимого после рендеринга
         self.auto_load = None
+        
+        # Рендерить компонент скрытом, чтобы показать нужно вызвать метод show
         self.hidden = True
+        
+        # Конфигурация layout
         self.layout_config = {}
+        
+        # Расположение кнопок (слева, по центру, справа)
         self.button_align = None
+        
+        # Ссылка на документацию
         self.help_topic = None
+        
+        # Признак только чтения
         self.read_only = False
+        
+        # Экшен на закрытие окна
         self.close_action = None
 
     def t_render_layout_config(self):
-        '''Рендерит конфиг, если указан layout'''
+        '''
+        Рендерит конфиг, если указан layout
+        '''
         return '{%s}' % ','.join(['%s:"%s"' % (k, v)
             for k, v in self.layout_config.items()])
 
@@ -88,8 +140,7 @@ class BaseExtWindow(ExtUIComponent):
         self._put_config_value('buttons', self.t_render_buttons, self.buttons)
         self._put_config_value('border', self.border)
         self._put_config_value('resizable', self.resizable)
-        self._put_config_value('draggable', self.draggable)
-        #self._put_config_value('parentWindowID', self.parent_window_id)
+        self._put_config_value('draggable', self.draggable)        
         self._put_config_value('keys', self.t_render_keys, self.keys)
         self._put_config_value('buttonAlign', self.button_align)
 
@@ -174,15 +225,21 @@ class BaseExtWindow(ExtUIComponent):
     # По-умолчанию у таких атрибутов значение None.
     # ps: Надеемся, что этот прицедент последний
     def t_get_maximizable(self):
+        # @deprecated: Не используется
         return str(self.maximizable)
 
     def t_get_minimizable(self):
+        # @deprecated: Не используется
         return str(self.minimizable)
 
     def t_get_closable(self):
+        # @deprecated: Не используется
         return str(self.closable)
 
     def t_render_keys(self):
+        '''
+        Биндинг множества кнопок к их действиям 
+        '''
         return '[%s]' % ','.join(['{%s}' % ','.join(['%s:%s' % (k,v) for k, v in key.items()]) for key in self.keys])
 
     def _help_topic_full_path(self):

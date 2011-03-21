@@ -28,8 +28,7 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
             self.menuitem_edit = menus.ExtContextMenuItem(text = u'Изменить', icon_cls = 'edit_item', handler='contextMenuEdit')
             self.menuitem_delete = menus.ExtContextMenuItem(text = u'Удалить', icon_cls = 'delete_item', handler='contextMenuDelete')
             self.menuitem_separator = menus.ExtContextMenuSeparator()            
-            
-            # self.items.extend([self.menuitem_add, self.menuitem_edit, self.menuitem_delete, self.menuitem_separator])
+                        
             self.init_component()
     
     class TreeTopBar(containers.ExtToolBar):
@@ -128,10 +127,6 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
         if not self.url and self.action_data:
             self.url = self.action_data.absolute_url()
         
-#        if self.allow_paging:
-#            self.store.start = 0
-#            self.store.limit = 25
-#            self.bottom_bar = self.paging_bar
         
         self.render_base_config()
         self.render_params()
