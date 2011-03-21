@@ -11,18 +11,25 @@ from m3.helpers import normalize
 from m3.ui.ext.base import BaseExtComponent
 from base_store import BaseExtStore
 
-
+#===============================================================================
 class ExtDataStore(BaseExtStore):
+    '''
+    Хранилище данных, которое не генерирует запрос на сервер, а принимает данные
+    в массиве data, либо через метод load_data
+    '''
     def __init__(self, data = None, *args, **kwargs):
         super(ExtDataStore, self).__init__(*args, **kwargs)
-        if data:
-            # По умолчанию первым параметром передаются данные на заполнение store
+        
+        # По умолчанию первым параметром передаются данные на заполнение store
+        if data:            
             self.data = data 
         else:
             self.data = []
             
-        self.template = 'ext-misc/ext-data-store.js'
-        self.__columns = [] # Для заполнения полей в шаблоне
+        self.template = 'ext-misc/ext-data-store.js' # TODO: Отрефакторить под внутриклассовый рендеринг
+        
+        # Для заполнения полей в шаблоне
+        self.__columns = [] 
         self.init_component(*args, **kwargs)
         
     def load_data(self, data):
@@ -54,18 +61,40 @@ class ExtDataStore(BaseExtStore):
             res.append( '[%s]' % ','.join(res_tmp) )
         return ','.join(res)
             
-    
+#===============================================================================    
 class ExtJsonStore(BaseExtStore):
+    '''
+    Хранилище данных, которое отправляет запрос на сервер и ждет, что данные 
+    вернуться в формате json
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtJsonStore, self).__init__(*args, **kwargs)
-        self.template = 'ext-misc/ext-json-store.js'
-        self.__columns = [] # Для заполнения полей в шаблоне
+        self.template = 'ext-misc/ext-json-store.js' # TODO: Отрефакторить под внутриклассовый рендеринг
+        
+        # Для заполнения полей в шаблоне
+        self.__columns = [] 
+        
+        # Начальная позиция для показа, если используется постраничная навигация
         self.__start = 0
+        
+        # Количество записей для показа, если используется постраничная навигация
         self.__limit = -1
+        
+        # 
         self.total_property = None
+        
+        # Название вершины в json массиве, откуда будут браться записи
+        # Например root = 'rows'
+        # Тогда предполагаемый json массив должен выглядеть примерно так:
+        # {rows: [id:1, name:'name', age:45]}
         self.root = None
+        
+        # Использовать ли удаленную сортировку
         self.remote_sort = False
+        
+        # Поле, откуда будет браться id записи
         self.id_property = 'id'
+        
         self.init_component(*args, **kwargs)
         
     def render(self, columns):
@@ -97,16 +126,24 @@ class ExtJsonStore(BaseExtStore):
     
     limit = property(_get_limit, _set_limit)
 
-
+#===============================================================================
 class ExtJsonWriter(BaseExtStore):
     '''
     Предназначен для отправки и преобразования новых и измененных записей Store на сервер
     '''
     def __init__(self, *args, **kwargs):
         super(ExtJsonWriter, self).__init__(*args, **kwargs)
+        
+        # Если True, записи (records) переводится в хешированные данные, имя беруться из
+        # ридера (Reader). Подробности http://extjs.docs/d/?class=Ext.data.JsonWriter
         self.encode = True
+        
+        # Если False, при удалении будет отправляться только id записи на сервер
         self.encode_delete = False
+        
+        # Если True, то сохраняются все записи, а не только измененные
         self.write_all_fields = False
+        
         self.init_component(*args, **kwargs)
     
     def render(self):
@@ -122,17 +159,30 @@ new Ext.data.JsonWriter({
         
         return result
 
+#===============================================================================
 class ExtJsonReader(BaseExtComponent):
     '''
     Ридер для данных
     '''
     def __init__(self, *args, **kwargs):
         super(ExtJsonReader, self).__init__(*args, **kwargs)
-        self.template = 'ext-misc/ext-json-reader.js'
+        self.template = 'ext-misc/ext-json-reader.js' # TODO: Отрефакторить под внутриклассовый рендеринг
+        
+        # Поле, откуда будет браться идентификатор
         self.id_property = 'id'
+        
+        # Название вершины в json массиве, откуда будут браться записи
+        # Например root = 'rows'
+        # Тогда предполагаемый json массив должен выглядеть примерно так:
+        # {rows: [id:1, name:'name', age:45]}
         self.root = None
+        
+        #
         self.total_property = None
+        
+        # Массив данных
         self.__fields = []
+        
         self.init_component(*args, **kwargs)
         
     def t_render_fields(self): 
@@ -145,15 +195,23 @@ class ExtJsonReader(BaseExtComponent):
     def get_fields(self):
         return self.__fields         
 
+#===============================================================================
 class ExtGroupingStore(ExtJsonStore):
     '''
     Хранилище используемое для группировки по определенным полям в гриде
     '''     
     def __init__(self, *args, **kwargs):
         super(ExtGroupingStore, self).__init__(*args, **kwargs)
-        self.template = 'ext-misc/ext-grouping-store.js'
+        self.template = 'ext-misc/ext-grouping-store.js' # TODO: Отрефакторить под внутриклассовый рендеринг
+        
+        # Серверная группировка
         self.remote_group = False
+        
+        # Имя поля, используемой для сортировки
         self.group_field = None
+        
+        # Объект, в котором может указываться например порядок сортировки
+        # см: http://extjs.docs/d/?class=Ext.data.GroupingStore
         self.sort_info = None
         self.init_component(*args, **kwargs)
         

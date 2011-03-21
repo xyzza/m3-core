@@ -3,6 +3,8 @@
 from base import BaseExtPanel, BaseExtContainer
 from m3.helpers.datastructures import TypedList
 
+# Данный набор контролов не используется
+
 #===============================================================================
 class ExtElementGroup(BaseExtContainer):
     def __init__(self, *args, **kwargs):

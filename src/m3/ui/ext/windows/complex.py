@@ -16,34 +16,56 @@ from m3.ui.ext.containers import (ExtContextMenu,
                                 ExtTree,
                                 ExtGrid)
         
-#===============================================================================                
+#===============================================================================
+# TODO: Необходимо отрефакторить данный класс под внутриклассовый рендеринг
 class ExtDictionaryWindow(BaseExtWindow):
     ''' 
     Базовое окно для линейного, иерархичесого и совмещенного справочника
     '''
+    
+    # Режим отображения
     LIST_MODE = 0
+    
+    # Режим выбора
     SELECT_MODE = 1
+    
     def __init__(self, *args, **kwargs):
         super(ExtDictionaryWindow, self).__init__(*args, **kwargs)
-        self.template = 'ext-windows/ext-window.js'
-        self.template_globals = 'ext-script/ext-dictionary-window-globals.js'
-        self.layout='border'
+        self.template = 'ext-windows/ext-window.js' # TODO: Отрефакторить под внутриклассовый рендеринг
+        self.template_globals = 'ext-script/ext-dictionary-window-globals.js' # TODO: Отрефакторить под внутриклассовый рендеринг
         
+        # Специальный layout для корректного отображения 
+        self.layout='border' 
+        
+        # Кнопка "Закрыть" по-умолчанию 
         self.buttons.append(ExtButton(name = 'close_btn', text = u'Закрыть',
                                       handler = 'function(){Ext.getCmp("%s").close();}' % self.client_id))
 
         # Основные контролы должны быть доступны для изменения
+        # Грид
         self.grid = None
+        
+        # Дерево
         self.tree = None
        
+        # TODO: не используется, убрать
         self.list_view = None
+        
+        # Контрол поиска для грида
         self.search_text_grid = None
+        
+        # Контрол поиска для дерева
         self.search_text_tree = None
+        
+        # Кнопка выбора, если mode = SELECT_MODE
         self.select_button = None
+        
+        # TODO: не используется. т.к не используется list_view
         self._panel_list_view = None
         
         # Окно может находится в двух положениях: просто список записей и список выбора записи/записей
-        self._mode = 0 # По умолчанию справочник открыт в режиме списка
+        # По умолчанию справочник открыт в режиме списка
+        self._mode = 0 
      
         # Компоненты для различных действий для грида
         self._components_new_grid = None
@@ -70,11 +92,18 @@ class ExtDictionaryWindow(BaseExtWindow):
         self._url_delete_tree = None
         self._url_drag_tree = None
         
+        # Колонка для выбора, если компонент находится в режиме выбора
         self._column_name_on_select = None
-        self.maximizable = True
-        self.minimizable = True
         
+        # Возможность максимизировать и минимизировать окно
+        self.maximizable = self.minimizable = True
+               
+        # Наименования атрибута при создании/редактировании элемента в дереве
+        # Если элемент создается/редактируется в корне, то id=''
+        # Если элемент создается/редактирвется внутри дерева, то id= parent_node.id - 
+        # id родительского узла
         self.contextTreeIdName = 'id'
+        
         self.init_component(*args, **kwargs)
         
     @property
@@ -134,20 +163,7 @@ class ExtDictionaryWindow(BaseExtWindow):
                 exclude_list.append(component)
             self.grid.make_read_only(self.read_only, exclude_list, *args, **kwargs)
             
-#        Если все будет нормально-убрать, так как в гриде и дереве контекстнрое меню
-#        должно выключаться самостоятельно.
-#        # Закроем контекстное меню
-#        if self.grid:
-#            for item in self.grid.handler_rowcontextmenu.items:
-#                item.disabled = access_off
-#            for item in self.grid.handler_contextmenu.items:
-#                item.disabled = access_off
-#        if self.tree:
-#            for item in self.tree.handler_contextmenu.items:
-#                item.disabled = access_off
-#            for item in self.tree.handler_containercontextmenu.items:
-#                item.disabled = access_off
-            
+
         # Оставим кнопку Закрыть и Выбрать
         for btn in self.buttons:
             if btn.name in ['close_btn', 'select_btn']:
@@ -328,6 +344,9 @@ class ExtDictionaryWindow(BaseExtWindow):
             component.disabled = True
             
     def init_grid_components(self):
+        '''
+        Идентификация грида
+        '''
         if not self.grid:
             grid = ExtGrid(region='center')
             grid.load_mask = True
@@ -352,6 +371,9 @@ class ExtDictionaryWindow(BaseExtWindow):
             grid.top_bar.items.append(search_grid)
             
     def init_tree_components(self):
+        '''
+        Идентификация дерева
+        '''
         if not self.tree:
             tree = ExtTree(width=180)
             tree.handler_contextmenu = ExtContextMenu()

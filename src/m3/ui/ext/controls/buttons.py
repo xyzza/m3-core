@@ -38,7 +38,7 @@ class ExtButton(BaseExtControl):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtButton, self).__init__(self, *args, **kwargs)
-        self.template = 'ext-controls/ext-button.js'
+        self.template = 'ext-controls/ext-button.js' # TODO: отрефакторить под внутриклассовый рендеринг
         self.text = None
         self.handler = None
         self.icon = None

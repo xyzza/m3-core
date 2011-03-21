@@ -9,8 +9,6 @@ Created on 27.02.2010
 from django.conf import settings
 from datetime import datetime
 
-from m3.helpers import normalize
-
 from base import BaseExtField, BaseExtTriggerField
 
 #===============================================================================        
@@ -43,10 +41,18 @@ class ExtStringField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtStringField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-string-field.js'
+        self.template = 'ext-fields/ext-string-field.js' # FIXME: Можно заккоментировать
+        
+        #
         self.enable_key_events = False # Разрешает перехват нажатий клавиш
+        
+        #
         self.input_type = None
+        
+        #
         self.mask_re = None
+        
+        #
         self.select_on_focus = None
         self.init_component(*args, **kwargs)
 
@@ -86,13 +92,19 @@ class ExtDateField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtDateField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-date-field.js'
+        self.template = 'ext-fields/ext-date-field.js' # FIXME: Можно заккоментировать
+        
+        #
         self.start_day = 1 # атрибут задает с какого дня начинается неделя в календаре.
                             # 0-Воскресенье, 1-Понедельник, 2-Вторник и т.д.
-        self.hide_today_btn = False
-        self.enable_key_events = False # Разрешает перехват нажатий клавиш
-        #self.value =  datetime.now()  # -- решили не использовать (c) prefer 
         
+        #
+        self.hide_today_btn = False
+        
+        #
+        self.enable_key_events = False # Разрешает перехват нажатий клавиш         
+        
+        #
         try:
             self.format = settings.DATE_FORMAT.replace('%', '')
         except:
@@ -169,16 +181,32 @@ class ExtNumberField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtNumberField, self).__init__(*args, **kwargs)
-        #self.template = 'ext-fields/ext-number-field.js'
+        
         # Свойства валидации специфичные для чисел
+        # Разделитель целой и дробной части
         self.decimal_separator = None
+        
+        # Признак, что может быть дробная часть
         self.allow_decimals = True
+        
+        # Признак, что могут быть отрицательные значения
         self.allow_negative = True
+        
+        # Точность дробной части
         self.decimal_precision = None
+        
+        # Маскимально возможное значение
         self.max_value = None
+        
+        # Если превышено максимально возможное значение, то будет отображаться этот текст
         self.max_text = None
+        
+        # Минимальное возможное значение 
         self.min_value = None
+        
+        # Если превышено минимальное возможное значение, то будет отображаться этот текст
         self.min_text = None
+        
         self.init_component(*args, **kwargs)
         
         
@@ -203,15 +231,8 @@ class ExtNumberField(BaseExtField):
         base_config = self._get_config_str()
         return 'new Ext.form.NumberField({%s})' % base_config
 
-#===============================================================================
 
-# class ExtRuNumberField(ExtNumberField):
-#     def __init__(self, *args, **kwargs):
-#         super(ExtRuNumberField, self).__init__(*args, **kwargs)
-#         self.decimal_separator = ','
-        
 #===============================================================================
-
 class ExtHiddenField(BaseExtField):
     ''' 
     Скрытое поле, которое не видно пользователю на форме, но хранит значение
@@ -225,12 +246,19 @@ class ExtHiddenField(BaseExtField):
     }
     @end_designer
      '''
+    # Тип поля - integer
     INT = 0
+    
+    # Тип поля - string
     STRING = 1
+    
     def __init__(self, *args, **kwargs):
         super(ExtHiddenField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-hidden-field.js'
+        self.template = 'ext-fields/ext-hidden-field.js' #TODO: Необходимо отрефакторить под внутриклассовый рендеринг
+        
+        # Тип поля
         self.type = ExtHiddenField.INT 
+        
         self.init_component(*args, **kwargs)
 
 #===============================================================================       
@@ -251,6 +279,8 @@ class ExtTextArea(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTextArea, self).__init__(*args, **kwargs)
+        
+        # Фильтр допустимых символов по регекспу
         self.mask_re = None
         self.init_component(*args, **kwargs)
     
@@ -291,9 +321,14 @@ class ExtCheckBox(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtCheckBox, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-checkbox.js'
+        self.template = 'ext-fields/ext-checkbox.js' #TODO: Необходимо отрефакторить под внутриклассовый рендеринг
+        
+        # Признак того, что значение выбрано
         self.checked = False
+        
+        # Текст рядом с полем выбора значения 
         self.box_label = None
+        
         self.init_component(*args, **kwargs)
         
     @property
@@ -318,8 +353,7 @@ class ExtComboBox(BaseExtTriggerField):
     @end_designer
     '''
     def __init__(self, *args, **kwargs):
-        super(ExtComboBox, self).__init__(*args, **kwargs)
-        #self.template = 'ext-fields/ext-combo.js'
+        super(ExtComboBox, self).__init__(*args, **kwargs)        
         self.init_component(*args, **kwargs)
         
     def render(self):
@@ -332,7 +366,8 @@ class ExtComboBox(BaseExtTriggerField):
         base_config = self._get_config_str()
         return 'new Ext.form.ComboBox({%s})' % base_config
 
-#===============================================================================        
+
+#===============================================================================
 class ExtTimeField(BaseExtField):
     '''
     Поле ввода времени
@@ -359,17 +394,25 @@ class ExtTimeField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTimeField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-time-field.js'
+        self.template = 'ext-fields/ext-time-field.js' #TODO: Необходимо отрефакторить под внутриклассовый рендеринг
+        
+        # Формат отображения времени
         self.format = None
+        
+        # Шаг повышения времени
         self.increment = None
+        
         # max и min допустимые значения времени. Задаются только в виде строки, 
         # т.к. форматы времени в python'e и javascript'e разные
-        self.max_value = None
-        self.min_value = None
+        self.max_value = self.min_value = None         
         self.init_component(*args, **kwargs)
-        
+
+#===============================================================================        
 class ExtHTMLEditor(BaseExtField):
-    '''Поле HTML-редактор'''
+    '''
+    Поле HTML-редактор
+    '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtHTMLEditor, self).__init__(*args, **kwargs)
         self.init_component(*args, **kwargs)
@@ -386,6 +429,7 @@ class ExtHTMLEditor(BaseExtField):
         base_config = self._get_config_str()
         return 'new Ext.form.HtmlEditor({%s})' % base_config
 
+#===============================================================================
 class ExtDisplayField(BaseExtField):
     '''
     Поле отображающее значение (не проверяется и не сабмитится)
