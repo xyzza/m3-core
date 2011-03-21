@@ -111,11 +111,11 @@ class SimpleModelImport(BaseDataExchange):
         # ссылочную модель
         field_cls = field.__class__ 
         if field_cls in RELATED_FIELDS:
-            result = self._get_related_object(field.rel.to, external_value)
+            result = self._get_replicated_object(field.rel.to, external_value)
             
         elif field_cls in STRING_FIELDS:
             if external_value:
-                result = force_unicode(external_value)
+                result = force_unicode(external_value)[0:field.max_length]
             else:
                 result = ''
             
@@ -159,7 +159,6 @@ class SimpleModelImport(BaseDataExchange):
         Добавляем регистрацию записанной в приемник данных модели с целью
         запоминания соответствия внутреннего и внешних ключей
         '''
-        
         if source_row and written_objects:
             if isinstance(written_objects, ReplicatedObjectsPackage):
                 for obj, external_key in written_objects.iter_objects():
@@ -170,7 +169,9 @@ class SimpleModelImport(BaseDataExchange):
                 if ekey:
                     if isinstance(written_objects, list):
                         for obj in written_objects:
-                            register_imported_model(obj, ekey)                
+                            register_imported_model(obj, ekey) 
+                    elif isinstance(written_objects, models.Model):
+                        register_imported_model(written_objects, ekey)                       
                 
 class ContragentModelImport(SimpleModelImport):
     '''
