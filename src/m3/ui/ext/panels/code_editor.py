@@ -4,11 +4,17 @@ from m3.ui.ext.containers.forms import ExtPanel
 __author__ = 'daniil-ganiev'
 
 class ExtCodeEditor(ExtPanel):
-    '''Редактор кода в браузере'''
+    '''
+    Редактор кода в браузере
+    '''
 
     def __init__(self, *args, **kwargs):
         super(ExtCodeEditor, self).__init__(*args, **kwargs)
+        
+        # Исходный код  
         self.source_code = '#Put some code here'
+        
+        # Признак: только чтение
         self.read_only = False
 
         self.init_component(*args, **kwargs)
@@ -25,4 +31,3 @@ class ExtCodeEditor(ExtPanel):
         params_config = self._get_params_str()
         return 'new Ext.ux.panel.CodeEditor({%s}, {%s})' % (base_config, 
                                                             params_config)
-  

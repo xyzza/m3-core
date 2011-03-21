@@ -29,8 +29,7 @@ class ExtObjectGrid(containers.ExtGrid):
             self.menuitem_delete = menus.ExtContextMenuItem(text = u'Удалить', 
                                 icon_cls = 'delete_item', handler='contextMenuDelete')
             self.menuitem_separator = menus.ExtContextMenuSeparator()            
-            
-            # self.items.extend([self.menuitem_add, self.menuitem_edit, self.menuitem_delete, self.menuitem_separator])
+                        
             self.init_component()
     
     class GridTopBar(containers.ExtToolBar):
@@ -56,31 +55,59 @@ class ExtObjectGrid(containers.ExtGrid):
     def __init__(self, *args, **kwargs):
         super(ExtObjectGrid, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-object-grid.js'
+        
         #=======================================================================
         # Действия, выполняемые изнутри грида 
         #=======================================================================
+        
+        # Для новой записи
         self.action_new = None
+        
+        # Для изменения
         self.action_edit = None
+        
+        # Для удаления
         self.action_delete = None
+        
+        # Для данных
         self.action_data = None
         
         #=======================================================================
         # Источник данных для грида
         #=======================================================================
+        
+        # Стор для загрузки данных
         self.store = misc.ExtJsonStore(auto_load=True, root='rows', id_property='id')
+        
+        # Признак того, маскировать ли грид при загрузки
         self.load_mask = True
+        
+        # Поля для id записи
         self.row_id_name = 'row_id'
-        self.column_param_name = 'column' # имя параметра, через который передается имя выделенной колонки
+        
+        # имя параметра, через который передается имя выделенной колонки
+        self.column_param_name = 'column' 
+        
+        # Использовать постраничную навигацию
         self.allow_paging = True
 
         #=======================================================================
         # Контекстное меню и бары грида
         #=======================================================================
+        
+        # Контекстное меню для строки грида
         self.context_menu_row = ExtObjectGrid.GridContextMenu()
+        
+        # Контекстное меню для грида, если произошел счелчок не на строке
         self.context_menu_grid = ExtObjectGrid.GridContextMenu()
+        
+        # Топ бар для грида
         self.top_bar = ExtObjectGrid.GridTopBar()
+        
+        # Paging бар для постраничной навигации
         self.paging_bar = containers.ExtPagingBar()
         
+        # Обработчик двойного клика
         self.dblclick_handler = 'onEditRecord'
         
         self.init_component()
@@ -136,6 +163,7 @@ class ExtObjectGrid(containers.ExtGrid):
         #=======================================================================
         # Настройка top bar
         #=======================================================================
+        # @TODO: Отрефакторить данный метод, чтобы он был не в рендеринге 
         if self.action_data:
             self.top_bar.items.insert(0, self.top_bar.button_refresh)
         

@@ -70,6 +70,8 @@ class BaseExtField(ExtUIComponent):
     '''
     def __init__(self, *args, **kwargs):
         super(BaseExtField, self).__init__(*args, **kwargs)
+        
+        # Метка поля
         self.label = None
         
         # Нужно выставлять пустое значение для того, чтобы обязательные поля, 
@@ -77,21 +79,46 @@ class BaseExtField(ExtUIComponent):
         # рендеринга 
         self.value = ""
         
+        # CSS стиль для label
         self.label_style = {}
+        
+        # Скрыть label
         self.hide_label = False
+        
+        # Признак нередактируемости поля
         self.read_only = False
         
+        # Признак, что поле используется для изменения значения, 
+        # а не для навигации - при Истине будут повешаны обработчики на изменение окна
+        # см. m3.js
         self.is_edit = True
         
-        # Свойства валидации, специфичные для TextField
+        # Не обязательно для заполнения (True), иначе поле должно быть не пустым
         self.allow_blank = True
+        
+        # Тип валидации
         self.vtype= None
+        
+        # Этот текст будет выводиться, если поле незаполненно
         self.empty_text = None
+        
+        # Минимальные длина поля и текст ошибки, если длина была превышена
         self.min_length = self.min_length_text = None
+        
+        # Максимальные длина поля и текст ошибки, если длина была превышена
         self.max_length = self.max_length_text = None
+        
+        # Валидация на регулярное вырожение и текст ошибки, если валидация будет нарушена
         self.regex      = self.regex_text      = None
+        
+        # Порядок обхода для этого поля
         self.tab_index = None
+        
+        # Свой CSS класс валидации для некорректно заполненного поля
+        # TODO: Вынести в атрибут класса, а не атрибут экземпляра 
         self.invalid_class = 'm3-form-invalid'
+        
+        # Текст, который будет отображаться, если поле заполненно некорректно
         self.invalid_text = None
    
     def t_render_label_style(self):
@@ -214,22 +241,51 @@ class BaseExtTriggerField(BaseExtField):
     '''
     def __init__(self, *args, **kwargs):
         super(BaseExtTriggerField, self).__init__(*args, **kwargs)
+        
+        # Поле, которое будет отображаться при выборе
         self.display_field = None
+        
+        # Поле, которое будет использоваться в качестве значения
         self.value_field = None
+        
+        #
         self.hidden_name = None
+        
+        # Скрыть триггера выподающего списка
         self.hide_trigger = False
+        
+        # 
         self.type_ahead = False
+        
+        #
         self.query_param = None
+        
+        # Количество записей, показываемых на странице
         self.page_size = None
+        
+        # Максимальная высота выподаюего списка
         self.max_heigth_dropdown_list = None
+        
+        # Количество введенных символов, после которых произойдет запрос на сервер
         self.min_chars = None
-        self.__store = None
-        #self.empty_text = None # Определен в родительском классе
-        #self.allow_blank = True # Определен в родительском классе
+        
+        # Ссылка на хранилище данных
+        self.__store = None        
+        
+        #
         self.mode = None
+        
+        # Признак возможности редактирования
         self.editable = True
+        
+        # Признак, что отображаться при выборе будут все записи (True),
+        # Иначе те, которые подходят введенному тексту (False)
         self.trigger_action_all = False
+        
+        #
         self.force_selection = False
+        
+        # Текст, если записей в сторе нет
         self.not_found_text = None
     
     def set_store(self, store):

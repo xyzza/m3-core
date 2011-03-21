@@ -14,21 +14,42 @@ from m3.helpers.datastructures import TypedList
 #===============================================================================
 class ExtTree(BaseExtPanel):
     '''
-    Дерево с колонками
-    
+    Дерево с колонками    
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTree, self).__init__(*args, **kwargs)
-        self.template = 'ext-trees/ext-tree.js'
+        self.template = 'ext-trees/ext-tree.js' # TODO: отрефакторить под внутриклассовый рендеринг 
+        
+        # Типизированный список узлов
         self.nodes = TypedList(type=ExtTreeNode)
+        
+        # Список колонок
         self._items = []
+        
+        # Специальный загрузчик для дерева
         self.tree_loader = ExtTreeLoader()
+        
+        # url для загрузки данных
         self.url = None
+        
+        # Текст для корневого элемента
         self.root_text = None
+        
+        # Возможность использовать drag & drop
         self.drag_drop = False
+        
+        # Если выставлен данный атрибут, то работает схема:
+        # Всегда подгружается уровни дочерних элементов, в то время как
+        # дочерние элементы уже подгружены. Таким образом создается впечатление,
+        # что дерево не динамическое и все узлы видны пользователю
         self.custom_load = False
-        self.read_only = False # Если включен - не рендерим drag'n'drop
-        self.allow_container_drop = True #разрешить перетаскивать элменты в корень (путем кидания просто в контейнер)
+        
+        # Если включен - не рендерим drag'n'drop
+        self.read_only = False 
+        
+        # разрешить перетаскивать элменты в корень (путем кидания просто в контейнер)
+        self.allow_container_drop = True 
+                
         self.init_component(*args, **kwargs)
         
     def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
@@ -72,19 +93,39 @@ class ExtTree(BaseExtPanel):
         return self.t_render_items()
     
     def add_nodes(self, *args):
+        '''
+        Добавляет переданные узлы дерева
+        @param *args: Узлы дерева
+        '''
         for node in args:
             self.nodes.append(node)
     
     def add_column(self,**kwargs):
+        '''
+        Добавляет колонку с аргументами
+        @param **kwargs: Аргументы
+        '''
         self.columns.append(ExtGridColumn(**kwargs))
         
     def add_bool_column(self,**kwargs):
+        '''
+        Добавляет колонку с аргументами
+        @param **kwargs: Аргументы
+        '''
         self.columns.append(ExtGridBooleanColumn(**kwargs))
         
     def add_number_column(self,**kwargs):
+        '''
+        Добавляет колонку с аргументами
+        @param **kwargs: Аргументы
+        '''
         self.columns.append(ExtGridNumberColumn(**kwargs))
         
     def add_date_column(self,**kwargs):
+        '''
+        Добавляет колонку с аргументами
+        @param **kwargs: Аргументы
+        '''
         self.columns.append(ExtGridDateColumn(**kwargs))
         
     @property
@@ -196,16 +237,32 @@ class ExtTree(BaseExtPanel):
 class ExtTreeNode(ExtUIComponent):
     def __init__(self,*args, **kwargs):
         super(ExtTreeNode, self).__init__(*args, **kwargs)
-        self.template = 'ext-trees/ext-tree-node.js'
+        self.template = 'ext-trees/ext-tree-node.js' # TODO: отрефакторить под внутриклассовый рендеринг
+        
+        # Отображаемый текст
         self.text = None
+        
+        # True - Листьевой узел
         self.leaf = False
+        
+        # Имеются ли дочерние узлы
         self.has_children = False
-        #self.node_id = '' # используется client_id
+        
+        # Развернут ли элемент        
         self.expanded = False
+        
+        #
         self.auto_check = False
+        
+        # Отмечен ли галкой данный узел
         self.checked = False
+        
+        # Может ли узел быть отмеченым
         self.can_check = False
+        
+        # Типизированный список дочерних узлов
         self.children = TypedList(type=ExtTreeNode)
+        
         self.__items = {}
         self.init_component(*args, **kwargs)
                  
@@ -214,12 +271,13 @@ class ExtTreeNode(ExtUIComponent):
              
     def add_children(self, children):
         '''
-            Добавляет дочерние узлы
-            Если необходимо, здесь можно указать у узлов атрибут "parent" на текущий (родительский) узел
+        Добавляет дочерние узлы
+        Если необходимо, здесь можно указать у узлов атрибут "parent" на текущий (родительский) узел
         '''
         self.has_children = True
         self.children.append(children)
        
+    # TODO: Сомнительный кусок --> В шаблоне используется items.items
     @property    
     def items(self):
         return self.__items
@@ -227,14 +285,23 @@ class ExtTreeNode(ExtUIComponent):
     def set_items(self, **kwargs):
         for k, v in kwargs.items():
             self.items[k] = v
+    # --<<
         
 #===============================================================================        
 class ExtTreeLoader(BaseExtComponent):
+    '''
+    Загрузчик данных для ExtTree
+    '''
     def __init__(self, *args, **kwargs):
         super(ExtTreeLoader, self).__init__(*args, **kwargs)
-        self.template = 'ext-trees/ext-tree-loader.js'
+        self.template = 'ext-trees/ext-tree-loader.js' # TODO: отрефакторить под внутриклассовый рендеринг
+        
+        # url для данных
         self.url = None
+        
+        # Словарь с параметрами
         self._base_params = {}
+                
         self.init_component(*args, **kwargs)
         
     def _set_base_params(self, params):

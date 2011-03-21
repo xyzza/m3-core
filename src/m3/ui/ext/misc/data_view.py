@@ -20,17 +20,24 @@ class ExtDataView(ExtUIComponent):
         
         # шаблон, при помощи которого будут отображаться данные
         self.tpl = None
+        
         # css-селектор узла(атома) DataView 
         self.item_selector = None
-        # single_select - позволяет выбирать только один элемент
-        # multi_select - позволяет выбирать несколько элементов
+        
         # multi_select сильнее чем single_select(если оба равны True)
+        
+        # Позволяет выбирать только один элемент        
         self.single_select = True
+        
+        # Позволяет выбирать несколько элементов 
         self.multi_select = True
+        
         # колонки стора
         self.columns = []
+        
         # css-класс, который будет применяться для выделенных элементов
         self.selected_class = None
+        
         # css-класс используемый при наведении мышки
         self.over_class = None
         
