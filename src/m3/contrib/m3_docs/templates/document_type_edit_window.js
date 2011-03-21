@@ -139,6 +139,7 @@ ComponentTreeView = Ext.extend(BaseView, {
             var newNode = new Ext.tree.TreeNode({
                 name:model.attributes.name,
                 modelObj:model,
+                id:model.id,
                 expanded:true,
                 allowDrop:model.isContainer(),
                 orderIndex:model.attributes.orderIndex+'' || '0',
@@ -156,62 +157,158 @@ ComponentTreeView = Ext.extend(BaseView, {
     }
 });
 
+
 /**
- *  Преднастроеное окно со свойствами объекта. Используется для создания новых элементов модели,
- * и редактирования существующих.
+ *  Классы для работы с редактором свойств.
  */
 
-PropertyGridAdapter = Ext.extend(Object, {
 
-//    vocabulary: {
-//        'id':'id',
-//        'name':'Наименование',
-//        'type':'Тип'
-//    },
-    newProxy: function() {
-        return {
-            id:0,
-            name:'',
-            type:'text'
+/**
+ * Класс предоставляет внешний интерфейс для контроллера. Он управляет показом окошка с редакторами свойств, содержит
+ * в себе необходимые структуры данных и обновляет модель. При обновлении модели зажигается событие modelUpdate
+ */
+
+PropertyEditorManager = Ext.extend( Ext.util.Observable, {
+    /**
+     * Конфиуграция доступных свойств для каждого типа компонента. Первый уровень вложенности - типы компонентов
+     * Второй уровень - доступные свойства каждого типа
+     */
+    //TODO этот конфиг где то отдельно должен лежать
+    typesConfig:{
+        text:{
+            name:{
+                allowBlank:false,
+                defaultValue:'Новый компонент'
+            },
+            allowBlank:{
+                allowBlank:true,
+                defaultValue:true
+            },
+            regexp:{
+                allowBlank:true,
+                defaultValue:''
+            }
+        },
+        number:{
+            name:{
+                editorType:'string',
+                allowBlank:false,
+                defaultValue:'Новый компонент'
+            },
+            decimalPrecision:{
+                allowBlank:true,
+                defaultValue:2
+            },
+            allowBlank:{
+                allowBlank:true,
+                defaultValue:true
+            }
+        },
+        section:{
+            name:{
+                editorType:'string',
+                allowBlank:false,
+                defaultValue:'Новый компонент'
+            }
+        },
+        document:{
+            name:{
+                editorType:'string',
+                allowBlank:false,
+                defaultValue:'Новый компонент'
+            }
+        }
+    },
+
+    constructor:function() {
+        PropertyEditorManager.superclass.constructor.call(this);
+        this.addEvents('modelUpdate');
+    },
+    editModel:function(model) {
+        //конфиг объект для PropertyGrid'а
+        var cfg = {};
+
+        //пояснение для тех кто не достиг дзена - в js объекты и ассоциативные массивы(словари) одно и тоже
+        //И более того, с помощью цикла for можно итерировать по свойствам массива(читай - получить все ключи словаря)
+
+        //заполняем сначала свойства дефолтными значениями
+        var currentType = this.typesConfig[model.attributes.type];
+        for (var i in currentType) {
+            cfg[i] = currentType[i]['defaultValue'];
         };
 
-//        return this.toRussian( {
-//            id:0,
-//            name:'',
-//            type:'text'
-//        });
-    }
-//    toRussian: function(obj) {
-//        var newObj = {};
-//        for (var v in obj) {
-//            newObj[ this.vocabulary[v] ] = obj[v];
-//        }
-//        return newObj;
-//    },
-//    fromRussian:function(obj) {
-//
-//    }
+        //теперь заполняем значениями которые есть у модели
+        for (var k in model.attributes) {
+            if (cfg.hasOwnProperty(k)) {
+                cfg[k] = model.attributes[k];
+            }
+        };
 
+        var window = new PropertyWindow({
+            source:cfg,
+            model:model
+        });
+        window.on('save', this.saveModel.createDelegate(this));
+        window.show();
+    },
+    saveModel:function(eventObj) {
+        // в ивент обжекте приходят объект модели и объект source из грида
+        // далее копируются свойства из сурса в атрибуты модели
+        
+        for (var i in eventObj.model.attributes) {
+            if (eventObj.source.hasOwnProperty(i) )
+            {
+                eventObj.model.attributes[i] = eventObj.source[i];
+            }
+        }
+        this.fireEvent('modelUpdate');
+    }
 });
 
 
+/**
+ *  Преднастроеное окно со свойствами объекта. Используется для создания новых элементов модели,
+ * и редактирования существующих. При нажатии кнопки сохранить генерируется событие save
+ */
+
 PropertyWindow = Ext.extend(Ext.Window, {
-    initComponent: function() {
-        this._proxyAdapter = new PropertyGridAdapter();
+    propertyNames: {
+        name:'Наименование',
+        regexp:'Ругулярное выражение',
+        decimalPrecision:'Знаков после запятой',
+        allowBlank:'Необязательно к заполнению'
+    },
+    /**
+     * Параметры конфига:
+     * cfg.source = {} - то что редактируется
+     * cfg.model = ... ссылка на модель
+     * @param cfg
+     */
+    constructor:function(cfg) {
+        Ext.apply(this, cfg);
+        PropertyWindow.superclass.constructor.call(this);
+    },
+    initComponent: function(cfg) {
         this.addEvents('save');
         this._grid = new Ext.grid.PropertyGrid({
                         autoHeight: true,
-                        source: {
-                            "(name)": "My Object",
-                            "id": 0,
-                            "type": "text"
+                        source: this.source,
+                        propertyNames:this.propertyNames,
+                        customRenderers:{
+                            allowBlank: function(v) {
+                                if (v) {
+                                    return 'Да'
+                                }
+                                else {
+                                    return 'Нет'
+                                }
+                            }
                         }
                     });
         
         Ext.apply(this, {
             height:400,
             width:400,
-            closeAction:'hide',
             title:'Редактирование компонента',
             layout:'fit',
             items:[this._grid],
@@ -221,24 +318,19 @@ PropertyWindow = Ext.extend(Ext.Window, {
             ]
         });
         
-        PropertyWindow.superclass.initComponent.apply(this, arguments);
-    },
-    createModel:function(context, type) {
-        var modelProxy = this._proxyAdapter.newProxy();
-        this._grid.setSource(modelProxy);
-        context.operation = 'append';
-        this.context = context;
-        PropertyWindow.superclass.show.call(this);
-        this.show();
-
+        PropertyWindow.superclass.initComponent.call(this);
     },
     show:function( ) {
         PropertyWindow.superclass.show.call(this);
     },
     _onSave:function() {
-        this.context.proxy = this._grid.getSource();
-        this.fireEvent('save', this.context);
-        this.context = null;
+        //TODO прикрутить валидацию
+        var eventObj = {
+            source:this._grid.getSource(),
+            model:this.model
+        };
+
+        this.fireEvent('save', eventObj);
         this.hide();
     },
     _onClose:function() {
@@ -261,98 +353,31 @@ PropertyWindow = Ext.extend(Ext.Window, {
 AppController = Ext.extend(Object, {
    constructor: function(config) {
        Ext.apply(this, config);
-       this._initDesignDD(this.designPanel);
        this._initCSSRules();
    },
-
    init: function() {
+       //создаем модель
        this._model = DocumentModel.initFromJson(this.initJson);
+       //создаем объекты представления
        this._treeView = new ComponentTreeView(this.tree, this._model);
        this._designView = new DesignView(this.designPanel, this._model);
        //синхронизируем id у панели - общего контейнера и рута модели
        //требуется для работы драг дропа с тулбокса в корень
        this._model.root.setId( this.designPanel.id);
+       //создаем объект отвечающий за редактирование свойств
+       this._editorManager = new PropertyEditorManager();
+       //иницируем ДД с тулбокса на превью
+       this._initDesignDD(this.designPanel);
 
-       this._editWindow = new PropertyWindow();
-       this._editWindow.on('save',this.saveModel, this);
+       //обработчики событий
+       this.tree.on('beforenodedrop', this.onBeforeNodeDrop.createDelegate(this));
+       this.tree.on('nodedrop', this.onTreeNodeDrop.createDelegate(this));
+       this.tree.on('dblclick', this.onTreeNodeDblClick.createDelegate(this))
+       this._editorManager.on('modelUpdate', this.onModelUpdate.createDelegate(this));
+
+
+       //обновим экранное представление
        this.refreshView();
-   },
-   refreshView:function() {
-       this._treeView.refresh();
-       this._designView.refresh();
-   },
-   deleteModel:function(treeNode) {
-       var model = treeNode.attributes.modelObj;
-       model.remove(true);
-   },
-   createModel:function(parentTreeNode) {
-       var parentModel = parentTreeNode.attributes.modelObj;
-       var contextObj = {
-           parent : parentModel
-       };
-       
-       this._editWindow.createModel(contextObj);
-   },
-   saveModel:function(context) {
-       switch(context.operation){
-           case 'append':
-               var newNode = new ComponentModel(context.proxy);
-               var parent = context.parent;
-               parent.appendChild(newNode);
-               break;
-       }
-   },
-   moveTreeNode:function(drop, target, point) {
-        var source = drop.attributes.modelObj;
-        var targetNode = target.attributes.modelObj;
-       //Изменение положения ноды это фактически две операции - удаление и аппенд к новому родителю
-       //поэтому прежде чем двигать отключим обновление UI, так как иначе получим js ошибки при перерисовке
-       //дерева в неподходящий момент
-       this._treeView.suspendModelListening();
-       this._designView.suspendModelListening();
-
-       this._moveModelComponent(source, targetNode, point);
-       
-       this._treeView.resumeModelListening();
-       this._designView.resumeModelListening();
-       this.refreshView();
-       return false;
-   },
-   _moveModelComponent:function( source, target, point) {
-       if(point == 'append') {
-           target.appendChild(source);
-       }
-       else if (point == 'above') {
-           var parent = target.parentNode;
-           parent.insertBefore(source, target);
-       }
-       else if (point == 'below') {
-           target.parentNode.insertBefore(source, target.nextSibling);
-       }
-   },
-   domNodeDrop:function(target, dd, e, data ) {
-       var componentNode = data.node;
-       var model = this._model.findModelById(target.id);
-
-       //TODO сделать умно
-       //Ну, тут тупейшее создание новых компонентов. Пока тупейшее
-
-       var newModelConfig = {
-           type:componentNode.attributes.type
-       };
-
-       switch(componentNode.attributes.type) {
-           case 'section':
-                   newModelConfig.name = 'Новая секция';
-           break;
-           case 'text':
-                   newModelConfig.name = 'Новый текстовый редактор';
-           break;
-           case 'number':
-                   newModelConfig.name = 'Новый редактор чисел';
-           break;
-       }
-       model.appendChild( new ComponentModel(newModelConfig) );
    },
    _initCSSRules:function() {
        //Когда-нибудь это все обзаведеться нормальными файлами с реусрсами. А пока будем таким вот образом
@@ -370,7 +395,7 @@ AppController = Ext.extend(Object, {
                    'border: 2px solid #710AF0;' +
                '}'
                ,'selectedPanelBody');
-       
+
    },
    _initDesignDD:function() {
        /**
@@ -420,6 +445,114 @@ AppController = Ext.extend(Object, {
                    this.processDropResults(target, dd, e, data);
                }
            });
+   },
+
+   refreshView:function() {
+       this._treeView.refresh();
+       this._designView.refresh();
+   },
+   createModel:function(parentTreeNode) {
+       //TODO перенести сюда создание новых нод после дропа
+//       var parentModel = parentTreeNode.attributes.modelObj;
+//       var contextObj = {
+//           parent : parentModel
+//       };
+//
+//       this._editWindow.createModel(contextObj);
+   },
+   saveModel:function(context) {
+//       switch(context.operation){
+//           case 'append':
+//               var newNode = new ComponentModel(context.proxy);
+//               var parent = context.parent;
+//               parent.appendChild(newNode);
+//               break;
+//       }
+   },
+   moveTreeNode:function(drop, target, point) {
+        var source = drop.attributes.modelObj;
+        var targetNode = target.attributes.modelObj;
+
+       //Изменение положения ноды это фактически две операции - удаление и аппенд к новому родителю
+       //поэтому прежде чем двигать отключим обновление UI, так как иначе получим js ошибки при перерисовке
+       //дерева в неподходящий момент внутри treeSorter'а
+
+       //TODO похоже баг при сортировке не исправлен! Надо попробовать двигать в beforeDrop или на колбэке к нему
+
+       this._treeView.suspendModelListening();
+       this._designView.suspendModelListening();
+
+       this._moveModelComponent(source, targetNode, point);
+
+       this.refreshView();
+
+       this._treeView.resumeModelListening();
+       this._designView.resumeModelListening();
+
+       return false;
+   },
+   _moveModelComponent:function( source, target, point) {
+       if(point == 'append') {
+           target.appendChild(source);
+       }
+       else if (point == 'above') {
+           var parent = target.parentNode;
+           parent.insertBefore(source, target);
+       }
+       else if (point == 'below') {
+           target.parentNode.insertBefore(source, target.nextSibling);
+       }
+   },
+   domNodeDrop:function(target, dd, e, data ) {
+       var componentNode = data.node;
+       var model = this._model.findModelById(target.id);
+
+       //TODO сделать умно
+       //Ну, тут тупейшее создание новых компонентов. Пока тупейшее
+
+       var newModelConfig = {
+           type:componentNode.attributes.type
+       };
+
+       switch(componentNode.attributes.type) {
+           case 'section':
+                   newModelConfig.name = 'Новая секция';
+           break;
+           case 'text':
+                   newModelConfig.name = 'Новый текстовый редактор';
+           break;
+           case 'number':
+                   newModelConfig.name = 'Новый редактор чисел';
+           break;
+       }
+       model.appendChild( new ComponentModel(newModelConfig) );
+   },
+   onBeforeNodeDrop:function(dropEvent) {
+        if (dropEvent.target.isRoot) {
+            //рут не отображается, и в него нельзя перетаскивать
+            return false;
+        }
+        if (this._model.findModelById(dropEvent.target.id ).type == 'document' && (dropEvent.point =='above' ||
+                dropEvent.point =='below')) {
+            //а это суррагатный рут "Документ"
+            return false;
+        }
+        return true;
+   },
+   onTreeNodeDrop: function(dropEvent) {
+       this.moveTreeNode(dropEvent.dropNode, dropEvent.target, dropEvent.point);
+       return false;
+   },
+   onTreeNodeDblClick:function(node, e) {
+       var model = this._model.findModelById(node.id);
+       this._editorManager.editModel(model);
+   },
+   onTreeNodeDeleteClick:function(treeNode) {
+       var model = this._model.findModelById(treeNode.id);
+       model.remove(true);
+   },
+   onModelUpdate:function() {
+       this.refreshView();
    }
 });
 
@@ -572,45 +705,6 @@ var application = new AppController({
 
 application.init();
 
-function treeNodeAddClick(item) {
-    application.createModel(item.parentMenu.contextNode);
-}
-
-function treeNodeDblClick(item) {
-    //application.createModel(item.parentMenu.contextNode);
-}
-
 function treeNodeDeleteClick(item) {
-    application.deleteModel(item.parentMenu.contextNode);
-}
-
-function treeBeforeNodeDrop(dropEvent){
-    //TODO перенести обработку ивента внутрь контроллера
-    //Здесь я подозреваю нужно проверять на валидность перемещения
-    if (dropEvent.target.isRoot) {
-        //рут не отображается, и в него нельзя перетаскивать
-        return false;
-    }
-    if (dropEvent.target.attributes.modelObj.type == 'document' && (dropEvent.point =='above' ||
-            dropEvent.point =='below')) {
-        //а это суррагатный рут "Документ"
-        return false;
-    }
-    return true;
-}
-
-function treeNodeDrop(dropEvent) {
-    //А вот тут фактическое перемещение
-    //Его нужно делать здесь, потому что по факту нода уже переместилась,
-    //Но после обновления модели, дерево снова перерисуется. Вобщем если двигать в событии
-    //before - получится полная ерунда
-    application.moveTreeNode(dropEvent.dropNode, dropEvent.target, dropEvent.point);
-}
-
-function addBtnClick() {
-    application.createModel(componentTree.root);
-}
-
-function deleteBtnClick() {
-    alert('Not implemented yet')
+    application.onTreeNodeDeleteClick(item.parentMenu.contextNode);
 }

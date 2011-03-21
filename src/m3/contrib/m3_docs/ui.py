@@ -83,21 +83,14 @@ class DocumentTypeEditWindow(ExtEditWindow):
     def _init_component_tree(self):
         self.tree = ExtTree()
         self.tree.add_column(header = u'Структура документа', data_index = 'name')
-        self.tree.handler_dblclick = 'treeNodeDblClick'
-        self.tree.handler_beforedrop = 'treeBeforeNodeDrop'
-        self.tree.handler_drop = 'treeNodeDrop'
         self.tree.drag_drop = True
         root = ExtTreeNode()
         root.set_items(name = u'Root')
         self.tree.nodes.append(root)
         self.tree.top_bar = ExtToolBar()
-        add_btn = ExtButton(text = u'Добавить', icon_cls = Icons.M3_ADD, handler = 'addBtnClick')
-        delete_btn = ExtButton(text = u'Удалить', icon_cls = Icons.M3_DELETE, handler = 'deleteBtnClick')
-        self.tree.top_bar.items.extend([add_btn, delete_btn])
 
         #Меню
         node_menu = ExtContextMenu()
-        node_menu.add_item(text = u'Добавить', handler = 'treeNodeAddClick', icon_cls = Icons.M3_ADD)
         node_menu.add_item(text = u'Удалить', handler = 'treeNodeDeleteClick', icon_cls = Icons.M3_DELETE)
         self.tree.handler_contextmenu = node_menu
 
