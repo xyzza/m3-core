@@ -69,7 +69,7 @@ DesignView = Ext.extend(BaseView, {
         this._container.doLayout();
     },
     _createComponent:function(model) {
-        return modelFacility.buildExtUIComponent(model);
+        return ModelUtils.buildExtUIComponent(model);
     }
 });
 
@@ -93,7 +93,7 @@ ComponentTreeView = Ext.extend(BaseView, {
         root.removeAll(true);
 
         var recursion = function(parent, model) {
-            var newNode = modelFacility.buildTreeNode(model);
+            var newNode = ModelUtils.buildTreeNode(model);
             parent.appendChild(newNode);
 
             if (model.childNodes && model.childNodes.length > 0) {
@@ -128,7 +128,7 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
     },
     editModel:function(model) {
         //конфиг объект для PropertyGrid'а
-        var cfg = modelFacility.getTypeDefaultProperties(model.attributes.type);
+        var cfg = ModelTypeLibrary.getTypeDefaultProperties(model.attributes.type);
         var window = new PropertyWindow({
             source:cfg,
             model:model
@@ -152,8 +152,8 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
 
 
 /**
- *  Преднастроеное окно со свойствами объекта. Используется для создания новых элементов модели,
- * и редактирования существующих. При нажатии кнопки сохранить генерируется событие save
+ *  Преднастроеное окно со свойствами объекта. При нажатии кнопки сохранить генерируется событие save, на него
+ * подвешен класс менеджера
  */
 
 PropertyWindow = Ext.extend(Ext.Window, {
@@ -165,7 +165,7 @@ PropertyWindow = Ext.extend(Ext.Window, {
     },
     /**
      * Параметры конфига:
-     * cfg.source = {} - то что редактируется
+     * cfg.source = {} - то что редактируется проперти гридом
      * cfg.model = ... ссылка на модель
      * @param cfg
      */
@@ -243,7 +243,7 @@ AppController = Ext.extend(Object, {
    init: function() {
        //создаем модель
        this._model = DocumentModel.initFromJson(this.initJson);
-       //создаем объекты представления
+       //создаем объекты представления модели
        this._treeView = new ComponentTreeView(this.tree, this._model);
        this._designView = new DesignView(this.designPanel, this._model);
        //синхронизируем id у панели - общего контейнера и рута модели
@@ -331,13 +331,21 @@ AppController = Ext.extend(Object, {
                }
            });
    },
+   /*
+    * Просто все перерисовываем
+    */
    refreshView:function() {
        this._treeView.refresh();
        this._designView.refresh();
    },
+
+   /*
+    * Обработка дропа на деверева компонентов. Параметры две TreeNode и строка с положеним относитнльно
+    * друг друга
+    */
    moveTreeNode:function(drop, target, point) {
-        var source = drop.attributes.modelObj;
-        var targetNode = target.attributes.modelObj;
+        var sourceModel = this._model.findModelById(drop.attributes.id);
+        var targetModel = this._model.findModelById(target.attributes.id);
 
        //Изменение положения ноды это фактически две операции - удаление и аппенд к новому родителю
        //поэтому прежде чем двигать отключим обновление UI, так как иначе получим js ошибки при перерисовке
@@ -348,7 +356,7 @@ AppController = Ext.extend(Object, {
        this._treeView.suspendModelListening();
        this._designView.suspendModelListening();
 
-       this._moveModelComponent(source, targetNode, point);
+       this._moveModelComponent(sourceModel, targetModel, point);
 
        this.refreshView();
 
@@ -357,6 +365,9 @@ AppController = Ext.extend(Object, {
 
        return false;
    },
+   /*
+    * Перемещение моделей в дереве документа
+    */
    _moveModelComponent:function( source, target, point) {
        if(point == 'append') {
            target.appendChild(source);
@@ -369,11 +380,14 @@ AppController = Ext.extend(Object, {
            target.parentNode.insertBefore(source, target.nextSibling);
        }
    },
+   /*
+   * Обработка дропа в дизайнер с тулбокса
+   */
    domNodeDrop:function(target, dd, e, data ) {
        var componentNode = data.node;
        var model = this._model.findModelById(target.id);
 
-       var newModelConfig = modelFacility.getTypeDefaultProperties(componentNode.attributes.type);
+       var newModelConfig = ModelTypeLibrary.getTypeDefaultProperties(componentNode.attributes.type);
        newModelConfig.type = componentNode.attributes.type;
        model.appendChild( new ComponentModel(newModelConfig) );
    },
@@ -415,7 +429,7 @@ ComponentModel = Ext.extend(Ext.data.Node, {
         ComponentModel.superclass.constructor.call(this,config);
     },
     isContainer: function() {
-        return this.type == 'section' || this.type == 'document';
+        return ModelTypeLibrary.isTypeContainer(this.attributes.type);
     }
 });
 
@@ -514,90 +528,9 @@ DocumentModel.initFromJson = function(jsonObj) {
 };
 
 /**
- * Класс включает в себя набор утилитных функций для преобразования модели во что-то другое
+ * Объект включает в себя набор утилитных функций для преобразования модели во что-то другое
  */
-ModelFacility = Ext.extend(Object,{
-
-    typesConfig:{
-        text:{
-            properties:{
-                name:{
-                    allowBlank:false,
-                    defaultValue:'Новый текстовый редактор'
-                },
-                allowBlank:{
-                    allowBlank:true,
-                    defaultValue:true
-                },
-                regexp:{
-                    allowBlank:true,
-                    defaultValue:''
-                }
-            },
-            toolboxData:{
-                iconCls:'',
-                text:''
-            }
-        },
-        number:{
-            properties:{
-                name:{
-                    editorType:'string',
-                    allowBlank:false,
-                    defaultValue:'Новый редактор чисел'
-                },
-                decimalPrecision:{
-                    allowBlank:true,
-                    defaultValue:2
-                },
-                allowBlank:{
-                    allowBlank:true,
-                    defaultValue:true
-                }
-            },
-            toolboxData:{
-                iconCls:'',
-                text:''
-            }
-        },
-        section:{
-            properties:{
-                name:{
-                    allowBlank:false,
-                    defaultValue:'Новая секция'
-                }
-            },
-            toolboxData:{
-                iconCls:'',
-                text:''
-            }
-        },
-        date: {
-            properties:{
-                name:{
-                    defaultValue:'Новый редактор даты',
-                    allowBlank:false
-                },
-                allowBlank:{
-                    defaultValue:true
-                }
-            },
-            toolboxData:{
-                iconCls:'',
-                text:''
-            }
-        },
-        document:{
-            properties: {
-                name:{
-                    allowBlank:false,
-                    defaultValue:'Новый документ'
-                }
-            }
-        }
-    },
-
-
+ModelUtils = Ext.apply(Object,{
     /**
      * Возвращает ExtComponent или какой нибудь его наследник
      */
@@ -644,23 +577,7 @@ ModelFacility = Ext.extend(Object,{
      */
     buildTreeNode:function(model) {
         //Опять же важное замечание - id ноды в дереве компнентов на экране и id модельки равны друг другу
-        var iconCls = '';
-            switch (model.attributes.type){
-                case 'document':
-                    iconCls = 'designer-icon-page';
-                break;
-                case 'section':
-                    iconCls = 'designer-icon-fieldset';
-                break;
-                case 'text':
-                    iconCls = 'designer-icon-text';
-                break;
-                case 'number':
-                    iconCls = 'designer-icon-number';
-                break;
-                case 'date':
-                    iconCls = 'designer-icon-datefield';
-            }
+        var iconCls = ModelTypeLibrary.getTypeIconCls(model.attributes.type);
             return new Ext.tree.TreeNode({
                 name:model.attributes.name,
                 modelObj:model,
@@ -670,6 +587,94 @@ ModelFacility = Ext.extend(Object,{
                 orderIndex:model.attributes.orderIndex+'' || '0',
                 iconCls: iconCls
             });
+    }
+});
+
+/**
+ * Объект хранит в себе данные о типах моделей. Пока конфиг просто захардкожен, но потом можно будет его откуда-нибуь
+ * загружать
+ */
+ModelTypeLibrary = Ext.apply(Object, {
+    typesConfig:{
+        text:{
+            properties:{
+                name:{
+                    allowBlank:false,
+                    defaultValue:'Новый текстовый редактор'
+                },
+                allowBlank:{
+                    allowBlank:true,
+                    defaultValue:true
+                },
+                regexp:{
+                    allowBlank:true,
+                    defaultValue:''
+                }
+            },
+            toolboxData:{
+                text:'Текстовый редактор'
+            },
+            treeIconCls:'designer-icon-text'
+        },
+        number:{
+            properties:{
+                name:{
+                    editorType:'string',
+                    allowBlank:false,
+                    defaultValue:'Новый редактор чисел'
+                },
+                decimalPrecision:{
+                    allowBlank:true,
+                    defaultValue:2
+                },
+                allowBlank:{
+                    allowBlank:true,
+                    defaultValue:true
+                }
+            },
+            toolboxData:{
+                text:'Редактор чисел'
+            },
+            treeIconCls:'designer-icon-number'
+        },
+        section:{
+            properties:{
+                name:{
+                    allowBlank:false,
+                    defaultValue:'Новая секция'
+                }
+            },
+            toolboxData:{
+                text:'Секция'
+            },
+            treeIconCls:'designer-icon-fieldset',
+            isContainer:true
+        },
+        date: {
+            properties:{
+                name:{
+                    defaultValue:'Новый редактор даты',
+                    allowBlank:false
+                },
+                allowBlank:{
+                    defaultValue:true
+                }
+            },
+            toolboxData:{
+                text:'Редактор даты'
+            },
+            treeIconCls:'designer-icon-datefield'
+        },
+        document:{
+            properties: {
+                name:{
+                    allowBlank:false,
+                    defaultValue:'Новый документ'
+                },
+                treeIconCls:'designer-icon-page'
+            },
+            isContainer:true
+        }
     },
     /**
      * Возвращает объект со свойствами заполнеными дефолтными значениями по типу модели
@@ -684,11 +689,20 @@ ModelFacility = Ext.extend(Object,{
             cfg[i] = currentType[i]['defaultValue'];
         }
         return cfg;
+    },
+    /**
+     * Возвращает класс иконки для переданного типа 
+     */
+    getTypeIconCls:function(type) {
+        return this.typesConfig[type]['treeIconCls'];
+    },
+    /**
+     * Просто проверка является ли типа контейнром
+     */
+    isTypeContainer:function(type) {
+        return this.typesConfig[type].isContainer ? true : false;
     }
 });
-
-//делаем глобальный инстанс и не выпендриваемся
-modelFacility = new ModelFacility();
 
 // Просто json для отладки
 //
