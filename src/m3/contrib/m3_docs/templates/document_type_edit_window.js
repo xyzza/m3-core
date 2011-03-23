@@ -394,12 +394,8 @@ AppController = Ext.extend(Object, {
    * Возвращает объект для отправки на сервер
    */
    getTransferObject:function() {
-
-       return {
-           type:'document',
-           name:'Новый документ'
-       }
-
+       var v = ModelUtils.buildTransferObject(this._model);
+       return v;
    },
    onBeforeNodeDrop:function(dropEvent) {
         if (dropEvent.target.isRoot) {
@@ -506,9 +502,13 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
  * @param jsonObj - сериализованая модель
  */
 DocumentModel._cleanConfig = function(jsonObj) {
-    // просто удаляет items из json объекта
+    //Удаляеца items из объекта. Значение id присваиваецо атрибуту serverId,
+    //тк внутри js код используются внутренний id'шники
     var config = Ext.apply({}, jsonObj);
     Ext.destroyMembers(config, 'items');
+    if (jsonObj.hasOwnProperty('id')) {
+        config.serverId = jsonObj.id;
+    }
     return config;
 };
 
@@ -597,6 +597,23 @@ ModelUtils = Ext.apply(Object,{
                 orderIndex:model.attributes.orderIndex+'' || '0',
                 iconCls: iconCls
             });
+    },
+    buildTransferObject:function(model){
+        var result = {};
+        var doRecursion = function(model) {
+            var node = Ext.apply({}, model.attributes);
+            if (model.hasChildNodes()) {
+                node.items = [];
+                for (var i = 0; i < model.childNodes.length; i++){
+                    node.items.push( doRecursion(model.childNodes[i]) );
+                }
+            }
+            return node;
+        }
+        var resultRoot = doRecursion(model.root);
+        result.model = resultRoot;
+        result.deletedItems = [];
+        return result;
     }
 });
 
@@ -707,7 +724,7 @@ ModelTypeLibrary = Ext.apply(Object, {
         return this.typesConfig[type]['treeIconCls'];
     },
     /**
-     * Просто проверка является ли типа контейнром
+     * Просто проверка является ли типа контейнером
      */
     isTypeContainer:function(type) {
         return this.typesConfig[type].isContainer ? true : false;
