@@ -228,7 +228,6 @@ PropertyWindow = Ext.extend(Ext.Window, {
 * должен быть передан конфиг следующего вида:
 *
 * config = {
-*   initJson = ...,
 *   tree = ...,
 *   container = ...,
 * }
@@ -240,9 +239,9 @@ AppController = Ext.extend(Object, {
        Ext.apply(this, config);
        this._initCSSRules();
    },
-   init: function() {
+   init: function(documentCfg) {
        //создаем модель
-       this._model = DocumentModel.initFromJson(this.initJson);
+       this._model = DocumentModel.initFromJson(documentCfg);
        //создаем объекты представления модели
        this._treeView = new ComponentTreeView(this.tree, this._model);
        this._designView = new DesignView(this.designPanel, this._model);
@@ -704,6 +703,51 @@ ModelTypeLibrary = Ext.apply(Object, {
     }
 });
 
+/**
+ * Объект для обмена данными с сервером
+ * cfg = {
+ *  id:507 - id документа
+ *  loadUrl:'foo.bar',  - url для загрузки данных
+ *  saveUrl:'foo.bar', - url для сохранения данных
+ *  maskEl: Ext.getBody() - элемент куда вешать маску
+ * }
+ */
+
+ServerStorage = Ext.extend(Ext.util.Observable, {
+
+    constructor: function(cfg){
+        Ext.apply(this, cfg)
+        ServerStorage.superclass.constructor.call(this);
+        this.addEvents('load');
+    },
+    loadModel:function(){
+        this.mask = new Ext.LoadMask(this.maskEl, {
+            msg:'Загрузка данных...'
+        });
+        this.mask.show();
+        Ext.Ajax.request({
+            url:this.loadUrl,
+            params:{
+                id:this.id
+            },
+            success:this._onSuccesLoad.createDelegate(this),
+            failure:function(response, opts){
+                Ext.msg.alert('Ошибка','Произошла ошибка при формировании данных документа');
+                this.mask.hide();
+            }
+        });
+    },
+    saveModel:function(){
+        // Not implemented yet
+    },
+    _onSuccesLoad:function(response, opts) {
+        var obj = Ext.util.JSON.decode(response.responseText);
+        this.mask.hide();
+        this.fireEvent('load', obj);
+    }
+});
+
+
 // Просто json для отладки
 //
 //
@@ -731,16 +775,31 @@ var fake = {
     ]
 };
 
+var window = Ext.getCmp('{{component.client_id}}');
 var previewPanel = Ext.getCmp('{{ component.preview_panel.client_id }}');
 var componentTree = Ext.getCmp('{{ component.tree.client_id }}');
+var hiddenId = Ext.getCmp('{{ component.id_field.client_id }}');
+var designerInitUrl = '{{component.designer_url}}';
+
+
+var storage = new ServerStorage({
+    id:hiddenId.getValue() ? hiddenId.getValue() : 0,
+    loadUrl:designerInitUrl,
+    maskEl:window.getEl()
+});
 
 var application = new AppController({
     tree:componentTree,
-    designPanel:previewPanel,
-    initJson:fake
+    designPanel:previewPanel
 });
 
-application.init();
+storage.on('load',
+        function(jsonObj){
+            application.init(jsonObj);
+        });
+
+storage.loadModel();
+
 
 function treeNodeDeleteClick(item) {
     application.onTreeNodeDeleteClick(item.parentMenu.contextNode);

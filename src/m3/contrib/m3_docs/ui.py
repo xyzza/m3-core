@@ -1,5 +1,6 @@
 #coding:utf-8
 from m3.helpers.icons import Icons
+from m3.helpers import urls
 from m3.ui.ext.containers.containers import ExtToolBar, ExtContainer
 from m3.ui.ext.containers.context_menu import ExtContextMenu
 from m3.ui.ext.containers.forms import ExtForm, ExtPanel
@@ -47,6 +48,8 @@ class DocumentTypeEditWindow(ExtEditWindow):
         self.items.extend([center_wrapper,
                            self._init_east_panel()])
 
+        self.designer_url = urls.get_acton_url('designer-config-action')
+
         save_btn = ExtButton(text=u'OK', handler='submitForm')
         cancel_btn = ExtButton(text=u'Отмена', handler='cancelForm')
         self.buttons.extend((save_btn, cancel_btn,))
@@ -56,8 +59,8 @@ class DocumentTypeEditWindow(ExtEditWindow):
         # Строчка далее - хрестоматийный пример понятие workaround aka "костыль"
         # self.form это пропертя с сеттером, где идет сразу добавление формы в коллекцию итемсов окна
         # Помните, дети, сайд эффекты при использовании пропертей ведут к минусам в профессиональную карму
-        self.form.style['padding'] = '5px'
         self.items.remove(self.form)
+        self.form.style['padding'] = '5px'
         self.name_field = ExtStringField(name = 'name', label = u'Наименование', allow_blank = False)
         self.id_field = ExtHiddenField(name = 'id')
         self.code_field = ExtStringField(name = 'code', label = u'Код')
@@ -85,7 +88,7 @@ class DocumentTypeEditWindow(ExtEditWindow):
         self.tree.add_column(header = u'Структура документа', data_index = 'name')
         self.tree.drag_drop = True
         root = ExtTreeNode()
-        root.set_items(name = u'Root')
+        root.set_items(name = u'Документ')
         self.tree.nodes.append(root)
         self.tree.top_bar = ExtToolBar()
 
