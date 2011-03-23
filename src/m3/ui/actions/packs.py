@@ -287,7 +287,7 @@ class BaseDictionaryActions(ActionPack):
     
     # права доступа для базовых справочников
     PERM_EDIT = 'edit'
-    sub_permissions = {PERM_EDIT: u'Редактирование справочника'}
+    sub_permissions = {PERM_EDIT: u'Редактирование'}
     
     def __init__(self):
         super(BaseDictionaryActions, self).__init__()
