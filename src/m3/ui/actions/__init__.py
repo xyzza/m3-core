@@ -112,6 +112,12 @@ class Action(object):
     # Как обрабатывается этот список - смотри в has_sub_permission
     sub_permissions = {}
     
+    # Логический путь действия в прикладной системе.
+    # Используется только для отображения и группировки действий с одинаковым путем.
+    # Также может использоваться для создания меню.
+    # Например, путь может быть: "Справочники\Общие" или "Реестры"
+    path = None
+    
     def get_sub_permission_code(self, sub_code):
         '''
         Возвращает код суб-права
@@ -234,6 +240,9 @@ class Action(object):
             url = self.url.replace(char, '')
         return self.controller.url + self.get_packs_url() + url
 
+    @classmethod
+    def get_verbose_name(cls):
+        return cls.verbose_name if cls.verbose_name else cls.__name__
 
 class ActionPack(object):
     '''
@@ -340,7 +349,7 @@ class ActionPack(object):
     @classmethod
     def get_verbose_name(cls):
         return cls.title if hasattr(cls, 'title') and cls.title else cls.verbose_name if cls.verbose_name else cls.__name__
-
+    
 class ActionController(object):
     '''
     Класс коонтроллер - обеспечивает обработку пользовательских запросов путем передачи
@@ -669,6 +678,9 @@ class ActionController(object):
         self._add_pack_to_search_dicts(wrapper)
         new_patterns = {}
         current_packs_slice = None
+        # списки соседей
+        left_packs = []
+        right_packs = []
         
         for url, value in self._url_patterns.iteritems():
             packs_list, final_action = value
@@ -692,7 +704,9 @@ class ActionController(object):
             packs_list.insert(pos, wrapper)
             if left_pack:
                 wrapper.parent = left_pack
-                
+                left_packs.append(left_pack)
+            right_packs.append(pack)
+            
             # Создание нового урла
             full_path = self._build_full_path(packs_list, final_action)
             new_patterns[full_path] = (packs_list[:], final_action)
@@ -705,13 +719,21 @@ class ActionController(object):
         # уже существующие экшены и паки, только заменить у них родителя
         if current_packs_slice:
             for subpack in wrapper.subpacks:
-                if subpack not in pack.subpack:
+                if subpack not in pack.subpacks:
                     self._build_pack_node(subpack, current_packs_slice)
 
             for action in wrapper.actions:
                 if action not in pack.actions:
                     self._build_pack_node(action, current_packs_slice)
-                    
+            
+            # добавим в левые паки наш врапер как подчиненный пак без перестройки узлов
+            # это нужно для корректной навигации сверху-вниз, а иначе мы никак не узнаем какие паки ниже
+            for pack in left_packs:
+                if wrapper not in pack.subpacks:
+                    pack.subpacks.append(wrapper)
+            for pack in right_packs:
+                if pack not in wrapper.subpacks:
+                    wrapper.subpacks.append(pack)
         else:
             raise ActionPackNotFoundException(dest_pack)
         
