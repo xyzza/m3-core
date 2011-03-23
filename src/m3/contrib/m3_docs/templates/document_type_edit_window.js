@@ -390,6 +390,17 @@ AppController = Ext.extend(Object, {
        newModelConfig.type = componentNode.attributes.type;
        model.appendChild( new ComponentModel(newModelConfig) );
    },
+   /*
+   * Возвращает объект для отправки на сервер
+   */
+   getTransferObject:function() {
+
+       return {
+           type:'document',
+           name:'Новый документ'
+       }
+
+   },
    onBeforeNodeDrop:function(dropEvent) {
         if (dropEvent.target.isRoot) {
             //рут не отображается, и в него нельзя перетаскивать
@@ -730,20 +741,21 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
             params:{
                 id:this.id
             },
-            success:this._onSuccesLoad.createDelegate(this),
-            failure:function(response, opts){
-                Ext.msg.alert('Ошибка','Произошла ошибка при формировании данных документа');
-                this.mask.hide();
-            }
+            success:this._onLoadSuccess.createDelegate(this),
+            failure:this._onLoadFailure.createDelegate(this)
         });
     },
     saveModel:function(){
         // Not implemented yet
     },
-    _onSuccesLoad:function(response, opts) {
+    _onLoadSuccess:function(response, opts) {
         var obj = Ext.util.JSON.decode(response.responseText);
         this.mask.hide();
         this.fireEvent('load', obj);
+    },
+    _onLoadFailure:function(response, opts){
+        this.mask.hide();
+        Ext.Msg.alert('Ошибка','Произошла ошибка при формировании данных документа');
     }
 });
 
@@ -781,6 +793,7 @@ var componentTree = Ext.getCmp('{{ component.tree.client_id }}');
 var hiddenId = Ext.getCmp('{{ component.id_field.client_id }}');
 var designerInitUrl = '{{component.designer_url}}';
 
+window.on('beforeSubmit', beforeSubmit);
 
 var storage = new ServerStorage({
     id:hiddenId.getValue() ? hiddenId.getValue() : 0,
@@ -799,6 +812,13 @@ storage.on('load',
         });
 
 storage.loadModel();
+
+function beforeSubmit(submitObj) {
+    Ext.destroyMembers(submitObj.params,'id'); //спасибо косякам с action context declaration
+    var transferObj = application.getTransferObject();
+    submitObj.params['data'] = Ext.util.JSON.encode(transferObj);
+    return true
+}
 
 
 function treeNodeDeleteClick(item) {

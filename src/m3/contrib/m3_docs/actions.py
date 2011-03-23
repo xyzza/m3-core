@@ -28,7 +28,9 @@ class DocumentTypePack(BaseTreeDictionaryModelActions):
 
     def __init__(self):
         super(DocumentTypePack,self).__init__()
-        self.actions.append(DesignerConfigAction)
+        self.actions.remove(self.save_row_action)
+        self.save_row_action = SaveDocumentTypeAction()
+        self.actions.extend([GetDesignerConfigAction,self.save_row_action])
 
     def get_list_window(self, win):
         win.maximized = True
@@ -42,7 +44,7 @@ class DocumentsPack(ActionPack):
         super(DocumentsPack, self).__init__()
 
 
-class DesignerConfigAction(Action):
+class GetDesignerConfigAction(Action):
     url = '/designer-config'
     shortname = 'designer-config-action'
 
@@ -59,3 +61,15 @@ class DesignerConfigAction(Action):
             raise NotImplementedError()
 
         return JsonResult(data = cfg)
+
+
+class SaveDocumentTypeAction(Action):
+    url = '/save-document-type'
+    shortname = 'save-document-type'
+
+#    def context_declaration(self):
+#        return [ActionContextDeclaration(name='id', required=True, type=int)]
+
+    def run(self, request, context):
+        raise NotImplementedError()
+        return OperationResult(success=True)

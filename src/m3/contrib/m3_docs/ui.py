@@ -55,17 +55,16 @@ class DocumentTypeEditWindow(ExtEditWindow):
         self.buttons.extend((save_btn, cancel_btn,))
 
     def _init_main_form_panel(self):
-        self.form = ExtForm(region = 'north', height = 70, padding = 5)
+        #Форма создается невидимая, редактирование производиться через дизайнер
+        self.form = ExtForm()
+        self.form.hidden = True
         # Строчка далее - хрестоматийный пример понятие workaround aka "костыль"
         # self.form это пропертя с сеттером, где идет сразу добавление формы в коллекцию итемсов окна
         # Помните, дети, сайд эффекты при использовании пропертей ведут к минусам в профессиональную карму
         self.items.remove(self.form)
-        self.form.style['padding'] = '5px'
-        self.name_field = ExtStringField(name = 'name', label = u'Наименование', allow_blank = False)
         self.id_field = ExtHiddenField(name = 'id')
-        self.code_field = ExtStringField(name = 'code', label = u'Код')
         self.parent_field = ExtHiddenField(name = 'parent_id')
-        self.form.items.extend([self.name_field, self.code_field, self.id_field, self.parent_field])
+        self.form.items.extend([self.id_field, self.parent_field])
         return self.form
 
     def _init_preview_panel(self):
