@@ -172,16 +172,20 @@ class ExtObjectGrid(containers.ExtGrid):
         # Настройка top bar
         #=======================================================================
         # @TODO: Отрефакторить данный метод, чтобы он был не в рендеринге 
-        if not self.action_data:
+        if (not self.action_data and
+                self.top_bar.button_refresh in self.top_bar.items):
             self.top_bar.items.remove(self.top_bar.button_refresh)
         
-        if not self.action_delete:
+        if (not self.action_delete and
+                self.top_bar.button_delete in self.top_bar.items):
             self.top_bar.items.remove(self.top_bar.button_delete)
         
-        if not self.action_edit:
+        if (not self.action_edit and
+                self.top_bar.button_edit in self.top_bar.items):
             self.top_bar.items.remove(self.top_bar.button_edit)
         
-        if not self.action_new:
+        if (not self.action_new and
+                self.top_bar.button_new in self.top_bar.items):
             self.top_bar.items.remove(self.top_bar.button_new) 
         
         # тонкая настройка self.store
