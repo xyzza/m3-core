@@ -9,14 +9,47 @@ import datetime
 import json
 from m3.helpers import logger
 
+#==================================== ИСКЛЮЧЕНИЯ ===========================================
+
+class ActionContextException(Exception):
+    """ Базовый класс для исключений контекста """
+    pass
+
+class RequiredFailed(ActionContextException):
+    '''
+    Исключительная ситуация, которая выбрасывается в случае
+    если фактическое наполнение контекста действия не соответствует
+    описанным правилам
+    '''
+    def __init__(self, reason):
+        self.reason = reason
+
+class ConversionFailed(ActionContextException):
+    """
+    Исключение, которое выбрасывается если значение из запроса *value*
+    не удалось привести к типу *type* указанному в правиле ActionContextDeclaration
+    """
+    def __init__(self, value, type, *args, **kwargs):
+        super(ConversionFailed, self).__init__(*args, **kwargs)
+        self.value = value
+        self.type = type
+
+    def __str__(self):
+        return u'Can not convert value of "%s" in a given type "%s"' % (self.value, self.type)
+
+#====================================== КЛАССЫ =============================================
+
 class ActionContextDeclaration(object):
-    '''
-    Класс, который декларирует необходимость наличия определенного параметра в объекте контекста
-    '''
+    """
+    Класс, который определяет правило извлечения параметра с именем *name* из
+    запроса и необходимость его наличия в объекте контекста ActionContext.
+    *default* - значение параметра по умолчанию, используется если его нет
+    в запросе, но наличие обязательно.
+    *type* - тип извлекаемого значения.
+    *required* - указывает что параметр обязательный.
+    *verbose_name* - человеческое имя параметра, необходимо для сообщений об ошибках.
+    """
     def __init__(self, name='', default=None, type=None, required=False, verbose_name = '', *args, **kwargs):
-        '''
-        Создает экземпляр
-        '''
         self.name = name
         self.default = default
         self.required = required
@@ -24,23 +57,15 @@ class ActionContextDeclaration(object):
         self.verbose_name = verbose_name
         
     def human_name(self):
-        '''
-        Выводит человеческое название параметра
-        '''
+        """ Возвращает человеческое название параметра *verbose_name* """
         return self.verbose_name if self.verbose_name else self.name
 
 class ActionContext(object):
     '''
     Контекст выполнения операции, восстанавливаемый из запроса.
     '''
-    class RequiredFailed(Exception):
-        '''
-        Исключительная ситуация, которая выбрасывается в случае
-        если фактическое наполнение контекста действия не соответствует
-        описанным правилам
-        '''
-        def __init__(self, reason):
-            self.reason = reason
+    # Для совместимости
+    RequiredFailed = RequiredFailed
     
     class ValuesList():
         '''
@@ -61,7 +86,7 @@ class ActionContext(object):
         pass
     
     def convert_value(self, raw_value, arg_type):
-        ''' Возвращает значение преобразованное в заданный формат '''
+        ''' Возвращает значение *raw_value* преобразованное в заданный тип *arg_type* '''
         value = None
         if arg_type == int:
             value = int(raw_value)
@@ -98,13 +123,14 @@ class ActionContext(object):
             # обработаем объект как JSON
             value = json.loads(raw_value)
         else:
-            raise Exception('Can not convert value of "%s" in a given type "%s"' % (raw_value, arg_type))
+            raise ConversionFailed(value=raw_value, type=arg_type)
         
         return value
     
     def build(self, request, rules):
         '''
-        Выполняет заполнение собственных атрибутов согласно переданному request
+        Выполняет заполнение собственных атрибутов согласно переданному *request*
+        исходя из списка правил *rules*
         '''
         params = {}
         if rules:
