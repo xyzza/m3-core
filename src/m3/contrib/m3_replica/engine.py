@@ -29,7 +29,7 @@ class ReplicatedObjectsPackage(object):
         
     def append(self, obj, external_key):
         '''
-        Добавляет объект с его внешним ключом к списоку объектов
+        Добавляет объект с его внешним ключом к списку объектов
         '''
         if not obj in self.objects:
             self.objects.append(obj)
@@ -206,7 +206,7 @@ class ModelReplicationStorage(BaseReplicationStorage):
         super(ModelReplicationStorage, self).__init__()
         
         # фабрика кешей объектов, которые используются при операциях над данными. 
-        self.cache_factory = None
+        self.cache_factory = ModelObjectStorageFactory()
         
     def get_replica(self, key, object_type=None, default=None, *args, **kwargs):
         '''
@@ -214,7 +214,8 @@ class ModelReplicationStorage(BaseReplicationStorage):
         '''
         ikey = self.get_replica_id(key, object_type)
         if ikey and object_type:
-            return get_object_by_id(object_type, ikey)
+            return self.cache_factory.get_storage(object_type).get(ikey)
+            #return get_object_by_id(object_type, ikey)
         
         # объект в модели репликации не найден, возвращаем указанное значение
         # по умолчанию
