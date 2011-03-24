@@ -202,6 +202,10 @@ class ObjectStorage(object):
     def __init__(self):
         self.data = {}
         self.handlers = []
+       
+        # в случае, если внутри класса кеша задан обработчик, то мы пытаемся его зарегистировать
+        if hasattr(self, 'handler') and callable(self.handler) and not self.handler_registered(self.handler):
+            self.register_handler(self.handler)
         
     def register_handler(self, handler):
         '''
@@ -215,12 +219,8 @@ class ObjectStorage(object):
         assert callable(handler), u'Обработчик заполнения кеша должен быть callable'
         
         # TODO: не совсем понятно, нужно ли ставить lock в данном случае
-        try:
-            self.write_lock.acquire()
-            if handler not in self.handlers:
-                self.handlers.append(handler)
-        finally:
-            self.write_lock.release()
+        if handler not in self.handlers:
+            self.handlers.append(handler)
   
     def handler_registered(self, handler):
         '''
@@ -254,17 +254,14 @@ class ObjectStorage(object):
         if not self._need_populate(dims):
             return False
         
-        try:
-            self.write_lock.acquire()
-            if not self._need_populate(dims):
-                return False
-            for handler in self.handlers:
-                prepared_data = handler(self, dims)
-                if isinstance(prepared_data, dict):
-                    for key,value in prepared_data.iteritems():
-                        self.set(key, value)
-        finally:
-            self.write_lock.release()
+        if not self._need_populate(dims):
+            return False
+        for handler in self.handlers:
+            prepared_data = handler(self, dims)
+            if isinstance(prepared_data, dict):
+                for key,value in prepared_data.iteritems():
+                    self.set(key, value)
+
 
         return True
     
@@ -302,24 +299,16 @@ class ObjectStorage(object):
         '''
         dims = self._normalize_dimensions(dimensions)
         
-        try:
-            self.write_lock.acquire()
-            self.data.pop(dims, None)
-        finally:
-            self.write_lock.release()
+        self.data.pop(dims, None)
         
     def drop_all(self):
-        try:
-            self.write_lock.acquire()
-            self.data = {}
-        finally:
-            self.write_lock.release()
+        self.data = {}
             
     def clear_stat(self):
         self.stat = CacheStat()
 
 
-class IntegralObjectStorage(RuntimeCache):
+class IntegralObjectStorage(ObjectStorage):
     '''
     Кеш данных, которые собирает все данные однократно и не пересобирает их после этого.
     (пока не произойдет сброс кеша)
