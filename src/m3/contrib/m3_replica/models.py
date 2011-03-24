@@ -55,7 +55,7 @@ class ImportedObject(models.Model):
     # может использоваться вместо ikey для обозначения ситуации, когда
     ifullkey = models.CharField(max_length=200, null=True, blank=True, db_index=True)
     # значение внешнего ключа
-    ekey = models.CharField(max_length=200, null=True, blank=True)
+    ekey = models.CharField(max_length=200, null=True, blank=True, db_index=True)
     # признак того, что в результате импорта модель в нашей БД была 
     # создана новая, а не произошла "прицепка" загруженной модели
     # к нашей
