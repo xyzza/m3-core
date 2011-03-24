@@ -39,18 +39,45 @@ class ExtButton(BaseExtControl):
     def __init__(self, *args, **kwargs):
         super(ExtButton, self).__init__(self, *args, **kwargs)
         self.template = 'ext-controls/ext-button.js' # TODO: отрефакторить под внутриклассовый рендеринг
+        
+        # Текст на кнопке
         self.text = None
+        
+        # Обработчик
         self.handler = None
+        
+        # Путь до иконки
         self.icon = None
+        
+        # CSS класс для иконки
         self.icon_cls = None
+        
+        # Заголовок всплывающей подсказки
         self.tooltip_title = None
+        
+        # Текст всплывающей подсказки
         self.tooltip_text = None
+        
+        # Ссылка на меню
         self.menu = None
+        
+        # Индекс обхода кнопки
         self.tab_index = None
+        
+        #
         self.margins = None
+        
+        # Признак того, что при нажатии кнопка визуально будет нажата до следующего нажатия
         self.enable_toggle = False
+        
+        # Группы кнопок, учавствующие в визуальном нажатии
         self.toggle_group = None
+        
+        # Если False, то не позваляет нажимать на кнопку, если она продавлена
+        # аткуально, если enable_toggle = True
         self.allow_depress = False
+        
+        # Кнопка будет нажата, если enable_toggle = True
         self.pressed = False
         
         self.init_component(*args, **kwargs)
