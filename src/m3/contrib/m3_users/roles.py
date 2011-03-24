@@ -270,6 +270,7 @@ def get_all_permission_tree():
                 parent.add_children(self)
             self.name = name
             self.path = path
+            self.expanded = True
             self.items['name'] = name
             self.items['url'] = url
             self.items['fullname'] = fullname if fullname else name
