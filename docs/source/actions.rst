@@ -1,7 +1,12 @@
 .. _actions:
 
 actions
-============
+=======
+
+.. toctree::
+   :maxdepth: 2
+	
+   actions_and_packs.rst
 
 context
 -------
