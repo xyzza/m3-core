@@ -56,9 +56,9 @@ class GetDesignerConfigAction(Action):
         cfg = None
 
         if context.id == 0:
-            cfg = builder.create_new()
+            cfg = builder.create_doctype()
         else:
-            raise NotImplementedError()
+            cfg = builder.read_doctype(context.id)
 
         return JsonResult(data = cfg)
 
@@ -72,5 +72,5 @@ class SaveDocumentTypeAction(Action):
 
     def run(self, request, context):
         parser = DesignerConfigAdapter()
-        parser.parse(json_string=request.POST['data'], doc_type_group_id = context.parent_id)
+        parser.save_doctype(json_string=request.POST['data'], doc_type_group_id = context.parent_id)
         return OperationResult(success=True)

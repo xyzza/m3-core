@@ -796,37 +796,10 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
     },
     _onLoadFailure:function(response, opts){
         this.mask.hide();
-        Ext.Msg.alert('Ошибка','Произошла ошибка при формировании данных документа');
+        uiAjaxFailMessage(response, opts);
+        //Ext.Msg.alert('Ошибка','Произошла ошибка при формировании данных документа');
     }
 });
-
-
-// Просто json для отладки
-//
-//
-//
-var fake = {
-    type:'document',
-    name:'Документ',
-    items:[
-        {
-            type:'section',
-            name:'Тупо секция',
-            orderIndex:0,
-            items:[
-                {
-                    type:'text',
-                    orderIndex:1,
-                    name:'Это строка'
-                },
-                {
-                    type:'number',
-                    orderIndex:0,
-                    name:'Это число'
-                }]
-        }
-    ]
-};
 
 var window = Ext.getCmp('{{component.client_id}}');
 var previewPanel = Ext.getCmp('{{ component.preview_panel.client_id }}');
