@@ -7,6 +7,7 @@ core
    :maxdepth: 2
 	
    excel_reporting.rst
+   plugins_architecture.rst
 
 history
 ---------------
