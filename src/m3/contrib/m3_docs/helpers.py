@@ -70,16 +70,36 @@ class DesignerConfigAdapter:
                     new_field.document_type_id = doc_type_id
                     new_field.save()
 
-        for i in data_obj['model']['items']:
-            if i['type'] == 'section':
-                section_model = self._get_document_section_model(i)
-                section_model.document_type_id = doc_type_model.id
-                section_model.save()
-                parse_section(section_model, i, doc_type_model.id)
+        if data_obj['model'].has_key('items'):
+            for i in data_obj['model']['items']:
+                if i['type'] == 'section':
+                    section_model = self._get_document_section_model(i)
+                    section_model.document_type_id = doc_type_model.id
+                    section_model.save()
+                    parse_section(section_model, i, doc_type_model.id)
+                else:
+                    field_model = self._get_document_field_model(i)
+                    field_model.document_type_id = doc_type_model.id
+                    field_model.save()
+
+        for m in data_obj['deletedModels']:
+
+            def do_recursive_delete(section):
+                for i in section['items']:
+                    if i['type'] == 'section':
+                        s = DocumentSection.objects.get(pk = int(i['id']))
+                        do_recursive_delete(i)
+                    else:
+                        f = DocumentField.objects.get(pk = int(i['id']))
+                        f.delete()
+                section_model = DocumentSection.objects.get(pk = int(section['id']))
+                section_model.delete()
+
+            if m['type'] == 'section':
+                do_recursive_delete(m)
             else:
-                field_model = self._get_document_field_model(i)
-                field_model.document_type_id = doc_type_model.id
-                field_model.save()
+                field = DocumentField.objects.get(pk = int(m['id']))
+                field.delete()
 
     ###########################################################
     # Преобразования из json'а в модели

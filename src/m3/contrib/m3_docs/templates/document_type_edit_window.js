@@ -441,6 +441,11 @@ ComponentModel = Ext.extend(Ext.data.Node, {
 });
 
 DocumentModel = Ext.extend(Ext.data.Tree, {
+    deletedItemsBag:[],//здесь храняться удаленные пользователем компоненты
+    constructor:function(root) {
+        DocumentModel.superclass.constructor.call(this, root);
+        this.on('remove', this._onRemove);
+    },
     /**
      * Поиск модели по id. Это именно поиск с обходом. Может быть в дальнейшем стоит разобраться
      * со словарем nodeHash внутри дерева и его использовать для поиска по id(но это вряд ли, деревья маленькие)
@@ -495,6 +500,33 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
                 next = next.nextSibling;
             }
         });
+    },
+    /*
+    * Обработчик при удалении дочернего компонента
+     */
+    _onRemove:function(tree, parent, node) {
+        //будем сохранять только те компоненты, что существуют на сервере
+        //в делетед итемс кладутся только данные, те если положить сам объект ComponentModel
+        //то после опреации remove из него будут почищены дочерние свойства
+        if (node.attributes.serverId) {
+            var doRecursion = function(item) {
+                var newNode = {
+                    id:item.attributes.id,
+                    type:item.attributes.type
+                }
+
+                if (item.isContainer()) {
+                    newNode.items = [];
+                    for (var i=0;i<item.childNodes.length;i++) {
+                        newNode.items.push(doRecursion(item.childNodes[i]))
+                    }
+                }
+                return newNode;
+            }
+
+            var item = doRecursion(node);
+            this.deletedItemsBag.push(item);
+        }
     }
 });
 
@@ -608,12 +640,17 @@ ModelUtils = Ext.apply(Object,{
     *       name:'fofofo',
     *       items:[]
     *   },
-    *   deletedItems:[] //нужно уведомить сервер о удаленных компонентов
+    *   deletedModels:[
+    *       {
+    *           id:508,
+    *           type:'date',
+    *           name:'Bla-bla'
+    *       }
+    *   ] //нужно уведомить сервер о удаленных компонентов
     * }
     */
     buildTransferObject:function(model){
         var result = {};
-
         var prepareId = function(dataObject){
             dataObject.id = dataObject.serverId ? dataObject.serverId : 0;
         }
@@ -632,15 +669,17 @@ ModelUtils = Ext.apply(Object,{
 
         var resultRoot = doRecursion(model.root);
         result.model = resultRoot;
-        result.deletedItems = [];
+
+        result.deletedModels = model.deletedItemsBag;
         return result;
     }
 });
 
 /**
  * Объект хранит в себе данные о типах моделей. Пока конфиг просто захардкожен, но потом можно будет его откуда-нибуь
- * загружать
+ * загружать.
  */
+//TODO использовать этот класс для заполнения тулбокса
 ModelTypeLibrary = Ext.apply(Object, {
     typesConfig:{
         text:{
