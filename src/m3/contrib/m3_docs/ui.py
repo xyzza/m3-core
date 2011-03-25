@@ -18,9 +18,9 @@ class SimpleDocumentTypeEditWindow(ExtEditWindow):
         self.layout = 'fit'
         self.form = ExtForm()
         self.items.append(self.form)
-        self.title = u'Тупо окошко'
-        self.width = 300
-        self.height = 400
+        self.title = u'Группа типов документов'
+        self.width = 270
+        self.height = 200
 
         self.name_field = ExtStringField(name = 'name', label = u'Наименование', allow_blank = False)
         self.id_field = ExtHiddenField(name = 'id')

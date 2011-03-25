@@ -1,7 +1,7 @@
 #coding:utf-8
 import json
 from django.http import  HttpResponse
-from m3.contrib.m3_docs.helpers import DesignerConfigBuilder
+from m3.contrib.m3_docs.helpers import DesignerConfigAdapter
 from m3.contrib.m3_docs.models import DocumentType, DocumentTypeGroup
 from m3.contrib.m3_docs.ui import SimpleDocumentTypeEditWindow, DocumentTypeEditWindow
 from m3.ui.actions import Action, ActionPack
@@ -52,7 +52,7 @@ class GetDesignerConfigAction(Action):
         return [ActionContextDeclaration(name='id', required=True, type=int)]
 
     def run(self, request, context):
-        builder = DesignerConfigBuilder()
+        builder = DesignerConfigAdapter()
         cfg = None
 
         if context.id == 0:
@@ -67,9 +67,10 @@ class SaveDocumentTypeAction(Action):
     url = '/save-document-type'
     shortname = 'save-document-type'
 
-#    def context_declaration(self):
-#        return [ActionContextDeclaration(name='id', required=True, type=int)]
+    def context_declaration(self):
+        return [ActionContextDeclaration(name='parent_id', required=True, type=int)]
 
     def run(self, request, context):
-        raise NotImplementedError()
+        parser = DesignerConfigAdapter()
+        parser.parse(json_string=request.POST['data'], doc_type_group_id = context.parent_id)
         return OperationResult(success=True)

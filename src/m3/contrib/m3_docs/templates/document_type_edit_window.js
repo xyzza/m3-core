@@ -159,9 +159,10 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
 PropertyWindow = Ext.extend(Ext.Window, {
     propertyNames: {
         name:'Наименование',
-        regexp:'Ругулярное выражение',
+        regexp:'Регулярное выражение',
         decimalPrecision:'Знаков после запятой',
-        allowBlank:'Необязательно к заполнению'
+        allowBlank:'Необязательно к заполнению',
+        code:'Код'
     },
     /**
      * Параметры конфига:
@@ -598,10 +599,28 @@ ModelUtils = Ext.apply(Object,{
                 iconCls: iconCls
             });
     },
+    /*
+    * Подготавливает данные модели для отправки на сервер. Объект выглядит следующим образом:
+    * {
+    *   model:{ //сама модель
+     *      id:507, //это серверный id, или 0 для новых компонентов 
+    *       type:'document',
+    *       name:'fofofo',
+    *       items:[]
+    *   },
+    *   deletedItems:[] //нужно уведомить сервер о удаленных компонентов
+    * }
+    */
     buildTransferObject:function(model){
         var result = {};
+
+        var prepareId = function(dataObject){
+            dataObject.id = dataObject.serverId ? dataObject.serverId : 0;
+        }
+
         var doRecursion = function(model) {
             var node = Ext.apply({}, model.attributes);
+            prepareId(node);
             if (model.hasChildNodes()) {
                 node.items = [];
                 for (var i = 0; i < model.childNodes.length; i++){
@@ -610,6 +629,7 @@ ModelUtils = Ext.apply(Object,{
             }
             return node;
         }
+
         var resultRoot = doRecursion(model.root);
         result.model = resultRoot;
         result.deletedItems = [];
@@ -698,9 +718,13 @@ ModelTypeLibrary = Ext.apply(Object, {
                     allowBlank:false,
                     defaultValue:'Новый документ'
                 },
-                treeIconCls:'designer-icon-page'
+                code:{
+                    allowBlank:true,
+                    defaultValue:''
+                }
             },
-            isContainer:true
+            isContainer:true,
+            treeIconCls:'designer-icon-page'
         }
     },
     /**

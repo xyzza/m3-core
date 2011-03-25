@@ -49,6 +49,7 @@ class DocumentField(BaseObjectModel):
     Произвольное поле документа
     '''
     document_type = models.ForeignKey(DocumentType, null = False)
+    name = models.CharField(max_length=300) #название поля
     section = models.ForeignKey('DocumentSection', null = True) #секция, которой приндлежит поле
     type = models.PositiveIntegerField(choices = DocumentFieldTypeEnum.get_choices())
     allow_blank = models.BooleanField(default = True) # обязательно для заполнения
@@ -69,6 +70,7 @@ class DocumentSection(BaseObjectModel):
     name = models.CharField(max_length = 200, null = False, blank = False)
     multiple = models.BooleanField(default = False) # возможно ли повторение секции в пределах документа
     order_index = models.IntegerField(null = False) # порядковый индекс секции
+    parent = models.ForeignKey('self', null = True) # родительская секция, если секции вложенные
 
     class Meta:
         db_table = 'm3_docs_doc_section'
