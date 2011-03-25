@@ -7,8 +7,7 @@
 .. toctree::
    :maxdepth: 2
 
-   contrib.rst
-   contrib/m3_replica.rst
+   contrib.rst   
    core.rst
    data.rst
    db.rst

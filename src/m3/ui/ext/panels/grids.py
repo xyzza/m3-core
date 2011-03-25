@@ -46,6 +46,14 @@ class ExtObjectGrid(containers.ExtGrid):
                                     icon_cls = 'delete_item', handler='topBarDelete')
             self.button_refresh = controls.ExtButton(text = u'Обновить', 
                                     icon_cls = 'refresh-icon-16', handler='topBarRefresh')
+            
+            self.items.extend([
+                self.button_new,
+                self.button_edit,
+                self.button_delete,
+                self.button_refresh,
+            ])
+
             self.init_component()
             
     #===========================================================================
@@ -164,17 +172,21 @@ class ExtObjectGrid(containers.ExtGrid):
         # Настройка top bar
         #=======================================================================
         # @TODO: Отрефакторить данный метод, чтобы он был не в рендеринге 
-        if self.action_data:
-            self.top_bar.items.insert(0, self.top_bar.button_refresh)
+        if (not self.action_data and
+                self.top_bar.button_refresh in self.top_bar.items):
+            self.top_bar.items.remove(self.top_bar.button_refresh)
         
-        if self.action_delete:
-            self.top_bar.items.insert(0, self.top_bar.button_delete)
+        if (not self.action_delete and
+                self.top_bar.button_delete in self.top_bar.items):
+            self.top_bar.items.remove(self.top_bar.button_delete)
         
-        if self.action_edit:
-            self.top_bar.items.insert(0, self.top_bar.button_edit)
+        if (not self.action_edit and
+                self.top_bar.button_edit in self.top_bar.items):
+            self.top_bar.items.remove(self.top_bar.button_edit)
         
-        if self.action_new:
-            self.top_bar.items.insert(0, self.top_bar.button_new) 
+        if (not self.action_new and
+                self.top_bar.button_new in self.top_bar.items):
+            self.top_bar.items.remove(self.top_bar.button_new) 
         
         # тонкая настройка self.store
         if not self.store.url and self.action_data:

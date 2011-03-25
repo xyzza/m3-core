@@ -1,0 +1,150 @@
+.start {
+	background-image: url( ../images/taskbar/blue/startbutton-icon.png ) !important;
+}
+.ux-taskbutton-left{
+	width:4px;
+	height:28px;
+	background:url( ../images/taskbar/blue/taskbutton.gif ) no-repeat 0 0;
+}
+.ux-taskbutton-right{
+	width:4px;
+	height:28px;
+	background:url( ../images/taskbar/blue/taskbutton.gif ) no-repeat 0 -28px;
+}
+
+.ux-taskbutton-center{
+	background:url( ../images/taskbar/blue/taskbutton.gif ) repeat-x 0 -56px;
+	vertical-align: middle;
+	text-align:center;
+	padding:0 5px;
+	cursor:pointer;
+	white-space:nowrap;
+}
+
+#ux-taskbar .active-win  .ux-taskbutton-right{
+	background:url( ../images/taskbar/blue/taskbutton.gif ) no-repeat 0 -112px;
+}
+#ux-taskbar .active-win .ux-taskbutton-center{
+	background:url( ../images/taskbar/blue/taskbutton.gif ) repeat-x 0 -140px;
+}
+
+.ux-start-menu-tl {
+	background: transparent url( ../images/taskbar/blue/start-menu-left-corners.gif ) no-repeat 0 0;
+	padding-left:6px;
+    zoom:1;
+    z-index:1;
+    position:relative;
+}
+
+.ux-start-menu-tr {
+	background: transparent url( ../images/taskbar/blue/start-menu-right-corners.gif ) no-repeat right 0;
+	padding-right:6px;
+}
+
+.ux-start-menu-tc {
+	background: transparent url( ../images/taskbar/blue/start-menu-top-bottom.gif ) repeat-x 0 0;
+	overflow:hidden;
+    zoom:1;
+}
+
+.ux-start-menu-ml {
+	background: transparent url( ../images/taskbar/blue/start-menu-left-right.gif ) repeat-y 0 0;
+	padding-left:6px;
+    zoom:1;
+}
+
+.ux-start-menu-bc {
+	background: transparent url( ../images/taskbar/blue/start-menu-top-bottom.gif ) repeat-x 0 bottom;
+    zoom:1;
+}
+
+.ux-start-menu-bl {
+	background: transparent url( ../images/taskbar/blue/start-menu-left-corners.gif ) no-repeat 0 bottom;
+	padding-left:6px;
+    zoom:1;
+}
+
+.ux-start-menu-br {
+	background: transparent url( ../images/taskbar/blue/start-menu-right-corners.gif ) no-repeat right bottom;
+	padding-right:6px;
+    zoom:1;
+}
+
+.ux-start-menu-tools-panel {
+	border:0px none;
+	background:transparent url( ../images/taskbar/blue/start-menu-right.gif ) repeat-y scroll right 0pt;
+}
+
+#ux-taskbar-start {
+	background:#000000 url( ../images/taskbar/blue/taskbar-start-panel-bg.gif ) repeat-x left top;
+	left:0px;
+	padding:0;
+	position:absolute;
+}
+
+#ux-taskbuttons-panel {
+	background:#000000 url( ../images/taskbar/blue/taskbuttons-panel-bg.gif ) repeat-x left top;
+	padding-top:0;
+	position:relative;
+}
+
+.ux-taskbuttons-scroller-left {
+    background: transparent url( ../images/taskbar/blue/scroll-left.gif ) no-repeat -18px 0;
+    width:18px;
+    position:absolute;
+    left:1px;
+    top:0px;
+    z-index:10;
+    cursor:pointer;
+}
+
+.ux-taskbuttons-scroller-right {
+    background: transparent url( ../images/taskbar/blue/scroll-right.gif ) no-repeat 0 0;
+    width:18px;
+    position:absolute;
+    right:0;
+    top:0px;
+    z-index:10;
+    cursor:pointer;
+}
+
+.ux-start-menu-tools-panel .x-menu-item-active {
+	background: #525456 url( ../images/taskbar/blue/item-over.gif ) repeat-x left bottom;
+	border:1px solid #000000;
+	padding: 0;
+}
+
+#ux-taskbar .x-splitbar-h {
+	background:#000000 url( ../images/taskbar/blue/taskbar-split-h.gif ) no-repeat 0 0;
+	width:8px;
+}
+
+.ux-startbutton-left{
+	width:10px;
+	height:28px;
+	background:url( ../images/taskbar/blue/startbutton.gif ) no-repeat 0 0;
+}
+.ux-startbutton-right{
+	width:10px;
+	height:30px;
+	background:url( ../images/taskbar/blue/startbutton.gif ) no-repeat 0 -28px;
+}
+
+.ux-startbutton-center{
+	background:url( ../images/taskbar/blue/startbutton.gif ) repeat-x 0 -56px;
+	vertical-align: middle;
+	text-align:center;
+	padding:0;
+	cursor:pointer;
+	white-space:nowrap;
+}
+
+#ux-taskbar .active-win  .ux-startbutton-right{
+	background:url( ../images/taskbar/blue/startbutton.gif ) no-repeat 0 -120px;
+}
+#ux-taskbar .active-win .ux-startbutton-center{
+	background:url( ../images/taskbar/blue/startbutton.gif ) repeat-x 0 -150px;
+}
+.ux-start-menu-apps-panel {
+    border: 1px solid #2E87B4;
+}

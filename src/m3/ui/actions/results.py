@@ -22,11 +22,11 @@ class ActionResult(object):
     '''
     
     def __init__(self, data = None, http_params = {}):
-        '''
-        @param data: данные, на основе которых будет сформирован результат выполнения действия. 
-                     Тип объекта, передаваемого через data зависит от дочернего результата
-        @param http_params: параметры, которые будут помещены ответ сервера 
-        '''
+        """
+        *data* - данные, на основе которых будет сформирован результат выполнения действия.
+        Тип объекта, передаваемого через data зависит от дочернего результата.
+        *http_params* - параметры http, которые будут помещены в ответ сервера
+        """
         self.data = data
         self.http_params = http_params
         
@@ -44,13 +44,15 @@ class ActionResult(object):
         
     
 class PreJsonResult(ActionResult):
-    '''
-    Результат выполнения операции в виде, например, списка объектов, 
-    готовых к сериализации в JSON формат и отправке в response.
-    Для данного класса в self.data храниться список некоторых объектов. 
-    Метод self.get_http_response выполняет сериализацию этих данных в строковый формат.
-    dict_list - Указываются объекты и/или атрибуты вложенных объектов для более глубокой сериализации.
-    '''
+    """
+    Результат выполнения операции в виде, например, списка объектов, готовых к
+    сериализации в JSON формат и отправке в HttpResponse.
+    В *data* передается объект для сериализации.
+    В *dict_list* указывается список объектов и/или атрибутов вложенных объектов для
+    более глубокой сериализации. Смотри класс т3.core.json.M3JSONEncoder.
+    Параметр специфичный для проекта *secret_values* - используется чтобы указать,
+    что передаются персональные обезличенные данные и их расшифровать перед отправкой клиенту. 
+    """
     def __init__(self, data = None, secret_values = False, dict_list = None):
         super(PreJsonResult, self).__init__(data)
         self.secret_values = secret_values
@@ -67,7 +69,7 @@ class PreJsonResult(ActionResult):
 class JsonResult(ActionResult):
     '''
     Результат выполнения операции в виде готового JSON объекта для возврата в response.
-    Для данного класса в self.data храниться строка с данными JSON объекта.
+    Для данного класса в *data* храниться строка с данными JSON объекта.
     '''
     def get_http_response(self):
         return http.HttpResponse(self.data, mimetype='application/json')
@@ -88,14 +90,14 @@ class ExtGridDataQueryResult(ActionResult):
 class HttpReadyResult(ActionResult):
     '''
     Результат выполнения операции в виде готового HttpResponse. 
-    Для данного класса в self.data храниться объект класса HttpResponse.
+    Для данного класса в *data* храниться объект класса HttpResponse.
     '''
     def get_http_response(self):
         return self.data
     
 class TextResult(ActionResult):
     '''
-    Результат, данные которого напрямую передаются в HttpResponse
+    Результат, данные *data* которого напрямую передаются в HttpResponse
     '''
     def get_http_response(self):
         return http.HttpResponse(self.data)
@@ -180,13 +182,13 @@ class ExtUIScriptResult(BaseContextedResult):
         return response
     
 class OperationResult(ActionResult):
-    '''
+    """
     Результат выполнения операции, описанный в виде Ajax результата ExtJS: success или failure.
-    
-    @param success: True в случае успешного завершения операции, False - в противном случае
-    @param message: сообщение, поясняющее результат выполнения операции
-    @param code: текст javascript, который будет выполнен на клиенте в результате обработки результата операции
-    '''
+    В случае если операция выполнена успешно, параметр *success* должен быть True, иначе False.
+    *message* - сообщение, поясняющее результат выполнения операции.
+    *code* - текст javascript, который будет выполнен на клиенте в результате
+    обработки результата операции.
+    """
     def __init__(self, success = True, code = '', message = '', *args, **kwargs):
         super(OperationResult, self).__init__(*args, **kwargs)
         # Результат выполнения операции: успех/неудача
@@ -198,12 +200,11 @@ class OperationResult(ActionResult):
     
     @staticmethod
     def by_message(message):
-        '''
-        Возвращает экземпляр OperationResult построенный исходя из сообщения message.
-        Если операция завершилась успешно, то сообщение должно быть пустым.
-        
-        @deprecated: Непонятно что это такое..
-        '''
+        """
+        Возвращает экземпляр OperationResult построенный исходя из сообщения *message*.
+        Если сообщение не пустое, то операция считается проваленной и success=False,
+        иначе операция считается успешной success=True.
+        """
         result = OperationResult(success = True)
         if message:
             result.success = False

@@ -3,6 +3,11 @@
 contrib
 ============
 
+.. toctree::
+   :maxdepth: 2
+   
+   contrib/m3_replica.rst
+   
 kladr
 -----
 
@@ -20,5 +25,4 @@ m3_users
 
 usermon
 -------
-
 

@@ -256,13 +256,21 @@ class GetRolePermissionAction(actions.Action):
         return actions.ExtGridDataQueryResult(res)
 
 def get_all_permission_tree():
+    '''
+    Общий подход к формированию дерева прав доступа (алгоритм):
+    собирается список прав доступа исходя из наборов действий, действий, субправ наборов действий, субправ действий
+    у каждого элемента списка прав должен быть путь в дереве (пока строкой), наименование права доступа, полное наименование права (для грида прав)
+    путь в дереве строится из значения path элемента, а если он отсутствует, то по иерархии этого элемента в фактической структуре действий и набора действий 
+    '''
     class PermProxy(ExtTreeNode):
-        def __init__(self, id, parent=None, name='', url='', can_select=True, fullname=None):
+        def __init__(self, id, parent=None, name='', url='', can_select=True, fullname=None, path = ''):
             super(PermProxy, self).__init__()
             self.parent = parent
             if parent:
                 parent.add_children(self)
             self.name = name
+            self.path = path
+            self.expanded = True
             self.items['name'] = name
             self.items['url'] = url
             self.items['fullname'] = fullname if fullname else name
@@ -280,7 +288,7 @@ def get_all_permission_tree():
         '''
         parent_node = None
         if path:
-            items = path.strip().replace("/", "\\").split("\\")
+            items = path.strip().split("\\") #.replace("/", "\\")
             for name in items:
                 node = find_node(name, parent_node, res)
                 if not node:
@@ -288,41 +296,100 @@ def get_all_permission_tree():
                     res.append(node)
                 parent_node = node
         return parent_node
-
+    
+    def get_action_sub_perm_path(action, sub_perm_code):
+        result = ''
+        if action:
+            if sub_perm_code in action.sub_permissions.keys():
+                path = action.sub_permissions[sub_perm_code]
+                items = path.strip().split("\\") #.replace("/", "\\")
+                # если длина пути больше 1, значит указали путь - выделим путь и имя
+                if len(items) > 1:
+                    name = items[-1]
+                    items.remove(name)
+                    result = '\\'.join(items)
+                else:
+                    # если нет пути, то построим путь по экшену
+                    result = get_action_perm_path(action)
+                    result = result + ('\\' if result != '' else '') + action.get_verbose_name()
+        return result
+    
+    def get_action_perm_path(action):
+        result = ''
+        if action:
+            # если указан путь, то строится по этому пути, иначе по иерархии паков
+            if action.path:
+                result = action.path
+            else:
+                result = get_actionpack_perm_path(action.parent)
+                result = result + ('\\' if result != '' else '') + action.parent.get_verbose_name()
+        return result
+    
+    def get_actionpack_sub_perm_path(actionpack, sub_perm_code):
+        result = ''
+        if actionpack:
+            if sub_perm_code in actionpack.sub_permissions.keys():
+                path = actionpack.sub_permissions[sub_perm_code]
+                items = path.strip().split("\\") #.replace("/", "\\")
+                # если длина пути больше 1, значит указали путь - выделим путь и имя
+                if len(items) > 1:
+                    name = items[-1]
+                    items.remove(name)
+                    result = '\\'.join(items)
+                else:
+                    # если нет пути, то построим путь по набору экшенов
+                    result = get_actionpack_perm_path(actionpack)
+                    result = result + ('\\' if result != '' else '') + actionpack.get_verbose_name()
+        return result
+    
+    def get_actionpack_perm_path(actionpack):
+        result = ''
+        if actionpack:
+            # если указан путь, то строится по этому пути, иначе по иерархии паков
+            if actionpack.path:
+                result = actionpack.path
+            else:
+                if actionpack.parent:
+                    result = get_actionpack_perm_path(actionpack.parent)
+                    result = result + ('\\' if result != '' else '') + actionpack.parent.get_verbose_name()
+        return result
+    
     def add_nodes(parent_node, action_set, res, ctrl):
         # если передали Набор действий, то у него надо взять Действия и подчиненные Наборы
         if isinstance(action_set, ActionPack):
             # найдем и создадим путь, по которому набор будет отображаться в дереве
-            path = action_set.path if hasattr(action_set, 'path') and action_set.path else ctrl.verbose_name if ctrl.verbose_name else ctrl.__class__.__name__
-            start_count = len(res)
-            parent_node = add_path(path, res)
+            #path = action_set.path if hasattr(action_set, 'path') and action_set.path else ctrl.verbose_name if ctrl.verbose_name else ctrl.__class__.__name__
+            #start_count = len(res)
+            #parent_node = add_path(path, res)
             # получим отображаемое имя набора 
-            name = action_set.get_verbose_name()
-            item = PermProxy(len(res) + 1, parent_node, name, action_set.absolute_url(), False)
-            res.append(item)
-            count = len(res)
+            #name = action_set.get_verbose_name()
+            #item = PermProxy(len(res) + 1, parent_node, name, action_set.absolute_url(), False)
+            #res.append(item)
+            #count = len(res)
             # обработаем действия
-            for act in action_set.actions:
-                # добавляем если надо проверять права или есть подчиненные права
-                add_nodes(item, act, res, ctrl)
+            if action_set.need_check_permission:
+                for act in action_set.actions:
+                    # добавляем если надо проверять права или есть подчиненные права
+                    add_nodes(None, act, res, ctrl)
             # обработаем подчиненные права
             # добавляем если надо проверять права или есть подчиненные права
             if action_set.need_check_permission and action_set.sub_permissions:
                 pack_name = action_set.get_verbose_name()
                 for key, value in action_set.sub_permissions.items():
                     fullname = '%s - %s' % (pack_name, value)
-                    child4 = PermProxy(len(res) + 1, item, value, action_set.get_sub_permission_code(key), True, fullname)
+                    path = get_actionpack_sub_perm_path(action_set, key)
+                    child4 = PermProxy(len(res) + 1, None, value, action_set.get_sub_permission_code(key), True, fullname, path)
                     res.append(child4)
             # обработаем подчиненные Наборы
             for pack in action_set.subpacks:
-                add_nodes(item, pack, res, ctrl)
+                add_nodes(None, pack, res, ctrl)
             # удалим созданные элементы, если небыло дочерних
-            if len(res) - count == 0:
+            #if len(res) - count == 0:
                 #res.remove(item)
-                while len(res) > start_count:
-                    item = res.pop()
-                    if item.parent:
-                        item.parent.children.remove(item)
+            #    while len(res) > start_count:
+            #        item = res.pop()
+            #        if item.parent:
+            #            item.parent.children.remove(item)
         # если передали Действие
         elif isinstance(action_set, Action):
             if action_set.need_check_permission or action_set.sub_permissions:
@@ -333,14 +400,25 @@ def get_all_permission_tree():
                     pack_name = pack.get_verbose_name()
                 else:
                     pack_name = ''
-                name = action_set.verbose_name if action_set.verbose_name else action_set.__class__.__name__
+                #name = action_set.verbose_name if action_set.verbose_name else action_set.__class__.__name__
+                name = action_set.get_verbose_name()
                 fullname = '%s - %s' % (pack_name, name)
-                item = PermProxy(len(res) + 1, parent_node, name, action_set.absolute_url(), action_set.need_check_permission, fullname)
-                res.append(item)
+                if action_set.need_check_permission:
+                    path = get_action_perm_path(action_set)
+                    item = PermProxy(len(res) + 1, None, name, action_set.absolute_url(), True, fullname, path)
+                    res.append(item)
                 # у действия берем подчиненные права
                 for key, value in action_set.sub_permissions.items():
-                    fullname = '%s - %s' % (pack_name, value)
-                    child3 = PermProxy(len(res) + 1, item, value, action_set.get_sub_permission_code(key), True, fullname)
+                    items = value.strip().split("\\")
+                    # если длина пути больше 1, значит указали путь - выделим путь и имя
+                    if len(items) > 1:
+                        name = items[-1]
+                        pack_name = items[-2] 
+                    else:
+                        name = value
+                    fullname = '%s - %s' % (pack_name, name)
+                    path = get_action_sub_perm_path(action_set, key)
+                    child3 = PermProxy(len(res) + 1, None, name, action_set.get_sub_permission_code(key), True, fullname, path)
                     res.append(child3)
     res = []
     # пройдемся по контроллерам
@@ -348,6 +426,14 @@ def get_all_permission_tree():
         # пройдемся по верхним наборам действий
         for pack in ctrl.get_top_actions():
             add_nodes(None, pack, res, ctrl)
+    
+    # выстроим иерархию    
+    for item in res:
+        if not item.parent:
+            parent_node = add_path(item.path, res)
+            if parent_node:
+                parent_node.add_children(item)
+                item.parent = parent_node 
     # преобразуем список в дерево (оставим только корневые элементы)
     nodes = []
     for item in res:
@@ -589,7 +675,7 @@ class RolesEditWindow(windows.ExtEditWindow):
         self.grid.store.id_property = 'permission_code'
         self.grid.store.auto_save = False
         #self.grid.add_column(header=u'Действие', data_index='permission_code', width=100)
-        self.grid.add_column(header=u'Действие', data_index='verbose_name', width=100)
+        self.grid.add_column(header=u'Разрешенные права', data_index='verbose_name', width=100)
         self.grid.add_bool_column(header=u'Запрет', data_index='disabled', width=50, text_false=u'Нет', text_true=u'Да', hidden=True)
         self.items.append(self.grid)
 

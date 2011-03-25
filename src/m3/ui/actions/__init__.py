@@ -1,24 +1,13 @@
 #coding:utf-8
 import threading
-import re
-import json
 import inspect
-import time
-import datetime
-import uuid # для генерации уникальных идентификаторов
 
 from django.conf import settings
 from django.utils.importlib import import_module
-from django.utils.datastructures import MultiValueDict
 from django import http
-from django.contrib.auth.models import User
 
 from m3.helpers import logger
-from m3.helpers.datastructures import MutableList
-from m3.core.json import M3JSONEncoder
 from m3.core.exceptions import ApplicationLogicException
-from m3.helpers import ui as ui_helpers
-from m3.ui.ext.base import BaseExtComponent
 
 #===============================================================================
 # Перенаправление импортов из вложенных модулей
@@ -45,7 +34,7 @@ class ActionNotFoundException(ActionException):
         return 'Action "%s" not registered in controller/pack' % self.clazz
     
 class ActionPackNotFoundException(ActionException):
-    """ Возникает в случае если экшен не найден ни в одном контроллере """
+    """ Возникает в случае если пак не найден ни в одном контроллере """
     def __str__(self):
         return 'ActionPack "%s" not registered in controller/pack' % self.clazz
 
@@ -111,6 +100,12 @@ class Action(object):
     # Общий код права доступа будет иметь вид: /edit#tab2 и /edit#work_visible соответственно
     # Как обрабатывается этот список - смотри в has_sub_permission
     sub_permissions = {}
+    
+    # Логический путь действия в прикладной системе.
+    # Используется только для отображения и группировки действий с одинаковым путем.
+    # Также может использоваться для создания меню.
+    # Например, путь может быть: "Справочники\Общие" или "Реестры"
+    path = None
     
     def get_sub_permission_code(self, sub_code):
         '''
@@ -234,12 +229,16 @@ class Action(object):
             url = self.url.replace(char, '')
         return self.controller.url + self.get_packs_url() + url
 
+    @classmethod
+    def get_verbose_name(cls):
+        return cls.verbose_name if cls.verbose_name else cls.__name__
 
 class ActionPack(object):
     '''
     Базовый класс для всех ActionPack'ов. Предназначен для хранения в себе других
     экшенов и паков, схожих по целям.
     '''
+    # Адрес экшенпака
     url = ''
     
     # Ссылка на вышестоящий пакет, тот в котором зарегистрирован данный пакет
@@ -340,7 +339,7 @@ class ActionPack(object):
     @classmethod
     def get_verbose_name(cls):
         return cls.title if hasattr(cls, 'title') and cls.title else cls.verbose_name if cls.verbose_name else cls.__name__
-
+    
 class ActionController(object):
     '''
     Класс коонтроллер - обеспечивает обработку пользовательских запросов путем передачи
@@ -508,9 +507,10 @@ class ActionController(object):
         return response
     
     def process_request(self, request):
-        '''
-        Обработка входящего запроса от клиента. Обрабатывается по аналогии с UrlResolver'ом Django
-        '''
+        """
+        Обработка входящего запроса *request* от клиента. 
+        Обрабатывается по аналогии с UrlResolver'ом Django
+        """
         ControllerCache.populate()
 
         path = request.path
@@ -556,10 +556,11 @@ class ActionController(object):
     # Методы, предназначенные для поиска экшенов и паков в контроллере
     #========================================================================================
     def find_pack(self, type):
-        '''
-        Ищет экшенпак внутри иерархии котроллера. Возвращает его экземпляр или None если не находит.
-        type может быть классом или строкой с названием класса
-        '''
+        """
+        Ищет экшенпак класса *type* внутри иерархии котроллера. Возвращает его экземпляр 
+        или None если не находит. *type* может быть классом или строкой с названием класса, 
+        это позволяет избежать кроссимпортов.
+        """
         # Нужно ли оно тут?
         ControllerCache.populate()
 
@@ -574,10 +575,7 @@ class ActionController(object):
     # Методы, предназначенные для добавления/изменения/удаления пакетов действий в контроллер
     #========================================================================================
     def append_pack(self, pack):
-        '''
-        Добавляет ActionPack в контроллер.
-        @param pack: объект типа ActionPack, который необходимо добавить в контроллер
-        '''
+        """ Добавляет *pack*, объект типа ActionPack, в контроллер. """
         # нам обязательно нужен экземпляр класса
         # этот метод повторяется кучу раз
         if isinstance(pack, str):
@@ -669,6 +667,9 @@ class ActionController(object):
         self._add_pack_to_search_dicts(wrapper)
         new_patterns = {}
         current_packs_slice = None
+        # списки соседей
+        left_packs = []
+        right_packs = []
         
         for url, value in self._url_patterns.iteritems():
             packs_list, final_action = value
@@ -692,7 +693,9 @@ class ActionController(object):
             packs_list.insert(pos, wrapper)
             if left_pack:
                 wrapper.parent = left_pack
-                
+                left_packs.append(left_pack)
+            right_packs.append(pack)
+            
             # Создание нового урла
             full_path = self._build_full_path(packs_list, final_action)
             new_patterns[full_path] = (packs_list[:], final_action)
@@ -705,13 +708,21 @@ class ActionController(object):
         # уже существующие экшены и паки, только заменить у них родителя
         if current_packs_slice:
             for subpack in wrapper.subpacks:
-                if subpack not in pack.subpack:
+                if subpack not in pack.subpacks:
                     self._build_pack_node(subpack, current_packs_slice)
 
             for action in wrapper.actions:
                 if action not in pack.actions:
                     self._build_pack_node(action, current_packs_slice)
-                    
+            
+            # добавим в левые паки наш врапер как подчиненный пак без перестройки узлов
+            # это нужно для корректной навигации сверху-вниз, а иначе мы никак не узнаем какие паки ниже
+            for pack in left_packs:
+                if wrapper not in pack.subpacks:
+                    pack.subpacks.append(wrapper)
+            for pack in right_packs:
+                if pack not in wrapper.subpacks:
+                    wrapper.subpacks.append(pack)
         else:
             raise ActionPackNotFoundException(dest_pack)
         
@@ -771,7 +782,7 @@ class ActionController(object):
     
     def dump_urls(self):
         '''
-        Отладочный метод. Выводит список всех адрес зарегистрированных в контроллере.
+        Отладочный метод. Выводит в консоль список всех адрес зарегистрированных в контроллере.
         '''
         print '==== CONTROLLER WITH URL: %s ======' % self.url
         for key in sorted(self._url_patterns.keys()):
@@ -780,18 +791,16 @@ class ActionController(object):
         print 'Total patterns %s' % len(self._url_patterns.keys())
     
     def get_action_by_url(self, url):
-        '''
+        """
         Получить Action по url
-        '''
+        """
         ControllerCache.populate()
 
         matched = self._url_patterns.get(url)
         if matched:
-            stack, action = matched
+            _, action = matched
             return action
-        else:
-            return None
-    
+
     def get_top_actions(self):
         '''
         Получение списка действий или наборов, находящихся на первом уровне 
@@ -854,6 +863,12 @@ class ControllerCache(object):
 
     @classmethod
     def populate(cls):
+        """
+        Загружает в кэш ActionController'ы из перечисленных в INSTALLED_APPS приложений.
+        В каждом из них загружает модуль *app_meta* и пытается выполнить метод *register_actions*
+        внутри него.
+        Выполняется только один раз. Возвращает истину в случае успеха.
+        """
         if cls._loaded:
             return False
         cls._write_lock.acquire()
@@ -879,7 +894,7 @@ class ControllerCache(object):
     @classmethod
     def dump_urls(cls):
         '''
-        Отладочный метод. Выводит адреса всех контроллеров зарегистрированных в кэше.
+        Отладочный метод. Выводит в консоль адреса всех контроллеров зарегистрированных в кэше.
         '''
         print '------------ CONTROLLER CACHE DUMP ------------'
         for cont in cls._controllers:
@@ -902,4 +917,5 @@ class ControllerCache(object):
     
     @classmethod
     def get_controllers(cls):
+        """ Возвращает множество всех контроллеров зарегистрированных в кэше """
         return cls._controllers
