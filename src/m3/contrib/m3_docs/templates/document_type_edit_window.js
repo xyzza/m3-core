@@ -395,8 +395,7 @@ AppController = Ext.extend(Object, {
    * Возвращает объект для отправки на сервер
    */
    getTransferObject:function() {
-       var v = ModelUtils.buildTransferObject(this._model);
-       return v;
+       return ModelUtils.buildTransferObject(this._model);
    },
    onBeforeNodeDrop:function(dropEvent) {
         if (dropEvent.target.isRoot) {
@@ -513,7 +512,7 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
                 var newNode = {
                     id:item.attributes.id,
                     type:item.attributes.type
-                }
+                };
 
                 if (item.isContainer()) {
                     newNode.items = [];
@@ -522,7 +521,7 @@ DocumentModel = Ext.extend(Ext.data.Tree, {
                     }
                 }
                 return newNode;
-            }
+            };
 
             var item = doRecursion(node);
             this.deletedItemsBag.push(item);
@@ -653,7 +652,7 @@ ModelUtils = Ext.apply(Object,{
         var result = {};
         var prepareId = function(dataObject){
             dataObject.id = dataObject.serverId ? dataObject.serverId : 0;
-        }
+        };
 
         var doRecursion = function(model) {
             var node = Ext.apply({}, model.attributes);
@@ -665,10 +664,9 @@ ModelUtils = Ext.apply(Object,{
                 }
             }
             return node;
-        }
+        };
 
-        var resultRoot = doRecursion(model.root);
-        result.model = resultRoot;
+        result.model = doRecursion(model.root);
 
         result.deletedModels = model.deletedItemsBag;
         return result;
@@ -807,7 +805,7 @@ ModelTypeLibrary = Ext.apply(Object, {
 ServerStorage = Ext.extend(Ext.util.Observable, {
 
     constructor: function(cfg){
-        Ext.apply(this, cfg)
+        Ext.apply(this, cfg);
         ServerStorage.superclass.constructor.call(this);
         this.addEvents('load');
     },
