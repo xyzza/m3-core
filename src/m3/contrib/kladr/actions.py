@@ -219,10 +219,14 @@ def GetAddr(place, street = None, house = None, flat = None, zipcode = None):
             addr_text = curr_index+delim+addr_text
         else:
             addr_text = delim+delim+addr_text
-    if house:
-        addr_text = addr_text+u'д. '+house
-    if flat:
-        addr_text = addr_text+delim+u'к. '+flat
+    # если нет дома и квартиры, то уберем последний разделитель
+    if not (house or flat):
+        addr_text = addr_text.rstrip(delim) 
+    else:
+        if house:
+            addr_text = addr_text+u'д. '+house
+        if flat:
+            addr_text = addr_text+delim+u'к. '+flat
     return addr_text
 
 class KLADRGetAddrAction(Action):
