@@ -10,15 +10,15 @@ from django.db import models as dj_models
 
 class M3JSONEncoder(json.JSONEncoder):
     def __init__(self, *args, **kwargs):
-        self.dict_list = kwargs.pop('dict_list',None)
-        super(M3JSONEncoder,self).__init__(*args, **kwargs)
-        
+        self.dict_list = kwargs.pop('dict_list', None)
+        super(M3JSONEncoder, self).__init__(*args, **kwargs)
+
     def default(self, obj):
         # обработаем простейшие объекты, которые не обрабатываются стандартным способом
         if isinstance(obj, datetime.datetime):
-            return '%02d.%02d.%04d %02d:%02d:%02d' % (obj.day,obj.month,obj.year,obj.hour,obj.minute,obj.second)
+            return '%02d.%02d.%04d %02d:%02d:%02d' % (obj.day, obj.month, obj.year, obj.hour, obj.minute, obj.second)
         elif isinstance(obj, datetime.date):
-            return '%02d.%02d.%04d' % (obj.day,obj.month,obj.year)
+            return '%02d.%02d.%04d' % (obj.day, obj.month, obj.year)
         elif isinstance(obj, datetime.time):
             return obj.strftime('%H:%M')
         elif isinstance(obj, decimal.Decimal):
@@ -35,7 +35,7 @@ class M3JSONEncoder(json.JSONEncoder):
         if isinstance(obj, dj_models.Model):
             related_objs = obj._meta.get_all_related_objects()
             related_objs_attrs = [ro.var_name for ro in related_objs]
-            
+
         # если передали специальный список атрибутов, то пройдемся по ним 
         # атрибуты вложенных объектов разделены точкой
         # будут созданы вложенные объекты для кодирования
@@ -58,19 +58,21 @@ class M3JSONEncoder(json.JSONEncoder):
                         arr = arr[last_attr]
                     if hasattr(value, attr):
                         value = getattr(value, attr)
+                        if callable(value): #это не свойство а функция, вызовем ее
+                            value = value()
                         set_value = True #нашли свойство, значит надо его будет поставить после цикла
                     else:
                         value = None
                         #break #если нас просят найти ref1.name а ref1 is None, то надо выдать ref1 = {name:None}
                     last_attr = attr
                 if set_value:
-                    arr[attr] = value        
+                    arr[attr] = value
 
         for attr in dir(obj):
             # Во всех экземплярах моделей Django есть атрибут "objects", т.к. он является статик-атрибутом модели.
             # Но заботливые разработчики джанги позаботились о нас и выкидывают спицифичную ошибку 
             # "Manager isn't accessible via %s instances" при обращении из экземпляра. Поэтому "objects" нужно игнорировать.
-            if (not attr.startswith('_') and attr!='objects' and attr!='tree' 
+            if (not attr.startswith('_') and attr != 'objects' and attr != 'tree'
                 and attr not in related_objs_attrs):
                 try:
                     if hasattr(getattr(obj, attr), 'json_encode'):
@@ -82,14 +84,14 @@ class M3JSONEncoder(json.JSONEncoder):
                     # Заботливые разработчики Django сделали её разной для всех моделей ;)
                     if exc.__class__.__name__.find('DoesNotExist') == -1:
                         raise
-                    
+
         for attribute in dict.keys():
             # Для полей типа myfield_id автоматически создается атрибут ссылающияся на наименование,
             # например для myfield_id будет myfield_ref_name, конечно если у модели myfield есть name.
             # Зачем это нужно - х.з.
             if len(attribute) > 3 and attribute.endswith('_id'):
                 try:
-                    field_name = attribute[0:len(attribute)-3]
+                    field_name = attribute[0:len(attribute) - 3]
                     if getattr(getattr(obj, field_name), 'name'):
                         if callable(getattr(getattr(obj, field_name), 'name')):
                             cleaned_dict[field_name + '_ref_name'] = getattr(getattr(obj, field_name), 'name')()
