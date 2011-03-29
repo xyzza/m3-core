@@ -13,6 +13,10 @@ var endDate = Ext.getCmp('{{component.end_date.client_id}}');
 startDate.on('select',callBackfunc_date,this);
 endDate.on('select',callBackfunc_date,this);
 
+if (logFilesCombo.getValue()){
+    callBackfunc_combo();
+}
+
 function callBackfunc_date(){
     if (!startDate.isValid() | !endDate.isValid()){
         fill_the_filds();
