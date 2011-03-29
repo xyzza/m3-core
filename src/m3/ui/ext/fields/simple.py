@@ -176,6 +176,9 @@ class ExtNumberField(BaseExtField):
     },{
         ext_attr: "minText"
         ,py_attr: "min_text"
+    },{
+        ext_attr: "selectOnFocus"
+        ,py_attr: "select_on_focus"
     }]}
     @end_designer
     '''
@@ -206,6 +209,10 @@ class ExtNumberField(BaseExtField):
         
         # Если превышено минимальное возможное значение, то будет отображаться этот текст
         self.min_text = None
+
+        # Выделение всего содержимого при попадании в фокус
+        self.select_on_focus = None
+
         
         self.init_component(*args, **kwargs)
         
@@ -221,6 +228,7 @@ class ExtNumberField(BaseExtField):
         self._put_config_value('maxText', self.max_text)
         self._put_config_value('minText', self.min_text)
         self._put_config_value('minText', self.min_text)
+        self._put_config_value('selectOnFocus', self.select_on_focus)
         
     def render(self):
         try:
