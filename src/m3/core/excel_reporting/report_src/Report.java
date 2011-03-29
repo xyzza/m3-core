@@ -695,6 +695,12 @@ class ReportGenerator{
 		out_sheet.setDisplayZeros(in_sheet.isDisplayZeros());
 		out_sheet.setDisplayRowColHeadings(in_sheet.isDisplayRowColHeadings());
 		
+		// Отступы при печати страницы
+		out_sheet.setMargin(Sheet.TopMargin, in_sheet.getMargin(Sheet.TopMargin));
+		out_sheet.setMargin(Sheet.BottomMargin, in_sheet.getMargin(Sheet.BottomMargin));
+		out_sheet.setMargin(Sheet.LeftMargin, in_sheet.getMargin(Sheet.LeftMargin));
+		out_sheet.setMargin(Sheet.RightMargin, in_sheet.getMargin(Sheet.RightMargin));
+		
 		// Копируем кучу параметров печати
         PrintSetup out_print = out_sheet.getPrintSetup();
         PrintSetup in_print = in_sheet.getPrintSetup();
