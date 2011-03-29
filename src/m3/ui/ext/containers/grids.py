@@ -484,6 +484,11 @@ class ExtGrid(BaseExtPanel):
             self._put_params_value('selModel', self.sm.render)
 
         self._put_params_value('colModel', self.col_model.render)
+        # проверим набор колонок на наличие фильтров, если есть, то добавим плагин с фильтрами
+        for col in self.columns:
+            if col.filter:
+                self.plugins.append(u"new Ext.ux.grid.GridFilters({menuFilterText:'Фильтр'})")
+                break                
         self._put_params_value('plugins', self.t_render_plugins)
 
         if self.show_banded_columns:
@@ -570,6 +575,9 @@ class BaseExtGridColumn(ExtUIComponent):
         
         # дополнительные атрибуты колонки
         self.extra = {}
+        
+        # Настройки фильтра колонки для плагина Ext.ux.grid.GridFilters
+        self.filter = None 
 
     def t_render_extra(self):
         lst = []
@@ -620,6 +628,7 @@ class BaseExtGridColumn(ExtUIComponent):
             
         self._put_config_value('renderer', self.render_column_renderer)
         self._put_config_value('tooltip', self.tooltip)
+        self._put_config_value('filter', self.filter)
         
     @property
     def column_renderer(self):

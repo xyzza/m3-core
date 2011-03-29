@@ -378,8 +378,11 @@ def get_all_permission_tree():
                 for key, value in action_set.sub_permissions.items():
                     fullname = '%s - %s' % (pack_name, value)
                     path = get_actionpack_sub_perm_path(action_set, key)
-                    child4 = PermProxy(len(res) + 1, None, value, action_set.get_sub_permission_code(key), True, fullname, path)
-                    res.append(child4)
+                    url = action_set.get_sub_permission_code(key)
+                    if not url in res_urls.keys():
+                        child4 = PermProxy(len(res) + 1, None, value, url, True, fullname, path)
+                        res.append(child4)
+                        res_urls[url] = child4
             # обработаем подчиненные Наборы
             for pack in action_set.subpacks:
                 add_nodes(None, pack, res, ctrl)
@@ -405,8 +408,11 @@ def get_all_permission_tree():
                 fullname = '%s - %s' % (pack_name, name)
                 if action_set.need_check_permission:
                     path = get_action_perm_path(action_set)
-                    item = PermProxy(len(res) + 1, None, name, action_set.absolute_url(), True, fullname, path)
-                    res.append(item)
+                    url = action_set.absolute_url()
+                    if not url in res_urls.keys():
+                        item = PermProxy(len(res) + 1, None, name, url, True, fullname, path)
+                        res.append(item)
+                        res_urls[url] = item
                 # у действия берем подчиненные права
                 for key, value in action_set.sub_permissions.items():
                     items = value.strip().split("\\")
@@ -418,22 +424,26 @@ def get_all_permission_tree():
                         name = value
                     fullname = '%s - %s' % (pack_name, name)
                     path = get_action_sub_perm_path(action_set, key)
-                    child3 = PermProxy(len(res) + 1, None, name, action_set.get_sub_permission_code(key), True, fullname, path)
-                    res.append(child3)
+                    url = action_set.get_sub_permission_code(key)
+                    if not url in res_urls.keys():
+                        child3 = PermProxy(len(res) + 1, None, name, url, True, fullname, path)
+                        res.append(child3)
+                        res_urls[url] = item
     res = []
+    res_urls = {}
     # пройдемся по контроллерам
     for ctrl in ControllerCache.get_controllers():
         # пройдемся по верхним наборам действий
         for pack in ctrl.get_top_actions():
             add_nodes(None, pack, res, ctrl)
     
-    # выстроим иерархию    
+    # выстроим иерархию
     for item in res:
         if not item.parent:
             parent_node = add_path(item.path, res)
             if parent_node:
                 parent_node.add_children(item)
-                item.parent = parent_node 
+                item.parent = parent_node
     # преобразуем список в дерево (оставим только корневые элементы)
     nodes = []
     for item in res:
