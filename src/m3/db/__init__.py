@@ -83,7 +83,7 @@ class BaseEnumerate(object):
         Возвращает значение атрибута константы, которая используется в
         качестве ключа к словарю values
         '''
-        if not isinstance(name, str):
+        if not isinstance(name, basestring):
             raise TypeError("'name' must be a string")
 
         if not name:

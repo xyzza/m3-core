@@ -551,6 +551,12 @@ class ActionController(object):
 #            if isinstance(act, action):
             if act.__class__ == action:
                 return path
+
+    def get_pack_url(self, pack):
+        temp_pack = self.find_pack(pack)
+        assert temp_pack is not None, u'Класс %s не зарегистрирован в контроллере' % pack_cls.__name__
+        return temp_pack.get_list_url()
+
     
     #========================================================================================
     # Методы, предназначенные для поиска экшенов и паков в контроллере
