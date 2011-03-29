@@ -18,13 +18,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				{name: 'zipcode'},
 				{name: 'gni'},
 				{name: 'uno'},
-				{name: 'okato'}
+				{name: 'okato'},
+				{name: 'addr_name'}
 			]
 		});
-		var record = new Ext.data.Record();
-    	record.code = params.place_value;
-    	record.display_name = params.place_text;
-		place_store.loadData({total:1, rows:[record]});
+		if (params.place_record != '') {
+			var rec = Ext.util.JSON.decode(params.place_record);
+    		place_store.loadData({total:1, rows:[rec]});
+		}
 		if (params.read_only) 
 			var field_cls = 'm3-grey-field' 
 		else
@@ -72,17 +73,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					{name: 'zipcode'},
 					{name: 'gni'},
 					{name: 'uno'},
-					{name: 'okato'}
+					{name: 'okato'},
+					{name: 'name'}
 				]
 			});
-			var record = new Ext.data.Record();
-			record.code = params.street_value;
-			record.display_name = params.street_text;
-			street_store.loadData({
-				total: 1,
-				rows: [record]
-			});
-			
+			if (params.street_record != '') {
+				var rec = Ext.util.JSON.decode(params.street_record);
+				street_store.loadData({total:1, rows:[rec]});
+			}
 			this.street = new Ext.form.ComboBox({
 				name: params.street_field_name,
 				fieldLabel: params.street_label,
@@ -327,7 +325,6 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		}
 		this.mon(this.place, 'beforequery', this.beforePlaceQuery, this);
 		if (this.level > 1) {
-			this.mon(this.place, 'change', this.clearStreet, this);
 			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
 		}
 		this.addEvents(
@@ -402,7 +399,24 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		if (this.zipcode != undefined) {
 			zipcode = this.zipcode.getValue();
 		}
-		var addrCmp = this
+		var place = null;
+		var place_data =  this.place.getStore().data.get(place_id);
+		if (place_data != undefined) {
+			place = place_data.data;
+		}
+		var street = null;
+		var street_data =  this.street.getStore().data.get(street_id);
+		if (street_data != undefined) {
+			street = street_data.data;
+		}
+		
+		var new_addr = this.generateTextAddr(place, street, house_num, flat_num, zipcode);
+		if (this.addr != undefined) {
+			this.addr.setValue(new_addr);
+		}
+		
+		/*
+		var addrCmp = this;
 		Ext.Ajax.request({
 			url: this.get_addr_url,
 			params: Ext.applyIf({ place: place_id, street: street_id, house: house_num, flat: flat_num, zipcode: zipcode, addr_cmp: this.addr.id }, this.params),
@@ -412,7 +426,30 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			    },
 			failure: function(){Ext.Msg.show({ title:'', msg: 'Не удалось получить адрес.<br>Причина: сервер временно недоступен.', buttons:Ext.Msg.OK, icon: Ext.Msg.WARNING });}
 		});
+		*/
     }
+	, generateTextAddr: function(place, street, house, flat, zipcode) {
+		/* Формирование текстового представления полного адреса */
+		
+		var addr_text = '';
+		if (street != undefined) {
+			addr_text = place.addr_name+', '+street.socr+' '+street.name;
+		} else {
+			addr_text = place.addr_name;
+		}
+		// проставим индекс
+		if (zipcode != '') {
+            addr_text = zipcode+', '+addr_text;
+		}
+		// обработаем и поставим дом с квартирой
+        if (house != '') {
+            addr_text = addr_text+', '+'д. '+house;
+        }
+        if (flat != '') {
+            addr_text = addr_text+', '+'к. '+flat;
+        }
+		return addr_text;
+	}
 	, setNewAddr: function(newAddr){
 		if (this.addr != undefined) {
 			this.addr.value = newAddr;
@@ -429,6 +466,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		} else {
 			this.place.setValue('');
 		}
+		this.clearStreet();
 		this.fireEvent('change_place', this, val, data);
 		if (this.addr_visible) {
 			this.getNewAddr();
