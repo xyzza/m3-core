@@ -1,5 +1,6 @@
 #coding:utf-8
 from django.db.models.query_utils import Q
+from m3.core.json import M3JSONEncoder
 from m3.ui.actions import Action, PreJsonResult, OperationResult, ActionPack, ActionController
 from models import KladrGeo, KladrStreet
 
@@ -20,9 +21,19 @@ class KLADRPack(ActionPack):
         return place[0].display_name() if place else ''
 
     @classmethod
+    def get_place(self, code):
+        place = KladrGeo.objects.select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').filter(code = code)
+        return M3JSONEncoder().encode(place[0]) if place else None
+
+    @classmethod
     def get_street_name(self, code):
         street = KladrStreet.objects.select_related('parent').filter(code = code)
         return street[0].display_name() if street else ''
+    
+    @classmethod
+    def get_street(self, code):
+        street = KladrStreet.objects.select_related('parent').filter(code = code)
+        return M3JSONEncoder().encode(street[0]) if street else None
 
 class KLADRRowsAction(Action):
     '''
