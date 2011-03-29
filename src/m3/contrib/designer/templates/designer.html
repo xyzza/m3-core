@@ -3,6 +3,22 @@
     <head>
         <title>M3 дизайнер</title>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+        <script type="text/javascript" src="/m3static/vendor/extjs/adapter/ext/ext-base.js"></script>
+        <script type='text/javascript' src='/m3static/vendor/extjs/ext-all-debug.js'></script>
+        <script type='text/javascript' src='/m3static/vendor/extjs/ux-all-debug.js'></script>
+        <script type='text/javascript' src='/m3static/vendor/extjs/locale/ext-lang-ru.js'></script>
+
+        <!-- Скрипты для дизайнера -->
+
+        <script type="text/javascript" src='/static/designer-src/bootstrapper.js'></script>
+
+        <script type="text/javascript">
+            Ext.onReady(function(){
+                var starter = new Bootstrapper();
+                starter.start();
+            });
+
+        </script>
     </head>
     <body>
         Привет мир
