@@ -20,4 +20,5 @@ urlpatterns = patterns('',
         {'document_root': os.path.join(settings.M3_ROOT, 'static')}),
     
     (r'^designer$','designer.ide.views.designer'),
+    (r'^designer/fake$','designer.ide.views.designer_fake_data'),
 )

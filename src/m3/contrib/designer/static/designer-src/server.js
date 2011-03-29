@@ -1,14 +1,14 @@
-/**
+п»ї/**
  * Crafted by ZIgi
  */
 
 /**
- * Объект для обмена данными с сервером
+ * РћР±СЉРµРєС‚ РґР»СЏ РѕР±РјРµРЅР° РґР°РЅРЅС‹РјРё СЃ СЃРµСЂРІРµСЂРѕРј
  * cfg = {
- *  id:507 - id документа
- *  loadUrl:'foo.bar',  - url для загрузки данных
- *  saveUrl:'foo.bar', - url для сохранения данных
- *  maskEl: Ext.getBody() - элемент куда вешать маску
+ *  id:507 - id РґРѕРєСѓРјРµРЅС‚Р°
+ *  loadUrl:'foo.bar',  - url РґР»СЏ Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
+ *  saveUrl:'foo.bar', - url РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ РґР°РЅРЅС‹С…
+ *  maskEl: Ext.getBody() - СЌР»РµРјРµРЅС‚ РєСѓРґР° РІРµС€Р°С‚СЊ РјР°СЃРєСѓ
  * }
  */
 
@@ -21,7 +21,7 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
     },
     loadModel:function(){
         this.mask = new Ext.LoadMask(this.maskEl, {
-            msg:'Загрузка данных...'
+            msg:'Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С…...'
         });
         this.mask.show();
         Ext.Ajax.request({
@@ -44,6 +44,6 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
     _onLoadFailure:function(response, opts){
         this.mask.hide();
         uiAjaxFailMessage(response, opts);
-        //Ext.Msg.alert('Ошибка','Произошла ошибка при формировании данных документа');
+        //Ext.Msg.alert('РћС€РёР±РєР°','РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° РїСЂРё С„РѕСЂРјРёСЂРѕРІР°РЅРёРё РґР°РЅРЅС‹С… РґРѕРєСѓРјРµРЅС‚Р°');
     }
 });

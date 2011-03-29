@@ -3,24 +3,39 @@
     <head>
         <title>M3 дизайнер</title>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+
+        <!-- Ext js -->
+        <link rel='stylesheet' type='text/css' href='/m3static/vendor/extjs/resources/css/ext-all.css'/>
+        <link rel='stylesheet' type='text/css' href='/m3static/vendor/extjs/resources/css/ux/ux-all.css'/>
+
         <script type="text/javascript" src="/m3static/vendor/extjs/adapter/ext/ext-base.js"></script>
         <script type='text/javascript' src='/m3static/vendor/extjs/ext-all-debug.js'></script>
         <script type='text/javascript' src='/m3static/vendor/extjs/ux-all-debug.js'></script>
         <script type='text/javascript' src='/m3static/vendor/extjs/locale/ext-lang-ru.js'></script>
 
-        <!-- Скрипты для дизайнера -->
+        <!-- М3 -->
+        <script type='text/javascript' src='/m3static/m3/js/m3-opt.js'></script>
 
+        <!-- Скрипты для дизайнера -->
+        <script type="text/javascript" src="/static/designer-src/view.js"></script>
+        <script type="text/javascript" src="/static/designer-src/property-editor.js"></script>
+        <script type="text/javascript" src="/static/designer-src/controller.js"></script>
+        <script type="text/javascript" src="/static/designer-src/model.js"></script>
+        <script type="text/javascript" src="/static/designer-src/model-utils.js"></script>
+        <script type="text/javascript" src="/static/designer-src/model-types.js"></script>
+        <script type="text/javascript" src="/static/designer-src/server.js"></script>
         <script type="text/javascript" src='/static/designer-src/bootstrapper.js'></script>
 
         <script type="text/javascript">
             Ext.onReady(function(){
+                Ext.QuickTips.init();
+
                 var starter = new Bootstrapper();
-                starter.start();
+                starter.start('{{data_url}}');
             });
 
         </script>
     </head>
     <body>
-        Привет мир
     </body>
 </html>

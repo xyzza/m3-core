@@ -1,15 +1,15 @@
-/**
+п»ї/**
  * Crafted by ZIgi
  */
 
 /**
- *  Классы для работы с редактором свойств.
+ *  РљР»Р°СЃСЃС‹ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ СЂРµРґР°РєС‚РѕСЂРѕРј СЃРІРѕР№СЃС‚РІ.
  */
 
 
 /**
- * Класс предоставляет внешний интерфейс для контроллера. Он управляет показом окошка с редакторами свойств, содержит
- * в себе необходимые структуры данных и обновляет модель. При обновлении модели зажигается событие modelUpdate
+ * РљР»Р°СЃСЃ РїСЂРµРґРѕСЃС‚Р°РІР»СЏРµС‚ РІРЅРµС€РЅРёР№ РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ РєРѕРЅС‚СЂРѕР»Р»РµСЂР°. РћРЅ СѓРїСЂР°РІР»СЏРµС‚ РїРѕРєР°Р·РѕРј РѕРєРѕС€РєР° СЃ СЂРµРґР°РєС‚РѕСЂР°РјРё СЃРІРѕР№СЃС‚РІ, СЃРѕРґРµСЂР¶РёС‚
+ * РІ СЃРµР±Рµ РЅРµРѕР±С…РѕРґРёРјС‹Рµ СЃС‚СЂСѓРєС‚СѓСЂС‹ РґР°РЅРЅС‹С… Рё РѕР±РЅРѕРІР»СЏРµС‚ РјРѕРґРµР»СЊ. РџСЂРё РѕР±РЅРѕРІР»РµРЅРёРё РјРѕРґРµР»Рё Р·Р°Р¶РёРіР°РµС‚СЃСЏ СЃРѕР±С‹С‚РёРµ modelUpdate
  */
 
 PropertyEditorManager = Ext.extend( Ext.util.Observable, {
@@ -18,7 +18,7 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         this.addEvents('modelUpdate');
     },
     editModel:function(model) {
-        //конфиг объект для PropertyGrid'а
+        //РєРѕРЅС„РёРі РѕР±СЉРµРєС‚ РґР»СЏ PropertyGrid'Р°
         //debugger;
 
         var cfg = ModelTypeLibrary.getTypeDefaultProperties(model.attributes.type);
@@ -35,8 +35,8 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         window.show();
     },
     saveModel:function(eventObj) {
-        // в ивент обжекте приходят объект модели и объект source из грида
-        // далее копируются свойства из сурса в атрибуты модели
+        // РІ РёРІРµРЅС‚ РѕР±Р¶РµРєС‚Рµ РїСЂРёС…РѕРґСЏС‚ РѕР±СЉРµРєС‚ РјРѕРґРµР»Рё Рё РѕР±СЉРµРєС‚ source РёР· РіСЂРёРґР°
+        // РґР°Р»РµРµ РєРѕРїРёСЂСѓСЋС‚СЃСЏ СЃРІРѕР№СЃС‚РІР° РёР· СЃСѓСЂСЃР° РІ Р°С‚СЂРёР±СѓС‚С‹ РјРѕРґРµР»Рё
 
         for (var i in eventObj.model.attributes) {
             if (eventObj.source.hasOwnProperty(i) )
@@ -50,15 +50,15 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
 
 
 /**
- *  Преднастроеное окно со свойствами объекта. При нажатии кнопки сохранить генерируется событие save, на него
- * подвешен класс менеджера
+ *  РџСЂРµРґРЅР°СЃС‚СЂРѕРµРЅРѕРµ РѕРєРЅРѕ СЃРѕ СЃРІРѕР№СЃС‚РІР°РјРё РѕР±СЉРµРєС‚Р°. РџСЂРё РЅР°Р¶Р°С‚РёРё РєРЅРѕРїРєРё СЃРѕС…СЂР°РЅРёС‚СЊ РіРµРЅРµСЂРёСЂСѓРµС‚СЃСЏ СЃРѕР±С‹С‚РёРµ save, РЅР° РЅРµРіРѕ
+ * РїРѕРґРІРµС€РµРЅ РєР»Р°СЃСЃ РјРµРЅРµРґР¶РµСЂР°
  */
 
 PropertyWindow = Ext.extend(Ext.Window, {
     /**
-     * Параметры конфига:
-     * cfg.source = {} - то что редактируется проперти гридом
-     * cfg.model = ... ссылка на модель
+     * РџР°СЂР°РјРµС‚СЂС‹ РєРѕРЅС„РёРіР°:
+     * cfg.source = {} - С‚Рѕ С‡С‚Рѕ СЂРµРґР°РєС‚РёСЂСѓРµС‚СЃСЏ РїСЂРѕРїРµСЂС‚Рё РіСЂРёРґРѕРј
+     * cfg.model = ... СЃСЃС‹Р»РєР° РЅР° РјРѕРґРµР»СЊ
      * @param cfg
      */
     constructor:function(cfg) {
@@ -75,12 +75,12 @@ PropertyWindow = Ext.extend(Ext.Window, {
         Ext.apply(this, {
             height:400,
             width:400,
-            title:'Редактирование компонента',
+            title:'Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°',
             layout:'fit',
             items:[this._grid],
             buttons:[
-                new Ext.Button({text:'Сохранить',handler:this._onSave.createDelegate(this) }),
-                new Ext.Button({ text:'Отмена', handler:this._onClose.createDelegate(this) })
+                new Ext.Button({text:'РЎРѕС…СЂР°РЅРёС‚СЊ',handler:this._onSave.createDelegate(this) }),
+                new Ext.Button({ text:'РћС‚РјРµРЅР°', handler:this._onClose.createDelegate(this) })
             ]
         });
 
@@ -90,7 +90,7 @@ PropertyWindow = Ext.extend(Ext.Window, {
         PropertyWindow.superclass.show.call(this);
     },
     _onSave:function() {
-        //TODO прикрутить валидацию
+        //TODO РїСЂРёРєСЂСѓС‚РёС‚СЊ РІР°Р»РёРґР°С†РёСЋ
         var eventObj = {
             source:this._grid.getSource(),
             model:this.model
