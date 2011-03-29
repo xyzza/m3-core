@@ -24,6 +24,19 @@ class KladrGeo(models.Model):
             return self.socr+" "+self.name
     display_name.json_encode = True
     
+    def addr_name(self):
+        # наименование в формате текстового адреса
+        curr = self
+        res = None
+        while curr:
+            if res:
+                res = curr.socr+" "+curr.name+", "+res
+            else:
+                res = curr.socr+" "+curr.name
+            curr = curr.parent
+        return res
+    addr_name.json_encode = True
+    
 class KladrStreet(models.Model):
     '''
     Справочник КЛАДР (улицы)
