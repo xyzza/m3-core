@@ -30,14 +30,17 @@ class LogsAction(Action):
         
         win = forms.ExtLogsWindow(window_params)
         win.grid.action_data = GetLogsAction
-        logs_store = ExtDataStore(admin_helpers.log_files_list())
+        logs_array = admin_helpers.log_files_list()
+        logs_store = ExtDataStore(logs_array)
         win.log_files_combo.set_store(logs_store)
-        if admin_helpers.log_files_list():
-            for log_files in admin_helpers.log_files_list():
-                if u'error.log' in log_files:
-                   win.log_files_combo.value = u'error.log'
-            if not win.log_files_combo.value:
-                win.log_files_combo.value = admin_helpers.log_files_list()[0][1]
+        error_log = admin_helpers.ERROR
+        if logs_array:
+            for log_file in logs_array:
+                if error_log in log_file:
+                    win.log_files_combo.value = error_log
+                    break
+            else:
+                win.log_files_combo.value = logs_array[0][1]
         return ExtUIScriptResult(win)
 
 class LogsDateChangeAction(Action):
