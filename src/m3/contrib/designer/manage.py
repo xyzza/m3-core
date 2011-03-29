@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+
+# Добавляем путь до django
+import sys
+import os
+PATH_VENDOR = os.path.dirname( os.path.abspath(os.path.pardir) )
+sys.path.insert(0, os.path.join(PATH_VENDOR, 'vendor') )
+
 from django.core.management import execute_manager
 try:
     import settings # Assumed to be in the same directory.

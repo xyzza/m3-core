@@ -16,3 +16,5 @@ glob:src/m3/externals/STREET.dbf
 glob:.idea/*
 relre:class$
 glob:docs/build/
+glob:.project
+glob:.pydevproject

@@ -7,9 +7,10 @@ Created on 29.03.2011
 
 import os
 import subprocess
+from optparse import make_option
 
 from django.core.management.base import BaseCommand
-from optparse import make_option
+
 
 class Command(BaseCommand):
     '''
@@ -29,6 +30,13 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        '''
+        Обработчик запуска команды: python manage.py <<command>>
+        '''
+        
+        # Устанавливаем в переменную среды путь до проекта, откуда запущена runide
+        os.putenv('PROJECT_FOR_DESIGNER', os.path.abspath(os.path.curdir))
+        
         self.stdout.write('M3 Designer IDE starting... \n')
         
         # Путь до сервера дизайнера
@@ -39,4 +47,4 @@ class Command(BaseCommand):
                     shell = True,
                     cwd = cwd)
 
-        popen.wait()       
+        popen.wait()

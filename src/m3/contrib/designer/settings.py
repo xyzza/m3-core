@@ -1,4 +1,18 @@
-# Django settings for designer project.
+#coding: utf-8
+
+
+import os.path
+#import logging
+
+#import m3
+
+#from m3.helpers import config, logger
+
+# расположение папки с приложением в файловой системе сервера.
+PROJECT_ROOT = os.path.dirname(__file__)
+
+# расположение папки с М3 в файловой системе сервера приложений
+M3_ROOT = os.path.dirname( os.path.abspath(os.path.pardir) )
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -81,16 +95,14 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    #os.path.join(PROJECT_ROOT, 'templates')
 )
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+#    'django.contrib.auth',
+#    'django.contrib.contenttypes',
+#    'django.contrib.sessions',
+#    'django.contrib.sites',
+#    'django.contrib.messages',
+
 )
