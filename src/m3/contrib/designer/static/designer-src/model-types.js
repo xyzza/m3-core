@@ -116,7 +116,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                 continue;
            };
            var node = new Ext.tree.TreeNode({
-               name:this.typesConfig[type]['toolboxData'].text,
+               text:this.typesConfig[type]['toolboxData'].text,
                type:type,
                iconCls:this.typesConfig[type]['treeIconCls']
            });

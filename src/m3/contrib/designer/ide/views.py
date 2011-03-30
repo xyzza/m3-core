@@ -10,7 +10,7 @@ def workspace(request):
 
 def designer(request):
     return render_to_response('designer.html', {
-        'data_url' : 'designer/fake'
+        'data_url' : '/designer/fake'
     })
 
 def designer_fake_data(request):
@@ -21,4 +21,4 @@ def designer_fake_data(request):
             'layout':'fit',
             'id':0
         }
-    return HttpResponse(content_type='application/json', content = json.dumps(result))
+    return HttpResponse(mimetype='application/json', content = json.dumps(result))

@@ -26,9 +26,9 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
         this.mask.show();
         Ext.Ajax.request({
             url:this.loadUrl,
-            params:{
-                id:this.id
-            },
+            //params:{
+            //    id:this.id
+            //},
             success:this._onLoadSuccess.createDelegate(this),
             failure:this._onLoadFailure.createDelegate(this)
         });
