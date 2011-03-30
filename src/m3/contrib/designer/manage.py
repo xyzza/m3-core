@@ -5,7 +5,12 @@
 import sys
 import os
 PATH_VENDOR = os.path.dirname( os.path.abspath(os.path.pardir) )
+
+# Путь до vendor внутри m3
 sys.path.insert(0, os.path.join(PATH_VENDOR, 'vendor') )
+
+# Путь до m3
+sys.path.insert(0, os.path.join(os.path.dirname(PATH_VENDOR)))
 
 from django.core.management import execute_manager
 try:

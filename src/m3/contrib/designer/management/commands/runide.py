@@ -9,6 +9,8 @@ import os
 import subprocess
 from optparse import make_option
 
+from django.conf import settings
+
 from django.core.management.base import BaseCommand
 
 
@@ -35,7 +37,7 @@ class Command(BaseCommand):
         '''
         
         # Устанавливаем в переменную среды путь до проекта, откуда запущена runide
-        os.putenv('PROJECT_FOR_DESIGNER', os.path.abspath(os.path.curdir))
+        os.putenv('PROJECT_FOR_DESIGNER', settings.PROJECT_ROOT)
         
         self.stdout.write('M3 Designer IDE starting... \n')
         
