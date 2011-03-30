@@ -8,28 +8,35 @@ ModelTypeLibrary = Ext.apply(Object, {
             isContainer:true,
             properties:{
                 layout:{
-                    defaultValue:'auto'
+                    defaultValue:'auto',
+                    isInitProperty:true
                 },
                 title:{
-                    defaultValue:'New panel'
+                    defaultValue:'New panel',
+                    isInitProperty:true
                 },
                 name:{
-                    defaultValue:'New panel'
+                    defaultValue:'New panel',
+                    isInitProperty:true
                 },
+                // ATTENTION:EXT не понимает строки в качестве высоты и ширины панели, поэтому тут число
                 height:{
-                    defaultValue:'auto'
+                    defaultValue:0
                 },
                 width:{
-                    defaultValue:'auto'
+                    defaultValue:0
                 },
                 flex:{
-                    defaultValue:0
+                    defaultValue:''
                 },
                 labelWidth:{
                     defaultValue:100
                 },
                 labelAlign:{
                     defaultValue:'left'
+                },
+                padding:{
+                    defaultValue:'undefined'
                 }
             },
             toolboxData:{
@@ -41,13 +48,16 @@ ModelTypeLibrary = Ext.apply(Object, {
             isContainer:true,
             properties:{
                 title:{
-                    defaultValue:'New tab panel'
+                    defaultValue:'New tab panel',
+                    isInitProperty:true
                 },
                 name:{
-                    defaultValue:'New tab panel'
+                    defaultValue:'New tab panel',
+                    isInitProperty:true
                 },
                 activeTab:{
-                    defaultValue:0
+                    defaultValue:0,
+                    isInitProperty:true
                 }
             },
             toolboxData:{
@@ -61,10 +71,11 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:''
                 },
                 name:{
-                    defaultValue:'New text field'
+                    defaultValue:'New text field',
+                    isInitProperty:true
                 },
                 anchor:{
-                    defaultValue:'90%'
+                    defaultValue:'auto'
                 }
             },
             toolboxData:{
@@ -75,14 +86,16 @@ ModelTypeLibrary = Ext.apply(Object, {
         window:{
             properties: {
                 name:{
-                    allowBlank:false,
-                    defaultValue:'Ext window'
+                    defaultValue:'Ext window',
+                    isInitProperty:true
                 },
                 layout:{
-                    defaultValue:'fit'
+                    defaultValue:'fit',
+                    isInitProperty:true
                 },
                 title: {
-                    defaultValue:'New window'
+                    defaultValue:'New window',
+                    isInitProperty:true
                 }
             },
             isContainer:true,
@@ -100,6 +113,19 @@ ModelTypeLibrary = Ext.apply(Object, {
         var cfg = {};
         for (var i in currentType) {
             cfg[i] = currentType[i]['defaultValue'];
+        }
+        return cfg;
+    },
+    /*
+    * Возвращает конфиг объекта с атрибутами, нужными для его создания и заполнеными дефолтными значениями
+    */
+    getTypeInitProperties:function(type) {
+        var currentType = this.typesConfig[type]['properties'];
+        var cfg = {};
+        for (var i in currentType) {
+            if (currentType[i]['isInitProperty']) {
+                cfg[i] = currentType[i]['defaultValue'];
+            }
         }
         return cfg;
     },

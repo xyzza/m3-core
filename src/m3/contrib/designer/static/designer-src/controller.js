@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Crafted by ZIgi
  */
 
@@ -170,9 +170,10 @@ AppController = Ext.extend(Object, {
        var componentNode = data.node;
        var model = this._model.findModelById(target.id);
 
-       var newModelConfig = ModelTypeLibrary.getTypeDefaultProperties(componentNode.attributes.type);
-       newModelConfig.type = componentNode.attributes.type;
-       model.appendChild( new ComponentModel(newModelConfig) );
+       var newModelNodeConfig = {};
+       newModelNodeConfig.properties = ModelTypeLibrary.getTypeInitProperties(componentNode.attributes.type);
+       newModelNodeConfig.type = componentNode.attributes.type;
+       model.appendChild( new ComponentModel(newModelNodeConfig) );
    },
    /*
    * Возвращает объект для отправки на сервер

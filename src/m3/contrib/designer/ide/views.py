@@ -15,10 +15,12 @@ def designer(request):
 
 def designer_fake_data(request):
     result = {
+            'properties': {
+                'name':'Ext window',
+                'title':'Trololo',
+                'layout':'fit',
+            },
             'type':'window',
-            'name':'Ext window',
-            'title':'Trololo',
-            'layout':'fit',
             'id':0
         }
     return HttpResponse(mimetype='application/json', content = json.dumps(result))

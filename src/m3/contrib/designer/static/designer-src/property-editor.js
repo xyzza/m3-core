@@ -19,11 +19,10 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
     },
     editModel:function(model) {
         //конфиг объект для PropertyGrid'а
-
         var cfg = ModelTypeLibrary.getTypeDefaultProperties(model.attributes.type);
-        for (var p in model.attributes) {
+        for (var p in model.attributes.properties) {
             if (cfg.hasOwnProperty(p)) {
-                cfg[p] = model.attributes[p];
+                cfg[p] = model.attributes.properties[p];
             }
         }
         var window = new PropertyWindow({
@@ -35,12 +34,17 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
     },
     saveModel:function(eventObj) {
         // в ивент обжекте приходят объект модели и объект source из грида
-        // далее копируются свойства из сурса в атрибуты модели
+        // далее копируются свойства из сурса в атрибуты модели, при условии что пользователь
+        // менял что в свойстве(те значения отличается от дефолтного или значение было хоть раз задано, что
+        // требуется если пользователь поменял значение на равное дефолтному)
 
-        for (var i in eventObj.model.attributes) {
-            if (eventObj.source.hasOwnProperty(i) )
-            {
-                eventObj.model.attributes[i] = eventObj.source[i];
+        var defaults = ModelTypeLibrary.getTypeDefaultProperties(eventObj.model.attributes.type);
+        var model = eventObj.model;
+        var source = eventObj.source;
+
+        for (var s in source) {
+            if ((source[s] != defaults[s]) || ( model.attributes.properties.hasOwnProperty(s)) ) {
+                model.attributes.properties[s] = source[s];
             }
         }
         this.fireEvent('modelUpdate');
@@ -55,7 +59,7 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
 
 PropertyWindow = Ext.extend(Ext.Window, {
     listEditors:{
-        'layout':['fit','form','hbox','vbox','border','absolute'],
+        'layout':['auto','fit','form','hbox','vbox','border','absolute'],
         'labelAlign':['left','top']
     },
     /**

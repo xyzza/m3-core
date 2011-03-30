@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Crafted by ZIgi
  */
 
@@ -14,47 +14,40 @@ ModelUtils = Ext.apply(Object,{
         //это требуется для того чтобы ставить в соответсвие DOM элементы и экстовые компоненты
         //Важное замечание номер два - у контейнеров следует навешивать cls 'designContainer'
         //он нужен для визуального dd на форму при лукапе по DOM'у
+
+        var cfg = Ext.apply({}, model.attributes.properties);
+        cfg.id = model.id;
+        if (ModelTypeLibrary.isTypeContainer(model.attributes.type)) {
+            cfg.cls = 'designContainer';
+        }
+
+
         switch(model.attributes.type)
-            {
-                case 'panel':
-                    return new Ext.Panel({
-                            title:model.attributes.title,
-                            layout:model.attributes.layout,
-                            cls:'designContainer',
-                            id:model.id
-                    });
+        {
+            case 'panel':
+                return new Ext.Panel(cfg);
+            break;
 
-                break;
+            case 'window':
+                return new Ext.Panel(cfg);
+            break;
 
-                case 'window':
-                    return new Ext.Panel({
-                            title:model.attributes.title,
-                            layout:model.attributes.layout,
-                            cls:'designContainer',
-                            id:model.id
-                    });
-
-                break;
-
-                case 'textField':
-                    return new Ext.form.TextField({
-                        fieldLabel:model.attributes.fieldLabel,
-                        anchor:model.attributes.anchor,
-                        id:model.id,
+            case 'textField':
+                return new Ext.form.TextField(
+                    Ext.apply(cfg,{
                         readOnly:true
-                    });
-                break;
+                    })
+                );
+            break;
 
-                case 'tabPanel':
-                    return new Ext.TabPanel({
-                        id:model.id,
-                        deferredRender:false,
-                        activeTab:model.attributes.activeTab,
-                        title:model.attributes.title,
-                        cls:'designContainer'
-                    });
-                break;
-            }
+            case 'tabPanel':
+                return new Ext.TabPanel(
+                    Ext.apply(cfg,{
+                        deferredRender:false
+                    })
+                );
+            break;
+        }
     },
     /**
      * Возвращает TreeNode по модели
@@ -63,8 +56,7 @@ ModelUtils = Ext.apply(Object,{
         //Опять же важное замечание - id ноды в дереве компнентов на экране и id модельки равны друг другу
         var iconCls = ModelTypeLibrary.getTypeIconCls(model.attributes.type);
             return new Ext.tree.TreeNode({
-                text:model.attributes.name,
-                modelObj:model,
+                text:model.attributes.properties.name,
                 id:model.id,
                 expanded:true,
                 allowDrop:model.isContainer(),
