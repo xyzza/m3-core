@@ -10,6 +10,9 @@ urlpatterns = patterns('',
 
     # Точка входа
     (r'^$', 'designer.ide.views.workspace'),
+    
+    # Файлы проекта
+    (r'^project-files$', 'designer.ide.views.get_project_files'),
                        
     # статичный контент проекта
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', 
