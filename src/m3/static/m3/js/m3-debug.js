@@ -13252,10 +13252,10 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
             addr_text = zipcode+', '+addr_text;
 		}
 		// обработаем и поставим дом с квартирой
-        if (house != '') {
+        if (house != '' && house != undefined) {
             addr_text = addr_text+', '+'д. '+house;
         }
-        if (flat != '') {
+        if (flat != '' && flat != undefined) {
             addr_text = addr_text+', '+'к. '+flat;
         }
 		return addr_text;
