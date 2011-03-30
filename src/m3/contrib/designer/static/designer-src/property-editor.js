@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Crafted by ZIgi
  */
 
@@ -19,7 +19,6 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
     },
     editModel:function(model) {
         //конфиг объект для PropertyGrid'а
-        //debugger;
 
         var cfg = ModelTypeLibrary.getTypeDefaultProperties(model.attributes.type);
         for (var p in model.attributes) {
@@ -55,6 +54,10 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
  */
 
 PropertyWindow = Ext.extend(Ext.Window, {
+    listEditors:{
+        'layout':['fit','form','hbox','vbox','border','absolute'],
+        'labelAlign':['left','top']
+    },
     /**
      * Параметры конфига:
      * cfg.source = {} - то что редактируется проперти гридом
@@ -69,7 +72,11 @@ PropertyWindow = Ext.extend(Ext.Window, {
         this.addEvents('save');
         this._grid = new Ext.grid.PropertyGrid({
                         autoHeight: true,
-                        source: this.source
+                        source: this.source,
+                        customEditors:{
+                            'layout': this._get_combo_editor('layout'),
+                            'labelAlign':this._get_combo_editor('labelAlign')
+                        }
                     });
 
         Ext.apply(this, {
@@ -88,6 +95,29 @@ PropertyWindow = Ext.extend(Ext.Window, {
     },
     show:function( ) {
         PropertyWindow.superclass.show.call(this);
+    },
+    _get_combo_editor:function(propertyName) {
+        var data = [];
+        var ar = this.listEditors[propertyName];
+        for (var i=0;i<ar.length;i++) {
+            data.push([ar[i]]);
+        }
+
+        var store = new Ext.data.ArrayStore({
+            autoDestroy:true,
+            idIndex:0,
+            fields:['name'],
+            data:data
+        });
+        var result = new Ext.form.ComboBox({
+            store:store,
+            displayField:'name',
+            mode:'local',
+            triggerAction:'all',
+            editable:false,
+            selectOnFocus:true
+        });
+        return new Ext.grid.GridEditor(result);
     },
     _onSave:function() {
         //TODO прикрутить валидацию

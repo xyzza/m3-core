@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Crafted by ZIgi
  */
 
@@ -24,6 +24,12 @@ ModelTypeLibrary = Ext.apply(Object, {
                 },
                 flex:{
                     defaultValue:0
+                },
+                labelWidth:{
+                    defaultValue:100
+                },
+                labelAlign:{
+                    defaultValue:'left'
                 }
             },
             toolboxData:{
@@ -56,6 +62,9 @@ ModelTypeLibrary = Ext.apply(Object, {
                 },
                 name:{
                     defaultValue:'New text field'
+                },
+                anchor:{
+                    defaultValue:'90%'
                 }
             },
             toolboxData:{

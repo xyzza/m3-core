@@ -10,7 +10,6 @@ Bootstrapper = Ext.extend(Object, {
     start:function(dataUrl) {
 
         var designPanel = new Ext.Panel({
-            title:'M3 дизайнер',
             layout:'fit',
             region:'center',
             ddGroup:'designerDDGroup'
@@ -53,10 +52,27 @@ Bootstrapper = Ext.extend(Object, {
             items:[componentTree, toolbox]
         });
 
-        new Ext.Viewport({
-            layout: 'border',
+        var viewportWrapper = new Ext.Panel({
+            layout:'border',
             items: [
                 designPanel, eastWrapper
+            ],
+            buttons:[
+                new Ext.Button({
+                    text:'Сохранить',
+                    iconCls:'icon-disk'
+                }),
+                new Ext.Button({
+                    text:'Отмена',
+                    iconCls:'icon-cancel'
+                })
+            ]
+        });
+
+        new Ext.Viewport({
+            layout: 'fit',
+            items: [
+                viewportWrapper
             ]
 	    });
         var storage = new ServerStorage({
