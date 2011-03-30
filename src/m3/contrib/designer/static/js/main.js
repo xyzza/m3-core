@@ -34,8 +34,7 @@ Ext.onReady(function(){
 					        ,text: 'Файлы проекта'
 					        ,draggable: false
 					        ,id: 'source'
-					        ,expanded: true
-					        //,hidden: true
+					        ,expanded: true					     
 					    }
 						,contextMenu: new Ext.menu.Menu({
 						        items: [{
@@ -51,7 +50,7 @@ Ext.onReady(function(){
 						    listeners: {
 						        contextmenu: function(node, e) {
 						            node.select();
-						            if (node.text === 'ui.py' || node.text === 'form.py') {
+						            if (node.text === 'ui.py' || node.text === 'forms.py') {
 							            var c = node.getOwnerTree().contextMenu;
 							            c.contextNode = node;
 							            c.showAt(e.getXY());						            	
