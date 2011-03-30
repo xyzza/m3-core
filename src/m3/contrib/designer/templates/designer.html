@@ -16,7 +16,9 @@
         <!-- М3 -->
         <script type='text/javascript' src='/m3static/m3/js/m3-opt.js'></script>
 
-        <!-- Скрипты для дизайнера -->
+        <!-- Дизайнер -->
+        <link rel='stylesheet' type='text/css' href='/static/css/designer.css'/>
+
         <script type="text/javascript" src="/static/designer-src/view.js"></script>
         <script type="text/javascript" src="/static/designer-src/property-editor.js"></script>
         <script type="text/javascript" src="/static/designer-src/controller.js"></script>
@@ -29,6 +31,12 @@
         <script type="text/javascript">
             Ext.onReady(function(){
                 Ext.QuickTips.init();
+
+//                Ext.Ajax.request({
+//                    url:'{{data_url}}',
+//                    success:function() {alert('OK')},
+//                    failure:function() {alert('FAIL')}
+//                });
 
                 var starter = new Bootstrapper();
                 starter.start('{{data_url}}');

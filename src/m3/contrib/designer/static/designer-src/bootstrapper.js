@@ -19,9 +19,14 @@ Bootstrapper = Ext.extend(Object, {
         var componentTree = new Ext.tree.TreePanel({
             root: new Ext.tree.TreeNode({
                 text:'foo',
-                id:'root'
+                id:'root',
+                expanded:true
             }),
-            flex:1
+            flex:1,
+            enableDD:true,
+            animate:false,
+            rootVisible:false,
+            title:'Дерево компонентов'
         });
 
         var toolbox = new Ext.tree.TreePanel({
@@ -30,13 +35,17 @@ Bootstrapper = Ext.extend(Object, {
                 id:'root'
             }),
             flex:1,
-            ddGroup:'designerDDGroup'
+            ddGroup:'designerDDGroup',
+            enableDD:true,
+            animate:false,
+            rootVisible:false,
+            title:'Инструменты'
         });
 
         var eastWrapper = new Ext.Panel({
             region:'east',
             width:250,
-            split:true,
+            //split:true,
             layout:'vbox',
             layoutConfig:{
                 align:'stretch'
@@ -50,7 +59,6 @@ Bootstrapper = Ext.extend(Object, {
                 designPanel, eastWrapper
             ]
 	    });
-
         var storage = new ServerStorage({
             id:0,
             loadUrl:dataUrl,
@@ -70,6 +78,5 @@ Bootstrapper = Ext.extend(Object, {
                 });
 
         storage.loadModel();
-
     }
 });
