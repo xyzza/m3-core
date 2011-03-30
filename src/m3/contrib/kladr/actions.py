@@ -1,10 +1,41 @@
 #coding:utf-8
 from django.db.models.query_utils import Q
+
 from m3.core.json import M3JSONEncoder
 from m3.ui.actions import Action, PreJsonResult, OperationResult, ActionPack, ActionController
+from m3.ui.actions.tree_packs import BaseTreeDictionaryModelActions
+
 from models import KladrGeo, KladrStreet
+from ui import KLADRGeoEditWindow, KLADRStreetEditWindow
+
 
 kladr_controller = ActionController(url='/m3-kladr')
+
+class Kladr_DictPack(BaseTreeDictionaryModelActions):
+    '''
+    Пак для экшенов справочника КЛАДР
+    '''
+    url = '/kladr'
+    # Включаем проверку прав пользователя.
+    need_check_permission = True
+    title = u'Классификатор адресов России (КЛАДР)'
+    tree_model = KladrGeo
+    list_model = KladrStreet
+    
+    list_columns = [('socr', u'Сокращение', 20),
+                    ('name', u'Улица')]
+    tree_columns = [('name', u'Геогр. пункт', 240),
+                    ('socr', u'Сокращение', 90),
+                    ('zipcode', u'Индекс', 60)]
+    
+    filter_fields = ['code', 'name']
+    tree_filter_fields = ['name', 'zipcode']
+    
+    width, height = 910, 600
+    tree_width = 390
+    
+    edit_window = KLADRGeoEditWindow
+    edit_node_window = KLADRStreetEditWindow 
 
 class KLADRPack(ActionPack):
     url = ''

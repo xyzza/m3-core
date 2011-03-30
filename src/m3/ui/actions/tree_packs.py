@@ -175,6 +175,11 @@ class ListEditRowWindowAction(Action):
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             win.make_read_only(access_off=True, exclude_list=['cancel_btn','close_btn'])
+            
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
+        if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
+            win.configure_for_dictpack(action=self, pack=self.parent,
+                                       request=request, context=context)
         
         return ExtUIScriptResult(base.get_edit_window(win))
     
@@ -198,6 +203,11 @@ class ListNewRowWindowAction(Action):
         if not win.title:
             win.title = base.title
         win.form.url = base.save_row_action.get_absolute_url()
+        
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
+        if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
+            win.configure_for_dictpack(action=self, pack=self.parent,
+                                       request=request, context=context)
         
         return ExtUIScriptResult(base.get_edit_window(win))
         
@@ -224,6 +234,11 @@ class TreeEditNodeWindowAction(Action):
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             win.make_read_only(access_off = True, exclude_list = ['close_btn','cancel_btn'])
+        
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
+        if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
+            win.configure_for_dictpack(action=self, pack=self.parent,
+                                       request=request, context=context)
         
         return ExtUIScriptResult(base.get_node_edit_window(win))
     
