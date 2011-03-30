@@ -1,8 +1,9 @@
 #coding:utf-8
 
 from django.db import models, connection, transaction, IntegrityError, router
-from django.db.models.query import QuerySet, delete_objects
-from django.db.models.query_utils import CollectedObjects
+from django.db.models.query import QuerySet
+from django.db.models.deletion import Collector
+
 from m3.core.exceptions import RelatedError
 
 def safe_delete(model):
@@ -121,17 +122,19 @@ class BaseObjectModel(models.Model):
         """
         return safe_delete(self)
 
-    def get_related_objects(self):
+    def get_related_objects(self, using=None):
         """
         Возвращает структуру содержащую классы моделей, первичные ключи и экземпляры записей,
         зависящие от текущей записи. Возвращаемая структура имеет вид:
         [(КлассМодели1, {id1: ЭкземплярМодели1cID1, id2: ЭкземплярМодели1cID2, ...} ),
          (КлассМодели2, {id1: ЭкземплярМодели2cID1, id2: ЭкземплярМодели2cID2, ...} },
          ...]
+        @deprecated: Вытаскивает много данных. Сервер может зависнуть!
         """
-        seen_objs = CollectedObjects()
-        self._collect_sub_objects(seen_objs)
-        return seen_objs.items()
+        using = using or router.db_for_write(self.__class__, instance=self)
+        collector = Collector(using=using)
+        collector.collect([self])
+        return collector.data.items()
     
     def delete_related(self, affected=None, using=None):
         """
@@ -144,20 +147,21 @@ class BaseObjectModel(models.Model):
         """
         # Кописаст из django.db.models.Model delete()
         using = using or router.db_for_write(self.__class__, instance=self)
-        assert self._get_pk_val()!=None, "%s object can't be deleted because its %s attribute is set to None." %\
-                                         (self._meta.object_name, self._meta.pk.attname)
+        assert self._get_pk_val() is not None, "%s object can't be deleted because its %s attribute is set to None." % (self._meta.object_name, self._meta.pk.attname)
+
+        collector = Collector(using=using)
+        collector.collect([self])
+        # cut
         
         affected = affected or []
         assert isinstance(affected, list), 'Affected models must be the list type'
         affected.append(self.__class__)
         
-        seen_objs = CollectedObjects()
-        self._collect_sub_objects(seen_objs)
-        for model, _ in seen_objs.iteritems():
+        for model in collector.data.keys():
             if model not in affected:
                 return False
-         
-        delete_objects(seen_objs, using)
+        
+        collector.delete()
         return True
 
     class Meta:
