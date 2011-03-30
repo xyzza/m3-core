@@ -16,3 +16,9 @@
 .designer-icon-datefield {
     background-image:url(../images/date-field.png) !important;
 }
+.designer-panel {
+    background-image:url(../images/panel.png) !important;
+}
+.designer-tab-panel {
+    background-image:url(../images/tab-panel.png) !important;
+}

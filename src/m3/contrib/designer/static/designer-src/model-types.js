@@ -42,7 +42,7 @@ ModelTypeLibrary = Ext.apply(Object, {
             toolboxData:{
                 text:'Panel'
             },
-            treeIconCls:'icon-heart'
+            treeIconCls:'designer-panel'
         },
         tabPanel:{
             isContainer:true,
@@ -63,7 +63,7 @@ ModelTypeLibrary = Ext.apply(Object, {
             toolboxData:{
                 text:'Tab panel'
             },
-            treeIconCls:'icon-heart'
+            treeIconCls:'designer-tab-panel'
         },
         textField:{
             properties:{
