@@ -12832,7 +12832,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				{name: 'addr_name'}
 			]
 		});
-		if (params.place_record != '') {
+		if (params.place_record != '' && params.place_record != undefined) {
 			var rec = Ext.util.JSON.decode(params.place_record);
     		place_store.loadData({total:1, rows:[rec]});
 		}
@@ -12887,7 +12887,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					{name: 'name'}
 				]
 			});
-			if (params.street_record != '') {
+			if (params.street_record != '' && params.street_record != undefined) {
 				var rec = Ext.util.JSON.decode(params.street_record);
 				street_store.loadData({total:1, rows:[rec]});
 			}
