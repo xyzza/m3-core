@@ -248,6 +248,11 @@ class TreeNewNodeWindowAction(Action):
             win.title = base.title
         win.form.url = base.save_node_action.get_absolute_url()
         
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
+        if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
+            win.configure_for_dictpack(action=self, pack=self.parent,
+                                       request=request, context=context)
+        
         return ExtUIScriptResult(base.get_node_edit_window(win))
 
 class TreeDragAndDropAction(Action):

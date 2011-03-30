@@ -144,7 +144,12 @@ class DictEditWindowAction(Action):
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             exclude_list = ['close_btn', 'cancel_btn']
             win.make_read_only(True, exclude_list)
-            
+        
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
+        if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
+            win.configure_for_dictpack(action=self, pack=self.parent,
+                                       request=request, context=context)
+        
         return ExtUIScriptResult(base.get_edit_window(win))
 
 class DictRowsAction(Action):
