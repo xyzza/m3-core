@@ -43,7 +43,15 @@ ModelUtils = Ext.apply(Object,{
             case 'tabPanel':
                 return new Ext.TabPanel(
                     Ext.apply(cfg,{
-                        deferredRender:false
+                        deferredRender:false,
+                        activeTab: model.attributes.activeTabId ?
+                                model.attributes.activeTabId : model.attributes.properties.activeTab,
+                        listeners:{
+                            tabchange:function(panel, tab) {
+                                var tabPanelModel = model.ownerTree.findModelById(panel.id);
+                                tabPanelModel.attributes.activeTabId = tab.id;
+                            }
+                        }
                     })
                 );
             break;
