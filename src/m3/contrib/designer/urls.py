@@ -24,4 +24,5 @@ urlpatterns = patterns('',
     
     (r'^designer$','designer.ide.views.designer'),
     (r'^designer/fake$','designer.ide.views.designer_fake_data'),
+    (r'designer/save$','designer.ide.views.designer_save')
 )

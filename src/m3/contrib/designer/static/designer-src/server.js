@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Crafted by ZIgi
  */
 
@@ -33,8 +33,20 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
             failure:this._onLoadFailure.createDelegate(this)
         });
     },
-    saveModel:function(){
-        // Not implemented yet
+    saveModel:function(dataObj){
+        this.mask = new Ext.LoadMask(this.maskEl, {
+            msg:'Сохранение данных...'
+        });
+        this.mask.show();
+        Ext.Ajax.request({
+            url:this.saveUrl,
+            params:{
+                id:this.id,
+                data:Ext.util.JSON.encode( dataObj )
+            },
+            success:this._onSaveSuccess.createDelegate(this),
+            failure:this._onSaveFailure.createDelegate(this)
+        });
     },
     _onLoadSuccess:function(response, opts) {
         var obj = Ext.util.JSON.decode(response.responseText);
@@ -45,5 +57,13 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
         this.mask.hide();
         uiAjaxFailMessage(response, opts);
         //Ext.Msg.alert('Ошибка','Произошла ошибка при формировании данных документа');
+    },
+    _onSaveSuccess:function(response, opts) {
+        this.mask.hide();
+        this.fireEvent('save');
+    },
+    _onSaveFailure:function(response, opts) {
+        this.mask.hide();
+        uiAjaxFailMessage(response,opts);
     }
 });

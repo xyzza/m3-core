@@ -7,7 +7,7 @@
  */
 
 Bootstrapper = Ext.extend(Object, {
-    start:function(dataUrl) {
+    start:function(dataUrl,saveUrl) {
 
         var designPanel = new Ext.Panel({
             layout:'fit',
@@ -25,7 +25,34 @@ Bootstrapper = Ext.extend(Object, {
             enableDD:true,
             animate:false,
             rootVisible:false,
-            title:'Дерево компонентов'
+            title:'Дерево компонентов',
+            contextMenu: new Ext.menu.Menu({
+                items: [{
+                    id: 'delete-node',
+                    text: 'Удалить'
+                }],
+                listeners: {
+                    itemclick: function(item) {
+                        switch (item.id) {
+                            case 'delete-node':
+                                  alert('Fuck not implemented');
+//                                var n = item.parentMenu.contextNode;
+//                                if (n.parentNode) {
+//                                    n.remove();
+//                                }
+                                break;
+                        }
+                    }
+                }
+            }),
+            listeners: {
+                contextmenu: function(node, e) {
+                    node.select();
+                    var c = node.getOwnerTree().contextMenu;
+                    c.contextNode = node;
+                    c.showAt(e.getXY());
+                }
+            }
         });
 
         var toolbox = new Ext.tree.TreePanel({
@@ -39,6 +66,19 @@ Bootstrapper = Ext.extend(Object, {
             animate:false,
             rootVisible:false,
             title:'Инструменты'
+        });
+
+        var application = new AppController({
+            tree:componentTree,
+            designPanel:designPanel,
+            toolbox:toolbox
+        });
+
+         var storage = new ServerStorage({
+            id:0,
+            loadUrl:dataUrl,
+            saveUrl:saveUrl, 
+            maskEl:Ext.getBody()
         });
 
         var eastWrapper = new Ext.Panel({
@@ -60,7 +100,10 @@ Bootstrapper = Ext.extend(Object, {
             buttons:[
                 new Ext.Button({
                     text:'Сохранить',
-                    iconCls:'icon-disk'
+                    iconCls:'icon-disk',
+                    handler: function() {
+                            storage.saveModel(application.getTransferObject());
+                    }
                 }),
                 new Ext.Button({
                     text:'Отмена',
@@ -75,23 +118,14 @@ Bootstrapper = Ext.extend(Object, {
                 viewportWrapper
             ]
 	    });
-        var storage = new ServerStorage({
-            id:0,
-            loadUrl:dataUrl,
-            maskEl:Ext.getBody()
-        });
-
-        //а вот тут настоящее приложение
-        var application = new AppController({
-            tree:componentTree,
-            designPanel:designPanel,
-            toolbox:toolbox
-        });
-
         storage.on('load',
                 function(jsonObj){
                     application.init(jsonObj);
                 });
+
+        storage.on('save', function() {
+            alert('Save ok')
+        });
 
         storage.loadModel();
     }

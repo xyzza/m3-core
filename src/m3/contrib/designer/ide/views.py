@@ -26,7 +26,8 @@ def get_project_files(request):
 
 def designer(request):
     return render_to_response('designer.html', {
-        'data_url' : '/designer/fake'
+        'data_url' : '/designer/fake',
+        'save_url' : '/designer/save'
     })
 
 def designer_fake_data(request):
@@ -39,5 +40,9 @@ def designer_fake_data(request):
             'type':'window',
             'id':0
         }
+
     return HttpResponse(content_type='application/json', 
                         content = json.dumps(result))
+
+def designer_save(request):
+    return HttpResponse(content = 'OK')

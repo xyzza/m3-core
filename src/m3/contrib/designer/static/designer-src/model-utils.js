@@ -68,14 +68,12 @@ ModelUtils = Ext.apply(Object,{
     * Подготавливает данные модели для отправки на сервер. Объект выглядит следующим образом:
     * {
     *   model:{ //сама модель
-     *      id:507, //это серверный id, или 0 для новых компонентов
     *       type:'document',
     *       name:'fofofo',
     *       items:[]
     *   },
     *   deletedModels:[
     *       {
-    *           id:508,
     *           type:'date',
     *           name:'Bla-bla'
     *       }
@@ -84,13 +82,11 @@ ModelUtils = Ext.apply(Object,{
     */
     buildTransferObject:function(model){
         var result = {};
-        var prepareId = function(dataObject){
-            dataObject.id = dataObject.serverId ? dataObject.serverId : 0;
-        };
 
         var doRecursion = function(model) {
-            var node = Ext.apply({}, model.attributes);
-            prepareId(node);
+            var node = {};
+            Ext.apply(node.properties, model.attributes.properties);
+            Ext.apply(node.type, model.attributes.type);
             if (model.hasChildNodes()) {
                 node.items = [];
                 for (var i = 0; i < model.childNodes.length; i++){

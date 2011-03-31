@@ -2,6 +2,10 @@
  * Crafted by ZIgi
  */
 
+/*
+ * Класс хранит в себе информацию о возможных типах компонентов, доступных им свойст, отображение в тулбоксе
+ */
+
 ModelTypeLibrary = Ext.apply(Object, {
     typesConfig:{
         panel:{
@@ -27,7 +31,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:0
                 },
                 flex:{
-                    defaultValue:''
+                    defaultValue:'undefined'
                 },
                 labelWidth:{
                     defaultValue:100
