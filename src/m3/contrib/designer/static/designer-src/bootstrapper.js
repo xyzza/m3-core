@@ -26,6 +26,7 @@ Bootstrapper = Ext.extend(Object, {
             animate:false,
             rootVisible:false,
             title:'Дерево компонентов',
+            autoScroll: true,
             contextMenu: new Ext.menu.Menu({
                 items: [{
                     id: 'delete-node',
@@ -61,6 +62,7 @@ Bootstrapper = Ext.extend(Object, {
             ddGroup:'designerDDGroup',
             enableDD:true,
             animate:false,
+            autoScroll: true,
             rootVisible:false,
             title:'Инструменты'
         });

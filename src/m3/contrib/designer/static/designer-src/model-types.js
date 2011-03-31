@@ -11,6 +11,9 @@ ModelTypeLibrary = Ext.apply(Object, {
         panel:{
             isContainer:true,
             properties:{
+                autoScroll:{
+                    defaultValue:false    
+                },
                 layout:{
                     defaultValue:'auto',
                     isInitProperty:true
@@ -44,7 +47,8 @@ ModelTypeLibrary = Ext.apply(Object, {
                 }
             },
             toolboxData:{
-                text:'Panel'
+                text:'Panel',
+                category:'Containers'
             },
             treeIconCls:'designer-panel'
         },
@@ -65,7 +69,8 @@ ModelTypeLibrary = Ext.apply(Object, {
                 }
             },
             toolboxData:{
-                text:'Tab panel'
+                text:'Tab panel',
+                category:'Containers'
             },
             treeIconCls:'designer-tab-panel'
         },
@@ -83,7 +88,8 @@ ModelTypeLibrary = Ext.apply(Object, {
                 }
             },
             toolboxData:{
-                text:'Text field'
+                text:'Text field',
+                category:'Fields'
             },
             treeIconCls:'designer-icon-text'
         },
@@ -150,16 +156,39 @@ ModelTypeLibrary = Ext.apply(Object, {
      */
     getToolboxData:function() {
         var result = [];
+        var categories = {};
+
         for (var type in this.typesConfig){
            if (!this.typesConfig[type].hasOwnProperty('toolboxData')) {
                 continue;
            };
+
+           var currentType = this.typesConfig[type];
+
            var node = new Ext.tree.TreeNode({
                text:this.typesConfig[type]['toolboxData'].text,
                type:type,
                iconCls:this.typesConfig[type]['treeIconCls']
            });
-            result.push(node);
+
+           if (currentType['toolboxData'].hasOwnProperty('category')) {
+
+               if (categories[currentType['toolboxData']['category']]) {
+                   categories[currentType['toolboxData']['category']].appendChild(node);
+               }
+               else {
+                   var categoryNode = new Ext.tree.TreeNode({
+                       text:currentType['toolboxData']['category'],
+                       allowDrag:false
+                   });
+                   categories[currentType['toolboxData']['category']] = categoryNode; 
+                   categoryNode.appendChild(node);
+                   result.push(categoryNode);
+               }
+           }
+           else {
+               result.push(node);
+           }
         }
         return result;
     }

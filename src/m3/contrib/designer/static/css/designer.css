@@ -22,3 +22,19 @@
 .designer-tab-panel {
     background-image:url(../images/tab-panel.png) !important;
 }
+
+.x-tree-lines .x-tree-elbow-plus {
+    background-image:url(../images/designer-plus.png) !important;
+}
+
+.x-tree-lines .x-tree-elbow-minus {
+    background-image:url(../images/designer-minus.png) !important;
+}
+
+.x-tree-lines .x-tree-elbow-end-plus {
+    background-image:url(../images/designer-plus.png) !important;
+}
+
+.x-tree-lines .x-tree-elbow-end-minus {
+    background-image:url(../images/designer-minus.png) !important;
+}
