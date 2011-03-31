@@ -29,17 +29,14 @@ Bootstrapper = Ext.extend(Object, {
             contextMenu: new Ext.menu.Menu({
                 items: [{
                     id: 'delete-node',
-                    text: 'Удалить'
+                    text: 'Удалить',
+                    iconCls:'delete_item'
                 }],
                 listeners: {
                     itemclick: function(item) {
                         switch (item.id) {
                             case 'delete-node':
-                                  alert('Fuck not implemented');
-//                                var n = item.parentMenu.contextNode;
-//                                if (n.parentNode) {
-//                                    n.remove();
-//                                }
+                                  onTreeNodeDeleteClick(item);
                                 break;
                         }
                     }
@@ -118,6 +115,7 @@ Bootstrapper = Ext.extend(Object, {
                 viewportWrapper
             ]
 	    });
+
         storage.on('load',
                 function(jsonObj){
                     application.init(jsonObj);
@@ -128,5 +126,9 @@ Bootstrapper = Ext.extend(Object, {
         });
 
         storage.loadModel();
+
+        function onTreeNodeDeleteClick(item) {
+            application.onTreeNodeDeleteClick(item.parentMenu.contextNode);
+        }
     }
 });
