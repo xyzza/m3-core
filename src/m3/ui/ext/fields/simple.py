@@ -54,14 +54,22 @@ class ExtStringField(BaseExtField):
         
         #
         self.select_on_focus = None
+        
+        # маска ввода, например "(###)###-##-##"
+        # форматирует строку при вводе
+        self.input_mask = None
+        
         self.init_component(*args, **kwargs)
 
     def render_base_config(self):
+        if self.input_mask:
+            self.plugins.append("new Ext.ux.Mask('%s')" % self.input_mask)
         super(ExtStringField, self).render_base_config()
         self._put_config_value('inputType', self.input_type)
         self._put_config_value('maskRe', self.t_render_mask_re, self.mask_re)
         self._put_config_value('selectOnFocus', self.select_on_focus)
         self._put_config_value('enableKeyEvents', self.enable_key_events, self.enable_key_events)
+        
 
     def t_render_mask_re(self):
         return '/%s/' % self.mask_re
