@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Crafted by ZIgi
  */
 
@@ -71,7 +71,7 @@ DesignView = Ext.extend(BaseView, {
         this._container.doLayout(true, true);
     },
     _createComponent:function(model) {
-        return ModelUtils.buildExtUIComponent(model);
+        return ModelUIPresentaitionBuilder.build(model);
     }
 });
 
