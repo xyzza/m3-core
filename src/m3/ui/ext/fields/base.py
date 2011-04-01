@@ -120,7 +120,10 @@ class BaseExtField(ExtUIComponent):
 
         # Текст, который будет отображаться, если поле заполненно некорректно
         self.invalid_text = None
-
+        
+        # Плагины к полям ввода
+        self.plugins = []
+   
     def t_render_label_style(self):
         return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
 
@@ -183,8 +186,8 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('invalidClass', self.invalid_class)
         self._put_config_value('hideLabel', self.hide_label)
         self._put_config_value('invalidText', self.invalid_text)
-
-
+        self._put_config_value('plugins', (lambda: '[%s]' % ','.join(self.plugins)), self.plugins)
+        
 
 class BaseExtTriggerField(BaseExtField):
     '''
