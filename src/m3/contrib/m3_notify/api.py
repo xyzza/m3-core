@@ -1,22 +1,34 @@
 #coding:utf-8
 import threading
+
 from django.conf import settings
 from django.template import Template
+from django.template.loader import find_template
 from django.utils.importlib import import_module
-from m3.contrib.m3_notify.models import NotifyTemplate
+from m3.contrib.m3_notify import M3NotifyException
+from m3.contrib.m3_notify.backend import BackendFactory
+
+from m3.contrib.m3_notify.models import NotifyTemplate, NotifyMessageParentTypeEnum, BackendTypeEnum
 
 __author__ = 'daniil-ganiev'
 
 
 class NotificationMessage(object):
     def __init__(self, *args, **kwargs):
-
         self.template_id = kwargs.get('template_id')
         self.description = kwargs.get('description')
-        self.default_template = kwargs.get('default_template')
+        self.default_template_file = kwargs.get('default_template_file')
         self.default_template_text = kwargs.get('default_template_text', 'Пустой шаблон')
 
-#        self._template = Template()
+        if self.default_template_file:
+            self.default_template_text = find_template(self.default_template_file)[0]
+
+        self.parent_type = kwargs.get('parent_type', NotifyMessageParentTypeEnum.DEFAULT)
+        self.default_backend = kwargs.get('default_backend', BackendTypeEnum.EMAIL)
+
+    def form_django_template(self):
+        '''Формирует джанговский объект Template на основе своих данных'''
+        return Template(self.default_template_text)
 
 class NotifyManager:
     '''Менеджер рассылки шаблонных уведомлений. Синглтон'''
@@ -35,11 +47,11 @@ class NotifyManager:
         # К сожалению не работает с новыми объектами =(
         self.__dict__ = self.__shared_state
 
-    def make_notify_message_from_model(self, notify_template):
-        return NotificationMessage(template_id=notify_template.template_id,
-                                   description=notify_template.description,
-                                   default_template_text=notify_template.body
-        )
+    def _clear_settings(self):
+        '''Очищает настройки, чтобы менеджер был как новый'''
+        self.is_loaded = False
+        self.is_loaded_from_bd = False
+        self.messages.clear()
 
     def _populate_from_bd(self):
         '''Собирает перегруженные шаблоны рассылки из базы данных'''
@@ -48,6 +60,8 @@ class NotifyManager:
 
         self._write_lock.acquire()
         try:
+            if self.is_loaded_from_bd:
+                return False
             for template in NotifyTemplate.objects.all():
                 message = self.make_notify_message_from_model(template)
                 if self._validate_notify_message(message, is_from_bd=True):
@@ -89,8 +103,21 @@ class NotifyManager:
                 isinstance(notify_message, NotificationMessage) and
                 notify_message.template_id and
                 notify_message.template_id.strip() and
-#                isinstance(notify_message.default_listener, ExtensionListener) and
                 (is_from_bd or not self.messages.has_key(notify_message.template_id))
+        )
+
+    def repopulate(self):
+        '''Пересобирает шаблоны из приложения и из бд'''
+        self._clear_settings()
+        self._populate()
+
+    def make_notify_message_from_model(self, notify_template):
+        '''Превращает данные из модели БД в объект, воспринимаемый менеджером'''
+        return NotificationMessage(template_id=notify_template.template_id,
+                                   description=notify_template.description,
+                                   default_template_text=notify_template.body,
+                                   parent_type = NotifyMessageParentTypeEnum.DB,
+                                   default_backend=notify_template.default_backend
         )
 
     def register_notify_message(self, notify_message):
@@ -104,11 +131,33 @@ class NotifyManager:
         message_key = notify_message.template_id.strip()
         self.messages[message_key] = notify_message
 
+    def is_fully_loaded(self):
+        return self.is_loaded and self.is_loaded_from_bd
 
-#    def send_notify_message(self, template_id, backend=None, recipient = None):
-#        if not self.is_loaded:
-#            self._populate()
+    def get_messages(self):
+        if not self.is_fully_loaded():
+            self._populate()
+            
+        return self.messages
 
+    def send_message(self, template_id, context, recipients=(),
+                     backend_type=None, subject = None):
 
+        if not self.is_fully_loaded():
+            self._populate()
 
+        try:
+            message = self.messages[template_id]
+        except KeyError:
+            raise M3NotifyException(u'Не найдено шаблона с таким идентификатором')
 
+        template = message.form_django_template()
+
+        if not backend_type:
+            backend_type = message.default_backend
+        try:
+            backend = BackendFactory().create_backend(backend_type)
+            backend.add(template, context, recipients, subject=subject)
+            backend.send()
+        except Exception, ex:
+            raise M3NotifyException(u'Не удалось отправить письмо'+ex)

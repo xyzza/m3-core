@@ -6,9 +6,25 @@ from m3.db import BaseObjectModel, BaseEnumerate
 __author__ = 'daniil-ganiev'
 
 class BackendTypeEnum(BaseEnumerate):
+    '''
+    Тип средства коммуникации, по которому будет вестись рассылка
+    (Твиттер, эл. почта, и т.п.)
+    '''
     EMAIL = 1
 
-    values = {EMAIL: 'Электронная почта'}
+    values = {EMAIL: u'Электронная почта'}
+
+
+class NotifyMessageParentTypeEnum(BaseEnumerate):
+    '''
+    Тип шаблона, который указывает на то, создал ли шаблон пользователь с
+    помощью интерфейса
+    '''
+    DEFAULT = 1
+    DB = 2
+
+    values = {DEFAULT: u'Встроен в приложение',
+              DB: u'Создан или изменен пользователем'}
 
 
 class NotifyTemplate(BaseObjectModel):
