@@ -24,19 +24,25 @@ class ContragentActionPack(actions.ActionPack):
     
     def __init__(self):
         super(ContragentActionPack, self).__init__()
+        self.contact_save_action = SaveContragentContactAction()
+        self.address_save_action = SaveContragentAddressAction()
+        self.bank_detail_save_action = SaveContragentBankDetailsAction()
         self.actions.extend([ContragentContactListWindowAction(),
                              DataContragentContactAction(),
-                             SaveContragentContactAction(),
+                             self.contact_save_action,
+                             EditContragentContactAction(),
                              DeleteContragentContactAction(),
                              
                              ContragentAddressListWindowAction(),
                              DataContragentAddressAction(),
-                             SaveContragentAddressAction(),
+                             self.address_save_action,
+                             EditContragentAddressAction(),
                              DeleteContragentAddressAction(),
                              
                              ContragentBankDetailListWindowAction(),
                              DataContragentBankDetailsAction(),
-                             SaveContragentBankDetailsAction(),
+                             self.bank_detail_save_action,
+                             EditContragentBankDetailsAction(),
                              DeleteContragentBankDetailsAction(),])
         
         
@@ -94,6 +100,8 @@ class SaveContragentContactAction(actions.Action):
     
     def run(self, request, context):
         
+        create_new = context.contragent_contact_id == 0
+        win = ui.ContragentContactsEditWindow(create_new)
         if (not context.contragent_id and 
             not context.contragent_contact_id):
             raise ApplicationLogicException(u'Не указан контрагент для сохранения нового контакта')
@@ -104,10 +112,39 @@ class SaveContragentContactAction(actions.Action):
             contact = models.ContragentContact()
             contact.contragent_id = api.get_contragent_by_id(context.contragent_id)
         
-        # TODO: написать форму с данными контакта и 
-        pass
+        win.form.bind_to_request(request)
+        win.form.to_object(contact)
+        contact.save()
+        return actions.OperationResult()
         
 
+class EditContragentContactAction(actions.Action):
+    '''
+    Получение окна редактирования контакта
+    '''
+    url = '/contacts-edit'
+    shortname = 'm3-contragents-contacts-edit'
+    
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_id', type=int, required=True, default=0),
+                actions.ACD(name='contragent_contact_id', type=int, required=True, default=0)]  
+        
+    def run(self, request, context):
+        win = None
+        if context.contragent_contact_id == 0:
+            win = ui.ContragentContactsEditWindow(create_new=True)
+        else:
+            win = ui.ContragentContactsEditWindow(create_new=False)
+            reg = models.ContragentContact.objects.get(id=context.contragent_contact_id)
+            win.form.from_object(reg)
+        
+        if context.contragent_id:
+            win.contragent.value = context.contragent_id
+        
+        win.form.url = self.parent.contact_save_action.get_absolute_url()
+        return actions.ExtUIScriptResult(win)    
+    
+    
 class DeleteContragentContactAction(actions.Action):
     '''
     Удаление контакта контрагента
@@ -173,6 +210,8 @@ class SaveContragentAddressAction(actions.Action):
                 actions.ACD(name='contragent_address_id', type=int, required=True, default=0)]
     
     def run(self, request, context):
+        create_new = context.contragent_address_id == 0
+        win = ui.ContragentAddressesEditWindow(create_new)
         if (not context.contragent_id and 
             not context.contragent_address_id):
             raise ApplicationLogicException(u'Не указан контрагент для сохранения нового контакта')
@@ -183,9 +222,40 @@ class SaveContragentAddressAction(actions.Action):
             address = models.ContragentAddress()
             address.contragent_id = api.get_contragent_by_id(context.contragent_id)
         
-        # TODO: написать форму с данными адресов 
-        pass
+        win.form.bind_to_request(request)
+        win.form.to_object(address)
+        address.save()
+        
+        return actions.OperationResult()
+ 
+ 
+class EditContragentAddressAction(actions.Action):
+    '''
+    Получение окна редактирования контакта
+    '''
+    url = '/address-edit'
+    shortname = 'm3-contragents-address-edit'
     
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_id', type=int, required=True, default=0),
+                actions.ACD(name='contragent_address_id', type=int, required=True, default=0)]  
+        
+    def run(self, request, context):
+        win = None
+        if context.contragent_address_id == 0:
+            win = ui.ContragentAddressesEditWindow(create_new=True)
+        else:
+            win = ui.ContragentAddressesEditWindow(create_new=False)
+            reg = models.ContragentAddress.objects.get(id=context.contragent_address_id)
+            win.form.from_object(reg)
+        
+        if context.contragent_id:
+            win.contragent.value = context.contragent_id
+        
+        win.form.url = self.parent.address_save_action.get_absolute_url()
+        return actions.ExtUIScriptResult(win)  
+    
+        
 class DeleteContragentAddressAction(actions.Action):
     '''
     Удаление контакта контрагента
@@ -201,7 +271,7 @@ class DeleteContragentAddressAction(actions.Action):
         return actions.OperationResult.by_message(message)
     
 #===============================================================================
-# Работа с адресами контрагента
+# Работа с банковскими реквизитами контрагента
 #===============================================================================
 
 class ContragentBankDetailListWindowAction(actions.Action):
@@ -250,6 +320,8 @@ class SaveContragentBankDetailsAction(actions.Action):
                 actions.ACD(name='contragent_bank_detail_id', type=int, required=True, default=0)]
     
     def run(self, request, context):
+        create_new = context.contragent_bank_detail_id == 0
+        win = ui.ContragentBankDetailsEditWindow(create_new)
         if (not context.contragent_id and 
             not context.contragent_bank_detail_id):
             raise ApplicationLogicException(u'Не указан контрагент для сохранения нового контакта')
@@ -260,9 +332,40 @@ class SaveContragentBankDetailsAction(actions.Action):
             bank_detail = models.ContragentBankDetail()
             bank_detail.contragent_id = api.get_contragent_by_id(context.contragent_id)
         
-        # TODO: написать форму с данными адресов 
-        pass
+        win.form.bind_to_request(request)
+        win.form.to_object(bank_detail)
+        bank_detail.save()
+        
+        return actions.OperationResult()
+ 
+ 
+class EditContragentBankDetailsAction(actions.Action):
+    '''
+    Получение окна редактирования контакта
+    '''
+    url = '/bank-details-edit'
+    shortname = 'm3-contragents-bank-details-edit'
     
+    def context_declaration(self):
+        return [actions.ACD(name='contragent_id', type=int, required=True, default=0),
+                actions.ACD(name='contragent_bank_detail_id', type=int, required=True, default=0)]  
+        
+    def run(self, request, context):
+        win = None
+        if context.contragent_bank_detail_id == 0:
+            win = ui.ContragentBankDetailsEditWindow(create_new=True)
+        else:
+            win = ui.ContragentBankDetailsEditWindow(create_new=False)
+            reg = models.ContragentBankDetail.objects.get(id=context.contragent_bank_detail_id)
+            win.form.from_object(reg)
+        
+        if context.contragent_id:
+            win.contragent.value = context.contragent_id
+        
+        win.form.url = self.parent.bank_detail_save_action.get_absolute_url()
+        return actions.ExtUIScriptResult(win) 
+    
+       
 class DeleteContragentBankDetailsAction(actions.Action):
     '''
     Удаление банковских реквизитов контрагента
