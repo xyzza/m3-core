@@ -340,6 +340,8 @@ td.ux-taskButtons-edge {
 
 .ux-start-menu-tools-panel ul.x-menu-list li.x-menu-list-item a.x-menu-item {
 	color:#ffffff;
+    height: 32px;
+    padding-left: 45px;
 }
 
 .ux-start-menu-tools-panel ul.x-menu-list li.x-menu-list-item .x-menu-item-active a.x-menu-item {
@@ -637,4 +639,18 @@ td.ux-taskButtons-edge {
 	font-size:1px;
 	line-height:1px;
 	margin:2px 3px;
+}
+
+.default-launcher-icon {
+    height: 32px; !important;
+    width: 32px; !important;
+}
+
+a.x-menu-item{
+    line-height: 32px;
+    padding-left: 45px;
+}
+.x-menu {
+    background-color: #F0F0F0;
+    background-image: none;
 }
