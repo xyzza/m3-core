@@ -8,6 +8,9 @@ Created on 08.02.2011
 from m3.helpers import validation
 from m3.helpers import queries
 from m3.db.api import get_object_by_id
+
+from m3.core.plugins import extension_point
+
 from models import (ContragentTypeEnum,
                     Contragent,
                     ContragentGroup,
@@ -317,3 +320,15 @@ def delete_contragent_bank_detail(bank_detail):
     либо выдается исключительная ситуация.
     '''
     return _delete_contragent_detail(bank_detail, ContragentBankDetail)
+
+#===============================================================================
+# Обработчики точек расширения 
+#===============================================================================
+
+DETAIL_NEW = 0
+DETAIL_EDIT = 1
+DETAIL_DELETE = 2
+
+@extension_point(name='m3-contragents.detail-changed')
+def detail_changed(user, detail, operation_type, *args, **kwargs):
+    pass
