@@ -3,6 +3,7 @@ import threading
 
 from django.conf import settings
 from django.template import Template
+from django.template.context import Context
 from django.template.loader import find_template
 from django.utils.importlib import import_module
 from m3.contrib.m3_notify import M3NotifyException
@@ -145,6 +146,9 @@ class NotifyManager:
 
         if not self.is_fully_loaded():
             self._populate()
+
+        if isinstance(context,dict):
+            context = Context(context)        
 
         try:
             message = self.messages[template_id]

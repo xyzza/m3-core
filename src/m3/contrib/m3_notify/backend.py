@@ -41,9 +41,10 @@ class EMailBackend(Backend):
         kwargs['body'] = template.render(context)
         kwargs['from_email'] = kwargs.get('from_email', EMailBackend.ADDR_FROM)
 
-        to_recipients = self.ADDR_TO
+        to_recipients = []
+        to_recipients.extend(self.ADDR_TO)
         if recipients:
-            to_recipients = to_recipients.extend(recipients)
+            to_recipients.extend(recipients)
         kwargs['to'] = kwargs.get('to', to_recipients)
 
         msg = EmailMessage(**kwargs)
