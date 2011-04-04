@@ -52,6 +52,47 @@ ModelTypeLibrary = Ext.apply(Object, {
             },
             treeIconCls:'designer-panel'
         },
+        fieldSet:{
+            isContainer:true,
+            properties:{
+                layout:{
+                    defaultValue:'form',
+                    isInitProperty:true
+                },
+                title:{
+                    defaultValue:'New fieldset',
+                    isInitProperty:true
+                },
+                name:{
+                    defaultValue:'New fieldset',
+                    isInitProperty:true
+                },
+                // ATTENTION:EXT не понимает строки в качестве высоты и ширины панели, поэтому тут число
+                height:{
+                    defaultValue:0
+                },
+                width:{
+                    defaultValue:0
+                },
+                flex:{
+                    defaultValue:'undefined'
+                },
+                labelWidth:{
+                    defaultValue:100
+                },
+                labelAlign:{
+                    defaultValue:'left'
+                },
+                padding:{
+                    defaultValue:'undefined'
+                }
+            },
+            toolboxData:{
+                text:'Field set',
+                category:'Containers'
+            },
+            treeIconCls:'designer-icon-fieldset'
+        },
         tabPanel:{
             isContainer:true,
             properties:{
@@ -92,6 +133,90 @@ ModelTypeLibrary = Ext.apply(Object, {
                 category:'Fields'
             },
             treeIconCls:'designer-icon-text'
+        },
+        comboBox: {
+            properties: {
+                fieldLabel:{
+                    defaultValue:''
+                },
+                name:{
+                    defaultValue:'New text field',
+                    isInitProperty:true
+                },
+                anchor:{
+                    defaultValue:'auto'
+                },
+                triggerAction:{
+                    defaultValue:'all',
+                    isInitProperty:true
+                },
+                valueField:{
+                    defaultValue:'myId',
+                    isInitProperty:true
+                },
+                displayField:{
+                    defaultValue:'displayText',
+                    isInitProperty:true        
+                },
+                store:{
+                    defaultValue: new Ext.data.ArrayStore({
+                                id: 0,
+                                fields: [
+                                    'myId',
+                                    'displayText'
+                                ],
+                                data: [[1, 'item1'], [2, 'item2']]
+                            }),
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                text:'Combo box',
+                category:'Fields'
+            },
+            treeIconCls:'designer-icon-combo'
+        },
+        gridPanel:{
+            isContainer: true,
+            properties: {
+                name:{
+                    defaultValue:'Grid panel',
+                    isInitProperty:true
+                },
+                title: {
+                    defaultValue:'New grid',
+                    isInitProperty:true
+                },
+                autoExpandColumn: {
+                    defaultValue:''
+                }
+            },
+            treeIconCls:'icon-tux',
+            toolboxData:{
+                text:'Grid panel',
+                category:'Grid'
+            }
+
+        },
+        gridColumn:{
+            properties: {
+                name:{
+                    defaultValue:'New column',
+                    isInitValue:true
+                },
+                header:{
+                    defaultValue:'New column',
+                    isInitValue:true
+                },
+                dataIndex:{
+                    defaultValue:'Foo',
+                    isInitValue:true
+                }
+            },
+            toolboxData: {
+                text:'Grid column',
+                category:'Grid'
+            }
         },
         window:{
             properties: {

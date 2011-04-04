@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Crafted by ZIgi
  */
 
@@ -21,12 +21,39 @@ ModelUIPresentaitionBuilder = function() {
         panel:function(model, cfg) {
             return new Ext.Panel(cfg);
         },
+        fieldSet:function(model, cfg) {
+            return new Ext.form.FieldSet(cfg);    
+        },
         textField:function(model, cfg) {
             return new Ext.form.TextField(
                     Ext.apply(cfg,{
                         readOnly:true
                     })
                 );
+        },
+        comboBox:function(model, cfg) {
+            var store = new Ext.data.ArrayStore({
+            autoDestroy:true,
+            idIndex:0,
+            fields:['name'],
+            data:['foo','bar']
+        });
+            var result = new Ext.form.ComboBox({
+                store:store,
+                displayField:'name',
+                mode:'local',
+                triggerAction:'all',
+                editable:false,
+                selectOnFocus:true,
+                fieldLabel:'fukken test',
+                lazyInit:false,
+                value:'foo'
+            });
+            return result;
+
+//            return new Ext.form.ComboBox(
+//                    cfg
+//                    );
         },
         tabPanel:function(model, cfg) {
             return new Ext.TabPanel(
@@ -42,6 +69,51 @@ ModelUIPresentaitionBuilder = function() {
                         }
                     })
                 );
+        },
+        gridPanel:function(model, cfg) {
+            return new Ext.grid.GridPanel({
+                store: new Ext.data.Store({
+                    autoDestroy: true
+                    //reader: reader,
+                    //data: xg.dummyData
+                }),
+                colModel: new Ext.grid.ColumnModel({
+                    defaults: {
+                        width: 120,
+                        sortable: true
+                    },
+                    columns: [
+                        {id: 'company', header: 'Company', width: 200, sortable: true, dataIndex: 'company'},
+                        {header: 'Price', renderer: Ext.util.Format.usMoney, dataIndex: 'price'},
+                        {header: 'Change', dataIndex: 'change'},
+                        {header: '% Change', dataIndex: 'pctChange'},
+                        // instead of specifying renderer: Ext.util.Format.dateRenderer('m/d/Y') use xtype
+                        {
+                            header: 'Last Updated', width: 135, dataIndex: 'lastChange',
+                            xtype: 'datecolumn', format: 'M d, Y'
+                        }
+                    ]
+                }),
+                viewConfig: {
+                    forceFit: true,
+
+            //      Return CSS class to apply to rows depending upon data values
+                    getRowClass: function(record, index) {
+                        var c = record.get('change');
+                        if (c < 0) {
+                            return 'price-fall';
+                        } else if (c > 0) {
+                            return 'price-rise';
+                        }
+                    }
+                },
+                //sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+                width: 600,
+                height: 300,
+                //frame: true,
+                title: 'Framed with Row Selection and Horizontal Scrolling'
+                //iconCls: 'icon-grid'
+            });
         }
     }
 
@@ -55,7 +127,9 @@ ModelUIPresentaitionBuilder = function() {
             if (ModelTypeLibrary.isTypeContainer(model.attributes.type)) {
                 cfg.cls = 'designContainer';
             }
-            return mapObject[model.attributes.type](model, cfg);
+            if (mapObject.hasOwnProperty(model.attributes.type)) {
+                return mapObject[model.attributes.type](model, cfg);
+            }
         }
     }
 }();
