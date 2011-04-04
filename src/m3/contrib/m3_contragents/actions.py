@@ -5,6 +5,8 @@ Created on 03.02.2011
 @author: akvarats
 '''
 
+from django.db import transaction
+
 from m3.core import ApplicationLogicException
 from m3.ui import actions
 
@@ -98,6 +100,7 @@ class SaveContragentContactAction(actions.Action):
         return [actions.ACD(name='contragent_id', type=int, required=True, default=0),
                 actions.ACD(name='contragent_contact_id', type=int, required=True, default=0)] 
     
+    @transaction.commit_on_success
     def run(self, request, context):
         
         create_new = context.contragent_contact_id == 0
@@ -115,6 +118,9 @@ class SaveContragentContactAction(actions.Action):
         win.form.bind_to_request(request)
         win.form.to_object(contact)
         contact.save()
+        api.detail_changed(user=request.user, 
+                           detail=contact,
+                           operation_type=api.DETAIL_EDIT if context.contragent_contact_id else api.DETAIL_NEW)
         return actions.OperationResult()
         
 
@@ -155,8 +161,13 @@ class DeleteContragentContactAction(actions.Action):
     def context_declaration(self):
         return [actions.ACD(name='contragent_contact_id', type=int, required=True),]
     
+    @transaction.commit_on_success
     def run(self, request, context):
-        message = u'' if api.delete_contragent_contact(context.contragent_contact_id) else u'Не удалось удалить запись о контакте. На нее есть ссылки в базе данных'
+        contact = models.ContragentContact.objects.get(id=context.contragent_contact_id)
+        message = u'' if api.delete_contragent_contact(contact) else u'Не удалось удалить запись о контакте. На нее есть ссылки в базе данных'
+        api.detail_changed(user=request.user, 
+                           detail=contact,
+                           operation_type=api.DETAIL_DELETE)
         return actions.OperationResult.by_message(message)
     
 #===============================================================================
@@ -209,6 +220,7 @@ class SaveContragentAddressAction(actions.Action):
         return [actions.ACD(name='contragent_id', type=int, required=True, default=0),
                 actions.ACD(name='contragent_address_id', type=int, required=True, default=0)]
     
+    @transaction.commit_on_success
     def run(self, request, context):
         create_new = context.contragent_address_id == 0
         win = ui.ContragentAddressesEditWindow(create_new)
@@ -225,7 +237,9 @@ class SaveContragentAddressAction(actions.Action):
         win.form.bind_to_request(request)
         win.form.to_object(address)
         address.save()
-        
+        api.detail_changed(user=request.user, 
+                           detail=address,
+                           operation_type=api.DETAIL_EDIT if context.contragent_address_id else api.DETAIL_NEW)
         return actions.OperationResult()
  
  
@@ -266,8 +280,13 @@ class DeleteContragentAddressAction(actions.Action):
     def context_declaration(self):
         return [actions.ACD(name='contragent_address_id', type=int, required=True),]
     
+    @transaction.commit_on_success
     def run(self, request, context):
-        message = u'' if api.delete_contragent_address(context.contragent_address_id) else u'Не удалось удалить запись об адресе. На нее есть ссылки в базе данных'
+        address = models.ContragentAddress.objects.get(id=context.contragent_address_id)
+        message = u'' if api.delete_contragent_address(address) else u'Не удалось удалить запись об адресе. На нее есть ссылки в базе данных'
+        api.detail_changed(user=request.user, 
+                           detail=address,
+                           operation_type=api.DETAIL_DELETE)
         return actions.OperationResult.by_message(message)
     
 #===============================================================================
@@ -319,6 +338,7 @@ class SaveContragentBankDetailsAction(actions.Action):
         return [actions.ACD(name='contragent_id', type=int, required=True, default=0),
                 actions.ACD(name='contragent_bank_detail_id', type=int, required=True, default=0)]
     
+    @transaction.commit_on_success
     def run(self, request, context):
         create_new = context.contragent_bank_detail_id == 0
         win = ui.ContragentBankDetailsEditWindow(create_new)
@@ -335,7 +355,9 @@ class SaveContragentBankDetailsAction(actions.Action):
         win.form.bind_to_request(request)
         win.form.to_object(bank_detail)
         bank_detail.save()
-        
+        api.detail_changed(user=request.user, 
+                           detail=bank_detail,
+                           operation_type=api.DETAIL_EDIT if context.contragent_bank_detail_id else api.DETAIL_NEW)
         return actions.OperationResult()
  
  
@@ -376,6 +398,11 @@ class DeleteContragentBankDetailsAction(actions.Action):
     def context_declaration(self):
         return [actions.ACD(name='contragent_bank_detail_id', type=int, required=True),]
     
+    @transaction.commit_on_success
     def run(self, request, context):
-        message = u'' if api.delete_contragent_bank_detail(context.contragent_bank_detail_id) else u'Не удалось удалить запись о банковских реквизитах. На нее есть ссылки в базе данных'
+        bank_detail = models.ContragentBankDetail.objects.get(id=context.contragent_bank_detail_id)
+        message = u'' if api.delete_contragent_bank_detail(bank_detail) else u'Не удалось удалить запись о банковских реквизитах. На нее есть ссылки в базе данных'
+        api.detail_changed(user=request.user, 
+                           detail=bank_detail,
+                           operation_type=api.DETAIL_DELETE)
         return actions.OperationResult.by_message(message)
