@@ -7,6 +7,11 @@ contrib
    :maxdepth: 2
    
    contrib/m3_replica.rst
+
+.. toctree::
+   :maxdepth: 2
+
+   contrib/m3_logview.rst
    
 kladr
 -----
@@ -14,7 +19,6 @@ kladr
 licensing
 ---------
 
-logview
 -------
 
 m3_plugins
