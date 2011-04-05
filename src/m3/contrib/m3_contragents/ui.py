@@ -206,7 +206,8 @@ class ContragentAddressesEditWindow(windows.ExtEditWindow):
             place_field_name = 'geo',
             street_field_name = 'street',
             addr_field_name = 'address',
-            level = ExtAddrComponent.STREET
+            house_field_name = 'house',
+            flat_field_name = 'flat'
         )
         
         # Раскладка
