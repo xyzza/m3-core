@@ -71,49 +71,40 @@ ModelUIPresentaitionBuilder = function() {
                 );
         },
         gridPanel:function(model, cfg) {
-            return new Ext.grid.GridPanel({
-                store: new Ext.data.Store({
-                    autoDestroy: true
-                    //reader: reader,
-                    //data: xg.dummyData
-                }),
-                colModel: new Ext.grid.ColumnModel({
-                    defaults: {
-                        width: 120,
-                        sortable: true
-                    },
-                    columns: [
-                        {id: 'company', header: 'Company', width: 200, sortable: true, dataIndex: 'company'},
-                        {header: 'Price', renderer: Ext.util.Format.usMoney, dataIndex: 'price'},
-                        {header: 'Change', dataIndex: 'change'},
-                        {header: '% Change', dataIndex: 'pctChange'},
-                        // instead of specifying renderer: Ext.util.Format.dateRenderer('m/d/Y') use xtype
-                        {
-                            header: 'Last Updated', width: 135, dataIndex: 'lastChange',
-                            xtype: 'datecolumn', format: 'M d, Y'
-                        }
-                    ]
-                }),
-                viewConfig: {
-                    forceFit: true,
 
-            //      Return CSS class to apply to rows depending upon data values
-                    getRowClass: function(record, index) {
-                        var c = record.get('change');
-                        if (c < 0) {
-                            return 'price-fall';
-                        } else if (c > 0) {
-                            return 'price-rise';
-                        }
-                    }
-                },
-                //sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
-                width: 600,
-                height: 300,
-                //frame: true,
-                title: 'Framed with Row Selection and Horizontal Scrolling'
-                //iconCls: 'icon-grid'
+            var store = new Ext.data.Store({
+                autoDestroy:true
             });
+
+            var columns = [];
+
+            //поиск колонок
+            for (var i = 0; i < model.childNodes.length; i++) {
+                if (model.childNodes[i].attributes.type == 'gridColumn') {
+                      var newColumn = new Ext.grid.Column(
+                              Ext.apply({},model.childNodes[i].attributes.properties)
+                              );
+                      columns.push(newColumn);
+                }
+            }
+
+            //если нет колонок, создадим фейк
+            if (columns.length == 0) {
+                columns.push({
+                    id:'fake',
+                    header:'Fake column',
+                    dataIndex:'fake'
+                });
+            }
+
+            return new Ext.grid.GridPanel( Ext.apply(cfg, {
+                cls:'designContainer',
+                id:model.id,
+                store: store,
+                colModel:new Ext.grid.ColumnModel({
+                    columns:columns
+                })
+            }));
         }
     }
 

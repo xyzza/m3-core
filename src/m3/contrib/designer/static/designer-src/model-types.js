@@ -200,17 +200,21 @@ ModelTypeLibrary = Ext.apply(Object, {
         },
         gridColumn:{
             properties: {
+                id:{
+                    defaultValue:'grid column',
+                    isInitProperty:true
+                },
                 name:{
                     defaultValue:'New column',
-                    isInitValue:true
+                    isInitProperty:true
                 },
                 header:{
                     defaultValue:'New column',
-                    isInitValue:true
+                    isInitProperty:true
                 },
                 dataIndex:{
                     defaultValue:'Foo',
-                    isInitValue:true
+                    isInitProperty:true
                 }
             },
             toolboxData: {
