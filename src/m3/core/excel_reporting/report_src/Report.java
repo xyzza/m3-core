@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -125,6 +126,9 @@ class ReportGenerator{
 	// Список ячеек с тегом TAG_MATRIX
 	Map<Cell, CellWrap> matrixCells = new HashMap<Cell, CellWrap>();
 	
+	// Список строк с тегами, которые нужно удалить после обработки листа
+	ArrayList<Integer> unusedTagRows = new ArrayList<Integer>();
+	
 	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
 	// Они запоминаются и используются в дальнейшем
 	Cell cell_repeat_tag_start = null;
@@ -225,6 +229,23 @@ class ReportGenerator{
 	}
 	
 	/**
+	 * Метод собирает номера строк с тегами на текущей обрабатываемой странице.
+	 * Дело в том, что нельзя сразу удалить все теги после обработки, потому что они могут 
+	 * возникнуть в результате подстановки из JSON данных. Да-да! Некоторые извращенцы 
+	 * формируют отчет в несколько проходов. В первом проходе подстанавливая теги,
+	 * во втором подставляя в них значения.
+	 */
+	private void saveUnusedTagPosition(Cell oldCell, Cell newCell){
+		if (oldCell.getSheet() != newCell.getSheet() && newCell.getCellType() == Cell.CELL_TYPE_STRING){
+			String value = newCell.getStringCellValue();
+			if ((value.length() > 3) && (value.indexOf("%") == 0)){
+				int rowNum = newCell.getRow().getRowNum();
+				unusedTagRows.add(rowNum);
+			}
+		}
+	}
+	
+	/**
 	 * Копирование ячейки 1 к 1
 	 * @param oldCell
 	 * @param newCell
@@ -252,6 +273,8 @@ class ReportGenerator{
             	newCell.setCellFormula(oldCell.getCellFormula());
                 break;
         }
+        
+        saveUnusedTagPosition(oldCell, newCell);
 	}
 	
 	/**
@@ -899,6 +922,8 @@ class ReportGenerator{
 			
 			// Количество регионов которые нужно раскопировать
 			JSONArray arr =	(JSONArray)root.get(tag_key);
+			if (arr == null)
+				throw new Exception("Data not found for tag key " + tag_key);
 			int size = arr.size() - 1;
 			
 			// Сдвиг ячеек справа от региона и копирование
@@ -1002,34 +1027,18 @@ class ReportGenerator{
 	}
 	
 	/**
-	 * Удаляет со страницы все строки с тегами #, ##, %, %% которые
+	 * Удаляет со страницы все строки с тегами #, ##, %, %% которые предварительно были собраны методом saveUnusedTagPosition
 	 * @param sheet Целевая страница
 	 */
-	private void clean_unused_tags(Sheet sheet){
-		// Перебор строк
-		for (int row_num = sheet.getLastRowNum(); row_num >= sheet.getFirstRowNum(); row_num--){
-			Row row = sheet.getRow(row_num);
-			if (row == null)
-				continue;
-			boolean has_tag = false;
-			// Перебор колонок
-			for (Cell cell: row){
-				if (cell.getCellType() == Cell.CELL_TYPE_STRING){
-					String value = cell.getStringCellValue();
-					if ((value.length() > 3) && (value.indexOf("%") == 0)){
-						has_tag = true;
-						break;
-					}
-				}
+	private void clean_unused_tags(Sheet sheet){		
+		Collections.sort(unusedTagRows);
+		for (int i=unusedTagRows.size() - 1; i>=0; i--){
+			int row_num = unusedTagRows.get(i);
+			// Может отвалиться из-за отсутствия строки row_num + 1
+			if (row_num == sheet.getLastRowNum()){
+				sheet.createRow(row_num + 1);
 			}
-			// Удаляем если есть мусор
-			if (has_tag){
-				// Может отвалиться из-за отсутствия строки row_num + 1
-				if (row_num == sheet.getLastRowNum()){
-					sheet.createRow(row_num + 1);
-				}
-				sheet.shiftRows(row_num + 1, sheet.getLastRowNum(), -1);
-			}
+			sheet.shiftRows(row_num + 1, sheet.getLastRowNum(), -1);
 		}
 	}
 	
@@ -1108,6 +1117,7 @@ class ReportGenerator{
 			cellsToMegre.clear();
 			lazyMergedCells.clear();
 			matrixCells.clear();
+			unusedTagRows.clear();
 			
 			in_sheet = in_book.getSheetAt(sheet_index);
 			out_sheet = createShadowSheet(in_sheet);
