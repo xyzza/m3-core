@@ -33,7 +33,9 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			
 			funcRowContMenu = function(grid, index, e){
 				e.stopEvent();
-                this.getSelectionModel().selectRow(index);
+				if (!this.getSelectionModel().isSelected(index)) {
+						this.getSelectionModel().selectRow(index);
+				};
                 params.menus.rowContextMenu.showAt(e.getXY())
 			}
 		} else {

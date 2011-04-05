@@ -2,6 +2,50 @@
  * 
  */
 
+var treeLoader = new Ext.tree.TreeLoader({
+	url: '/project-files'
+})
+
+var tree = new Ext.tree.TreePanel({
+	useArrows: true
+    ,autoScroll: true
+    ,animate: true
+    //,enableDD: true
+    ,containerScroll: true
+    ,border: false					    
+    //,dataUrl: '/project-files'
+    ,loader: treeLoader					
+    ,root: {
+        nodeType: 'async'
+        ,text: 'Файлы проекта'
+        ,draggable: false
+        ,id: 'source'
+        ,expanded: true					     
+    }
+	,contextMenu: new Ext.menu.Menu({
+	        items: [{
+	            id: 'open-file',
+	            text: 'Открыть файл'
+	        }],
+	        listeners: {
+	            itemclick: function(item) {
+	                window.open('/designer');
+	            }
+	        }
+	    }),
+	    listeners: {
+	        contextmenu: function(node, e) {
+	            node.select();
+	            if (node.text === 'ui.py' || node.text === 'forms.py') {
+		            var c = node.getOwnerTree().contextMenu;
+		            c.contextNode = node;
+		            c.showAt(e.getXY());						            	
+	            }
+
+	        }
+	    }	
+})
+
 Ext.onReady(function(){
 	new Ext.Viewport({
 		title: 'Дизайнер UI m3'
@@ -21,44 +65,7 @@ Ext.onReady(function(){
 	        ,maxWidth: 300
 	        ,minWidth: 200
 	        ,layout: 'fit'     
-	        ,items: [new Ext.tree.TreePanel({
-	        	    	useArrows: true
-					    ,autoScroll: true
-					    ,animate: true
-					    //,enableDD: true
-					    ,containerScroll: true
-					    ,border: false					    
-					    ,dataUrl: '/project-files'					
-					    ,root: {
-					        nodeType: 'async'
-					        ,text: 'Файлы проекта'
-					        ,draggable: false
-					        ,id: 'source'
-					        ,expanded: true					     
-					    }
-						,contextMenu: new Ext.menu.Menu({
-						        items: [{
-						            id: 'open-file',
-						            text: 'Открыть файл'
-						        }],
-						        listeners: {
-						            itemclick: function(item) {
-						                window.open('/designer');
-						            }
-						        }
-						    }),
-						    listeners: {
-						        contextmenu: function(node, e) {
-						            node.select();
-						            if (node.text === 'ui.py' || node.text === 'forms.py') {
-							            var c = node.getOwnerTree().contextMenu;
-							            c.contextNode = node;
-							            c.showAt(e.getXY());						            	
-						            }
-
-						        }
-						    }	
-	        })]
+	        ,items: [tree]
 	    }, {
 	        region: 'center'
 	        ,xtype: 'tabpanel' 
@@ -70,3 +77,9 @@ Ext.onReady(function(){
 	    }]
 	});
 })
+
+
+treeLoader.on("beforeload", function(treeLoader, node) {
+	console.log( node.attributes );
+    treeLoader.baseParams['path'] = node.attributes.path;
+}, this);
