@@ -22,7 +22,16 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         var cfg = ModelTypeLibrary.getTypeDefaultProperties(model.attributes.type);
         for (var p in model.attributes.properties) {
             if (cfg.hasOwnProperty(p)) {
+
                 cfg[p] = model.attributes.properties[p];
+                
+                if ((cfg[p]) == undefined) {
+                    cfg[p] = 'undefined';
+                }
+
+                if (ModelTypeLibrary.isPropertyObject(model.attributes.type, p)) {
+                    cfg[p] = Ext.util.JSON.encode(cfg[p]);
+                }
             }
         }
         var window = new PropertyWindow({
@@ -41,10 +50,15 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         var defaults = ModelTypeLibrary.getTypeDefaultProperties(eventObj.model.attributes.type);
         var model = eventObj.model;
         var source = eventObj.source;
-
+        
         for (var s in source) {
             if ((source[s] != defaults[s]) || ( model.attributes.properties.hasOwnProperty(s)) ) {
-                model.attributes.properties[s] = source[s];
+                if (ModelTypeLibrary.isPropertyObject(model.attributes.type, s)) {
+                    model.attributes.properties[s] = Ext.util.JSON.decode(source[s])
+                }
+                else {
+                    model.attributes.properties[s] = source[s];
+                }
             }
         }
         this.fireEvent('modelUpdate');
@@ -79,7 +93,13 @@ PropertyWindow = Ext.extend(Ext.Window, {
                         source: this.source,
                         customEditors:{
                             'layout': this._get_combo_editor('layout'),
+                            'layoutConfig': this._get_code_editor(),
                             'labelAlign':this._get_combo_editor('labelAlign')
+                        },
+                        customRenderers:{
+                            layoutConfig: function() {
+                                return '{Object}';
+                            }
                         }
                     });
 
@@ -123,10 +143,17 @@ PropertyWindow = Ext.extend(Ext.Window, {
         });
         return new Ext.grid.GridEditor(result);
     },
+    _get_code_editor:function() {
+        return new Ext.grid.GridEditor(
+                    new Ext.form.TextArea()
+                );
+    },
     _onSave:function() {
         //TODO прикрутить валидацию
+
+        var source = this._grid.getSource();
         var eventObj = {
-            source:this._grid.getSource(),
+            source:source,
             model:this.model
         };
 

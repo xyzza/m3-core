@@ -22,7 +22,12 @@
 .designer-tab-panel {
     background-image:url(../images/tab-panel.png) !important;
 }
-
+.designer-grid-panel {
+    background-image:url(../images/grid.png) !important;
+}
+.designer-grid-column {
+    background-image:url(../images/grid-column.png) !important;
+}
 .x-tree-lines .x-tree-elbow-plus {
     background-image:url(../images/designer-plus.png) !important;
 }
@@ -37,4 +42,12 @@
 
 .x-tree-lines .x-tree-elbow-end-minus {
     background-image:url(../images/designer-minus.png) !important;
+}
+
+.selectedElement {
+    border: 2px solid #710AF0
+}
+
+.selectedElement * .x-panel-body {
+    border: 2px solid #710AF0
 }

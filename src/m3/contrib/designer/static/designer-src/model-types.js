@@ -18,6 +18,10 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:'auto',
                     isInitProperty:true
                 },
+                layoutConfig :{
+                    defaultValue:'undefined',
+                    propertyType:'object'
+                },
                 title:{
                     defaultValue:'New panel',
                     isInitProperty:true
@@ -191,7 +195,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                     defaultValue:''
                 }
             },
-            treeIconCls:'icon-tux',
+            treeIconCls:'designer-grid-panel',
             toolboxData:{
                 text:'Grid panel',
                 category:'Grid'
@@ -217,6 +221,7 @@ ModelTypeLibrary = Ext.apply(Object, {
                     isInitProperty:true
                 }
             },
+            treeIconCls:'designer-grid-column',
             toolboxData: {
                 text:'Grid column',
                 category:'Grid'
@@ -279,6 +284,19 @@ ModelTypeLibrary = Ext.apply(Object, {
      */
     isTypeContainer:function(type) {
         return this.typesConfig[type].isContainer ? true : false;
+    },
+    /*
+    * Является ли данное свойство объектом?
+    */
+    isPropertyObject:function(type, property) {
+        if (this.typesConfig[type]['properties'][property].hasOwnProperty('propertyType') &&
+                this.typesConfig[type]['properties'][property]['propertyType'] == 'object') {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     },
     /*
      * Метод возвращает массив ExtTreeNode для отображения в тулбоксе

@@ -17,7 +17,6 @@
 AppController = Ext.extend(Object, {
    constructor: function(config) {
        Ext.apply(this, config);
-       this._initCSSRules();
    },
    init: function(documentCfg) {
        //создаем модель
@@ -44,25 +43,6 @@ AppController = Ext.extend(Object, {
 
        //обновим экранное представление
        this.refreshView();
-   },
-   _initCSSRules:function() {
-       //TODO перенести в CSS файл!
-       //Когда-нибудь это все обзаведеться нормальными файлами с реусрсами. А пока будем таким вот образом
-       //добавлять CSS'ки в документ
-
-       Ext.util.CSS.createStyleSheet(
-               '.selectedElement {' +
-                    'border: 2px solid #710AF0;'+
-               '}','selectedElem');
-
-       //selectedElement вешается на все подряд, но панельки составные из хедера, футера etc
-       //поэтому перебиваем цвет у body
-       Ext.util.CSS.createStyleSheet(
-               '.selectedElement * .x-panel-body {' +
-                   'border: 2px solid #710AF0;' +
-               '}'
-               ,'selectedPanelBody');
-
    },
    _initDesignDD:function() {
        /**
