@@ -58,11 +58,7 @@ class Parser(object):
         nodes.extend(child_nodes)
                 
         # Добавление вложенных компонентов
-        
-        
-        nodes.extend( self.gen_nested_components() )
-        #return 
-        #nodes.extend( self.gen_nested_components() )
+        nodes.extend( self.gen_nested_components() )        
                 
         module_node = ast.parse(open(self.path).read())
         func_node = self.get_func_initialize(module_node, self.class_name)     
@@ -113,14 +109,15 @@ class Parser(object):
         
         dict_instanses[ type_obj['id'] ] = li = []
  
-        for item in type_obj['items']:
-            d = {item['id']: []}             
-            li.append(d)
-            
-            nodes.append( self.gen_instanse(item) )
-            nodes.extend( self.gen_base_properties(item) )                    
-            
-            self.gen_child_properties(item, nodes, dict_instanses=d)
+        if type_obj.has_key('items'):
+            for item in type_obj['items']:
+                d = {item['id']: []}             
+                li.append(d)
+                
+                nodes.append( self.gen_instanse(item) )
+                nodes.extend( self.gen_base_properties(item) )                    
+                
+                self.gen_child_properties(item, nodes, dict_instanses=d)
 
         return nodes
     
@@ -130,14 +127,19 @@ class Parser(object):
                 value = item['class'][ obj['type'] ]
                 return ast.Assign([ast.Name(obj['id'], '1')], ast.Call(ast.Name(str(value), 1), [], [], None, None))
     
-    def gen_base_properties(self, type_obj):
-        #print type_obj['type']
+    def gen_base_properties(self, type_obj):        
         config_dict = self.gen_config(type_obj['type'])
         properties = type_obj['properties']
         
         nodes = []
         for extjs_name, value in properties.items():
+            
+            if str(extjs_name) == 'id':
+                continue
+            
             py_name = config_dict[extjs_name]
+            
+            assert type_obj.get('id'), 'ID component "%s" is not defined' % type_obj['type']
             node = ast.Assign([ast.Attribute(ast.Name(type_obj['id'], '1'), str(py_name), '1')], self.get_node_value(value))
             nodes.append(node)
             
@@ -221,6 +223,23 @@ def get_classess(path):
     
     
     return res
+
+def restores(data):
+    '''
+    Будет пытаться преобразить все символы в кодировку ansii, если это 
+    невозможно (то есть присутсвует unicode символы), то оcтается как есть
+    '''
+    for k, v in data.items():
+        if isinstance(v, dict):
+            restores(v)
+        elif isinstance(v, list):
+            map(restores, v)
+        else:
+            try:
+                data[k] = str(v)
+            except UnicodeEncodeError:
+                pass # Итак останется в unicode
+        
 
 # Словарь сопоставлений контролов в дизайнере к контролам в питоне
 mapping_list = json.loads(open( os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').read())

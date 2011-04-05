@@ -24,22 +24,8 @@ var tree = new Ext.tree.TreePanel({
 	            text: 'Открыть файл'
 	        }],
 	        listeners: {
-	            itemclick: function(item, e) {								
-					
-					var attr =  item.parentMenu.contextNode.attributes;	            	
-					
-					var starter = new Bootstrapper();
-					var panel = starter.init('/designer/fake', 
-								'/designer/save', 
-								attr['path'], 
-								attr['class_name']);
-			   					   	 
-				   	panel.setTitle(attr['class_name']); 
-			   		tabPanel.add( panel );
-			   		
-			   		starter.loadModel();
-			   		
-			   		tabPanel.activate(panel);
+	            itemclick: function(item, e) {													
+					onClickNode( item.parentMenu.contextNode ); 
 	            }
 	        }
 	    }),
@@ -52,6 +38,9 @@ var tree = new Ext.tree.TreePanel({
 		            c.showAt(e.getXY());						            	
 	            }
 
+	        },
+	        dblclick: function(node, e){
+	        	onClickNode(node);
 	        }
 	    }	
 })
@@ -67,6 +56,23 @@ var tabPanel = new Ext.TabPanel({
     }]	    
 });
 
+
+function onClickNode(node) {					
+	var attr =  node.attributes;	            	
+	
+	var starter = new Bootstrapper();
+	var panel = starter.init('/designer/fake', 
+				'/designer/save', 
+				attr['path'], 
+				attr['class_name']);
+				   	 
+   	panel.setTitle(attr['class_name']); 
+	tabPanel.add( panel );
+	
+	starter.loadModel();
+	
+	tabPanel.activate(panel);
+}
 
 
 tree.getLoader().on("beforeload", function(treeLoader, node) {	

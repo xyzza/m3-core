@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 from helpers import Parser, get_files
-from m3.contrib.designer.ide.helpers import get_classess
+from m3.contrib.designer.ide.helpers import get_classess, restores
 
 
 def workspace(request):
@@ -55,25 +55,16 @@ def designer_fake_data(request):
                         content = json.dumps(result))
 
 def designer_save(request):
+    class_name = request.POST.get('className')
+    path = request.POST.get('path')
+    data = request.POST.get('data')    
+
+
+    js = json.loads(data)
     
-    fake_data = {
-        'properties': {
-            'name':'Ext window',
-            'title':'Trololo',
-            'layout':'fit',
-        },
-        'type':'window',
-        'items': [{
-            'properties': {
-                'name':'Ext window',
-                'title':'Trololo',
-                'layout':'fit'
-            },
-            'type': 'panel'  
-        }]        
-    }
+    restores(js['model'])
     
-    parser = Parser('tests.py', 'TestOne')
-    parser.from_designer(fake_data)
-    
+    # js['model'] -- Конфигурация для отображение в py
+    Parser(path, class_name).from_designer(js['model']) 
+
     return HttpResponse(content = 'OK')
