@@ -1,0 +1,38 @@
+[{
+	"class": {
+		"window": "ExtWindow"	
+	},
+	"config": {
+		"name": "name"
+		,"title": "title"
+		,"layout": "layout"	
+	}		
+},{
+	"class": {
+		"panel": "ExtPanel"	
+	},
+	"config": {
+		"name": "name"
+		,"title": "title"
+		,"layout": "layout"	
+		,"width": "width"
+	}		
+},{
+	"class": {
+		"form": "ExtForm"	
+	},
+	"config": {
+		"name": "name"
+		,"title": "title"
+		,"layout": "layout"	
+	}		
+},{
+	"class": {
+		"field": "ExtStringField"	
+	},
+	"config": {
+		"name": "name"
+		,"title": "title"
+		,"width": "width"	
+	}
+}]
