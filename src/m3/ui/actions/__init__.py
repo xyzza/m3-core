@@ -376,6 +376,8 @@ class ActionController(object):
         self._packs_by_name = {}
         self._packs_by_type = {}
         self._actions_by_type = {}
+        self._actions_by_name = {}
+        #TODO: Тоже самое можно добавить для short_name в экшенах вместо m3.helpers.urls
         
         self.top_level_packs = []
         
@@ -387,14 +389,31 @@ class ActionController(object):
         
     def __str__(self):
         return self.name if self.name else super(ActionController, self).__str__()
+    
+    #========================================================================================
+    # Методы для быстрого поиска экшенов и паков по разным атрибутам
+    #========================================================================================
+    
+    def _add_action_to_search_dicts(self, action, full_path):
+        """ Добавляет экшен в словари для быстрого доступа """
+        assert isinstance(action, Action)
+        self._actions_by_name[action.__class__.__name__] = (action, full_path)
+        self._actions_by_type[action.__class__] = (action, full_path)
         
     def _add_pack_to_search_dicts(self, pack):
-        '''
-        Добавляет экшен в словари для быстрого доступа
-        '''
+        """ Добавляет экшенпак в словари для быстрого доступа """
         assert isinstance(pack, ActionPack)
         self._packs_by_name[pack.__class__.__name__] = pack
         self._packs_by_type[pack.__class__] = pack
+        
+    def _remove_action_from_search_dicts(self, action):
+        """ Удаляет экшен из словарей быстрого поиска """
+        del self._actions_by_type[action.__class__]
+        del self._actions_by_name[action.__class__.__name__]
+    
+    #========================================================================================
+    # Методы формирующие иерархию экшенов и паков
+    #========================================================================================
     
     def _load_class(self, full_path):
         '''
@@ -437,10 +456,7 @@ class ActionController(object):
             for pack in clazz.subpacks:
                 self._build_pack_node(pack, stack)
             stack.pop()
-        else:
-            # Для быстрого поиска
-            self._actions_by_type[clazz.__class__] = clazz
-            
+        else:            
             clazz.controller = self
             full_path = self._build_full_path(stack, clazz)
             
@@ -450,6 +466,9 @@ class ActionController(object):
 #                _, collision = self._url_patterns[full_path]
 #                if collision.__class__ != clazz.__class__:
 #                    raise ActionUrlAlreadyExists(clazz, collision, full_path)
+            
+            # Для быстрого поиска
+            self._add_action_to_search_dicts(clazz, full_path)
             
             self._url_patterns[full_path] = (stack[:], clazz)
     
@@ -540,19 +559,7 @@ class ActionController(object):
         Выполняет построение контекста вызова операции ActionContext на основе переданного request
         '''
         return ActionContext()
-    
-    def get_action_url(self, action):
-        '''
-        Возвращает полный URL адрес для класс экшена 
-        '''
-        assert issubclass(action, Action)
-        for path, value in self._url_patterns.items():
-            act = value[1]
-#            if isinstance(act, action):
-            if act.__class__ == action:
-                return path
-            
-    
+        
     #========================================================================================
     # Методы, предназначенные для поиска экшенов и паков в контроллере
     #========================================================================================
@@ -562,7 +569,6 @@ class ActionController(object):
         или None если не находит. *type* может быть классом или строкой с названием класса, 
         это позволяет избежать кроссимпортов.
         """
-        # Нужно ли оно тут?
         ControllerCache.populate()
 
         if isinstance(type, str):
@@ -571,6 +577,38 @@ class ActionController(object):
             return self._packs_by_type.get(type)
         else:
             raise ValueError('Wrong type of argument %s' % type)
+        
+    def find_action(self, type):
+        """
+        Ищет экшен класса *type* внутри иерархии котроллера. Возвращает его экземпляр 
+        или None если не находит. *type* может быть классом или строкой с названием класса, 
+        это позволяет избежать кроссимпортов.
+        """
+        ControllerCache.populate()
+        
+        if isinstance(type, str):
+            clazz, _ = self._actions_by_name.get(type, (None, None))
+        elif issubclass(type, Action):
+            clazz, _ =  self._actions_by_type.get(type, (None, None))
+        else:
+            raise ValueError('Wrong type of argument %s' % type)
+        
+        return clazz
+        
+    def get_action_url(self, type):
+        """
+        Возвращает полный URL адрес для класс или имени класса экшена *action*
+        """
+        ControllerCache.populate()
+        
+        if isinstance(type, str):
+            _, full_path = self._actions_by_name.get(type, (None, None))
+        elif issubclass(type, Action):
+            _, full_path = self._actions_by_type.get(type, (None, None))
+        else:
+            raise ValueError('Wrong type of argument %s' % type)
+        
+        return full_path
 
     #========================================================================================
     # Методы, предназначенные для добавления/изменения/удаления пакетов действий в контроллер
@@ -621,7 +659,7 @@ class ActionController(object):
             del self._packs_by_type[type]
             del self._packs_by_name[type.__name__]
             for action in pack.actions:
-                del self._actions_by_type[action.__class__]
+                self._remove_action_from_search_dicts(action)
         
             return True    
 
@@ -827,11 +865,15 @@ class ControllerCache(object):
     
     # словарь зарегистрированных контроллеров в прикладном приложении
     _controllers = set()
-        
+    
+    #========================================================================================
+    # Методы, предназначенные для поиска экшенов и паков во всех контроллерах системы
+    #========================================================================================
+    
     @classmethod
     def get_action_url(cls, type):
-        ''' Возвращает URL экшена по его классу '''
-        assert issubclass(type, Action)
+        """ Возвращает URL экшена *type* по его имени или классу """
+        assert isinstance(type, basestring) or issubclass(type, Action) 
         cls.populate()
         for cont in cls._controllers:
             url = cont.get_action_url(type)
@@ -841,9 +883,8 @@ class ControllerCache(object):
     @classmethod
     def find_pack(cls, pack):
         """
-        Ищет заданный pack по имени или классу во всех зарегистрированных контроллерах.
+        Ищет заданный *pack* по имени класса или классу во всех зарегистрированных контроллерах.
         Возвращает экземпляр первого найденного пака.
-        @param pack: Имя или класс пака.
         """
         for cont in list(cls._controllers):
             p = cont.find_pack(pack)
@@ -851,9 +892,31 @@ class ControllerCache(object):
                 return p
     
     @classmethod
+    def find_action(cls, action):
+        """
+        Ищет заданный *action* по имени класса или классу во всех зарегистрированных контроллерах.
+        Возвращает экземпляр первого найденного экшена.
+        """
+        for cont in list(cls._controllers):
+            p = cont.find_action(action)
+            if p:
+                return p
+    
+    @classmethod
+    def get_action_by_url(cls, url):
+        """ Возвращает Action по переданному *url* """
+        for cont in cls._controllers:
+            act = cont.get_action_by_url(url)
+            if act:
+                return act
+        return
+    
+    #========================================================================================
+    
+    @classmethod
     def register_controller(cls, controller):
         '''
-        Выполняет регистрацию контроллера во внутреннем кеше.
+        Выполняет регистрацию контроллера *controller* во внутреннем кеше.
         '''
         assert isinstance(controller, ActionController)
         cls._write_lock.acquire()
@@ -903,18 +966,11 @@ class ControllerCache(object):
 
     @classmethod
     def require_update(cls):
+        """
+        Сбрасывает внутренний флаг заполненности контроллера.
+        Следующий запрос к контроллеру вызовет перестройку иерархии экшенов и паков. 
+        """
         cls._loaded = False
-        
-    @classmethod
-    def get_action_by_url(cls, url):
-        '''
-        Возвращает Action по переданному url 
-        '''
-        for cont in cls._controllers:
-            act = cont.get_action_by_url(url)
-            if act:
-                return act
-        return None
     
     @classmethod
     def get_controllers(cls):

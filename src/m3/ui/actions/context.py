@@ -50,6 +50,7 @@ class ActionContextDeclaration(object):
     *verbose_name* - человеческое имя параметра, необходимо для сообщений об ошибках.
     """
     def __init__(self, name='', default=None, type=None, required=False, verbose_name = '', *args, **kwargs):
+        assert type, 'type must be defined!'
         self.name = name
         self.default = default
         self.required = required
