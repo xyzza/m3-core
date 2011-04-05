@@ -181,5 +181,9 @@ class ContragentAddress(BaseObjectModel):
     street = models.CharField(max_length=17, null=True, blank=True)
     address = models.CharField(max_length=300, null=True, blank=True)
     
+    house    = models.CharField(max_length = 10, null = True, blank = True)
+    building = models.CharField(max_length = 5, null = True, blank = True)
+    flat     = models.CharField(max_length = 5, null = True, blank = True)
+    
     class Meta:
         db_table = 'm3_contragent_addresses'

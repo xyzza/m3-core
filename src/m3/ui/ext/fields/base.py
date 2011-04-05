@@ -121,6 +121,9 @@ class BaseExtField(ExtUIComponent):
         # Текст, который будет отображаться, если поле заполненно некорректно
         self.invalid_text = None
 
+        # Плагины к полям ввода
+        self.plugins = []
+
     def t_render_label_style(self):
         return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
 
@@ -134,7 +137,7 @@ class BaseExtField(ExtUIComponent):
         # Выключаем\включаем компоненты.
         self.read_only = access_off
         # Выключаем/включаем обязательность заполнения.
-        if not hasattr(self, 'allow_blank_old'):
+        if not hasattr(self, '_allow_blank_old'):
             self._allow_blank_old = self.allow_blank
         self.allow_blank = True if access_off else self._allow_blank_old
 
@@ -183,7 +186,7 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('invalidClass', self.invalid_class)
         self._put_config_value('hideLabel', self.hide_label)
         self._put_config_value('invalidText', self.invalid_text)
-
+        self._put_config_value('plugins', (lambda: '[%s]' % ','.join(self.plugins)), self.plugins)
 
 
 class BaseExtTriggerField(BaseExtField):
