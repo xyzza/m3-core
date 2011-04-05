@@ -30,12 +30,57 @@
     <script type='text/javascript' src='/m3static/vendor/extjs/locale/ext-lang-ru.js'></script>       
       
     <script type='text/javascript' src='/m3static/m3/js/m3-opt.js'></script>
-    
-    <!-- Файлы проекта -->
+
+    <!-- Дизайнер -->
+    <link rel='stylesheet' type='text/css' href='/static/css/designer.css'/>
+
+    <script type="text/javascript" src="/static/designer-src/view.js"></script>
+    <script type="text/javascript" src="/static/designer-src/property-editor.js"></script>
+    <script type="text/javascript" src="/static/designer-src/controller.js"></script>
+    <script type="text/javascript" src="/static/designer-src/model.js"></script>
+    <script type="text/javascript" src="/static/designer-src/designer-ui.js"></script>
+    <script type="text/javascript" src="/static/designer-src/model-utils.js"></script>
+    <script type="text/javascript" src="/static/designer-src/model-types.js"></script>
+    <script type="text/javascript" src="/static/designer-src/server.js"></script>
+    <script type="text/javascript" src='/static/designer-src/bootstrapper.js'></script>
+
+
+	<!-- Файлы проекта -->
     <link rel='stylesheet' type='text/css' href='/static/css/main.css'/>
     <script type='text/javascript' src='/static/js/main.js'></script>
-
+    
     </head>
     <body scroll="no">
+    	
+    	 <script type="text/javascript">
+            Ext.onReady(function(){
+                
+                	Ext.QuickTips.init();
+	
+					new Ext.Viewport({
+						title: 'Дизайнер UI m3'
+					    ,layout: 'border'
+					    ,items: [{
+					        region: 'north'					        
+					        ,autoHeight: true
+					        ,border: false
+					        ,margins: '0 0 5 0'
+					    }, {
+					        region: 'west'
+					        ,collapsible: true
+					        ,title: 'Project Viewer'
+					        ,split: true
+					        ,width: 300
+					        ,maxWidth: 300
+					        ,minWidth: 200
+					        ,layout: 'fit'     
+					        ,items: [tree]
+					    }, 
+					    tabPanel]
+					});		                
+            });
+
+        </script>
+        
     </body>
 </html>

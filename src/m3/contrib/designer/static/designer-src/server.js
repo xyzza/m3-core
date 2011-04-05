@@ -26,9 +26,10 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
         this.mask.show();
         Ext.Ajax.request({
             url:this.loadUrl,
-            //params:{
-            //    id:this.id
-            //},
+            params:{
+               path: this.pathFile,
+               className: this.className
+            },
             success:this._onLoadSuccess.createDelegate(this),
             failure:this._onLoadFailure.createDelegate(this)
         });
@@ -42,7 +43,9 @@ ServerStorage = Ext.extend(Ext.util.Observable, {
             url:this.saveUrl,
             params:{
                 id:this.id,
-                data:Ext.util.JSON.encode( dataObj )
+                data:Ext.util.JSON.encode( dataObj ),
+                path: this.pathFile,
+                className: this.className
             },
             success:this._onSaveSuccess.createDelegate(this),
             failure:this._onSaveFailure.createDelegate(this)

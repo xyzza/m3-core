@@ -7,7 +7,7 @@
  */
 
 Bootstrapper = Ext.extend(Object, {
-    start:function(dataUrl,saveUrl) {
+    init: function(dataUrl, saveUrl, path, className) {
 
         var designPanel = new Ext.Panel({
             layout:'fit',
@@ -76,9 +76,12 @@ Bootstrapper = Ext.extend(Object, {
          var storage = new ServerStorage({
             id:0,
             loadUrl:dataUrl,
-            saveUrl:saveUrl, 
+            saveUrl:saveUrl,
+            pathFile: path,
+            className: className,
             maskEl:Ext.getBody()
         });
+		this.storage = storage;
 
         var eastWrapper = new Ext.Panel({
             region:'east',
@@ -93,6 +96,7 @@ Bootstrapper = Ext.extend(Object, {
 
         var viewportWrapper = new Ext.Panel({
             layout:'border',
+            closable: true,
             items: [
                 designPanel, eastWrapper
             ],
@@ -111,13 +115,6 @@ Bootstrapper = Ext.extend(Object, {
             ]
         });
 
-        new Ext.Viewport({
-            layout: 'fit',
-            items: [
-                viewportWrapper
-            ]
-	    });
-
         storage.on('load',
                 function(jsonObj){
                     application.init(jsonObj);
@@ -125,12 +122,15 @@ Bootstrapper = Ext.extend(Object, {
 
         storage.on('save', function() {
             alert('Save ok')
-        });
-
-        storage.loadModel();
+        });        
 
         function onTreeNodeDeleteClick(item) {
             application.onTreeNodeDeleteClick(item.parentMenu.contextNode);
-        }
+        }              
+        
+        return viewportWrapper;  
+    },
+    loadModel: function(){
+    	this.storage.loadModel();
     }
 });
