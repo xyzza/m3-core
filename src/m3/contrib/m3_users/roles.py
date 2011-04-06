@@ -172,7 +172,7 @@ class RolesDataAction(actions.Action):
 
     def context_declaration(self):
         return [
-            actions.ActionContextDeclaration(name='filter', required=True, default=''),
+            actions.ActionContextDeclaration(name='filter', type=unicode, required=True, default=''),
             actions.ActionContextDeclaration(name='start', type=int, required=True, default=0),
             actions.ActionContextDeclaration(name='limit', type=int, required=True, default=25),
         ]
