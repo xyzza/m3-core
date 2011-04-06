@@ -26,7 +26,7 @@ class Parser(object):
     GENERATED_FUNC = 'initialize'
     
     # Название папки для бакапа
-    BACKUP_DIR_NAME = '.form-buckup'
+    BACKUP_DIR_NAME = '.form-backup'
     
     # Сколько бакупных файлов хранить
     BACKUP_FILES_MAXIMUM = 10
@@ -52,8 +52,20 @@ class Parser(object):
         Отвечает за преобразования py-кода в json, понятный m3-дизайнеру.
         Возвращает json объект в виде строки.
         '''
-        pass
+        source_code = open(self.path).read()
+        node_module = ast.parse(source_code)
+        func = self._get_func_initialize(node_module, self.class_name)
+        
+        for node in func.body:
+            if isinstance(node, ast.Assign):
+                # Составление структуры конфигов и типов компонентов
+                pass
+            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
+                # Составление структуры вложенных компонентов
+                pass
     
+        # На основе двух структур и маппинга генерируется отдающий файл        
+        return {}
 
     def from_designer(self, json_dict):
         '''
@@ -85,12 +97,11 @@ class Parser(object):
             nodes.insert(0, func_node.body[0])
             
         # Замена старого содержимого на новое сгенерированное 
-        func_node.body = nodes
-                
-        print codegen.to_source(module_node)
+        func_node.body = nodes                       
 
         # Бакап файла на всякий пожарный случай и cохранение нового файла
         source_code = codegen.to_source(module_node)
+        print source_code
         self._write_to_file(source_code)
         
     def _write_to_file(self, source_code):
@@ -129,7 +140,8 @@ class Parser(object):
         new_path = os.path.join(dir_backup, os.path.basename(self.path))        
         shutil.copyfile(self.path, new_path + '.old')
                     
-        open(self.path, 'w').write(source_code)
+        with open(self.path, 'w') as f:
+            f.write(source_code)
 
     def _gen_nested_components(self, d=None, nodes=None):
         '''
@@ -276,11 +288,11 @@ class Parser(object):
         '''
         Поиск и возвращение функции GENERATED_FUNC 
         '''
-        for node in ast.walk(node_module):            
+        for node in node_module.body:        
             if isinstance(node, ast.ClassDef) and node.name == class_name:                
-                for node in ast.walk(node):
-                    if isinstance(node, ast.FunctionDef) and node.name == Parser.GENERATED_FUNC:
-                        return node
+                for nested_node in node.body:    
+                    if isinstance(nested_node, ast.FunctionDef) and nested_node.name == Parser.GENERATED_FUNC:
+                        return nested_node
                         
         
 def get_files(path):
@@ -291,7 +303,10 @@ def get_files(path):
         
     li = []
          
-    for ffile in sorted(os.listdir(path)):     
+    for ffile in sorted(os.listdir(path), \
+            # Папки имеют приоритет над файлами
+            key=lambda x: ' %s' % x if os.path.isdir(os.path.join(path, x)) else x):
+            
 
         if ffile.split('.')[-1]  in EXCLUSION:
             continue
@@ -322,21 +337,20 @@ def get_classess(path):
     '''
     Возвращает набор классов в файле
     '''
-    
-    ast_module = ast.parse( open(path).read() )
-    
-    res = []
-    for item in ast.walk( ast_module ):
-        if isinstance(item, ast.ClassDef):
-            d = {'text': item.name,
-                 'leaf': True,
-                 'iconCls':  Icons.PAGE_WHITE_C,
-                 'class_name':  item.name,
-                 'path': path}
-            res.append(d)
-    
-    
-    return res
+    with open(path) as f:
+        ast_module = ast.parse( f.read() )
+        
+        res = []
+        for item in ast.walk( ast_module ):
+            if isinstance(item, ast.ClassDef):
+                d = {'text': item.name,
+                     'leaf': True,
+                     'iconCls':  Icons.PAGE_WHITE_C,
+                     'class_name':  item.name,
+                     'path': path}
+                res.append(d)
+            
+        return res
 
 
 def restores(data):

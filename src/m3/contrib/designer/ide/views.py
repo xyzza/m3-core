@@ -40,7 +40,11 @@ def designer(request):
         'save_url' : '/designer/save'
     })
 
+
 def designer_fake_data(request):
+    '''
+    Вьюшка для показа формы
+    '''
     result = {
             'properties': {
                 'id':'Ext window',
@@ -55,10 +59,15 @@ def designer_fake_data(request):
                         content = json.dumps(result))
 
 def designer_save(request):
+    '''
+    Вьюшка для сохранения формы
+    '''
     class_name = request.POST.get('className')
     path = request.POST.get('path')
     data = request.POST.get('data')    
 
+    assert class_name, 'Class name is undefined'
+    assert path, 'Path to source file is undefined'
 
     js = json.loads(data)
     
