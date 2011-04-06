@@ -39,8 +39,10 @@ var tree = new Ext.tree.TreePanel({
 	            }
 
 	        },
-	        dblclick: function(node, e){
-	        	onClickNode(node);
+	        dblclick: function(node, e){	        	
+	        	if (node.parentNode && (node.parentNode.text === 'ui.py' || node.parentNode.text === 'forms.py' ) ){
+		        	onClickNode(node);
+	        	}
 	        }
 	    }	
 })

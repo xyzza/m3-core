@@ -5,14 +5,15 @@ import os
 import json
 import codegen
 
+# Для тестов обернуто в try
 try:
     from m3.helpers.icons import Icons
-except:
+except ImportError:
     pass
+
 
 EXCLUSION = ('pyc', 'orig',)
 POSIBLE_EDIT_FILES = ('ui.py', 'forms.py')
-
 
 
 class Parser(object):
@@ -20,14 +21,20 @@ class Parser(object):
     Класс, отвечающий за преобразование данных
     '''
     
-    # Функция 
+    # Имя функция, которая будет сгенерирована
     GENERATED_FUNC = 'initialize'
     
     def __init__(self, path, class_name):
+        '''
+        @param path: Путь до py файла
+        @param class_name: Имя класса для генерации
+        '''
         self.path = path
         self.class_name = class_name
         
-        
+        # Содержаться вложенные объекты для последующей генерации
+        # Пример:
+        # {'self':[{'simple_panel':[...]},{'simple_form':[...]}]}
         self.dict_instances = {}
     
     def to_designer(self):
@@ -42,42 +49,56 @@ class Parser(object):
         '''
         Отвечает за преобразование json-a формы из m3-дизайнеру в py-код.
         '''
+                
+        # Получение узлов AST непосредственно для класса (например свойства ExtWindow)
+        nodes = self._gen_base_properties(json_dict)
         
-        # Опишем действия для окна
-        # 1. Получение конфига сопоставлений
-        nodes = self.gen_base_properties(json_dict)
+        # Получение узлов AST для дочерних элементов (вложенные объекты)
+        child_nodes = self._gen_child_properties(json_dict)
         
-        child_nodes = self.gen_child_properties(json_dict)
-        
-        #print child_nodes
-        
-        print self.dict_instances
-        
-        #return 
-    
+        # Добавление дочерних узлов в список узлов свойств
         nodes.extend(child_nodes)
                 
-        # Добавление вложенных компонентов
-        nodes.extend( self.gen_nested_components() )        
-                
+        # Добавление вложенных компонентов (строки вида: self._items.append(...) )
+        nodes.extend( self._gen_nested_components() )        
+
+        # Преобразование модуля в AST дерево
         module_node = ast.parse(open(self.path).read())
-        func_node = self.get_func_initialize(module_node, self.class_name)     
-                
+        
+        # Нахождение нужной функции GENERATED_FUNC
+        func_node = self._get_func_initialize(module_node, self.class_name)     
+        
+        # Старая док строка не должна потеряться
         if func_node and isinstance(func_node.body, list) and len(func_node.body) > 0 \
             and isinstance(func_node.body[0], ast.Expr):            
-            # Включение докстроки 
             nodes.insert(0, func_node.body[0])
             
+        # Замена старого содержимого на новое сгенерированное 
         func_node.body = nodes
         
-        print module_node
-        print codegen.to_source(module_node)
         
-        # 2. Построение вложенных элементов
-        # ast.Assign([ast.Attribute(ast.Name('a','1'), 'a', '1')], ast.Num(5))
+        print codegen.to_source(module_node)
+
+        # Бакап файла на всякий пожарный случай
+        
+        # Сохранение нового файла
 
         
-    def gen_nested_components(self, d=None, nodes=None):
+    def _gen_nested_components(self, d=None, nodes=None):
+        '''
+        Генерирует список узлов AST вложенных компонент вида:
+        self._items.append(spanel)
+        spanel._items.append(code)
+        spanel._items.append(descr)
+        
+        При этом рекурсивно спускается по структуре вида
+        {'self':[{'simple_panel':[...]},{'simple_form':[...]}]}
+        
+        @param d: словарь, структуру которого необходимо отобразить
+        @param param: nodes - для передачи нодов внутрь функции
+        
+        @return: nodes - Возвращает набор узлов
+        '''
         nodes = nodes or []
         d = d or self.dict_instances        
         for k, v in d.items(): # Вызывается 1 раз, т.к. 1 ключ
@@ -85,7 +106,7 @@ class Parser(object):
                 for ik, _ in item.items(): # Вызывается 1 раз, для получения внутреннего ключа
                     
                     # Вот такая ебическая конструкция
-                    # Привыкаем блять к лиспу (с) greatfuckingadvice
+                    # Привыкаем, блеать, к лиспу (с) greatfuckingadvice
                     node = ast.Expr(
                                 ast.Call(
                                     ast.Attribute(
@@ -97,16 +118,28 @@ class Parser(object):
                             )
                     nodes.append(node)
                         
-                    self.gen_nested_components(item, nodes)
+                    self._gen_nested_components(item, nodes)
         
         return nodes    
         
     
-    def gen_child_properties(self, type_obj, nodes = None, dict_instanses=None):
+    def _gen_child_properties(self, type_obj, nodes = None, dict_instanses=None):
+        '''
+        Генерация узлов AST для свойств дочерних элементов 
         
+        Рекурсивно вызывается для вложенных объектов
+        
+        Строки вида: 
+        panel = ExtPanel()
+        panel.title = u'Панелько'
+        ...
+        my_field = ExtStringField()
+        my_field.label = 'my_label'
+        '''
         nodes = nodes or []
         dict_instanses = dict_instanses or self.dict_instances
         
+        # li - вспомогательный список, укороченная ссылка на dict_instanses[ type_obj['id'] ]
         dict_instanses[ type_obj['id'] ] = li = []
  
         if type_obj.has_key('items'):
@@ -114,54 +147,88 @@ class Parser(object):
                 d = {item['id']: []}             
                 li.append(d)
                 
-                nodes.append( self.gen_instanse(item) )
-                nodes.extend( self.gen_base_properties(item) )                    
+                nodes.append( self._gen_instanse(item) )
+                nodes.extend( self._gen_base_properties(item) )                    
                 
-                self.gen_child_properties(item, nodes, dict_instanses=d)
+                self._gen_child_properties(item, nodes, dict_instanses=d)
 
         return nodes
     
-    def gen_instanse(self, obj):
-        for item in self.get_mapping():            
+    def _gen_instanse(self, obj):
+        '''
+        Получение по маппингу 
+        Строки вида: 
+        panel = ExtPanel()
+        '''
+        for item in self._get_mapping():            
             if item['class'].has_key(obj['type']):
                 value = item['class'][ obj['type'] ]
-                return ast.Assign([ast.Name(obj['id'], '1')], ast.Call(ast.Name(str(value), 1), [], [], None, None))
+                return ast.Assign([ast.Name(obj['id'], '1')], 
+                                  ast.Call(
+                                        ast.Name( str(value) , 1), [], [], None, None)
+                                  )
     
-    def gen_base_properties(self, type_obj):        
-        config_dict = self.gen_config(type_obj['type'])
+    def _gen_base_properties(self, type_obj):
+        '''
+        Генерация узлов для свойств 
+        Строки вида:
+        self.width = 100
+        self.title = u'Окошко'
+        
+        panel.title = 'Simple title'
+        '''
+        config_dict = self._gen_config(type_obj['type'])
         properties = type_obj['properties']
         
         nodes = []
         for extjs_name, value in properties.items():
             
+            # Вложенные id не учитываем
             if str(extjs_name) == 'id':
                 continue
             
+            assert type_obj.get('id'), 'ID component "%s" is not defined' % type_obj['type']
+            assert config_dict, 'Mapping component "%s" (%s) is not define' % (type_obj['type'], type_obj['id']) 
+            assert config_dict.get(extjs_name), 'Mapping object "%s" for "%s" is not define' % (extjs_name, type_obj['id'])
+
             py_name = config_dict[extjs_name]
             
-            assert type_obj.get('id'), 'ID component "%s" is not defined' % type_obj['type']
-            node = ast.Assign([ast.Attribute(ast.Name(type_obj['id'], '1'), str(py_name), '1')], self.get_node_value(value))
+            node = ast.Assign([ast.Attribute(ast.Name(type_obj['id'], '1'), str(py_name), '1')], self._get_node_value(value))
             nodes.append(node)
             
         return nodes
     
-    def gen_config(self, type_obj):           
-        for item in self.get_mapping():
+    def _gen_config(self, type_obj):  
+        '''
+        Получение конфигурации свойств из маппинга по типу объекта
+        @param type_obj: Тип объекта (window, panel, etc.)
+        '''         
+        for item in self._get_mapping():
             if item['class'].has_key(type_obj):
                 return item['config']
     
     
-    def get_mapping(self):
+    def _get_mapping(self):
+        '''
+        Получение объекта маппинга
+        '''
         return mapping_list
     
-    def get_node_value(self, value):
+    def _get_node_value(self, value):
+        '''
+        Генерация узла дерева для простых элементов
+        Например для строки и числа
+        '''
         if isinstance(value, int):
             return ast.Num(value)
         elif isinstance(value, basestring):
             return ast.Str(value)
         
         
-    def get_func_initialize(self, node_module, class_name):
+    def _get_func_initialize(self, node_module, class_name):
+        '''
+        Поиск и возвращение функции GENERATED_FUNC 
+        '''
         for node in ast.walk(node_module):            
             if isinstance(node, ast.ClassDef) and node.name == class_name:                
                 for node in ast.walk(node):
@@ -224,10 +291,11 @@ def get_classess(path):
     
     return res
 
+
 def restores(data):
     '''
-    Будет пытаться преобразить все символы в кодировку ansii, если это 
-    невозможно (то есть присутсвует unicode символы), то оcтается как есть
+    Будет пытаться преобразить все символы в кодировку ascii, если это 
+    невозможно - если присутсвует unicode символы, то оcтавляет их как есть
     '''
     for k, v in data.items():
         if isinstance(v, dict):
@@ -242,11 +310,15 @@ def restores(data):
         
 
 # Словарь сопоставлений контролов в дизайнере к контролам в питоне
-mapping_list = json.loads(open( os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').read())
+mapping_list = json.loads(open( 
+                    os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').read())
 
 
+#===============================================================================
 def test_from_designer():
-    
+    '''
+    Функция для легкого тестирования метода from_designer
+    '''
     fake_data = {
         'properties': {
             'name':'Ext window',
@@ -286,5 +358,9 @@ def test_from_designer():
         }]
     }
     
-    parser = Parser('tests.py', 'TestOne')
-    parser.from_designer(fake_data)
+    Parser('tests.py', 'TestOne').from_designer(fake_data)
+    print 'Parser.from_designer - ok'
+    
+    
+if __name__ == '__main__':
+    test_from_designer()
