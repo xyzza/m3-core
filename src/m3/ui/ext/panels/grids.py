@@ -68,17 +68,29 @@ class ExtObjectGrid(containers.ExtGrid):
         # Действия, выполняемые изнутри грида 
         #=======================================================================
         
-        # Для новой записи
+        # Экшен для новой записи
         self.action_new = None
         
-        # Для изменения
+        # Экшен для  изменения
         self.action_edit = None
         
-        # Для удаления
+        # Экшен для удаления
         self.action_delete = None
         
-        # Для данных
+        # Экшен для данных
         self.action_data = None
+        
+        # Адрес для новой записи. Адреса имеют приоритет над экшенами!
+        self.url_new = None
+        
+        # Адрес для изменения
+        self.url_edit = None
+        
+        # Адрес для удаления
+        self.url_delete = None
+        
+        # Адрес для данных
+        self.url_data = None
         
         #=======================================================================
         # Источник данных для грида
@@ -150,15 +162,15 @@ class ExtObjectGrid(containers.ExtGrid):
         Переопределяем рендер грида для того, чтобы модифицировать содержимое его 
         панелей и контекстных меню
         '''
-        if self.action_new:
+        if self.action_new or self.url_new:
             self.context_menu_row.items.append(self.context_menu_row.menuitem_new)
             self.context_menu_grid.items.append(self.context_menu_grid.menuitem_new)
             
-        if self.action_edit:
+        if self.action_edit or self.url_edit:
             self.context_menu_row.items.append(self.context_menu_row.menuitem_edit)
             self.handler_dblclick = self.dblclick_handler
             
-        if self.action_delete:
+        if self.action_delete or self.url_delete:
             self.context_menu_row.items.append(self.context_menu_row.menuitem_delete)
                     
         # контекстное меню прицепляется к гриду только в том случае, если 
@@ -172,25 +184,28 @@ class ExtObjectGrid(containers.ExtGrid):
         # Настройка top bar
         #=======================================================================
         # @TODO: Отрефакторить данный метод, чтобы он был не в рендеринге 
-        if (not self.action_data and
+        if (not self.action_data and not self.url_data and
                 self.top_bar.button_refresh in self.top_bar.items):
             self.top_bar.items.remove(self.top_bar.button_refresh)
         
-        if (not self.action_delete and
+        if (not self.action_delete and not self.url_delete and
                 self.top_bar.button_delete in self.top_bar.items):
             self.top_bar.items.remove(self.top_bar.button_delete)
         
-        if (not self.action_edit and
+        if (not self.action_edit and not self.url_edit and
                 self.top_bar.button_edit in self.top_bar.items):
             self.top_bar.items.remove(self.top_bar.button_edit)
         
-        if (not self.action_new and
+        if (not self.action_new and not self.url_new and
                 self.top_bar.button_new in self.top_bar.items):
             self.top_bar.items.remove(self.top_bar.button_new) 
         
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
             self.store.url = self.action_data.absolute_url()
+            
+        if self.url_data:
+            self.store.url = self.url_data
         
         if self.allow_paging:
             self.store.start = 0
@@ -206,16 +221,25 @@ class ExtObjectGrid(containers.ExtGrid):
     def render_params(self):
         super(ExtObjectGrid, self).render_params()
         
-        new_url = self.action_new.absolute_url() if self.action_new else None
-        edit_url = self.action_edit.absolute_url() if self.action_edit else None
-        delete_url = self.action_delete.absolute_url() if self.action_delete else None
-        data_url = self.action_data.absolute_url() if self.action_data else None
+        # Получение адресов для грида. Текстовые адреса более приоритетны чем экшены!
+        if not self.url_new and self.action_new:
+            self.url_new = self.action_new.absolute_url()
+             
+        if not self.url_edit and self.action_edit:
+            self.url_edit = self.action_edit.absolute_url()
+            
+        if not self.url_delete and self.action_delete:
+            self.url_delete = self.action_delete.absolute_url()
+            
+        if not self.url_data and self.action_data:
+            self.url_data = self.action_data.absolute_url()
+
         context_json = self.action_context.json if self.action_context else None
         
-        self._put_params_value('actions', {'newUrl': new_url,
-                                            'editUrl': edit_url,
-                                            'deleteUrl': delete_url,
-                                            'dataUrl': data_url,
+        self._put_params_value('actions', {'newUrl': self.url_new,
+                                            'editUrl': self.url_edit,
+                                            'deleteUrl': self.url_delete,
+                                            'dataUrl': self.url_data,
                                             'contextJson': context_json})
         
         self._put_params_value('rowIdName', self.row_id_name)
