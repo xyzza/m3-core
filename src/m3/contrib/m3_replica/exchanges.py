@@ -186,7 +186,7 @@ class ContragentModelImport(SimpleModelImport):
     
     def __init__(self, model, data_source, field_map, contragent_field_map,
                  ekey_index=0, replica_storage=None, replica_map={},
-                 contragent_field = 'contragent',):
+                 target=None, contragent_field = 'contragent',):
         '''
         В дополнение к конструктору базового класса добавляется словарь 
         соответствия прочитанных значений из источника данных в модели 
@@ -197,7 +197,7 @@ class ContragentModelImport(SimpleModelImport):
         '''
         super(ContragentModelImport, self).__init__(model=model,
                                                     data_source=data_source,
-                                                    target=ContragentModelDataTarget(),
+                                                    target=target or ContragentModelDataTarget(),
                                                     field_map=field_map,
                                                     ekey_index=ekey_index,
                                                     replica_storage=replica_storage,

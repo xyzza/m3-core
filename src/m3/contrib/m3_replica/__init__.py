@@ -10,3 +10,7 @@ from exchanges import (SimpleModelImport,
 from engine import (DjangoSQLDataSource,
                     ModelReplicationStorage,
                     ReplicatedObjectsPackage,)
+
+from targets import (ModelDataTarget,ReferenceModelTarget)
+
+from sources import (SQLiteXDataSource,)
