@@ -660,7 +660,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             nodes = list(query)       
             # Если имеем дело с листом, нужно передавать параметр leaf = true
             for node in nodes:
-                if self.tree_model.objects.filter(parent = node.id).count() == 0:
+                if not self.tree_model.objects.filter(parent = node.id).exists():
                     node.leaf = 'true'
                     
         # генерируем сигнал о том, что узлы дерева подготовлены
@@ -832,9 +832,9 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         message = ''
         if obj == None:
             message = u'Группа не существует в базе данных.'
-        elif self.tree_model.objects.filter(**{self.tree_parent_field: obj}).count() > 0:
+        elif self.tree_model.objects.filter(**{self.tree_parent_field: obj}).exists():
             message = u'Нельзя удалить группу содержащую в себе другие группы.'
-        elif self.list_model and self.list_model.objects.filter(**{self.list_parent_field: obj}).count() > 0:
+        elif self.list_model and self.list_model.objects.filter(**{self.list_parent_field: obj}).exists():
             message = u'Нельзя удалить группу содержащую в себе элементы.'
         elif not safe_delete(obj):
             message = u'Не удалось удалить группу. Возможно на неё есть ссылки.'
