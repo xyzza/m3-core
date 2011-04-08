@@ -345,7 +345,7 @@ class ListWindowAction(Action):
             win.url_edit_grid   = base.edit_grid_window_action.get_absolute_url()
             win.url_delete_grid = base.delete_row_action.get_absolute_url()
             # Драг&Дроп
-            if not base.tree_readonly:
+            if not base.tree_readonly and base.list_drag_and_drop:
                 win.url_drag_grid = base.drag_list.get_absolute_url()
     
     def configure_tree(self, win, request, context):
@@ -376,7 +376,8 @@ class ListWindowAction(Action):
             win.url_edit_tree   = base.edit_node_window_action.get_absolute_url()
             win.url_delete_tree = base.delete_node_action.get_absolute_url()
             # Драг&Дроп
-            win.url_drag_tree = base.drag_tree.get_absolute_url()
+            if base.tree_drag_and_drop:
+                win.url_drag_tree = base.drag_tree.get_absolute_url()
     
     def configure_other(self, win, request, context):
         pass
@@ -612,6 +613,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     tree_parent_field = 'parent' # Имя поля ссылающегося на группу
     tree_readonly = False # Если истина, то адреса экшенов дереву не назначаются
     tree_order_field = ''
+    tree_drag_and_drop = True # Разрешает перетаскивание внутри дерева
     
     # Настройки модели списка
     list_model = None # Не обязательная модель списка связанного с деревом
@@ -619,6 +621,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     filter_fields = [] # Поля по которым производится поиск в списке
     list_parent_field = 'parent' # Имя поля ссылающегося на группу
     list_readonly = False # Если истина, то адреса экшенов гриду не назначаются
+    list_drag_and_drop = True # Разрешает перетаскивание элементов из грида в другие группы дерева
     list_order_field = ''
     list_paging = True
     
@@ -660,7 +663,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             nodes = list(query)       
             # Если имеем дело с листом, нужно передавать параметр leaf = true
             for node in nodes:
-                if self.tree_model.objects.filter(parent = node.id).count() == 0:
+                if not self.tree_model.objects.filter(parent = node.id).exists():
                     node.leaf = 'true'
                     
         # генерируем сигнал о том, что узлы дерева подготовлены
@@ -832,9 +835,9 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         message = ''
         if obj == None:
             message = u'Группа не существует в базе данных.'
-        elif self.tree_model.objects.filter(**{self.tree_parent_field: obj}).count() > 0:
+        elif self.tree_model.objects.filter(**{self.tree_parent_field: obj}).exists():
             message = u'Нельзя удалить группу содержащую в себе другие группы.'
-        elif self.list_model and self.list_model.objects.filter(**{self.list_parent_field: obj}).count() > 0:
+        elif self.list_model and self.list_model.objects.filter(**{self.list_parent_field: obj}).exists():
             message = u'Нельзя удалить группу содержащую в себе элементы.'
         elif not safe_delete(obj):
             message = u'Не удалось удалить группу. Возможно на неё есть ссылки.'

@@ -23,15 +23,6 @@ class TestOne(ExtWindow):
         '''
         self.width = 200
         self.height = 300
-        self.title = u'Простое окно'
-        self.layout = "fit"
-        panel1 = ExtPanel()
-        panel1.title = u'Простое название'
-        panel1.layout = 'form'
-        field1 = ExtStringField()
-        field1.label = u'Простое поле'
-        panel1.items.extend([field1])
-        self.items.extend([panel1])
-        
+
     def ata(self):
         pass

@@ -46,7 +46,7 @@ class Parser(object):
         
         # Старый исходный код модуля
         self.old_source_code = ''
-    
+        
     def to_designer(self):
         '''
         Отвечает за преобразования py-кода в json, понятный m3-дизайнеру.
@@ -56,17 +56,143 @@ class Parser(object):
         node_module = ast.parse(source_code)
         func = self._get_func_initialize(node_module, self.class_name)
         
+        assert func, 'Function name "%s" is not define in class "%s"' % \
+                        (Parser.GENERATED_FUNC, self.class_name,)
+        
+        self.nested_cmp = {}
+        self.config_cmp = {}
         for node in func.body:
             if isinstance(node, ast.Assign):
                 # Составление структуры конфигов и типов компонентов
-                pass
+                parent, attr, value = self._get_config_component(node)
+                self.config_cmp.setdefault(parent, {})[attr] = value
+                
             elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
                 # Составление структуры вложенных компонентов
-                pass
-    
-        # На основе двух структур и маппинга генерируется отдающий файл        
-        return {}
+                parent, child = self._get_nested_component(node.value)
+                self.nested_cmp.setdefault(parent, []).append(child)
+                        
+        return self._get_json()        
+                
 
+    def _get_json(self, key='self', a_property_dict=None):
+        '''
+        Преобразует линейную структуру вида:
+            {'panel1': ['field1'], 'self': ['panel1', 'panel2']}
+        в иерархическую структуру вида:
+            {'self':[{'panel1': ['field1']}, {'panel2': []}]}  
+            
+        И попутно преобразует py-объекты в объекты дизайнера
+        В конечном итоге получается словарь, понятный дизайнеру  
+        '''
+        res_dict = a_property_dict if isinstance(a_property_dict, dict) else {}                
+               
+        l = []
+        if self.nested_cmp and self.nested_cmp.get(key):
+            for item in self.nested_cmp[key]:
+
+                property_dict = {}      
+                if self.nested_cmp.get(item):
+                    res_dict.setdefault('items', []).append(property_dict)
+                    self._get_json(item, property_dict)                                               
+                else:
+                    property_dict.update( self._get_json_config(item ) )    
+
+                l.append(property_dict)
+        
+        res_dict.update(self._get_json_config(key))    
+        res_dict.update({'items': l})
+        return res_dict
+    
+    def _get_json_config(self, key):
+        '''
+        Возвращает конфигурацию компонента в качестве словаря
+        '''
+        properties, py_name = self._get_properties(key)                
+        return {'type': py_name, 'id':key, 'properties': properties}
+
+    def _get_properties(self, key):
+        '''
+        Возвращает кортеж: свойства контрола, имя контрола в натации дизайнера
+        (extjs)
+        '''        
+        conf = self.config_cmp[key].copy()
+        
+        if conf.get('py_name'):
+            py_name = conf.pop('py_name')            
+        else:
+            py_name = 'ExtWindow' # FIXME: Здесь должно быть имя класса
+        
+        extjs_name = self._get_extjs_class(py_name)
+        
+        properties = dict(id= key) 
+        for k, v in conf.items():
+            extjs_attr = self._get_json_attr(k, extjs_name)
+            assert extjs_attr, 'Mapping object "%s" for "%s" is not define' % (k, extjs_name,)
+            properties[extjs_attr] = v
+            
+        return properties, extjs_name
+    
+    def _get_extjs_class(self, py_name):
+        '''
+        Получает из маппинга наименование extjs класса 
+        '''
+        for item in self._get_mapping():
+            k, v = item['class'].items()[0] # Одно значение
+            if v == py_name:
+                return str(k)
+                    
+    def _get_json_attr(self, name, extjs_class_name):
+        '''
+        Получает из маппинга свойство по наименованию extjs контрола
+        '''
+        conf = self._gen_config(extjs_class_name)
+
+        for k, v in conf.items():
+            if v == name:
+                return str(k)
+        
+    def _get_nested_component(self, node_value):
+        '''
+        Распарсивается структура вида:
+        self._items.append(panel)
+        
+        node_value.func.value.value.id - доступ к self
+        node_value.args[0].elts[0].id - доступ к panel
+        '''
+        assert isinstance(node_value, ast.Call)
+        
+        return node_value.func.value.value.id, node_value.args[0].id
+
+    def _get_value(self, node):
+        '''
+        Получает значение исходя из типа узла
+        '''
+        if isinstance(node, ast.Num):
+            return node.n
+        elif isinstance(node, ast.Str):
+            return node.s
+
+    def _get_config_component(self, node):
+        '''
+        Разбирает конструкцию вида:
+        
+        self.width = 100
+        
+        parent - self
+        attr - width
+        value - 100        
+        '''
+        assert isinstance(node, ast.Assign)#        
+        if isinstance(node.value, ast.Call):
+            # Создание экземпляра            
+            # instanse, attr, class name
+            return node.targets[0].id, 'py_name', node.value.func.id
+        else:            
+            # Распарсивание свойства
+            # parent, attr, value
+            return node.targets[0].value.id, node.targets[0].attr, self._get_value(node.value)        
+    
     def from_designer(self, json_dict):
         '''
         Отвечает за преобразование json-a формы из m3-дизайнеру в py-код.
@@ -219,7 +345,7 @@ class Parser(object):
         Строки вида: 
         panel = ExtPanel()
         '''
-        for item in self._get_mapping():            
+        for item in self._get_mapping():
             if item['class'].has_key(obj['type']):
                 value = item['class'][ obj['type'] ]
                 return ast.Assign([ast.Name(obj['id'], '1')], 
@@ -372,7 +498,7 @@ def restores(data):
 
 # Словарь сопоставлений контролов в дизайнере к контролам в питоне
 mapping_list = json.loads(open( 
-                    os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').read())
+            os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').read())
 
 
 #===============================================================================
@@ -422,6 +548,13 @@ def test_from_designer():
     Parser('tests.py', 'TestOne').from_designer(fake_data)
     print 'Parser.from_designer - ok'
     
+def test_to_designer():
+    js = Parser('tests.py', 'TestOne').to_designer()
+    
+    import pprint
+    pprint.pprint( js ) 
+    
+    print 'Parser.to_designer - ok'
     
 if __name__ == '__main__':
     test_from_designer()
