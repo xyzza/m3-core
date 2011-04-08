@@ -265,26 +265,98 @@ Ext.apply(ModelTypeLibrary,{
             toolboxData:{
                 text:'Text area',
                 category:'Fields'
-            }
+            },
+            treeIconCls:'designer-textarea'
         },
-        textField:{
-            properties:{
-                fieldLabel:{
-                    defaultValue:''
-                },
-                id:{
-                    defaultValue:'New text field',
+        checkBox:{
+            parent:'baseField',
+            properties: {
+                id: {
+                    defaultValue:'New check box',
                     isInitProperty:true
                 },
-                anchor:{
-                    defaultValue:'auto'
+                checked: {
+                    defaultValue:false
+                },
+                boxLabel: {
+                    defaultValue:''
                 }
             },
             toolboxData:{
-                text:'Text field',
+                text:'Checkbox',
+                category:'Fields'
+            },
+            treeIconCls:'designer-checkbox'
+        },
+        dateField: {
+            parent:'baseField',
+            properties: {
+                id:{
+                    defaultValue:'New datetime field',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                text:'Datetime field',
+                category:'Fields'
+            },
+            treeIconCls:'designer-icon-datefield'
+        },
+        textField:{
+            parent:'baseField',
+            properties:{
+                id:{
+                    defaultValue:'New string field',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                text:'String field',
                 category:'Fields'
             },
             treeIconCls:'designer-icon-text'
+        },
+        numberField:{
+            parent:'baseField',
+            properties:{
+                id:{
+                    defaultValue:'New number field',
+                    isInitProperty:true
+                },
+                decimalSeparator:{
+                    defaultValue:'.'
+                },
+                allowDecimal: {
+                    defaultValue:true
+                },
+                allowNegative: {
+                    defaultValue:true
+                },
+                decimalPrecision: {
+                    defaultValue:2
+                },
+                maxValue : {
+                    defaultValue:0
+                },
+                maxText: {
+                    defaultValue:''
+                },
+                minValue : {
+                    defaultValue:0
+                },
+                minText: {
+                    defaultValue:''
+                },
+                selectOnFocus: {
+                    defaultValue: false
+                }
+
+            },
+            toolboxData:{
+                text:'Number field',
+                category:'Fields'
+            },
+            treeIconCls:'designer-icon-number'
         },
         comboBox: {
             //FIXME комбобоксеке не работают
@@ -328,6 +400,39 @@ Ext.apply(ModelTypeLibrary,{
                 category:'Fields'
             },
             treeIconCls:'designer-icon-combo'
+        },
+        displayField: {
+            parent:'baseField',
+            properties: {
+                id : {
+                    defaultValue:'New display field',
+                    isInitProperty:true
+                },
+                value : {
+                    defaultValue:'New display field',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                text:'Display field',
+                category:'Fields'
+            },
+            treeIconCls:'designer-displayfield'
+        },
+        hiddenField: {
+            properties: {
+                id : {
+                    defaultValue:'New hidden field',
+                    isInitProperty:true
+                },
+                name : {
+                    defaultValue:''
+                }
+            },
+            toolboxData:{
+                text:'Hidden field',
+                category:'Fields'
+            }
         },
         gridPanel:{
             isContainer: true,

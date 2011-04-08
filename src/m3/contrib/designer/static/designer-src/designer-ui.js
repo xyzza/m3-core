@@ -39,6 +39,26 @@ ModelUIPresentaitionBuilder = function() {
                     })
                 );
         },
+        checkBox:function(model, cfg){
+            return new Ext.form.Checkbox(
+                    Ext.apply(cfg,{
+                        readOnly:true
+                    })
+                );
+        },
+        numberField:function(model, cfg){
+            return new Ext.form.NumberField(
+                    Ext.apply(cfg,{
+                        readOnly:true
+                    })
+                );
+        },
+        displayField:function(model, cfg) {
+            return new Ext.form.DisplayField(cfg);    
+        },
+        dateField:function(model, cfg){
+            return new Ext.form.DateField(cfg);
+        },
         comboBox:function(model, cfg) {
             var store = new Ext.data.ArrayStore({
             autoDestroy:true,

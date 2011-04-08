@@ -28,6 +28,15 @@
 .designer-grid-column {
     background-image:url(../images/grid-column.png) !important;
 }
+.designer-checkbox {
+    background-image:url(../images/checkbox.png) !important;
+}
+.designer-displayfield {
+    background-image:url(../images/display-field.png) !important;
+}
+.designer-textarea {
+    background-image:url(../images/textarea.png) !important;
+}
 .x-tree-lines .x-tree-elbow-plus {
     background-image:url(../images/designer-plus.png) !important;
 }

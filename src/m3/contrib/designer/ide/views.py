@@ -46,14 +46,16 @@ def designer_fake_data(request):
     Вьюшка для показа формы
     '''
 
-    class_name = request.GET.get('className')
-    path = request.GET.get('path')
-    
-    assert class_name, 'Class name is undefined'
-    assert path, 'Path to source file is undefined'
-    
-    result = Parser(path, class_name).to_designer() 
-    
+    result = {
+            'properties': {
+                'id':'Ext window',
+                'title':'Ma teh window',
+                'layout':'fit',
+            },
+            'type':'window',
+            'id':0
+        }
+
     return HttpResponse(content_type='application/json', 
                         content = json.dumps(result))
 

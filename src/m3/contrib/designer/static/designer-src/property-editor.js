@@ -89,7 +89,7 @@ PropertyWindow = Ext.extend(Ext.Window, {
 
         var customEditors = {};
         var customRenderers = {};
-        this._setup_grid_customs(customEditors, customRenderers)
+        this._setup_grid_customs(customEditors, customRenderers);
 
         this._grid = new Ext.grid.PropertyGrid({
                         source: this.source,
