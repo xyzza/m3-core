@@ -380,10 +380,10 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         filter_fields = self._default_filter()
         query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, filter_fields)
-        total = query.count()
-        
+
         query = self.modify_get_rows(query, request, context)
-        
+        total = query.count()
+
         if limit > 0:
             query = query[offset: offset + limit]
 
