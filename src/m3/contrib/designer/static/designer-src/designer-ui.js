@@ -59,6 +59,9 @@ ModelUIPresentaitionBuilder = function() {
         dateField:function(model, cfg){
             return new Ext.form.DateField(cfg);
         },
+        timeField :function(model, cfg) {
+            return new Ext.form.TimeField(cfg);    
+        },
         comboBox:function(model, cfg) {
             var store = new Ext.data.ArrayStore({
             autoDestroy:true,

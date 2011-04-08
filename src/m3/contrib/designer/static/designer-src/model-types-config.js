@@ -292,12 +292,35 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id:{
-                    defaultValue:'New datetime field',
+                    defaultValue:'New date field',
                     isInitProperty:true
+                },
+                startDay : {
+                    defaultValue:0
                 }
             },
             toolboxData:{
-                text:'Datetime field',
+                text:'Date field',
+                category:'Fields'
+            },
+            treeIconCls:'designer-icon-datefield'
+        },
+        timeField : {
+            parent:'baseField',
+            properties: {
+                id:{
+                    defaultValue:'New time field',
+                    isInitProperty:true
+                },
+                format : {
+                    defaultValue:'g:i A'
+                },
+                increment: {
+                    defaultValue:15
+                }
+            },
+            toolboxData:{
+                text:'Time field',
                 category:'Fields'
             },
             treeIconCls:'designer-icon-datefield'
