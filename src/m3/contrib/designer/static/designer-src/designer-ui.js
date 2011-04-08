@@ -32,6 +32,13 @@ ModelUIPresentaitionBuilder = function() {
                     })
                 );
         },
+        textArea:function(model, cfg){
+            return new Ext.form.TextArea(
+                    Ext.apply(cfg,{
+                        readOnly:true
+                    })
+                );
+        },
         comboBox:function(model, cfg) {
             var store = new Ext.data.ArrayStore({
             autoDestroy:true,

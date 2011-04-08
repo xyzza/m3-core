@@ -4,6 +4,75 @@
 
 Ext.apply(ModelTypeLibrary,{
     typesConfig:{
+        component:{
+            properties:{
+                style:{
+                    defaultValue:'undefined',
+                    propertyType:'object'
+                },
+                hidden:{
+                    defaultValue:false
+                },
+                disabled:{
+                    defaultValue:false
+                },
+                height:{
+                    defaultValue:0
+                },
+                width:{
+                    defaultValue:0
+                },
+                x:{
+                    defaultValue:0
+                },
+                y:{
+                    defaultValue:0
+                },
+                html:{
+                    defaultValue:''
+                },
+                region:{
+                    defaultValue:''
+                },
+                flex:{
+                    defaultValue:''
+                },
+                maxHeight:{
+                    defaultValue:0
+                },
+                minHeight:{
+                    defaultValue:0
+                },
+                maxWidth:{
+                    defaultValue:0
+                },
+                minWidth:{
+                    defaultValue:0
+                },
+                name:{
+                    defaultValue:''
+                },
+                anchor:{
+                    defaultValue:''
+                },
+                cls:{
+                    defaultValue:''
+                },
+                labelWidth:{
+                    defaultValue:0
+                },
+                labelAlign:{
+                    defaultValue:'left',
+                    propertyType:'enum'
+                },
+                labelPad:{
+                    defaultValue:''
+                },
+                autoScroll:{
+                    defaultValue:false
+                }
+            }
+        },
         panel:{
             isContainer:true,
             properties:{
@@ -127,6 +196,76 @@ Ext.apply(ModelTypeLibrary,{
                 category:'Containers'
             },
             treeIconCls:'designer-tab-panel'
+        },
+        /*
+        * Поля для ввода
+        */
+        baseField : {
+            parent:'component',
+            properties:{
+                fieldLabel:{
+                    defaultValue:''
+                },
+                value: {
+                    defaultValue:''
+                },
+                labelStyle:{
+                    defaultValue:''
+                },
+                readOnly:{
+                    defaultValue:false
+                },
+                allowBlank :{
+                    defaultValue:true
+                },
+                hideLabel :{
+                    defaultValue:false
+                },
+                vtype: {
+                    defaultValue:''
+                },
+                emptyText: {
+                    defaultValue:''
+                },
+                minLength:{
+                    defaultValue:0
+                },
+                minLengthText:{
+                    defaultValue:''
+                },
+                maxLength:{
+                    defaultValue:0
+                },
+                maxLengthText:{
+                    defaultValue:''
+                },
+                regex:{
+                    defaultValue:''
+                },
+                regexText:{
+                    defaultValue:''
+                },
+                tabIndex:{
+                    defaultValue:0
+                },
+                invalidClass:{
+                    defaultValue:'m3-form-invalid',
+                    isInitValue:true
+                }
+            }
+        },
+        textArea:{
+            parent:'baseField',
+            properties:{
+                id:{
+                    defaultValue:'New text area',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                text:'Text area',
+                category:'Fields'
+            }
         },
         textField:{
             properties:{

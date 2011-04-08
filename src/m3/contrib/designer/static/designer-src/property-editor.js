@@ -73,6 +73,7 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
  */
 
 PropertyWindow = Ext.extend(Ext.Window, {
+    //autoScroll:true,
     /**
      * Параметры конфига:
      * cfg.source = {} - то что редактируется проперти гридом
@@ -91,7 +92,6 @@ PropertyWindow = Ext.extend(Ext.Window, {
         this._setup_grid_customs(customEditors, customRenderers)
 
         this._grid = new Ext.grid.PropertyGrid({
-                        autoHeight: true,
                         source: this.source,
                         customEditors:customEditors,
                         customRenderers:customRenderers

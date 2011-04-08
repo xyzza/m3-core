@@ -3,7 +3,8 @@
  */
 
 /*
- * Класс хранит в себе информацию о возможных типах компонентов, доступных им свойст, отображение в тулбоксе
+ * Класс хранит в себе информацию о возможных типах компонентов, доступных им свойств, отображение в тулбоксе.
+ * Предоставляется внешний интерфейс для получения ин-ции о свойствах из других частей программы.
  */
 
 ModelTypeLibrary = Ext.apply({}, {
@@ -12,22 +13,40 @@ ModelTypeLibrary = Ext.apply({}, {
         labelAlign:['left','top']
     },
     /*
+    * Возвращает массив из объектов со свойствами типа и его типов родителей. Внутренний метод предназначеный
+    * для поиска свойств в цепочке наследования. Объекты свойств заполненеы в порядке от предка к ребенку
+     */
+    _buildInheritanceChain:function(type) {
+        var inheritanceChain = [];
+        var t = type;
+
+        do { // кажется цикл do - while в послед раз я писал года три назад O_o
+            inheritanceChain.unshift(this.typesConfig[t]['properties']);
+            t = this.typesConfig[t]['parent'];
+        }
+        while (this.typesConfig[t] != undefined );
+        return inheritanceChain;
+    },
+    /*
     * Возаращает ограничения для переданого типа
     */
     getTypeRestrictions:function(type) {
         return this.typesConfig[type]['childTypesRestrictions'];
     },
     /**
-     * Возвращает объект со свойствами заполнеными дефолтными значениями по типу модели
-     *
+     * Возвращает объект со свойствами заполнеными дефолтными значениями по типу модели, с учетом наследования типов
      */
     getTypeDefaultProperties:function(type) {
-        //пояснение для тех кто не достиг дзена - в js объекты и ассоциативные массивы(словари) одно и тоже
-        //И более того, с помощью цикла for можно итерировать по свойствам массива(читай - получить все ключи словаря)
-        var currentType = this.typesConfig[type]['properties'];
+        var chain = this._buildInheritanceChain(type);
+
         var cfg = {};
-        for (var i in currentType) {
-            cfg[i] = currentType[i]['defaultValue'];
+        for (var i = 0; i <= chain.length; i++) {
+            var currentType = chain[i];
+            //пояснение для тех кто не достиг дзена - в js объекты и ассоциативные массивы(словари) одно и тоже
+            //И более того, с помощью цикла for можно итерировать по свойствам массива(читай - получить все ключи словаря)
+            for (var j in currentType) {
+                cfg[j] = currentType[j]['defaultValue'];
+            }
         }
         return cfg;
     },
@@ -35,13 +54,18 @@ ModelTypeLibrary = Ext.apply({}, {
     * Возвращает конфиг объекта с атрибутами, нужными для его создания и заполнеными дефолтными значениями
     */
     getTypeInitProperties:function(type) {
-        var currentType = this.typesConfig[type]['properties'];
+        var chain = this._buildInheritanceChain(type);
+
         var cfg = {};
-        for (var i in currentType) {
-            if (currentType[i]['isInitProperty']) {
-                cfg[i] = currentType[i]['defaultValue'];
+        for (var i = 0; i < chain.length; i++) {
+            var currentType = chain[i];
+            for (var j in currentType) {
+                if (currentType[j]['isInitProperty']) {
+                    cfg[j] = currentType[j]['defaultValue'];
+                }
             }
         }
+        
         return cfg;
     },
     /**
@@ -60,14 +84,17 @@ ModelTypeLibrary = Ext.apply({}, {
     * Является ли данное свойство объектом?
     */
     isPropertyObject:function(type, property) {
-        if (this.typesConfig[type]['properties'][property].hasOwnProperty('propertyType') &&
-                this.typesConfig[type]['properties'][property]['propertyType'] == 'object') {
-            return true;
+        var chain = this._buildInheritanceChain(type);
+        var prop = undefined;
+
+        for (var i = chain.length -1; i >= 0 ; i--) {
+            if (chain[i].hasOwnProperty(property)) {
+                prop = chain[i][property];
+                break;
+            }
         }
-        else
-        {
-            return false;
-        }
+        return (prop.hasOwnProperty('propertyType') &&
+                prop['propertyType'] == 'object') ? true : false;
     },
     /*
     * Возвращает списко значений перечисления(типичный пример - layout)
@@ -81,11 +108,22 @@ ModelTypeLibrary = Ext.apply({}, {
     * в PropertyGrid'е
     */
     getPropertyType:function(modelTypeName, propertyName) {
-        if (this.typesConfig[modelTypeName]['properties'][propertyName].hasOwnProperty('propertyType')) {
-            return this.typesConfig[modelTypeName]['properties'][propertyName]['propertyType']
+        var chain = this._buildInheritanceChain(modelTypeName);
+        var prop = undefined;
+
+        //найдем сначала пропертю в цепочке наследования
+        for(var i = chain.length-1; i >= 0; i--) {
+            if (chain[i].hasOwnProperty(propertyName)) {
+                prop = chain[i][propertyName];
+                break;
+            }
+        }
+
+        if (prop.hasOwnProperty('propertyType') ) {
+            return prop['propertyType'];
         }
         else {
-            return typeof this.typesConfig[modelTypeName]['properties'][propertyName]['defaultValue'];
+            return typeof prop['propertyType'];
         }
     },
     /*
