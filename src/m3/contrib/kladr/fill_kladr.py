@@ -9,13 +9,13 @@ from m3.contrib.kladr import models
 
 
 @transaction.commit_manually
-def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
+def fill_kladr(region_only=None, dbf_path='', clear_before=True):
     '''
     Заполнение справочника КЛАДР
     region_only - первые два символа региона, для ограничения загрузки только этого региона 
     '''
-    COMMIT_PER = 10000       
-     
+    COMMIT_PER = 5000
+
     def fill_record(result_list, rec, type):
         temp_dict = {}
         temp_dict['name'] = rec[0].decode('866')
@@ -41,10 +41,10 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
             temp_dict['level'] = 2
         if type == 'place':
             code = temp_dict['code'][:11]
-            temp_dict['level'] = 3       
-            
-        result_list[code] = temp_dict   
-    
+            temp_dict['level'] = 3
+
+        result_list[code] = temp_dict
+
     if dbf_path:
         db_file_geo = os.path.normpath(os.path.join(dbf_path, 'KLADR.dbf'))
         db_file_street = os.path.normpath(os.path.join(dbf_path, 'STREET.dbf'))
@@ -52,49 +52,50 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
         MOD_PATH = os.path.dirname(__file__)
         db_file_geo = os.path.normpath(os.path.join(MOD_PATH, "../../externals/KLADR.dbf"))
         db_file_street = os.path.normpath(os.path.join(MOD_PATH, "../../externals/STREET.dbf"))
-    
+
     # открываем .dbf для чтения
     db_geo = dbf.Dbf(db_file_geo, readOnly=True, new=False)
     db_street = dbf.Dbf(db_file_street, readOnly=True, new=False)
-    
+
     # Предварительная очистка таблиц кладра
     if clear_before:
         cursor = connection.cursor() #@UndefinedVariable
         for mod in [models.KladrStreet, models.KladrGeo]:
             sql = "TRUNCATE TABLE %s CASCADE;" % connection.ops.quote_name(mod._meta.db_table) #@UndefinedVariable 
             cursor.execute(sql)
+        transaction.commit()
         print u'Старые записи КЛАДРа удалены.'
 
     # список субъектов
     sub_list = {}
     # список районов
-    region_list = {}     
+    region_list = {}
     # список городов
     city_list = {}
     # список нас.пунктов
     geo_places_list = {}
-    
+
     error_code_list = []
     error_code_streets_list = []
     not_actual_places_list = []
-    
+
     for rec in db_geo:
         if region_only:
             if str(rec[2])[:2] != region_only:
                 continue
         if str(rec[2])[2:] == '00000000000':
-            fill_record(sub_list,rec, 'subject')
+            fill_record(sub_list, rec, 'subject')
         if (str(rec[2])[5:] == '00000000') and (str(rec[2])[2:5] != '000'):
-            fill_record(region_list,rec, 'region')
+            fill_record(region_list, rec, 'region')
         if (str(rec[2])[8:] == '00000') and (str(rec[2])[5:8] != '000'):
-            fill_record(city_list,rec, 'city')
+            fill_record(city_list, rec, 'city')
         if (str(rec[2])[11:] == '00') and (str(rec[2])[8:11] != '000'):
-            fill_record(geo_places_list,rec, 'place')
+            fill_record(geo_places_list, rec, 'place')
         else:
-            not_actual_places_list.append(rec[2])                 
-      
+            not_actual_places_list.append(rec[2])
+
     list_count = len(sub_list)
-    transaction_commit_counter = 0   
+    transaction_commit_counter = 0
     i = 1
     for sub_value in sub_list.itervalues():
         new_kladr_geo_sub = models.KladrGeo()
@@ -109,17 +110,17 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
         new_kladr_geo_sub.status = sub_value['status']
         new_kladr_geo_sub.level = sub_value['level']
         new_kladr_geo_sub.save()
-        
+
         sub_value['id'] = new_kladr_geo_sub.id
         sub_value['flag'] = True
-        
+
         transaction_commit_counter += 1
         if transaction_commit_counter % COMMIT_PER == 0:
-            transaction.commit()           
+            transaction.commit()
         if i % 1000 == 1:
-            print (str(i)+'/'+str(list_count)+' '+new_kladr_geo_sub.name)
-        i=i+1
-    
+            print (str(i) + '/' + str(list_count) + ' ' + new_kladr_geo_sub.name)
+        i = i + 1
+
     i = 1
     list_count = len(region_list)
     for region_key in region_list.itervalues():
@@ -138,16 +139,16 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
             new_kladr_geo_region.status = region_key['status']
             new_kladr_geo_region.level = region_key['level']
             new_kladr_geo_region.save()
-            
+
             region_key['id'] = new_kladr_geo_region.id
             region_key['flag'] = True
-            
+
             transaction_commit_counter += 1
             if transaction_commit_counter % COMMIT_PER == 0:
-                transaction.commit()                  
+                transaction.commit()
             if i % 1000 == 1:
-                print (' '*5+str(i)+'/'+str(list_count)+' '+new_kladr_geo_region.name)
-            i=i+1
+                print (' '*5 + str(i) + '/' + str(list_count) + ' ' + new_kladr_geo_region.name)
+            i = i + 1
 
     i = 1
     list_count = len(city_list)
@@ -170,17 +171,17 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                 new_kladr_geo_city.status = city_key['status']
                 new_kladr_geo_city.level = city_key['level']
                 new_kladr_geo_city.save()
-            
+
                 city_key['id'] = new_kladr_geo_city.id
                 city_key['flag'] = True
-                
+
                 transaction_commit_counter += 1
                 if transaction_commit_counter % COMMIT_PER == 0:
-                    transaction.commit() 
+                    transaction.commit()
                 if i % 1000 == 1:
-                    print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
-                i=i+1
-                
+                    print (' '*8 + str(i) + '/' + str(list_count) + ' ' + new_kladr_geo_city.name)
+                i = i + 1
+
         elif code[2:] != '000':
             # ищем родителя в регионах
             if not city_key['flag']:
@@ -197,17 +198,17 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                 new_kladr_geo_city.status = city_key['status']
                 new_kladr_geo_city.level = city_key['level']
                 new_kladr_geo_city.save()
-            
+
                 city_key['id'] = new_kladr_geo_city.id
                 city_key['flag'] = True
-                
+
                 transaction_commit_counter += 1
                 if transaction_commit_counter % COMMIT_PER == 0:
                     transaction.commit()
                 if i % 1000 == 1:
-                    print (' '*8+str(i)+'/'+str(list_count)+' '+new_kladr_geo_city.name)
-                i=i+1
-    
+                    print (' '*8 + str(i) + '/' + str(list_count) + ' ' + new_kladr_geo_city.name)
+                i = i + 1
+
     i = 1
     list_count = len(geo_places_list)
     for place_value in geo_places_list.itervalues():
@@ -220,7 +221,7 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     place = city_list[code]
                 except KeyError:
                     error_code_list.append(code)
-                else:    
+                else:
                     new_kladr_geo_place = models.KladrGeo()
                     new_kladr_geo_place.parent_id = int(place['id'])
                     new_kladr_geo_place.name = place_value['name']
@@ -233,17 +234,17 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     new_kladr_geo_place.status = place_value['status']
                     new_kladr_geo_place.level = place_value['level']
                     new_kladr_geo_place.save()
-                
+
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
-                    
+
                     transaction_commit_counter += 1
                     if transaction_commit_counter % COMMIT_PER == 0:
                         transaction.commit()
                     if i % 1000 == 1:
-                        print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
-                    i=i+1
-                
+                        print (' '*13 + str(i) + '/' + str(list_count) + ' ' + new_kladr_geo_place.name)
+                    i = i + 1
+
         elif (code[5:8] == '000') and not (code[2:5] == '000'):
             #поиск родителя в районах   
             if not place_value['flag']:
@@ -252,7 +253,7 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     place = region_list[code]
                 except KeyError:
                     error_code_list.append(code)
-                else:                
+                else:
                     new_kladr_geo_place = models.KladrGeo()
                     new_kladr_geo_place.parent_id = int(place['id'])
                     new_kladr_geo_place.name = place_value['name']
@@ -265,16 +266,16 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     new_kladr_geo_place.status = place_value['status']
                     new_kladr_geo_place.level = place_value['level']
                     new_kladr_geo_place.save()
-                
+
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
                     transaction_commit_counter += 1
                     if transaction_commit_counter % COMMIT_PER == 0:
                         transaction.commit()
                     if i % 1000 == 1:
-                        print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
-                    i=i+1
-                
+                        print (' '*13 + str(i) + '/' + str(list_count) + ' ' + new_kladr_geo_place.name)
+                    i = i + 1
+
         elif (code[5:8] == '000') and (code[2:5] == '000'):
             #поиск родителя в субъектах   
             if not place_value['flag']:
@@ -283,7 +284,7 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     place = sub_list[code]
                 except KeyError:
                     error_code_list.append(code)
-                else:                
+                else:
                     new_kladr_geo_place = models.KladrGeo()
                     new_kladr_geo_place.parent_id = int(place['id'])
                     new_kladr_geo_place.name = place_value['name']
@@ -296,16 +297,16 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     new_kladr_geo_place.status = place_value['status']
                     new_kladr_geo_place.level = place_value['level']
                     new_kladr_geo_place.save()
-                
+
                     place_value['id'] = new_kladr_geo_place.id
                     city_key['flag'] = True
                     transaction_commit_counter += 1
                     if transaction_commit_counter % COMMIT_PER == 0:
                         transaction.commit()
                     if i % 1000 == 1:
-                        print (' '*13+str(i)+'/'+str(list_count)+' '+new_kladr_geo_place.name)
-                    i=i+1
-    
+                        print (' '*13 + str(i) + '/' + str(list_count) + ' ' + new_kladr_geo_place.name)
+                    i = i + 1
+
     i = 1
     #list_count = len(street_list)
     # Загрузка улиц. 
@@ -332,13 +333,13 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     street_sub.gni = street[4].decode('866')
                     street_sub.okato = street[5].decode('866')
                     street_sub.save()
-                    transaction_commit_counter += 1 
+                    transaction_commit_counter += 1
                     if transaction_commit_counter % COMMIT_PER == 0:
                         transaction.commit()
                     if i % 1000 == 1:
-                        print (' '*20+str(i)+'/'+str(list_count)+' '+street_sub.name)
-                    i=i+1
-                    
+                        print (' '*20 + str(i) + '/' + str(list_count) + ' ' + street_sub.name)
+                    i = i + 1
+
             elif (code[8:11] == '000') and (code[5:8] != '000'):
                 # поиск родителя в городах
                 code = code[:8]
@@ -360,9 +361,9 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     if transaction_commit_counter % COMMIT_PER == 0:
                         transaction.commit()
                     if i % 1000 == 1:
-                        print (' '*20+str(i)+'/'+str(list_count)+' '+street_city.name)
-                    i=i+1 
-                    
+                        print (' '*20 + str(i) + '/' + str(list_count) + ' ' + street_city.name)
+                    i = i + 1
+
             else:
                 # поиск родителя в селах\деревнях
                 code = code[:11]
@@ -384,8 +385,7 @@ def fill_kladr(region_only = None, dbf_path = '', clear_before=True):
                     if transaction_commit_counter % COMMIT_PER == 0:
                         transaction.commit()
                     if i % 1000 == 1:
-                        print (' '*20+str(i)+'/'+str(list_count)+' '+street_place.name)
-                    i=i+1                   
-    transaction.commit()               
-    print (u'Загрузка КЛАДР в систему завершена')     
-    
+                        print (' '*20 + str(i) + '/' + str(list_count) + ' ' + street_place.name)
+                    i = i + 1
+    transaction.commit()
+    print (u'Загрузка КЛАДР в систему завершена')
