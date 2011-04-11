@@ -181,8 +181,7 @@ class ExtGrid(BaseExtPanel):
     # TODO: Реализовать человеческий MVC грид
     
     def __init__(self, *args, **kwargs):
-        super(ExtGrid, self).__init__(*args, **kwargs)
-        self.template = 'ext-grids/ext-grid.js' # FIXME: Не нужный атрибут
+        super(ExtGrid, self).__init__(*args, **kwargs)        
         self._items = []
         self.__store = None
         
@@ -579,6 +578,8 @@ class BaseExtGridColumn(ExtUIComponent):
         # Настройки фильтра колонки для плагина Ext.ux.grid.GridFilters
         self.filter = None 
 
+        self.menu_disabled = False
+
     def t_render_extra(self):
         lst = []
         for key in self.extra.keys():
@@ -629,6 +630,7 @@ class BaseExtGridColumn(ExtUIComponent):
         self._put_config_value('renderer', self.render_column_renderer)
         self._put_config_value('tooltip', self.tooltip)
         self._put_config_value('filter', self.filter)
+        self._put_config_value('menuDisabled', self.menu_disabled)
         
     @property
     def column_renderer(self):

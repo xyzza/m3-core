@@ -125,6 +125,36 @@
 	"parent": "basePanel"
 },
 
+// Таблица (грид)
+{
+	"class": {
+		"gridPanel": "ExtGrid"	
+	},
+	"config": {}
+	,"parent": "formPanel"
+},
+
+// Колонка для грида
+{
+	"class": {
+		"gridColumn": "ExtGridColumn"	
+	},
+	"config": {
+		"header":"header"
+		,"sortable":"sortable"
+		,"dataIndex":"data_index"
+		,"align":"align"
+		,"editor":"editor"
+		,"hidden":"hidden"
+		,"readOnly":"readOnly"
+		,"colspan":"colspan"
+		,"fixed":"fixed"
+		,"tooltip":"tooltip"
+		,"filter":"filter"
+		,"menuDisabled":"menu_disabled"
+	}	
+},
+
 // Окно
 {
 	"class": {
@@ -282,6 +312,19 @@
 	},
 	"config": {}
 	,"parent": "field"
+},
+
+// Array Store 
+{
+	"class": {
+		"arrayStore": "ExtDataStore"	
+	},
+	"config": {
+		"data":"data"
+		,"fields":"fields"
+		,"storeId":"store_id"
+		,"idIndex":"id_index"
+	}	
 }
 
 ]

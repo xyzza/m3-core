@@ -91,7 +91,7 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:''
                 },
                 id: {
-                    defaultValue:'New container',
+                    defaultValue:'new_container',
                     isInitProperty:true
                 }
             },
@@ -113,7 +113,7 @@ Ext.apply(ModelTypeLibrary,{
                     isInitProperty:true
                 },
                 id:{
-                    defaultValue:'New panel',
+                    defaultValue:'new_panel',
                     isInitProperty:true
                 },
                 collapsible: {
@@ -161,7 +161,7 @@ Ext.apply(ModelTypeLibrary,{
                     isInitProperty:true
                 },
                 id:{
-                    defaultValue:'New fieldset',
+                    defaultValue:'new_fieldset',
                     isInitProperty:true
                 }
             },
@@ -179,7 +179,7 @@ Ext.apply(ModelTypeLibrary,{
             isContainer:true,
             properties:{
                 id:{
-                    defaultValue:'New tab panel',
+                    defaultValue:'new_tab_panel',
                     isInitProperty:true
                 },
                 activeTab:{
@@ -205,7 +205,7 @@ Ext.apply(ModelTypeLibrary,{
             isContainer:true,
             properties : {
                 id : {
-                    defaultValue:'New form panel',
+                    defaultValue:'new_form_panel',
                     isInitProperty:true
                 },
                 layout: {
@@ -266,7 +266,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'textField',
             properties:{
                 id:{
-                    defaultValue:'New text area',
+                    defaultValue:'new_text_area',
                     isInitProperty:true
                 }
             },
@@ -280,7 +280,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id: {
-                    defaultValue:'New check box',
+                    defaultValue:'new_check_box',
                     isInitProperty:true
                 },
                 checked: {
@@ -300,7 +300,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id:{
-                    defaultValue:'New date field',
+                    defaultValue:'new_date_field',
                     isInitProperty:true
                 },
                 startDay : {
@@ -317,7 +317,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id:{
-                    defaultValue:'New time field',
+                    defaultValue:'new_time_field',
                     isInitProperty:true
                 },
                 format : {
@@ -337,7 +337,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties:{
                 id:{
-                    defaultValue:'New string field',
+                    defaultValue:'new_string_field',
                     isInitProperty:true
                 },
                  allowBlank :{
@@ -378,7 +378,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'textField',
             properties:{
                 id:{
-                    defaultValue:'New number field',
+                    defaultValue:'new_number_field',
                     isInitProperty:true
                 },
                 decimalSeparator:{
@@ -420,7 +420,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties : {
                 id: {
-                    defaultValue:'New html editor',
+                    defaultValue:'new_html_editor',
                     isInitProperty:true
                 }
 
@@ -436,7 +436,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'triggerField',
             properties: {
                 id:{
-                    defaultValue:'New combobox',
+                    defaultValue:'new_combobox',
                     isInitProperty:true
                 },
                 triggerAction:{
@@ -517,7 +517,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id : {
-                    defaultValue:'New display field',
+                    defaultValue:'new_display_field',
                     isInitProperty:true
                 },
                 value : {
@@ -534,7 +534,7 @@ Ext.apply(ModelTypeLibrary,{
         hiddenField: {
             properties: {
                 id : {
-                    defaultValue:'New hidden field',
+                    defaultValue:'new_hidden_field',
                     isInitProperty:true
                 },
                 name : {
@@ -554,7 +554,7 @@ Ext.apply(ModelTypeLibrary,{
             isContainer: true,
             properties: {
                 id:{
-                    defaultValue:'Grid panel',
+                    defaultValue:'grid_panel',
                     isInitProperty:true
                 },
                 title: {
@@ -587,12 +587,8 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:'gridColumn',
                     isInitProperty:true
                 },
-                name:{
-                    defaultValue:'New column',
-                    isInitProperty:true
-                },
                 header:{
-                    defaultValue:'New column',
+                    defaultValue:'new_column',
                     isInitProperty:true
                 },
                 dataIndex:{
@@ -614,7 +610,7 @@ Ext.apply(ModelTypeLibrary,{
             parent:'panel',
             properties: {
                 id:{
-                    defaultValue:'Ext window',
+                    defaultValue:'window',
                     isInitProperty:true
                 },
                 layout:{
@@ -636,7 +632,7 @@ Ext.apply(ModelTypeLibrary,{
         arrayStore:{
             properties : {
                 id: {
-                    defaultValue:'New array store',
+                    defaultValue:'new_array_store',
                     isInitProperty:true
                 },
                 storeId: {

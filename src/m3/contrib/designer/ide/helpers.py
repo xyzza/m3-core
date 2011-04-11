@@ -130,7 +130,6 @@ class Parser(object):
         Собирает конфиг маппинга рекурсивно обходя родительские компоненты
         '''
 
-
     def _get_properties(self, key):
         '''
         Возвращает кортеж: свойства контрола, имя контрола в натации дизайнера
@@ -193,6 +192,9 @@ class Parser(object):
             return node.n
         elif isinstance(node, ast.Str):
             return node.s
+        elif isinstance(node, ast.Name):
+            # Булевый тип
+            return node.id == 'True'
 
     def _get_config_component(self, node):
         '''
@@ -319,6 +321,8 @@ class Parser(object):
         nodes = nodes or []
         d = d or self.dict_instances        
         for k, v in d.items(): # Вызывается 1 раз, т.к. 1 ключ #FIXME
+            #print v
+            #print self.dict_instances  
             for item in v: # Обход списка вложенных контролов               
                 for ik, _ in item.items(): # Вызывается 1 раз, для получения внутреннего ключа #FIXME
                     
@@ -380,6 +384,9 @@ class Parser(object):
         for item in self._get_mapping():
             if item['class'].has_key(obj['type']):
                 value = item['class'][ obj['type'] ]
+                                             
+                assert obj['id'].find(" ") == -1, 'Variable "%s" can"t has whitespace' % obj['id']
+                
                 return ast.Assign([ast.Name(obj['id'], '1')], 
                                   ast.Call(
                                         ast.Name( str(value) , 1), [], [], None, None)
@@ -434,13 +441,14 @@ class Parser(object):
     def _get_node_value(self, value):
         '''
         Генерация узла дерева для простых элементов
-        Например для строки и числа
-        '''
-        if isinstance(value, int):
+        Например для строки и числа, булевого типа
+        '''        
+        if value in ('False', 'True'):
+            return ast.Name(value, 1)
+        elif isinstance(value, int):
             return ast.Num(value)
         elif isinstance(value, basestring):
             return ast.Str(value)
-        
         
     def _get_func_initialize(self, node_module, class_name):
         '''
