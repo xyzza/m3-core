@@ -215,35 +215,8 @@ Ext.apply(ModelTypeLibrary,{
                 readOnly:{
                     defaultValue:false
                 },
-                allowBlank :{
-                    defaultValue:true
-                },
                 hideLabel :{
                     defaultValue:false
-                },
-                vtype: {
-                    defaultValue:''
-                },
-                emptyText: {
-                    defaultValue:''
-                },
-                minLength:{
-                    defaultValue:0
-                },
-                minLengthText:{
-                    defaultValue:''
-                },
-                maxLength:{
-                    defaultValue:0
-                },
-                maxLengthText:{
-                    defaultValue:''
-                },
-                regex:{
-                    defaultValue:''
-                },
-                regexText:{
-                    defaultValue:''
                 },
                 tabIndex:{
                     defaultValue:0
@@ -255,7 +228,7 @@ Ext.apply(ModelTypeLibrary,{
             }
         },
         textArea:{
-            parent:'baseField',
+            parent:'textField',
             properties:{
                 id:{
                     defaultValue:'New text area',
@@ -323,7 +296,7 @@ Ext.apply(ModelTypeLibrary,{
                 text:'Time field',
                 category:'Fields'
             },
-            treeIconCls:'designer-icon-datefield'
+            treeIconCls:'designer-timefield'
         },
         textField:{
             parent:'baseField',
@@ -331,6 +304,33 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'New string field',
                     isInitProperty:true
+                },
+                 allowBlank :{
+                    defaultValue:true
+                },
+                 vtype: {
+                    defaultValue:''
+                },
+                emptyText: {
+                    defaultValue:''
+                },
+                minLength:{
+                    defaultValue:0
+                },
+                minLengthText:{
+                    defaultValue:''
+                },
+                maxLength:{
+                    defaultValue:0
+                },
+                maxLengthText:{
+                    defaultValue:''
+                },
+                regex:{
+                    defaultValue:''
+                },
+                regexText:{
+                    defaultValue:''
                 }
             },
             toolboxData:{
@@ -340,7 +340,7 @@ Ext.apply(ModelTypeLibrary,{
             treeIconCls:'designer-icon-text'
         },
         numberField:{
-            parent:'baseField',
+            parent:'textField',
             properties:{
                 id:{
                     defaultValue:'New number field',
@@ -449,6 +449,9 @@ Ext.apply(ModelTypeLibrary,{
                     isInitProperty:true
                 },
                 name : {
+                    defaultValue:''
+                },
+                value: {
                     defaultValue:''
                 }
             },

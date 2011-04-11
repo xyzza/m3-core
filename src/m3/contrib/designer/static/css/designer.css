@@ -37,6 +37,18 @@
 .designer-textarea {
     background-image:url(../images/textarea.png) !important;
 }
+.designer-formpanel {
+    background-image:url(../images/formpanel.png) !important;
+}
+.designer-htmleditor {
+    background-image:url(../images/htmleditor.png) !important;
+}
+.designer-timefield {
+    background-image:url(../images/timefield.png) !important;
+}
+.designer-container {
+    background-image:url(../images/container.png) !important;
+}
 .x-tree-lines .x-tree-elbow-plus {
     background-image:url(../images/designer-plus.png) !important;
 }
