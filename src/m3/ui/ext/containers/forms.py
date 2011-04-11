@@ -33,29 +33,8 @@ from m3.helpers.datastructures import TypedList
 class ExtForm(BaseExtPanel):
     '''
     Форма, умеющая биндиться и делать сабмит по урлу
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Form"
-    ,ext_class: "Ext.form.FormPanel"
-    ,xtype: "form"
-    ,attr: [{
-        ext_attr: "layout"
-        ,py_attr: "layout" 
-        ,default_value: "form"
-    },{
-        ext_attr: "fileUpload"
-        ,py_attr: "file_upload"
-        ,default_value: false
-    },{
-        ext_attr: "url"
-        ,py_attr: "url"
-    },{
-        ext_attr: "padding"
-        ,py_attr: "padding"
-    }]}
-    @end_designer
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtForm, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-form.js' # TODO: отрефакторить под внутриклассовый рендеринг
@@ -77,6 +56,9 @@ class ExtForm(BaseExtPanel):
         
         # поле, которое будет под фокусом ввода после рендеринга формы
         self.focused_field = None 
+        
+        # Атрибуты специфичные для form layout
+        self.label_width = self.label_align = self.label_pad = None
         
         self.init_component(*args, **kwargs)
     
@@ -509,20 +491,18 @@ class ExtPanel(BaseExtPanel):
         self.padding = None
         
         # Возможность сворачивать панель
-        self.collapsible = False
-        
-        # Будет ли граница
-        self.border = True
+        self.collapsible = False                
         
         # Показывать ли внутреннюю границу у элемента
         self.body_border = True
 
-        # @deprecated: TODO: для чего нужен следующий атрибут?
-        # Похоже он был в прошлых версиях и его убрали в 3.3
-        # Остается поддерживать для полной совместимости        
+        # Если контрол находится непосредственно на компоненте с layout=border
+        # то при задании этого свойства можно будет ресайзить (изменять размеры)
+        # панели  
         self.split = False
         
-        # @deprecated: TODO: этого атрибута нет в 3.3
+        # Если контрол находится непосредственно на компоненте с layout=border
+        # то можно указывать различные типы, например "mini" 
         self.collapse_mode = None
         
         # Возможность сворачивать
@@ -534,11 +514,9 @@ class ExtPanel(BaseExtPanel):
         # Базовый CSS класс, по умолчанию 'x-panel'
         self.base_cls = ''
         
-        # @deprecated: TODO: этого атрибута нет в 3.3
+        # Данное свойства - приватное в контексте extjs
+        # Переопределяет стиль панели
         self.body_cls = ''
-        
-        # FIXME: Определен в родительском компоненте ExtUIComponent
-        self.anchor = ''
         
         # Автозагрузка контента
         self.auto_load = None
@@ -551,13 +529,10 @@ class ExtPanel(BaseExtPanel):
         self._put_config_value('collapsible', self.collapsible)
         self._put_config_value('split', self.split)
         self._put_config_value('baseCls', self.base_cls)
-        self._put_config_value('bodyCls', self.body_cls)
-        self._put_config_value('anchor', self.anchor)
+        self._put_config_value('bodyCls', self.body_cls)     
         self._put_config_value('autoLoad', self.auto_load)
-        self._put_config_value('collapseMode', self.collapse_mode)
-        self._put_config_value('collapsible', self.collapsible)
-        self._put_config_value('collapsed', self.collapsed)
-        self._put_config_value('border', self.border)
+        self._put_config_value('collapseMode', self.collapse_mode)        
+        self._put_config_value('collapsed', self.collapsed)        
         self._put_config_value('bodyBorder', self.body_border)
 
     

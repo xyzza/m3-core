@@ -240,13 +240,14 @@ class ExtPagingBar(BaseExtContainer):
         
         self.page_size = 25
         self.display_message = u'Показано записей {0} - {1} из {2}'
+        self.display_info = True
         self.empty_message = u'Нет записей'
         self.init_component(*args, **kwargs)
         
     def render_base_config(self):
         super(ExtPagingBar, self).render_base_config()
         self._put_config_value('pageSize', self.page_size)
-        self._put_config_value('displayInfo', True)
+        self._put_config_value('displayInfo', self.display_info)
         self._put_config_value('displayMsg', self.display_message)
         self._put_config_value('emptyMsg', self.empty_message)
         

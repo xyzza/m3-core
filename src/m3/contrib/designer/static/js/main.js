@@ -63,7 +63,7 @@ function onClickNode(node) {
 	var attr =  node.attributes;	            	
 	
 	var starter = new Bootstrapper();
-	var panel = starter.init('/designer/fake', 
+	var panel = starter.init('/designer/data', 
 				'/designer/save', 
 				attr['path'], 
 				attr['class_name']);
