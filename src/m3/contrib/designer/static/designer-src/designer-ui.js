@@ -12,7 +12,7 @@ ModelUIPresentaitionBuilder = function() {
     //это требуется для того чтобы ставить в соответсвие DOM элементы и экстовые компоненты
     //Важное замечание номер два - у контейнеров следует навешивать cls 'designContainer'
     //он нужен для визуального dd на форму при лукапе по DOM'у
-    //Третьее важное замечание - у всего что можно подсвечивать вешается класс designComponent
+    //Третье важное замечание - у всего что можно подсвечивать вешается класс designComponent
 
     var mapObject =
     {
@@ -22,8 +22,14 @@ ModelUIPresentaitionBuilder = function() {
         panel:function(model, cfg) {
             return new Ext.Panel(cfg);
         },
+        container:function(model, cfg) {
+            return new Ext.Container(cfg);    
+        },
         fieldSet:function(model, cfg) {
             return new Ext.form.FieldSet(cfg);    
+        },
+        formPanel:function(model, cfg) {
+            return new Ext.form.FormPanel(cfg);
         },
         textField:function(model, cfg) {
             return new Ext.form.TextField(

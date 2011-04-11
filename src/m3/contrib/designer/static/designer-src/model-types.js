@@ -10,7 +10,8 @@
 ModelTypeLibrary = Ext.apply({}, {
     enumConfig: {
         layout:['auto','fit','form','hbox','vbox','border','absolute'],
-        labelAlign:['left','top']
+        labelAlign:['left','top'],
+        region:['north','south','center','east','west']
     },
     /*
     * Возвращает массив из объектов со свойствами типа и его типов родителей. Внутренний метод предназначеный

@@ -32,7 +32,8 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:''
                 },
                 region:{
-                    defaultValue:''
+                    defaultValue:'',
+                    propertyType:'enum'
                 },
                 flex:{
                     defaultValue:''
@@ -58,6 +59,27 @@ Ext.apply(ModelTypeLibrary,{
                 cls:{
                     defaultValue:''
                 },
+                autoScroll:{
+                    defaultValue:false
+                }
+            }
+        },
+        /*
+        * Контейнеры
+        */
+        container : {
+            isContainer:true,
+            parent:'component',
+            properties: {
+                layout:{
+                    defaultValue:'auto',
+                    isInitProperty:true,
+                    propertyType:'enum'
+                },
+                layoutConfig :{
+                    defaultValue:'undefined',
+                    propertyType:'object'
+                },
                 labelWidth:{
                     defaultValue:0
                 },
@@ -68,26 +90,24 @@ Ext.apply(ModelTypeLibrary,{
                 labelPad:{
                     defaultValue:''
                 },
-                autoScroll:{
-                    defaultValue:false
+                id: {
+                    defaultValue:'New container',
+                    isInitProperty:true
                 }
-            }
+            },
+            toolboxData:{
+                category:'Containers',
+                text:'Container'
+            },
+            childTypesRestrictions:{
+                disallowed:['arrayStore','gridColumn']
+            },
+            treeIconCls:'designer-container'
         },
         panel:{
             isContainer:true,
+            parent:'container',
             properties:{
-                autoScroll:{
-                    defaultValue:false
-                },
-                layout:{
-                    defaultValue:'auto',
-                    isInitProperty:true,
-                    propertyType:'enum'
-                },
-                layoutConfig :{
-                    defaultValue:'undefined',
-                    propertyType:'object'
-                },
                 title:{
                     defaultValue:'New panel',
                     isInitProperty:true
@@ -96,22 +116,23 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:'New panel',
                     isInitProperty:true
                 },
-                // ATTENTION:EXT не понимает строки в качестве высоты и ширины панели, поэтому тут число
-                height:{
-                    defaultValue:0
+                collapsible: {
+                    defaultValue:false
                 },
-                width:{
-                    defaultValue:0
+                collapsed : {
+                    defaultValue:false    
                 },
-                flex:{
-                    defaultValue:'undefined'
+                border: {
+                    defaultValue: true
                 },
-                labelWidth:{
-                    defaultValue:100
+                bodyBorder : {
+                    defaultValue: true
                 },
-                labelAlign:{
-                    defaultValue:'left',
-                    propertyType:'enum'
+                baseCls :{
+                    defaultValue: 'x-panel'
+                },
+                autoLoad : {
+                    defaultValue: 'undefined'
                 },
                 padding:{
                     defaultValue:'undefined'
@@ -127,6 +148,7 @@ Ext.apply(ModelTypeLibrary,{
             treeIconCls:'designer-panel'
         },
         fieldSet:{
+            parent:'panel',
             isContainer:true,
             properties:{
                 layout:{
@@ -141,26 +163,6 @@ Ext.apply(ModelTypeLibrary,{
                 id:{
                     defaultValue:'New fieldset',
                     isInitProperty:true
-                },
-                // ATTENTION:EXT не понимает строки в качестве высоты и ширины панели, поэтому тут число
-                height:{
-                    defaultValue:0
-                },
-                width:{
-                    defaultValue:0
-                },
-                flex:{
-                    defaultValue:'undefined'
-                },
-                labelWidth:{
-                    defaultValue:100
-                },
-                labelAlign:{
-                    defaultValue:'left',
-                    propertyType:'enum'
-                },
-                padding:{
-                    defaultValue:'undefined'
                 }
             },
             childTypesRestrictions:{
@@ -173,12 +175,9 @@ Ext.apply(ModelTypeLibrary,{
             treeIconCls:'designer-icon-fieldset'
         },
         tabPanel:{
+            parent:'panel',
             isContainer:true,
             properties:{
-                title:{
-                    defaultValue:'New tab panel',
-                    isInitProperty:true
-                },
                 id:{
                     defaultValue:'New tab panel',
                     isInitProperty:true
@@ -186,16 +185,49 @@ Ext.apply(ModelTypeLibrary,{
                 activeTab:{
                     defaultValue:0,
                     isInitProperty:true
+                },
+                layout: {
+                    defaultValue:undefined,
+                    isInitProperty:true
                 }
             },
             childTypesRestrictions:{
-                allowed:['panel', 'gridPanel']
+                allowed:['panel', 'formPanel','fieldSet', 'gridPanel']
             },
             toolboxData:{
                 text:'Tab panel',
                 category:'Containers'
             },
             treeIconCls:'designer-tab-panel'
+        },
+        formPanel: {
+            parent:'panel',
+            isContainer:true,
+            properties : {
+                id : {
+                    defaultValue:'New form panel',
+                    isInitProperty:true
+                },
+                layout: {
+                    defaultValue:'form',
+                    isInitProperty:true
+                },
+                title: {
+                    defaultValue:'',
+                    isInitProperty:true
+                },
+                url: {
+                    defaultValue:''
+                },
+                fileUpload:{
+                    defaultValue:false
+                }
+            },
+            toolboxData: {
+                category:'Containers',
+                text:'Form panel'
+            },
+            treeIconCls:'designer-formpanel'
         },
         /*
         * Поля для ввода
@@ -461,6 +493,7 @@ Ext.apply(ModelTypeLibrary,{
             }
         },
         gridPanel:{
+            parent:'panel',
             isContainer: true,
             properties: {
                 id:{
@@ -473,6 +506,10 @@ Ext.apply(ModelTypeLibrary,{
                 },
                 autoExpandColumn: {
                     defaultValue:''
+                },
+                layout: {
+                    defaultValue:undefined,
+                    isInitProperty:true
                 }
             },
             childTypesRestrictions:{
@@ -517,6 +554,7 @@ Ext.apply(ModelTypeLibrary,{
             }
         },
         window:{
+            parent:'panel',
             properties: {
                 id:{
                     defaultValue:'Ext window',
