@@ -55,10 +55,7 @@ class ExtForm(BaseExtPanel):
         self.object = None
         
         # поле, которое будет под фокусом ввода после рендеринга формы
-        self.focused_field = None 
-        
-        # Атрибуты специфичные для form layout
-        self.label_width = self.label_align = self.label_pad = None
+        self.focused_field = None               
         
         self.init_component(*args, **kwargs)
     
@@ -614,10 +611,7 @@ class ExtTabPanel(BaseExtPanel):
         self.active_tab = 0
         
         # Активный скрол у табов
-        self.enable_tab_scroll = True
-        
-        # Граница
-        self.border = True
+        self.enable_tab_scroll = True       
         
         # Внутренняя граница
         self.body_border = True

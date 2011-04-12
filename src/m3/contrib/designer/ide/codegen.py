@@ -86,8 +86,8 @@ def to_source(node, indent_with=' ' * 4, add_line_information=False):
     for i in generator.result:
         if isinstance(i, unicode):
             res.append("u'%s'" % i.encode('utf-8'))        
-        elif SPEC_SYMBOL in i:
-            res.append("'''%s'''" % i)
+#        elif SPEC_SYMBOL in i:
+#            res.append("'''%s'''" % i)
         else:    
             res.append(i)
     return ''.join(res)

@@ -121,7 +121,7 @@ Bootstrapper = Ext.extend(Object, {
                 });
 
         storage.on('save', function() {
-            alert('Save ok')
+            Ext.Msg.alert('Сохранение формы','Данные успешно сохранены');
         });        
 
         function onTreeNodeDeleteClick(item) {

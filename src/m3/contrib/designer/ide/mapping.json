@@ -167,7 +167,7 @@
 		,"width": "width"
 		,"height": "height"
 	},
-	"parent": "basePanel"
+	"parent": "panel"
 },
 
 // Окно редактирования
@@ -325,6 +325,32 @@
 		,"storeId":"store_id"
 		,"idIndex":"id_index"
 	}	
+},
+
+// Tab panel
+{
+	"class": {
+		"tabPanel": "ExtTabPanel"	
+	},
+	"config": {
+		"activeTab":"active_tab"
+		,"enableTabScroll":"enable_tab_scroll"
+		,"deferredRender":"deferred_render"		
+	}
+	,"parent":"panel"
+},
+
+// Field set
+{
+	"class": {
+		"fieldSet": "ExtFieldSet"	
+	},
+	"config": {
+		"checkboxToggle":"checkboxToggle"
+		,"collapsed":"collapsed"		
+	}
+	,"parent":"panel"
 }
+
 
 ]

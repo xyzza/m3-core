@@ -248,9 +248,9 @@ class Parser(object):
         self._set_class_name(class_node, json_dict['type'])
         
         # Старая док строка не должна потеряться
-        if func_node and isinstance(func_node.body, list) and len(func_node.body) > 0 \
-            and isinstance(func_node.body[0], ast.Expr):            
-            nodes.insert(0, func_node.body[0])
+#        if func_node and isinstance(func_node.body, list) and len(func_node.body) > 0 \
+#            and isinstance(func_node.body[0], ast.Expr):            
+#            nodes.insert(0, func_node.body[0])
             
         # Замена старого содержимого на новое сгенерированное 
         func_node.body = nodes                       

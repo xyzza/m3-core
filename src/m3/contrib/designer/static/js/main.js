@@ -57,9 +57,7 @@ var tree = new Ext.tree.TreePanel({
 				            				,iconCls: 'icon-page-white-c'	
 				            				,leaf: true			            				
 				            			});
-				            			
-				            			console.log( new_node.attributes );
-				            			
+
 				            			node.appendChild(new_node);
 				            		},
 				            		failure: uiAjaxFailMessage

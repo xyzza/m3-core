@@ -86,8 +86,12 @@ def restores(data):
             except UnicodeEncodeError:
                 pass # Итак останется в unicode
         
-def _get_simple_assign():
-    return ast.Assign([ast.Attribute(ast.Name('self', 1), 'title', 1)], ast.Str(u'Окно'))
+def _get_conf():
+    '''
+    Первоначальное заполнение функции initialize
+    '''
+    return [ast.Assign([ast.Attribute(ast.Name('self', 1), 'title', 1)], ast.Str(u'Окно')),
+        ast.Assign([ast.Attribute(ast.Name('self', 1), 'layout', 1)], ast.Str('auto')) ]
         
 def create_py_class(path, class_name, base_class = 'ExtWindow'):
     '''
@@ -107,9 +111,9 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
     #     self.title = u'Окно' 
     args = ast.arguments([ast.Name('self', 1)], None, None, [])
         
-    assign = _get_simple_assign()
+    tuple_conf = _get_conf()
     doc_str = ast.Expr(ast.Str(Parser.GENERATED_FUNC_DOCSTRING))
-    func = ast.FunctionDef(Parser.GENERATED_FUNC, args, [doc_str, assign], [])
+    func = ast.FunctionDef(Parser.GENERATED_FUNC, args, [doc_str,] + tuple_conf, [])
     
     cl = ast.ClassDef(str(class_name), [ast.Name(base_class, 1)], [func,], [])
      

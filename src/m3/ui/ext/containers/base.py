@@ -40,6 +40,9 @@ class BaseExtContainer(ExtUIComponent):
         # Типизированный список контролов, находящихся в данном компоненте
         self._items = TypedList(type = ExtUIComponent)
         
+        # Атрибуты специфичные для form layout
+        self.label_width = self.label_align = self.label_pad = None
+        
     def t_render_items(self):
         ''' 
         @deprecated: Рекомендуется использовать render_base_config
@@ -84,6 +87,10 @@ class BaseExtContainer(ExtUIComponent):
                                       self.t_render_layout_config,
                                       self.layout)
         self._put_config_value('layout', self.layout)
+        
+        self._put_config_value('labelWidth', self.label_width)
+        self._put_config_value('labelAlign', self.label_align)
+        self._put_config_value('labelPad', self.label_pad)
     
         
     def nested_components(self):
