@@ -6,8 +6,8 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
-from helpers import Parser, get_files
-from m3.contrib.designer.ide.helpers import get_classess, restores
+from helpers import get_files, get_classess, restores, create_py_class
+from parser import Parser
 
 
 def workspace(request):
@@ -94,3 +94,19 @@ def designer_save(request):
     Parser(path, class_name).from_designer(js['model']) 
 
     return HttpResponse(content = 'OK')
+
+
+def create_class(request):
+    '''
+    Создание нового класса
+    '''    
+    class_name = request.POST.get('className')
+    path = request.POST.get('path')    
+
+    assert class_name, 'Class name is undefined'
+    assert path, 'Path to source file is undefined'
+    
+    create_py_class(path, class_name)
+    
+    res_dict = {'success': True}
+    return HttpResponse(json.dumps(res_dict), content_type='application/json')

@@ -14,6 +14,9 @@ urlpatterns = patterns('',
     # Файлы проекта
     (r'^project-files$', 'designer.ide.views.get_project_files'), 
                        
+    # Создание нового класса в файле    
+    (r'^create-new-class$', 'designer.ide.views.create_class'),
+                       
     # статичный контент проекта
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', 
         {'document_root': settings.MEDIA_ROOT}),

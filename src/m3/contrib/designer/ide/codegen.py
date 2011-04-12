@@ -82,7 +82,7 @@ def to_source(node, indent_with=' ' * 4, add_line_information=False):
     # M prefer 31.03.11
     #return ''.join(generator.result)
     # -->
-    res = ['#coding: utf-8\n\n',]
+    res = []
     for i in generator.result:
         if isinstance(i, unicode):
             res.append("u'%s'" % i.encode('utf-8'))        

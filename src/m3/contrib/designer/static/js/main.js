@@ -20,19 +20,61 @@ var tree = new Ext.tree.TreePanel({
     }
 	,contextMenu: new Ext.menu.Menu({
 	        items: [{
-	            id: 'open-file',
-	            text: 'Открыть файл'
-	        }],
-	        listeners: {
-	            itemclick: function(item, e) {													
-					onClickNode( item.parentMenu.contextNode ); 
+	            id: 'create-file'
+	            ,text: 'Создать файл'
+	            ,iconCls: 'icon-script-add'
+	        },{
+	            id: 'rename-file'
+	            ,text: 'Переименовать файл'
+	            ,iconCls: 'icon-script-edit'
+	        },{
+	            id: 'delete-file'
+	            ,text: 'Удалить файл'
+	            ,iconCls: 'icon-script-delete'
+	        },'-',{
+	        	id: 'create-class'
+	            ,text: 'Добавить класс'
+	            ,iconCls: 'icon-cog-add'
+	            ,handler: function(item, e){
+			
+					Ext.MessageBox.prompt('Создание класса', 
+						'Введите название класса',
+						function(btn, text){
+							if (btn == 'ok'){
+								var node = item.parentMenu.contextNode;
+					            var attr = node.attributes;
+				            	Ext.Ajax.request({
+				            		url:'/create-new-class'
+				            		,params: {
+				            			path: attr['path']
+				            			,className: text
+				            		}
+				            		,success: function(){
+				            			var new_node = new Ext.tree.TreeNode({
+				            				text: text
+				            				,path: attr['path']
+				            				,class_name: text
+				            				,iconCls: 'icon-page-white-c'	
+				            				,leaf: true			            				
+				            			});
+				            			
+				            			console.log( new_node.attributes );
+				            			
+				            			node.appendChild(new_node);
+				            		},
+				            		failure: uiAjaxFailMessage
+				            	});
+				            }
+						}						
+					);
 	            }
 	        }
+	        ]
 	    }),
 	    listeners: {
 	        contextmenu: function(node, e) {
 	            node.select();	            
-	            if (node.parentNode && (node.parentNode.text === 'ui.py' || node.parentNode.node.text === 'forms.py' ) ){
+	            if (node.text === 'ui.py' || node.text === 'forms.py' ) {
 		            var c = node.getOwnerTree().contextMenu;
 		            c.contextNode = node;
 		            c.showAt(e.getXY());						            	
@@ -63,7 +105,8 @@ function onClickNode(node) {
 	var attr =  node.attributes;	            	
 	
 	var starter = new Bootstrapper();
-	var panel = starter.init('/designer/data', 
+	var panel = starter.init(
+				'/designer/data', 
 				'/designer/save', 
 				attr['path'], 
 				attr['class_name']);
