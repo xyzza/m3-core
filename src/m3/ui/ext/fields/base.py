@@ -12,61 +12,6 @@ from m3.ui.ext.misc import ExtDataStore
 class BaseExtField(ExtUIComponent):
     '''
     Базовый класс для полей
-    
-    @version: 0.1
-    @begin_designer
-    {abstract: true
-    ,attr: [{
-        ext_attr: "fieldLabel"
-        ,py_attr: "label" 
-    },{
-        ext_attr: "value"
-        ,py_attr: "value" 
-    },{
-        ext_attr: "labelStyle"
-        ,py_attr: "label_style" 
-    },{
-        ext_attr: "readOnly"
-        ,py_attr: "read_only" 
-    },{
-        ext_attr: "allowBlank"
-        ,py_attr: "allow_blank" 
-    },{
-        ext_attr: "hideLabel"
-        ,py_attr: "hide_label"
-    },{
-        ext_attr: "vtype"
-        ,py_attr: "vtype" 
-    },{
-        ext_attr: "emptyText"
-        ,py_attr: "empty_text" 
-    },{
-        ext_attr: "minLength"
-        ,py_attr: "min_length" 
-    },{
-        ext_attr: "minLengthText"
-        ,py_attr: "min_length_text" 
-    },{
-        ext_attr: "maxLength"
-        ,py_attr: "max_length" 
-    },{
-        ext_attr: "maxLengthText"
-        ,py_attr: "max_length_text" 
-    },{
-        ext_attr: "regex"
-        ,py_attr: "regex" 
-    },{
-        ext_attr: "regexText"
-        ,py_attr: "regex_text" 
-    },{
-        ext_attr: "tabIndex"
-        ,py_attr: "tab_index" 
-    },{
-        ext_attr: "invalidClass"
-        ,py_attr: "invalid_class"
-        ,default: "m3-form-invalid"
-    }]}
-    @end_designer
     '''
     def __init__(self, *args, **kwargs):
         super(BaseExtField, self).__init__(*args, **kwargs)
@@ -192,57 +137,6 @@ class BaseExtField(ExtUIComponent):
 class BaseExtTriggerField(BaseExtField):
     '''
     Базовый класс для комбобокса, поля выбора справочника
-    
-    @version: 0.1
-    @begin_designer
-    {abstract: true
-    ,attr: [{
-        ext_attr: "displayField"
-        ,py_attr: "display_field" 
-    },{
-        ext_attr: "valueField"
-        ,py_attr: "value_field"
-    },{
-        ext_attr: "hiddenName"
-        ,py_attr: "hidden_name"
-    },{
-        ext_attr: "hideTrigger"
-        ,py_attr: "hide_trigger"
-    },{
-        ext_attr: "typeAhead"
-        ,py_attr: "type_ahead"
-    },{
-        ext_attr: "queryParam"
-        ,py_attr: "query_param"
-    },{
-        ext_attr: "pageSize"
-        ,py_attr: "page_size"
-    },{
-        ext_attr: "maxHeight"
-        ,py_attr: "max_heigth_dropdown_list"
-    },{
-        ext_attr: "minChars"
-        ,py_attr: "min_chars"
-    },{
-        ext_attr: "store"
-        ,py_attr: "store"
-    },{
-        ext_attr: "mode"
-        ,py_attr: "mode"
-    },{
-        ext_attr: "editable"
-        ,py_attr: "editable"
-    },{
-        ext_attr: "triggerAction"
-        ,py_attr: "trigger_action"
-    },{
-        ext_attr: "forceSelection"
-        ,py_attr: "force_selection"
-    },{
-        ext_attr: "valueNotFoundText"
-        ,py_attr: "not_found_text"
-    }]}
-    @end_designer
     FIXME: Необходимо создать свойство trigger_action_all
            Внутри него изменять атрибут trigger_action     
     '''

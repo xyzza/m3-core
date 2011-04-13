@@ -450,35 +450,6 @@ class ExtForm(BaseExtPanel):
 class ExtPanel(BaseExtPanel):
     '''
     Панель. Kак правило этот контрол включает другие компоненты для отображения
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Panel"
-    ,ext_class: "Ext.Panel"
-    ,xtype: "panel"
-    ,attr: [{
-        ext_attr: "padding"
-        ,py_attr: "padding" 
-    },{
-        ext_attr: "collapsible"
-        ,py_attr: "collapsible"
-    },{
-        ext_attr: "baseCls"
-        ,py_attr: "base_cls"
-    },{
-        ext_attr: "bodyCls"
-        ,py_attr: "body_cls"
-    },{
-        ext_attr: "anchor"
-        ,py_attr: "anchor"
-    },{
-        ext_attr: "autoLoad"
-        ,py_attr: "auto_load"
-    },{
-        ext_attr: "split"
-        ,py_attr: "split"
-    }]}
-    @end_designer
     '''
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)
@@ -587,21 +558,6 @@ class ExtTitlePanel(ExtPanel):
 class ExtTabPanel(BaseExtPanel):
     '''
     Класс, отвечающий за работу TabPanel
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Tab panel"
-    ,activeTab: 0
-    ,ext_class: "Ext.TabPanel"
-    ,xtype: "tabpanel"
-    ,attr: [{
-        ext_attr: "enableTabScroll"
-        ,py_attr: "enable_tab_scroll" 
-    },{
-        ext_attr: "items"
-        ,py_attr: "tabs"
-    }]}
-    @end_designer
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
@@ -640,20 +596,6 @@ class ExtTabPanel(BaseExtPanel):
 class ExtFieldSet(ExtPanel):
     '''
     Объеденяет внутренние элементы и создает рамку для остальных контролов
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Field set"
-    ,ext_class: "Ext.form.FieldSet"
-    ,xtype: "fieldset"
-    ,attr: [{
-        ext_attr: "checkboxToggle"
-        ,py_attr: "checkboxToggle" 
-    },{
-        ext_attr: "collapsible"
-        ,py_attr: "collapsible"
-    }]}
-    @end_designer
     '''
     
     checkboxToggle = False # TODO: Зачем нужны эти свойства?

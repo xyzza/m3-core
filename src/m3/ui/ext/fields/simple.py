@@ -15,30 +15,8 @@ from base import BaseExtField, BaseExtTriggerField
 class ExtStringField(BaseExtField):
     '''
     Поле ввода простого текстового значения
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Text field"
-    ,ext_class: "Ext.form.TextField"
-    ,xtype: "textfield"
-    ,attr: [{
-        ext_attr: "inputType"
-        ,py_attr: "input_type" 
-    },{
-        ext_attr: "maskRe"
-        ,py_attr: "mask_re"
-    },{
-        ext_attr: "iconCls"
-        ,py_attr: "icon_cls"
-    },{
-        ext_attr: "menu"
-        ,py_attr: "menu"
-    },{
-        ext_attr: "tabIndex"
-        ,py_attr: "tab_index"
-    }]}
-    @end_designer
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtStringField, self).__init__(*args, **kwargs)        
         
@@ -86,17 +64,8 @@ class ExtStringField(BaseExtField):
 class ExtDateField(BaseExtField):
     '''
     Поле ввода даты
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Advanced data field"
-    ,xtype: "advanceddatefield"
-    ,attr: [{
-        ext_attr: "startDay"
-        ,py_attr: "start_day"
-    }]}
-    @end_designer
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtDateField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-date-field.js' # FIXME: Можно заккоментировать
@@ -153,42 +122,8 @@ class ExtDateField(BaseExtField):
 class ExtNumberField(BaseExtField):
     '''
     Поле ввода числового значения
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Number field"
-    ,ext_class: "Ext.form.NumberField"
-    ,xtype: "numberfield"
-    ,attr: [{
-        ext_attr: "allowDecimals"
-        ,py_attr: "allow_decimals" 
-    },{
-        ext_attr: "allowNegative"
-        ,py_attr: "allow_negative"
-    },{
-        ext_attr: "decimalPrecision"
-        ,py_attr: "decimal_precision"
-    },{
-        ext_attr: "maxValue"
-        ,py_attr: "max_value"
-    },{
-        ext_attr: "maxText"
-        ,py_attr: "max_text"
-    },{
-        ext_attr: "minValue"
-        ,py_attr: "min_value"
-    },{
-        ext_attr: "decimalSeparator"
-        ,py_attr: "decimal_separator"
-    },{
-        ext_attr: "minText"
-        ,py_attr: "min_text"
-    },{
-        ext_attr: "selectOnFocus"
-        ,py_attr: "select_on_focus"
-    }]}
-    @end_designer
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtNumberField, self).__init__(*args, **kwargs)
         
@@ -251,15 +186,8 @@ class ExtHiddenField(BaseExtField):
     ''' 
     Скрытое поле, которое не видно пользователю на форме, но хранит значение
      и передает его при submit'е 
-     
-    @version: 0.1
-    @begin_designer
-    {title: "Hidden field"
-    ,ext_class: "Ext.form.Hidden"
-    ,xtype: "hidden"
-    }
-    @end_designer
      '''
+     
     # Тип поля - integer
     INT = 0
     
@@ -279,18 +207,8 @@ class ExtHiddenField(BaseExtField):
 class ExtTextArea(BaseExtField):
     '''
     Большое :) Текстовое поле
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Text area"
-    ,ext_class: "Ext.form.TextArea"
-    ,xtype: "textarea"
-    ,attr: [{
-        ext_attr: "maskRe"
-        ,py_attr: "mask_re" 
-    }]}
-    @end_designer
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtTextArea, self).__init__(*args, **kwargs)
         
@@ -318,21 +236,8 @@ class ExtTextArea(BaseExtField):
 class ExtCheckBox(BaseExtField):
     '''
     Галочка выбора значения
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Check box"
-    ,ext_class: "Ext.form.Checkbox"
-    ,xtype: "checkbox"
-    ,attr: [{
-        ext_attr: "checked"
-        ,py_attr: "checked" 
-    },{
-        ext_attr: "boxLabel"
-        ,py_attr: "box_label" 
-    }]}
-    @end_designer
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtCheckBox, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-checkbox.js' #TODO: Необходимо отрефакторить под внутриклассовый рендеринг
@@ -357,15 +262,8 @@ class ExtCheckBox(BaseExtField):
 class ExtComboBox(BaseExtTriggerField):
     '''
     Поле выпадающий список - combobox
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Combo box"
-    ,ext_class: "Ext.form.ComboBox"
-    ,xtype: "combo"
-    }
-    @end_designer
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtComboBox, self).__init__(*args, **kwargs)        
         self.init_component(*args, **kwargs)
@@ -385,27 +283,8 @@ class ExtComboBox(BaseExtTriggerField):
 class ExtTimeField(BaseExtField):
     '''
     Поле ввода времени
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Time field"
-    ,ext_class: "Ext.form.TimeField"
-    ,xtype: "timefield"
-    ,attr: [{
-        ext_attr: "format"
-        ,py_attr: "format" 
-    },{
-        ext_attr: "increment"
-        ,py_attr: "increment" 
-    },{
-        ext_attr: "maxValue"
-        ,py_attr: "max_value" 
-    },{
-        ext_attr: "minValue"
-        ,py_attr: "min_value" 
-    }]}
-    @end_designer
     '''
+    
     def __init__(self, *args, **kwargs):
         super(ExtTimeField, self).__init__(*args, **kwargs)
         self.template = 'ext-fields/ext-time-field.js' #TODO: Необходимо отрефакторить под внутриклассовый рендеринг

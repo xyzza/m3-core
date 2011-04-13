@@ -75,16 +75,20 @@ def restores(data):
     Будет пытаться преобразить все символы в кодировку ascii, если это 
     невозможно - если присутсвует unicode символы, то оcтавляет их как есть
     '''
-    for k, v in data.items():
-        if isinstance(v, dict):
-            restores(v)
-        elif isinstance(v, list):
-            map(restores, v)
-        else:
-            try:
-                data[k] = str(v)
-            except UnicodeEncodeError:
-                pass # Итак останется в unicode
+    if isinstance(data, dict):
+        for k, v in data.items():
+            if isinstance(v, dict):
+                restores(v)
+            elif isinstance(v, list):
+                map(restores, v)
+            else:
+                try:
+                    data[k] = str(v)
+                except UnicodeEncodeError:
+                    pass # Итак останется в unicode
+    else:
+        # Для списков значений
+        return data
         
 def _get_conf():
     '''

@@ -146,36 +146,7 @@ class ExtPivotGrid(BaseExtPanel):
 #===============================================================================
 class ExtGrid(BaseExtPanel):
     '''
-    Таблица
-
-    @version: 0.1
-    @begin_designer
-    {title: "Grid"
-    ,ext_class: "Ext.grid.GridPanel"
-    ,xtype: "grid"
-    ,attr: [{
-        ext_attr: "loadMask"
-        ,py_attr: "load_mask"
-    },{
-        ext_attr: "enableDragDrop"
-        ,py_attr: "drag_drop"
-    },{
-        ext_attr: "ddGroup"
-        ,py_attr: "drag_drop"
-    },{
-        ext_attr: "enableDragDrop"
-        ,py_attr: "drag_drop_group"
-    },{
-        ext_attr: "sm"
-        ,py_attr: "sm"
-    },{
-        ext_attr: "view"
-        ,py_attr: "view"
-    },{
-        ext_attr: "autoExpandColumn"
-        ,py_attr: "auto_expand_column"
-    }]}
-    @end_designer
+    Таблица (Grid)
     '''
     
     # TODO: Реализовать человеческий MVC грид
