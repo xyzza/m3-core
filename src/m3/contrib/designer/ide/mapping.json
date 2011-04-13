@@ -207,7 +207,8 @@
 		,"hideLabel":"hide_label"
 		,"invalidText":"invalid_text"
 		,"plugins": "plugins"		
-	}
+	},
+	"parent":"component"
 },
 
 // Текстовое поле
