@@ -135,7 +135,7 @@ class Parser(object):
         (extjs)
         '''
         conf = self.config_cmp[key].copy()
-        py_name = conf.get('py_name') if conf.get('py_name') else self.base_class
+        py_name = conf.pop('py_name') if conf.get('py_name') else self.base_class
         
         extjs_name = self._get_extjs_class(py_name)
         assert extjs_name, 'Mapping for class "%s" is not define' % py_name
@@ -232,9 +232,9 @@ class Parser(object):
         self._set_class_name(class_node, json_dict['type'])
         
         # Старая док строка не должна потеряться
-#        if func_node and isinstance(func_node.body, list) and len(func_node.body) > 0 \
-#            and isinstance(func_node.body[0], ast.Expr):            
-#            nodes.insert(0, func_node.body[0])
+        if func_node and isinstance(func_node.body, list) and len(func_node.body) > 0 \
+            and isinstance(func_node.body[0], ast.Expr):            
+            nodes.insert(0, func_node.body[0])
             
         # Замена старого содержимого на новое сгенерированное 
         func_node.body = nodes                       
@@ -250,7 +250,7 @@ class Parser(object):
         for item in self._get_mapping():
             k, v = item['class'].items()[0]
             if k ==  extjs_type:
-                node.bases = [ast.Name( str(v), 1)] 
+                node.bases = [ast.Name( str(v), ast.Load())] 
                 break
         
     def _write_to_file(self, source_code):
@@ -323,10 +323,10 @@ class Parser(object):
                                 ast.Call(
                                     ast.Attribute(
                                         ast.Attribute(
-                                            ast.Name(k, 1), 
-                                            '_items', 1),
-                                        'append' , 1),
-                                [ast.Name(ik, 1), ], [], None, None)
+                                            ast.Name(k, ast.Load()), 
+                                            '_items', ast.Load()),
+                                        'append' , ast.Load()),
+                                [ast.Name(ik, ast.Load()), ], [], None, None)
                             )
                     nodes.append(node)
                         
@@ -378,9 +378,9 @@ class Parser(object):
                                              
                 assert obj['id'].find(" ") == -1, 'Variable "%s" can"t has whitespace' % obj['id']
                 
-                return ast.Assign([ast.Name(obj['id'], '1')], 
+                return ast.Assign([ast.Name(obj['id'], ast.Load())], 
                                   ast.Call(
-                                        ast.Name( str(value) , 1), [], [], None, None)
+                                        ast.Name( str(value) , ast.Load()), [], [], None, None)
                                   )
     
     def _gen_base_properties(self, type_obj):
@@ -408,7 +408,14 @@ class Parser(object):
 
             py_name = config_dict[extjs_name]
             
-            node = ast.Assign([ast.Attribute(ast.Name(type_obj['id'], '1'), str(py_name), '1')], self._get_node_value(value))
+            node = ast.Assign(
+                        [ast.Attribute(
+                                ast.Name(type_obj['id'], ast.Load()), 
+                                str(py_name), 
+                                ast.Load()
+                            )], 
+                        self._get_node_value(value)
+                    )
             nodes.append(node)
             
         return nodes
@@ -434,7 +441,7 @@ class Parser(object):
         Например для строки и числа, булевого типа
         '''        
         if value in ('False', 'True'):
-            return ast.Name(value, 1)
+            return ast.Name(value, ast.Load())
         elif isinstance(value, int):
             return ast.Num(value)
         elif isinstance(value, basestring):
@@ -444,10 +451,10 @@ class Parser(object):
                              [ self._get_node_value(v) for v in value.values()] )
             
         elif isinstance(value, tuple):
-            return ast.Tuple([self._get_node_value(item) for item in value], 1)
+            return ast.Tuple([self._get_node_value(item) for item in value], ast.Load())
                
         elif isinstance(value, list):
-            return ast.List([self._get_node_value(item) for item in value], 1)                    
+            return ast.List([self._get_node_value(item) for item in value], ast.Load())
         
         raise ValueError("Type '%s' value '%s' is not supported" % (type(value), value) )
         
