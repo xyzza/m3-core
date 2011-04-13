@@ -84,8 +84,6 @@ def to_source(node, indent_with=' ' * 4, add_line_information=False):
     for i in generator.result:
         if isinstance(i, unicode):
             res.append("u'%s'" % i.encode('utf-8'))        
-#        elif SPEC_SYMBOL in i:
-#            res.append("'''%s'''" % i)
         else:    
             res.append(i)
     return ''.join(res)
@@ -266,9 +264,10 @@ class SourceGenerator(NodeVisitor):
                 self.write(':')
                 self.body(node.body)
             else:
-                self.newline()
-                self.write('else:')
-                self.body(else_)
+                if else_: # A prefer 13.04.2011
+                    self.newline()
+                    self.write('else:')
+                    self.body(else_)
                 break
 
     def visit_For(self, node):
