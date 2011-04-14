@@ -220,4 +220,16 @@ class ExtGroupingStore(ExtJsonStore):
         'can`t find sortfield "%s" in %s' % (self.sort_info,self.reader.get_fields(),)
         assert self.group_field in self.reader.get_fields(), \
         'can`t find groupfield "%s" in %s' % (self.group_field,self.reader.get_fields(),)
-        return super(ExtGroupingStore, self).render(columns)        
+        return super(ExtGroupingStore, self).render(columns)
+    
+#===============================================================================
+class ExtMultiGroupingStore(ExtJsonStore):
+    '''
+    Хранилище используемое для грида с множественной серверной группировкой
+    '''     
+    def __init__(self, *args, **kwargs):
+        super(ExtMultiGroupingStore, self).__init__(*args, **kwargs)
+        self.template = 'ext-misc/ext-livegrid-store.js' # TODO: Отрефакторить под внутриклассовый рендеринг
+        self.version_property = 'version'
+        self.bufferSize = 200
+        self.init_component(*args, **kwargs)
