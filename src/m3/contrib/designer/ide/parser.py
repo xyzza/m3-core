@@ -49,6 +49,11 @@ class Parser(object):
         # {'self':[{'simple_panel':[...]},{'simple_form':[...]}]}
         self.dict_instances = {}
         
+        
+        self.dict_attrs = {}
+        
+        self.list_ignore_nested = []
+        
         # Старый исходный код модуля
         self.old_source_code = ''
         
@@ -221,14 +226,15 @@ class Parser(object):
         nodes = self._gen_base_properties(json_dict)
         
         # Получение узлов AST для дочерних элементов (вложенные объекты)
-        child_nodes = self._gen_child_properties(json_dict)
+        # и добавление дочерних узлов в список узлов свойств
+        nodes.extend( self._gen_child_properties(json_dict) )
         
-        # Добавление дочерних узлов в список узлов свойств
-        nodes.extend(child_nodes)
+        # Добавление атрибутов, которые должны быть записаны в property объекта
+        nodes.extend( self._gen_attr_components() )
                 
         # Добавление вложенных компонентов (строки вида: self._items.append(...) )
         nodes.extend( self._gen_nested_components() )        
-
+        
         # Преобразование модуля в AST дерево
         self.old_source_code = open(self.path).read()
         module_node = ast.parse(self.old_source_code)
@@ -249,36 +255,33 @@ class Parser(object):
         # Бакап файла на всякий пожарный случай и cохранение нового файла
         source_code = codegen.to_source(module_node)        
         self._write_to_file(source_code)
-
-    def from_designer_preview(self, json_dict):
+        
+    def _gen_attr_components(self):
         '''
-        Преобразовывает js в py код и возвращает его в виде строки
         '''
-
-        # Получение узлов AST непосредственно для класса (например свойства ExtWindow)
-        nodes = self._gen_base_properties(json_dict)
-
-        # Получение узлов AST для дочерних элементов (вложенные объекты)
-        child_nodes = self._gen_child_properties(json_dict)
-
-        # Добавление дочерних узлов в список узлов свойств
-        nodes.extend(child_nodes)
-
-        # Добавление вложенных компонентов (строки вида: self._items.append(...) )
-        nodes.extend( self._gen_nested_components() )
-
-        fake_args = ast.arguments([ast.Name('self', ast.Load())],
-                                     None,
-                                     None,
-                                     [])
-
-        constructor_func = ast.FunctionDef(self.GENERATED_FUNC,
-                                            fake_args,
-                                            [],
-                                            [])
-        constructor_func.body = nodes
-        return codegen.to_source(constructor_func)
-
+        
+        def assign(parent_cmp, attr_cmp, value_cmp):
+            '''
+            '''
+            return ast.Assign(
+                        [ast.Attribute(
+                            ast.Name(parent_cmp, ast.Load()), 
+                            str(attr_cmp), 
+                            ast.Load()
+                        )], 
+                        ast.Name(value_cmp, ast.Load())
+                    )
+        
+        nodes = [StringSpaces()]
+        for k, v in self.dict_attrs.items():
+            if isinstance(v, list):
+                for item in v:
+                    property_cmp, value_cmp = item.items()[0]
+                    nodes.append( assign(k, property_cmp, value_cmp) ) 
+            else:
+                raise ValueError("Values self.dict_attrs must by type 'list'")
+        return nodes
+        
     def _set_class_name(self, node, extjs_type):
         '''
         Устанавливает соответсвующее имя класса наследника
@@ -346,36 +349,37 @@ class Parser(object):
         @return: nodes - Возвращает набор узлов
         '''
         nodes = nodes or [StringSpaces()]
-        d = d or self.dict_instances        
+        d = d or self.dict_instances
+         
         for k, v in d.items(): # Вызывается 1 раз, т.к. 1 ключ #FIXME
             #print v
             #print self.dict_instances  
             for item in v: # Обход списка вложенных контролов               
                 for ik, _ in item.items(): # Вызывается 1 раз, для получения внутреннего ключа #FIXME
                     
-                    print k
-                    print ik
-                    
-                    
-                    # Вот такая ебическая конструкция
-                    # Привыкаем, блеать, к лиспу (с) greatfuckingadvice
-                    node = ast.Expr(
-                                ast.Call(
-                                    ast.Attribute(
+                    # Если компонент не в списке игнорируемых,
+                    # То есть он не является свойством
+                    if not ik in self.list_ignore_nested:
+                        
+                        # Вот такая ебическая конструкция
+                        # Привыкаем, блеать, к лиспу (с) greatfuckingadvice
+                        node = ast.Expr(
+                                    ast.Call(
                                         ast.Attribute(
-                                            ast.Name(k, ast.Load()), 
-                                            '_items', ast.Load()),
-                                        'append' , ast.Load()),
-                                [ast.Name(ik, ast.Load()), ], [], None, None)
-                            )                                        
-                    nodes.append(node)
+                                            ast.Attribute(
+                                                ast.Name(k, ast.Load()), 
+                                                '_items', ast.Load()),
+                                            'append' , ast.Load()),
+                                    [ast.Name(ik, ast.Load()), ], [], None, None)
+                                )                                        
+                        nodes.append(node)
                         
                     self._gen_nested_components(item, nodes)
         
         return nodes    
         
     
-    def _gen_child_properties(self, type_obj, nodes = None, dict_instanses=None):
+    def _gen_child_properties(self, type_obj, nodes = None, dict_instanses=None, parent=None):
         '''
         Генерация узлов AST для свойств дочерних элементов 
         
@@ -389,25 +393,47 @@ class Parser(object):
         my_field.label = 'my_label'
         '''
         nodes = nodes or []
-        dict_instanses = dict_instanses or self.dict_instances
+        dict_instanses = dict_instanses or self.dict_instances       
         
         # li - вспомогательный список, укороченная ссылка на dict_instanses[ type_obj['id'] ]
         dict_instanses[ type_obj['id'] ] = li = []
  
         if type_obj.has_key('items'):
             for item in type_obj['items']:
-                d = {item['id']: []}             
-                li.append(d)                               
                 
-                nodes.append(StringSpaces())
+                if parent:
+                    attr = self._get_attr_mapping(item['type'], parent['type'])
+                    if attr:
+                        self.list_ignore_nested.append(item['id'])
+                        self.dict_attrs.setdefault( parent['id'], []).append({attr:item['id']})
+                        
+
+                d = {item['id']: []}
+                li.append(d)
+                
+                nodes.append( StringSpaces() )
                 nodes.append( self._gen_instanse(item) )
                 nodes.extend( self._gen_base_properties(item) )
                 nodes.append( self._add_cmp_in_self(item['id']) )
-                
-                self._gen_child_properties(item, nodes, dict_instanses=d)
+
+                self._gen_child_properties(item, nodes, dict_instanses=d, 
+                                           parent={'type':item['type'], 'id':item['id']})
 
         return nodes
     
+    def _get_attr_mapping(self, component_type, parent_type):
+        '''
+        '''        
+        for item in self._get_mapping():
+            k =  item['class'].keys()[0]
+            if k == parent_type and item.get('attr'):
+                for k, v in item['attr'].items():
+                    if isinstance(v, list) and component_type in v:
+                        return k
+                    elif component_type == v:
+                        return k                
+                
+                
     def _add_cmp_in_self(self, variable):
         '''
         Добавляет в self компонент
@@ -526,9 +552,7 @@ class Parser(object):
                 else:
                     raise Exception('Autogenerated function "%s" is not defined in class "%s"' % 
                                     (Parser.GENERATED_FUNC, class_name)    )
-
-
-
+                    
     @staticmethod
     def generate_class(class_name, class_base):
         '''

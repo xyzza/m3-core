@@ -59,9 +59,10 @@
 // Тулбар
 {
 	"class": {
-		"Toolbar": "ExtToolBar"
+		"toolbar": "ExtToolBar"
 	},
 	"config": {
+		"parentDockType":"doc_type"
 	},
 	"parent": "container"
 },
@@ -108,8 +109,11 @@
 		,"collapseMode":"collapse_mode"
 		,"collapsed":"collapsed"		
 		,"bodyBorder":"body_border"
-	},
-	"parent": "basePanel"
+	}
+	,"parent": "basePanel"
+	,"attr":{
+		"tbar":["toolbar"]
+	}
 },
 
 // Форма
@@ -357,6 +361,18 @@
 		,"collapsed":"collapsed"		
 	}
 	,"parent":"panel"
+},
+
+// Кнопка
+{
+	"class": {
+		"button": "ExtButton"	
+	},
+	"config": {
+		"text":"text"
+		,"handler":"handler"		
+	}
+	,"parent":"component"
 }
 
 ]
