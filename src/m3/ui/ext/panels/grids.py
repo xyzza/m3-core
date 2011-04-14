@@ -251,3 +251,41 @@ class ExtObjectGrid(containers.ExtGrid):
     
     def t_render_params(self):
         return self._get_params_str()
+
+class ExtMultiGroupinGrid(containers.ExtGrid):
+    def __init__(self, *args, **kwargs):
+        super(ExtMultiGroupinGrid, self).__init__(*args, **kwargs)
+        self.template = 'ext-grids/ext-multigrouping-grid.js'
+        # Для данных
+        self.action_data = None
+        # Стор для загрузки данных
+        self.store = misc.ExtMultiGroupingStore(auto_load=True, root='rows', id_property='id')
+        # Признак того, маскировать ли грид при загрузки
+        self.load_mask = True
+        # Поле в котором будет содержаться значение ключа группировки
+        # должно отличаться от ключевого поля Store, т.к. должно содержать совсем другие данные 
+        self.data_id_field = 'id'
+        self.init_component()
+
+    def render(self):
+        # тонкая настройка self.store
+        if not self.store.url and self.action_data:
+            self.store.url = self.action_data.absolute_url()
+        self.render_base_config()
+        self.render_params()
+        return render_component(self)
+
+    def render_params(self):
+        super(ExtMultiGroupinGrid, self).render_params()
+        data_url = self.action_data.absolute_url() if self.action_data else None
+        context_json = self.action_context.json if self.action_context else None
+        
+        self._put_params_value('actions', {'dataUrl': data_url,
+                                            'contextJson': context_json})
+        
+    def t_render_base_config(self):
+        self._put_config_value('dataIdField', self.data_id_field)
+        return self._get_config_str()
+    
+    def t_render_params(self):
+        return self._get_params_str()
