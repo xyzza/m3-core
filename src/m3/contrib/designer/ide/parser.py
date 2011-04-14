@@ -75,6 +75,12 @@ class Parser(object):
         for node in func_node.body:
             if isinstance(node, ast.Assign):
                 # Составление структуры конфигов и типов компонентов
+                
+                # Игнорирование значений, которые просто прописываются в объект
+                # self.panel_1 = panel_1
+                if  isinstance(node.value, ast.Name) and node.value.id in self.config_cmp:
+                    continue
+                
                 parent, attr, value = self._get_config_component(node)
                 self.config_cmp.setdefault(parent, {})[attr] = value
                 
@@ -317,6 +323,10 @@ class Parser(object):
             #print self.dict_instances  
             for item in v: # Обход списка вложенных контролов               
                 for ik, _ in item.items(): # Вызывается 1 раз, для получения внутреннего ключа #FIXME
+                    
+                    print k
+                    print ik
+                    
                     
                     # Вот такая ебическая конструкция
                     # Привыкаем, блеать, к лиспу (с) greatfuckingadvice

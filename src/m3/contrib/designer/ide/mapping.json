@@ -131,7 +131,7 @@
 // Таблица (грид)
 {
 	"class": {
-		"gridPanel": "ExtGrid"	
+		"gridPanel": "ExtGrid"
 	},
 	"config": {}
 	,"parent": "formPanel"
