@@ -259,7 +259,7 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         # Для данных
         self.action_data = None
         # Стор для загрузки данных
-        self.store = misc.ExtMultiGroupingStore(auto_load=True, root='rows', id_property='id')
+        self.store = misc.store.ExtMultiGroupingStore(auto_load=True, root='rows', id_property='id')
         # Признак того, маскировать ли грид при загрузки
         self.load_mask = True
         # Поле в котором будет содержаться значение ключа группировки
