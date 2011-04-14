@@ -49,7 +49,7 @@ class ActionContextDeclaration(object):
     *required* - указывает что параметр обязательный.
     *verbose_name* - человеческое имя параметра, необходимо для сообщений об ошибках.
     """
-    def __init__(self, name='', default=None, type=None, required=False, verbose_name = '', *args, **kwargs):
+    def __init__(self, name='', default=None, type=None, required=False, verbose_name='', *args, **kwargs):
         assert type, 'type must be defined!'
         self.name = name
         self.default = default
@@ -180,25 +180,13 @@ class ActionContext(object):
         '''
         Рендеринг контекста в виде javascript объекта
         '''
-        result = ''
-        for k, v in self.__dict__.items():
-            if v is None:
-                continue
 
-            if isinstance(v, bool):
-                result += '"%s": "%s",' % (k, 'true' if v is True else 'false')
-            elif isinstance(v, int):
-                result += '"%s": %s,' % (k, v)
-            elif isinstance(v, datetime.datetime):
-                result += '"%s": "%s",' % (k, v.strftime('%d.%m.%Y'))
-            elif isinstance(v, datetime.time):
-                result += '"%s": "%s",' % (k, v.strftime('%H:%M'))
+        def encoder_extender(obj):
+            if isinstance(obj, datetime.datetime):
+                result = obj.strftime('%d.%m.%Y')
+            elif isinstance(obj, datetime.time):
+                result = obj.strftime('%H:%M')
             else:
-                try:
-                    result += '"%s": "%s",' % (k, normalize(unicode(v)))
-                except:
-                    # TODO: обрабатывать все типы параметров
-                    pass
-        if result:
-            result = result[:-1]
-        return '{' + result + '}'
+                result = unicode(repr(obj))
+
+        return json.dumps(self.__dict__, default=encoder_extender)
