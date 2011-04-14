@@ -57,7 +57,8 @@ class M3Calendar(calendar.Calendar):
                and not (cdate in self.db_excepted_days)
 
     def working_days_by_period(self, start_date, end_date):
-        self.days = self._get_days_by_period()
+#        self.days = self._get_days_by_period()
+        pass
 
     def working_days_by_bound(self, date, count, bound_since=True):
         pass
