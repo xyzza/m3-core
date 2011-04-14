@@ -13,6 +13,7 @@ import shutil # Для копирования файлов
 # Для тестов 
 import pprint
 
+from advanced_ast import StringSpaces
 
 class Parser(object):
     '''
@@ -309,7 +310,7 @@ class Parser(object):
         
         @return: nodes - Возвращает набор узлов
         '''
-        nodes = nodes or []
+        nodes = nodes or [StringSpaces()]
         d = d or self.dict_instances        
         for k, v in d.items(): # Вызывается 1 раз, т.к. 1 ключ #FIXME
             #print v
@@ -327,7 +328,7 @@ class Parser(object):
                                             '_items', ast.Load()),
                                         'append' , ast.Load()),
                                 [ast.Name(ik, ast.Load()), ], [], None, None)
-                            )
+                            )                                        
                     nodes.append(node)
                         
                     self._gen_nested_components(item, nodes)
@@ -357,14 +358,30 @@ class Parser(object):
         if type_obj.has_key('items'):
             for item in type_obj['items']:
                 d = {item['id']: []}             
-                li.append(d)
+                li.append(d)                               
                 
+                nodes.append(StringSpaces())
                 nodes.append( self._gen_instanse(item) )
-                nodes.extend( self._gen_base_properties(item) )                    
+                nodes.extend( self._gen_base_properties(item) )
+                nodes.append( self._add_cmp_in_self(item['id']) )
                 
                 self._gen_child_properties(item, nodes, dict_instanses=d)
 
         return nodes
+    
+    def _add_cmp_in_self(self, variable):
+        '''
+        Добавляет в self компонент
+        '''
+        return ast.Assign(
+                        [ast.Attribute(
+                                ast.Name('self', ast.Load()), 
+                                str(variable), 
+                                ast.Load()
+                            )], 
+                        ast.Name(variable, ast.Load())
+                    )
+        
     
     def _gen_instanse(self, obj):
         '''
@@ -664,3 +681,5 @@ def test_to_designer():
     pprint.pprint( js ) 
     
     print 'Parser.to_designer - ok'
+    
+    

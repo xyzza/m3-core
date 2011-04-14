@@ -135,6 +135,9 @@
 	},
 	"config": {}
 	,"parent": "formPanel"
+	,"attr": {
+		"store": ["arrayStore", "jsonStore"]
+	}
 },
 
 // Колонка для грида
