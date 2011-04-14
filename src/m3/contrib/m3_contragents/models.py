@@ -87,7 +87,7 @@ class Contragent(BaseObjectModel):
     
     def name(self):
         return self.u_short_name if self.contragent_type == ContragentTypeEnum.UL else \
-               ((self.f_fname or '') + ' ' + (self.f_oname or '') + ' ' + (self.f_iname or '')).strip()
+               ((self.f_fname or '') + ' ' + (self.f_iname or '') + ' ' + (self.f_oname or '')).strip()
                
     name.json_encode = True
     
