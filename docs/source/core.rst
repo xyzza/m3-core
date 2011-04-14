@@ -8,6 +8,7 @@ core
 	
    excel_reporting.rst
    plugins_architecture.rst
+   core/registry.rst
 
 history
 ---------------
@@ -18,8 +19,6 @@ json
 notifications
 ---------------
 
-registry
----------------
 
 replication
 ---------------

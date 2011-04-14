@@ -20,7 +20,7 @@ from m3.helpers import logger
 from m3.contrib.m3_users import GENERIC_USER, SUPER_ADMIN
 
 from m3.contrib.m3_users.helpers import get_assigned_metaroles_query
-from m3.contrib.m3_users.metaroles import UserMetarole
+from m3.contrib.m3_users.metaroles import UserMetarole, get_metarole
 from m3.ui.actions.packs import BaseDictionaryActions
 from m3.ui.actions import ControllerCache, Action
 from m3.ui.actions.tree_packs import BaseTreeDictionaryActions
@@ -362,3 +362,61 @@ class DesktopLoader(object):
         assert isinstance(metarole, UserMetarole)
         
         insert_for_role(metarole, element)
+
+#===============================================================================
+# Разные полезные шорткаты
+#===============================================================================
+
+def add_desktop_launcher(name = '', url = '', icon='',
+                         path = None, metaroles = None, places=None):
+    '''
+    Шорткат для добавления ланчеров в элементы рабочего стола.
+    
+    @param name: подпись ланчера на рабочем столе/в меню
+    @param url: url, по которому происходит обращение к ланчеру
+    @param icon: класс, на основе которого рисуется иконка ланчера
+    @param path: список кортежей, которые задают путь к ланчеру в случае, если
+                 этот ланчер спрятан в подменю. каждый элемент пути задается либо 
+                 в формате "(название,)", либо "(название, иконка,)", 
+                 либо "(название, иконка, индекс)"
+    @param metaroles: список метаролей (либо одиночная метароль)
+    '''
+    if not metaroles or not places:
+        return
+    
+    launcher = DesktopLauncher(url=url,
+                               name=name,
+                               icon=icon)
+    # "чистый" список металорей, для которых выполняется регистрация метаролей
+    # 
+    cleaned_metaroles = [] 
+    cleaned_places = []
+    
+    cleaned_metaroles.extend(metaroles if isinstance(metaroles, list) else [metaroles,])
+    cleaned_places.extend(places if isinstance(places, list) else [places,])
+    
+    root = None
+    parent_group = None
+    for slug in (path or []):
+        group = DesktopLaunchGroup(name=slug[0])
+        if len(slug) > 1 and slug[1]:
+            group.icon = slug[1]
+        elif len(slug) > 2 and isinstance(slug[2], int):
+            group.index = slug[2]
+        if not root:
+            root = group
+        if parent_group:
+            parent_group.subitems.append(group)
+        
+        parent_group = group
+        
+    if root:
+        root.subitems.append(launcher)
+        launcher = root # мы в ланчеры, значится, будем добавлять самого рута.
+    
+    for metarole in cleaned_metaroles:
+        mt = get_metarole(metarole) if isinstance(metarole, str) else metarole 
+        if mt:
+            for place in cleaned_places:
+                DesktopLoader.add(mt, place, launcher)
+        
