@@ -26,7 +26,7 @@ class ExceptedDay(models.Model):
     '''
     Модель дня, исключенного из обычного календаря.
     '''
-    name = models.CharField(max_length=200) # наименование выключенного дня
+    name = models.CharField(max_length=200, null=True) # наименование выключенного дня
     day = models.DateField() # собственно, само значение даты
     type = models.SmallIntegerField(choices=ExceptedDayTypeEnum.get_choices()) # тип записи
     

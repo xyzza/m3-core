@@ -33,9 +33,14 @@ class M3Calendar(calendar.Calendar):
         Вытаскивает из бд все даты, которые пользователь обозначил как
         выходные и праздничные
         '''
-        self.db_excepted_days = ExceptedDay.objects\
-        .filter(type__in=[ExceptedDayTypeEnum.HOLIDAY, ExceptedDayTypeEnum.DAYOFF,])\
-        .distinct().values_list('day', flat=True).order_by('day')
+        db_days = ExceptedDay.objects.all().distinct().order_by('day')
+
+        self.db_excepted_days = [day.day for day in db_days if day.type
+                                 in [ExceptedDayTypeEnum.DAYOFF,
+                                     ExceptedDayTypeEnum.HOLIDAY]]
+
+        self.db_working_days = [day.day for day in db_days
+                                if day.type == ExceptedDayTypeEnum.WORKDAY]
 
     def _get_days_by_period(self, start_date, end_date):
         pass
@@ -52,7 +57,7 @@ class M3Calendar(calendar.Calendar):
                and not (cdate in self.db_excepted_days)
 
     def working_days_by_period(self, start_date, end_date):
-        self.days = self._get_days_by_period
+        self.days = self._get_days_by_period()
 
     def working_days_by_bound(self, date, count, bound_since=True):
         pass
