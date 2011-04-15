@@ -12,6 +12,12 @@ ModelUtils = Ext.apply({},{
     parseModelId:function(cmpId) {
         return cmpId.substring(4, cmpId.length);
     },
+    /*
+    * Возвращает id DOM element'а по id модели
+     */
+    parseModelIdToDomId:function(modelId) {
+        return 'cmp-'+modelId;
+    },
     /**
      * Возвращает TreeNode по модели
      */

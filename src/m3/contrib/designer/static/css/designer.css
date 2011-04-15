@@ -68,3 +68,48 @@
 .selectedElement {
     border: 2px solid #710AF0
 }
+/*Custom'ый toolTip*/
+.x-tipcustom{position:absolute;top:0;left:0;visibility:hidden;z-index:20000;border:0 none}
+.x-tipcustom > * {
+    background: rgba(51, 51, 51, 0.9);
+}
+.x-tipcustom .x-tipcustom-bwrap{
+    border-radius: 0 0 5px 5px;
+}
+.x-tipcustom.x-panel-collapsed .x-tipcustom-tl{
+    border-radius: 5px;
+}
+
+/*.x-tipcustom .x-tool{background-image:url(../images/gray/panel/tool-sprites.gif)}*/
+/*.x-tipcustom .x-tool.x-tool-close{background-position: 0 0}*/
+
+.x-tipcustom .x-tipcustom-tl{padding-left:10px;overflow:hidden;zoom:1; padding-bottom: 2px; border-radius: 5px 5px 0 0}
+.x-tipcustom .x-tipcustom-tc{padding-top:3px;overflow:hidden;zoom:1;}
+.x-tipcustom .x-tipcustom-tr{padding-right:6px;overflow:hidden;zoom:1}
+
+.x-tipcustom .x-tipcustom-ml{padding-left:6px;zoom:1;}
+.x-tipcustom .x-tipcustom-mc{border:0 none;font:normal 11px tahoma,arial,helvetica,sans-serif;}
+.x-tipcustom .x-tipcustom-mr{padding-right:6px;zoom:1;}
+
+
+.x-tipcustom .x-tipcustom-bl{padding-left:6px;zoom:1}
+.x-tipcustom .x-tipcustom-br{padding-right:6px;zoom:1}
+.x-tipcustom .x-tipcustom-bc{padding-bottom:2px;height:2px;overflow:hidden; } /*padding-bottom:6px;height:6px;*/
+
+.x-tipcustom .x-tipcustom-body{font:normal 11px tahoma,arial,helvetica,sans-serif;margin:0!important;line-height:14px;padding:0;overflow-x: hidden !important;}
+.x-tipcustom .x-tipcustom-body .loading-indicator{margin:0;}
+.x-tipcustom .x-tipcustom-body .x-form-item .x-form-item-label{color:white;}
+
+.x-tipcustom-icon{ background: url(../images/cog_16x16.png) no-repeat left center; height:20px}
+
+.ext-ie .x-tipcustom .x-tipcustom-header,.ext-ie .x-tipcustom .x-tipcustom-tc{font-size:0;line-height:0;}
+.x-tipcustom .x-tipcustom-header-text{font:bold 11px tahoma,arial,helvetica,sans-serif;padding:0;margin:0 0 2px 0;color:white; padding: 0 15px 0 25px; line-height: 19px}
+
+.x-tipcustom-header .x-tool.x-tool-close{
+    margin-top:2px;
+}
+
+/*.x-tipcustom-draggable .x-tipcustom-header,.x-tipcustom-draggable .x-tipcustom-header-text{cursor:move;}*/
+
+/*.x-tipcustom-header-text a{ text-decoration:none }*/
+/*.x-tipcustom-icon.wraped{ padding-left: 20px; color: white; }*/
