@@ -221,26 +221,16 @@ class Parser(object):
         '''
         Отвечает за преобразование json-a формы из m3-дизайнеру в py-код.
         '''
-                
-        # Получение узлов AST непосредственно для класса (например свойства ExtWindow)
-        nodes = self._gen_base_properties(json_dict)
-        
-        # Получение узлов AST для дочерних элементов (вложенные объекты)
-        # и добавление дочерних узлов в список узлов свойств
-        nodes.extend( self._gen_child_properties(json_dict) )
-        
-        # Добавление атрибутов, которые должны быть записаны в property объекта
-        nodes.extend( self._gen_attr_components() )
-                
-        # Добавление вложенных компонентов (строки вида: self._items.append(...) )
-        nodes.extend( self._gen_nested_components() )        
-        
+
         # Преобразование модуля в AST дерево
         self.old_source_code = open(self.path).read()
         module_node = ast.parse(self.old_source_code)
         
         # Нахождение нужной функции GENERATED_FUNC
         class_node, func_node = self._get_func_initialize(module_node, self.class_name)
+        
+        Node.mapping = self._get_mapping()
+        nodes = Node(json_dict).walk()        
         
         self._set_class_name(class_node, json_dict['type'])
         
@@ -256,60 +246,17 @@ class Parser(object):
         source_code = codegen.to_source(module_node)        
         self._write_to_file(source_code)
         
-    def _gen_attr_components(self):
-        '''
-        '''
-        
-        def assign(parent_cmp, attr_cmp, value_cmp):
-            '''
-            '''
-            return ast.Assign(
-                        [ast.Attribute(
-                            ast.Name(parent_cmp, ast.Load()), 
-                            str(attr_cmp), 
-                            ast.Load()
-                        )], 
-                        ast.Name(value_cmp, ast.Load())
-                    )
-        
-        nodes = [StringSpaces()]
-        for k, v in self.dict_attrs.items():
-            if isinstance(v, list):
-                for item in v:
-                    property_cmp, value_cmp = item.items()[0]
-                    nodes.append( assign(k, property_cmp, value_cmp) ) 
-            else:
-                raise ValueError("Values self.dict_attrs must by type 'list'")
-        return nodes
-        
     def from_designer_preview(self, json_dict):
         '''
         Преобразовывает js в py код и возвращает его в виде строки
         '''
 
-        # Получение узлов AST непосредственно для класса (например свойства ExtWindow)
-        nodes = self._gen_base_properties(json_dict)
+        Node.mapping = self._get_mapping()
+        nodes = Node(json_dict).walk()
 
-        # Получение узлов AST для дочерних элементов (вложенные объекты)
-        child_nodes = self._gen_child_properties(json_dict)
+        list_source_code = map(codegen.to_source, nodes)
+        return '\n'.join(list_source_code)
 
-        # Добавление дочерних узлов в список узлов свойств
-        nodes.extend(child_nodes)
-
-        # Добавление вложенных компонентов (строки вида: self._items.append(...) )
-        nodes.extend( self._gen_nested_components() )
-
-        fake_args = ast.arguments([ast.Name('self', ast.Load())],
-                                     None,
-                                     None,
-                                     [])
-
-        constructor_func = ast.FunctionDef(self.GENERATED_FUNC,
-                                            fake_args,
-                                            [],
-                                            [])
-        constructor_func.body = nodes
-        return codegen.to_source(constructor_func)
  
     def _set_class_name(self, node, extjs_type):
         '''
@@ -362,212 +309,11 @@ class Parser(object):
         with open(self.path, 'w') as f:
             f.write(source_code)
 
-    def _gen_nested_components(self, d=None, nodes=None):
-        '''
-        Генерирует список узлов AST вложенных компонент вида:
-        self._items.append(spanel)
-        spanel._items.append(code)
-        spanel._items.append(descr)
-        
-        При этом рекурсивно спускается по структуре вида
-        {'self':[{'simple_panel':[...]},{'simple_form':[...]}]}
-        
-        @param d: словарь, структуру которого необходимо отобразить
-        @param param: nodes - для передачи нодов внутрь функции
-        
-        @return: nodes - Возвращает набор узлов
-        '''
-        nodes = nodes or [StringSpaces()]
-        d = d or self.dict_instances
-         
-        for k, v in d.items(): # Вызывается 1 раз, т.к. 1 ключ #FIXME
-            #print v
-            #print self.dict_instances  
-            for item in v: # Обход списка вложенных контролов               
-                for ik, _ in item.items(): # Вызывается 1 раз, для получения внутреннего ключа #FIXME
-                    
-                    # Если компонент не в списке игнорируемых,
-                    # То есть он не является свойством
-                    if not ik in self.list_ignore_nested:
-                        
-                        # Вот такая ебическая конструкция
-                        # Привыкаем, блеать, к лиспу (с) greatfuckingadvice
-                        node = ast.Expr(
-                                    ast.Call(
-                                        ast.Attribute(
-                                            ast.Attribute(
-                                                ast.Name(k, ast.Load()), 
-                                                '_items', ast.Load()),
-                                            'append' , ast.Load()),
-                                    [ast.Name(ik, ast.Load()), ], [], None, None)
-                                )                                        
-                        nodes.append(node)
-                        
-                    self._gen_nested_components(item, nodes)
-        
-        return nodes    
-        
-    
-    def _gen_child_properties(self, type_obj, nodes = None, dict_instanses=None, parent=None):
-        '''
-        Генерация узлов AST для свойств дочерних элементов 
-        
-        Рекурсивно вызывается для вложенных объектов
-        
-        Строки вида: 
-        panel = ExtPanel()
-        panel.title = u'Панелько'
-        ...
-        my_field = ExtStringField()
-        my_field.label = 'my_label'
-        '''
-        nodes = nodes or []
-        dict_instanses = dict_instanses or self.dict_instances       
-        
-        # li - вспомогательный список, укороченная ссылка на dict_instanses[ type_obj['id'] ]
-        dict_instanses[ type_obj['id'] ] = li = []
- 
-        if type_obj.has_key('items'):
-            for item in type_obj['items']:
-                
-                if parent:
-                    attr = self._get_attr_mapping(item['type'], parent['type'])
-                    if attr:
-                        self.list_ignore_nested.append(item['id'])
-                        self.dict_attrs.setdefault( parent['id'], []).append({attr:item['id']})
-                        
-
-                d = {item['id']: []}
-                li.append(d)
-                
-                nodes.append( StringSpaces() )
-                nodes.append( self._gen_instanse(item) )
-                nodes.extend( self._gen_base_properties(item) )
-                nodes.append( self._add_cmp_in_self(item['id']) )
-
-                self._gen_child_properties(item, nodes, dict_instanses=d, 
-                                           parent={'type':item['type'], 'id':item['id']})
-
-        return nodes
-    
-    def _get_attr_mapping(self, component_type, parent_type):
-        '''
-        '''        
-        for item in self._get_mapping():
-            k =  item['class'].keys()[0]
-            if k == parent_type and item.get('attr'):
-                for k, v in item['attr'].items():
-                    if isinstance(v, list) and component_type in v:
-                        return k
-                    elif component_type == v:
-                        return k                
-                
-                
-    def _add_cmp_in_self(self, variable):
-        '''
-        Добавляет в self компонент
-        '''
-        return ast.Assign(
-                        [ast.Attribute(
-                                ast.Name('self', ast.Load()), 
-                                str(variable), 
-                                ast.Load()
-                            )], 
-                        ast.Name(variable, ast.Load())
-                    )
-        
-    
-    def _gen_instanse(self, obj):
-        '''
-        Получение по маппингу 
-        Строки вида: 
-        panel = ExtPanel()
-        '''
-        for item in self._get_mapping():
-            if item['class'].has_key(obj['type']):
-                value = item['class'][ obj['type'] ]
-                                             
-                assert obj['id'].find(" ") == -1, 'Variable "%s" can"t has whitespace' % obj['id']
-                
-                return ast.Assign([ast.Name(obj['id'], ast.Load())], 
-                                  ast.Call(
-                                        ast.Name( str(value) , ast.Load()), [], [], None, None)
-                                  )
-    
-    def _gen_base_properties(self, type_obj):
-        '''
-        Генерация узлов для свойств 
-        Строки вида:
-        self.width = 100
-        self.title = u'Окошко'
-        
-        panel.title = 'Simple title'
-        '''
-        config_dict = self._gen_config(type_obj['type'])
-        properties = type_obj['properties']
-        
-        nodes = []
-        for extjs_name, value in properties.items():
-            
-            # Вложенные id не учитываем
-            if str(extjs_name) == 'id':
-                continue
-            
-            assert type_obj.get('id'), 'ID component "%s" is not defined' % type_obj['type']
-            assert config_dict, 'Mapping component "%s" (%s) is not define' % (type_obj['type'], type_obj['id']) 
-            assert config_dict.get(extjs_name), 'Mapping object "%s" for "%s" is not define' % (extjs_name, type_obj['id'])
-
-            py_name = config_dict[extjs_name]
-            
-            node = ast.Assign(
-                        [ast.Attribute(
-                                ast.Name(type_obj['id'], ast.Load()), 
-                                str(py_name), 
-                                ast.Load()
-                            )], 
-                        self._get_node_value(value)
-                    )
-            nodes.append(node)
-            
-        return nodes
-    
-    def _gen_config(self, type_obj):  
-        '''
-        Получение конфигурации свойств из маппинга по типу объекта
-        @param type_obj: Тип объекта (window, panel, etc.)
-        '''         
-        for item in self._get_mapping():
-            if item['class'].has_key(type_obj):
-                return item['config']
-        
     def _get_mapping(self):
         '''
         Получение объекта маппинга
         '''
         return mapping_list
-    
-    def _get_node_value(self, value):
-        '''
-        Генерация узла дерева для простых элементов
-        Например для строки и числа, булевого типа
-        '''        
-        if value in ('False', 'True'):
-            return ast.Name(value, ast.Load())
-        elif isinstance(value, int):
-            return ast.Num(value)
-        elif isinstance(value, basestring):
-            return ast.Str(value)
-        elif isinstance(value, dict):
-            return ast.Dict( [ self._get_node_value(str(k))  for k in value.keys()],
-                             [ self._get_node_value(v) for v in value.values()] )
-            
-        elif isinstance(value, tuple):
-            return ast.Tuple([self._get_node_value(item) for item in value], ast.Load())
-               
-        elif isinstance(value, list):
-            return ast.List([self._get_node_value(item) for item in value], ast.Load())
-        
-        raise ValueError("Type '%s' value '%s' is not supported" % (type(value), value) )
         
     def _get_func_initialize(self, node_module, class_name):
         '''
@@ -696,7 +442,190 @@ class Parser(object):
                     [])
         
         return cl
+
+class Node(object):
+    
+    mapping = None
+    
+    def __init__(self, data):        
+        self.data = data                    
+        
+
+    @staticmethod
+    def sort_items(items):
+        key, item = items
+        if isinstance(item, list):
+            return 100
+        elif isinstance(item, dict):
+            return 10
+        elif key == 'id':            
+            return 0
+        else:            
+            return 1
+
+    def walk(self, nodes = [], 
+                    nodes_attr = [StringSpaces()], 
+                    nodes_extends=[StringSpaces()], 
+                    nodes_in_self=[StringSpaces()]):        
+        for key, value in sorted(self.data.items(), key=Node.sort_items):
+            if isinstance(value, list):
+                extends_list = []
+                for item in value:
+                    if isinstance(item, dict):                        
+                        Node(item).walk()                                                
+                        extends_list.append(item['id'])
+                    else:
+                        raise ValueError('Alarma')
+                                    
+                ast_node = self._get_extends(self.data['id'], key, extends_list, self.data['type'])
+                
+                nodes_extends.append(ast_node)
+            elif isinstance(value, dict):                
+                Node(value).walk()                
+                
+                ast_node = self._get_attr(self.data['id'], key, value['id'], self.data['type'])
+                
+                nodes_attr.append(ast_node)
+            else:
+                if key == 'type' or value == 'self':
+                    continue
+                elif key == 'id' and value != 'self':                                                   
+                    ast_node = self._get_instanse(self.data['type'], value)                                        
+                    nodes.extend([StringSpaces(), ast_node, ])
                     
+                    in_self_node = self._add_cmp_in_self(value)                    
+                    nodes_in_self.append(in_self_node)                                
+                else:                    
+                    ast_node = self._get_property(self.data['id'], key, value, self.data['type'])
+                    nodes.append(ast_node)
+        return nodes + nodes_attr + nodes_extends + nodes_in_self
+     
+    def _add_cmp_in_self(self, field, parent_fields='self'):
+        return ast.Assign(
+                [ast.Attribute(
+                        ast.Name(parent_fields, ast.Load()), 
+                        str(field), 
+                        ast.Load()
+                    )], 
+                ast.Name(field, ast.Load())
+            )
+    
+    def _get_property(self, parent_field, extjs_attr, value, extjs_class):
+        for item in self.mapping:
+            if item['class'].has_key(extjs_class):
+                
+                assert item['config'].get(extjs_attr), 'Mapping is "%s" not found %s' % (extjs_class, extjs_attr)
+                
+                py_attr = item['config'][extjs_attr]
+                return ast.Assign(
+                    [ast.Attribute(
+                        ast.Name(parent_field, ast.Load()), 
+                        str(py_attr), 
+                        ast.Load()
+                    )], 
+                    self._get_node_value(value)
+                )
+        else:
+            raise ValueError("Mapping is undefined for class '%s'" % extjs_class) 
+    
+    def _get_instanse(self, extjs_class, value):
+        for item in self.mapping:
+            if item['class'].has_key(extjs_class):
+                instanse_name = item['class'][ extjs_class ]
+                                           
+                assert value.find(" ") == -1, 'Variable "%s" can"t has whitespace' % value
+                
+                return ast.Assign([ast.Name( 
+                                        value, 
+                                        ast.Load()
+                                  )], 
+                                  ast.Call(
+                                        ast.Name( 
+                                            str(instanse_name) , 
+                                            ast.Load()
+                                        ), 
+                                        [], 
+                                        [], 
+                                        None, 
+                                        None)
+                                  )
+        else:
+            raise ValueError("Mapping is undefined for class '%s'" % extjs_class) 
+    
+    def _get_attr(self, parent_field, extjs_attr, value, extjs_class):
+        for item in self.mapping:
+            if item['class'].has_key(extjs_class):
+                
+                assert item['config'].get(extjs_attr), 'Mapping is "%s" not found %s' % (extjs_class, extjs_attr)
+                
+                py_attr = item['config'][extjs_attr]
+                return ast.Assign(
+                    [ast.Attribute(
+                        ast.Name(parent_field, ast.Load()), 
+                        str(py_attr), 
+                        ast.Load()
+                    )], 
+                    ast.Name(value, ast.Load())
+                )
+        else:
+            raise ValueError("Mapping is undefined for class '%s'" % extjs_class) 
+    
+
+    def _get_extends(self, parent_field, extjs_name, list_cmp, extjs_class):
+        for item in self.mapping:
+            if item['class'].has_key(extjs_class):
+                
+                assert item['config'].get(extjs_name), 'Mapping is "%s" not found %s' % (extjs_class, extjs_name)
+                
+                py_attr = item['config'][extjs_name]
+                 
+                ast_list = ast.List([ast.Name(item, ast.Load() ) for item in list_cmp], ast.Load())                                                                
+                return ast.Expr( 
+                            ast.Call(
+                                ast.Attribute(
+                                    ast.Attribute(
+                                        ast.Name(
+                                            parent_field,
+                                            ast.Load()
+                                        ),
+                                        str(py_attr),
+                                        ast.Load()       
+                                    ),
+                                    'extend',
+                                    ast.Load()          
+                                ),     
+                                [ast_list,],
+                                [],     
+                                None,
+                                None
+                            )
+                        )
+        else:
+            raise ValueError("Mapping is undefined for class '%s'" % extjs_class)            
+
+    def _get_node_value(self, value):
+        '''
+        Генерация узла дерева для простых элементов
+        Например для строки и числа, булевого типа
+        '''        
+        if value in ('False', 'True'):
+            return ast.Name(value, ast.Load())
+        elif isinstance(value, int):
+            return ast.Num(value)
+        elif isinstance(value, basestring):
+            return ast.Str(value)
+        elif isinstance(value, dict):
+            return ast.Dict( [ self._get_node_value(str(k))  for k in value.keys()],
+                             [ self._get_node_value(v) for v in value.values()] )
+            
+        elif isinstance(value, tuple):
+            return ast.Tuple([self._get_node_value(item) for item in value], ast.Load())
+               
+        elif isinstance(value, list):
+            return ast.List([self._get_node_value(item) for item in value], ast.Load())
+        
+        raise ValueError("Type '%s' value '%s' is not supported" % (type(value), value) )
+             
                     
 def update_with_inheritance(m_list, parent=None, config=None):
     '''
@@ -723,49 +652,64 @@ update_with_inheritance(mapping_list)
 #===============================================================================
 def test_from_designer():
     '''
-    Функция для легкого тестирования метода from_designer
+    С новым протоколом
     '''
     fake_data = {
-        'properties': {
-            'name':'Ext window',
-            'title':'Trololo',
-            'layout':'fit',
-        },
+        'name':'Ext window',
+        'title':'Trololo',
+        'layout':'fit',
+
         'type':'window',
         'id':'self',
+        
         'items': [{
-            'properties': {
+                'type': 'panel',
+                'id': 'base_panel',
+                
                 'name':'Ext panel',
                 'title':'Im panel ',
-                'layout':'absolute'
-            },
-            'type': 'panel',
-            'id': 'base_panel',
-            'items': []
-        }, {
-            'properties': {
-                'name':'Ext form',
-                'title':'Im form ',
-                'layout':'form'
-            },
-            'type': 'form',
-            'id': 'simple_form',
-            'items': [{
-                'properties': {
-                    'name':'Ext panel',
-                    'title':'Im panel 2',
-                    'layout':'absolute 2',
-                    'width': 100
-                },
-                'type': 'panel',
-                'id': 'inner_panel',
-                'items': []
+                'layout':'absolute',
+                'items': [{
+                    'type': 'gridPanel',
+                    'id': 'grid_1',                      
+                    'store': {
+                        'id': 'store1'
+                        ,'type':'arrayStore'
+                    },
+                      
+                    'tbar':{
+                            'id': 'tbar_1'
+                            ,'type':'toolbar'
+                            ,'items':[{
+                                'type':'button'
+                                ,'id':'button_1'
+                                ,'text':u'Кнопка 1'
+                            },{
+                               'type':'button'
+                                ,'id':'button_2'
+                                ,'text':u'Кнопка 2'                            
+                            }]
+                    }
+                    ,'columns': [{
+                        'type': 'gridColumn',
+                        'id': 'gridColumn_1',
+                        'header': '2'  
+                    },{
+                       'type': 'gridColumn',
+                        'id': 'gridColumn_2',
+                        'header': '1'
+                    }]     
+                           
+                }]
             }]
-        }]
     }
-    
-    Parser('tests.py', 'TestOne').from_designer(fake_data)
-    print 'Parser.from_designer - ok'
+        
+    Node.mapping = mapping_list
+    nodes = Node(fake_data).walk()
+
+    list_nodes_str = map(codegen.to_source, nodes)
+    print '\n'.join(list_nodes_str)         
+    print '====== from_designer - ok ======'    
     
 def test_to_designer():
     '''
@@ -775,5 +719,3 @@ def test_to_designer():
     pprint.pprint( js ) 
     
     print 'Parser.to_designer - ok'
-    
-    

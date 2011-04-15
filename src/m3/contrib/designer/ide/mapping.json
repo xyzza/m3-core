@@ -62,7 +62,7 @@
 		"toolbar": "ExtToolBar"
 	},
 	"config": {
-		"parentDockType":"doc_type"
+		"items":"items"
 	},
 	"parent": "container"
 },
@@ -110,6 +110,7 @@
 		,"collapsed":"collapsed"		
 		,"bodyBorder":"body_border"
 		,"tbar":"tbar"
+		,"items":"_items"
 	}
 	,"parent": "basePanel"
 	,"attr":{
@@ -138,11 +139,12 @@
 	"class": {
 		"gridPanel": "ExtGrid"
 	},
-	"config": {}
-	,"parent": "formPanel"
-	,"attr": {
-		"store": ["arrayStore", "jsonStore"]
+	"config": {
+		"store":"store"
+		,"tbar":"tbar"
+		,"columns":"columns"
 	}
+	,"parent": "formPanel"
 },
 
 // Колонка для грида

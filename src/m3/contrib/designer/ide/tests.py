@@ -59,10 +59,4 @@ class Claz(ExtWindow):
         self.layout = 'auto'
         
 def ata(a, b):
-    if a:
-        data = 1
-    elif b:
-        data = 2
-    else:
-        data = 3
- 
+    field.items.extend([field1, field2, field3])

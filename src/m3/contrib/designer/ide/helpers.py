@@ -19,25 +19,24 @@ def get_files(path):
     '''    
         
     li = []
-         
+ 
     for ffile in sorted(os.listdir(path), \
             # Папки имеют приоритет над файлами
             key=lambda x: ' %s' % x if os.path.isdir(os.path.join(path, x)) else x):
-            
 
         if ffile.split('.')[-1]  in EXCLUSION:
             continue
                 
-        path_file =  os.path.join(path, ffile)
-      
+        # Никаких крокозябр - unicode(..)
+        path_file = unicode( os.path.join(path, ffile) )
+        
         propertys_dict = dict(text=ffile) 
         if os.path.isdir(path_file):                                    
             propertys_dict['children'] = get_files(path_file)
             propertys_dict['leaf'] = False             
         else:            
             propertys_dict['path'] = path_file
-                        
-                             
+                                                    
             if ffile in POSIBLE_EDIT_FILES:
                 propertys_dict['iconCls'] = Icons.PAGE_WHITE_CODE
                 propertys_dict['leaf'] = False
@@ -47,6 +46,7 @@ def get_files(path):
                 propertys_dict['leaf'] = True
                  
         li.append(propertys_dict)
+
     return li
 
 

@@ -35,6 +35,9 @@ def get_project_files(request):
     
     path_project = os.getenv('PROJECT_FOR_DESIGNER', None)
     files = get_files(os.path.abspath(path_project))
+    
+    #print files
+    
     return HttpResponse(content_type='application/json', 
                         content = json.dumps(files))
 
