@@ -69,7 +69,9 @@ Ext.ux.ToolbarDroppable = Ext.extend(Object, {
      * @param {String} ddGroup The DD Group
      */
     addDDGroup: function(ddGroup) {
-        this.dropTarget.addToGroup(ddGroup);
+    	if (this.dropTarget != undefined) {
+    		this.dropTarget.addToGroup(ddGroup);
+    	}
     },
     
     /**
