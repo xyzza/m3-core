@@ -4,10 +4,12 @@ Created on 14.04.2011
 
 @author: kirov
 '''
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Avg, Max, Min, Sum
 
-class GroupingRecordProxy(object):
-    model = None
+class GroupingRecordBase(object):
+    data = None
+    reader = None
+    counter = None
     def __init__(self, *args, **kwargs):
         self.id = 0 # ID записи в базе
         self.index = 0 # индекс записи в раскрытом дереве (заполняется при выводе)
@@ -35,8 +37,24 @@ class GroupingRecordProxy(object):
         '''
         pass
 
+class GroupingRecordModelProvider(GroupingRecordBase):
+    @staticmethod
+    def reader(*args, **kwargs):
+        return read_model(*args, **kwargs)
+    @staticmethod
+    def counter(*args, **kwargs):
+        return count_model(*args, **kwargs)
 
-def get_elements(grouped, offset, level_index, level, begin, end, keys, data_reader, data_counter, data_model):
+class GroupingRecordDataProvider(GroupingRecordBase):
+    @staticmethod
+    def reader(*args, **kwargs):
+        return read_data(*args, **kwargs)
+    @staticmethod
+    def counter(*args, **kwargs):
+        return count_data(*args, **kwargs)
+
+
+def get_elements(grouped, offset, level_index, level, begin, end, keys, data_provider, aggregates):
     # offset - смещение индекса уровня. нужно чтобы элементы имели индекс со смещением
     res = []
     all_out = False # признак того, что все необходимые элементы выведены, идет подсчет общего количества открытых элементов
@@ -50,7 +68,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_rea
         
         # на текущий момент необходимо вычислить количество дочерних элементов
         if exp['count'] == -1:
-            exp['count'] = data_counter(grouped, level_index+1, (keys+[level['id']] if level['id'] else [])+[exp['id']], exp['expandedItems'], data_model)
+            exp['count'] = data_provider.counter(grouped, level_index+1, (keys+[level['id']] if level['id'] else [])+[exp['id']], exp['expandedItems'], data_provider)
             # тут надо считать также ниже раскрытые элементы
         
         if all_out:
@@ -63,7 +81,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_rea
             # выдать диапазон с begin по end
             #print '1) диапазон уже пройден'
             #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
-            list, total = data_reader(grouped, offset+len(res)-begin, level_index, keys+[level['id']] if level['id'] else [], begin, end, data_model)
+            list = data_provider.reader(grouped, offset+len(res)-begin, level_index, keys+[level['id']] if level['id'] else [], begin, end, data_provider, aggregates)
             # если выдали раскрытый элемент, то установим у него признак раскрытости
             if end == exp['index']:
                 list[-1].expanded = True
@@ -79,7 +97,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_rea
             #print '2) интервал переходит с предыдущего'
             #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
             # выдадим известный диапазон, а остальное продолжим искать
-            list, total = data_reader(grouped, offset+len(res)-begin, level_index, keys+[level['id']] if level['id'] else [], begin, exp['index'], data_model)
+            list = data_provider.reader(grouped, offset+len(res)-begin, level_index, keys+[level['id']] if level['id'] else [], begin, exp['index'], data_provider, aggregates)
             # если выдали раскрытый элемент, то установим у него признак раскрытости
             list[-1].expanded = True
             res.extend(list)
@@ -91,7 +109,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_rea
             #print '3) мы попадаем в раскрытый уровень'
             #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
             # переходим искать на след. уровень
-            list, total = get_elements(grouped, offset+len(res), level_index+1, exp, begin-exp['index']-1, end-exp['index']-1, keys+[level['id']] if level['id'] else [], data_reader, data_counter, data_model)
+            list, total = get_elements(grouped, offset+len(res), level_index+1, exp, begin-exp['index']-1, end-exp['index']-1, keys+[level['id']] if level['id'] else [], data_provider, aggregates)
             #total_len = total_len+total # добавляем количество раскрытых элементов
             res.extend(list)
             # переходим к след. развернутому элементу
@@ -104,7 +122,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_rea
             #print '4) частично попадаем в раскрытый'
             #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
             # часть переведем искать на след. уровень, остальное продолжим
-            list, total = get_elements(grouped, offset+len(res), level_index+1, exp, begin-exp['index']-1, exp['count']-1, keys+[level['id']] if level['id'] else [], data_reader, data_counter, data_model)
+            list, total = get_elements(grouped, offset+len(res), level_index+1, exp, begin-exp['index']-1, exp['count']-1, keys+[level['id']] if level['id'] else [], data_provider, aggregates)
             #total_len = total_len+total # добавляем количество раскрытых элементов
             res.extend(list)
             delta = end-begin-len(list)
@@ -125,14 +143,14 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_rea
         i = i+1
         
     if level['count'] == -1:
-        level['count'] = data_counter(grouped, level_index, keys, level['expandedItems'], data_model)
+        level['count'] = data_provider.counter(grouped, level_index, keys, level['expandedItems'], data_provider)
     # 5) выдадим из уровеня всё что осталось
     if not all_out and begin <= end and begin < level['count']:
         #print '5) выдадим из уровеня всё что осталось'
         #print 'begin=%s, end=%s, level[count]=%s, len(res)=%s, offset=%s, keys=%s' % (begin,end,level['count'], len(res), offset, keys)
         if end > level['count']-1:
             end = level['count']-1
-        list, total = data_reader(grouped, offset+len(res)-begin, level_index, keys+[level['id']] if level['id'] else [], begin, end, data_model)
+        list = data_provider.reader(grouped, offset+len(res)-begin, level_index, keys+[level['id']] if level['id'] else [], begin, end, data_provider, aggregates)
         res.extend(list)
     
     # можно уже не считать total выше
@@ -140,7 +158,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_rea
     #print 'get_elements()= total=%s, res_count=%s' % (total_len, len(res))
     return (res, total_len)
 
-def count_model(grouped, level_index, level_keys, expandedItems, data_model):
+def count_model(grouped, level_index, level_keys, expandedItems, data_provider):
     # подсчет количества строк в раскрытом уровне
     
 #    model = Person
@@ -162,7 +180,7 @@ def count_model(grouped, level_index, level_keys, expandedItems, data_model):
         if level_index == 0:
             # вывести элементы 1-го уровня группировки (не нужно использовать ключи)
             field = grouped_ranges[level_index]
-            total_of_level = data_model.model.objects.values(field).distinct().count()
+            total_of_level = data_provider.data.objects.values(field).distinct().count()
         else:
             # для всех остальных элементов будут использоваться ключи
             filter = None
@@ -173,15 +191,15 @@ def count_model(grouped, level_index, level_keys, expandedItems, data_model):
                     filter = filter & Q(**{lev_field:key})
                 else: 
                     filter = Q(**{lev_field:key})
-            total_of_level = data_model.model.objects.filter(filter).count()
+            total_of_level = data_provider.data.objects.filter(filter).count()
     else:
-        total_of_level = data_model.model.objects.count()
+        total_of_level = data_provider.data.objects.count()
         
     # добавим к количеству также сумму раскрытых элементов
     exp_count = 0
     for exp in expandedItems:
         if exp['count'] == -1:
-            exp['count'] = count_model(grouped, level_index+1, level_keys+[exp['id']], exp['expandedItems'], data_model)
+            exp['count'] = data_provider.counter(grouped, level_index+1, level_keys+[exp['id']], exp['expandedItems'], data_provider)
         exp_count = exp_count+exp['count']
         
     #count_cache[cache_key] = total_of_level+exp_count
@@ -189,7 +207,7 @@ def count_model(grouped, level_index, level_keys, expandedItems, data_model):
     #print 'count_model() = %s, total=%s, exp_count=%s' % (total_of_level+exp_count, total_of_level, exp_count) 
     return total_of_level+exp_count
 
-def read_model(grouped, offset, level_index, level_keys, begin, end, data_model):
+def read_model(grouped, offset, level_index, level_keys, begin, end, data_provider, aggregates):
     '''
     вывод элементов дерева группировок в зависимости от уровня, ключевых элементов и интервала в уровне
     '''
@@ -203,7 +221,6 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_model)
     
     #print 'read_model(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
     res = []
-    total_of_level = 0
     if grouped:
         grouped_ranges = []
         # определим порядок группировки
@@ -213,19 +230,48 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_model)
         if level_index == 0:
             # вывести элементы 1-го уровня группировки (не нужно использовать ключи)
             field = grouped_ranges[level_index]
-            query = data_model.model.objects.values(field).annotate(count=Count(field))
+            aggr = []
+            # будем считать агрегаты
+            for agg in aggregates.keys():
+                agg_type = aggregates[agg]
+                if agg_type == 'sum':
+                    aggr.append(Sum(agg))
+                elif agg_type == 'count':
+                    aggr.append(Count(agg))
+                elif agg_type == 'min':
+                    aggr.append(Min(agg))
+                elif agg_type == 'max':
+                    aggr.append(Max(agg))
+                elif agg_type == 'avg':
+                    aggr.append(Avg(agg))
+            if aggr:
+                query = data_provider.data.objects.values(field).annotate(*aggr).annotate(count=Count(field))
+            else:
+                query = data_provider.data.objects.values(field).annotate(count=Count(field))
+            
             # теперь выведем запрошенные элементы уровня
             index = 0
             for i in query[begin:end+1]:
-                item = data_model()
+                item = data_provider()
                 item.index = offset+index+begin
                 item.indent = level_index
                 item.id = i[field]
                 item.lindex = index+begin
                 item.count = i['count']
+                for agg in aggregates.keys():
+                    agg_type = aggregates[agg]
+                    if agg_type == 'sum':
+                        setattr(item, agg, i[agg+'__sum'])
+                    elif agg_type == 'count':
+                        setattr(item, agg, i[agg+'__count'])
+                    elif agg_type == 'min':
+                        setattr(item, agg, i[agg+'__min'])
+                    elif agg_type == 'max':
+                        setattr(item, agg, i[agg+'__max'])
+                    elif agg_type == 'avg':
+                        setattr(item, agg, i[agg+'__avg'])
                 res.append(item)
                 index = index+1
-            total_of_level = 0
         else:
             # для всех остальных элементов будут использоваться ключи
             # если берется уровень больший, чем количество группировок, то выдаем просто записи
@@ -242,23 +288,52 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_model)
                     filter = filter & Q(**{lev_field:key})
                 else: 
                     filter = Q(**{lev_field:key})
+            aggr = []
+            # будем считать агрегаты
+            for agg in aggregates.keys():
+                agg_type = aggregates[agg]
+                if agg_type == 'sum':
+                    aggr.append(Sum(agg))
+                elif agg_type == 'count':
+                    aggr.append(Count(agg))
+                elif agg_type == 'min':
+                    aggr.append(Min(agg))
+                elif agg_type == 'max':
+                    aggr.append(Max(agg))
+                elif agg_type == 'avg':
+                    aggr.append(Avg(agg))
             if field:
-                query = data_model.model.objects.filter(filter).values(field).annotate(count=Count(field))
+                if aggr:
+                    query = data_provider.data.objects.filter(filter).values(field).annotate(*aggr).annotate(count=Count(field))
+                else:
+                    query = data_provider.data.objects.filter(filter).values(field).annotate(count=Count(field))
             else:
-                query = data_model.model.objects.filter(filter)
+                query = data_provider.data.objects.filter(filter)
             # теперь выведем запрошенные элементы уровня
             index = 0
             for i in query[begin:end+1]:
                 if field:
-                    item = data_model()
+                    item = data_provider()
                     item.is_leaf = False
                     item.index = offset+index+begin
                     item.id = i[field]
                     item.indent = level_index
                     item.lindex = index+begin
                     item.count = i['count']
+                    for agg in aggregates.keys():
+                        agg_type = aggregates[agg]
+                        if agg_type == 'sum':
+                            setattr(item, agg, i[agg+'__sum'])
+                        elif agg_type == 'count':
+                            setattr(item, agg, i[agg+'__count'])
+                        elif agg_type == 'min':
+                            setattr(item, agg, i[agg+'__min'])
+                        elif agg_type == 'max':
+                            setattr(item, agg, i[agg+'__max'])
+                        elif agg_type == 'avg':
+                            setattr(item, agg, i[agg+'__avg'])
                 else:
-                    item = data_model()
+                    item = data_provider()
                     item.is_leaf = True
                     item.index = offset+index+begin
                     item.indent = level_index
@@ -266,13 +341,12 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_model)
                     item.load(i)
                 res.append(item)
                 index = index+1
-            total_of_level = 0
     else:
         # вывести без группировки
         index = 0
-        query = data_model.model.objects.all()
+        query = data_provider.data.objects.all()
         for i in query[begin:end+1]:
-            item = data_model()
+            item = data_provider()
             item.indent = 0
             item.is_leaf = True
             item.count = 0
@@ -281,12 +355,11 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_model)
             item.load(i)
             res.append(item)
             index = index+1
-        total_of_level = 0
     #print 'read_model()= total=%s, res_count=%s' % (total_of_level, len(res))
     #out_cache[cache_key] = (res,total_of_level)
-    return (res,total_of_level)
+    return res
 
-def read_data(grouped, offset, level_index, level_keys, begin, end, data_model):
+def read_data(grouped, offset, level_index, level_keys, begin, end, data_provider, aggregates):
     '''
     вывод элементов дерева группировок в зависимости от уровня, ключевых элементов и интервала в уровне
     '''
@@ -299,42 +372,65 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_model):
     
     #print 'out_data(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
     res = []
-    total_of_level = 0
     if grouped:
         # определим порядок группировки
         if level_index == 0:
             # вывести элементы 1-го уровня группировки (не нужно использовать ключи)
             level = {}
+            aggregate_values = {}
             # переберем элементы и сформируем уровень
             field = grouped[level_index]
-            for rec in data_model.model:
+            for rec in data_provider.data:
                 group_value = getattr(rec, field)
                 if not group_value in level.keys():
                     level[group_value] = 1
+                    aggr_rec = {}
+                    aggregate_values[group_value] = aggr_rec
                 else:
                     level[group_value] = level[group_value]+1
+                    aggr_rec = aggregate_values[group_value]
+                # будем считать агрегаты
+                for agg in aggregates.keys():
+                    agg_type = aggregates[agg]
+                    agg_value = getattr(rec, agg)
+                    if agg_type == 'sum':
+                        aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)   
+                    elif agg_type == 'count':
+                        aggr_rec[agg] = agg_value + (1 if aggr_rec.has_key(agg) else 0)
+                    elif agg_type == 'min':
+                        aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] > agg_value else aggr_rec[agg]
+                    elif agg_type == 'max':
+                        aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] < agg_value else aggr_rec[agg]
+                    elif agg_type == 'avg':
+                        aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
             # теперь выведем запрошенные элементы уровня
             index = 0
             for i in level.keys()[begin:end+1]:
-                item = data_model(index = offset+index+begin)
+                item = data_provider(index = offset+index+begin)
                 setattr(item, field, i)
                 item.indent = level_index
                 item.id = i
                 item.lindex = index+begin
                 item.count = level[i]
+                for agg in aggregates.keys():
+                    # для средних - посчитаем среднее
+                    if aggregates[agg] == 'avg':
+                        setattr(item, agg, aggregate_values[i][agg] / item.count)
+                    else:
+                        setattr(item, agg, aggregate_values[i][agg])
                 res.append(item)
                 index = index+1
-            total_of_level = len(level)
         else:
             # для всех остальных элементов будут использоваться ключи
             level = {}
+            aggregate_values = {}
             # если берется уровень больший, чем количество группировок, то выдаем просто записи
             if level_index >= len(grouped):
                 field = None
             else:  
                 field = grouped[level_index]
-                
-            for rec in data_model.model:
+            
+            for rec in data_provider.data:
                 for lev in range(0,level_index):
                     lev_field = grouped[lev]
                     key = level_keys[lev]
@@ -348,15 +444,32 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_model):
                             group_value = getattr(rec, field)
                             if not group_value in level.keys():
                                 level[group_value] = 1
+                                aggr_rec = {}
+                                aggregate_values[group_value] = aggr_rec
                             else:
                                 level[group_value] = level[group_value]+1
+                                aggr_rec = aggregate_values[group_value]
+                            # будем считать агрегаты
+                            for agg in aggregates.keys():
+                                agg_type = aggregates[agg]
+                                agg_value = getattr(rec, agg)
+                                if agg_type == 'sum':
+                                    aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)   
+                                elif agg_type == 'count':
+                                    aggr_rec[agg] = agg_value + (1 if aggr_rec.has_key(agg) else 0)
+                                elif agg_type == 'min':
+                                    aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] > agg_value else aggr_rec[agg]
+                                elif agg_type == 'max':
+                                    aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] < agg_value else aggr_rec[agg]
+                                elif agg_type == 'avg':
+                                    aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                         else:
                             level[rec.id] = rec
             # теперь выведем запрошенные элементы уровня
             index = 0
             for i in level.keys()[begin:end+1]:
                 if field:
-                    item = data_model(index = offset+index+begin)
+                    item = data_provider(index = offset+index+begin)
                     # проставим значения ключей уровня
                     for lev in range(0,level_index):
                         lev_field = grouped[lev]
@@ -367,8 +480,14 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_model):
                         item.indent = level_index
                         item.lindex = index+begin
                         item.count = level[i]
+                        for agg in aggregates.keys():
+                            # для средних - посчитаем среднее
+                            if aggregates[agg] == 'avg':
+                                setattr(item, agg, aggregate_values[i][agg] / item.count)
+                            else:
+                                setattr(item, agg, aggregate_values[i][agg])
                 else:
-                    item = data_model()
+                    item = data_provider()
                     item.is_leaf = True
                     item.index = offset+index+begin
                     item.indent = level_index
@@ -376,12 +495,11 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_model):
                     item.load(level[i])
                 res.append(item)
                 index = index+1
-            total_of_level = len(level)
     else:
         # вывести без группировки
         index = 0
-        for i in data_model.model[begin:end+1]:
-            item = data_model()
+        for i in data_provider.data[begin:end+1]:
+            item = data_provider()
             item.indent = 0
             item.is_leaf = True
             item.lindex = index+begin
@@ -389,10 +507,9 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_model):
             item.load(i)
             res.append(item)
             index = index+1
-        total_of_level = len(data_model.model)
     #print 'out_data()= total=%s, res_count=%s' % (total_of_level, len(res))
 #    out_cache[cache_key] = (res,total_of_level)
-    return (res,total_of_level)
+    return res
 
 #count_cache = {}
 #
@@ -407,7 +524,7 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_model):
 #            res = res+'+'+r
 #    return res
 
-def count_data(grouped, level_index, level_keys, expandedItems, data_model):
+def count_data(grouped, level_index, level_keys, expandedItems, data_provider):
     # подсчет количества строк в раскрытом уровне
     
     # построим ключ кэша
@@ -424,7 +541,7 @@ def count_data(grouped, level_index, level_keys, expandedItems, data_model):
             level = []
             # переберем элементы и сформируем уровень
             field = grouped[level_index]
-            for rec in data_model.model:
+            for rec in data_provider.data:
                 group_value = getattr(rec, field)
                 if not group_value in level:
                     level.append(group_value)
@@ -438,7 +555,7 @@ def count_data(grouped, level_index, level_keys, expandedItems, data_model):
             else:  
                 field = grouped[level_index]
                 
-            for rec in data_model.model:
+            for rec in data_provider.data:
                 for lev in range(0,level_index):
                     lev_field = grouped[lev]
                     key = level_keys[lev]
@@ -456,13 +573,13 @@ def count_data(grouped, level_index, level_keys, expandedItems, data_model):
                             level.append(rec)
             total_of_level = len(level)
     else:
-        total_of_level = len(data_model.model)
+        total_of_level = len(data_provider.data)
         
     # добавим к количеству также сумму раскрытых элементов
     exp_count = 0
     for exp in expandedItems:
         if exp['count'] == -1:
-            exp['count'] = count_data(grouped, level_index+1, level_keys+[exp['id']], exp['expandedItems'], data_model)
+            exp['count'] = data_provider.counter(grouped, level_index+1, level_keys+[exp['id']], exp['expandedItems'], data_provider)
         exp_count = exp_count+exp['count']
         
     #count_cache[cache_key] = total_of_level+exp_count

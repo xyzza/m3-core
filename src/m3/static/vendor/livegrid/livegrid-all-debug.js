@@ -364,7 +364,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
      * @private
      */
     _loadMaskAnchor : null,
-
+    
 // }}}
 
 // {{{ --------------------------public API methods-----------------------------
@@ -422,29 +422,6 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
     },
 
 // {{{ ------------adjusted methods for applying custom behavior----------------
-
-    // private
-    render : function() {
-        if (this.autoFill) {
-            var ct = this.grid.ownerCt;
-
-            if (ct && ct.getLayout()) {
-                ct.on('afterlayout', function() {
-                    this.fitColumns(true, true);
-                    this.updateHeaders();
-                    this.updateHeaderSortState();
-                }, this, {single: true});
-            }
-        } else if (this.forceFit) {
-            this.fitColumns(true, false);
-        } else if (this.grid.autoExpandColumn) {
-            this.autoExpand(true);
-        }
-
-        this.grid.getGridEl().dom.innerHTML = this.renderUI();
-
-        this.afterRenderUI();
-    },
 
     /**
      * Overwritten so the {@link Ext.ux.grid.livegrid.DragZone} can be used
@@ -643,6 +620,11 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
                 this.scroller.dom.style.position = 'static';
             }
         }else{
+        	if (this.grid.groupingToolBar != undefined) { //kirov
+        		csize.height = csize.height-this.grid.groupingToolBar.getHeight();
+        	} else {
+        		csize.height = csize.height;
+        	}
             this.el.setSize(csize.width, csize.height);
 
             var hdHeight = this.mainHd.getHeight();
@@ -1835,6 +1817,9 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         var size  = c.getSize();
         var width = size.width;
         var vh    = size.height;
+        if (this.grid.groupingToolBar != undefined) { //kirov
+        	vh -= this.grid.groupingToolBar.getHeight();
+        }
 
         var vw = width-this.getScrollOffset();
         // horizontal scrollbar shown?
@@ -1844,7 +1829,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         }
 
         vh -= this.mainHd.getHeight();
-
+        
         var totalLength = ds.totalLength || 0;
 
         var visibleRows = Math.max(1, Math.floor(vh/this.rowHeight));

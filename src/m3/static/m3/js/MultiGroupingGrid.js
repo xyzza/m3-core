@@ -359,8 +359,8 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
     onRender: function(){
         this.grid.elements +=',tbar';
         this.grid.add(this.tbar);
-        this.grid.doLayout();
-        
+        this.grid.groupingToolBar = this.tbar;
+    	this.grid.doLayout();
         this.grid.enableDragDrop = true;
 
         var dragProxy = this.grid.getView().columnDrag,
@@ -557,7 +557,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	 * @param {Array} columns Список колонок для группировки
 	 */
     doGroup: function (columns) {
-        this.grouppingColumn.hidden= !(columns.length > 0)
+    	this.grid.colModel.setHidden(0, !(columns.length > 0));
         this.expandedItems = [];
         this.groupedColums = columns;
         this.grid.view.reset(true);
