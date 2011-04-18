@@ -142,7 +142,7 @@
 	"config": {
 		"store":"store"
 		,"tbar":"tbar"
-		,"columns":"columns"
+		,"items":"columns"
 	}
 	,"parent": "formPanel"
 },

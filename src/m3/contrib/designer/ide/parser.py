@@ -138,8 +138,10 @@ class Parser(object):
         '''
         Возвращает конфигурацию компонента в качестве словаря
         '''
-        properties, py_name = self._get_properties(key)                
-        return {'type': py_name, 'id':key, 'properties': properties}
+        properties, py_name = self._get_properties(key)
+        properties['type'] = py_name
+        properties['id'] = key
+        return properties
 
     def _get_properties(self, key):
         '''
@@ -178,6 +180,15 @@ class Parser(object):
         for k, v in conf.items():
             if v == name:
                 return str(k)
+        
+    def _gen_config(self, type_obj):  
+        '''
+        Получение конфигурации свойств из маппинга по типу объекта
+           @param type_obj: Тип объекта (window, panel, etc.)
+        '''         
+        for item in self._get_mapping():
+            if item['class'].has_key(type_obj):
+                return item['config']        
         
     def _get_nested_component(self, node_value):
         '''
@@ -230,8 +241,8 @@ class Parser(object):
         class_node, func_node = self._get_func_initialize(module_node, self.class_name)
         
         Node.mapping = self._get_mapping()
-        nodes = Node(json_dict).walk()        
-        
+        nodes = Node(json_dict).get_nodes()
+
         self._set_class_name(class_node, json_dict['type'])
         
         # Старая док строка не должна потеряться
@@ -251,8 +262,8 @@ class Parser(object):
         Преобразовывает js в py код и возвращает его в виде строки
         '''
 
-        Node.mapping = self._get_mapping()
-        nodes = Node(json_dict).walk()
+        Node.mapping = self._get_mapping()        
+        nodes = Node(json_dict).get_nodes()
 
         list_source_code = map(codegen.to_source, nodes)
         return '\n'.join(list_source_code)
@@ -463,25 +474,51 @@ class Node(object):
         else:            
             return 1
 
-    def walk(self, nodes = [], 
-                    nodes_attr = [StringSpaces()], 
-                    nodes_extends=[StringSpaces()], 
-                    nodes_in_self=[StringSpaces()]):        
+
+    def get_nodes(self):
+        '''
+        '''
+        nodes = []
+        nodes_attr = []
+        nodes_extends = [] 
+        nodes_in_self = []
+        
+        self.walk(nodes, nodes_attr, 
+                             nodes_extends, nodes_in_self)
+        
+        if nodes_attr:
+            nodes_attr.insert(0, StringSpaces())
+            nodes += nodes_attr
+            
+        if nodes_extends:
+            nodes_extends.insert(0, StringSpaces())
+            nodes += nodes_extends
+            
+        if nodes_in_self:
+            nodes_in_self.insert(0, StringSpaces())
+            nodes += nodes_in_self
+        
+        return nodes
+
+    def walk(self, nodes, nodes_attr, nodes_extends, nodes_in_self):        
+          
         for key, value in sorted(self.data.items(), key=Node.sort_items):
             if isinstance(value, list):
                 extends_list = []
                 for item in value:
-                    if isinstance(item, dict):                        
-                        Node(item).walk()                                                
+                    if isinstance(item, dict) and item.has_key('id') and item.has_key('type'):
+                        Node(item).walk(nodes, nodes_attr, nodes_extends, nodes_in_self)
                         extends_list.append(item['id'])
                     else:
-                        raise ValueError('Alarma')
-                                    
-                ast_node = self._get_extends(self.data['id'], key, extends_list, self.data['type'])
+                        ast_node = self._get_property(self.data['id'], key, value, self.data['type'])
+                        nodes.append(ast_node)
+                        break
                 
-                nodes_extends.append(ast_node)
-            elif isinstance(value, dict):                
-                Node(value).walk()                
+                if extends_list:
+                    ast_node = self._get_extends(self.data['id'], key, extends_list, self.data['type'])                    
+                    nodes_extends.append(ast_node)
+            elif isinstance(value, dict) and value.has_key('type') and value.has_key('id'):                
+                Node(value).walk(nodes, nodes_attr, nodes_extends, nodes_in_self)             
                 
                 ast_node = self._get_attr(self.data['id'], key, value['id'], self.data['type'])
                 
@@ -497,8 +534,7 @@ class Node(object):
                     nodes_in_self.append(in_self_node)                                
                 else:                    
                     ast_node = self._get_property(self.data['id'], key, value, self.data['type'])
-                    nodes.append(ast_node)
-        return nodes + nodes_attr + nodes_extends + nodes_in_self
+                    nodes.append(ast_node)                            
      
     def _add_cmp_in_self(self, field, parent_fields='self'):
         return ast.Assign(
@@ -571,7 +607,7 @@ class Node(object):
             raise ValueError("Mapping is undefined for class '%s'" % extjs_class) 
     
 
-    def _get_extends(self, parent_field, extjs_name, list_cmp, extjs_class):
+    def _get_extends(self, parent_field, extjs_name, list_cmp, extjs_class):        
         for item in self.mapping:
             if item['class'].has_key(extjs_class):
                 
