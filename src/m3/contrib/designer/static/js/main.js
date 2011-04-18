@@ -150,9 +150,32 @@ function onClickNodeOtherFiles(node, fileAttr){
             tabPanel.add( codeEditor );
             tabPanel.activate(codeEditor);
 
-            /* May be this wiil be work in future */
             /* async close tab && message */
-//            codeEditor.on('beforeclose', function(panel){})
+            var userTakeChoise = true;
+            codeEditor.on('beforeclose', function(panel){
+                var textArea = panel.findByType('textarea')[0];
+                if (textArea.isDirty()){
+                    var scope = this;
+                    this.showMessage(choise, textArea.id)
+                    function choise(buttonId){
+                        if (buttonId=='yes') {
+                           scope.onSave();
+                           scope.fireEvent('close_tab', scope);
+                        }
+                        else if (buttonId=='no') {
+                           scope.fireEvent('close_tab', scope);
+                        }
+                        else if (buttonId=='cancel') {
+                            userTakeChoise = !userTakeChoise;
+                        }
+                        userTakeChoise = !userTakeChoise;
+                    }
+                }
+                else userTakeChoise = !userTakeChoise
+
+                return !userTakeChoise;
+                
+            })
 
             codeEditor.on('close_tab', function(tab){
                 if (tab) tabPanel.remove(tab)
