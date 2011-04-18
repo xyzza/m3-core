@@ -150,7 +150,7 @@ class CumulativeRegister(object):
         kw_dims = cls._cleaned_kwargs_by_dims(model, kwargs)
         kw_dims[cls.date_field + '__lte'] = normalized_date
         
-        query = model.objects.filter(**kw_dims).order_by('-date')[0:1].values_list(*([cls.date_field,] + cls.rest_fields + cls.circ_fields))
+        query = model.objects.filter(**kw_dims).order_by('-' + cls.date_field)[0:1].values_list(*([cls.date_field,] + cls.rest_fields + cls.circ_fields))
         if len(query) > 0:
             for i in range(0, len(cls.rest_fields)):
                 result[i] = query[0][i + 1]
