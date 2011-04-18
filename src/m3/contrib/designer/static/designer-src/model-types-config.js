@@ -78,7 +78,8 @@ Ext.apply(ModelTypeLibrary,{
             properties: {
                 id:{
                     defaultValue:'button',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 },
                 text:{
                     defaultValue:'New button',
@@ -101,7 +102,8 @@ Ext.apply(ModelTypeLibrary,{
             properties: {
                 id:{
                     defaultValue:'label',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 },
                 text: {
                     defaultValue:'New label',
@@ -650,7 +652,8 @@ Ext.apply(ModelTypeLibrary,{
             properties: {
                 id: {
                     defaultValue: 'toolbar',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 },
                 parentDockType: {
                     defaultValue:'tbar',
@@ -672,7 +675,8 @@ Ext.apply(ModelTypeLibrary,{
             properties: {
                 id: {
                     defaultValue: 'toolbar_fill',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -684,7 +688,8 @@ Ext.apply(ModelTypeLibrary,{
             properties: {
                 id: {
                     defaultValue: 'toolbar_separator',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -696,7 +701,8 @@ Ext.apply(ModelTypeLibrary,{
             properties: {
                 id: {
                     defaultValue: 'toolbar_spacer',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 }
             },
             toolboxData:{
@@ -708,7 +714,8 @@ Ext.apply(ModelTypeLibrary,{
             properties: {
                 id: {
                     defaultValue: 'toolbar_text',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 },
                 text: {
                     defaultValue:'Toolbar text',

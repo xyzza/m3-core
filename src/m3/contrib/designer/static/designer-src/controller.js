@@ -107,6 +107,8 @@ AppController = Ext.extend(Object, {
        var el = panel.getEl();
        el.on('dblclick', this.onDomDblClick.createDelegate(this));
        el.on('click', this.onDomClick.createDelegate(this));
+       /* Демократия товарищи */
+       el.on('contextmenu', this.onDomClick.createDelegate(this), null, {preventDefault: true});
    },
    /*
    * Заполняем тулбокс компонентами
@@ -239,8 +241,7 @@ AppController = Ext.extend(Object, {
            //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
            var win = Ext.getCmp(self._lastQuickPropertyId);
            if (win) win.close();
-           
-           self._lastQuickPropertyId = this._editorManager.quickEditModel(model);
+           self._lastQuickPropertyId = this._editorManager.quickEditModel(model, event.xy);
        }
    },
    onTreeNodeClick:function(node, e) {

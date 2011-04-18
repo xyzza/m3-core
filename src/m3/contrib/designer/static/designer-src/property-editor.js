@@ -27,13 +27,13 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         window.show();
     },
     /**/
-    quickEditModel:function(model) {
+    quickEditModel:function(model, xy) {
         var cfg = this.initConfig(model, true);
         var window = new QuickPropertyWindow({
             source:cfg,
             model:model
         });
-        window.anchorToId(model.id);
+        window.showAt(model.id, xy);
         window.on('save', this.saveModel.createDelegate(this));
         window.show();
         return window.id
@@ -123,11 +123,14 @@ QuickPropertyWindow = Ext.extend(Ext.Window, {
 
         QuickPropertyWindow.superclass.initComponent.call(this);
     },
-    anchorToId:function(modeId){
+    showAt:function(modeId, xy){
         QuickPropertyWindow.superclass.show.call(this);
         this.collapse(false);
-        var domElementId = ModelUtils.parseModelIdToDomId(modeId);
-        this.anchorTo(document.getElementById(domElementId), "tl-l");
+        /* padding for menu */
+        xy[0] += 15
+        this.setPosition(xy);
+        this.setTitle('Настройка '+this.source['id']||'')
+
     },
     /**/
     _setup_panel_customs:function(customEditorsCfg) {
