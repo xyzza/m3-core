@@ -29,5 +29,6 @@ urlpatterns = patterns('',
     (r'^designer/fake$','designer.ide.views.designer_fake_data'),
     (r'^designer/data$','designer.ide.views.designer_data'),
     (r'designer/save$','designer.ide.views.designer_save'),
-    (r'designer/preview$','designer.ide.views.designer_preview')
+    (r'designer/preview$','designer.ide.views.designer_preview'),
+    (r'file-content$','designer.ide.views.designer_file_content'),
 )

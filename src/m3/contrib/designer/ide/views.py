@@ -132,3 +132,26 @@ def create_class(request):
     
     res_dict = {'success': True}
     return HttpResponse(json.dumps(res_dict), content_type='application/json')
+
+
+def designer_file_content(request):
+    '''
+    Вьюшка для отдачи содержимого файла
+    '''
+    import codecs
+    path = request.POST.get('path')
+    content = request.POST.get('content')
+
+    assert path, 'Path to source file is undefined'
+
+    action = "r" if not content else "w"
+    result = None
+
+    fileObj = codecs.open( path, action, "utf-8" )
+    if not content:
+        result = fileObj.read()
+    else:
+        fileObj.write(content)
+    fileObj.close()
+    return HttpResponse(content_type='application/json',
+                        content = result)

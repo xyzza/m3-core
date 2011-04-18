@@ -83,6 +83,13 @@ function createTreeView(rootNodeName){
 		        	if (node.parentNode && (node.parentNode.text === 'ui.py' || node.parentNode.text === 'forms.py' ) ){
 			        	onClickNode(node);
 		        	}
+                    /*Все файлы не являющиеся ui.py/*/
+                    else if(node.leaf){
+                        var fileAttr = {};
+                        fileAttr['path'] = node.attributes.path;
+                        fileAttr['fileName'] = node.attributes.text;
+                        onClickNodeOtherFiles(node, fileAttr)
+                    }
 		        }
 		    }	
 	})
@@ -95,13 +102,13 @@ function createTreeView(rootNodeName){
 	return tree;
 }
 
-var tabPanel = new Ext.TabPanel({	
-	region: 'center'
-    ,xtype: 'tabpanel' 
-    ,activeTab: 0
-    ,items: [{
-    	title: 'Обзор'
-		,html: '<iframe src="http://m3.bars-open.ru" width="100%" height="100%" style="border: 0px none;"></iframe>'
+var tabPanel = new Ext.TabPanel({
+	region: 'center',
+    xtype: 'tabpanel',
+    activeTab: 0,
+    items: [{
+    	title: 'Обзор',
+        html: '<iframe src="http://m3.bars-open.ru" width="100%" height="100%" style="border: 0px none;"></iframe>'
     }]	    
 });
 
@@ -125,4 +132,46 @@ function onClickNode(node) {
 	tabPanel.activate(panel);
 }
 
+/*Вымогает у сервера некий файл*/
+function onClickNodeOtherFiles(node, fileAttr){
+    var path = fileAttr.path;
+    var fileName = fileAttr.fileName;
 
+    Ext.Ajax.request({
+        url:'/file-content'
+        ,params: {
+            path: path
+        }
+        ,success: function(response, opts){
+            var codeEditor = new extendedCodeEditor({
+                sourceCode : response.responseText
+            })
+            codeEditor.setTitle(fileName)
+            tabPanel.add( codeEditor );
+            tabPanel.activate(codeEditor);
+
+            /* May be this wiil be work in future */
+            /* async close tab && message */
+//            codeEditor.on('beforeclose', function(panel){})
+
+            codeEditor.on('close_tab', function(tab){
+                if (tab) tabPanel.remove(tab)
+            })
+            codeEditor.on('save', function(fileContent, tab){
+                /*Запрос на сохранения изменений */
+                Ext.Ajax.request({
+                    url:'/file-content'
+                    ,params: {
+                        path: path,
+                        content: fileContent
+                    }
+                    ,success: function(response, opts){
+                        if (tab) tabPanel.remove(tab)
+                    },
+                    failure: uiAjaxFailMessage
+                });
+            })
+        },
+        failure: uiAjaxFailMessage
+    });
+}
