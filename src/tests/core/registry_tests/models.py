@@ -26,3 +26,15 @@ class RegisterDayModel(models.Model):
     circ1 = models.DecimalField(max_digits=16, decimal_places=4)
     circ2 = models.DecimalField(max_digits=16, decimal_places=4)    
     
+    
+class OperdateRegisterModel(models.Model):
+    '''
+    Модель хранения данных регистра, в котором для хранения системной даты
+    используется поле с названием, отличным от date
+    '''
+    operdate = models.DateField(db_index=True)
+    
+    dim = models.CharField(max_length=10, db_index=True)
+    
+    balance = models.DecimalField(max_digits=16, decimal_places=2)
+    oborot = models.DecimalField(max_digits=16, decimal_places=2)
