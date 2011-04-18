@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Crafted by ZIgi
  */
 
@@ -7,6 +7,7 @@ PyCodeWindow = Ext.extend(Ext.Window, {
     width:600,
     height:500,
     layout:'fit',
+    maximizable:true,
     constructor:function(cfg) {
         Ext.apply(this, cfg);
         PropertyWindow.superclass.constructor.call(this);
@@ -17,7 +18,8 @@ PyCodeWindow = Ext.extend(Ext.Window, {
     show:function( code ) {
         this.add(
             new Ext.ux.panel.CodeEditor({
-                sourceCode:code
+                sourceCode:code,
+                autoScroll:true
             })
         );
         PropertyWindow.superclass.show.call(this);

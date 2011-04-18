@@ -7,14 +7,20 @@
  */
 
 ModelTransfer = Ext.apply({},{
-    doToolbarWorkaround:function(property, componentNode){
+    doToolbarDeserializeWorkaround:function(property, componentNode){
         //Ладно, кто бы что не говорил тулбары архитектурно некрасивы в 3 эксте кто бы что не говорил, я счетаю
-        if (componentNode.attributes.type == 'toolbar' && (property == 'tbar' ||
-                property == 'fbar' || property == 'bbar' )) {
-            componentNode.attributes.properties.parentDockType = property;
+        if (componentNode.attributes.type == 'toolbar') {
+            if (property == 'tbar' || property == 'fbar' || property == 'bbar' ) {
+                componentNode.attributes.properties.parentDockType = property;
+            }
+            else {
+                componentNode.attributes.properties.parentDockType = '(none)';
+            }
         }
-        else {
-            componentNode.attributes.properties.parentDockType = '(none)';
+    },
+    doToolbarSerializeWorkaround:function(node) {
+        if (node.type == 'toolbar') {
+            Ext.destroyMembers(node, 'parentDockType');
         }
     },
     childPropertyObjects:{
@@ -50,6 +56,7 @@ ModelTransfer = Ext.apply({},{
             Ext.apply(node, model.attributes.properties);
             node.type = model.attributes.type;
             node.id = model.attributes.properties.id;
+            this.doToolbarSerializeWorkaround(node);
             if (model.hasChildNodes()) {
                 node.items = [];
                 for (var i = 0; i < model.childNodes.length; i++){
@@ -82,7 +89,7 @@ ModelTransfer = Ext.apply({},{
         Ext.destroyMembers(config.properties,'type');
         for (var p in jsonObj) {
             if (this.childPropertyObjects.isPropertyMapedType(p)) {
-                Ext.destroyMembers(config,p);
+                Ext.destroyMembers(config.properties,p);
             }
         }
         return config;
@@ -98,7 +105,7 @@ ModelTransfer = Ext.apply({},{
                 if (this.childPropertyObjects.isPropertyMapedType(p)) {
                     var child = callBack.call(this, jsonObj[p]);
                     newNode.appendChild(child);
-                    this.doToolbarWorkaround(p, child)
+                    this.doToolbarDeserializeWorkaround(p, child)
                 }
             }
 
@@ -120,7 +127,7 @@ ModelTransfer = Ext.apply({},{
             if (this.childPropertyObjects.isPropertyMapedType(p)) {
                 var child = callBack.call(this, jsonObj[p]);
                 root.appendChild(child);
-                this.doToolbarWorkaround(p, child);
+                this.doToolbarDeserializeWorkaround(p, child);
             }
         }
 
