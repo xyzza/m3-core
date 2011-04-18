@@ -80,11 +80,13 @@ class CumulativeRegister(object):
             if not model.objects.filter(**kw_dims).exists():
                 # добавляем новую запись регистра с указанной датой
                 entry = cls._init_model_instance(model, kwargs)
-                entry.date = normalized_date
+                setattr(entry, cls.date_field, normalized_date)
                 
                 # при добавлении новой записи обороты становятся равными нулю,
                 # а остатки должны принять наиболее близкое предыдущее значение
-                prev_rests = cls.get(normalized_date, model)
+                del kw_dims[cls.date_field]
+                prev_rests = cls.get(normalized_date, model, **kw_dims)
+                kw_dims[cls.date_field] = normalized_date
                 
                 for i in range(0, len(cls.rest_fields)):
                     setattr(entry, cls.rest_fields[i], prev_rests[i])
