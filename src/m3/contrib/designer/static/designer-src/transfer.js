@@ -11,7 +11,7 @@ Ext.namespace('M3Designer');
 M3Designer.ModelTransfer = Ext.apply({},{
     doToolbarDeserializeWorkaround:function(property, componentNode){
         //Ладно, кто бы что не говорил тулбары архитектурно некрасивы в 3 эксте кто бы что не говорил, я счетаю
-        if (componentNode.attributes.type == 'toolbar') {
+        if (componentNode.attributes.type == 'toolbar' || componentNode.attributes.type == 'pagingToolbar' ) {
             if (property == 'tbar' || property == 'fbar' || property == 'bbar' ) {
                 componentNode.attributes.properties.parentDockType = property;
             }
@@ -45,6 +45,14 @@ M3Designer.ModelTransfer = Ext.apply({},{
             return 'store';    
         },
         toolbar:function(model) {
+            if (model.attributes.properties.parentDockType == '(none)') {
+                return undefined;
+            }
+            else {
+                return model.attributes.properties.parentDockType;
+            }
+        },
+        pagingToolbar:function(model) {
             if (model.attributes.properties.parentDockType == '(none)') {
                 return undefined;
             }

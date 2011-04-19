@@ -226,6 +226,11 @@ M3Designer.ui.ModelUIPresentaitionBuilder = function() {
             return Ext.apply(cfg,{
                 xtype:'tbtext'
             });
+        },
+        pagingToolbar:function(model,cfg) {
+            return Ext.apply(cfg,{
+                xtype:'paging'
+            });
         }
     };
 

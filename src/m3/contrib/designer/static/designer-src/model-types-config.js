@@ -158,7 +158,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 text:'Container'
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore']
+                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
             },
             treeIconCls:'designer-container'
         },
@@ -204,7 +204,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore']
+                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
             },
             toolboxData:{
                 text:'Panel',
@@ -234,7 +234,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore']
+                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
             },
             toolboxData:{
                 text:'Field set',
@@ -296,7 +296,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore']
+                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
             },
             toolboxData: {
                 category:'Containers',
@@ -673,7 +673,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 text:'Toolbar'
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore']
+                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
             }
         },
         tbfill: {
@@ -732,6 +732,43 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 text:'Toolbar text item'
             }
         },
+        pagingToolbar: {
+            properties: {
+                id: {
+                    defaultValue: 'paging_toolbar',
+                    isInitProperty:true,
+                    isQuickEditable: true
+                },
+                parentDockType: {
+                    defaultValue:'bbar',
+                    isInitProperty:true,
+                    propertyType:'enum',
+                    isQuickEditable: true
+                },
+                layout: {
+                    defaultValue:'toolbar',
+                    isInitProperty:true
+                },
+                pageSize:{
+                    defaultValue:25,
+                    isQuickEditable:true
+                },
+                displayMessage: {
+                    defaultValue:'Показано записей {0} - {1} из {2}'
+                },
+                displayInfo: {
+                    defaultValue:true
+                },
+                emptyMessage:{
+                    defaultValue:'Нет записей'
+                }
+            },
+            toolboxData:{
+                category:'Grid',
+                text:'Paging toolbar'
+            }
+        },
+
         gridPanel:{
             parent:'panel',
             isContainer: true,
@@ -756,8 +793,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                allowed:['gridColumn','arrayStore', 'toolbar','jsonStore'],
-                single:['arrayStore','jsonStore']
+                allowed:['gridColumn','arrayStore', 'toolbar','jsonStore','pagingToolbar'],
+                single:['arrayStore','jsonStore','pagingToolbar']
             },
             treeIconCls:'designer-grid-panel',
             toolboxData:{
@@ -816,7 +853,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore']
+                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
             },
             isContainer:true,
             treeIconCls:'designer-icon-page'
