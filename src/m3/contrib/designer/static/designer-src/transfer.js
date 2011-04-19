@@ -28,7 +28,7 @@ M3Designer.ModelTransfer = Ext.apply({},{
     childPropertyObjects:{
         mapedToPropertiesTypes:['store','tbar','fbar','bbar'],
         isPropertyMapedType:function(property) {
-            return this.mapedToPropertiesTypes.indexOf(property) > 0;
+            return this.mapedToPropertiesTypes.indexOf(property) >= 0;
         },
         getTypeProperty:function(model) {
             if (this.hasOwnProperty(model.attributes.type)) {
