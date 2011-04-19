@@ -2,6 +2,8 @@
  * Crafted by ZIgi
  */
 
+Ext.namespace('M3Designer.controller');
+
 /* Класс контроллера приложения. Является клеем между другими частями приложения.
 * При создании экземпляра
 * должен быть передан конфиг следующего вида:
@@ -14,7 +16,7 @@
 *
  */
 
-AppController = Ext.extend(Object, {
+M3Designer.controller.AppController = Ext.extend(Object, {
    //здесь храниться id последнего подсвеченного dom элемента
    _lastHighlightedId: undefined,
    _lastQuickPropertyId: undefined,

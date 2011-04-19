@@ -143,7 +143,7 @@ function onClickNodeOtherFiles(node, fileAttr){
             path: path
         }
         ,success: function(response, opts){
-            var codeEditor = new ExtendedCodeEditor({
+            var codeEditor = new M3Designer.code.ExtendedCodeEditor({
                 sourceCode : response.responseText
             })
             codeEditor.setTitle(fileName)

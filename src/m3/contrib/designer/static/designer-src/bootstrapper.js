@@ -67,7 +67,7 @@ Bootstrapper = Ext.extend(Object, {
             title:'Инструменты'
         });
 
-        var application = new AppController({
+        var application = new M3Designer.controller.AppController({
             tree:componentTree,
             designPanel:designPanel,
             toolbox:toolbox
@@ -129,7 +129,7 @@ Bootstrapper = Ext.extend(Object, {
         });        
 
         storage.on('preview', function(responseText) {
-           var previewWindow = new PyCodeWindow();
+           var previewWindow = new M3Designer.code.PyCodeWindow();
             previewWindow.show(responseText);
         });
 

@@ -2,7 +2,9 @@
  * Crafted by ZIgi
  */
 
-PyCodeWindow = Ext.extend(Ext.Window, {
+Ext.namespace('M3Designer.code');
+
+M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
     title:'Предварительный просмотр',
     width:600,
     height:500,
@@ -13,7 +15,7 @@ PyCodeWindow = Ext.extend(Ext.Window, {
         PropertyWindow.superclass.constructor.call(this);
     },
     initComponent: function() {
-        PyCodeWindow.superclass.initComponent.call(this);
+        M3Designer.code.PyCodeWindow.superclass.initComponent.call(this);
     },
     show:function( code ) {
         this.add(
@@ -26,7 +28,7 @@ PyCodeWindow = Ext.extend(Ext.Window, {
     }
 });
 
-ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
+M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
     initComponent: function() {
         Ext.applyIf(this, {
             closable: true,
@@ -35,7 +37,7 @@ ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
                 new Ext.Button({ text:'Отмена', handler:this._onClose.createDelegate(this) })
             ]
         });
-        ExtendedCodeEditor.superclass.initComponent.call(this);
+        M3Designer.code.ExtendedCodeEditor.superclass.initComponent.call(this);
     },
     _onClose:function() {
        /*Вероятно можно будет оптимизировать, т.к. дублирует поведение beforeclose у tabpanel (выше)*/
