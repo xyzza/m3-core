@@ -39,6 +39,9 @@ ModelTransfer = Ext.apply({},{
         arrayStore:function(model) {
             return 'store';
         },
+        jsonStore:function(model) {
+            return 'store';    
+        },
         toolbar:function(model) {
             if (model.attributes.properties.parentDockType == '(none)') {
                 return undefined;

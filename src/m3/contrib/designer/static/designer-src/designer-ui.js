@@ -103,7 +103,9 @@ ModelUIPresentaitionBuilder = function() {
             for (var i = 0; i < model.childNodes.length; i++) {
                 if (model.childNodes[i].attributes.type == 'arrayStore') {
                     store = new Ext.data.ArrayStore(
-                                Ext.apply({},model.childNodes[i].attributes.properties)
+                                Ext.apply({
+                                    fields:['id',model.attributes.properties.displayField]
+                                },model.childNodes[i].attributes.properties)
                             );
                 }
             }
@@ -140,22 +142,6 @@ ModelUIPresentaitionBuilder = function() {
                     });
         },
         gridPanel:function(model, cfg) {
-            var store = undefined;
-            //попробуем найти стор
-            for (var i = 0; i < model.childNodes.length; i++) {
-                if (model.childNodes[i].attributes.type == 'arrayStore') {
-                    store = new Ext.data.ArrayStore(
-                                Ext.apply({},model.childNodes[i].attributes.properties)
-                            );
-                }
-            }
-            //или создадим пустой
-            if (!store) {
-                store = new Ext.data.Store({
-                    autoDestroy:true
-                });
-            }
-
             var columns = [];
 
             //поиск колонок
@@ -173,6 +159,28 @@ ModelUIPresentaitionBuilder = function() {
                     header:'Fake column',
                     dataIndex:'fake',
                     menuDisabled:true
+                });
+            }
+
+             var store = undefined;
+            //попробуем найти стор
+            for (var i = 0; i < model.childNodes.length; i++) {
+                if (model.childNodes[i].attributes.type == 'arrayStore') {
+
+                    var fields = ['id'];
+                    for (var k=0; k<columns.length;k++) {
+
+                    }
+
+                    store = new Ext.data.ArrayStore(
+                                Ext.apply({},model.childNodes[i].attributes.properties)
+                            );
+                }
+            }
+            //или создадим пустой
+            if (!store) {
+                store = new Ext.data.Store({
+                    autoDestroy:true
                 });
             }
 

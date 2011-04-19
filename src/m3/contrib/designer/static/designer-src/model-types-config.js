@@ -156,7 +156,7 @@ Ext.apply(ModelTypeLibrary,{
                 text:'Container'
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn']
+                disallowed:['arrayStore','gridColumn','jsonStore']
             },
             treeIconCls:'designer-container'
         },
@@ -202,7 +202,7 @@ Ext.apply(ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn']
+                disallowed:['arrayStore','gridColumn','jsonStore']
             },
             toolboxData:{
                 text:'Panel',
@@ -232,7 +232,7 @@ Ext.apply(ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn']
+                disallowed:['arrayStore','gridColumn','jsonStore']
             },
             toolboxData:{
                 text:'Field set',
@@ -294,7 +294,7 @@ Ext.apply(ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn']
+                disallowed:['arrayStore','gridColumn','jsonStore']
             },
             toolboxData: {
                 category:'Containers',
@@ -532,12 +532,12 @@ Ext.apply(ModelTypeLibrary,{
                     isQuickEditable: true
                 },
                 valueField:{
-                    defaultValue:'value',
+                    defaultValue:'id',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
                 displayField:{
-                    defaultValue:'displayText',
+                    defaultValue:'name',
                     isInitProperty:true
                 },
                 mode: {
@@ -571,8 +571,8 @@ Ext.apply(ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                allowed:['arrayStore'],
-                single:['arrayStore']
+                allowed:['arrayStore','jsonStore'],
+                single:['arrayStore','jsonStore']
             },
             toolboxData:{
                 text:'Combo box',
@@ -669,6 +669,9 @@ Ext.apply(ModelTypeLibrary,{
             toolboxData:{
                 category:'Toolbar',
                 text:'Toolbar'
+            },
+            childTypesRestrictions:{
+                disallowed:['arrayStore','gridColumn','jsonStore']
             }
         },
         tbfill: {
@@ -751,8 +754,8 @@ Ext.apply(ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                allowed:['gridColumn','arrayStore', 'toolbar'],
-                single:['arrayStore']
+                allowed:['gridColumn','arrayStore', 'toolbar','jsonStore'],
+                single:['arrayStore','jsonStore']
             },
             treeIconCls:'designer-grid-panel',
             toolboxData:{
@@ -811,12 +814,31 @@ Ext.apply(ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn']
+                disallowed:['arrayStore','gridColumn','jsonStore']
             },
             isContainer:true,
             treeIconCls:'designer-icon-page'
         },
+        baseStore: {
+            properties: {
+                _baseParams: {
+                    defaultValue:'undefined',
+                    propertyType:'object'
+                },
+                autoLoad: {
+                    defaultValue:false
+                },
+                autoSave: {
+                    defaultValue: true
+                },
+                url: {
+                    defaultValue:'',
+                    isQuickEditable:true
+                }
+            }
+        },
         arrayStore:{
+            parent:'baseStore',
             properties : {
                 id: {
                     defaultValue:'array_store',
@@ -831,19 +853,55 @@ Ext.apply(ModelTypeLibrary,{
                     defaultValue:0,
                     isInitProperty:true
                 },
+                data: {
+                    defaultValue:'undefined',
+                    propertyType:'object',
+                    isQuickEditable:true
+                }
+            },
+            treeIconCls:'icon-database',
+            toolboxData: {
+                text:'Data store',
+                category:'Data'
+            }
+        },
+        jsonStore:{
+            parent:'baseStore',
+            properties : {
+                id: {
+                    defaultValue:'json_store',
+                    isInitProperty:true,
+                    isQuickEditable: true
+                },
+                storeId: {
+                    defaultValue:'newJsonStore',
+                    isInitProperty:true
+                },
+                idProperty : {
+                    defaultValue:'id',
+                    isInitProperty:true
+                },
                 fields: {
                     defaultValue:'undefined',
                     propertyType:'object',
                     isQuickEditable: true
                 },
-                data: {
-                    defaultValue:'undefined',
-                    propertyType:'object'
+                root: {
+                    defaultValue:'undefined'
+                },
+                _start: {
+                    defaultValue: 0
+                },
+                _limit: {
+                    defaultValue:-1
+                },
+                totalProperty: {
+                    defaultValue:'undefined'
                 }
             },
             treeIconCls:'icon-database',
             toolboxData: {
-                text:'Array store',
+                text:'Json store',
                 category:'Data'
             }
         }
