@@ -904,6 +904,68 @@ Ext.apply(ModelTypeLibrary,{
                 text:'Json store',
                 category:'Data'
             }
+        },
+        /*
+        * М3
+        */
+        dictSelect:{
+            parent:'comboBox',
+            properties: {
+                id: {
+                    defaultValue:'dict_select_field',
+                    isInitProperty:true
+                },
+                hideTrigger: {
+                    defaultValue:true
+                },
+                hideClearTrigger: {
+                    defaultValue:false
+                },
+                hideEditTrigger: {
+                    defaultValue:false
+                },
+                hideDictSelectTrigger: {
+                    defaultValue:false
+                },
+                minChars: {
+                    defaultValue:2
+                },
+                width: {
+                    defaultValue:150
+                },
+                defaultText: {
+                    defaultValue:''
+                },
+                askBeforeDelete: {
+                    defaultValue:true
+                },
+                url: {
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
+                urlShortName:{
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
+                editUrl:{
+                    defaultValue:''
+                },
+                editUrlShortName: {
+                    defaultValue:''
+                },
+                autocompleteUrl: {
+                    defaultValue:''
+                },
+                autocompleteUrlShortName: {
+                    defaultValue:''
+                }
+
+            },
+            treeIconCls:'designer-icon-combo',
+            toolboxData: {
+                text:'Dictionary select field',
+                category:'M3'
+            }
         }
     }
 });

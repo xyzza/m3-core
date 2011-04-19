@@ -126,6 +126,11 @@ ModelUIPresentaitionBuilder = function() {
                 xtype:'trigger'
             });
         },
+        dictSelect:function(model, cfg) {
+            return Ext.apply(cfg,{
+                        xtype:'designer-dict-select'
+            });
+        },
         tabPanel:function(model, cfg) {
             return Ext.apply(cfg,{
                         xtype:'tabpanel',

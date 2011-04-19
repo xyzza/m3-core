@@ -55,4 +55,4 @@ extendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
                icon: Ext.MessageBox.QUESTION
         });
     }
-})
+});
