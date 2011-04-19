@@ -40,6 +40,36 @@ class DictLoadException(Exception):
         self.reason = reason
         #TODO нужно что-то еще сделать с исходным эксепшеном. хотя бы прокинуть дальше value и traceback
 
+def read_simple_CSV_dict_file(filename, comma=','):
+    '''
+        Чтение данных из файла (формата CSV), где первая строка содержит перечисление
+        имен атрибутов, а последующие строки содержат значения для заданных атрибутов для
+        каждой записи в порядке, указанном в первой строке.
+        Струткура возвращаемого значения аналогична той, что с методом @see read_simple_dict_file(filename)
+    '''
+    assert isinstance(filename, basestring), u"filename must be 'str'"
+
+    attrs = []
+    values = []
+
+    try:
+        with open(filename, "rb") as f:
+            first_string = f.readline()
+            first_string = strip_bom(first_string)
+
+
+            attrs = [item.strip().lower() for item in smart_unicode(first_string).split(comma)]
+            for num, line in enumerate(f, 1):
+                row_values = [item.strip() for item in smart_unicode(line).split(comma)]
+                if len(row_values) == len(attrs):
+                    values.append(row_values)
+                else:
+                    raise DictLoadException(None, u'Количество полей не совпадает: строка %s' % num)
+    except IOError:
+        raise
+
+    return (attrs, values,)
+
 def read_simple_dict_file(filename):
     '''
     Выполняет чтение данных из формата простого линейного справочника
@@ -49,7 +79,7 @@ def read_simple_dict_file(filename):
       [ ['Код1','Наименование 1'],
         ['Код2','Наименование 2'],
       ]
-    )  
+    )
     '''
 
     assert isinstance(filename, basestring), u"filename must be 'str'"
@@ -64,7 +94,7 @@ def read_simple_dict_file(filename):
                 first_string = first_string[1:].strip()
             else:
                 raise DictLoadException(None, u'Первая строка скрипта загрузки линейного справочника должна содержать название аттрибутов и начинаться с символа #')
-            
+
             attrs = [item.strip() for item in smart_unicode(first_string).split('\t')]
             for num, line in enumerate(f, 1):
                 row_values = [item.strip() for item in line.split('\t')]
@@ -74,7 +104,7 @@ def read_simple_dict_file(filename):
                     raise DictLoadException(None, u'Количество полей не совпадает: строка %s' % num)
     except IOError:
         raise
-    
+
     return (attrs, values,)
 
 def read_tree_dict_file(filename):
@@ -96,14 +126,14 @@ def read_tree_dict_file(filename):
 
     class StringStruct():
         '''
-        Парсит строку: определяет уровень вложенности, значения аттрибутов, 
+        Парсит строку: определяет уровень вложенности, значения аттрибутов,
         является ли запись веткой или листом, генерит уникальный id'шник
         '''
-        
+
         def __init__(self, row_string):
             if row_string == '':
                 raise DictLoadException(None ,u'Пустая строка')
-            
+
             s = row_string.split('\t')
             # Делаем для каждой записи уникальный id'шник
             self.uid = str(uuid.uuid4())[0:16]
@@ -116,9 +146,9 @@ def read_tree_dict_file(filename):
                 if item == '':
                     self.level += 1
                 else:
-                    # знак '-' - это обозначение пустого значения, чтобы отличать начало строки от уровней вложенности ветки 
+                    # знак '-' - это обозначение пустого значения, чтобы отличать начало строки от уровней вложенности ветки
                     # (может использоваться только для первого элемента в строке)
-                    if item == '-': 
+                    if item == '-':
                         s[self.level] = ''
                     break
             self.attrs = [ item.strip() for item in s[self.level:]]
@@ -129,29 +159,29 @@ def read_tree_dict_file(filename):
                     self.attrs[0] = self.attrs[0][3:].strip()
                     if self.attrs[0] == '-':
                         self.attrs[0] = ' '
-                
+
             else:
-                # листьям разрешено не иметь полей 
+                # листьям разрешено не иметь полей
                 self.is_leaf = True
-                
+
     try:
         with open(filename, 'rb') as f:
             lines = f.readlines()
             if len(lines) < 3:
                 raise DictLoadException(None, u'В файле должно быть, как минимум, три строки')
-            
+
             first_string = strip_bom(lines[0])
             if first_string.startswith('#'):
                 first_string = first_string[1:].strip()
             else:
                 raise DictLoadException(None, u'Первая строка скрипта загрузки иерархического справочника должна содержать название модели групп и начинаться с символа #')
-            
+
             second_string = lines[1]
             if second_string.startswith('#'):
                 second_string = second_string[1:].strip()
             else:
                 raise DictLoadException(None, u'Вторая строка скрипта загрузки иерархического справочника должна содержать название аттрибутов модели линейного справочника и начинаться с символа #')
-            
+
             tree_attrs = [item.strip() for item in smart_unicode(first_string).split('\t')]
             dict_attrs = [item.strip() for item in smart_unicode(second_string).split('\t')]
             dict_rows = {}
@@ -161,7 +191,7 @@ def read_tree_dict_file(filename):
             level = 0
             for num, line in enumerate(lines[2:], 3):
                 #пустые строки в файле пропускаются
-                if line == '': 
+                if line == '':
                     continue
                 struct = StringStruct(line)
                 if (struct.level == level) or (struct.level-1 == level):
@@ -174,7 +204,7 @@ def read_tree_dict_file(filename):
                     level -= d
                 else:
                     raise DictLoadException(None, u'Уровень вложенности задан неверно: строка %s' % num)
-                
+
                 struct.parent_uid = cur_parent
                 if struct.is_leaf:
                     dict_rows[struct.uid] = struct
@@ -183,24 +213,24 @@ def read_tree_dict_file(filename):
                     cur_parent = struct.uid
                     level += 1
                     tree_rows[struct.uid] = struct
-            
+
     except IOError:
         raise
-    
+
     return (tree_attrs, dict_attrs, tree_rows, dict_rows)
 
-@transaction.commit_on_success    
+@transaction.commit_on_success
 def fill_simple_dict(model, data):
     '''
     Выполняет заполнение модели model (тип параметра - classobj) данными data,
     в формате, возвращаемом функцией read_simple_dict_file
     '''
-    
+
     assert issubclass(model, models.Model), 'model must be subclass of django.db.models.Model'
-    
+
     if model.objects.all().count() > 0:
         raise DictNotEmptyException(model.__name__, u'Таблица справочника %s не должна содержать записи' % model.__name__)
-    
+
     fields = dict( (field.name, field,) for field in model._meta.fields)
     attrs = data[0]
     values = data[1]
@@ -220,16 +250,16 @@ def fill_simple_dict(model, data):
 
 @transaction.commit_on_success
 def fill_tree_dict(group_model, list_model, group_link, list_link, data):
-    
+
     assert issubclass(list_model, models.Model), 'model must be subclass of django.db.models.Model'
     assert issubclass(group_model, models.Model), 'model must be subclass of django.db.models.Model'
-    
+
     if group_model.objects.all().count() > 0:
         raise DictNotEmptyException(group_model.__name__, u'Таблица справочника %s не должна содержать записи' % group_model.__name__)
-    
+
     if list_model.objects.all().count() > 0:
         raise DictNotEmptyException(list_model.__name__, u'Таблица справочника %s не должна содержать записи' % list_model.__name__)
-    
+
     tree_attrs = data[0]
     dict_attrs = data[1]
     tree_rows = data[2]
@@ -250,7 +280,7 @@ def fill_tree_dict(group_model, list_model, group_link, list_link, data):
         except:
             raise DictLoadException(group_model.__name__, u'Не удалось сохранить запись справочника: %s' % string.join(v.attrs))
         tree_values[k] = (obj, v.parent_uid,)
-    
+
     for k,v in tree_values.items():
         if v[1] != -1:
             setattr(v[0], group_link, tree_values[v[1]][0])
@@ -258,7 +288,7 @@ def fill_tree_dict(group_model, list_model, group_link, list_link, data):
                 v[0].save()
             except:
                 raise DictLoadException(group_model.__name__, u'Не удалось сохранить запись справочника: %s' % string.join(v[0]))
-    
+
     dict_fields = dict( (field.name, field,) for field in list_model._meta.fields)
     for k,v in dict_rows.items():
         obj = list_model()
@@ -269,7 +299,7 @@ def fill_tree_dict(group_model, list_model, group_link, list_link, data):
                 raise DictLoadException(list_model.__name__, u'Не удалось преобразовать значение: %s' % v.attrs[i])
             setattr(obj, str(dict_attrs[i]), val)
 
-        parent = None if v.parent_uid == -1 else tree_values[v.parent_uid][0] 
+        parent = None if v.parent_uid == -1 else tree_values[v.parent_uid][0]
         setattr(obj, list_link, parent)
         try:
             obj.save()
@@ -280,9 +310,9 @@ def strip_bom(s):
     '''
     Убирает от начала строки все символы BOM
     '''
-    boms = (codecs.BOM, codecs.BOM32_BE, codecs.BOM32_LE, codecs.BOM64_BE, 
-            codecs.BOM64_LE, codecs.BOM_BE, codecs.BOM_LE, codecs.BOM_UTF16, 
-            codecs.BOM_UTF16_BE, codecs.BOM_UTF16_LE, codecs.BOM_UTF32, 
+    boms = (codecs.BOM, codecs.BOM32_BE, codecs.BOM32_LE, codecs.BOM64_BE,
+            codecs.BOM64_LE, codecs.BOM_BE, codecs.BOM_LE, codecs.BOM_UTF16,
+            codecs.BOM_UTF16_BE, codecs.BOM_UTF16_LE, codecs.BOM_UTF32,
             codecs.BOM_UTF32_BE, codecs.BOM_UTF32_LE, codecs.BOM_UTF8,)
     return s.lstrip(''.join(boms))
 
@@ -294,9 +324,9 @@ def _convert_value(field, value):
         pass
     elif isinstance(field, models.BooleanField):
         value = value.lower()
-        if value == 'true':
-            converted_value = True 
-        elif value == 'false':
+        if value == 'true' or value == '1':
+            converted_value = True
+        elif value == 'false' or value == '0':
             converted_value = False
         else:
             raise Exception()
