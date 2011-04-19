@@ -2,6 +2,8 @@
  * Crafted by ZIgi
  */
 
+Ext.namespace('M3Designer.edit');
+
 /**
  *  Классы для работы с редактором свойств.
  */
@@ -12,14 +14,14 @@
  * в себе необходимые структуры данных и обновляет модель. При обновлении модели зажигается событие modelUpdate
  */
 
-PropertyEditorManager = Ext.extend( Ext.util.Observable, {
+M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
     constructor:function() {
-        PropertyEditorManager.superclass.constructor.call(this);
+        M3Designer.edit.PropertyEditorManager.superclass.constructor.call(this);
         this.addEvents('modelUpdate');
     },
     editModel:function(model) {
         var cfg = this.initConfig(model);
-        var window = new PropertyWindow({
+        var window = new M3Designer.edit.PropertyWindow({
             source:cfg,
             model:model
         });
@@ -29,7 +31,7 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
     /**/
     quickEditModel:function(model, xy) {
         var cfg = this.initConfig(model, true);
-        var window = new QuickPropertyWindow({
+        var window = new M3Designer.edit.QuickPropertyWindow({
             source:cfg,
             model:model
         });
@@ -46,8 +48,8 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         var modelAttrProperties = model.attributes.properties;
         
         var cfg = (quickEditProperties ?
-                ModelTypeLibrary.getQuickEditProperties(modelAttrType):
-                ModelTypeLibrary.getTypeDefaultProperties(modelAttrType));
+                M3Designer.Types.getQuickEditProperties(modelAttrType):
+                M3Designer.Types.getTypeDefaultProperties(modelAttrType));
         for (var p in modelAttrProperties) {
             if (cfg.hasOwnProperty(p)) {
                 cfg[p] = modelAttrProperties[p];
@@ -56,7 +58,7 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
                     cfg[p] = 'undefined';
                 }
 
-                if (ModelTypeLibrary.isPropertyObject(modelAttrType, p)) {
+                if (M3Designer.Types.isPropertyObject(modelAttrType, p)) {
                     cfg[p] = Ext.util.JSON.encode(cfg[p]);
                 }
             }
@@ -68,13 +70,13 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         // далее копируются свойства из сурса в атрибуты модели, при условии что пользователь
         // менял что в свойстве(те значения отличается от дефолтного или значение было хоть раз задано, что
         // требуется если пользователь поменял значение на равное дефолтному)
-        var defaults = ModelTypeLibrary.getTypeDefaultProperties(eventObj.model.attributes.type);
+        var defaults = M3Designer.Types.getTypeDefaultProperties(eventObj.model.attributes.type);
         var model = eventObj.model;
         var source = eventObj.source;
         
         for (var s in source) {
             if ((source[s] != defaults[s]) || ( model.attributes.properties.hasOwnProperty(s)) ) {
-                if (ModelTypeLibrary.isPropertyObject(model.attributes.type, s)) {
+                if (M3Designer.Types.isPropertyObject(model.attributes.type, s)) {
                     model.attributes.properties[s] = Ext.isEmpty(source[s]) ? undefined :
                             Ext.util.JSON.decode(source[s])
                 }
@@ -90,7 +92,7 @@ PropertyEditorManager = Ext.extend( Ext.util.Observable, {
 /**
  * Окно быстрой настройки объекта
  */
-QuickPropertyWindow = Ext.extend(Ext.Window, {
+M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
     layout: 'form',
     autoWidth: true,
     autoHeight:true,
@@ -107,7 +109,7 @@ QuickPropertyWindow = Ext.extend(Ext.Window, {
     
     constructor:function(cfg) {
         Ext.apply(this, cfg);
-        QuickPropertyWindow.superclass.constructor.call(this);
+        M3Designer.edit.QuickPropertyWindow.superclass.constructor.call(this);
     },
     initComponent: function(cfg) {
         var customEditors = {};
@@ -121,13 +123,13 @@ QuickPropertyWindow = Ext.extend(Ext.Window, {
             items: modelItems
         });
 
-        QuickPropertyWindow.superclass.initComponent.call(this);
+        M3Designer.edit.QuickPropertyWindow.superclass.initComponent.call(this);
     },
     showAt:function(modeId, xy){
-        QuickPropertyWindow.superclass.show.call(this);
+        M3Designer.edit.QuickPropertyWindow.superclass.show.call(this);
         this.collapse(false);
         /* padding for menu */
-        xy[0] += 15
+        xy[0] += 15;
         this.setPosition(xy);
         this.setTitle('Настройка '+this.source['id']||'')
 
@@ -135,7 +137,7 @@ QuickPropertyWindow = Ext.extend(Ext.Window, {
     /**/
     _setup_panel_customs:function(customEditorsCfg) {
         for (var p in this.source) {
-            var type = ModelTypeLibrary.getPropertyType(this.model.attributes.type, p);
+            var type = M3Designer.Types.getPropertyType(this.model.attributes.type, p);
             
             if (type == 'object') {
                 customEditorsCfg[p] = this._get_code_editor(p);
@@ -182,7 +184,7 @@ QuickPropertyWindow = Ext.extend(Ext.Window, {
     },
     _get_combo_editor:function(propertyName) {
         var data = [];
-        var ar = ModelTypeLibrary.getEnumValues(propertyName);
+        var ar = M3Designer.Types.getEnumValues(propertyName);
         for (var i=0;i<ar.length;i++) {
             data.push([ar[i]]);
         }
@@ -210,8 +212,8 @@ QuickPropertyWindow = Ext.extend(Ext.Window, {
         return new Ext.grid.GridEditor(new Ext.form.TextArea({value:'{Object}'}));
     },
     _onSave:function(obj, newValue) {
-        var itemsObj = {}
-        itemsObj[obj['fieldLabel']] = newValue
+        var itemsObj = {};
+        itemsObj[obj['fieldLabel']] = newValue;
 /* Если будет изменение более одного элемента*/
 //        var items = this.items.items;
 //        for (var i in items)
@@ -224,14 +226,14 @@ QuickPropertyWindow = Ext.extend(Ext.Window, {
         this.fireEvent('save', eventObj);
         this.close();
     }
-})
+});
 
 /**
  *  Преднастроеное окно со свойствами объекта. При нажатии кнопки сохранить генерируется событие save, на него
  * подвешен класс менеджера
  */
 
-PropertyWindow = Ext.extend(Ext.Window, {
+M3Designer.edit.PropertyWindow = Ext.extend(Ext.Window, {
     //autoScroll:true,
     /**
      * Параметры конфига:
@@ -241,7 +243,7 @@ PropertyWindow = Ext.extend(Ext.Window, {
      */
     constructor:function(cfg) {
         Ext.apply(this, cfg);
-        PropertyWindow.superclass.constructor.call(this);
+        M3Designer.edit.PropertyWindow.superclass.constructor.call(this);
     },
     initComponent: function(cfg) {
         this.addEvents('save');
@@ -268,14 +270,14 @@ PropertyWindow = Ext.extend(Ext.Window, {
             ]
         });
 
-        PropertyWindow.superclass.initComponent.call(this);
+        M3Designer.edit.PropertyWindow.superclass.initComponent.call(this);
     },
     show:function( ) {
-        PropertyWindow.superclass.show.call(this);
+        M3Designer.edit.PropertyWindow.superclass.show.call(this);
     },
     _setup_grid_customs:function(customEditorsCfg, customRenderersCfg) {
         for (var p in this.source) {
-            var type = ModelTypeLibrary.getPropertyType(this.model.attributes.type, p);
+            var type = M3Designer.Types.getPropertyType(this.model.attributes.type, p);
             if (type == 'object') {
                 customEditorsCfg[p] = this._get_code_editor();
                 customRenderersCfg[p] = function() { return '{Object}'; }
@@ -287,7 +289,7 @@ PropertyWindow = Ext.extend(Ext.Window, {
     },
     _get_combo_editor:function(propertyName) {
         var data = [];
-        var ar = ModelTypeLibrary.getEnumValues(propertyName); 
+        var ar = M3Designer.Types.getEnumValues(propertyName);
         for (var i=0;i<ar.length;i++) {
             data.push([ar[i]]);
         }

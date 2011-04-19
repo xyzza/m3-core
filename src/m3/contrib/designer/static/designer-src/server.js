@@ -2,6 +2,8 @@
  * Crafted by ZIgi
  */
 
+Ext.namespace('M3Designer');
+
 /**
  * Объект для обмена данными с сервером
  * cfg = {
@@ -13,11 +15,11 @@
  * }
  */
 
-ServerStorage = Ext.extend(Ext.util.Observable, {
+M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
 
     constructor: function(cfg){
         Ext.apply(this, cfg);
-        ServerStorage.superclass.constructor.call(this);
+        M3Designer.ServerStorage.superclass.constructor.call(this);
         this.addEvents('load','save','preview');
     },
     loadModel:function(){

@@ -26,15 +26,15 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    },
    init: function(formCfg) {
        //создаем модель
-       this._model = ModelTransfer.deserialize(formCfg);
+       this._model = M3Designer.ModelTransfer.deserialize(formCfg);
        //создаем объекты представления модели
-       this._treeView = new ComponentTreeView(this.tree, this._model);
-       this._designView = new DesignView(this.designPanel, this._model);
+       this._treeView = new M3Designer.view.ComponentTree(this.tree, this._model);
+       this._designView = new M3Designer.view.DesignView(this.designPanel, this._model);
        //синхронизируем id у панели - общего контейнера и рута модели
        //требуется для работы драг дропа с тулбокса в корень
        this._model.root.setId( this.designPanel.id);
        //создаем объект отвечающий за редактирование свойств
-       this._editorManager = new PropertyEditorManager();
+       this._editorManager = new M3Designer.edit.PropertyEditorManager();
        //заполним тулбокс
        this._initToolbox(this.toolbox);
        //иницируем ДД с тулбокса на превью
@@ -117,7 +117,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    */
    _initToolbox:function(toolbox) {
             var root = toolbox.getRootNode();
-            root.appendChild(ModelTypeLibrary.getToolboxData() );
+            root.appendChild(M3Designer.Types.getToolboxData() );
    },
    /*
     * Подствека в превью дизайнера компонента для элемента с id
@@ -200,7 +200,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    domNodeDrop:function(target, dd, e, data ) {
        this.removeHighlight();
        var componentNode = data.node;
-       var modelId = ModelUtils.parseModelId(target.id);
+       var modelId = M3Designer.Utils.parseModelId(target.id);
        var model = this._model.findModelById(modelId);
 
        if (!model.checkRestrictions(componentNode.attributes.type)) {
@@ -208,14 +208,14 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        }
 
        var newModelNodeConfig = {};
-       newModelNodeConfig.properties = ModelTypeLibrary.getTypeInitProperties(componentNode.attributes.type);
+       newModelNodeConfig.properties = M3Designer.Types.getTypeInitProperties(componentNode.attributes.type);
        var nameIndex = this._model.countModelsByType(componentNode.attributes.type);
        newModelNodeConfig.properties.id = newModelNodeConfig.properties.id + '_' + (nameIndex+1) ;
        newModelNodeConfig.type = componentNode.attributes.type;
-       model.appendChild( new ComponentModel(newModelNodeConfig) );
+       model.appendChild( new M3Designer.model.ComponentModel(newModelNodeConfig) );
    },
    validateDomDrop:function(target, dd, e, data) {
-       var modelId = ModelUtils.parseModelId(target.id);
+       var modelId = M3Designer.Utils.parseModelId(target.id);
        var parent = this._model.findModelById(modelId);
        var child = data.node.attributes.type;
        return parent.checkRestrictions(child);
@@ -224,12 +224,12 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    * Возвращает объект для отправки на сервер
    */
    getTransferObject:function() {
-       return ModelTransfer.serialize(this._model);
+       return M3Designer.ModelTransfer.serialize(this._model);
    },
    onDomDblClick: function(event, target, obj) {
        var el = event.getTarget('.designComponent');
        if (el) {
-           var modelId = ModelUtils.parseModelId(el.id);
+           var modelId = M3Designer.Utils.parseModelId(el.id);
            var model = this._model.findModelById(modelId);
            this._editorManager.editModel(model);
        }
@@ -238,7 +238,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        var el = event.getTarget('.designComponent');
        if (el) {
            this.highlightElement(el.id);
-           var modelId = ModelUtils.parseModelId(el.id);
+           var modelId = M3Designer.Utils.parseModelId(el.id);
            var model = this._model.findModelById(modelId);
            //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
            var win = Ext.getCmp(self._lastQuickPropertyId);

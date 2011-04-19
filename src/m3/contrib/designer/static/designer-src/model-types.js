@@ -7,7 +7,9 @@
  * Предоставляется внешний интерфейс для получения ин-ции о свойствах из других частей программы.
  */
 
-ModelTypeLibrary = Ext.apply({}, {
+Ext.namespace('M3Designer.model');
+
+M3Designer.model.ModelTypeLibrary = Ext.apply({}, {
     enumConfig: {
         layout:['auto','fit','form','hbox','vbox','border','absolute'],
         labelAlign:['left','top'],
@@ -189,3 +191,6 @@ ModelTypeLibrary = Ext.apply({}, {
         return result;
     }
 });
+
+// Шорткат
+M3Designer.Types = M3Designer.model.ModelTypeLibrary;

@@ -2,12 +2,14 @@
  * Crafted by ZIgi
  */
 
+Ext.namespace('M3Designer.ui');
+
 /*
 * Эта реализация паттерна посетитель, которая позволяет используя мощь JS'а
 * реализовать полиморфное поведение при обходе древовидной структуры
 */
 
-ModelUIPresentaitionBuilder = function() {
+M3Designer.ui.ModelUIPresentaitionBuilder = function() {
     //Важное замечание номер раз - каждому экстовому компоненту присваевается id = id модели
     //это требуется для того чтобы ставить в соответсвие DOM элементы и экстовые компоненты
     //Важное замечание номер два - у контейнеров следует навешивать cls 'designContainer'
@@ -139,7 +141,7 @@ ModelUIPresentaitionBuilder = function() {
                                 model.attributes.activeTabId : model.attributes.properties.activeTab,
                         listeners:{
                             tabchange:function(panel, tab) {
-                                var modelId = ModelUtils.parseModelId(panel.id);
+                                var modelId = M3Designer.Utils.parseModelId(panel.id);
                                 var tabPanelModel = model.ownerTree.findModelById(modelId);
                                 tabPanelModel.attributes.activeTabId = tab.id;
                             }
@@ -172,6 +174,7 @@ ModelUIPresentaitionBuilder = function() {
             for (var i = 0; i < model.childNodes.length; i++) {
                 if (model.childNodes[i].attributes.type == 'arrayStore') {
 
+                    //TODO доделать
                     var fields = ['id'];
                     for (var k=0; k<columns.length;k++) {
 
@@ -192,7 +195,7 @@ ModelUIPresentaitionBuilder = function() {
             return  Ext.apply(cfg, {
                 xtype:'grid',
                 cls:'designContainer designComponent',
-                id: ModelUtils.parseModelIdToDomId(model.id),
+                id: M3Designer.Utils.parseDomId(model.id),
                 store: store,
                 colModel:new Ext.grid.ColumnModel({
                     columns:columns
@@ -232,8 +235,8 @@ ModelUIPresentaitionBuilder = function() {
          */
         build:function(model) {
             var cfg = Ext.apply({}, model.attributes.properties);
-            cfg.id = ModelUtils.parseModelIdToDomId(model.id);
-            if (ModelTypeLibrary.isTypeContainer(model.attributes.type)) {
+            cfg.id = M3Designer.Utils.parseDomId(model.id);
+            if (M3Designer.Types.isTypeContainer(model.attributes.type)) {
                 cfg.cls = 'designContainer designComponent';
                 cfg.items = [];
             }

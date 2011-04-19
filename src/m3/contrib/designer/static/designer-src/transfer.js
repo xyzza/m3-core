@@ -2,11 +2,13 @@
  * Crafted by ZIgi
  */
 
+Ext.namespace('M3Designer');
+
 /*
 * Объект для перевода модели из/в транспортный json
  */
 
-ModelTransfer = Ext.apply({},{
+M3Designer.ModelTransfer = Ext.apply({},{
     doToolbarDeserializeWorkaround:function(property, componentNode){
         //Ладно, кто бы что не говорил тулбары архитектурно некрасивы в 3 эксте кто бы что не говорил, я счетаю
         if (componentNode.attributes.type == 'toolbar') {
@@ -99,10 +101,10 @@ ModelTransfer = Ext.apply({},{
     },
     deserialize:function(jsonObj) {
         //обходит json дерево и строт цивилизованое дерево с нодами, событьями и проч
-        var root = new ComponentModel(this._cleanConfig(jsonObj));
+        var root = new M3Designer.model.ComponentModel(this._cleanConfig(jsonObj));
 
         var callBack = function(jsonObj) {
-            var newNode = new ComponentModel(this._cleanConfig(jsonObj));
+            var newNode = new M3Designer.model.ComponentModel(this._cleanConfig(jsonObj));
 
             for (var p in jsonObj) {
                 if (this.childPropertyObjects.isPropertyMapedType(p)) {
@@ -134,7 +136,7 @@ ModelTransfer = Ext.apply({},{
             }
         }
 
-        var result = new DocumentModel(root);
+        var result = new M3Designer.model.FormModel(root);
         result.initOrderIndexes();
         return result;
     }

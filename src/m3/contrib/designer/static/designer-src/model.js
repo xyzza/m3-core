@@ -2,22 +2,24 @@
  * Crafted by ZIgi
  */
 
+Ext.namespace('M3Designer.model');
+
 /**
  *  Внутрення модель представления структуры документа. Для простоты реализации
  * наследуемся от классов Ext.data.Tree и Ext.data.Node, предоставляющих уже реалзованые функции
  * работы с деревом и его вершинами.
  */
 
-ComponentModel = Ext.extend(Ext.data.Node, {
+M3Designer.model.ComponentModel = Ext.extend(Ext.data.Node, {
     constructor: function(config) {
         this.type = config.type || 'undefined';
-        ComponentModel.superclass.constructor.call(this,config);
+        M3Designer.model.ComponentModel.superclass.constructor.call(this,config);
     },
     isContainer: function() {
-        return ModelTypeLibrary.isTypeContainer(this.attributes.type);
+        return M3Designer.Types.isTypeContainer(this.attributes.type);
     },
     checkRestrictions: function(childType) {
-        var restrictions = ModelTypeLibrary.getTypeRestrictions(this.attributes.type);
+        var restrictions = M3Designer.Types.getTypeRestrictions(this.attributes.type);
         //ограничения не заданы. Считаем что все можно. Те разруливание происходит только по признаку
         //isContainer
         if (!restrictions) {
@@ -61,9 +63,9 @@ ComponentModel = Ext.extend(Ext.data.Node, {
     }
 });
 
-DocumentModel = Ext.extend(Ext.data.Tree, {
+M3Designer.model.FormModel = Ext.extend(Ext.data.Tree, {
     constructor:function(root) {
-        DocumentModel.superclass.constructor.call(this, root);
+        M3Designer.model.FormModel.superclass.constructor.call(this, root);
     },
     /**
      * Поиск модели по id. Это именно поиск с обходом. Может быть в дальнейшем стоит разобраться

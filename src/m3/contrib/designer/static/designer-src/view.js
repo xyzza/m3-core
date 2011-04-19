@@ -2,13 +2,15 @@
  * Crafted by ZIgi
  */
 
+Ext.namespace('M3Designer.view');
+
 /**
  * Классы представления. Принцип работы - классы наследники повешены на события обновления модели,
  * когда модель обновляется контроллером, представление перерисовывается без внешнего участия
  * Это MVC етп.
  */
 
-BaseView = Ext.extend(Object, {
+M3Designer.view.BaseView = Ext.extend(Object, {
     _modelEventsActive:true,
     constructor: function(model) {
         this._model = model;
@@ -47,10 +49,10 @@ BaseView = Ext.extend(Object, {
  * по модели
  */
 
-DesignView = Ext.extend(BaseView, {
+M3Designer.view.DesignView = Ext.extend(M3Designer.view.BaseView, {
     constructor: function(container, model) {
         this._container = container;
-        DesignView.superclass.constructor.call(this, model);
+        M3Designer.view.DesignView.superclass.constructor.call(this, model);
     },
     refresh: function(){
         this._container.removeAll();
@@ -83,7 +85,7 @@ DesignView = Ext.extend(BaseView, {
         this._container.doLayout(true, true);
     },
     _createComponent:function(model) {
-        return ModelUIPresentaitionBuilder.build(model);
+        return M3Designer.ui.ModelUIPresentaitionBuilder.build(model);
     }
 });
 
@@ -91,25 +93,44 @@ DesignView = Ext.extend(BaseView, {
 * Обновляет содержимое дерева по модели
  */
 
-ComponentTreeView = Ext.extend(BaseView, {
+M3Designer.view.ComponentTree = Ext.extend(M3Designer.view.BaseView, {
     constructor: function(tree, model) {
         this._tree = tree;
-        ComponentTreeView.superclass.constructor.call(this, model);
+        M3Designer.view.ComponentTree.superclass.constructor.call(this, model);
     },
     refresh:function() {
         var root = this._tree.root;
         root.removeAll(true);
 
         var recursion = function(parent, model) {
-            var newNode = ModelUtils.buildTreeNode(model);
+            var newNode = this.createTreeNode(model);
             parent.appendChild(newNode);
 
             if (model.childNodes && model.childNodes.length > 0) {
                 for (var i=0; i < model.childNodes.length; i ++) {
-                    recursion(newNode, model.childNodes[i]);
+                    recursion.call(this,newNode, model.childNodes[i]);
                 }
             }
         };
-        recursion(root, this._model.root);
+        recursion.call(this,root, this._model.root);
+    },
+    createTreeNode:function(model) {
+        //Опять же важное замечание - id ноды в дереве компнентов на экране и id модельки равны друг другу
+        var iconCls = M3Designer.Types.getTypeIconCls(model.attributes.type);
+        var nodeText = model.attributes.properties.id;
+        if (model.attributes.properties.title) {
+            nodeText += ' (' + model.attributes.properties.title + ')'
+        };
+        if (model.attributes.properties.fieldLabel) {
+            nodeText += ' (' + model.attributes.properties.fieldLabel + ')'
+        };
+        return new Ext.tree.TreeNode({
+                text:nodeText,
+                id:model.id,
+                expanded:true,
+                allowDrop:model.isContainer(),
+                orderIndex:model.attributes.orderIndex+'' || '0',
+                iconCls: iconCls
+            });
     }
 });

@@ -2,7 +2,9 @@
  * Crafted by ZIgi
  */
 
-Ext.apply(ModelTypeLibrary,{
+Ext.namespace('M3Designer.model');
+
+Ext.apply(M3Designer.model.ModelTypeLibrary,{
     typesConfig:{
         component:{
             properties:{

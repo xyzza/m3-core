@@ -73,7 +73,7 @@ Bootstrapper = Ext.extend(Object, {
             toolbox:toolbox
         });
 
-         var storage = new ServerStorage({
+         var storage = new M3Designer.ServerStorage({
             id:0,
             loadUrl:cfg.dataUrl,
             saveUrl:cfg.saveUrl,

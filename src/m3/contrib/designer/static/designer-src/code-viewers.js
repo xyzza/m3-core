@@ -12,7 +12,7 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
     maximizable:true,
     constructor:function(cfg) {
         Ext.apply(this, cfg);
-        PropertyWindow.superclass.constructor.call(this);
+        M3Designer.edit.PropertyWindow.superclass.constructor.call(this);
     },
     initComponent: function() {
         M3Designer.code.PyCodeWindow.superclass.initComponent.call(this);
@@ -24,7 +24,7 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
                 autoScroll:true
             })
         );
-        PropertyWindow.superclass.show.call(this);
+        M3Designer.edit.PropertyWindow.superclass.show.call(this);
     }
 });
 
