@@ -12,6 +12,22 @@ from django.utils.importlib import import_module
 
 from m3.helpers import logger
 
+class ExtensionException(Exception):
+    '''
+    Класс исключений для расширений
+    '''
+    pass
+        
+class ExtensionPointDoesNotExist(ExtensionException):
+    '''
+    Возникает в случае если не найдена точка расширения
+    '''
+    def __init__(self, extension_name, *args, **kwargs):
+        self.extension_name = extension_name
+    
+    def __str__(self):
+        return 'ExtensionPoint "%s" not founded' % self.extension_name
+
 class ExtensionPoint:
     '''
     Класс, описывающий точку расширения с именем *name* и 
@@ -157,7 +173,10 @@ class ExtensionManager:
                 # передали неправильное определение листенера
                 # ничего не делаем
                 return
-        self.listeners[extension_name].append(listener)
+        try:    
+            self.listeners[extension_name].append(listener)
+        except KeyError:
+            raise ExtensionPointDoesNotExist(extension_name=extension_name)    
     
     append_listener = register_handler # для совместимости
     
