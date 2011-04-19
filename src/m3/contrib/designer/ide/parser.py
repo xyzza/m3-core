@@ -75,64 +75,92 @@ class Parser(object):
         assert func_node, 'Function name "%s" is not define in class "%s"' % \
                         (Parser.GENERATED_FUNC, self.class_name,)
         
-        self.nested_cmp = {}
+        #self.nested_cmp = {}
         self.config_cmp = {}
+        self.extends_cmp = {}
+        self.nested_cmp = {}
         for node in func_node.body:
-            if isinstance(node, ast.Assign):
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):
                 # Составление структуры конфигов и типов компонентов
                 
                 # Игнорирование значений, которые просто прописываются в объект
-                # self.panel_1 = panel_1
-                if  isinstance(node.value, ast.Name) and node.value.id in self.config_cmp:
+                if 'self' == node.targets[0].value.id:
                     continue
                 
+                parent, parent_item, item = self._get_attr(node)
+                self.extends_cmp[parent] = {parent_item: item}
+
+            elif isinstance(node, ast.Assign):
                 parent, attr, value = self._get_config_component(node)
                 self.config_cmp.setdefault(parent, {})[attr] = value
                 
-            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
-                # Составление структуры вложенных компонентов
-                parent, child = self._get_nested_component(node.value)
-                self.nested_cmp.setdefault(parent, []).append(child)
-                        
-        return self._get_json()        
+            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and node.value.args:
+
+                parent, parent_item, items = self._get_extends(node.value)
+                self.extends_cmp[parent] = {parent_item: items}
+            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
+                # док. строки 
+                pass
+            else:
+                raise ValueError("Alarma %s %s" % (node, node.value) )
+
+        return self._get_js()                                        
+
+    def _get_js(self):
+        js_dict = {}        
+        self._build_json(js_dict)        
+        return js_dict
+        
+            
+    def _build_json(self, js_dict, key='self'):
+        
+        item = self.extends_cmp.get(key)
+        js_dict.update( self._get_json_config(key ) )
+        if isinstance(item, dict):
+            for k, v in item.items():
+                if isinstance(v, list):
+                    
+                    l = []
+                    for value in v:                    
+
+                        if self.extends_cmp.get(value):                            
+                            p = {}
+                            l.append(p)                   
+                            self._build_json(p, value)
+                        else:
+
+                            l.append(self._get_json_config(value))                            
+            
+                    extjs_item = self._get_json_attr(k, js_dict['type'])
+                    assert extjs_item, 'Mapping object "%s" for item "%s" is not defined' % (js_dict['type'], k)
+                                
+                    js_dict[extjs_item] = l
+                else: # Приходят атрибуты                    
+                    extjs_item = self._get_json_attr(k, js_dict['type'])
+                    assert extjs_item, 'Mapping object "%s" for item "%s" is not defined' % (js_dict['type'], k)
+                                         
+                    js_dict[extjs_item] = self._get_json_config(v)                    
+        
+    def _get_extends(self, node):
+        parent =  node.func.value.value.id
+        parent_item =  node.func.value.attr
+        
+        assert isinstance(node.args[0], ast.List), 'Syntax is not supported'
+        
+        items = list(map(lambda x: x.id, node.args[0].elts))                
+        return parent, parent_item, items
+    
+    def _get_attr(self, node):
+        value = node.value.id
+        parent_item =  node.targets[0].attr
+        parent =  node.targets[0].value.id
+        return parent, parent_item, value
 
     def _get_base_class(self, class_node):
         '''
         Получает базовый класс
         '''
         return class_node.bases[0].id
-
-    def _get_json(self, key='self', a_property_dict=None):
-        '''
-        Преобразует линейную структуру вида:
-            {'panel1': ['field1'], 'self': ['panel1', 'panel2']}
-        в иерархическую структуру вида:
-            {'self':[{'panel1': ['field1']}, {'panel2': []}]}  
-            
-        И попутно преобразует py-объекты в объекты дизайнера
-        В конечном итоге получается словарь, понятный дизайнеру  
-        '''
-        res_dict = a_property_dict if isinstance(a_property_dict, dict) else {}                
-               
-        tmp_list = []
-        if self.nested_cmp and self.nested_cmp.get(key):
-            for item in self.nested_cmp[key]:
-
-                property_dict = {}      
-                if self.nested_cmp.get(item):
-                    res_dict.setdefault('items', []).append(property_dict)
-                    self._get_json(item, property_dict)                                               
-                else:
-                    property_dict.update( self._get_json_config(item ) )    
-
-                tmp_list.append(property_dict)
-        
-        if self.config_cmp:
-            res_dict.update(self._get_json_config(key))    
-            res_dict.update({'items': tmp_list})
-        else:
-            res_dict = {'id':'self'}
-        return res_dict
     
     def _get_json_config(self, key):
         '''
@@ -190,17 +218,18 @@ class Parser(object):
             if item['class'].has_key(type_obj):
                 return item['config']        
         
-    def _get_nested_component(self, node_value):
-        '''
-        Распарсивается структура вида:
-        self._items.append(panel)
-        
-        node_value.func.value.value.id - доступ к self
-        node_value.args[0].elts[0].id - доступ к panel
-        '''
-        assert isinstance(node_value, ast.Call)
-        
-        return node_value.func.value.value.id, node_value.args[0].id
+# append пока не поддерживается        
+#    def _get_nested_component(self, node_value):
+#        '''
+#        Распарсивается структура вида:
+#        self._items.append(panel)
+#        
+#        node_value.func.value.value.id - доступ к self
+#        node_value.args[0].elts[0].id - доступ к panel
+#        '''
+#        assert isinstance(node_value, ast.Call)
+#        
+#        return node_value.func.value.value.id, node_value.args[0].id
 
     def _get_value(self, node):
         '''
@@ -747,11 +776,11 @@ def test_from_designer():
     print '\n'.join(list_nodes_str)         
     print '====== from_designer - ok ======'    
     
-def test_to_designer():
+def test_to_designer(class_name='TestOne'):
     '''
     Для тестирования метода to_designer
     '''
-    js = Parser('tests.py', 'TestOne').to_designer()        
+    js = Parser('tests.py', class_name).to_designer()        
     pprint.pprint( js ) 
     
     print 'Parser.to_designer - ok'
