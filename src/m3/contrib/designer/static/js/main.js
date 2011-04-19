@@ -143,7 +143,7 @@ function onClickNodeOtherFiles(node, fileAttr){
             path: path
         }
         ,success: function(response, opts){
-            var codeEditor = new extendedCodeEditor({
+            var codeEditor = new ExtendedCodeEditor({
                 sourceCode : response.responseText
             })
             codeEditor.setTitle(fileName)
