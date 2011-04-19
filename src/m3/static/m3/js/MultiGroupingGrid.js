@@ -64,6 +64,8 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
             this.grid.view.on('beforebuffer', this.onBeforeBuffer, this);
             this.grid.store.on('beforeload', this.onBeforeLoad, this);
             this.grid.grouper = this;
+            // обработка клавиш PgUp и PgDown
+            this.grid.on('keypress', this.onKeyPress, this);
 
             grid.on('afterrender',this.onRender,this);
 
@@ -223,7 +225,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
                     return this.owner.createGroupingButton({
                         text    : column.header,
                         groupingData: {
-                            field: column.dataIndex,
+                            field: column.dataIndex
                         }
                     });
                 },
@@ -561,6 +563,53 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
         this.expandedItems = [];
         this.groupedColums = columns;
         this.grid.view.reset(true);
+    },
+	/**
+	 * 
+	 * @param {Ext.EventObject} e Параметры события нажатия клавиши
+	 */
+    onKeyPress: function (e) {
+    	if (e.keyCode == e.PAGEUP) {
+    		if (this.rowHeight == -1) {
+                e.stopEvent();
+                return;
+            }
+    		var d = this.grid.view.visibleRows-1;
+    		if (this.grid.view.rowIndex-d < 0) {
+            	d = this.grid.view.rowIndex;
+            }
+            this.grid.view.adjustScrollerPos(-(d*this.grid.view.rowHeight),true);
+            this.grid.view.focusEl.focus();
+            this.grid.getSelectionModel().selectRow(this.grid.view.rowIndex-d);
+    		e.stopEvent();
+    		}
+    	if (e.keyCode == e.PAGEDOWN) { 
+    		if (this.rowHeight == -1) {
+                e.stopEvent();
+                return;
+            }
+    		var d = this.grid.view.visibleRows-1;
+    		if (this.grid.view.rowIndex+d > this.grid.store.totalLength) {
+    			d = this.grid.store.totalLength-this.grid.view.rowIndex-1;
+    		}
+            this.grid.view.adjustScrollerPos((d*this.grid.view.rowHeight),true);
+            this.grid.view.focusEl.focus();
+            this.grid.getSelectionModel().selectRow(this.grid.view.rowIndex+d);
+    		e.stopEvent();
+    		}
+    	if (e.keyCode == e.HOME) {
+    		this.grid.view.adjustScrollerPos(-(this.grid.view.rowIndex*this.grid.view.rowHeight),true);
+            this.grid.view.focusEl.focus();
+            this.grid.getSelectionModel().selectRow(0);
+    		e.stopEvent();
+    		}
+    	if (e.keyCode == e.END) {
+    		var d = this.grid.store.totalLength-this.grid.view.rowIndex;
+    		this.grid.view.adjustScrollerPos((d*this.grid.view.rowHeight),true);
+            this.grid.view.focusEl.focus();
+            this.grid.getSelectionModel().selectRow(this.grid.store.totalLength-1);
+    		e.stopEvent();
+    		}
     }
 })
 
