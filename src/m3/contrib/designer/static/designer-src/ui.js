@@ -149,27 +149,8 @@ M3Designer.ui.ModelUIPresentaitionBuilder = function() {
                     });
         },
         gridPanel:function(model, cfg) {
-            var columns = [];
-
-            //поиск колонок
-            for (var i = 0; i < model.childNodes.length; i++) {
-                if (model.childNodes[i].attributes.type == 'gridColumn') {
-                      var newColumn = Ext.apply({},model.childNodes[i].attributes.properties);
-                      columns.push(newColumn);
-                }
-            }
-
-            //если нет колонок, создадим фейк
-            if (columns.length == 0) {
-                columns.push({
-                    id:'fake',
-                    header:'Fake column',
-                    dataIndex:'fake',
-                    menuDisabled:true
-                });
-            }
-
-             var store = undefined;
+            var columns = this._getGridColumns(model);
+            var store = undefined;
             //попробуем найти стор
             for (var i = 0; i < model.childNodes.length; i++) {
                 if (model.childNodes[i].attributes.type == 'arrayStore') {
@@ -195,12 +176,50 @@ M3Designer.ui.ModelUIPresentaitionBuilder = function() {
             return  Ext.apply(cfg, {
                 xtype:'grid',
                 cls:'designContainer designComponent',
-                id: M3Designer.Utils.parseDomId(model.id),
+                //id: M3Designer.Utils.parseDomId(model.id),
                 store: store,
                 colModel:new Ext.grid.ColumnModel({
                     columns:columns
                 })
             });
+        },
+        objectGrid:function(model, cfg) {
+            var columns = this._getGridColumns(model);
+            return  Ext.apply(cfg, {
+                xtype:'grid',
+                cls:'designContainer designComponent',
+                store: {
+                    xtype:'arraystore'
+                },
+                tbar: {
+                    xtype:'toolbar',
+                    items:[{
+                        xtype:'button',
+                        text:'Добавить',
+                        iconCls:'add_item'
+                    },{
+                        xtype:'button',
+                        text:'Изменить',
+                        iconCls:'edit_item'
+                    },{
+                        xtype:'button',
+                        text:'Удалить',
+                        iconCls:'delete_item'
+                    },{
+                        xtype:'button',
+                        text:'Обновить',
+                        iconCls:'refresh-icon-16'
+                    }]
+                },
+                bbar: {
+                    xtype:'paging'
+                },
+                
+                colModel:new Ext.grid.ColumnModel({
+                    columns:columns
+                })
+            });
+
         },
         toolbar:function(model,cfg) {
             return Ext.apply(cfg,{
@@ -231,6 +250,28 @@ M3Designer.ui.ModelUIPresentaitionBuilder = function() {
             return Ext.apply(cfg,{
                 xtype:'paging'
             });
+        },
+        _getGridColumns:function(model) {
+            var columns = [];
+
+            //поиск колонок
+            for (var i = 0; i < model.childNodes.length; i++) {
+                if (model.childNodes[i].attributes.type == 'gridColumn') {
+                      var newColumn = Ext.apply({},model.childNodes[i].attributes.properties);
+                      columns.push(newColumn);
+                }
+            }
+            //если нет колонок, создадим фейк
+            if (columns.length == 0) {
+                columns.push({
+                    id:'fake',
+                    header:'Fake column',
+                    dataIndex:'fake',
+                    menuDisabled:true
+                });
+            }
+
+            return columns;
         }
     };
 

@@ -787,9 +787,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     defaultValue:''
                 },
                 layout: {
-                    defaultValue:undefined,
+                    defaultValue:'auto',
                     isInitProperty:true,
-                    isQuickEditable: true
+                    isQuickEditable: false
                 }
             },
             childTypesRestrictions:{
@@ -1003,6 +1003,80 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             treeIconCls:'designer-icon-combo',
             toolboxData: {
                 text:'Dictionary select field',
+                category:'M3'
+            }
+        },
+        objectGrid: {
+            parent:'grid',
+            isContainer: true,
+            properties: {
+                id:{
+                    defaultValue:'object_grid',
+                    isInitProperty:true,
+                    isQuickEditable: true
+                },
+                title: {
+                    defaultValue:'New object grid',
+                    isInitProperty:true,
+                    isQuickEditable: true
+                },
+                autoExpandColumn: {
+                    defaultValue:''
+                },
+                layout: {
+                    defaultValue:'auto',
+                    isInitProperty:true,
+                    isQuickEditable: false
+                },
+                urlDataShortName: {
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
+                urlEditShortName: {
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
+                urlDeleteShortName: {
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
+                urlNewShortName: {
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
+                urlData: {
+                    defaultValue:''
+                },
+                urlEdit: {
+                    defaultValue:''
+                },
+                urlDelete: {
+                    defaultValue:''
+                },
+                urlNew: {
+                    defaultValue:''
+                },
+                loadMask: {
+                    defaultValue:true
+                },
+                rowIdName: {
+                    defaultValue:'row_id',
+                    isQuickEditable:true
+                },
+                columnParamName: {
+                    defaultValue:'column'
+                },
+                allowPaging: {
+                    defaultValue:true
+                }
+            },
+            childTypesRestrictions:{
+                allowed:['gridColumn'],
+                disallowed:['arrayStore','jsonStore','pagingToolbar','toolbar']
+            },
+            treeIconCls:'designer-grid-panel',
+            toolboxData:{
+                text:'Object grid',
                 category:'M3'
             }
         }
