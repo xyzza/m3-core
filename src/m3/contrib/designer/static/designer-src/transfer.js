@@ -122,7 +122,7 @@ ModelTransfer = Ext.apply({},{
 
         if (jsonObj.items) {
             for (var i = 0; i < jsonObj.items.length; i++) {
-                root.appendChild(callBack.call(this,root, jsonObj.items[i]))
+                root.appendChild(callBack.call(this,jsonObj.items[i]))
             }
         }
 
