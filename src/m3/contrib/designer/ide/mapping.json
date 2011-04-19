@@ -221,6 +221,42 @@
 	"parent":"component"
 },
 
+// Базовый конфиг триггерных компонент
+{
+	"class": {
+		"triggerField": "BaseExtTriggerField"	
+	},
+	"config": {
+		"displayField":"display_field"
+		,"valueField":"value_field"
+		,"hiddenName":"hidden_name"
+		,"hideTrigger":"hide_trigger"
+		,"typeAhead":"type_ahead"
+		,"queryParam":"query_param"
+		,"pageSize":"page_size"
+		,"maxHeight":"max_heigth_dropdown_list"
+		,"minChars":"min_chars"
+		,"mode":"mode"
+		,"triggerAction":"trigger_action"
+		,"editable":"editable"
+		,"forceSelection":"force_selection"
+		,"valueNotFoundText":"not_found_text"
+		,"loadingText":"loading_text"
+		,"store":"store"
+	},
+	"parent":"field"
+},
+
+// Базовый конфиг триггерных компонент
+{
+	"class": {
+		"comboBox": "ExtComboBox"	
+	},
+	"config": {
+	},
+	"parent":"triggerField"
+},
+
 // Текстовое поле
 {
 	"class": {
@@ -232,7 +268,7 @@
 		,"selectOnFocus":"select_on_focus"
 		,"enableKeyEvents":"enable_key_events"		
 	}
-	,"parent": "field"
+	,"parent": "triggerField"
 },
 
 // Поле даты 
@@ -374,6 +410,16 @@
 	"config": {
 		"text":"text"
 		,"handler":"handler"		
+	}
+	,"parent":"component"
+},
+// Лэйбл
+{
+	"class": {
+		"label": "ExtLabel"	
+	},
+	"config": {
+		"text":"text"	
 	}
 	,"parent":"component"
 }

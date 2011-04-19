@@ -512,8 +512,7 @@ class Node(object):
         nodes_extends = [] 
         nodes_in_self = []
         
-        self.walk(nodes, nodes_attr, 
-                             nodes_extends, nodes_in_self)
+        self.walk(nodes, nodes_attr, nodes_extends, nodes_in_self)
         
         if nodes_attr:
             nodes_attr.insert(0, StringSpaces())
