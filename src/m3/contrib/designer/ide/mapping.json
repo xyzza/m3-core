@@ -52,7 +52,7 @@
 		,"labelWidth":"label_width"
 		,"labelAlign":"label_align"
 		,"labelPad":"label_pad"
-		,"items":"items"
+		,"items":"_items"
 	},
 	"parent": "component"
 },
@@ -369,6 +369,19 @@
 {
 	"class": {
 		"arrayStore": "ExtDataStore"	
+	},
+	"config": {
+		"data":"data"
+		,"fields":"fields"
+		,"storeId":"store_id"
+		,"idIndex":"id_index"
+	}	
+},
+
+// Json Store 
+{
+	"class": {
+		"arrayStore": "ExtJsonStore"	
 	},
 	"config": {
 		"data":"data"

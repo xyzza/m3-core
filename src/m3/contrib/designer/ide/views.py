@@ -6,9 +6,8 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
-from helpers import get_files, get_classess, restores, create_py_class
-from parser import Parser
-
+from helpers import JsonResponse, get_files, get_classess, restores, create_py_class
+from parser import Parser, ParserError
 
 def workspace(request):
     '''
@@ -29,17 +28,11 @@ def get_project_files(request):
     '''
     if request.POST.get('path'):
         ui_classess = get_classess(request.POST.get('path')) 
-        
-        return HttpResponse(content_type='application/json', 
-                        content = json.dumps(ui_classess))
+        return JsonResponse(ui_classess)
     
     path_project = os.getenv('PROJECT_FOR_DESIGNER', None)
     files = get_files(os.path.abspath(path_project))
-    
-    #print files
-    
-    return HttpResponse(content_type='application/json', 
-                        content = json.dumps(files))
+    return JsonResponse(files)
 
 def designer(request):
     return render_to_response('designer.html', {
@@ -49,11 +42,14 @@ def designer(request):
     })
 
 def designer_preview(request):
+    '''
+    Вьюшка для preview
+    '''
     data = request.POST.get('data')
     js = json.loads(data)
     restores(js['model'])
-    py_code = Parser('','').from_designer_preview(js['model'])
-    return HttpResponse(content=py_code)
+    py_code = Parser.from_designer_preview(js['model'])
+    return JsonResponse({'success': True, 'json':py_code})
 
 def designer_fake_data(request):
     '''
@@ -78,8 +74,7 @@ def designer_fake_data(request):
 
         }
 
-    return HttpResponse(content_type='application/json', 
-                        content = json.dumps(result))
+    return JsonResponse(result)
 
 def designer_data(request):
     '''
@@ -92,10 +87,12 @@ def designer_data(request):
     assert class_name, 'Class name is undefined'
     assert path, 'Path to source file is undefined'
     
-    result = Parser(path, class_name).to_designer() 
-    
-    return HttpResponse(content_type='application/json', 
-                        content = json.dumps(result))
+    try:
+        result = Parser(path, class_name).to_designer()
+    except ParserError, e:                
+        return JsonResponse({'success': False, 'json': repr(e)})
+        
+    return JsonResponse({'success': True, 'json':result})
 
 def designer_save(request):
     '''
@@ -108,14 +105,15 @@ def designer_save(request):
     assert class_name, 'Class name is undefined'
     assert path, 'Path to source file is undefined'
 
-    js = json.loads(data)
-    
+    js = json.loads(data)    
     restores(js['model'])
     
     # js['model'] -- Конфигурация для отображение в py
-    Parser(path, class_name).from_designer(js['model']) 
-
-    return HttpResponse(content = 'OK')
+    try:
+        Parser(path, class_name).from_designer(js['model'])
+    except ParserError, e:
+        return JsonResponse({'success': False, 'json': repr(e)})
+    return JsonResponse({'success': True})
 
 
 def create_class(request):
@@ -128,11 +126,12 @@ def create_class(request):
     assert class_name, 'Class name is undefined'
     assert path, 'Path to source file is undefined'
     
-    create_py_class(path, class_name)
+    try:
+        create_py_class(path, class_name)
+    except ParserError, e:
+        return JsonResponse({'success': False, 'json': repr(e)})
     
-    res_dict = {'success': True}
-    return HttpResponse(json.dumps(res_dict), content_type='application/json')
-
+    return JsonResponse({'success': True})
 
 def designer_file_content(request):
     '''
@@ -146,12 +145,17 @@ def designer_file_content(request):
 
     action = "r" if not content else "w"
     result = None
-
+    
+    # И долго будет продолжаться js в питоне и self в js-e?
+    # Для открытия файлов существуют менеджеры контекста
+    # И было бы намного понятней. Т.к. операции чтения и записи разные по сути
+    # Было бы правильнее разнести это по двум вьюшкам и через POST для записи
+    # GET - для чтения 
     fileObj = codecs.open( path, action, "utf-8" )
     if not content:
         result = fileObj.read()
     else:
         fileObj.write(content)
     fileObj.close()
-    return HttpResponse(content_type='application/json',
-                        content = result)
+    
+    return HttpResponse(result)
