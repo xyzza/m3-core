@@ -480,3 +480,11 @@ function sendRequest(url, desktop, params){
     return retVal;
 }
 
+// Функция проверки существования элемента в массиве. В эксте её нет.
+// Не работает под ие6, но для него тоже написана реализация, если понадобится:
+// http://stackoverflow.com/questions/143847/best-way-to-find-an-item-in-a-javascript-array
+function includeInArr(arr, obj) {
+    return (arr.indexOf(obj) != -1);
+}
+
+
