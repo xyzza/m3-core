@@ -78,7 +78,7 @@ class Parser(object):
         #self.nested_cmp = {}
         self.config_cmp = {}
         self.extends_cmp = {}
-        self.nested_cmp = {}
+        #self.nested_cmp = {}
         for node in func_node.body:
             if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):
                 # Составление структуры конфигов и типов компонентов
@@ -88,22 +88,23 @@ class Parser(object):
                     continue
                 
                 parent, parent_item, item = self._get_attr(node)
-                self.extends_cmp[parent] = {parent_item: item}
-
+                self.extends_cmp.setdefault(parent, {})[parent_item] =  item
             elif isinstance(node, ast.Assign):
+                
                 parent, attr, value = self._get_config_component(node)
                 self.config_cmp.setdefault(parent, {})[attr] = value
                 
             elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and node.value.args:
 
                 parent, parent_item, items = self._get_extends(node.value)
-                self.extends_cmp[parent] = {parent_item: items}
+                self.extends_cmp.setdefault(parent, {})[parent_item] =  items
             elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
                 # док. строки 
                 pass
             else:
                 raise ValueError("Alarma %s %s" % (node, node.value) )
 
+        #print self.extends_cmp
         return self._get_js()                                        
 
     def _get_js(self):
@@ -137,8 +138,7 @@ class Parser(object):
                     js_dict[extjs_item] = l
                 else: # Приходят атрибуты                    
                     extjs_item = self._get_json_attr(k, js_dict['type'])
-                    assert extjs_item, 'Mapping object "%s" for item "%s" is not defined' % (js_dict['type'], k)
-                                         
+                    assert extjs_item, 'Mapping object "%s" for item "%s" is not defined' % (js_dict['type'], k)  
                     js_dict[extjs_item] = self._get_json_config(v)                    
         
     def _get_extends(self, node):
@@ -203,8 +203,7 @@ class Parser(object):
         '''
         Получает из маппинга свойство по наименованию extjs контрола
         '''
-        conf = self._gen_config(extjs_class_name)
-
+        conf = self._gen_config(extjs_class_name)        
         for k, v in conf.items():
             if v == name:
                 return str(k)
@@ -698,8 +697,12 @@ def update_with_inheritance(m_list, parent=None, config=None):
     '''        
     
     for item in m_list:
-        if parent and item.get('class').keys()[0] == parent:            
-            config.update(item['config'])             
+        if parent and item.get('class').keys()[0] == parent:    
+            
+            # Для того, чтобы родительские свойства не перекрывали свойства объекта
+            tmp_dict = config.copy() 
+            config.update(item['config'])
+            config.update(tmp_dict)
             break
         elif not parent and item.get('parent'):
             update_with_inheritance(m_list, item.get('parent'), item['config'])

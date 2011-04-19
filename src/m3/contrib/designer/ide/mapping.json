@@ -52,6 +52,7 @@
 		,"labelWidth":"label_width"
 		,"labelAlign":"label_align"
 		,"labelPad":"label_pad"
+		,"items":"items"
 	},
 	"parent": "component"
 },
