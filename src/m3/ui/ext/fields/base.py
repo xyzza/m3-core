@@ -140,6 +140,10 @@ class BaseExtTriggerField(BaseExtField):
     FIXME: Необходимо создать свойство trigger_action_all
            Внутри него изменять атрибут trigger_action     
     '''
+    
+    ALL = 'all'
+    QUERY = 'query'
+    
     def __init__(self, *args, **kwargs):
         super(BaseExtTriggerField, self).__init__(*args, **kwargs)
 
@@ -179,15 +183,18 @@ class BaseExtTriggerField(BaseExtField):
         # Признак возможности редактирования
         self.editable = True
 
-        # Признак, что отображаться при выборе будут все записи (True),
-        # Иначе те, которые подходят введенному тексту (False)
-        self.trigger_action_all = False
+        # Признак, что отображаться при выборе будут все записи (QUERY),
+        # Иначе те, которые подходят введенному тексту (ALL)
+        self.trigger_action = BaseExtTriggerField.QUERY
 
         #
         self.force_selection = False
 
         # Текст, если записей в сторе нет
         self.not_found_text = None
+        
+        # Текст, отображаемый при загрузке данных
+        self.loading_text = u'Загрузка...'
 
     def set_store(self, store):
         self.mode = 'local' if isinstance(store, ExtDataStore) else 'remote'
@@ -199,6 +206,21 @@ class BaseExtTriggerField(BaseExtField):
     def t_render_store(self):
         assert self.__store, 'Store is not define'
         return self.__store.render([self.display_field, ])
+
+    @property
+    def trigger_action_all(self):
+        '''
+        Для обратной совместимости
+        '''
+        return self.trigger_action == BaseExtTriggerField.ALL
+
+    @trigger_action_all.setter
+    def trigger_action_all(self, value):
+        '''
+        Для обратной совместимости
+        '''        
+        self.trigger_action = BaseExtTriggerField.ALL if value else \
+            BaseExtTriggerField.QUERY
 
     @property
     def name(self):
@@ -253,14 +275,11 @@ class BaseExtTriggerField(BaseExtField):
         self._put_config_value('pageSize', self.page_size)
         self._put_config_value('maxHeight', self.max_heigth_dropdown_list)
         self._put_config_value('minChars', self.min_chars)
-
-        self._put_config_value('mode', self.mode)
-        if self.trigger_action_all:
-            self._put_config_value('triggerAction', 'all')
-
+        self._put_config_value('mode', self.mode)        
+        self._put_config_value('triggerAction', self.trigger_action)
         self._put_config_value('editable', self.editable)
         self._put_config_value('forceSelection', self.force_selection)
         self._put_config_value('valueNotFoundText', self.not_found_text)
-        self._put_config_value('loadingText', u'Загрузка...')
+        self._put_config_value('loadingText', self.loading_text)
         self._put_config_value('store', self.t_render_store, self.get_store())
 
