@@ -120,10 +120,10 @@ M3Designer.view.ComponentTree = Ext.extend(M3Designer.view.BaseView, {
         var nodeText = model.attributes.properties.id;
         if (model.attributes.properties.title) {
             nodeText += ' (' + model.attributes.properties.title + ')'
-        };
+        }
         if (model.attributes.properties.fieldLabel) {
             nodeText += ' (' + model.attributes.properties.fieldLabel + ')'
-        };
+        }
         return new Ext.tree.TreeNode({
                 text:nodeText,
                 id:model.id,

@@ -241,9 +241,9 @@ M3Designer.controller.AppController = Ext.extend(Object, {
            var modelId = M3Designer.Utils.parseModelId(el.id);
            var model = this._model.findModelById(modelId);
            //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
-           var win = Ext.getCmp(self._lastQuickPropertyId);
+           var win = Ext.getCmp(this._lastQuickPropertyId);
            if (win) win.close();
-           self._lastQuickPropertyId = this._editorManager.quickEditModel(model, event.xy);
+           this._lastQuickPropertyId = this._editorManager.quickEditModel(model, event.xy);
        }
    },
    onTreeNodeClick:function(node, e) {

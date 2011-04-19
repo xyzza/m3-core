@@ -114,11 +114,11 @@ M3Designer.model.FormModel = Ext.extend(Ext.data.Tree, {
         //Смотрим на события изменения в дереве и обновляем orderIndex.
         //Он нам нужен для хранения на сервере верного
         //порядка расположения компонентов на форме
-        this.on('append', function(tree, self, node, index) {
+        this.on('append', function(tree, selfNode, node, index) {
             node.attributes.orderIndex = index;
         } );
-        this.on('move', function(tree, self, oldParent, newParent, index ) {
-            self.attributes.orderIndex = index ;
+        this.on('move', function(tree, selfNode, oldParent, newParent, index ) {
+            selfNode.attributes.orderIndex = index ;
         });
         this.on('remove', function(tree, parent, node) {
             var next  = node.nextSibling;
