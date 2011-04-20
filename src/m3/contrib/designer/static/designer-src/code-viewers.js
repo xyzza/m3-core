@@ -46,8 +46,7 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
 
        if (textArea.isDirty()){
            var scope = this;
-           this.showMessage(choice, textArea.id);
-           function choice(buttonId){
+           this.showMessage(function(buttonId){
                if (buttonId=='yes') {
                    scope.onSave();
                    scope.fireEvent('close_tab', scope);
@@ -55,7 +54,7 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
                else if (buttonId=='no') {
                    scope.fireEvent('close_tab', scope);
                }
-           }
+           }, textArea.id);
        }
        else{
            this.fireEvent('close_tab', this);
