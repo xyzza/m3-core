@@ -1,4 +1,8 @@
-﻿.designer-icon-combo {
+﻿.icon-class {
+    background-image:url(../images/icon_c.gif) !important;
+}
+
+.designer-icon-combo {
     background-image:url(../images/combo-field.png) !important;
 }
 .designer-icon-fieldset {

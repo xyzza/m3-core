@@ -136,7 +136,7 @@ def create_class(request):
     try:
         create_py_class(path, class_name)
     except ParserError, e:
-        return JsonResponse({'success': False, 'json': repr(e)})
+        return JsonResponse({'success': False, 'json': unicode(e)})
     
     return JsonResponse({'success': True})
 
