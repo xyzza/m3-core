@@ -168,7 +168,7 @@ Bootstrapper = Ext.extend(Object, {
         });
 
         function onTreeNodeDeleteClick(item) {
-            application.onTreeNodeDeleteClick(item.parentMenu.contextNode);
+            application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
         }              
         
         return viewportWrapper;  

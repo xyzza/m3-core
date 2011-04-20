@@ -130,7 +130,8 @@ M3Designer.view.ComponentTree = Ext.extend(M3Designer.view.BaseView, {
                 expanded:true,
                 allowDrop:model.isContainer(),
                 orderIndex:model.attributes.orderIndex+'' || '0',
-                iconCls: iconCls
+                iconCls: iconCls,
+                type:model.attributes.type
             });
     }
 });

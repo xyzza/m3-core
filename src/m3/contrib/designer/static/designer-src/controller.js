@@ -43,10 +43,11 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        this._initDesignMouseEvents(this.designPanel);
 
        //обработчики событий
-       this.tree.on('beforenodedrop', this.onBeforeNodeDrop.createDelegate(this));
-       this.tree.on('nodedrop', this.onTreeNodeDrop.createDelegate(this));
-       this.tree.on('dblclick', this.onTreeNodeDblClick.createDelegate(this));
-       this.tree.on('click', this.onTreeNodeClick.createDelegate(this));
+       this.tree.on('beforenodedrop', this.onComponentTreeBeforeNodeDrop.createDelegate(this));
+       this.tree.on('nodedrop', this.onComponentTreeNodeDrop.createDelegate(this));
+       this.tree.on('dblclick', this.onComponentTreeNodeDblClick.createDelegate(this));
+       this.tree.on('click', this.onComponentTreeNodeClick.createDelegate(this));
+       this.tree.on('nodedragover', this.onComponentTreeNodeDragOver.createDelegate(this));
        this._editorManager.on('modelUpdate', this.onModelUpdate.createDelegate(this));
 
 
@@ -107,10 +108,10 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    */
    _initDesignMouseEvents: function(panel) {
        var el = panel.getEl();
-       el.on('dblclick', this.onDomDblClick.createDelegate(this));
-       el.on('click', this.onDomClick.createDelegate(this));
+       el.on('dblclick', this.onDesignerPanelDomDblClick.createDelegate(this));
+       el.on('click', this.onDesignerPanelDomClick.createDelegate(this));
        /* Демократия товарищи */
-       el.on('contextmenu', this.onDomClick.createDelegate(this), null, {preventDefault: true});
+       el.on('contextmenu', this.onDesignerPanelDomClick.createDelegate(this), null, {preventDefault: true});
    },
    /*
    * Заполняем тулбокс компонентами
@@ -214,10 +215,35 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        newModelNodeConfig.type = componentNode.attributes.type;
        model.appendChild( new M3Designer.model.ComponentModel(newModelNodeConfig) );
    },
+   /*
+   * Проверка допустимости при перетаскивании между тулбоксом и дизайнером
+    */
    validateDomDrop:function(target, dd, e, data) {
        var modelId = M3Designer.Utils.parseModelId(target.id);
        var parent = this._model.findModelById(modelId);
        var child = data.node.attributes.type;
+       return parent.checkRestrictions(child);
+   },
+   /*
+    * Проверка допустимости при перетаскивании в дереве компонентов. eventObj эли dragOverEvent или dropEvent
+    * у TreePanel
+    */
+   validateComponentTreeDrop:function(eventObj) {
+       var parent = this._model.findModelById( eventObj.target.attributes.id);
+       var child = eventObj.dropNode.attributes.type;
+
+       if (eventObj.target.isRoot) {
+           //рут не отображается, и в него нельзя перетаскивать
+           return false;
+       }
+
+       //отображаемый рут - window или panel. Вне него нельзя ничего перемещать
+       if (parent.isRoot && (eventObj.point == 'above' ||
+           eventObj.point == 'below')) {
+           return false;
+       }
+       
+       //проверка допустимости типов
        return parent.checkRestrictions(child);
    },
    /*
@@ -226,7 +252,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    getTransferObject:function() {
        return M3Designer.ModelTransfer.serialize(this._model);
    },
-   onDomDblClick: function(event, target, obj) {
+   onDesignerPanelDomDblClick: function(event, target, obj) {
        var el = event.getTarget('.designComponent');
        if (el) {
            var modelId = M3Designer.Utils.parseModelId(el.id);
@@ -234,7 +260,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
            this._editorManager.editModel(model);
        }
    },
-   onDomClick: function(event, target, obj) {
+   onDesignerPanelDomClick: function(event, target, obj) {
        var el = event.getTarget('.designComponent');
        if (el) {
            this.highlightElement(el.id);
@@ -246,27 +272,25 @@ M3Designer.controller.AppController = Ext.extend(Object, {
            this._lastQuickPropertyId = this._editorManager.quickEditModel(model, event.xy);
        }
    },
-   onTreeNodeClick:function(node, e) {
+   onComponentTreeNodeClick:function(node, e) {
        this.highlightElement('cmp-'+node.id);
    },
-   onBeforeNodeDrop:function(dropEvent) {
-        if (dropEvent.target.isRoot) {
-            //рут не отображается, и в него нельзя перетаскивать
-            return false;
-        }
-        return !(this._model.findModelById(dropEvent.target.id).type == 'document' && (dropEvent.point == 'above' ||
-                dropEvent.point == 'below'));
-
+   onComponentTreeBeforeNodeDrop:function(dropEvent) {
+       return this.validateComponentTreeDrop(dropEvent);
    },
-   onTreeNodeDrop: function(dropEvent) {
+   onComponentTreeNodeDragOver:function(dragOverEvent){
+       //если перетаскивать нельзя, то будет отображен соответствующий значек на курсоре мышки
+       dragOverEvent.cancel = !this.validateComponentTreeDrop(dragOverEvent);
+   },
+   onComponentTreeNodeDrop: function(dropEvent) {
        this.moveTreeNode(dropEvent.dropNode, dropEvent.target, dropEvent.point);
        return false;
    },
-   onTreeNodeDblClick:function(node, e) {
+   onComponentTreeNodeDblClick:function(node, e) {
        var model = this._model.findModelById(node.id);
        this._editorManager.editModel(model);
    },
-   onTreeNodeDeleteClick:function(treeNode) {
+   onComponentTreeNodeDeleteClick:function(treeNode) {
        var model = this._model.findModelById(treeNode.id);
        model.remove(true);
    },
