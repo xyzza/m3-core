@@ -177,10 +177,12 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     isQuickEditable: true
                 },
                 collapsible: {
-                    defaultValue:false
+                    defaultValue:false,
+                    isQuickEditable: true
                 },
                 collapsed : {
-                    defaultValue:false
+                    defaultValue:false,
+                    isQuickEditable: true
                 },
                 border: {
                     defaultValue: true
@@ -257,8 +259,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 },
                 layout: {
                     defaultValue:undefined,
-                    isInitProperty:true,
-                    isQuickEditable: true
+                    isInitProperty:true
                 }
             },
             childTypesRestrictions:{

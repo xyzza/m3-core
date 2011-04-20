@@ -148,8 +148,8 @@ def designer_file_content(request):
 
     assert path, 'Path to source file is undefined'
 
-    with codecs.open( path, "r", "utf-8" ) as file:
-        result = file.read()
+    with codecs.open( path, "r", "utf-8" ) as f:
+        result = f.read()
     
     return JsonResponse({'success': True, 'data':{'file_content':result}})
 
@@ -162,7 +162,7 @@ def designer_file_content_save(request):
 
     assert path, 'Path to source file is undefined'
 
-    with codecs.open( path, "w", "utf-8" ) as file:
-        file.write(content)
+    with codecs.open( path, "w", "utf-8" ) as f:
+        f.write(content)
 
     return JsonResponse({'success': True})

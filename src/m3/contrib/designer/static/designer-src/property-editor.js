@@ -73,7 +73,7 @@ M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         var defaults = M3Designer.Types.getTypeDefaultProperties(eventObj.model.attributes.type);
         var model = eventObj.model;
         var source = eventObj.source;
-        
+
         for (var s in source) {
             if ((source[s] != defaults[s]) || ( model.attributes.properties.hasOwnProperty(s)) ) {
                 if (M3Designer.Types.isPropertyObject(model.attributes.type, s)) {
@@ -156,7 +156,8 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
                 customEditorsCfg[p] = this._get_boolean_editor(p);
                 customEditorsCfg[p].on('check', this._onSave.createDelegate(this))
             }
-            customEditorsCfg[p].on('change', this._onSave.createDelegate(this))
+            type != "undefined" ? customEditorsCfg[p].on('change', this._onSave.createDelegate(this)) : 0
+            
         }
     },
     _get_number_editor:function(propertyName){
@@ -195,6 +196,7 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
             fields:['name'],
             data:data
         });
+        
         var result = new Ext.form.ComboBox({
             width: 120,
             fieldLabel:propertyName,
@@ -213,7 +215,8 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
     },
     _onSave:function(obj, newValue) {
         var itemsObj = {};
-        itemsObj[obj['fieldLabel']] = newValue;
+        var nVal =  typeof newValue == 'object' ? newValue.id: newValue
+        itemsObj[obj['fieldLabel']] = nVal;
 /* Если будет изменение более одного элемента*/
 //        var items = this.items.items;
 //        for (var i in items)
@@ -223,6 +226,7 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
             source: itemsObj,
             model:this.model
         };
+        
         this.fireEvent('save', eventObj);
         this.close();
     }
