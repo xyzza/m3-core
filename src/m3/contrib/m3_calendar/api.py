@@ -89,7 +89,8 @@ class M3Calendar(object):
     def working_days_by_bound(self, date, count, bound_since=True):
         pass
 
-    def add_date_to_db(self, date, type=ExceptedDayTypeEnum.HOLIDAY):
+    @classmethod
+    def add_date_to_db(cls, date, type=ExceptedDayTypeEnum.HOLIDAY):
         try:
             save_date = ExceptedDay.objects.get(day=date)
         except ObjectDoesNotExist:
