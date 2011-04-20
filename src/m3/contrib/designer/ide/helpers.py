@@ -13,6 +13,11 @@ from parser import Parser, ParserError
 
 EXCLUSION = ('pyc', 'orig',)
 POSIBLE_EDIT_FILES = ('ui.py', 'forms.py')
+POSIBLE_EDIT_FILE_PY = 'py'
+POSIBLE_FILE_JS = 'js'
+POSIBLE_FILE_CSS = 'css'
+POSIBLE_FILE_HTML = 'html'
+POSIBLE_FILES_IMAGE = ('png', 'jpeg', 'jpg', 'ico', 'gif')
 
 class JsonResponse(HttpResponse):
     def __init__(self, content, *args, **kwargs):        
@@ -38,21 +43,47 @@ def get_files(path):
         # Никаких крокозябр - unicode(..)
         path_file = unicode( os.path.join(path, ffile) )
         
-        propertys_dict = dict(text=ffile) 
+        propertys_dict = dict(text=ffile)
+        
         if os.path.isdir(path_file):                                    
             propertys_dict['children'] = get_files(path_file)
-            propertys_dict['leaf'] = False             
+            propertys_dict['leaf'] = False
+
+            if '__init__.py' in os.listdir(path_file):
+                ''' Признак что папка является packag'ом, изменяет иконку'''
+                propertys_dict['iconCls'] = Icons.PACKAGE_PY
+
         else:            
             propertys_dict['path'] = path_file
-                                                    
+            # Расширение файла (*.py, *.css, ...)
+            file_type = ffile.split('.')[-1]
+
+            #По дефолту является узлом
+            propertys_dict['leaf'] = True
+            
             if ffile in POSIBLE_EDIT_FILES:
                 propertys_dict['iconCls'] = Icons.PAGE_WHITE_CODE
                 propertys_dict['leaf'] = False
+
+            elif file_type == POSIBLE_EDIT_FILE_PY:
+                propertys_dict['iconCls'] = Icons.PAGE_WHITE_PY
+
+            elif file_type == POSIBLE_FILE_JS:
+                propertys_dict['iconCls'] = Icons.PAGE_WHITE_JS
+
+            elif file_type == POSIBLE_FILE_HTML:
+                propertys_dict['iconCls'] = Icons.HTML
+
+            elif file_type == POSIBLE_FILE_CSS:
+                propertys_dict['iconCls'] = Icons.CSS
+
+            elif file_type in POSIBLE_FILES_IMAGE:
+                propertys_dict['iconCls'] = Icons.IMAGE
+
             else:
                 propertys_dict['iconCls'] = Icons.PAGE_WHITE_TEXT
                 propertys_dict['attr'] = path_file
-                propertys_dict['leaf'] = True
-                 
+
         li.append(propertys_dict)
 
     return li

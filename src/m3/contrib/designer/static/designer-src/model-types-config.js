@@ -257,7 +257,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 },
                 layout: {
                     defaultValue:undefined,
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 }
             },
             childTypesRestrictions:{
@@ -665,7 +666,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 },
                 layout: {
                     defaultValue:'toolbar',
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isQuickEditable: true
                 }
             },
             toolboxData:{

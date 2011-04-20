@@ -37,5 +37,5 @@ FILE_NAME = 'm3-debug.js'
 FILE_NAME_OPT = 'm3-opt.js'
 
 #Игнорируемые файлы
-EXCLUDE = ('calendar-all.js', 'calendar-all-debug.js','Calendar.js', FILE_NAME, FILE_NAME_OPT)
+EXCLUDE = ('calendar-all.js', 'calendar-all-debug.js','Calendar.js', FILE_NAME, FILE_NAME_OPT, 'MultiGroupingGrid.js')
 

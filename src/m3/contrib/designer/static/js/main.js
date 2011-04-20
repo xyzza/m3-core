@@ -94,12 +94,12 @@ function createTreeView(rootNodeName){
 		        	if (node.parentNode && (node.parentNode.text === 'ui.py' || node.parentNode.text === 'forms.py' ) ){
 			        	onClickNode(node);
 		        	}
-                    /*Все файлы не являющиеся ui.py/*/
-                    else if(node.leaf){
+                    /*Все файлы не являющиеся *.py и conf */
+                    else if(node.leaf && node.text.split('.').slice(-1) == 'py' || node.text.split('.').slice(-1) == 'conf'){
                         var fileAttr = {};
                         fileAttr['path'] = node.attributes.path;
                         fileAttr['fileName'] = node.attributes.text;
-                        onClickNodeOtherFiles(node, fileAttr)
+                        onClickNodePyFiles(node, fileAttr);
                     }
 		        }
 		    }	
@@ -144,19 +144,22 @@ function onClickNode(node) {
 }
 
 /*Вымогает у сервера некий файл*/
-function onClickNodeOtherFiles(node, fileAttr){
+function onClickNodePyFiles(node, fileAttr){
     var path = fileAttr.path;
     var fileName = fileAttr.fileName;
 
     Ext.Ajax.request({
-        url:'/file-content'
-        ,params: {
+        url:'/file-content',
+        method: 'GET',
+        params: {
             path: path
         }
         ,success: function(response, opts){
+            var obj = Ext.util.JSON.decode(response.responseText);
             var codeEditor = new M3Designer.code.ExtendedCodeEditor({
-                sourceCode : response.responseText
+                sourceCode : obj.data.file_content
             })
+
             codeEditor.setTitle(fileName)
             tabPanel.add( codeEditor );
             tabPanel.activate(codeEditor);
@@ -164,11 +167,12 @@ function onClickNodeOtherFiles(node, fileAttr){
             /* async close tab && message */
             var userTakeChoise = true;
             codeEditor.on('beforeclose', function(panel){
+                /* findByType вернет список элементов, т.к у нас всего один
+                textarea забираем его по индексу */
                 var textArea = panel.findByType('textarea')[0];
                 if (textArea.isDirty()){
                     var scope = this;
-                    this.showMessage(choise, textArea.id)
-                    function choise(buttonId){
+                    this.showMessage(function(buttonId){
                         if (buttonId=='yes') {
                            scope.onSave();
                            scope.fireEvent('close_tab', scope);
@@ -180,30 +184,31 @@ function onClickNodeOtherFiles(node, fileAttr){
                             userTakeChoise = !userTakeChoise;
                         }
                         userTakeChoise = !userTakeChoise;
-                    }
+                    }, textArea.id);
+
                 }
-                else userTakeChoise = !userTakeChoise
+                else userTakeChoise = !userTakeChoise;
 
                 return !userTakeChoise;
                 
             })
 
             codeEditor.on('close_tab', function(tab){
-                if (tab) tabPanel.remove(tab)
+                if (tab) tabPanel.remove(tab);
             })
             codeEditor.on('save', function(fileContent, tab){
                 /*Запрос на сохранения изменений */
                 Ext.Ajax.request({
-                    url:'/file-content'
-                    ,params: {
+                    url:'/file-content/save',
+                    params: {
                         path: path,
                         content: fileContent
-                    }
-                    ,success: function(response, opts){
-                        if (tab) tabPanel.remove(tab)
+                    },
+                    success: function(response, opts){
+                        console.log('file saved');
                     },
                     failure: uiAjaxFailMessage
-                });
+                })
             })
         },
         failure: uiAjaxFailMessage
