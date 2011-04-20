@@ -517,9 +517,10 @@ class Parser(object):
         
 class Node(object):
  
+    mapping = None
+ 
     def __init__(self, data):        
-        self.data = data                    
-        self.mapping = None
+        self.data = data                            
 
     @staticmethod
     def sort_items(items):
@@ -537,7 +538,7 @@ class Node(object):
     def get_nodes(self, mapping):
         '''
         '''
-        self.mapping = mapping
+        Node.mapping = mapping
         
         nodes = []
         nodes_attr = []
