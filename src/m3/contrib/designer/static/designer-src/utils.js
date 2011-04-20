@@ -19,5 +19,12 @@ M3Designer.Utils = Ext.apply({},{
      */
     parseDomId:function(modelId) {
         return 'cmp-'+modelId;
+    },
+    /*
+    * Возвращает id node по id DOM element'а
+     */
+    parseDomIdToNodeId:function(domId) {
+        // удаляем первые 4 символа из id > "cmp-"
+        return domId.slice(4,domId.length)
     }
 });
