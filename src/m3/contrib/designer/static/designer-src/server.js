@@ -70,10 +70,10 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
             failure:this._onPreviewFailure.createDelegate(this)
         });
     },
-    _onLoadSuccess:function(response, opts) {
-        var obj = Ext.util.JSON.decode(response.responseText);
-        this.mask.hide();
-        this.fireEvent('load', obj);
+    _onLoadSuccess:function(response, opts) {    	
+    	this.mask.hide();        
+        var obj = Ext.util.JSON.decode(response.responseText);                
+        this.fireEvent('load', obj);        
     },
     _onLoadFailure:function(response, opts){
         this.mask.hide();
@@ -82,7 +82,8 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
     },
     _onSaveSuccess:function(response, opts) {
         this.mask.hide();
-        this.fireEvent('save');
+        var obj = Ext.util.JSON.decode(response.responseText);
+        this.fireEvent('save', obj);
     },
     _onSaveFailure:function(response, opts) {
         this.mask.hide();
@@ -90,7 +91,8 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
     },
     _onPreviewSuccess:function(response, opts) {
         this.mask.hide();
-        this.fireEvent('preview',response.responseText);
+        var obj = Ext.util.JSON.decode(response.responseText);
+        this.fireEvent('preview', obj);
     },
     _onPreviewFailure:function(response, opts) {
         this.mask.hide();

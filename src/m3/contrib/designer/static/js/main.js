@@ -49,16 +49,27 @@ function createTreeView(rootNodeName){
 					            			path: attr['path']
 					            			,className: text
 					            		}
-					            		,success: function(){
-					            			var new_node = new Ext.tree.TreeNode({
-					            				text: text
-					            				,path: attr['path']
-					            				,class_name: text
-					            				,iconCls: 'icon-page-white-c'	
-					            				,leaf: true			            				
-					            			});
-	
-					            			node.appendChild(new_node);
+					            		,success: function(response, opts){
+					            			var obj = Ext.util.JSON.decode(response.responseText);             
+					            			if (obj.success) {                
+						            			var new_node = new Ext.tree.TreeNode({
+						            				text: text
+						            				,path: attr['path']
+						            				,class_name: text
+						            				,iconCls: 'icon-page-white-c'	
+						            				,leaf: true			            				
+						            			});
+		
+						            			node.appendChild(new_node);
+								           	} else {
+								           		Ext.Msg.show({
+												   title:'Ошибка'
+												   ,msg: obj.json
+												   ,buttons: Ext.Msg.OK						   						   
+												   ,icon: Ext.MessageBox.WARNING
+												});
+								           	}    
+
 					            		},
 					            		failure: uiAjaxFailMessage
 					            	});
@@ -125,7 +136,7 @@ function onClickNode(node) {
                 previewUrl:'/designer/preview'});
 				   	 
    	panel.setTitle(attr['class_name']); 
-	tabPanel.add( panel );
+	tabPanel.add(panel);
 	
 	starter.loadModel();
 	

@@ -121,16 +121,50 @@ Bootstrapper = Ext.extend(Object, {
 
         storage.on('load',
                 function(jsonObj){
-                    application.init(jsonObj);
+                	if (jsonObj.success) { 
+	                    application.init(jsonObj.json);	                    
+                   	} else {
+                   		Ext.Msg.show({
+						   title:'Ошибка'
+						   ,msg: jsonObj.json
+						   ,buttons: Ext.Msg.OK						   						   
+						   ,icon: Ext.MessageBox.WARNING
+						});
+                   	}                   	
                 });
 
-        storage.on('save', function() {
-            Ext.Msg.alert('Сохранение формы','Данные успешно сохранены');
+        storage.on('save', function(jsonObj) {
+	        if (jsonObj.success) {                
+                Ext.Msg.show({
+				   title:'Сохранение формы'
+				   ,msg: 'Данные успешно сохранены'
+				   ,buttons: Ext.Msg.OK						   						   
+				   ,icon: Ext.MessageBox.INFO
+				});
+           	} else {
+           		Ext.Msg.show({
+				   title:'Ошибка'
+				   ,msg: jsonObj.json
+				   ,buttons: Ext.Msg.OK						   						   
+				   ,icon: Ext.MessageBox.WARNING
+				});
+           	}                 
         });        
 
-        storage.on('preview', function(responseText) {
-           var previewWindow = new M3Designer.code.PyCodeWindow();
-            previewWindow.show(responseText);
+        storage.on('preview', function(jsonObj) {
+        	if (jsonObj.success) {                
+           		var previewWindow = new M3Designer.code.PyCodeWindow();
+            	previewWindow.show(jsonObj.json);
+           	} else {
+           		Ext.Msg.show({
+				   title:'Ошибка'
+				   ,msg: jsonObj.json
+				   ,buttons: Ext.Msg.OK						   						   
+				   ,icon: Ext.MessageBox.WARNING
+				});
+           	}     
+           	
+
         });
 
         function onTreeNodeDeleteClick(item) {

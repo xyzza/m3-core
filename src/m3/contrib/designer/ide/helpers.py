@@ -3,14 +3,22 @@
 import ast
 import os
 import codegen
+import json
 
-from parser import Parser
+from django.http import HttpResponse
+
 from m3.helpers.icons import Icons
 
+from parser import Parser, ParserError
 
 EXCLUSION = ('pyc', 'orig',)
 POSIBLE_EDIT_FILES = ('ui.py', 'forms.py')
 
+class JsonResponse(HttpResponse):
+    def __init__(self, content, *args, **kwargs):        
+        kwargs['content_type']='application/json'
+        kwargs['content'] = json.dumps(content)      
+        super(JsonResponse, self).__init__(*args, **kwargs)
         
 def get_files(path):
     '''
@@ -95,12 +103,14 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
     '''
     Создает класс с функцией автогенерации
     '''
+        
+    if class_name.find(" ") > 0:
+        raise ParserError(u'Наименование класса "%s" не должно содержать пробелов' % class_name)
     
-    assert class_name.find(" ") == -1, 'Class name "%s" can"t has whitespace' % class_name
     try:
         str(class_name)
     except UnicodeEncodeError:
-        raise Exception('Class name "%s" can"t has unicode symbols' % class_name)
+        raise ParserError(u'Наименование класса "%s" должно содержать только ascii символы ' % class_name)
 
     cl = Parser.generate_class(class_name, base_class)
      
