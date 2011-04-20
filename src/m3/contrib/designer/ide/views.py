@@ -48,7 +48,12 @@ def designer_preview(request):
     data = request.POST.get('data')
     js = json.loads(data)
     restores(js['model'])
-    py_code = Parser.from_designer_preview(js['model'])
+    
+    try:
+        py_code = Parser.from_designer_preview(js['model'])
+    except ParserError, e:
+        return JsonResponse({'success': False, 'json':repr(e)})
+    
     return JsonResponse({'success': True, 'json':py_code})
 
 def designer_fake_data(request):

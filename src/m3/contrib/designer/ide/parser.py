@@ -22,10 +22,10 @@ class ParserError(Exception):
         self.text = text
 
     def __str__(self):
-        return self.text.encode('utf-8')
+        return self.text
     
     def __repr__(self):
-        return self.text.encode('utf-8')
+        return self.text
 
 #===============================================================================
 class Parser(object):
@@ -75,7 +75,7 @@ class Parser(object):
         self.base_class = self._get_base_class(class_node)
                    
         if not func_node:
-            raise ParserError(u'Функция автогенерации с названием "%s" не определена в классе "%s"' % 
+            raise ParserError('Функция автогенерации с названием "%s" не определена в классе "%s"' % 
                                 (Parser.GENERATED_FUNC, self.class_name)    )
                 
         self.config_cmp = {}
@@ -253,8 +253,10 @@ class Parser(object):
         parent - self
         attr - width
         value - 100        
-        '''
-        assert isinstance(node, ast.Assign)
+        '''        
+        if not isinstance(node, ast.Assign):
+            raise ParserError("Некорректный синтаксис файла")
+        
         if isinstance(node.value, ast.Call):
             # Создание экземпляра            
             # instanse, attr, class name
@@ -372,8 +374,8 @@ class Parser(object):
                     if isinstance(nested_node, ast.FunctionDef) and nested_node.name == Parser.GENERATED_FUNC:
                         return node, nested_node
                 else:
-                    raise ParserError(u'Функция автогенерации с названием "%s" не определена в классе "%s"' % 
-                                    (Parser.GENERATED_FUNC, class_name)    )
+                    raise ParserError('Функция автогенерации с названием "%s" не \
+                        определена в классе "%s"' % (Parser.GENERATED_FUNC, str(class_name)))
                     
     @staticmethod
     def generate_class(class_name, class_base):
@@ -578,8 +580,9 @@ class Node(object):
     def _get_property(self, parent_field, extjs_attr, value, extjs_class):
         for item in self.mapping:
             if item['class'].has_key(extjs_class):
-                
-                assert item['config'].get(extjs_attr), 'Mapping is "%s" not found %s' % (extjs_class, extjs_attr)
+                                
+                if not item['config'].get(extjs_attr):
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_attr, extjs_class))
                 
                 py_attr = item['config'][extjs_attr]
                 return ast.Assign(
@@ -591,14 +594,15 @@ class Node(object):
                     self._get_node_value(value)
                 )
         else:
-            raise ParserError("Mapping is undefined for class '%s'" % extjs_class) 
+            raise ParserError("Не определен объект маппинга для класса '%s'" % extjs_class) 
     
     def _get_instanse(self, extjs_class, value):
         for item in self.mapping:
             if item['class'].has_key(extjs_class):
                 instanse_name = item['class'][ extjs_class ]
-                                           
-                assert value.find(" ") == -1, 'Variable "%s" can"t has whitespace' % value
+                                                           
+                if value.find(" ") > 0:
+                    raise ParserError('Переменная "%s" не может содержать пробелы' % value)
                 
                 return ast.Assign([ast.Name( 
                                         value, 
@@ -615,7 +619,7 @@ class Node(object):
                                         None)
                                   )
         else:
-            raise ParserError("Mapping is undefined for class '%s'" % extjs_class) 
+            raise ParserError("Не определен объект маппинга для класса '%s'" % extjs_class) 
     
     def _get_attr(self, parent_field, extjs_attr, value, extjs_class):
         for item in self.mapping:
