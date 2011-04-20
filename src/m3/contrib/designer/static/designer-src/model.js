@@ -92,9 +92,12 @@ M3Designer.model.FormModel = Ext.extend(Ext.data.Tree, {
         return counter;
     },
     /**
-     * Сортирует коллекции items дерева в соответствии в orderIndex атрибутами
+     * Сортирует коллекции items дерева в соответствии в orderIndex атрибутами.
      */
     initOrderIndexes:function() {
+        //вообще код здесь это наследие m3_docs. Очень странно, но кажется он правильно работает. Может он
+        // и не нужен(учитывая что
+        //вообще говоря теперь orderIndex'ы на сервере здесь не храняться)
         var sortFn = function(node1, node2) {
             if (node1.attributes.orderIndex > node2.attributes.orderIndex ) {
                 return 1;

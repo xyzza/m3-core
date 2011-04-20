@@ -108,8 +108,13 @@ M3Designer.ModelTransfer = Ext.apply({},{
         return config;
     },
     deserialize:function(jsonObj) {
-        //обходит json дерево и строт цивилизованое дерево с нодами, событьями и проч
+        //обходим json дерево и строт цивилизованое дерево с нодами, событьями и проч
         var root = new M3Designer.model.ComponentModel(this._cleanConfig(jsonObj));
+
+        //Дочерние ноды следует добавлять к руту, который принадлежит дереву
+        //иначе у дочерних элементов рута не будет проинициализировано свойство
+        //ownerTree
+        var result = new M3Designer.model.FormModel(root);
 
         var callBack = function(jsonObj) {
             var newNode = new M3Designer.model.ComponentModel(this._cleanConfig(jsonObj));
@@ -143,8 +148,7 @@ M3Designer.ModelTransfer = Ext.apply({},{
                 this.doToolbarDeserializeWorkaround(p, child);
             }
         }
-
-        var result = new M3Designer.model.FormModel(root);
+        
         result.initOrderIndexes();
         return result;
     }
