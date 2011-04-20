@@ -31,4 +31,5 @@ urlpatterns = patterns('',
     (r'designer/save$','designer.ide.views.designer_save'),
     (r'designer/preview$','designer.ide.views.designer_preview'),
     (r'file-content$','designer.ide.views.designer_file_content'),
+    (r'file-content/save$','designer.ide.views.designer_file_content_save'),
 )

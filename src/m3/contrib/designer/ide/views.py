@@ -2,6 +2,7 @@
 
 import os
 import json
+import codecs
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -142,25 +143,25 @@ def designer_file_content(request):
     '''
     Вьюшка для отдачи содержимого файла
     '''
-    import codecs
+    path = request.GET.get('path')
+
+    assert path, 'Path to source file is undefined'
+
+    with codecs.open( path, "r", "utf-8" ) as file:
+        result = file.read()
+    
+    return JsonResponse({'success': True, 'data':{'file_content':result}})
+
+def designer_file_content_save(request):
+    '''
+    Вьюшка сохраняет изменения
+    '''
     path = request.POST.get('path')
     content = request.POST.get('content')
 
     assert path, 'Path to source file is undefined'
 
-    action = "r" if not content else "w"
-    result = None
-    
-    # И долго будет продолжаться js в питоне и self в js-e?
-    # Для открытия файлов существуют менеджеры контекста
-    # И было бы намного понятней. Т.к. операции чтения и записи разные по сути
-    # Было бы правильнее разнести это по двум вьюшкам и через POST для записи
-    # GET - для чтения 
-    fileObj = codecs.open( path, action, "utf-8" )
-    if not content:
-        result = fileObj.read()
-    else:
-        fileObj.write(content)
-    fileObj.close()
-    
-    return HttpResponse(result)
+    with codecs.open( path, "w", "utf-8" ) as file:
+        file.write(content)
+
+    return JsonResponse({'success': True})
