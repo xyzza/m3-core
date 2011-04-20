@@ -261,7 +261,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions:{
-                allowed:['panel', 'formPanel','fieldSet', 'gridPanel']
+                allowed:['panel', 'formPanel','fieldSet', 'gridPanel','objectGrid']
             },
             toolboxData:{
                 text:'Tab panel',
