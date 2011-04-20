@@ -115,7 +115,10 @@ class Parser(object):
     def _build_json(self, js_dict, key='self'):
         
         item = self.extends_cmp.get(key)
-        js_dict.update( self._get_json_config(key ) )
+        
+        
+        
+        js_dict.update( self._get_json_config(key) )
         if isinstance(item, dict):
             for k, v in item.items():
                 if isinstance(v, list):
@@ -127,8 +130,7 @@ class Parser(object):
                             p = {}
                             l.append(p)                   
                             self._build_json(p, value)
-                        else:
-
+                        else:                            
                             l.append(self._get_json_config(value))                            
             
                     extjs_item = self._get_json_attr(k, js_dict['type'])                    
@@ -137,11 +139,19 @@ class Parser(object):
                                 
                     js_dict[extjs_item] = l
                 else: 
-                    # Приходят атрибуты                    
+                    # Приходят property                    
                     extjs_item = self._get_json_attr(k, js_dict['type'])
                     if not extjs_item:
                         raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (js_dict['type'], k))  
-                    js_dict[extjs_item] = self._get_json_config(v)                    
+
+                    # Объект может быть вложенный
+                    if self.extends_cmp.get(v):                            
+                        p = {}                 
+                        self._build_json(p, v)                                                
+                        js_dict[extjs_item] = p
+                    else:                                                    
+                        js_dict[extjs_item] = self._get_json_config(v)                    
+        
         
     def _get_extends(self, node):
         parent =  node.func.value.value.id
@@ -170,6 +180,7 @@ class Parser(object):
         Возвращает конфигурацию компонента в качестве словаря
         '''
         properties, py_name = self._get_properties(key)
+
         properties['type'] = py_name
         properties['id'] = key
         return properties
@@ -260,7 +271,14 @@ class Parser(object):
         if isinstance(node.value, ast.Call):
             # Создание экземпляра            
             # instanse, attr, class name
-            return node.targets[0].id, 'py_name', node.value.func.id
+            
+            func = node.value.func
+            if isinstance(func, ast.Attribute):
+                return node.targets[0].id, 'py_name', '%s.%s' % (func.value.id ,func.attr)
+            elif isinstance(node.value.func, ast.Name):                
+                return node.targets[0].id, 'py_name', func.id
+            else:
+                raise ParserError("Некорректный синтаксис файла")
         else:            
             # Распарсивание свойства
             # parent, attr, value
