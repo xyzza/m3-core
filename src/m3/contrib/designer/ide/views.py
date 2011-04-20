@@ -62,7 +62,7 @@ def designer_fake_data(request):
     Вьюшка для показа формы (fake)
     '''
 
-    result = {
+    data = {
             'title':'Ma teh window',
             'layout':'fit',
             'type':'window',
@@ -80,7 +80,8 @@ def designer_fake_data(request):
 
         }
 
-    return JsonResponse(result)
+    res = {'success':True, 'json':data}
+    return JsonResponse(res)
 
 def designer_data(request):
     '''
