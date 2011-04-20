@@ -68,6 +68,42 @@
 	"parent": "container"
 },
 
+// Элемент тулбара: прижатие к левому углу
+{
+	"class": {
+		"tbseparator": "ExtToolBar.Separator"
+	},
+	"config": {}	
+},
+
+// Элемент тулбара: прижатие к левому углу
+{
+	"class": {
+		"tbspacer": "ExtToolBar.Spacer"
+	},
+	"config": {
+		"width":"width"
+	}	
+},
+
+// Элемент тулбара: прижатие к левому углу
+{
+	"class": {
+		"tbtext": "ExtToolBar.TextItem"
+	},
+	"config": {
+		"text":"text"
+	}	
+},
+
+// Элемент тулбара: прижатие к левому углу
+{
+	"class": {
+		"tbfill": "ExtToolBar.Fill"
+	},
+	"config": {}	
+},
+
 // Пэйджинг бар
 {
 	"class": {

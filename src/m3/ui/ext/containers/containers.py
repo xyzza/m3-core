@@ -59,20 +59,31 @@ class ExtContainer(BaseExtContainer):
 class ExtToolBar(BaseExtContainer):
     '''
     Класс, имитирующий работу Ext.Toolbar
-    
-    Атрибуты для дизайнера:
-    @designer: Tool Bar
-    @ext_class: Ext.Toolbar
-    @xtype: toolbar
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Tool Bar"
-    ,ext_class: "Ext.Toolbar"
-    ,xtype: "toolbar"
-    }
-    @end_designer
     '''
+    #===============================================================================
+    # Наборы классов, которые могут быть в качестве элементов тулбара    
+    class Fill(object):
+        def render(self):
+            return '"->"'
+    
+    class Separator(object):
+        def render(self):
+            return '"-"'        
+    
+    class Spacer(object):
+        def __init__(self, width=2):
+            self.width = width
+        
+        def render(self):
+            return "{xtype: 'tbspacer', width: %d}" % self.width
+    
+    class TextItem(object):
+        def __init__(self, text):
+            self.text = text
+        
+        def render(self):
+            return '"%s"' % self.text
+    
     def __init__(self, *args, **kwargs):
         super(ExtToolBar, self).__init__(*args, **kwargs)
         self._ext_name = 'Ext.Toolbar'
@@ -84,7 +95,7 @@ class ExtToolBar(BaseExtContainer):
         for item in self.items:
             # Если объект структуры классов, то пусть сам рендерится, 
             # если нет - так как есть.
-            if isinstance(item, ExtUIComponent):
+            if hasattr(item, 'render') and callable(item.render):
                 res.append(item.render()) 
             else:
                 res.append(item)        
@@ -94,27 +105,27 @@ class ExtToolBar(BaseExtContainer):
         '''
         Переносит все последующие компоненты направо
         '''
-        self.items.append(ExtStaticToolBarItem('"->"'))
+        self.items.append(ExtToolBar.Fill())
                 
     def add_separator(self):
         '''
         Добавляет разделитель
         '''
-        self.items.append(ExtStaticToolBarItem('"-"'))
+        self.items.append(ExtToolBar.Separator())
                 
     def add_spacer(self, width=2):
         '''
         Добавляет дополнительное расстояние с шириной width
         @param width: расстояние
         '''
-        self.items.append(ExtStaticToolBarItem("{xtype: 'tbspacer', width: %d}" % width))
+        self.items.append(ExtToolBar.Spacer(width))
                 
     def add_text_item(self, text_item):
         '''
         Добавляет текст
         @text_item: текст
         '''
-        self.items.append(ExtStaticToolBarItem('"%s"' % text_item))
+        self.items.append(ExtToolBar.TextItem(text_item))
         
     def add_menu(self, **kwargs):
         '''
@@ -156,10 +167,11 @@ class ExtToolBar(BaseExtContainer):
         
         return 'new %s' % res if not self._is_function_render else res
     
-    
 #=============================================================================== 
 class ExtStaticToolBarItem(ExtUIComponent):
     '''
+    @deprecated: Нужно использовать встроенные подклассы в качестве элементов 
+    
     Преднастроенные элементы в тулбаре
     @TODO: Для чего нужнен отдельный класс, если задача может решится методами
     тулбара?
@@ -180,6 +192,8 @@ class ExtStaticToolBarItem(ExtUIComponent):
 #===============================================================================
 class ExtTextToolBarItem(ExtUIComponent):
     '''
+    @deprecated: Нужно использовать встроенные подклассы в качестве элементов
+    
     Текстовый элемент в тулбаре
     @TODO: Для чего нужнен отдельный класс, если задача может решится методами
     тулбара?
@@ -201,26 +215,6 @@ class ExtTextToolBarItem(ExtUIComponent):
 class ExtPagingBar(BaseExtContainer):   
     '''
     Класс, имитирующий работу Ext.PagingToolbar
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Paging Bar"
-    ,ext_class: "Ext.PagingToolbar"
-    ,xtype: "paging"
-    ,attr: [{
-        ext_attr: "pageSize"
-        ,py_attr: "page_size" 
-        ,default_value: 25
-    },{
-        ext_attr: "displayMsg"
-        ,py_attr: "display_message"
-        ,default_value: "Показано записей {0} - {1} из {2}"
-    },{
-        ext_attr: "empty_message"
-        ,py_attr: "emptyText"
-        ,default_value: "Нет записей"
-    }]}
-    @end_designer
     '''
     def __init__(self, *args, **kwargs):
         super(ExtPagingBar, self).__init__(*args, **kwargs)
@@ -298,14 +292,6 @@ class ExtToolbarMenu(ExtUIComponent):
 class ExtButtonGroup(BaseExtContainer):
     '''
     Класс, имитирующий работу Ext.ButtonGroup
-    
-    @version: 0.1
-    @begin_designer
-    {title: "Button Group"
-    ,ext_class: "Ext.ButtonGroup"
-    ,xtype: "buttongroup"
-    }
-    @end_designer
     '''
     def __init__(self, *args, **kwargs):
         super(ExtButtonGroup, self).__init__(*args, **kwargs)
