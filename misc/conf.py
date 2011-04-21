@@ -18,6 +18,9 @@ INNER_JS_FOLDER = os.path.join(STATIC_PATH, 'm3', 'js')
 # Какие типы файлов
 FILE_EXTENSIONS = ('js',)
 
+# Внешние приоритетные js файлы для загрузки
+HIGH_PRIORITY_OUTER = ('Reorderer.js', )
+
 # Приоритетные js файлы для загрузки
 HIGH_PRIORITY = ('m3.js', 
                  'ComboBox.js', 
