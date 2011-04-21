@@ -16,13 +16,13 @@ def add_file(src_file, dst_files, folder):
     @attr dst_files Файлы, которые необходимо добавить
     @attr folder Папка откуда добавляются файлы
     '''
+
     for ffile in dst_files:
         if ffile not in conf.EXCLUDE:             
-            if DEBUG:   
-                print ffile       
-            
             file_names = ffile.split('.')
             if len(file_names) > 0 and file_names[-1] in conf.FILE_EXTENSIONS:
+                if DEBUG:   
+                    print ffile
                             
                 file_path = os.path.join(folder, ffile)
                 with codecs.open(file_path, 'r', encoding='utf-8') as f:
@@ -49,15 +49,23 @@ def main():
     new_file_name = os.path.join(conf.INNER_JS_FOLDER, conf.FILE_NAME)
     with codecs.open(new_file_name, 'w+', encoding='utf-8', buffering=0) as new_file:
         
-        # Загрузка внешних файлов
-        add_file(new_file, os.listdir(conf.OUTER_JS_FOLDER), conf.OUTER_JS_FOLDER)
+        # Файлы, приоритеты которых не заданы будут перебираться в алфавитном порядке
+        # с помощью функции sorted
+        
+        # Загрузка внешних файлов c высоким приоритетом
+        add_file(new_file, conf.HIGH_PRIORITY_OUTER, conf.OUTER_JS_FOLDER)
+        
+        # Загрузка остальных внешних файлов
+        add_file(new_file, [f for f in sorted(os.listdir(conf.OUTER_JS_FOLDER)) 
+                                if f not in conf.HIGH_PRIORITY_OUTER], 
+                conf.OUTER_JS_FOLDER)
         
         # Загрузка внутренних файлов с высоким приоритетом
         file_list_hight_priority = conf.HIGH_PRIORITY
         add_file(new_file, file_list_hight_priority, conf.INNER_JS_FOLDER)
     
         # Загрузка внутренних файлов с средним приоритетом
-        file_list_middle_priority = [f for f in os.listdir(conf.INNER_JS_FOLDER) 
+        file_list_middle_priority = [f for f in sorted(os.listdir(conf.INNER_JS_FOLDER))
                                      if f not in conf.HIGH_PRIORITY and 
                                      f not in conf.LOW_PRIORITY]
     
