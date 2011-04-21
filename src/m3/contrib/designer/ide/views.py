@@ -162,7 +162,14 @@ def designer_file_content_save(request):
 
     assert path, 'Path to source file is undefined'
 
-    with codecs.open( path, "w", "utf-8" ) as f:
-        f.write(content)
+    success = False
+    error =''
 
-    return JsonResponse({'success': True})
+    try:
+        with codecs.open( path, "w", "utf-8" ) as f:
+            f.write(content)
+            success = True
+    except IOError as (errno, strerror):
+        error =  "I/O error({0}): {1}".format(errno, strerror)
+
+    return JsonResponse({'success': success, 'error': error})

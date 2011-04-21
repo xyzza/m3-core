@@ -38,8 +38,10 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
             ]
         });
         M3Designer.code.ExtendedCodeEditor.superclass.initComponent.call(this);
+        /**/
     },
     _onClose:function() {
+         
        /*Вероятно можно будет оптимизировать, т.к. дублирует поведение beforeclose у tabpanel (выше)*/
        var textArea = this.findByType('textarea')[0];
        /*Если есть именения в коде, выводим сообщения [ showMessage ]*/

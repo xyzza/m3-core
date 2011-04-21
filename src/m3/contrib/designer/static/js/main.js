@@ -205,7 +205,18 @@ function onClickNodePyFiles(node, fileAttr){
                         content: fileContent
                     },
                     success: function(response, opts){
-                        console.log('file saved');
+                        var obj = Ext.util.JSON.decode(response.responseText);
+                        var title = '';
+                        var message ='';
+                        var icon ='success';
+                        if (obj.success)
+                            message = 'Изменения были успешно сохранены';
+                        else if (!obj.success && obj.error){
+                            message = 'Ошибка при сохранении файла';
+                            icon = 'warning';
+                        }
+                        AlertBox.show(' ', message, icon, {timeout: 2, closable: false});
+
                     },
                     failure: uiAjaxFailMessage
                 })
