@@ -140,6 +140,8 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    removeHighlight:function() {
        if (!Ext.isEmpty(this._lastHighlightedId)) {
            var flyEl = Ext.fly(this._lastHighlightedId);
+           var win = Ext.getCmp(this._lastQuickPropertyId);
+           if (win) win.close();
            if (flyEl) {
                flyEl.removeClass('selectedElement');
            }
@@ -293,7 +295,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
            //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
            var win = Ext.getCmp(this._lastQuickPropertyId);
            if (win) win.close();
-           this._lastQuickPropertyId = this._editorManager.quickEditModel(model, event.xy);
+           this._lastQuickPropertyId = this._editorManager.quickEditModel(model);
        }
    },
    onComponentTreeNodeClick:function(node, e) {

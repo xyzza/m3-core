@@ -58,9 +58,27 @@
     border: 2px solid #710AF0
 }
 /*Custom'ый toolTip*/
-.x-tipcustom{position:absolute;top:0;left:0;visibility:hidden;z-index:20000;border:0 none}
+.x-tipcustom{
+    position:absolute;
+    top:0;
+    left:0;
+    visibility:hidden;
+    z-index:20000;
+    border:0 none;
+}
 .x-tipcustom > * {
-    background: rgba(51, 51, 51, 0.9);
+    background: rgba(51, 51, 51, 0.3);
+
+    transition: background 0.3s linear 0.3s;
+    /* Firefox 4 */
+    -moz-transition:background 0.3s linear 0.3s;
+    /* Safari and Chrome */
+    -webkit-transition:background 0.3s linear 0.3s;
+    /* Opera */
+    -o-transition-transition:background 0.3s linear 0.3s;
+}
+.x-tipcustom:hover > * {
+    background: rgba(51, 51, 51, 0.8);
 }
 .x-tipcustom .x-tipcustom-bwrap{
     border-radius: 0 0 5px 5px;
@@ -89,10 +107,10 @@
 .x-tipcustom .x-tipcustom-body .loading-indicator{margin:0;}
 .x-tipcustom .x-tipcustom-body .x-form-item .x-form-item-label{color:white;}
 
-.x-tipcustom-icon{ background: url(../images/cog_16x16.png) no-repeat left center; height:20px}
+.x-tipcustom-icon{ background: url(../images/cog_16x16.png) no-repeat left center; height:18px; width:20px;}
 
 .ext-ie .x-tipcustom .x-tipcustom-header,.ext-ie .x-tipcustom .x-tipcustom-tc{font-size:0;line-height:0;}
-.x-tipcustom .x-tipcustom-header-text{font:bold 11px tahoma,arial,helvetica,sans-serif;padding:0;margin:0 0 2px 0;color:white; padding: 0 15px 0 25px; line-height: 19px}
+.x-tipcustom .x-tipcustom-header-text{font:bold 11px tahoma,arial,helvetica,sans-serif;padding:0;margin:0 0 2px 0;color:white; padding: 0 15px 0 20px; line-height: 19px}
 
 .x-tipcustom-header .x-tool.x-tool-close{
     margin-top:2px;

@@ -29,13 +29,13 @@ M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         window.show();
     },
     /**/
-    quickEditModel:function(model, xy) {
+    quickEditModel:function(model) {
         var cfg = this.initConfig(model, true);
         var window = new M3Designer.edit.QuickPropertyWindow({
             source:cfg,
             model:model
         });
-        window.showAt(model.id, xy);
+        window.anchorWinTo(model.id);
         window.on('save', this.saveModel.createDelegate(this));
         window.show();
         return window.id
@@ -98,12 +98,13 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
     autoHeight:true,
     draggable: false,
     resizable: false,
+    closable: false,
     border:false,
     plain: true,
     titleCollapse: true,
     collapsible: true,
     hideCollapseTool: true,
-    title:'Настройки',
+    title:'',
     baseCls: 'x-tipcustom',
     iconCls: 'x-tipcustom-icon',
     
@@ -124,15 +125,24 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
         });
 
         M3Designer.edit.QuickPropertyWindow.superclass.initComponent.call(this);
+// Тут будет кусок код отвечающй за развертку и сворачивание окна быстрых настроек
+//        var scope = this;
+//        this.on('afterrender', function(){
+//            var el = Ext.fly(scope.id);
+//            el.on('mouseover', function(){
+//                scope.expand();
+//            });
+//            el.on('mouseout', function(e){
+////                scope.collapse();
+//            });
+//        });
     },
-    showAt:function(modeId, xy){
+    anchorWinTo:function(modeId){
         M3Designer.edit.QuickPropertyWindow.superclass.show.call(this);
         this.collapse(false);
-        /* padding for menu */
-        xy[0] += 15;
-        this.setPosition(xy);
-        this.setTitle('Настройка '+this.source['id']||'')
-
+        var domElementId = M3Designer.Utils.parseDomId(modeId);
+        this.anchorTo(document.getElementById(domElementId), "tr-tr");
+        this.setTitle(this.source['id']||'');
     },
     /**/
     _setup_panel_customs:function(customEditorsCfg) {
