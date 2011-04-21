@@ -16,6 +16,7 @@ class M3CalendarWindow(ExtWindow):
         self.layout = 'fit'
         self.template_globals = 'showM3Calendar.js'
         self.date_save_url = urls.get_url('save_calendar_date')
+        self.get_date_url = urls.get_url('get_dates_to_ui')
 
         table_container = ExtContainer(layout='table', height=600, width=800)
         table_container.layout_config = dict(columns=4, rows=3)
