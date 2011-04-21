@@ -362,7 +362,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     isQuickEditable: true
                 },
                 checked: {
-                    defaultValue:false
+                    defaultValue:false,
+                    isQuickEditable: true
                 },
                 boxLabel: {
                     defaultValue:'',
@@ -432,7 +433,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     defaultValue:''
                 },
                 emptyText: {
-                    defaultValue:''
+                    defaultValue:'',
+                    isQuickEditable: true
                 },
                 minLength:{
                     defaultValue:0

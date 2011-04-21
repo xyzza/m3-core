@@ -1,9 +1,13 @@
 # coding:utf-8
 
+import sys
 import os
 import codecs
 import subprocess
+
 import conf
+
+DEBUG = False
 
 def add_file(src_file, dst_files, folder):
     '''
@@ -13,13 +17,17 @@ def add_file(src_file, dst_files, folder):
     @attr folder Папка откуда добавляются файлы
     '''
     for ffile in dst_files:
-        file_names = ffile.split('.')
-        if len(file_names) > 0 and file_names[-1] in conf.FILE_EXTENSIONS:
-                        
-            file_path = os.path.join(folder, ffile)
-            with codecs.open(file_path, 'r', encoding='utf-8') as f:
-                src_file.write(f.read())
-                src_file.write('\n')
+        if ffile not in conf.EXCLUDE:             
+            if DEBUG:   
+                print ffile       
+            
+            file_names = ffile.split('.')
+            if len(file_names) > 0 and file_names[-1] in conf.FILE_EXTENSIONS:
+                            
+                file_path = os.path.join(folder, ffile)
+                with codecs.open(file_path, 'r', encoding='utf-8') as f:
+                    src_file.write(f.read())
+                    src_file.write('\n')
 
 def compile_production(src_file):
     '''
@@ -40,6 +48,7 @@ def main():
     '''
     new_file_name = os.path.join(conf.INNER_JS_FOLDER, conf.FILE_NAME)
     with codecs.open(new_file_name, 'w+', encoding='utf-8', buffering=0) as new_file:
+        
         # Загрузка внешних файлов
         add_file(new_file, os.listdir(conf.OUTER_JS_FOLDER), conf.OUTER_JS_FOLDER)
         
@@ -50,8 +59,7 @@ def main():
         # Загрузка внутренних файлов с средним приоритетом
         file_list_middle_priority = [f for f in os.listdir(conf.INNER_JS_FOLDER) 
                                      if f not in conf.HIGH_PRIORITY and 
-                                     f not in conf.LOW_PRIORITY and 
-                                     f not in conf.EXCLUDE]
+                                     f not in conf.LOW_PRIORITY]
     
         add_file(new_file, file_list_middle_priority, conf.INNER_JS_FOLDER)
     
@@ -59,9 +67,13 @@ def main():
         file_list_low_priority = conf.LOW_PRIORITY
         add_file(new_file, file_list_low_priority, conf.INNER_JS_FOLDER)
         
-
-    compile_production(new_file_name)
+    if not DEBUG:
+        compile_production(new_file_name)
 
 if __name__ == '__main__':
+    
+    if len(sys.argv) > 1 and sys.argv[1] == '--debug':
+        DEBUG = True 
+    
     main()
     print "It's a Good job"

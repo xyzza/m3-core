@@ -62,7 +62,7 @@ def get_files(path):
             propertys_dict['leaf'] = True
             
             if ffile in POSIBLE_EDIT_FILES:
-                propertys_dict['iconCls'] = Icons.PAGE_WHITE_CODE
+                propertys_dict['iconCls'] = Icons.PAGE_WHITE_PY
                 propertys_dict['leaf'] = False
 
             elif file_type == POSIBLE_EDIT_FILE_PY:
@@ -101,7 +101,7 @@ def get_classess(path):
             if isinstance(item, ast.ClassDef):
                 d = {'text': item.name,
                      'leaf': True,
-                     'iconCls':  Icons.PAGE_WHITE_C,
+                     'iconCls':  'icon-class',
                      'class_name':  item.name,
                      'path': path}
                 res.append(d)
@@ -142,12 +142,21 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
         str(class_name)
     except UnicodeEncodeError:
         raise ParserError(u'Наименование класса "%s" должно содержать только ascii символы ' % class_name)
+    
 
     cl = Parser.generate_class(class_name, base_class)
      
     # Чтение файла    
     f = open(path, 'r')
     module = ast.parse(f.read())
+    
+    #Нужно добавить импорт всего, если этого импорта нет
+    for node in ast.iter_child_nodes(module):
+        if isinstance(node, ast.ImportFrom) and node.module == Parser.IMPORT_ALL:            
+            break
+    else:
+        module.body.insert(0, Parser.generate_import())
+    
     module.body.append(cl)
     f.close()
     

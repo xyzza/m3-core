@@ -283,6 +283,10 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    onDesignerPanelDomClick: function(event, target, obj) {
        var el = event.getTarget('.designComponent');
        if (el) {
+           //Выделяет элемент в дереве компонентов
+           var nodeId = M3Designer.Utils.parseDomIdToNodeId(el.id)
+           this.tree.getNodeById(nodeId).select();
+
            this.highlightElement(el.id);
            var modelId = M3Designer.Utils.parseModelId(el.id);
            var model = this._model.findModelById(modelId);

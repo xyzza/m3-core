@@ -56,7 +56,7 @@ function createTreeView(rootNodeName){
 						            				text: text
 						            				,path: attr['path']
 						            				,class_name: text
-						            				,iconCls: 'icon-page-white-c'	
+						            				,iconCls: 'icon-class'	
 						            				,leaf: true			            				
 						            			});
 		
