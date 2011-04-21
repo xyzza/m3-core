@@ -50,6 +50,9 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        this.tree.on('nodedragover', this.onComponentTreeNodeDragOver.createDelegate(this));
        this._editorManager.on('modelUpdate', this.onModelUpdate.createDelegate(this));
 
+       //в тулбокс ничего перетаскивать нельзя, можно только из него
+       this.toolbox.on('nodedragover', function(dragOverEvent) {dragOverEvent.cancel = true });
+       this.toolbox.on('beforenodedrop', function(dropEvent){dropEvent.cancel = true });
 
        //обновим экранное представление
        this.refreshView();
@@ -75,8 +78,8 @@ M3Designer.controller.AppController = Ext.extend(Object, {
                // нужно это потому что объект который порождает дроп зону будет недоступен на момент
                // исполнения onNodeDrop. И, увы, дроп зона не наследует Observable
                // Да, чуваки, ООП в жабаскрипте это вам не хрен собачий
-               processDropResults : this.domNodeDrop.createDelegate(this),
-               validateDrop: this.validateDomDrop.createDelegate(this),
+               processDropResults : this.processDesignerDomDrop.createDelegate(this),
+               validateDrop: this.validateDesignerDomDrop.createDelegate(this),
 
                getTargetFromEvent: function(e) {
                    //сюда попадают мышиные DOM события, будем пытаться найти ближайший допустимый
@@ -196,29 +199,40 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        }
    },
    /*
+   * Создаем новый компонент
+   */
+   _createModelComponent:function(parentModel, type){
+       if (!parentModel.checkRestrictions(type)) {
+           return;
+       }
+       var newModelNodeConfig = {};
+       newModelNodeConfig.properties = M3Designer.Types.getTypeInitProperties(type);
+       var nameIndex = this._model.countModelsByType(type);
+       newModelNodeConfig.properties.id = newModelNodeConfig.properties.id + '_' + (nameIndex+1) ;
+       newModelNodeConfig.type = type;
+       parentModel.appendChild( new M3Designer.model.ComponentModel(newModelNodeConfig) );
+   },
+   /*
    * Обработка дропа в дизайнер с тулбокса
    */
-   domNodeDrop:function(target, dd, e, data ) {
+   processDesignerDomDrop:function(target, dd, e, data ) {
        this.removeHighlight();
+       if (!data.node.attributes.isToolboxNode) {
+           return void(!!'Jakesnake, %username%');//void? void!
+       }
        var componentNode = data.node;
        var modelId = M3Designer.Utils.parseModelId(target.id);
        var model = this._model.findModelById(modelId);
-
-       if (!model.checkRestrictions(componentNode.attributes.type)) {
-           return;
-       }
-
-       var newModelNodeConfig = {};
-       newModelNodeConfig.properties = M3Designer.Types.getTypeInitProperties(componentNode.attributes.type);
-       var nameIndex = this._model.countModelsByType(componentNode.attributes.type);
-       newModelNodeConfig.properties.id = newModelNodeConfig.properties.id + '_' + (nameIndex+1) ;
-       newModelNodeConfig.type = componentNode.attributes.type;
-       model.appendChild( new M3Designer.model.ComponentModel(newModelNodeConfig) );
+       this._createModelComponent(model, componentNode.attributes.type);
    },
    /*
    * Проверка допустимости при перетаскивании между тулбоксом и дизайнером
     */
-   validateDomDrop:function(target, dd, e, data) {
+   validateDesignerDomDrop:function(target, dd, e, data) {
+       //в дизайнер разрешается дропать только ноды с тулбокса, из дерева компонентов нельзя
+       if (!data.node.attributes.isToolboxNode) {
+           return false;
+       }
        var modelId = M3Designer.Utils.parseModelId(target.id);
        var parent = this._model.findModelById(modelId);
        var child = data.node.attributes.type;
@@ -244,7 +258,13 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        }
        
        //проверка допустимости типов
-       return parent.checkRestrictions(child);
+       if (eventObj.point == 'append') {
+           return parent.checkRestrictions(child);
+       }
+       else {
+           var grandParent = parent.parentNode;
+           return grandParent.checkRestrictions(child);
+       }
    },
    /*
    * Возвращает объект для отправки на сервер
@@ -273,17 +293,34 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        }
    },
    onComponentTreeNodeClick:function(node, e) {
-       this.highlightElement('cmp-'+node.id);
+       this.highlightElement(M3Designer.Utils.parseDomId(node.id));
    },
    onComponentTreeBeforeNodeDrop:function(dropEvent) {
-       return this.validateComponentTreeDrop(dropEvent);
+       var dropAllowed = this.validateComponentTreeDrop(dropEvent);
+       if (dropAllowed && dropEvent.dropNode.attributes.isToolboxNode) {
+           //тут такой хитрый воркэраунд - мы заменяем объект перетаскивания на дубликат
+           //если этого не сделать то перемещаемая нода будет удалена в тулбоксе(какое дефолтное поведение экстового дерева),
+           //а так как был создан дубликат то его и удалят, его не жалко.
+           //Кажется что есть другие способы, например создавать компонент в этом соыбтии и отменять дд
+           //но все это ведет к js ошибкам.
+           dropEvent.dropNode = new Ext.tree.TreeNode(dropEvent.dropNode.attributes);
+       }
+       return dropAllowed;
    },
    onComponentTreeNodeDragOver:function(dragOverEvent){
        //если перетаскивать нельзя, то будет отображен соответствующий значек на курсоре мышки
        dragOverEvent.cancel = !this.validateComponentTreeDrop(dragOverEvent);
    },
    onComponentTreeNodeDrop: function(dropEvent) {
-       this.moveTreeNode(dropEvent.dropNode, dropEvent.target, dropEvent.point);
+       //либо перемещение нод, либо создание нового компонента, если нода была из тулбокса
+       if (!dropEvent.dropNode.attributes.isToolboxNode) {
+           this.moveTreeNode(dropEvent.dropNode, dropEvent.target, dropEvent.point);
+       }
+       else {
+           var model = this._model.findModelById(dropEvent.target.id);
+           var type = dropEvent.dropNode.attributes.type;
+           this._createModelComponent(model,type);
+       }
        return false;
    },
    onComponentTreeNodeDblClick:function(node, e) {

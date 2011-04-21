@@ -166,7 +166,8 @@ M3Designer.model.ModelTypeLibrary = Ext.apply({}, {
            var node = new Ext.tree.TreeNode({
                text:this.typesConfig[type]['toolboxData'].text,
                type:type,
-               iconCls:this.typesConfig[type]['treeIconCls']
+               iconCls:this.typesConfig[type]['treeIconCls'],
+               isToolboxNode:true
            });
 
            if (currentType['toolboxData'].hasOwnProperty('category')) {

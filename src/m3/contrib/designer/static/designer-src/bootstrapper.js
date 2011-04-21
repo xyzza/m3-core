@@ -23,6 +23,7 @@ Bootstrapper = Ext.extend(Object, {
             }),
             flex:1,
             enableDD:true,
+            ddGroup:'designerDDGroup',
             animate:false,
             rootVisible:false,
             title:'Дерево компонентов',
