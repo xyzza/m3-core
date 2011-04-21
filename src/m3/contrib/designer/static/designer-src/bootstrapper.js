@@ -21,6 +21,7 @@ Bootstrapper = Ext.extend(Object, {
                 id:'root',
                 expanded:true
             }),
+            useArrows:true,
             flex:1,
             enableDD:true,
             ddGroup:'designerDDGroup',
@@ -60,6 +61,7 @@ Bootstrapper = Ext.extend(Object, {
                 id:'root'
             }),
             flex:1,
+            useArrows:true,
             ddGroup:'designerDDGroup',
             enableDD:true,
             animate:false,

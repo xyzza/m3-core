@@ -63,21 +63,10 @@ def designer_fake_data(request):
     '''
 
     data = {
-            'title':'Ma teh window',
-            'layout':'fit',
+            'title':'Test window',
+            'layout':'form',
             'type':'window',
-            'id':'self',
-            'tbar': {
-                'type':'toolbar',
-                'id' : 'toolbar',
-                'items': [ {
-                        'type':'button',
-                        'id':'bla',
-                        'text':'freaking button'
-                    }
-                ]
-            }
-
+            'id':'self'
         }
 
     res = {'success':True, 'json':data}

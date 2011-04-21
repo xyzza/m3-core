@@ -133,6 +133,23 @@ M3Designer.ui.ModelUIPresentaitionBuilder = function() {
                         xtype:'designer-dict-select'
             });
         },
+        fileUploadField:function(model, cfg) {
+            //если не задать никаких указаний ширины то поле расплывается
+            if (!cfg.width && !cfg.anchor) {
+                cfg['width'] = 150;
+            }
+            return Ext.apply(cfg,{
+                        xtype:'fileuploadfield'
+            });
+        },
+        imageUploadField:function(model,cfg) {
+            if (!cfg.width && !cfg.anchor) {
+                cfg['width'] = 150;
+            }
+            return Ext.apply(cfg,{
+                        xtype:'imageuploadfield'
+            });
+        },
         tabPanel:function(model, cfg) {
             return Ext.apply(cfg,{
                         xtype:'tabpanel',

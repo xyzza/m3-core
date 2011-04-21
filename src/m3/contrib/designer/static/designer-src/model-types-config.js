@@ -1084,6 +1084,59 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 text:'Object grid',
                 category:'M3'
             }
+        },
+        fileUploadField: {
+            parent:'baseField',
+            properties: {
+                id: {
+                    defaultValue:'file_upload_field',
+                    isInitProperty:true
+                },
+                possibleFileExtensions: {
+                    defaultValue:'',
+                    isInitProperty:true
+                },
+                value: {
+                    defaultValue:'',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                text:'File upload field',
+                category:'M3'
+            }
+        },
+        imageUploadField: {
+            parent:'baseField',
+            properties: {
+                id: {
+                    defaultValue:'image_upload_field',
+                    isInitProperty:true
+                },
+                possibleFileExtensions: {
+                    defaultValue: ('png', 'jpeg', 'gif', 'bmp', 'jpg'),
+                    isInitProperty:true
+                },
+                thumbnailSize: {
+                    defaultValue:[300,300],
+                    propertyType:'object'
+                },
+                thumbnail:{
+                    defaultValue:true
+                },
+                imageMaxSize:{
+                    defaultValue:[600,600],
+                    propertyType:'object'
+                },
+                value: {
+                    defaultValue:'',
+                    isInitProperty:true
+                }
+            },
+            toolboxData:{
+                text:'Image upload field',
+                category:'M3'
+            }
         }
     }
 });
