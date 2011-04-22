@@ -78,8 +78,14 @@ class ExtDateField(BaseExtField):
         self.hide_today_btn = False
         
         #
-        self.enable_key_events = False # Разрешает перехват нажатий клавиш         
-        
+        self.enable_key_events = False # Разрешает перехват нажатий клавиш
+
+        #
+        self.max_value = None
+
+        #
+        self.min_value = None
+
         #
         try:
             self.format = settings.DATE_FORMAT.replace('%', '')
@@ -102,11 +108,13 @@ class ExtDateField(BaseExtField):
         self._put_config_value('value', value)
         self._put_config_value('enableKeyEvents', self.enable_key_events, self.enable_key_events)
         self._put_config_value('startDay', self.start_day)
+        self._put_config_value('maxValue', self.max_value)
+        self._put_config_value('minValue', self.min_value)
 
     def render_params(self):
         super(ExtDateField, self).render_params()
         self._put_params_value('hideTriggerToday', self.hide_today_btn)
-    
+
     def render(self):
         try:
             self.render_base_config()
