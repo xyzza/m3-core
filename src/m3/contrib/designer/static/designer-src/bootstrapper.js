@@ -30,20 +30,11 @@ Bootstrapper = Ext.extend(Object, {
             title:'Дерево компонентов',
             autoScroll: true,
             contextMenu: new Ext.menu.Menu({
-                items: [{
-                    id: 'delete-node',
+                items: [{                    
                     text: 'Удалить',
-                    iconCls:'delete_item'
-                }],
-                listeners: {
-                    itemclick: function(item) {
-                        switch (item.id) {
-                            case 'delete-node':
-                                  onTreeNodeDeleteClick(item);
-                                break;
-                        }
-                    }
-                }
+                    iconCls:'delete_item',
+                    handler: onTreeNodeDeleteClick
+                }]
             }),
             listeners: {
                 contextmenu: function(node, e) {
