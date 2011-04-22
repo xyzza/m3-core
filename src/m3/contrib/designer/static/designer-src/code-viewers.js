@@ -34,7 +34,7 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
             closable: true,
             buttons:[
                 new Ext.Button({text:'Сохранить',handler:this.onSave.createDelegate(this) }),
-                new Ext.Button({ text:'Отмена', handler:this._onClose.createDelegate(this) })
+                new Ext.Button({ text:'Закрыть', handler:this._onClose.createDelegate(this) })
             ]
         });
         M3Designer.code.ExtendedCodeEditor.superclass.initComponent.call(this);

@@ -66,12 +66,33 @@ class Parser(object):
         # Базовый класс для окон (Если нет в маппинге)
         self.base_class = 'BaseExtWindow'
         
+    @staticmethod
+    def get_source_without_end_space(path):
+        '''
+        Убирает оконечные пробельные строки
+        '''
+        f_lines = open(path).readlines()
+        lines = f_lines[:]
+        
+        
+        f_lines.reverse()
+        for line in f_lines:
+            if str.isspace(line):
+                lines.pop()
+            else:
+                break
+                  
+        return ''.join(lines)                
+    
     def to_designer(self):
         '''
         Отвечает за преобразования py-кода в json, понятный m3-дизайнеру.
         Возвращает json объект в виде строки.
         '''
-        source_code = open(self.path).read()
+
+        # AST не дружит в конечными пробельными строками, поэтому убираем их и все пробельные строки за одно
+        source_code = Parser.get_source_without_end_space(self.path)
+
         node_module = ast.parse(source_code)
         class_node, func_node = self._get_func_initialize(node_module, self.class_name)
         
@@ -138,14 +159,14 @@ class Parser(object):
             
                     extjs_item = self._get_json_attr(k, js_dict['type'])                    
                     if not extjs_item:
-                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (js_dict['type'], k))
+                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (k, js_dict['type']))
                                 
                     js_dict[extjs_item] = l
                 else: 
                     # Приходят property                    
                     extjs_item = self._get_json_attr(k, js_dict['type'])
                     if not extjs_item:
-                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (js_dict['type'], k))  
+                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (k, js_dict['type']))  
 
                     # Объект может быть вложенный
                     if self.extends_cmp.get(v):                            
@@ -292,8 +313,9 @@ class Parser(object):
         Отвечает за преобразование json-a формы из m3-дизайнеру в py-код.
         '''
 
-        # Преобразование модуля в AST дерево
-        old_source_code = open(self.path).read()
+        # AST не дружит в конечными пробельными строками, поэтому убираем их и все пробельные строки за одно
+        old_source_code = Parser.get_source_without_end_space(self.path)
+        
         module_node = ast.parse(old_source_code)
         
         # Нахождение нужной функции GENERATED_FUNC
@@ -309,12 +331,34 @@ class Parser(object):
             nodes.insert(0, func_node.body[0])
             
         # Замена старого содержимого на новое сгенерированное 
-        func_node.body = nodes                       
+        func_node.body = nodes + [StringSpaces(lines=2), ]
+                
+        begin_line, end_line = self._get_number_lines(module_node, class_node, func_node)
 
         # Бакап файла на всякий пожарный случай и cохранение нового файла
-        source_code = codegen.to_source(module_node)        
-        self._write_to_file(source_code)
+        source_code = codegen.to_source(func_node, indentation=1)
         
+        self._write_to_file(source_code, begin_line, end_line)
+        
+    def _get_number_lines(self, module_node, class_node, func_node):
+        '''
+        Возвращает начало и конец функции Parser.GENERATED_FUNC_DOCSTRING
+        '''
+        begin_line = func_node.lineno
+        
+        # А вот с концом функции немного сложнее
+        # Сначало проверим, есть ли еще методы в данном классе
+        # Если нет, то то возьмем следующий узел module_node после класса
+        for i, node in enumerate(class_node.body):            
+            if node == func_node and len(class_node.body) > i+1:
+                return begin_line, class_node.body[i+1].lineno
+        else:
+            for j, node in enumerate(module_node.body):
+                if node == class_node and len(module_node.body) > j+1:
+                    return begin_line, module_node.body[j+1].lineno
+            else:
+                return begin_line, None
+    
     @staticmethod
     def from_designer_preview(json_dict):
         '''
@@ -338,7 +382,7 @@ class Parser(object):
                 node.bases = [ast.Name( str(v), ast.Load())] 
                 break
         
-    def _write_to_file(self, source_code):
+    def _write_to_file(self, source_code, begin_line, end_line):
         '''
         Запись в файл сгенерированного кода
         '''
@@ -373,11 +417,14 @@ class Parser(object):
                     
         new_path = os.path.join(dir_backup, os.path.basename(self.path))        
         shutil.copyfile(self.path, new_path + '.old')
+
+        f_lines = open(self.path, 'r').readlines()
         
-        # Поддержка юникода            
-        source_code = Parser.UNICODE_STR + source_code
-        with open(self.path, 'w') as f:
-            f.write(source_code)
+        # Включаем и свою строку и пробельную строку выше
+        end_l = f_lines[end_line-2:] if end_line else []
+
+        with open(self.path, 'w') as f:            
+            f.write(''.join(f_lines[:begin_line-1]) + source_code + ''.join(end_l))
 
     def _get_mapping(self):
         '''
@@ -676,7 +723,7 @@ class Node(object):
             if item['class'].has_key(extjs_class):
                                 
                 if not item['config'].get(extjs_name):
-                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_class, extjs_name))                
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_name, extjs_class))                
                 
                 py_attr = item['config'][extjs_name]
                  
