@@ -286,7 +286,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        var el = event.getTarget('.designComponent');
        if (el) {
            //Выделяет элемент в дереве компонентов
-           var nodeId = M3Designer.Utils.parseDomIdToNodeId(el.id)
+           var nodeId = M3Designer.Utils.parseDomIdToNodeId(el.id);
            this.tree.getNodeById(nodeId).select();
 
            this.highlightElement(el.id);

@@ -98,7 +98,7 @@ M3Designer.ModelTransfer = Ext.apply({},{
         };
         Ext.apply(config.properties, jsonObj);
         config.type = jsonObj.type;
-        Ext.destroyMembers(config, 'items');
+        Ext.destroyMembers(config.properties, 'items');
         Ext.destroyMembers(config.properties,'type');
         for (var p in jsonObj) {
             if (this.childPropertyObjects.isPropertyMapedType(p)) {

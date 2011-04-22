@@ -216,6 +216,7 @@
 		,"layout": "layout"	
 		,"width": "width"
 		,"height": "height"
+        ,"items": "items"
 	},
 	"parent": "panel"
 },
