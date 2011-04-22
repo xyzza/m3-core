@@ -9,6 +9,7 @@ import ast
 
 class StringSpaces(ast.AST):
     '''
-    Добавляет строку с пробелами
+    Добавляет строки с пробелами
     '''
-    pass
+    def __init__(self, lines=1):
+        self.lines = lines

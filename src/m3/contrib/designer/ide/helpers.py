@@ -93,20 +93,18 @@ def get_classess(path):
     '''
     Возвращает набор классов в файле
     '''
-    with open(path) as f:
-        ast_module = ast.parse( f.read() )
+    ast_module = ast.parse( Parser.get_source_without_end_space(path) )    
+    res = []
+    for item in ast_module.body:
+        if isinstance(item, ast.ClassDef):
+            d = {'text': item.name,
+                 'leaf': True,
+                 'iconCls':  'icon-class',
+                 'class_name':  item.name,
+                 'path': path}
+            res.append(d)
         
-        res = []
-        for item in ast.walk( ast_module ):
-            if isinstance(item, ast.ClassDef):
-                d = {'text': item.name,
-                     'leaf': True,
-                     'iconCls':  'icon-class',
-                     'class_name':  item.name,
-                     'path': path}
-                res.append(d)
-            
-        return res
+    return res
 
 
 def restores(data):
@@ -143,25 +141,27 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
     except UnicodeEncodeError:
         raise ParserError(u'Наименование класса "%s" должно содержать только ascii символы ' % class_name)
     
-
-    cl = Parser.generate_class(class_name, base_class)
+    
+    source = Parser.get_source_without_end_space(path)
      
-    # Чтение файла    
-    f = open(path, 'r')
-    module = ast.parse(f.read())
+    # Чтение файла        
+    module = ast.parse( Parser.get_source_without_end_space(path) )
     
     #Нужно добавить импорт всего, если этого импорта нет
-    for node in ast.iter_child_nodes(module):
-        if isinstance(node, ast.ImportFrom) and node.module == Parser.IMPORT_ALL:            
-            break
-    else:
-        module.body.insert(0, Parser.generate_import())
-    
-    module.body.append(cl)
-    f.close()
-    
+    line = 1
+    for node in module.body:
+        if isinstance(node, ast.ImportFrom):
+            line = node.lineno
+            if node.module == Parser.IMPORT_ALL:
+                break
+    else:        
+        source_lines = source.split('\n')
+        source = '\n'.join(source_lines[:line]) + \
+                '\n\n' + codegen.to_source(Parser.generate_import()) + '\n'+ \
+                '\n'.join(source_lines[line:])
+
     # Запись
-    f = open(path, 'w')
-    source_code = codegen.to_source(module)    
-    f.write(Parser.UNICODE_STR + source_code)
-    f.close()
+    with open(path, 'w') as f:   
+        cl = Parser.generate_class(class_name, base_class)     
+        f.write(source + '\n\n\n' +  codegen.to_source(cl))
+    
