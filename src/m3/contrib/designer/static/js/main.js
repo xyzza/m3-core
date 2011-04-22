@@ -90,12 +90,12 @@ function createTreeView(rootNodeName){
 		            }
 	
 		        },
-		        dblclick: function(node, e){	        	
+		        dblclick: function(node, e){
 		        	if (node.parentNode && (node.parentNode.text === 'ui.py' || node.parentNode.text === 'forms.py' ) ){
 			        	onClickNode(node);
 		        	}
                     /*Все файлы не являющиеся *.py и conf */
-                    else if(node.leaf && node.text.split('.').slice(-1) == 'py' || node.text.split('.').slice(-1) == 'conf'){
+                    else if(node.text.split('.').slice(-1) == 'py' || node.text.split('.').slice(-1) == 'conf'){
                         var fileAttr = {};
                         fileAttr['path'] = node.attributes.path;
                         fileAttr['fileName'] = node.attributes.text;
@@ -104,7 +104,6 @@ function createTreeView(rootNodeName){
 		        }
 		    }	
 	})
-	
 	
 	tree.getLoader().on("beforeload", function(treeLoader, node) {	
     	treeLoader.baseParams['path'] = node.attributes.path;
@@ -215,8 +214,7 @@ function onClickNodePyFiles(node, fileAttr){
                             message = 'Ошибка при сохранении файла';
                             icon = 'warning';
                         }
-                        AlertBox.show(' ', message, icon, {timeout: 2, closable: false});
-
+                        /*Тут будет вывод сообщения*/
                     },
                     failure: uiAjaxFailMessage
                 })

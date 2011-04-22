@@ -122,20 +122,26 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
 
         Ext.apply(this, {
             items: modelItems
+            /** Обработчики на события mouseover (раскрывает),
+             * mouseout(сворачивает) панель
+            **/
+//            listeners: {
+//                render: function(p, e) {
+//                    p.el.on('mouseover', function(e){
+//                        if(!e.within(Ext.get(p.el.id), true)) {
+//                            if (p.collapsed) p.expand();
+//                        }
+//                    }, this, p.el.id);
+//                    p.el.on('mouseout', function(e){
+//                        if(!e.within(Ext.get(p.el.id), true)) {
+//                            if (!p.collapsed) p.collapse();
+//                    }
+//                }, this, p.el.id);
+//              }
+//            }
         });
 
         M3Designer.edit.QuickPropertyWindow.superclass.initComponent.call(this);
-// Тут будет кусок код отвечающй за развертку и сворачивание окна быстрых настроек
-//        var scope = this;
-//        this.on('afterrender', function(){
-//            var el = Ext.fly(scope.id);
-//            el.on('mouseover', function(){
-//                scope.expand();
-//            });
-//            el.on('mouseout', function(e){
-////                scope.collapse();
-//            });
-//        });
     },
     anchorWinTo:function(modeId){
         M3Designer.edit.QuickPropertyWindow.superclass.show.call(this);
