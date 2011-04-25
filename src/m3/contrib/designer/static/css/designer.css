@@ -120,3 +120,7 @@
 
 /*.x-tipcustom-header-text a{ text-decoration:none }*/
 /*.x-tipcustom-icon.wraped{ padding-left: 20px; color: white; }*/
+
+
+/* Адекватный скроллинг */
+.CodeMirror-wrapping{ height:auto !important; width:auto !important;}
