@@ -285,9 +285,53 @@
 	"parent":"field"
 },
 
-// Базовый конфиг триггерных компонент
+// Компонент выбора из справочника
 {
 	"class": {
+		"dictSelect": "ExtDictSelectField"
+	},
+	"config": {
+		"hideClearTrigger":"hide_clear_trigger"
+		,"hideEditTrigger":"hide_edit_trigger"
+		,"hideDictSelectTrigger":"hide_dict_select_trigger"
+		,"askBeforeDelete":"ask_before_deleting"
+		,"url":"url"
+		,"editUrl":"edit_url"
+		,"autocompleteUrl":"autocomplete_url"
+	},
+	"parent":"triggerField"
+},
+
+// Компонент загрузки файлов
+{
+	"class": {
+		"fileUploadField": "ExtFileUploadField"	
+	},
+	"config": {
+		"possibleFileExtensions":"possible_file_extensions"		
+	},
+	"parent":"field"
+},
+
+// Компонент загрузки изображений
+{
+	"class": {
+		"imageUploadField": "ExtImageUploadField"	
+	},
+	"config": {
+		"middleThumbnailSize":"middle_thumbnail_size"
+		,"maxThumbnailSize":"max_thumbnail_size"
+		,"minThumbnailSize":"min_thumbnail_size"
+		,"thumbnailSize":"thumbnail_size"
+		,"thumbnail":"thumbnail"
+		,"imageMaxSize":"image_max_size"		
+	},
+	"parent":"fileUploadField"
+},
+
+// Базовый конфиг триггерных компонент
+{
+	"class": {			
 		"comboBox": "ExtComboBox"	
 	},
 	"config": {
