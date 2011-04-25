@@ -7,6 +7,7 @@ Created on 12.04.2011
 import ast
 import os
 import json
+import codecs
 import codegen
 import shutil # Для копирования файлов
 
@@ -14,6 +15,7 @@ import shutil # Для копирования файлов
 import pprint
 
 from advanced_ast import StringSpaces
+
 
 #===============================================================================
 # Класс исключительных ситуаций
@@ -792,10 +794,43 @@ def update_with_inheritance(m_list, parent=None, config=None):
             update_with_inheritance(m_list, item.get('parent'), item['config'])
 
 # Для избавления от комментов делим файл на строки
-raw_js = open(os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').readlines()
+def open_text_file(filename, mode='r', encoding = 'utf-8'):
+    '''
+    Для открытия файла, если он был сохранен под виндами. Бомы всякие удаляются.
+    '''
+    has_BOM = False
+    if os.path.isfile(filename):
+        f = open(filename,'rb')
+        header = f.read(4)
+        f.close()
+        
+        # Don't change this to a map, because it is ordered
+        encodings = [ ( codecs.BOM_UTF32, 'utf-32' ),
+            ( codecs.BOM_UTF16, 'utf-16' ),
+            ( codecs.BOM_UTF8, 'utf-8' ) ]
+        
+        for h, e in encodings:
+            if header.startswith(h):
+                encoding = e
+                has_BOM = True
+                break
+        
+    f = codecs.open(filename,mode,encoding)
+    # Eat the byte order mark
+    if has_BOM:
+        f.read(1)
+        
+    return f
+
+def get_mapping():
+    '''
+    Возвращает строковое представление маппинга
+    '''
+    f = open_text_file(os.path.join(os.path.dirname(__file__), 'mapping.json'))
+    return ''.join(filter(lambda x: not '//' in x, f.xreadlines()))
 
 # Словарь сопоставлений контролов в дизайнере к контролам в питоне
-mapping_list = json.loads('\n'.join(filter(lambda x: not '//' in x, raw_js)))
+mapping_list = json.loads( get_mapping() )
 
 # Рекурсивное добавление свойств у классов наследников
 update_with_inheritance(mapping_list)
