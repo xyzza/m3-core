@@ -15,6 +15,9 @@ from m3.data.caching import ModelObjectStorageFactory
 from api import (register_imported_model,
                  get_ikey)
 
+from log import (ExchangeLog, 
+                 ExchangeLogEntry,)
+
 #===============================================================================
 # Класс-описатель 
 #===============================================================================
@@ -101,6 +104,7 @@ class BaseDataExchange(object):
         self.target = target
         self.replica_storage = replica_storage or ModelReplicationStorage()
         self.objects_storage = objects_storage or ModelObjectStorageFactory()
+        self.log = ExchangeLog()
         
     def handle(self, source_row=None):
         '''
@@ -113,7 +117,10 @@ class BaseDataExchange(object):
     def run(self):
         '''
         Метод выполнения операции по передаче данных от источника к приемнику
+        
+        Возвращает лог выполнения операции.
         '''
+        self.log = ExchangeLog()
         try:
             # предварительные инициализационные действия
             self.source.open_session()
@@ -122,6 +129,20 @@ class BaseDataExchange(object):
             for row in self.source.read():
                 source_row = self.post_read(row)
                 objects = self.handle(source_row)
+                
+                log_entries = self.validate(source_row, objects)
+                has_errors = False
+                for entry in (log_entries if isinstance(log_entries, list) else [log_entries, ]):
+                    if not entry:
+                        continue
+                    self.log.append(entry)                    
+                    has_errors = has_errors or entry.type == ExchangeLogEntry.ERROR
+                    
+                if has_errors:
+                    # в случае наличия ошибок обработка текущей строки источника
+                    # данных дальше не выполняется
+                    continue 
+                
                 objects = self.pre_write(source_row, objects)
                 result = self.target.write(objects)
                 self.post_write(source_row, result or objects)
@@ -154,6 +175,21 @@ class BaseDataExchange(object):
         Вызывается после успешной записи в приемник данных
         '''
         pass
+    
+    def validate(self, source_row, objects):
+        '''
+        Метод валидации загруженного объекта. Вызывается перед выполнением
+        pre_write.
+        
+        Специфические методы валидации должны перекрываться в дочерних классах.
+        В случае если валидация значений не выполнена, то должен возвращаться 
+        объект (список объектов) типа m3_replica.engine.ExchangeLogEntry
+        
+        В случае если среди возвращенных значений встретиться запись с типом
+        ExchangeLogEntry.ERROR, то обработка текущей строки из источника данных
+        будет приостановлена
+        '''
+        return None
     
 #===============================================================================
 # Базовые классы для репликации 
