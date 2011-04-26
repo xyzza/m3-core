@@ -20,4 +20,6 @@ new Ext.Panel({
 	,autoScroll: true
 	,items: {{ component.t_render_items|safe }}
 	{% if component.auto_load %} ,autoLoad: {{ component.auto_load|safe}} {% endif %}
+	{% if component.label_align %} ,labelAlign: '{{ component.label_align }}' {% endif %}
+	{% if component.label_width %} ,labelWidth: {{ component.label_width }} {% endif %}
 })

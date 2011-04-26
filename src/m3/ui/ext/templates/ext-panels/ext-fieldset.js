@@ -20,4 +20,5 @@ new Ext.form.FieldSet({
     {% if component.checkboxToggle %} ,checkboxToggle: true {% endif %}
     {% if component.collapsed %} ,collapsed: true {% endif %}
 	{% if component.label_align %} ,labelAlign: '{{ component.label_align }}' {% endif %}
+	{% if component.label_width %} ,labelWidth: {{ component.label_width }} {% endif %}
 })
