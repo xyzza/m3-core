@@ -19,4 +19,5 @@ new Ext.form.FieldSet({
 	{% if component.auto_load %} ,autoLoad: {{ component.auto_load|safe}} {% endif %}
     {% if component.checkboxToggle %} ,checkboxToggle: true {% endif %}
     {% if component.collapsed %} ,collapsed: true {% endif %}
+	{% if component.label_align %} ,labelAlign: '{{ component.label_align }}' {% endif %}
 })

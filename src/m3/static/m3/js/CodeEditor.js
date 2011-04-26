@@ -48,11 +48,11 @@ Ext.ux.panel.CodeEditor = Ext.extend(Ext.Panel, {
                 xtype: 'textarea',
                 readOnly: this.readOnly,
                 hidden: true,
-                value: this.sourceCode
+                value: this.sourceCode,
+                enableKeyEvents: true
             }]
 
         });
-
         Ext.ux.panel.CodeEditor.superclass.initComponent.apply(this, arguments);
     },
 
@@ -93,6 +93,7 @@ Ext.ux.panel.CodeEditor = Ext.extend(Ext.Panel, {
 //                   console.error(e);
                }
            },
+            /* Событие изменения контента */
            onChange: function() {
                var sCode = oThis.codeMirrorEditor.getCode();
                oCmp.setValue(sCode);
@@ -102,9 +103,10 @@ Ext.ux.panel.CodeEditor = Ext.extend(Ext.Panel, {
                }else{
                    oThis.setTitleClass();
                }
-
+               oThis.fireEvent('contentChaged', oThis);
            }
-       });
+//           ,onKeyEvent: function(){console.log('keypress')}
+       }); 
 
         var sParserType = oThis.parser || 'python';
         editorConfig = Ext.applyIf(editorConfig, Ext.ux.panel.CodeEditorConfig.parser[sParserType]);
