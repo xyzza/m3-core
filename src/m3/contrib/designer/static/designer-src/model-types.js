@@ -52,6 +52,9 @@ M3Designer.model.ModelTypeLibrary = Ext.apply({}, {
             //И более того, с помощью цикла for можно итерировать по свойствам массива(читай - получить все ключи словаря)
             for (var j in currentType) {
                 cfg[j] = currentType[j]['defaultValue'];
+                if (currentType[j].isNotEditable) {
+                    Ext.destroyMembers(cfg,j);
+                }
             }
         }
         return cfg;

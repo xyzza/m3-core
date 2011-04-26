@@ -177,8 +177,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     isQuickEditable: true
                 },
                 collapsible: {
-                    defaultValue:false,
-                    isQuickEditable: true
+                    defaultValue:false
                 },
                 collapsed : {
                     defaultValue:false,
@@ -259,7 +258,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 },
                 layout: {
                     defaultValue:undefined,
-                    isInitProperty:true
+                    isInitProperty:true,
+                    isNotEditable:true,
+                    isQuickEditable:false
                 }
             },
             childTypesRestrictions:{
@@ -659,7 +660,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 id: {
                     defaultValue: 'toolbar',
                     isInitProperty:true,
-                    isQuickEditable: true
+                    isQuickEditable: false
                 },
                 parentDockType: {
                     defaultValue:'tbar',
@@ -670,7 +671,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 layout: {
                     defaultValue:'toolbar',
                     isInitProperty:true,
-                    isQuickEditable: true
+                    isQuickEditable: false
                 }
             },
             toolboxData:{
@@ -1118,9 +1119,14 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     defaultValue:''
                 },
                 layout: {
-                    defaultValue:'auto',
-                    isInitProperty:true,
-                    isQuickEditable: false
+                    defaultValue:undefined,
+                    isInitProperty:false,
+                    isQuickEditable: false,
+                    isNotEditable:true
+                },
+                layoutConfig:{
+                    defaultValue:undefined,
+                    isNotEditable:true
                 },
                 urlDataShortName: {
                     defaultValue:'',
