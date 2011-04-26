@@ -1209,7 +1209,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     isInitProperty:true
                 },
                 possibleFileExtensions: {
-                    defaultValue: ('png', 'jpeg', 'gif', 'bmp', 'jpg'),
+                    defaultValue: 'png,jpeg,gif,bmp,jpg',
                     isInitProperty:true
                 },
                 thumbnailSize: {
