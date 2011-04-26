@@ -47,22 +47,15 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
         });
         /*Хендлер на изменение кода*/
         this.on('contentChaged', function(){
-            var newTitle = '*'+this.orginalTitle;
-            if (this.title != newTitle) {
-                this.orginalTitle = this.title;
-                this.setTitle('*'+this.orginalTitle);
-            }
-            else if(!this.contentChanged) this.setTitle(this.orginalTitle);
+            this.onChange();
         });
         M3Designer.code.ExtendedCodeEditor.superclass.initComponent.call(this, arguments);
     },
     _onClose:function() {
-         
        /*Вероятно можно будет оптимизировать, т.к. дублирует поведение beforeclose у tabpanel (выше)*/
        var textArea = this.findByType('textarea')[0];
        /*Если есть именения в коде, выводим сообщения [ showMessage ]*/
-
-       if (textArea.isDirty()){
+       if (this.contentChanged){
            var scope = this;
            this.showMessage(function(buttonId){
                if (buttonId=='yes') {
@@ -78,10 +71,19 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
            this.fireEvent('close_tab', this);
        }
     },
-
+    onChange:function(){
+        var newTitle = '*'+this.orginalTitle;
+        if (this.title != newTitle) {
+            this.orginalTitle = this.title;
+            this.setTitle('*'+this.orginalTitle);
+        }
+        else if(!this.contentChanged) this.setTitle(this.orginalTitle);
+    },
     onSave:function() {
         var textArea = this.findByType('textarea')[0];
+        this.contentChanged = false;
         this.fireEvent('save', textArea.value, this);
+
     },
     onUpdate:function() {
         var textArea = this.findByType('textarea')[0];

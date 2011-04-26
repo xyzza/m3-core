@@ -176,7 +176,7 @@ function onClickNodePyFiles(node, fileAttr){
                 /* findByType вернет список элементов, т.к у нас всего один
                 textarea забираем его по индексу */
                 var textArea = panel.findByType('textarea')[0];
-                if (textArea.isDirty()){
+                if (codeEditor.contentChanged){
                     var scope = this;
                     this.showMessage(function(buttonId){
                         if (buttonId=='yes') {
@@ -200,6 +200,8 @@ function onClickNodePyFiles(node, fileAttr){
                 if (tab) tabPanel.remove(tab);
             });
             codeEditor.on('save', function(fileContent, tab){
+                /* Меняем title по изменению контента */
+                codeEditor.onChange();
                 /*Запрос на сохранения изменений */
                 Ext.Ajax.request({
                     url:'/file-content/save',
@@ -209,16 +211,22 @@ function onClickNodePyFiles(node, fileAttr){
                     },
                     success: function(response, opts){
                         var obj = Ext.util.JSON.decode(response.responseText);
-                        var title = '';
+                        var title = 'Сохранение';
                         var message ='';
-                        var icon ='success';
+                        var icon = Ext.Msg.INFO;
                         if (obj.success)
                             message = 'Изменения были успешно сохранены';
                         else if (!obj.success && obj.error){
-                            message = 'Ошибка при сохранении файла';
-                            icon = 'warning';
+                            message = 'Ошибка при сохранении файла\n'+obj.error;
+                            icon = Ext.MessageBox.QUESTION;
                         };
-                         /*Тут будет вывод сообщения*/
+                         Ext.Msg.show({
+                            title: title,
+                            msg: message,
+                            buttons: Ext.Msg.OK,
+                            animEl: codeEditor.id,
+                            icon: Ext.MessageBox.QUESTION
+                         });
                     },
                     failure: uiAjaxFailMessage
                 });
