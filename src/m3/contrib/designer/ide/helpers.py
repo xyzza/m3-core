@@ -118,6 +118,9 @@ def restores(data):
                 restores(v)
             elif isinstance(v, list):
                 map(restores, v)
+            elif isinstance(v, int):
+                # Не нужно преобразовывать в юникод
+                pass
             else:
                 try:
                     data[k] = str(v)

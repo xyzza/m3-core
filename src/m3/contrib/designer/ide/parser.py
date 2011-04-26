@@ -134,6 +134,7 @@ class Parser(object):
 
     def _get_js(self):
         js_dict = {}        
+        #pprint.pprint(self.config_cmp) 
         self._build_json(js_dict)        
         return js_dict
         
@@ -141,8 +142,6 @@ class Parser(object):
     def _build_json(self, js_dict, key='self'):
         
         item = self.extends_cmp.get(key)
-        
-        
         
         js_dict.update( self._get_json_config(key) )
         if isinstance(item, dict):
@@ -207,6 +206,8 @@ class Parser(object):
         '''
         properties, py_name = self._get_properties(key)
 
+        #print properties
+
         properties['type'] = py_name
         properties['id'] = key
         return properties
@@ -225,16 +226,33 @@ class Parser(object):
             raise ParserError('Не определен класс маппинга "%s"' % py_name)
         
         properties = dict(id= key) 
-        for k, v in conf.items():            
-            extjs_attr = self._get_json_attr(k, extjs_name)            
-            
-            if not extjs_attr:
-                raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), extjs_name))
-              
-            properties[extjs_attr] = v
+        for k, v in conf.items():         
+            if isinstance(v, dict):
+                # Обрабатываются комплексные компоненты
+                extjs_attr, value = self._get_json_complex_attr(k, v, extjs_name)
+                
+                properties[extjs_attr] = value
+            else:              
+                extjs_attr = self._get_json_attr(k, extjs_name)            
+                if not extjs_attr:
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), extjs_name))
+                  
+                properties[extjs_attr] = v
             
         return properties, extjs_name
     
+    def _get_json_complex_attr(self, name, value, extjs_class_name):
+        '''
+        Получается значение для комплексного компонента
+        '''
+        conf = self._gen_config(extjs_class_name)       
+ 
+        for k, v in conf.items():                
+            if isinstance(v, dict) and name == v['value'] and v['type'] == value['type']:                
+                return str(k), value['value']
+        else:
+            raise ParserError('Комплексное свойство %s в классе %s не найдено' % (name, extjs_class_name) )
+        
     def _get_extjs_class(self, py_name):
         '''
         Получает из маппинга наименование extjs класса 
@@ -281,6 +299,21 @@ class Parser(object):
         '''
         return ast.literal_eval(node)
 
+    def get_complex_property(self, node):
+        '''
+        Пробует распарсить комплексное свойство
+        '''        
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Call) \
+            and len(node.value.args) == 1 and isinstance(node.value.args[0], ast.Str):     
+            # Маппинг для shortname
+             
+            # Чтобы потом при подстановки extjs названия полей выяснить, что
+            # это поле нужно маппить отдельно                  
+            return dict(type='shortname',value=node.value.args[0].s)
+        else:
+            raise ParserError('Некорректный синтаксис файла')
+
+
     def _get_config_component(self, node):
         '''
         Разбирает конструкцию вида:
@@ -300,7 +333,15 @@ class Parser(object):
             
             func = node.value.func
             if isinstance(func, ast.Attribute):
-                return node.targets[0].id, 'py_name', '%s.%s' % (func.value.id ,func.attr)
+                if isinstance(node.targets[0], ast.Name):
+                    return node.targets[0].id, 'py_name', '%s.%s' % (func.value.id ,func.attr)
+                else:
+                    # Пробуем разобрать комплексное свойство
+                    
+                    parent, attr =  node.targets[0].value.id, node.targets[0].attr                    
+                    value = self.get_complex_property(func)
+                    return parent, attr, value
+                    
             elif isinstance(node.value.func, ast.Name):                
                 return node.targets[0].id, 'py_name', func.id
             else:
@@ -325,7 +366,7 @@ class Parser(object):
                 
         nodes = Node(json_dict).get_nodes(self._get_mapping())
 
-        self._set_class_name(class_node, json_dict['type'])
+        # self._set_class_name(class_node, json_dict['type']) -- Не используется в данный момент
         
         # Старая док строка не должна потеряться
         if func_node and isinstance(func_node.body, list) and len(func_node.body) > 0 \
@@ -656,6 +697,44 @@ class Node(object):
                 ast.Name(field, ast.Load())
             )
     
+    def _get_complex_field(self, py_attr, value):
+        '''
+        Преобразует сложные проперти
+        '''
+        if py_attr['type'] == 'shortname':
+            # Преобразует шортнэймы
+            attr = py_attr['value']
+            
+            func = ast.Call(
+                        func=ast.Attribute(
+                            attr='get_absolute_url'
+                            ,value=ast.Call(
+                                    args=[ast.Str(value)]
+                                    ,func=ast.Attribute(
+                                        attr='get_action'
+                                        ,value=ast.Name(
+                                            id='urls'
+                                            ,ctx=ast.Load()      
+                                        )
+                                        ,ctx=ast.Load()
+                                    )                                    
+                                    ,keywords=[]
+                                    ,kwargs=None
+                                    ,starargs=None  
+                                )
+                            ,ctx=ast.Load()                  
+                        )
+                        ,args=[]
+                        ,keywords=[]
+                        ,kwargs=None
+                        ,starargs=None                       
+                    ) 
+            
+            
+            return str(attr), func
+        else:
+            raise ParserError('Комплексное свойство "%s" не поддерживается') % py_attr['type']
+    
     def _get_property(self, parent_field, extjs_attr, value, extjs_class):
         for item in self.mapping:
             if item['class'].has_key(extjs_class):
@@ -664,14 +743,29 @@ class Node(object):
                     raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(extjs_attr) , extjs_class))
                 
                 py_attr = item['config'][extjs_attr]
-                return ast.Assign(
-                    [ast.Attribute(
-                        ast.Name(parent_field, ast.Load()), 
-                        str(py_attr), 
-                        ast.Load()
-                    )], 
-                    self._get_node_value(value)
-                )
+                
+                if isinstance(py_attr, dict):
+                    # Сложное свойство
+                    
+                    attr, attr_value = self._get_complex_field(py_attr, value)
+                    
+                    return ast.Assign(
+                        [ast.Attribute(
+                            ast.Name(parent_field, ast.Load()), 
+                            attr, 
+                            ast.Load()
+                        )], 
+                        attr_value
+                    )
+                else:
+                    return ast.Assign(
+                        [ast.Attribute(
+                            ast.Name(parent_field, ast.Load()), 
+                            str(py_attr), 
+                            ast.Load()
+                        )], 
+                        self._get_node_value(value)
+                    )
         else:
             raise ParserError("Не определен объект маппинга для класса '%s'" % extjs_class) 
     
