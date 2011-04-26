@@ -32,7 +32,10 @@ def create_sqlite_from_sql(sql_text_path, db_ready_path):
     query_queue = compose_queries(file_data)
 
     for query in query_queue:
-        cursor.execute(query)
+        try:
+            cursor.execute(query)
+        except:
+            raise Exception(u"Не удалось выполнить запрос %s" % query)
     cursor.close()
     connection.commit()
     connection.close()

@@ -25,6 +25,17 @@ class SimpleModelImport(BaseDataExchange):
     линейных моделей
     '''
     
+    # константы для групповой обработки типов полей
+    RELATED_FIELDS  = [models.ForeignKey, models.OneToOneField,]
+    STRING_FIELDS   = [models.CharField, models.TextField,]
+    INTEGER_FIELDS  = [models.IntegerField, models.PositiveIntegerField,
+                       models.SmallIntegerField, models.PositiveSmallIntegerField,
+                       models.BigIntegerField, models.AutoField,]
+    FLOAT_FIELDS    = [models.FloatField, models.DecimalField,]
+    DATE_FIELDS     = [models.DateField,]
+    DATETIME_FIELDS = [models.DateTimeField,]
+    BOOLEAN_FIELDS  = [models.BooleanField,]
+    
     def __init__(self, model, data_source, field_map, ekey_index=0, 
                  target=ModelDataTarget(),
                  replica_storage=None, replica_map={}):
@@ -96,46 +107,45 @@ class SimpleModelImport(BaseDataExchange):
         
         result = None
         
-        # константы для групповой обработки типов полей
-        RELATED_FIELDS  = [models.ForeignKey, models.OneToOneField,]
-        STRING_FIELDS   = [models.CharField, models.TextField,]
-        INTEGER_FIELDS  = [models.IntegerField, models.PositiveIntegerField,
-                           models.SmallIntegerField, models.PositiveSmallIntegerField,
-                           models.BigIntegerField, models.AutoField,]
-        FLOAT_FIELDS    = [models.FloatField, models.DecimalField,]
-        DATE_FIELDS     = [models.DateField,]
-        DATETIME_FIELDS = [models.DateTimeField,]
-        BOOLEAN_FIELDS  = [models.BooleanField,]
-        
         # если поле является ссылочным, то пытаемся достать
         # ссылочную модель
         field_cls = field.__class__ 
-        if field_cls in RELATED_FIELDS:
+        if field_cls in SimpleModelImport.RELATED_FIELDS:
             result = self._get_replicated_object(field.rel.to, external_value)
             
-        elif field_cls in STRING_FIELDS:
+        elif field_cls in SimpleModelImport.STRING_FIELDS:
             if external_value:
                 result = force_unicode(external_value)[0:field.max_length]
             else:
                 result = ''
             
-        elif field_cls in INTEGER_FIELDS:
+        elif field_cls in SimpleModelImport.INTEGER_FIELDS:
             result = int(external_value)
             
-        elif field_cls in FLOAT_FIELDS:
+        elif field_cls in SimpleModelImport.FLOAT_FIELDS:
             result = float(field_cls)
             
-        elif (field_cls in DATE_FIELDS or
-              field_cls in DATETIME_FIELDS):
+        elif (field_cls in SimpleModelImport.DATE_FIELDS or
+              field_cls in SimpleModelImport.DATETIME_FIELDS):
             # вроде как джанговские бэкэнды читают дату и время корректно
             result = external_value 
-        elif field_cls in BOOLEAN_FIELDS:
+        elif field_cls in SimpleModelImport.BOOLEAN_FIELDS:
             result = bool(external_value) 
         else:
             result = external_value
             
         return result
-        
+    
+    def _set_field_value(self, obj, field, value):
+        '''
+        Записывает значение value в поле field модели obj
+        '''
+        field_cls = field.__class__
+        if (field_cls in SimpleModelImport.RELATED_FIELDS and
+            not field.blank and not value):
+            setattr(obj, field.name + '_id', None)
+        else:
+            setattr(obj, field.name, value)
         
     def handle(self, source_row):
         '''
@@ -150,7 +160,7 @@ class SimpleModelImport(BaseDataExchange):
         for field in self.model._meta.fields:
             if self.field_map.has_key(field.name):
                 value = self._convert_value(field, source_row[self.field_map[field.name]])
-                setattr(obj, field.name, value)
+                self._set_field_value(obj, field, value)
         
         return obj
     
@@ -230,7 +240,7 @@ class ContragentModelImport(SimpleModelImport):
             for field in Contragent._meta.fields:
                 if self.contragent_field_map.has_key(field.name):
                     value = self._convert_value(field, source_row[self.contragent_field_map[field.name]])
-                    setattr(contragent, field.name, value)
+                    self._set_field_value(obj, field, value)
         
         # возвращаем контрагента и связанный с ним объект предметной области
         return [contragent, obj]
