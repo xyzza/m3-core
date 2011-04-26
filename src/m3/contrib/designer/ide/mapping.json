@@ -52,7 +52,7 @@
 		,"labelWidth":"label_width"
 		,"labelAlign":"label_align"
 		,"labelPad":"label_pad"
-		,"items":"_items"
+		,"items":"items"
 	},
 	"parent": "component"
 },
@@ -107,7 +107,7 @@
 // Пэйджинг бар
 {
 	"class": {
-		"PagingToolbar": "ExtPagingBar"
+		"pagingToolbar": "ExtPagingBar"
 	},
 	"config": {
 		"pageSize": "page_size"
@@ -115,44 +115,32 @@
 		,"emptyMsg": "empty_message"
 		,"displayInfo": "display_info"		
 	},
-	"parent": "Toolbar"
+	"parent": "toolbar"
 },
 
 // Базовый класс для панелей
 {
 	"class": {
-		"basePanel": ""
+		"panel": "ExtPanel"
 	},
 	"config": {
 		"title":"title"
 		,"header":"header"
 		,"border":"border"
 		,"iconCls":"icon_cls"
-	},
-	"parent": "container"
-},
-
-// Панель
-{
-	"class": {
-		"panel": "ExtPanel"
-	},
-	"config": {
-		"padding":"padding"
-		,"collapsible":"collapsible"
-		,"baseCls": "base_cls"
-		,"split":"split"
-		,"autoLoad":"auto_load"
 		,"collapseMode":"collapse_mode"
 		,"collapsed":"collapsed"		
+		,"collapsible":"collapsible"
+		,"split":"split"
+		,"baseCls": "base_cls"
+		,"padding":"padding"
+		,"autoLoad":"auto_load"
 		,"bodyBorder":"body_border"
 		,"tbar":"tbar"
-		,"items":"_items"
-	}
-	,"parent": "basePanel"
-	,"attr":{
-		"tbar":["toolbar"]
-	}
+		,"bbar":"bbar"
+		,"fbar":"fbar"
+	},
+	"parent": "container"
 },
 
 // Форма
@@ -168,7 +156,7 @@
 		,"fileUpload":"file_upload"
 		,"url":"url"
 	},
-	"parent": "basePanel"
+	"parent": "panel"
 },
 
 // Таблица (грид)
@@ -186,7 +174,7 @@
 		,"loadMask":"load_mask"
 		,"cm":"cm"
 	}
-	,"parent": "formPanel"
+	,"parent": "panel"
 },
 
 // Object grid
@@ -255,7 +243,7 @@
 		,"layout": "layout"	
 		,"width": "width"
 		,"height": "height"
-		,"items": "items"
+		,"items": "items"		
 	},
 	"parent": "panel"
 },
