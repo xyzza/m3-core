@@ -202,8 +202,25 @@
 		,"rowIdName":"row_id_name"
 		,"columnParamName":"column_param_name"
 		,"allowPaging":"allow_paging"
+		
+		,"urlDataShortName": {
+			"type":"shortname"
+			,"value":"url_data"
+		}
+		,"urlEditShortName": {
+			"type":"shortname"
+			,"value":"url_edit"
+		}
+		,"urlDeleteShortName":{
+			"type":"shortname"
+			,"value":"url_delete"
+		} 
+		,"urlNewShortName":{
+			"type":"shortname"
+			,"value":"url_new"
+		} 
 	}
-	,"parent": "gridPanel"
+	,"parent": "gridPanel"	
 },
 
 // Колонка для грида

@@ -93,4 +93,4 @@ class Claz(ExtWindow):
         self.gridColumn_2 = gridColumn_2
         
 def ata(a, b):
-    panel_2.store = store_1
+    panel_2.store = urls.get_action('vega-action').get_absolute_url()
