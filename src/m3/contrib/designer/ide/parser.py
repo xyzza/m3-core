@@ -7,6 +7,7 @@ Created on 12.04.2011
 import ast
 import os
 import json
+import codecs
 import codegen
 import shutil # Для копирования файлов
 
@@ -14,6 +15,7 @@ import shutil # Для копирования файлов
 import pprint
 
 from advanced_ast import StringSpaces
+
 
 #===============================================================================
 # Класс исключительных ситуаций
@@ -159,14 +161,14 @@ class Parser(object):
             
                     extjs_item = self._get_json_attr(k, js_dict['type'])                    
                     if not extjs_item:
-                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (k, js_dict['type']))
+                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), js_dict['type']))
                                 
                     js_dict[extjs_item] = l
                 else: 
                     # Приходят property                    
                     extjs_item = self._get_json_attr(k, js_dict['type'])
                     if not extjs_item:
-                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (k, js_dict['type']))  
+                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), js_dict['type']))  
 
                     # Объект может быть вложенный
                     if self.extends_cmp.get(v):                            
@@ -227,7 +229,7 @@ class Parser(object):
             extjs_attr = self._get_json_attr(k, extjs_name)            
             
             if not extjs_attr:
-                raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (k, extjs_name))
+                raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), extjs_name))
               
             properties[extjs_attr] = v
             
@@ -659,7 +661,7 @@ class Node(object):
             if item['class'].has_key(extjs_class):
                                 
                 if not item['config'].get(extjs_attr):
-                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_attr, extjs_class))
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(extjs_attr) , extjs_class))
                 
                 py_attr = item['config'][extjs_attr]
                 return ast.Assign(
@@ -703,7 +705,7 @@ class Node(object):
             if item['class'].has_key(extjs_class):
                                 
                 if not item['config'].get(extjs_attr):
-                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_attr, extjs_class))
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(extjs_attr), extjs_class))
                 
                 py_attr = item['config'][extjs_attr]
                 return ast.Assign(
@@ -723,7 +725,7 @@ class Node(object):
             if item['class'].has_key(extjs_class):
                                 
                 if not item['config'].get(extjs_name):
-                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_name, extjs_class))                
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(extjs_name), extjs_class))                
                 
                 py_attr = item['config'][extjs_name]
                  
@@ -792,10 +794,43 @@ def update_with_inheritance(m_list, parent=None, config=None):
             update_with_inheritance(m_list, item.get('parent'), item['config'])
 
 # Для избавления от комментов делим файл на строки
-raw_js = open(os.path.join(os.path.dirname(__file__), 'mapping.json'), 'r').readlines()
+def open_text_file(filename, mode='r', encoding = 'utf-8'):
+    '''
+    Для открытия файла, если он был сохранен под виндами. Бомы всякие удаляются.
+    '''
+    has_BOM = False
+    if os.path.isfile(filename):
+        f = open(filename,'rb')
+        header = f.read(4)
+        f.close()
+        
+        # Don't change this to a map, because it is ordered
+        encodings = [ ( codecs.BOM_UTF32, 'utf-32' ),
+            ( codecs.BOM_UTF16, 'utf-16' ),
+            ( codecs.BOM_UTF8, 'utf-8' ) ]
+        
+        for h, e in encodings:
+            if header.startswith(h):
+                encoding = e
+                has_BOM = True
+                break
+        
+    f = codecs.open(filename,mode,encoding)
+    # Eat the byte order mark
+    if has_BOM:
+        f.read(1)
+        
+    return f
+
+def get_mapping():
+    '''
+    Возвращает строковое представление маппинга
+    '''
+    f = open_text_file(os.path.join(os.path.dirname(__file__), 'mapping.json'))
+    return ''.join(filter(lambda x: not '//' in x, f.xreadlines()))
 
 # Словарь сопоставлений контролов в дизайнере к контролам в питоне
-mapping_list = json.loads('\n'.join(filter(lambda x: not '//' in x, raw_js)))
+mapping_list = json.loads( get_mapping() )
 
 # Рекурсивное добавление свойств у классов наследников
 update_with_inheritance(mapping_list)

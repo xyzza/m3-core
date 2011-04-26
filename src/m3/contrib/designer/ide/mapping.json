@@ -179,9 +179,31 @@
 	"config": {
 		"store":"store"
 		,"tbar":"tbar"
+		,"bbar":"bbar"
+		,"fbar":"fbar"
 		,"items":"columns"
+		,"autoExpandColumn":"auto_expand_column"
+		,"loadMask":"load_mask"
+		,"cm":"cm"
 	}
 	,"parent": "formPanel"
+},
+
+// Object grid
+{
+	"class": {
+		"objectGrid": "ExtObjectGrid"
+	},
+	"config": {
+		"urlNew":"url_new"
+		,"urlEdit":"url_edit"
+		,"urlDelete":"url_delete"
+		,"urlData":"url_data"
+		,"rowIdName":"row_id_name"
+		,"columnParamName":"column_param_name"
+		,"allowPaging":"allow_paging"
+	}
+	,"parent": "gridPanel"
 },
 
 // Колонка для грида
@@ -216,7 +238,7 @@
 		,"layout": "layout"	
 		,"width": "width"
 		,"height": "height"
-        ,"items": "items"
+		,"items": "items"
 	},
 	"parent": "panel"
 },
@@ -285,9 +307,53 @@
 	"parent":"field"
 },
 
-// Базовый конфиг триггерных компонент
+// Компонент выбора из справочника
 {
 	"class": {
+		"dictSelect": "ExtDictSelectField"
+	},
+	"config": {
+		"hideClearTrigger":"hide_clear_trigger"
+		,"hideEditTrigger":"hide_edit_trigger"
+		,"hideDictSelectTrigger":"hide_dict_select_trigger"
+		,"askBeforeDelete":"ask_before_deleting"
+		,"url":"url"
+		,"editUrl":"edit_url"
+		,"autocompleteUrl":"autocomplete_url"
+	},
+	"parent":"triggerField"
+},
+
+// Компонент загрузки файлов
+{
+	"class": {
+		"fileUploadField": "ExtFileUploadField"	
+	},
+	"config": {
+		"possibleFileExtensions":"possible_file_extensions"		
+	},
+	"parent":"field"
+},
+
+// Компонент загрузки изображений
+{
+	"class": {
+		"imageUploadField": "ExtImageUploadField"	
+	},
+	"config": {
+		"middleThumbnailSize":"middle_thumbnail_size"
+		,"maxThumbnailSize":"max_thumbnail_size"
+		,"minThumbnailSize":"min_thumbnail_size"
+		,"thumbnailSize":"thumbnail_size"
+		,"thumbnail":"thumbnail"
+		,"imageMaxSize":"image_max_size"		
+	},
+	"parent":"fileUploadField"
+},
+
+// Базовый конфиг триггерных компонент
+{
+	"class": {			
 		"comboBox": "ExtComboBox"	
 	},
 	"config": {
@@ -402,6 +468,20 @@
 	,"parent": "field"
 },
 
+
+// Base store 
+{
+	"class": {
+		"baseStore": "BaseExtStore"	
+	},
+	"config": {
+		"_baseParams":"_base_params"
+		,"autoLoad":"auto_load"
+		,"autoSave":"auto_save"
+		,"url":"url"
+	}	
+},
+
 // Array Store 
 {
 	"class": {
@@ -412,20 +492,25 @@
 		,"fields":"fields"
 		,"storeId":"store_id"
 		,"idIndex":"id_index"
-	}	
+	}
+	,"parent":"baseStore"
 },
 
 // Json Store 
 {
 	"class": {
-		"arrayStore": "ExtJsonStore"	
+		"jsonStore": "ExtJsonStore"	
 	},
-	"config": {
-		"data":"data"
+	"config": {		
+		"storeId":"store_id"
+		,"idProperty":"id_property"
 		,"fields":"fields"
-		,"storeId":"store_id"
-		,"idIndex":"id_index"
-	}	
+		,"root":"root"
+		,"_start":"start"
+		,"_limit":"limit"
+		,"totalProperty":"total_property"
+	}
+	,"parent":"baseStore"	
 },
 
 // Tab panel

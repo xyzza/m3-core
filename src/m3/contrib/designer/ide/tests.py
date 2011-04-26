@@ -13,13 +13,6 @@ class TestOne(ExtWindow):
         super(TestOne, self).__init__(*args, **kwargs)
         self.initialize()
 
-    # asdasdasdl;ajsfldihads
-    #a asdoa;sjdoliajs 
-    # asd
-    
-    
-    
-
     def initialize(self):
         '''©
         AUTOGENERATIONS! Не редактировать!!
