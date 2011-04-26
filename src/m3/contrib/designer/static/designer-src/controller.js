@@ -319,11 +319,15 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    },
    onComponentTreeNodeDrop: function(dropEvent) {
        //либо перемещение нод, либо создание нового компонента, если нода была из тулбокса
+
        if (!dropEvent.dropNode.attributes.isToolboxNode) {
            this.moveTreeNode(dropEvent.dropNode, dropEvent.target, dropEvent.point);
        }
        else {
            var model = this._model.findModelById(dropEvent.target.id);
+           if (dropEvent.point != 'append') {
+               model = model.parentNode;
+           }
            var type = dropEvent.dropNode.attributes.type;
            this._createModelComponent(model,type);
        }

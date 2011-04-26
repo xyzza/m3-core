@@ -201,7 +201,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     isQuickEditable: true
                 },
                 header: {
-                    defaultValue:false,
+                    defaultValue:true,
                     isInitProperty:true
                 }
             },
@@ -773,7 +773,55 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 text:'Paging toolbar'
             }
         },
-
+        /*
+        * Дерево
+        */
+        treeNode:{
+            isContainer:true,
+            properties:{
+                items:{
+                    defaultValue:'undefined',
+                    propertyType:'object'
+                },
+                id: {
+                    defaultValue:'tree_node',
+                    isInitProperty:true
+                },
+                text: {
+                    defaultValue:'New tree node',
+                    isInitProperty:true
+                },
+                iconCls:{
+                    defaultValue:''
+                },
+                leaf:{
+                    defaultValue:false,
+                    isInitProperty:true
+                },
+                expanded:{
+                    defaultValue:false
+                },
+                hasChildren:{
+                    defaultValue:false
+                },
+                autoCheck:{
+                    defaultValue:false
+                },
+                checked:{
+                    defaultValue:false
+                },
+                canCheck:{
+                    defaultValue:false
+                }
+            },
+            childTypesRestrictions:{
+                allowed:['treeNode']
+            },
+            toolboxData:{
+                category:'Tree',
+                text:'Tree node'
+            }
+        },
         gridPanel:{
             parent:'panel',
             isContainer: true,
@@ -952,6 +1000,47 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
         /*
         * М3
         */
+         treeGrid: {
+            isContainer:true,
+            parent:'panel',
+            properties: {
+                id: {
+                    defaultValue:'tree_panel',
+                    isInitProperty:true
+                },
+                rootText:{
+                    defaultValue:'Root',
+                    isInitProperty:true
+                },
+                url: {
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
+                urlShortName:{
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
+                customLoad:{
+                    defaultValue:false
+                },
+                readOnly:{
+                    defaultValue:false
+                },
+                dragDrop:{
+                    defaultValue:false
+                },
+                allowContainerDrop:{
+                    defaultValue:true
+                }
+            },
+            childTypesRestrictions: {
+                allowed:['treeNode','gridColumn']
+            },
+            toolboxData: {
+                category:'M3',
+                text:'Tree panel'
+            }
+        },
         dictSelect:{
             parent:'comboBox',
             properties: {

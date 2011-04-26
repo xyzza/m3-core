@@ -165,6 +165,45 @@ M3Designer.ui.ModelUIPresentaitionBuilder = function() {
                         }
                     });
         },
+        treeGrid:function(model, cfg) {
+
+            var children = [];
+            var columns = this._getGridColumns(model);
+
+            var recursion = function(m) {
+                var kids = []
+                for (var j=0;j<m.childNodes.length;j++) {
+                    if (m.childNodes[j].attributes.type == 'treeNode') {
+                        var nodeCfg = Ext.apply({},
+                            m.childNodes[j].attributes.properties);
+                        if (m.childNodes[j].attributes.properties.items) {
+                            Ext.apply(nodeCfg, m.childNodes[j].attributes.properties.items);    
+                        }
+                        kids.push(nodeCfg);
+
+                        if (m.childNodes[j].childNodes && m.childNodes[j].childNodes.length>0) {
+                            nodeCfg.children = recursion(m.childNodes[j]);
+                        }
+                        else {
+                            nodeCfg.leaf = true;
+                        }
+                    }
+                }
+                return kids;
+            }
+            children = recursion(model);
+
+            return Ext.apply(cfg,{
+                root:new Ext.tree.AsyncTreeNode({
+                    text:model.attributes.properties.rootText,
+                    children: children
+                }),
+                rootVisible:false,
+                xtype:'treegrid',
+                columns:columns
+            });
+
+        },
         gridPanel:function(model, cfg) {
             var columns = this._getGridColumns(model);
             var store = undefined;
