@@ -161,14 +161,14 @@ class Parser(object):
             
                     extjs_item = self._get_json_attr(k, js_dict['type'])                    
                     if not extjs_item:
-                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (k, js_dict['type']))
+                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), js_dict['type']))
                                 
                     js_dict[extjs_item] = l
                 else: 
                     # Приходят property                    
                     extjs_item = self._get_json_attr(k, js_dict['type'])
                     if not extjs_item:
-                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (k, js_dict['type']))  
+                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), js_dict['type']))  
 
                     # Объект может быть вложенный
                     if self.extends_cmp.get(v):                            
@@ -229,7 +229,7 @@ class Parser(object):
             extjs_attr = self._get_json_attr(k, extjs_name)            
             
             if not extjs_attr:
-                raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (k, extjs_name))
+                raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), extjs_name))
               
             properties[extjs_attr] = v
             
@@ -661,7 +661,7 @@ class Node(object):
             if item['class'].has_key(extjs_class):
                                 
                 if not item['config'].get(extjs_attr):
-                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_attr, extjs_class))
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(extjs_attr) , extjs_class))
                 
                 py_attr = item['config'][extjs_attr]
                 return ast.Assign(
@@ -705,7 +705,7 @@ class Node(object):
             if item['class'].has_key(extjs_class):
                                 
                 if not item['config'].get(extjs_attr):
-                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_attr, extjs_class))
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(extjs_attr), extjs_class))
                 
                 py_attr = item['config'][extjs_attr]
                 return ast.Assign(
@@ -725,7 +725,7 @@ class Node(object):
             if item['class'].has_key(extjs_class):
                                 
                 if not item['config'].get(extjs_name):
-                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % (extjs_name, extjs_class))                
+                    raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(extjs_name), extjs_class))                
                 
                 py_attr = item['config'][extjs_name]
                  
