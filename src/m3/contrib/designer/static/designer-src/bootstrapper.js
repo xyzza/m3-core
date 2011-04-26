@@ -66,6 +66,7 @@ Bootstrapper = Ext.extend(Object, {
             designPanel:designPanel,
             toolbox:toolbox
         });
+        this.application = application;
 
          var storage = new M3Designer.ServerStorage({
             id:0,

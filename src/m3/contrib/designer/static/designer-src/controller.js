@@ -41,6 +41,8 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        this._initDesignDD(this.designPanel);
        //запустим обработку мышиных событий на панели дизайнера
        this._initDesignMouseEvents(this.designPanel);
+       //Иницализация "сторонних" событий панели
+       this._initDesignPanelEvents(this.designPanel);
 
        //обработчики событий
        this.tree.on('beforenodedrop', this.onComponentTreeBeforeNodeDrop.createDelegate(this));
@@ -115,6 +117,11 @@ M3Designer.controller.AppController = Ext.extend(Object, {
        el.on('click', this.onDesignerPanelDomClick.createDelegate(this));
        /* Демократия товарищи */
        el.on('contextmenu', this.onDesignerPanelDomClick.createDelegate(this), null, {preventDefault: true});
+   },
+   /* Cлушает событие "tabchanged", которое происходит в tabPanel */
+   _initDesignPanelEvents: function(panel){
+       var scope = this;
+       panel.on('tabchanged', function(){ scope.removeHighlight(); });
    },
    /*
    * Заполняем тулбокс компонентами
@@ -289,12 +296,17 @@ M3Designer.controller.AppController = Ext.extend(Object, {
            var nodeId = M3Designer.Utils.parseDomIdToNodeId(el.id);
            this.tree.getNodeById(nodeId).select();
 
+           //Подсвечивает элементы выделения
            this.highlightElement(el.id);
+
+           // Определение QuickPropertyWindow
            var modelId = M3Designer.Utils.parseModelId(el.id);
            var model = this._model.findModelById(modelId);
+
            //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
            var win = Ext.getCmp(this._lastQuickPropertyId);
            if (win) win.close();
+
            this._lastQuickPropertyId = this._editorManager.quickEditModel(model);
        }
    },

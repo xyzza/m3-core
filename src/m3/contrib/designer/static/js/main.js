@@ -119,9 +119,8 @@ var tabPanel = new Ext.TabPanel({
     items: [{
     	title: 'Обзор',
         html: '<iframe src="http://m3.bars-open.ru" width="100%" height="100%" style="border: 0px none;"></iframe>'
-    }]	    
+    }]
 });
-
 
 function onClickNode(node) {					
 	var attr =  node.attributes;	            	
@@ -136,17 +135,25 @@ function onClickNode(node) {
 				   	 
    	panel.setTitle(attr['class_name']); 
 	tabPanel.add(panel);
-	
 	starter.loadModel();
-	
-	tabPanel.activate(panel);
+
+    tabPanel.activate(panel);
+
+    // Прослушивает событие "tabchange", вызывает новое событие в дочерней панели
+    tabPanel.on('tabchange', function(panel,newTab,currentTab){
+        starter.application.designPanel.fireEvent('tabchanged');
+    });
 }
 
-/*Вымогает у сервера некий файл*/
+/**
+ * Вымогает у сервера некий файл
+ * @param path - путь к файлу
+ * TODO: Сделать callBack'ами Ext.Ajax.request
+ */
 function onClickNodePyFiles(node, fileAttr){
     var path = fileAttr.path;
     var fileName = fileAttr.fileName;
-
+    /*Запрос содержимого файла по path на сервере*/
     Ext.Ajax.request({
         url:'/file-content',
         method: 'GET',
@@ -157,9 +164,9 @@ function onClickNodePyFiles(node, fileAttr){
             var obj = Ext.util.JSON.decode(response.responseText);
             var codeEditor = new M3Designer.code.ExtendedCodeEditor({
                 sourceCode : obj.data.file_content
-            })
+            });
 
-            codeEditor.setTitle(fileName)
+            codeEditor.setTitle(fileName);
             tabPanel.add( codeEditor );
             tabPanel.activate(codeEditor);
 
@@ -184,17 +191,14 @@ function onClickNodePyFiles(node, fileAttr){
                         }
                         userTakeChoise = !userTakeChoise;
                     }, textArea.id);
-
                 }
                 else userTakeChoise = !userTakeChoise;
-
                 return !userTakeChoise;
-                
-            })
+            });
 
             codeEditor.on('close_tab', function(tab){
                 if (tab) tabPanel.remove(tab);
-            })
+            });
             codeEditor.on('save', function(fileContent, tab){
                 /*Запрос на сохранения изменений */
                 Ext.Ajax.request({
@@ -213,12 +217,27 @@ function onClickNodePyFiles(node, fileAttr){
                         else if (!obj.success && obj.error){
                             message = 'Ошибка при сохранении файла';
                             icon = 'warning';
-                        }
-                        /*Тут будет вывод сообщения*/
+                        };
+                         /*Тут будет вывод сообщения*/
                     },
                     failure: uiAjaxFailMessage
-                })
-            })
+                });
+            });
+            codeEditor.on('update', function(){
+                /*Запрос на обновление */
+                Ext.Ajax.request({
+                    url:'/file-content',
+                    method: 'GET',
+                    params: {
+                        path: path
+                    },
+                    success: function(response, opts){
+                        var obj = Ext.util.JSON.decode(response.responseText);
+                        codeEditor.codeMirrorEditor.setCode(obj.data.file_content)
+                    },
+                    failure: uiAjaxFailMessage
+                });
+            });
         },
         failure: uiAjaxFailMessage
     });

@@ -29,16 +29,32 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
 });
 
 M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
+    autoScroll:true,
     initComponent: function() {
         Ext.applyIf(this, {
             closable: true,
             buttons:[
-                new Ext.Button({text:'Сохранить',handler:this.onSave.createDelegate(this) }),
-                new Ext.Button({ text:'Закрыть', handler:this._onClose.createDelegate(this) })
+                new Ext.Button({text:'Сохранить',
+                                handler:this.onSave.createDelegate(this),
+                                iconCls:'icon-script-save'}),
+                new Ext.Button({text:'Обновить',
+                                handler:this.onUpdate.createDelegate(this),
+                                iconCls:'icon-script-go'}),
+                new Ext.Button({text:'Закрыть',
+                                handler:this._onClose.createDelegate(this),
+                                iconCls:'icon-cancel'})
             ]
         });
-        M3Designer.code.ExtendedCodeEditor.superclass.initComponent.call(this);
-        /**/
+        /*Хендлер на изменение кода*/
+        this.on('contentChaged', function(){
+            var newTitle = '*'+this.orginalTitle;
+            if (this.title != newTitle) {
+                this.orginalTitle = this.title;
+                this.setTitle('*'+this.orginalTitle);
+            }
+            else if(!this.contentChanged) this.setTitle(this.orginalTitle);
+        });
+        M3Designer.code.ExtendedCodeEditor.superclass.initComponent.call(this, arguments);
     },
     _onClose:function() {
          
@@ -66,6 +82,10 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
     onSave:function() {
         var textArea = this.findByType('textarea')[0];
         this.fireEvent('save', textArea.value, this);
+    },
+    onUpdate:function() {
+        var textArea = this.findByType('textarea')[0];
+        this.fireEvent('update', textArea.value, this);
     },
 
     /* Показывает messagebox, о имеющихся изменениях*/
