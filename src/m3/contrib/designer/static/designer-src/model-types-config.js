@@ -79,7 +79,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'component',
             properties: {
                 id:{
-                    defaultValue:'button',
+                    defaultValue:'btn_button',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -103,7 +103,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'component',
             properties: {
                 id:{
-                    defaultValue:'label',
+                    defaultValue:'lbl_label',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -148,7 +148,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     defaultValue:''
                 },
                 id: {
-                    defaultValue:'container',
+                    defaultValue:'cnt_container',
                     isInitProperty:true,
                     isQuickEditable: true
                 }
@@ -172,7 +172,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     isQuickEditable: true
                 },
                 id:{
-                    defaultValue:'panel',
+                    defaultValue:'pnl_panel',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -229,7 +229,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     isQuickEditable: true
                 },
                 id:{
-                    defaultValue:'fieldset',
+                    defaultValue:'fset_fieldset',
                     isInitProperty:true,
                     isQuickEditable: true
                 }
@@ -248,7 +248,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             isContainer:true,
             properties:{
                 id:{
-                    defaultValue:'tab_panel',
+                    defaultValue:'tab_tappanel',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -277,7 +277,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             isContainer:true,
             properties : {
                 id : {
-                    defaultValue:'form_panel',
+                    defaultValue:'frm_formpanel',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -343,7 +343,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'textField',
             properties:{
                 id:{
-                    defaultValue:'text_area',
+                    defaultValue:'tarea_textarea',
                     isInitProperty:true,
                     isQuickEditable: true
                 }
@@ -358,7 +358,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id: {
-                    defaultValue:'check_box',
+                    defaultValue:'chk_checkbox',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -381,7 +381,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id:{
-                    defaultValue:'date_field',
+                    defaultValue:'date_datefield',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -399,7 +399,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id:{
-                    defaultValue:'time_field',
+                    defaultValue:'time_timefield',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -422,7 +422,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseField',
             properties:{
                 id:{
-                    defaultValue:'string_field',
+                    defaultValue:'str_stringfield',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -466,7 +466,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'textField',
             properties:{
                 id:{
-                    defaultValue:'number_field',
+                    defaultValue:'nmbr_numberfield',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -511,7 +511,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseField',
             properties : {
                 id: {
-                    defaultValue:'html_editor',
+                    defaultValue:'html_htmleditor',
                     isInitProperty:true,
                     isQuickEditable: true
                 }
@@ -528,7 +528,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'triggerField',
             properties: {
                 id:{
-                    defaultValue:'combobox',
+                    defaultValue:'cmb_combobox',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -613,7 +613,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id : {
-                    defaultValue:'display_field',
+                    defaultValue:'dspl_displayfield',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -632,7 +632,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
         hiddenField: {
             properties: {
                 id : {
-                    defaultValue:'hidden_field',
+                    defaultValue:'hdn_hiddenfield',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -658,7 +658,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'container',
             properties: {
                 id: {
-                    defaultValue: 'toolbar',
+                    defaultValue: 'tb_toolbar',
                     isInitProperty:true,
                     isQuickEditable: false
                 },
@@ -685,7 +685,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
         tbfill: {
             properties: {
                 id: {
-                    defaultValue: 'toolbar_fill',
+                    defaultValue: 'tbfill_toolbarfill',
                     isInitProperty:true,
                     isQuickEditable: true
                 }
@@ -698,7 +698,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
         tbseparator: {
             properties: {
                 id: {
-                    defaultValue: 'toolbar_separator',
+                    defaultValue: 'tbsep_toolbarseparator',
                     isInitProperty:true,
                     isQuickEditable: true
                 }
@@ -711,7 +711,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
         tbspacer: {
             properties: {
                 id: {
-                    defaultValue: 'toolbar_spacer',
+                    defaultValue: 'tbsp_toolbarspacer',
                     isInitProperty:true,
                     isQuickEditable: true
                 }
@@ -724,7 +724,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
         tbtext: {
             properties: {
                 id: {
-                    defaultValue: 'toolbar_text',
+                    defaultValue: 'tbtxt_toolbartext',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -741,7 +741,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
         pagingToolbar: {
             properties: {
                 id: {
-                    defaultValue: 'paging_toolbar',
+                    defaultValue: 'pbr_pagingtoolbar',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -785,7 +785,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     propertyType:'object'
                 },
                 id: {
-                    defaultValue:'tree_node',
+                    defaultValue:'tnode_treenode',
                     isInitProperty:true
                 },
                 text: {
@@ -828,7 +828,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             isContainer: true,
             properties: {
                 id:{
-                    defaultValue:'grid_panel',
+                    defaultValue:'grd_gridpanel',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -861,7 +861,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             properties: {
                 id:{
                     //ATTENTION - пробелы в id ведут к багу при наведении мышки на хедер
-                    defaultValue:'gridColumn',
+                    defaultValue:'clmn_gridColumn',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -890,7 +890,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'panel',
             properties: {
                 id:{
-                    defaultValue:'window',
+                    defaultValue:'win_window',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -934,7 +934,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseStore',
             properties : {
                 id: {
-                    defaultValue:'array_store',
+                    defaultValue:'astore_arraystore',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -962,7 +962,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseStore',
             properties : {
                 id: {
-                    defaultValue:'json_store',
+                    defaultValue:'jstore_jsonstore',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -1006,7 +1006,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'panel',
             properties: {
                 id: {
-                    defaultValue:'tree_panel',
+                    defaultValue:'tree_treepanel',
                     isInitProperty:true
                 },
                 rootText:{
@@ -1046,7 +1046,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'comboBox',
             properties: {
                 id: {
-                    defaultValue:'dict_select_field',
+                    defaultValue:'dsf_dictselectfield',
                     isInitProperty:true
                 },
                 hideTrigger: {
@@ -1106,7 +1106,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             isContainer: true,
             properties: {
                 id:{
-                    defaultValue:'object_grid',
+                    defaultValue:'ogrd_objectgrid',
                     isInitProperty:true,
                     isQuickEditable: true
                 },
@@ -1184,7 +1184,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id: {
-                    defaultValue:'file_upload_field',
+                    defaultValue:'fupf_fileuploadfield',
                     isInitProperty:true
                 },
                 possibleFileExtensions: {
@@ -1205,7 +1205,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
             parent:'baseField',
             properties: {
                 id: {
-                    defaultValue:'image_upload_field',
+                    defaultValue:'iupf_imageuploadfield',
                     isInitProperty:true
                 },
                 possibleFileExtensions: {
