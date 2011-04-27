@@ -47,7 +47,7 @@ class ExtTree(BaseExtPanel):
         # Если включен - не рендерим drag'n'drop
         self.read_only = False 
         
-        # разрешить перетаскивать элменты в корень (путем кидания просто в контейнер)
+        # разрешить перетаскивать элементы в корень (путем кидания просто в контейнер)
         self.allow_container_drop = True 
                 
         self.init_component(*args, **kwargs)
