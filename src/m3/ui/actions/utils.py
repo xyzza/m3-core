@@ -6,7 +6,7 @@ from m3.core.exceptions import ApplicationLogicException
 import json
 
 from django.db.models.query_utils import Q
-from django.db import models, connection, transaction
+from django.db import models
 
 
 def apply_sort_order(query, columns, sort_order):
@@ -152,11 +152,17 @@ def bind_request_form_to_object(request, obj_factory, form):
     # Создаем форму для биндинга к ней
     win = form()
     win.form.bind_to_request(request)
-    # Получаем наш объект по id
+    
+    # Получаем наш объект по id и биндим форму к нему
     id = extract_int(request, 'id')
     obj = obj_factory(id)
-    # Биндим форму к объекту
     win.form.to_object(obj)
+    
+    # Может возникнуть трудноуловимая ошибка, когда в request был id=0 и
+    # он присвоился obj.id. В БД не должно быть pk=0
+    if not id:
+        obj.id = None
+    
     return obj
 
 def safe_delete_record(model, id=None):
