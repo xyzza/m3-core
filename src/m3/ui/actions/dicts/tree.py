@@ -104,7 +104,7 @@ class ListGetRowsAction(Action):
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
         filter = request.REQUEST.get('filter')
-        result = self.parent.get_rows(parent_id, offset, limit, filter)
+        result = self.parent.get_rows(request, context, parent_id, offset, limit, filter)
         return PreJsonResult(result)
 
 class ListGetRowAction(Action):
@@ -623,7 +623,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         '''
         return query
     
-    def get_rows(self, parent_id, offset, limit, filter):
+    def get_rows(self, request, context, parent_id, offset, limit, filter):
         # если справочник состоит только из дерева и у него просят запись, то надо брать из модели дерева
         #TODO: возможно это не надо было делать - раз не туда обратились, значит сами виноваты
         if self.list_model:
@@ -640,6 +640,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             query = utils.apply_sort_order(query, self.list_columns, self.list_sort_order)
             query = utils.apply_search_filter(query, filter, self.filter_fields)
             # Для работы пейджинга нужно передавать общее количество записей
+            query = self.modify_get_rows(query, request, context)
             total = query.count()
             # Срез данных для страницы
             if limit > 0:
@@ -649,7 +650,13 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             return result
         else:
             return self.get_nodes(parent_id, filter)
-    
+
+    def modify_get_rows(self, query, request, context):
+        '''
+        метод для переопределения запроса на получение данных справочника
+        '''
+        return query
+
     def _get_model_fieldnames(self, model):
         """ Возвращает имена всех полей модели """ 
         return [field.attname for field in model._meta.local_fields]
