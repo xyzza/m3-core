@@ -183,7 +183,7 @@
 		"treeGrid": "ExtTree"
 	},
 	"config": {		
-		"items":"columns"
+		"columns":"columns"
 		,"url":"url"
 		,"rootText":"root_text"
 		,"dragDrop":"drag_drop"
@@ -215,6 +215,7 @@
 		,"iconCls":"icon_cls"
 		,"expanded":"expanded"
 		,"hasChildren":"has_children"
+		,"children":"children"
 	}	
 },
 
