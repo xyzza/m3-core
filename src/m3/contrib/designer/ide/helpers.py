@@ -93,7 +93,7 @@ def get_classess(path):
     '''
     Возвращает набор классов в файле
     '''
-    ast_module = ast.parse( Parser.get_source_without_end_space(path) )    
+    ast_module = ast.parse( Parser.get_source(path) )    
     res = []
     for item in ast_module.body:
         if isinstance(item, ast.ClassDef):
@@ -145,10 +145,10 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
         raise ParserError(u'Наименование класса "%s" должно содержать только ascii символы ' % class_name)
     
     
-    source = Parser.get_source_without_end_space(path)
+    source = Parser.get_source(path)
      
     # Чтение файла        
-    module = ast.parse( Parser.get_source_without_end_space(path) )
+    module = ast.parse( Parser.get_source(path) )
     
     #Нужно добавить импорт всего, если этого импорта нет
     line = 1

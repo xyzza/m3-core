@@ -69,21 +69,21 @@ class Parser(object):
         self.base_class = 'BaseExtWindow'
         
     @staticmethod
-    def get_source_without_end_space(path):
+    def get_source(path):
         '''
-        Убирает оконечные пробельные строки
-        '''
-        f_lines = open(path).readlines()
+        Убирает символ "возврат каретки", оставляемый на win системах
+        и убирает конечные пробелы
+        '''        
+        f_lines = map(lambda x: x.replace('\r', ''), open(path).xreadlines())
         lines = f_lines[:]
-        
-        
+
         f_lines.reverse()
         for line in f_lines:
             if str.isspace(line):
                 lines.pop()
             else:
                 break
-                  
+                                    
         return ''.join(lines)                
     
     def to_designer(self):
@@ -93,7 +93,7 @@ class Parser(object):
         '''
 
         # AST не дружит в конечными пробельными строками, поэтому убираем их и все пробельные строки за одно
-        source_code = Parser.get_source_without_end_space(self.path)
+        source_code = Parser.get_source(self.path)
 
         node_module = ast.parse(source_code)
         class_node, func_node = self._get_func_initialize(node_module, self.class_name)
@@ -357,7 +357,7 @@ class Parser(object):
         '''
 
         # AST не дружит в конечными пробельными строками, поэтому убираем их и все пробельные строки за одно
-        old_source_code = Parser.get_source_without_end_space(self.path)
+        old_source_code = Parser.get_source(self.path)
         
         module_node = ast.parse(old_source_code)
         

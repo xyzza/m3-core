@@ -137,7 +137,7 @@ function createTreeView(rootNodeName){
 	
 	var accordion = new Ext.Panel({
 		id:'accordition-view',		   
-	    layout:'accordion',
+	    layout:'accordion',	    
 	    layoutConfig: {
 	        animate: true,
 	        collapseFirst: true	        
@@ -150,7 +150,7 @@ function createTreeView(rootNodeName){
 	        title: 'Свойства',
 	        id: 'property-panel',
 	        layout: 'fit'
-	    },]
+	    }]
 	});
 	
 	
