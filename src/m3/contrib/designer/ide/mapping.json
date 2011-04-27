@@ -177,6 +177,47 @@
 	,"parent": "panel"
 },
 
+// Многоколоночное дерево
+{
+	"class": {
+		"treeGrid": "ExtTree"
+	},
+	"config": {		
+		"items":"columns"
+		,"url":"url"
+		,"rootText":"root_text"
+		,"dragDrop":"drag_drop"
+		,"customLoad":"custom_load"
+		,"readOnly":"read_only"
+		,"allowContainerDrop":"allow_container_drop"
+		,"nodes":"nodes"		
+		
+		,"urlShortName": {
+			"type":"shortname"
+			,"value":"url"
+		}
+	}
+	,"parent": "panel"
+},
+
+// Узел дерева
+{
+	"class": {
+		"treeNode": "ExtTreeNode"
+	},
+	"config": {		
+		"text":"text"
+		,"autoCheck":"auto_check"
+		,"checked":"checked"
+		,"canCheck":"can_check"
+		,"items":"children"
+		,"leaf":"leaf"
+		,"iconCls":"icon_cls"
+		,"expanded":"expanded"
+		,"hasChildren":"has_children"
+	}	
+},
+
 // Object grid
 {
 	"class": {
@@ -484,6 +525,11 @@
 		,"autoLoad":"auto_load"
 		,"autoSave":"auto_save"
 		,"url":"url"
+		
+		,"urlShortName": {
+			"type":"shortname"
+			,"value":"url"
+		}
 	}	
 },
 
