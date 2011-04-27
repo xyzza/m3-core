@@ -214,7 +214,7 @@ class ContragentModelImport(SimpleModelImport):
                                                     replica_map=replica_map)
         
         self.contragent_field_map = contragent_field_map
-        self.contragent_field = 'contragent'  
+        self.contragent_field = contragent_field  
         
     def handle(self, source_row):
         '''
@@ -240,7 +240,7 @@ class ContragentModelImport(SimpleModelImport):
             for field in Contragent._meta.fields:
                 if self.contragent_field_map.has_key(field.name):
                     value = self._convert_value(field, source_row[self.contragent_field_map[field.name]])
-                    self._set_field_value(obj, field, value)
+                    self._set_field_value(contragent, field, value)
         
         # возвращаем контрагента и связанный с ним объект предметной области
         return [contragent, obj]
