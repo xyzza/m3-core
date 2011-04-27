@@ -1168,6 +1168,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 },
                 allowPaging: {
                     defaultValue:true
+                },
+                header: {
+                    defaultValue:true
                 }
             },
             childTypesRestrictions:{
