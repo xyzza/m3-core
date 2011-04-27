@@ -28,7 +28,7 @@ def create_sqlite_from_sql(sql_text_path, db_ready_path):
     connection = sqlite3.connect(db_ready_path)
     cursor = connection.cursor()
     file_data = open(sql_text_path).read() or ""
-    file_data = file_data.split("\r\n")
+    file_data = file_data.split("\n")
     query_queue = compose_queries(file_data)
 
     for query in query_queue:
