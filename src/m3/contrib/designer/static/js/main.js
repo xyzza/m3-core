@@ -4,13 +4,39 @@
 function createTreeView(rootNodeName){
 	var tree =  new Ext.tree.TreePanel({
 		useArrows: true
+		,id:'project-view'
 	    ,autoScroll: true
 	    ,animate: true    
 	    ,containerScroll: true
-	    ,border: false					        
+	    ,border: false
+	    ,header: false		        
 	    ,loader: new Ext.tree.TreeLoader({
 			url: '/project-files'
-		})					
+		})
+		,tbar: new Ext.Toolbar({			
+            items: [{
+            	iconCls: 'icon-script-add'
+            	,tooltip:'Создать файл'
+            },{
+            	iconCls: 'icon-script-edit'
+            	,tooltip:'Переименовать файл'
+            },{
+            	iconCls: 'icon-script-delete'
+            	,tooltip:'Удалить файл'
+            },{
+            	xtype: 'tbseparator'
+            },{
+            	iconCls: 'icon-arrow-refresh'
+            	,tooltip:'Обновить структуру проекта'
+            	,handler: function(){
+            		var cmp = Ext.getCmp('project-view');
+					var loader = cmp.getLoader();
+		        	var rootNode = cmp.getRootNode();
+		        	loader.load(rootNode);
+		        	rootNode.expand();
+            	}
+            }]        
+		})
 	    ,root: {
 	        nodeType: 'async'
 	        ,text: rootNodeName
@@ -109,7 +135,25 @@ function createTreeView(rootNodeName){
     	treeLoader.baseParams['path'] = node.attributes.path;
 	}, this);
 	
-	return tree;
+	var accordion = new Ext.Panel({	    
+	    layout:'accordion',
+	    layoutConfig: {
+	        animate: true,
+	        collapseFirst: true	        
+	    },
+	    items: [{
+	        title: 'Структура проекта',	 
+	        layout: 'fit',       
+	        items: [tree]
+	    },{
+	        title: 'Свойства',
+	        hidden: true,
+	        html: '<p>Тут должны быть свойства компонента!</p>'
+	    },]
+	});
+	
+	
+	return accordion;
 }
 
 var tabPanel = new Ext.TabPanel({
