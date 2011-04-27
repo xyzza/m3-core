@@ -308,10 +308,17 @@ M3Designer.controller.AppController = Ext.extend(Object, {
            if (win) win.close();
 
            this._lastQuickPropertyId = this._editorManager.quickEditModel(model);
+       
+
+
        }
    },
    onComponentTreeNodeClick:function(node, e) {
-       this.highlightElement(M3Designer.Utils.parseDomId(node.id));
+       this.highlightElement(M3Designer.Utils.parseDomId(node.id)); 
+             
+       // Отображение property, в панели динамически 
+       var model = this._model.findModelById(node.id);
+       this._editorManager.editModelInline(model);
    },
    onComponentTreeBeforeNodeDrop:function(dropEvent) {
        var dropAllowed = this.validateComponentTreeDrop(dropEvent);

@@ -135,7 +135,8 @@ function createTreeView(rootNodeName){
     	treeLoader.baseParams['path'] = node.attributes.path;
 	}, this);
 	
-	var accordion = new Ext.Panel({	    
+	var accordion = new Ext.Panel({
+		id:'accordition-view',		   
 	    layout:'accordion',
 	    layoutConfig: {
 	        animate: true,
@@ -147,8 +148,8 @@ function createTreeView(rootNodeName){
 	        items: [tree]
 	    },{
 	        title: 'Свойства',
-	        hidden: true,
-	        html: '<p>Тут должны быть свойства компонента!</p>'
+	        id: 'property-panel',
+	        layout: 'fit'
 	    },]
 	});
 	
