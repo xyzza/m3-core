@@ -27,8 +27,13 @@ M3Designer.ModelTransfer = Ext.apply({},{
     },
     childPropertyObjects:{
         mapedToPropertiesTypes:['store','tbar','fbar','bbar'],
+        mapedToPropertiesCollections:['columns','nodes','children'],
         isPropertyMapedType:function(property) {
-            return this.mapedToPropertiesTypes.indexOf(property) >= 0;
+            return this.mapedToPropertiesTypes.indexOf(property) >= 0
+                    || this.mapedToPropertiesCollections.indexOf(property) >= 0;
+        },
+        isPropertyMapedCollection:function(property){
+            return this.mapedToPropertiesCollections.indexOf(property) >=0;
         },
         getTypeProperty:function(model) {
             if (this.hasOwnProperty(model.attributes.type)) {
@@ -43,6 +48,17 @@ M3Designer.ModelTransfer = Ext.apply({},{
         },
         jsonStore:function(model) {
             return 'store';    
+        },
+        gridColumn:function(model) {
+            return 'columns';
+        },
+        treeNode:function(model) {
+            if (model.parentNode.attributes.type != 'treeNode') {
+                return 'nodes';
+            }
+            else {
+                return 'children'
+            }
         },
         toolbar:function(model) {
             if (model.attributes.properties.parentDockType == '(none)') {
@@ -71,14 +87,24 @@ M3Designer.ModelTransfer = Ext.apply({},{
             node.id = model.attributes.properties.id;
             this.doToolbarSerializeWorkaround(node);
             if (model.hasChildNodes()) {
-                node.items = [];
                 for (var i = 0; i < model.childNodes.length; i++){
                     var property = this.childPropertyObjects.getTypeProperty(model.childNodes[i]);
                     if (property == undefined) {
+                        if (!node.items) {
+                            node.items = [];
+                        }
                         node.items.push( doRecursion.call(this, model.childNodes[i]) );
                     }
                     else {
-                        node[property] = doRecursion.call(this, model.childNodes[i]);
+                        if (this.childPropertyObjects.isPropertyMapedCollection(property)) {
+                            if (!node[property]) {
+                                node[property] = [];
+                            }
+                            node[property].push( doRecursion.call(this, model.childNodes[i]));
+                        }
+                        else {
+                            node[property] = doRecursion.call(this, model.childNodes[i]);
+                        }
                     }
                 }
             }
