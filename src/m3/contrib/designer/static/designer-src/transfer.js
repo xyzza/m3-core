@@ -5,7 +5,8 @@
 Ext.namespace('M3Designer');
 
 /*
-* Объект для перевода модели из/в транспортный json
+* Объект для перевода модели из/в транспортный json. Этот класс очень страшный, но он нужен
+* чтобы бы остальные были няшными и аккуратными
  */
 
 M3Designer.ModelTransfer = Ext.apply({},{
@@ -147,9 +148,16 @@ M3Designer.ModelTransfer = Ext.apply({},{
 
             for (var p in jsonObj) {
                 if (this.childPropertyObjects.isPropertyMapedType(p)) {
-                    var child = callBack.call(this, jsonObj[p]);
-                    newNode.appendChild(child);
-                    this.doToolbarDeserializeWorkaround(p, child)
+                    if (this.childPropertyObjects.isPropertyMapedCollection(p)) {
+                        for (var k =0; k< jsonObj[p].length; k++) {
+                            newNode.appendChild(callBack.call(this, jsonObj[p][k]));
+                        }
+                    }
+                    else {
+                        var child = callBack.call(this, jsonObj[p]);
+                        newNode.appendChild(child);
+                        this.doToolbarDeserializeWorkaround(p, child);
+                    }
                 }
             }
 
@@ -169,9 +177,16 @@ M3Designer.ModelTransfer = Ext.apply({},{
 
         for (var p in jsonObj) {
             if (this.childPropertyObjects.isPropertyMapedType(p)) {
-                var child = callBack.call(this, jsonObj[p]);
-                root.appendChild(child);
-                this.doToolbarDeserializeWorkaround(p, child);
+                 if (this.childPropertyObjects.isPropertyMapedCollection(p)) {
+                    for (var k =0; k< jsonObj[p].length; k++) {
+                        root.appendChild(callBack.call(this, jsonObj[p][k]));
+                    }
+                 }
+                else {
+                    var child = callBack.call(this, jsonObj[p]);
+                    root.appendChild(child);
+                    this.doToolbarDeserializeWorkaround(p, child);
+                }
             }
         }
         
