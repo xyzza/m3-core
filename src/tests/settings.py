@@ -22,12 +22,23 @@ MANAGERS = ADMINS
 #DATABASE_HOST = 'localhost'              # Set to empty string for localhost. Not used with sqlite3.
 #DATABASE_PORT = ''                   # Set to empty string for default. Not used with sqlite3.
 
-DATABASE_ENGINE = 'sqlite3'  # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = 'tests'              # Or path to database file if using sqlite3.
-DATABASE_USER = 'tests'               # Not used with sqlite3.
-DATABASE_PASSWORD = 'tests'             # Not used with sqlite3.
-DATABASE_HOST = 'localhost'              # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''                   # Set to empty string for default. Not used with sqlite3.
+#DATABASE_ENGINE = 'sqlite3'  # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+#DATABASE_NAME = 'tests'              # Or path to database file if using sqlite3.
+#DATABASE_USER = 'tests'               # Not used with sqlite3.
+#DATABASE_PASSWORD = 'tests'             # Not used with sqlite3.
+#DATABASE_HOST = 'localhost'              # Set to empty string for localhost. Not used with sqlite3.
+#DATABASE_PORT = ''                   # Set to empty string for default. Not used with sqlite3.
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'tests',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -102,6 +113,7 @@ INSTALLED_APPS = (
     'tests.contrib.m3_audit_tests',
 #    'tests.contrib.palo_olap',
     'tests.core.registry_tests',
+    'tests.db.ddl_tests',
 )
 
 logger.init_logging('./logs')

@@ -1,13 +1,12 @@
 #!/usr/bin/python
-from django.core.management import execute_manager
-
-
 import os,sys
 PROJECT_PATH = os.path.dirname(__file__)
 
 sys.path.insert(0, os.path.join(PROJECT_PATH, '../plugins/'))
 sys.path.insert(0, os.path.join(PROJECT_PATH, '../'))
 sys.path.insert(0, os.path.join(PROJECT_PATH, '../m3/vendor/'))
+
+from django.core.management import execute_manager
 
 try:
     import settings # Assumed to be in the same directory.
