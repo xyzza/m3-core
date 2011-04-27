@@ -169,7 +169,7 @@
 		,"tbar":"tbar"
 		,"bbar":"bbar"
 		,"fbar":"fbar"
-		,"items":"columns"
+		,"columns":"columns"
 		,"autoExpandColumn":"auto_expand_column"
 		,"loadMask":"load_mask"
 		,"cm":"cm"

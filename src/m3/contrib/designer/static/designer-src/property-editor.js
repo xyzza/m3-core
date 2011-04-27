@@ -28,6 +28,36 @@ M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         window.on('save', this.saveModel.createDelegate(this));
         window.show();
     },
+    /**
+     * Отображение свойств (аля delphi)
+     */
+    editModelInline:function(model) {
+    	
+    	// Грубый подбор компонента
+    	var idCmp = 'property-panel';
+        var panel = Ext.getCmp(idCmp);   
+        if (panel) {
+	        var cfg = this.initConfig(model);
+	        var propertyGrid = new M3Designer.edit.InlinePropertyGrid({
+	            source:cfg,
+	            model:model
+	        });
+			propertyGrid.on('save', this.saveModel.createDelegate(this));
+	
+			// Нужно найти компонент
+			var idCmp = 'property-panel';
+	        var panel = Ext.getCmp(idCmp);        
+	        panel.removeAll();
+	        panel.setTitle('Свойства (' + cfg.id + ')');
+	        panel.add(propertyGrid);
+	        panel.doLayout();   
+	        
+	        var accorditionView = panel.ownerCt;         
+	        if (accorditionView.items.itemAt(1).collapsed) {
+	        	accorditionView.items.itemAt(1).expand();	
+	        }
+        }
+    },
     /**/
     quickEditModel:function(model) {
         var cfg = this.initConfig(model, true);
@@ -348,5 +378,84 @@ M3Designer.edit.PropertyWindow = Ext.extend(Ext.Window, {
     },
     _onClose:function() {
         this.hide();
+    }
+});
+
+/**
+ * Грид для встраивания в панель свойств
+ */
+M3Designer.edit.InlinePropertyGrid = Ext.extend(Ext.grid.PropertyGrid, {    
+    /**
+     * Параметры конфига:
+     * cfg.source = {} - то что редактируется проперти гридом
+     * cfg.model = ... ссылка на модель
+     * @param cfg
+     */
+    constructor:function(cfg) {
+        Ext.apply(this, cfg);        
+        M3Designer.edit.InlinePropertyGrid.superclass.constructor.call(this);
+    },
+    initComponent: function(cfg) {
+        this.addEvents('save');
+
+        var customEditors = {};
+        var customRenderers = {};
+		this._setup_grid_customs(customEditors, customRenderers);
+		
+		Ext.apply(this, {
+			customEditors: customEditors,
+			customRenderers: customRenderers
+		});
+		
+		this.on('propertychange', this._onSave.createDelegate(this))
+
+        M3Designer.edit.InlinePropertyGrid.superclass.initComponent.call(this);
+    },
+    _setup_grid_customs:function(customEditorsCfg, customRenderersCfg) {
+        for (var p in this.source) {
+            var type = M3Designer.Types.getPropertyType(this.model.attributes.type, p);
+            if (type == 'object') {
+                customEditorsCfg[p] = this._get_code_editor();
+                customRenderersCfg[p] = function() { return '{Object}'; }
+            }
+            else if (type == 'enum') {
+                customEditorsCfg[p] = this._get_combo_editor(p);
+            }            
+        }
+    },
+    _get_combo_editor:function(propertyName) {
+        var data = [];
+        var ar = M3Designer.Types.getEnumValues(propertyName);
+        for (var i=0;i<ar.length;i++) {
+            data.push([ar[i]]);
+        }
+
+        var store = new Ext.data.ArrayStore({
+            autoDestroy:true,
+            idIndex:0,
+            fields:['name'],
+            data:data
+        });
+        var result = new Ext.form.ComboBox({
+            store:store,
+            displayField:'name',
+            mode:'local',
+            triggerAction:'all',
+            editable:false,
+            selectOnFocus:true
+        });
+        return new Ext.grid.GridEditor(result);
+    },
+    _get_code_editor:function() {
+        return new Ext.grid.GridEditor(
+                    new Ext.form.TextArea()
+                );
+    },
+    _onSave:function() {
+        var eventObj = {
+            source: this.getSource(),
+            model:this.model
+        };
+        this.fireEvent('save', eventObj);        
     }
 });
