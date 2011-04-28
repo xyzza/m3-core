@@ -148,7 +148,7 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
     source = Parser.get_source(path)
      
     # Чтение файла        
-    module = ast.parse( Parser.get_source(path) )
+    module = ast.parse(source)
     
     #Нужно добавить импорт всего, если этого импорта нет
     line = 1
@@ -168,3 +168,34 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
         cl = Parser.generate_class(class_name, base_class)     
         f.write(source + '\n\n\n' +  codegen.to_source(cl))
     
+def create_generation_func(path, class_name):
+    '''
+    Генерирует функцию для возможности работы с дизайнером форм
+    '''
+    source = Parser.get_source(path)
+    
+    module = ast.parse(source)
+    
+    for i, node in enumerate(module.body):
+        if isinstance(node, ast.ClassDef) and node.name == class_name:
+            if len(module.body) > i+1:
+                line_end = module.body[i+1].lineno
+            else:
+                line_end = None
+            break
+    else:
+        raise ValueError('Класс "%s" неопределен' % str(class_name) )
+
+    # Запись
+    with open(path, 'w') as f:
+    
+        init_func = Parser.generate_initialize()
+        
+        print codegen.to_source(init_func, indentation=1)
+        if line_end:
+            source_lines = source.split('\n')        
+            f.write('\n'.join(source_lines[:line_end-1]) +
+                    '\n' +  codegen.to_source(init_func, indentation=1) + '\n' +
+                    '\n'.join(source_lines[line_end-2:]) )
+        else:            
+            f.write(source + '\n' +  codegen.to_source(init_func, indentation=1))

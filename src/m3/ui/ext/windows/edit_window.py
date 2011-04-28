@@ -7,6 +7,7 @@ Created on 02.03.2010
 
 from base import BaseExtWindow
 from m3.ui.ext.containers import ExtForm
+from django.template import TemplateSyntaxError
 
 #===============================================================================
 class ExtEditWindow(BaseExtWindow):
@@ -61,7 +62,7 @@ class ExtEditWindow(BaseExtWindow):
         try:
             self.render_base_config()
             self.render_params()
-        except Exception as msg:
+        except TemplateSyntaxError as msg:
             raise Exception(msg) 
         
         base_config = self._get_config_str()

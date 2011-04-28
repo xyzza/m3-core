@@ -206,13 +206,14 @@ class ExtObjectGrid(containers.ExtGrid):
             
         if self.url_data:
             self.store.url = self.url_data
+                            
+        assert self.store.url, 'Url for store or action_data is not define'        
         
         if self.allow_paging:
             self.store.start = 0
             self.store.limit = 25
             self.bottom_bar = self.paging_bar
-        
-        
+                
         self.render_base_config()
         self.render_params()
         return render_component(self)
@@ -271,6 +272,7 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
             self.store.url = self.action_data.absolute_url()
+            
         self.render_base_config()
         self.render_params()
         return render_component(self)

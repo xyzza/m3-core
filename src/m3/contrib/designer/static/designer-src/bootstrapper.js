@@ -114,19 +114,7 @@ Bootstrapper = Ext.extend(Object, {
             ]
         });
 
-        storage.on('load',
-                function(jsonObj){
-                	if (jsonObj.success) { 
-	                    application.init(jsonObj.json);	                    
-                   	} else {
-                   		Ext.Msg.show({
-						   title:'Ошибка'
-						   ,msg: jsonObj.json
-						   ,buttons: Ext.Msg.OK						   						   
-						   ,icon: Ext.MessageBox.WARNING
-						});
-                   	}                   	
-                });
+        storage.on('load', this.onSuccessLoad);
 
         storage.on('save', function(jsonObj) {
 	        if (jsonObj.success) {                
@@ -170,5 +158,18 @@ Bootstrapper = Ext.extend(Object, {
     },
     loadModel: function(){
     	this.storage.loadModel();
+    },
+    
+    onSuccessLoad: function(jsonObj){    	
+		if (jsonObj.success) { 
+	        this.application.init(jsonObj.json);	                    
+	   	} else {
+	   		Ext.Msg.show({
+			   title:'Ошибка'
+			   ,msg: jsonObj.json
+			   ,buttons: Ext.Msg.OK						   						   
+			   ,icon: Ext.MessageBox.WARNING
+			});
+        }                   	
     }
 });
