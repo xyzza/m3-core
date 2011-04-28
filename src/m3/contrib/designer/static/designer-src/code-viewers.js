@@ -19,7 +19,7 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
     },
     show:function( code ) {
         this.add(
-            new Ext.ux.panel.CodeEditor({
+            new Ext.m3.CodeEditor({
                 sourceCode:code,
                 autoScroll:true
             })
@@ -28,7 +28,7 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
     }
 });
 
-M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
+M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor,{
     autoScroll:true,
     border:true,
     initComponent: function() {

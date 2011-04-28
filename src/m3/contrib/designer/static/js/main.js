@@ -45,25 +45,33 @@ function createTreeView(rootNodeName){
 	        ,expanded: true					     
 	    }
 		,contextMenu: new Ext.menu.Menu({
-		        items: [{
+                items: [{
+		            id: 'edit-file'
+		            ,text: 'Редактировать файл'
+		            ,iconCls: 'icon-script-lightning'
+                    ,handler: function(item, e){}
+		        },{
 		            id: 'create-file'
 		            ,text: 'Создать файл'
 		            ,iconCls: 'icon-script-add'
+                    ,handler: function(item, e){}
 		        },{
 		            id: 'rename-file'
 		            ,text: 'Переименовать файл'
 		            ,iconCls: 'icon-script-edit'
+                    ,handler: function(item, e){}
 		        },{
 		            id: 'delete-file'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
+                    ,handler: function(item, e){}
 		        },'-',{
 		        	id: 'create-class'
 		            ,text: 'Добавить класс'
 		            ,iconCls: 'icon-cog-add'
 		            ,handler: function(item, e){
-				
-						Ext.MessageBox.prompt('Создание класса', 
+
+						Ext.MessageBox.prompt('Создание класса',
 							'Введите название класса',
 							function(btn, text){
 								if (btn == 'ok'){
@@ -106,15 +114,73 @@ function createTreeView(rootNodeName){
 		        }
 		        ]
 		    }),
+            contextFileMenu: new Ext.menu.Menu({
+                items: [{
+		            id: 'edit-file1'
+		            ,text: 'Редактировать файл'
+		            ,iconCls: 'icon-script-lightning'
+                    ,handler: function(item, e){}
+		        },{
+		            id: 'create-file2'
+		            ,text: 'Создать файл'
+		            ,iconCls: 'icon-script-add'
+                    ,handler: function(item, e){}
+		        },{
+		            id: 'rename-file2'
+		            ,text: 'Переименовать файл'
+		            ,iconCls: 'icon-script-edit'
+                    ,handler: function(item, e){}
+		        },{
+		            id: 'delete-file2'
+		            ,text: 'Удалить файл'
+		            ,iconCls: 'icon-script-delete'
+                    ,handler: function(item, e){}
+		        }]
+            }),
+            contextDirMenu: new Ext.menu.Menu({
+                items: [{
+		            id: 'create-file3'
+		            ,text: 'Создать файл'
+		            ,iconCls: 'icon-script-add'
+                    ,handler: function(item, e){}
+                },'-',{
+		            id: 'create-dir'
+		            ,text: 'Создать директорию'
+		            ,iconCls: 'icon-folder-add'
+                    ,handler: function(item, e){}
+		        },{
+		            id: 'rename-dir'
+		            ,text: 'Переименовать директорию'
+		            ,iconCls: 'icon-folder-edit'
+                    ,handler: function(item, e){}
+		        },{
+		            id: 'delete-dir'
+		            ,text: 'Удалить директорию'
+		            ,iconCls: 'icon-folder-delete'
+                    ,handler: function(item, e){}
+		        }]
+            }),
 		    listeners: {
 		        contextmenu: function(node, e) {
-		            node.select();	            
+		            node.select();
+                    /* Файл дизайна форм */
 		            if (node.text === 'ui.py' || node.text === 'forms.py' ) {
 			            var c = node.getOwnerTree().contextMenu;
 			            c.contextNode = node;
 			            c.showAt(e.getXY());						            	
 		            }
-	
+                    /* Файл */
+                    else if(node.leaf && (node.parentNode.text !== 'ui.py' && node.parentNode.text !== 'forms.py')) {
+                        var c = node.getOwnerTree().contextFileMenu;
+			            c.contextNode = node;
+			            c.showAt(e.getXY());
+                    }
+                    /* Директория */
+                    else if(!node.leaf && (node.parentNode.text !== 'ui.py' && node.parentNode.text !== 'forms.py')) {
+                        var c = node.getOwnerTree().contextDirMenu;
+			            c.contextNode = node;
+			            c.showAt(e.getXY());
+                    };
 		        },
 		        dblclick: function(node, e){
 		        	if (node.parentNode && (node.parentNode.text === 'ui.py' || node.parentNode.text === 'forms.py' ) ){
@@ -126,10 +192,10 @@ function createTreeView(rootNodeName){
                         fileAttr['path'] = node.attributes.path;
                         fileAttr['fileName'] = node.attributes.text;
                         onClickNodePyFiles(node, fileAttr);
-                    }
+                    };
 		        }
-		    }	
-	})
+		    }
+	});
 	
 	tree.getLoader().on("beforeload", function(treeLoader, node) {	
     	treeLoader.baseParams['path'] = node.attributes.path;
@@ -220,114 +286,128 @@ function onClickNodePyFiles(node, fileAttr){
         ,success: function(response, opts){
             var obj = Ext.util.JSON.decode(response.responseText);
             var codeEditor = new M3Designer.code.ExtendedCodeEditor({
-                sourceCode : obj.data.file_content
+                sourceCode : obj.data.content
             });
 
             codeEditor.setTitle(fileName);
             tabPanel.add( codeEditor );
             tabPanel.activate(codeEditor);
+        
+            initCodeEditorHandlers(codeEditor, path);
+        },
+        failure: uiAjaxFailMessage
+    });
+};
+/**
+ * Иницализация хендлеров codeEditor'а
+ * @param codeEditor
+ */
+function initCodeEditorHandlers(codeEditor, path){
+    /* findByType вернет список элементов, т.к у нас всего один
+    textarea забираем его по индексу */
+    var textArea = codeEditor.findByType('textarea')[0];
 
-            /* findByType вернет список элементов, т.к у нас всего один
-            textarea забираем его по индексу */
-            var textArea = codeEditor.findByType('textarea')[0];
+    /* async close tab && message */
+    var userTakeChoice = true;
 
-            /* async close tab && message */
-            var userTakeChoice = true;
-            codeEditor.on('beforeclose', function(){
+    /* Хендлер на событие перед закрытием */
+    codeEditor.on('beforeclose', function(){
+        if (codeEditor.contentChanged){
+            var scope = this;
+            this.showMessage(function(buttonId){
+                if (buttonId=='yes') {
+                   scope.onSave();
+                   scope.fireEvent('close_tab', scope);
+                }
+                else if (buttonId=='no') {
+                   scope.fireEvent('close_tab', scope);
+                }
+                else if (buttonId=='cancel') {
+                    userTakeChoice = !userTakeChoice;
+                }
+                userTakeChoice = !userTakeChoice;
+            }, textArea.id);
+        }
+        else userTakeChoice = !userTakeChoice;
+        return !userTakeChoice;
+    });
 
+    /* Хендлер на событие закрытие таба таб панели */
+    codeEditor.on('close_tab', function(tab){
+        if (tab) tabPanel.remove(tab);
+    });
+
+    /* Хендлер на событие сохранения */
+    codeEditor.on('save', function(){
+        /*Запрос на сохранения изменений */
+        Ext.Ajax.request({
+            url:'/file-content/save',
+            params: {
+                path: path,
+                content: codeEditor.codeMirrorEditor.getCode()
+            },
+            success: function(response, opts){
+                var obj = Ext.util.JSON.decode(response.responseText);
+                var title = 'Сохранение';
+                var message ='';
+                var icon = Ext.Msg.INFO;
+                if (obj.success)
+                    message = 'Изменения были успешно сохранены';
+                else if (!obj.success && obj.error){
+                    message = 'Ошибка при сохранении файла\n'+obj.error;
+                    icon = Ext.MessageBox.WARNING;
+                };
+                 Ext.Msg.show({
+                    title: title,
+                    msg: message,
+                    buttons: Ext.Msg.OK,
+                    animEl: codeEditor.id,
+                    icon: icon
+                 });
+                codeEditor.contentChanged = false;
+                codeEditor.onChange();
+            },
+            failure: uiAjaxFailMessage
+        });
+    });
+
+    /* Хендлер на событие обновление */
+    codeEditor.on('update', function(){
+        var scope = this;
+        /*Запрос на обновление */
+        Ext.Ajax.request({
+            url:'/file-content',
+            method: 'GET',
+            params: {
+                path: path
+            },
+            success: function(response, opts){
+                var obj = Ext.util.JSON.decode(response.responseText);
                 if (codeEditor.contentChanged){
-                    var scope = this;
-                    this.showMessage(function(buttonId){
+                    var msg = 'Хотели бы вы сохранить ваши изменения?';
+                    codeEditor.showMessage(function(buttonId){
                         if (buttonId=='yes') {
-                           scope.onSave();
-                           scope.fireEvent('close_tab', scope);
+                           scope.onSave(function(){
+                               codeEditor.codeMirrorEditor.setCode(obj.data.content);
+                               codeEditor.contentChanged = false;
+                           });
                         }
                         else if (buttonId=='no') {
-                           scope.fireEvent('close_tab', scope);
+                           codeEditor.codeMirrorEditor.setCode(obj.data.content, function(){
+                               codeEditor.contentChanged = false;
+                           });
                         }
                         else if (buttonId=='cancel') {
                             userTakeChoice = !userTakeChoice;
                         }
                         userTakeChoice = !userTakeChoice;
-                    }, textArea.id);
+                    }, textArea.id, msg);
+                    codeEditor.onChange();
                 }
                 else userTakeChoice = !userTakeChoice;
                 return !userTakeChoice;
-            });
-
-            codeEditor.on('close_tab', function(tab){
-                if (tab) tabPanel.remove(tab);
-            });
-            codeEditor.on('save', function(){
-                /*Запрос на сохранения изменений */
-                Ext.Ajax.request({
-                    url:'/file-content/save',
-                    params: {
-                        path: path,
-                        content: codeEditor.codeMirrorEditor.getCode()
-                    },
-                    success: function(response, opts){
-                        var obj = Ext.util.JSON.decode(response.responseText);
-                        var title = 'Сохранение';
-                        var message ='';
-                        var icon = Ext.Msg.INFO;
-                        if (obj.success)
-                            message = 'Изменения были успешно сохранены';
-                        else if (!obj.success && obj.error){
-                            message = 'Ошибка при сохранении файла\n'+obj.error;
-                            icon = Ext.MessageBox.WARNING;
-                        };
-                         Ext.Msg.show({
-                            title: title,
-                            msg: message,
-                            buttons: Ext.Msg.OK,
-                            animEl: codeEditor.id,
-                            icon: icon
-                         });
-                        codeEditor.contentChanged = false;
-                        codeEditor.onChange();
-                    },
-                    failure: uiAjaxFailMessage
-                });
-            });
-            codeEditor.on('update', function(){
-                var scope = this;
-                /*Запрос на обновление */
-                Ext.Ajax.request({
-                    url:'/file-content',
-                    method: 'GET',
-                    params: {
-                        path: path
-                    },
-                    success: function(response, opts){
-                        var obj = Ext.util.JSON.decode(response.responseText);
-                        if (codeEditor.contentChanged){
-                            var msg = 'Хотели бы вы сохранить ваши изменения?';
-                            codeEditor.showMessage(function(buttonId){
-                                if (buttonId=='yes') {
-                                   scope.onSave(function(){
-                                       codeEditor.codeMirrorEditor.setCode(obj.data.file_content);
-                                       codeEditor.contentChanged = false;
-                                   });
-                                }
-                                else if (buttonId=='no') {
-                                   codeEditor.codeMirrorEditor.setCode(obj.data.file_content);
-                                   codeEditor.contentChanged = false;
-                                }
-                                else if (buttonId=='cancel') {
-                                    userTakeChoice = !userTakeChoice;
-                                }
-                                userTakeChoice = !userTakeChoice;
-                            }, textArea.id, msg);
-                            codeEditor.onChange();
-                        }
-                        else userTakeChoice = !userTakeChoice;
-                        return !userTakeChoice;
-                    },
-                    failure: uiAjaxFailMessage
-                });
-            });
-        },
-        failure: uiAjaxFailMessage
+            },
+            failure: uiAjaxFailMessage
+        });
     });
 };

@@ -134,13 +134,12 @@ def designer_file_content(request):
     Вьюшка для отдачи содержимого файла
     '''
     path = request.GET.get('path')
-
     assert path, 'Path to source file is undefined'
 
     with codecs.open( path, "r", "utf-8" ) as f:
         result = f.read()
     
-    return JsonResponse({'success': True, 'data':{'file_content':result}})
+    return JsonResponse({'success': True, 'data':{'content':result}})
 
 def designer_file_content_save(request):
     '''
@@ -160,5 +159,23 @@ def designer_file_content_save(request):
             success = True
     except IOError as (errno, strerror):
         error =  "I/O error({0}): {1}".format(errno, strerror)
+
+    return JsonResponse({'success': success, 'error': error})
+
+def designer_structure_manipulation(request):
+    '''
+    Производит манипуляции над структурой проекта
+    path ( путь к объекту )
+    action: delete, rename, new ( Действия )
+    error ( Ошибка, произошедшая во время выполения )
+    success ( Результат )
+    Действия производятся как над файлами так и над директориями.
+    '''
+    success = False
+    error =''
+    path = request.GET.get('path')
+    assert path, 'Path to source file is undefined'
+    action = request.GET.get('action')
+    assert action, 'Аction to target is undefined'
 
     return JsonResponse({'success': success, 'error': error})
