@@ -15,12 +15,13 @@ import string
 
 from django.utils.encoding import smart_unicode
 from django.db import models, transaction
+from dbfpy.dbf import Dbf
+
 
 class DictNotEmptyException(Exception):
     '''
     Эксепшн, который выбрасывается в случае, если заполняемый справочник не пуст.
     '''
-
     def __init__(self, model, reason):
         # указывает на модель записи справочника, для которой определилось, что есть записи в базе данных
         self.model = model
@@ -69,6 +70,50 @@ def read_simple_CSV_dict_file(filename, comma=','):
         raise
 
     return (attrs, values,)
+
+def read_simple_DBF_dict_file(filename, encoding='utf-8',
+                              code_field="CODE", name_field="NAME"):
+    ''' Чтение данных из файла формата "DBase" (.dbf) '''
+
+    assert isinstance(filename, basestring), u"filename must be 'str'"
+
+    attrs = []
+    values = []
+
+    try:
+        records = Dbf(filename, readOnly=True, new=False)
+        if records:
+            for k,v in records[0].asDict().items(): # каждая запись - это ассоц. массив, ключи - имена атрибутов
+                attrs.append(k)
+
+            for record in records:
+                vals_here = []
+                for name in attrs:
+                    vals_here.append(smart_unicode(record[name], encoding=encoding))
+
+                values.append(vals_here)
+
+        else:
+            raise DictLoadException(None, u'Исходные данные отсутствуют. Пустой DBF-файл')
+    except IOError:
+        raise
+    except TypeError:
+        raise
+
+    attrs_lowercase = []
+    for attr in attrs:
+        if attr not in [code_field, name_field, ]:
+            attrs_lowercase.append(attr.strip().lower())
+        else:
+            if attr == code_field:
+                attrs_lowercase.append("code")
+            else:
+                attrs_lowercase.append("name")
+
+    attrs = attrs_lowercase
+
+    return (attrs, values,)
+
 
 def read_simple_dict_file(filename):
     '''
