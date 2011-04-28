@@ -1,5 +1,5 @@
 /**
- * @class Ext.ux.panel.CodeEditor
+ * @class Ext.m3.CodeEditor
  * @extends Ext.Panel
  * Converts a panel into a code mirror editor with toolbar
  * @constructor
@@ -9,39 +9,34 @@
 
  // Define a set of code type configurations
 
-Ext.ns('Ext.ux.panel.CodeEditorConfig');
+Ext.ns('Ext.m3.CodeEditorConfig');
 
-Ext.apply(Ext.ux.panel.CodeEditorConfig, {
+Ext.apply(Ext.m3.CodeEditorConfig, {
     cssPath: "m3static/vendor/codemirror/css/",
     jsPath: "m3static/vendor/codemirror/js/"
 });
 
-Ext.apply(Ext.ux.panel.CodeEditorConfig, {
+Ext.apply(Ext.m3.CodeEditorConfig, {
     parser: {
         python: { // js code
             parserfile: ["parsepython.js"],
-            stylesheet: Ext.ux.panel.CodeEditorConfig.cssPath + "pythoncolors.css"
+            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "pythoncolors.css"
         }
     }
 });
 
-Ext.ns('Ext.ux.panel');
-Ext.ux.panel.CodeEditor = Ext.extend(Ext.Panel, {
+//Ext.ns('Ext.m3');
+Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
     sourceCode: '/*Default code*/ ',
+    readOnly: false,
 
-    constructor: function(baseConfig, params){
-        if (params) {
-            this.sourceCode = params.sourceCode ? params.sourceCode : '# Paste code here';
-            this.readOnly = params.readOnly ? params.readOnly : false;
-        }
-
-        Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
+    constructor: function(baseConfig){
+        Ext.m3.CodeEditor.superclass.constructor.call(this, baseConfig);
     },
 
     initComponent: function() {
         // this property is used to determine if the source content changes
         this.contentChanged = false;
-        var oThis = this;
 
         Ext.apply(this, {
             items: [{
@@ -51,15 +46,15 @@ Ext.ux.panel.CodeEditor = Ext.extend(Ext.Panel, {
                 value: this.sourceCode,
                 enableKeyEvents: true
             }]
-
         });
-        Ext.ux.panel.CodeEditor.superclass.initComponent.apply(this, arguments);
+        Ext.m3.CodeEditor.superclass.initComponent.apply(this, arguments);
     },
 
 
     onRender: function() {
+        Ext.m3.CodeEditor.superclass.onRender.apply(this, arguments);
+
         this.oldSourceCode = this.sourceCode;
-        Ext.ux.panel.CodeEditor.superclass.onRender.apply(this, arguments);
         // trigger editor on afterlayout
         this.on('afterlayout', this.triggerCodeEditor, this, {
             single: true
@@ -81,7 +76,7 @@ Ext.ux.panel.CodeEditor = Ext.extend(Ext.Panel, {
            tabMode: 'shift',
            readOnly: oCmp.readOnly,
            basefiles: ['codemirror_base.js'],
-           path: Ext.ux.panel.CodeEditorConfig.jsPath,
+           path: Ext.m3.CodeEditorConfig.jsPath,
            autoMatchParens: true,
            initCallback: function(editor) {
                editor.win.document.body.lastChild.scrollIntoView();
@@ -109,7 +104,7 @@ Ext.ux.panel.CodeEditor = Ext.extend(Ext.Panel, {
        }); 
 
         var sParserType = oThis.parser || 'python';
-        editorConfig = Ext.applyIf(editorConfig, Ext.ux.panel.CodeEditorConfig.parser[sParserType]);
+        editorConfig = Ext.applyIf(editorConfig, Ext.m3.CodeEditorConfig.parser[sParserType]);
 
         this.codeMirrorEditor = new CodeMirror.fromTextArea( Ext.getDom(oCmp.id).id, editorConfig);
     },
@@ -119,4 +114,4 @@ Ext.ux.panel.CodeEditor = Ext.extend(Ext.Panel, {
     }
 });
 
-Ext.reg('uxCodeEditor', Ext.ux.panel.CodeEditor);
+Ext.reg('uxCodeEditor', Ext.m3.CodeEditor);

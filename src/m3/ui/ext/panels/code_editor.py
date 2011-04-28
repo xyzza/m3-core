@@ -21,13 +21,11 @@ class ExtCodeEditor(ExtPanel):
 
     def render_params(self):
         super(ExtCodeEditor, self).render_params()
-        self._put_params_value('sourceCode', self.source_code)
-        self._put_params_value('readOnly', self.read_only)
+        self._put_config_value('sourceCode', self.source_code)
+        self._put_config_value('readOnly', self.read_only)
 
     def render(self):
         self.render_base_config()
         self.render_params()
         base_config = self._get_config_str()
-        params_config = self._get_params_str()
-        return 'new Ext.ux.panel.CodeEditor({%s}, {%s})' % (base_config, 
-                                                            params_config)
+        return 'new Ext.m3.CodeEditor({%s})' % base_config
