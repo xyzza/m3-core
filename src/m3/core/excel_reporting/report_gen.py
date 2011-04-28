@@ -111,8 +111,15 @@ def make_report_from_json_string(json_str):
     else:
         # Под нормальным сервером перекодировка не нужна
         encoding_name = 'utf-8'
-    process = sub.Popen(['java', '-jar', JAR_FULL_PATH, encoding_name], 
-                        stdin = sub.PIPE, stdout = sub.PIPE, stderr = sub.PIPE)
+    
+    args = ['java', '-jar', JAR_FULL_PATH, encoding_name]
+    try:
+        process = sub.Popen(args=args, stdin=sub.PIPE, stdout=sub.PIPE, stderr=sub.PIPE)
+    except OSError as e:
+        raise ReportGeneratorError(
+            'Cant start process "%s" with error "%s". May be JRE not installed?' 
+            % (sub.list2cmdline(args), e))
+    
     _, result_err = process.communicate(input = json_str.encode(encoding_name))
     __check_process(encoding_name, process, result_err)
     
