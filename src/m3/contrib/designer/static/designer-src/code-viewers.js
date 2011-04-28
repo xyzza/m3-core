@@ -73,21 +73,20 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
     },
     onChange:function(){
         var newTitle = '*'+this.orginalTitle;
-        if (this.title != newTitle) {
+        if  ( (this.title != newTitle) && this.contentChanged) {
             this.orginalTitle = this.title;
             this.setTitle('*'+this.orginalTitle);
         }
-        else if(!this.contentChanged) this.setTitle(this.orginalTitle);
+        else if(!this.contentChanged) this.setTitle(this.orginalTitle || this.title);
     },
     onSave:function() {
-        var textArea = this.findByType('textarea')[0];
+        this.fireEvent('save');
         this.contentChanged = false;
-        this.fireEvent('save', textArea.value, this);
+        this.onChange();
 
     },
     onUpdate:function() {
-        var textArea = this.findByType('textarea')[0];
-        this.fireEvent('update', textArea.value, this);
+        this.fireEvent('update');
     },
 
     /* Показывает messagebox, о имеющихся изменениях*/

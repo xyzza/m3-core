@@ -244,15 +244,13 @@ function onClickNodePyFiles(node, fileAttr){
             codeEditor.on('close_tab', function(tab){
                 if (tab) tabPanel.remove(tab);
             });
-            codeEditor.on('save', function(fileContent, tab){
-                /* Меняем title по изменению контента */
-                codeEditor.onChange();
+            codeEditor.on('save', function(){
                 /*Запрос на сохранения изменений */
                 Ext.Ajax.request({
                     url:'/file-content/save',
                     params: {
                         path: path,
-                        content: fileContent
+                        content: codeEditor.codeMirrorEditor.getCode()
                     },
                     success: function(response, opts){
                         var obj = Ext.util.JSON.decode(response.responseText);
@@ -286,7 +284,10 @@ function onClickNodePyFiles(node, fileAttr){
                     },
                     success: function(response, opts){
                         var obj = Ext.util.JSON.decode(response.responseText);
-                        codeEditor.codeMirrorEditor.setCode(obj.data.file_content)
+                        codeEditor.codeMirrorEditor.setCode(obj.data.file_content);
+                        /* Изменение состояния изменения контета %) */
+                        codeEditor.contentChanged = false;
+                        codeEditor.onChange();
                     },
                     failure: uiAjaxFailMessage
                 });
