@@ -202,6 +202,8 @@ class BaseExtTriggerField(BaseExtField):
 
     def get_store(self):
         return self.__store
+    
+    store = property(get_store, set_store)
 
     def t_render_store(self):
         assert self.__store, 'Store is not define'
