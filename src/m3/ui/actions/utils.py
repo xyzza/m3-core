@@ -117,15 +117,16 @@ def apply_search_filter(query, filter, fields):
         query = query.filter(condition)
     return query
 
-def bind_object_from_request_to_form(request, obj_factory, form):
+def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id'):
     '''
     Функция извлекает объект из запроса по id, создает его экземпляр и биндит к форме
     @param request:     Запрос от клиента содержащий id объекта
     @param obj_factory: Функция возвращающая объект по его id
     @param form:        Класс формы к которому привязывается объект
+    @param request_id_name:   Имя параметра запроса соответствующего ID объекта
     '''
     # Получаем объект по id
-    id = extract_int(request, 'id')
+    id = extract_int(request, request_id_name)
     obj = obj_factory(id)
     if obj is None:
         raise ApplicationLogicException('Такого элемента не существует, возможно он был удален.\
@@ -142,19 +143,20 @@ def bind_object_from_request_to_form(request, obj_factory, form):
     win.form.from_object(obj)
     return win
 
-def bind_request_form_to_object(request, obj_factory, form):
+def bind_request_form_to_object(request, obj_factory, form, request_id_name = 'id'):
     '''
     Функция создает объект по id в запросе и заполняет его атрибуты из данных пришедшей формы
     @param request:     Запрос от клиента содержащий id объекта
     @param obj_factory: Функция возвращающая объект по его id
     @param form:        Класс формы к которому привязывается объект
+    @param request_id_name:   Имя параметра запроса соответствующего ID объекта
     '''
     # Создаем форму для биндинга к ней
     win = form()
     win.form.bind_to_request(request)
     
     # Получаем наш объект по id и биндим форму к нему
-    id = extract_int(request, 'id')
+    id = extract_int(request, request_id_name)
     obj = obj_factory(id)
     win.form.to_object(obj)
     

@@ -30,8 +30,11 @@ var ajax = Ext.Ajax;
 			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
 				return;
 			};
-			params = Ext.applyIf({ 'id': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
+			params = Ext.applyIf({ '{{ component.contextTreeIdName }}': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		{%endif%}
+
+		// добавим глобальный контекст окна
+		params = Ext.applyIf(params, win.actionContextJson || {});
                 
         var mask = new Ext.LoadMask(win.body);			
         mask.show();
@@ -57,12 +60,16 @@ var ajax = Ext.Ajax;
 		if (!isGridSelected(grid, 'Редактирование', 'Элемент не выбран') ) {
 			return;
 		};
-		
+
+		var params = Ext.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
+		// добавим глобальный контекст окна
+		params = Ext.applyIf(params, win.actionContextJson || {});
+
 		var mask = new Ext.LoadMask(win.body);   
 		mask.show();
 		ajax.request({
 			url: "{{ component.url_edit_grid }}"
-			,params: Ext.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+			,params: params
 			,success: function(){                
                 renderWindowGrid.apply(this, arguments);
                 mask.hide();
@@ -95,7 +102,10 @@ var ajax = Ext.Ajax;
 		else
 			message = 'Вы действительно хотите удалить элемент?'
 		
-
+		var params = {'id': selectedId.join(',')};
+		// добавим глобальный контекст окна
+		params = Ext.applyIf(params, win.actionContextJson || {});
+				
 		Ext.Msg.show({
 		   title:'Подтверждение',
 		   msg: message,
@@ -109,9 +119,7 @@ var ajax = Ext.Ajax;
         
 		    		ajax.request({
 						url: "{{ component.url_delete_grid }}"
-						,params: {
-							'id': selectedId.join(',')
-						}
+						,params: params
 						,success: function(response, opts){
 							renderWindowGrid(response, opts);
 							mask.hide();
@@ -176,12 +184,16 @@ var ajax = Ext.Ajax;
 	 * @param {Object} opts
 	 */
 	function renderWindowTree(response, opts, parentNode){
-		var win = smart_eval(response.responseText);
-		if (win!=undefined){
-			win.on('refresh_store', function(event, target){
+		var child_win = smart_eval(response.responseText);
+		if (child_win != undefined){
+			child_win.on('refresh_store', function(event, target){
 				// Если задан родительский узел, то перезаполнянм его дочерние
 				// элементы и раскрываем его.
 				if (parentNode) {
+					var params = Ext.applyIf({ node: parentNode.id }, {% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %});
+					// добавим глобальный контекст окна
+					params = Ext.applyIf(params, win.actionContextJson || {});
+
 					var tree = Ext.getCmp('{{ component.tree.client_id }}');
 					ajax.request({
 						url: tree.getLoader().dataUrl,
@@ -193,8 +205,7 @@ var ajax = Ext.Ajax;
 								if (isExpanded)
 									parentNode.expand();
 						},
-						params: Ext.applyIf({ node: parentNode.id }, 
-							{% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %}),
+						params: params,
 						failure: uiAjaxFailMessage
 					});
 				}
@@ -202,30 +213,32 @@ var ajax = Ext.Ajax;
 					refreshTreeLoader();
 				}
 			});
-      win.on('closed_ok', function(event, target){
-        // Если задан родительский узел, то перезаполнянм его дочерние
-        // элементы и раскрываем его.
-        if (parentNode) {
-          var tree = Ext.getCmp('{{ component.tree.client_id }}');
-          ajax.request({
-            url: tree.getLoader().dataUrl,
-            success: function (response, opts) {
-                var nodes = Ext.util.JSON.decode(response.responseText);
-                var isExpanded = !parentNode.childNodes.length || parentNode.isExpanded();
-                parentNode.removeAll();
-                parentNode.appendChild(nodes);
-                if (isExpanded)
-                  parentNode.expand();
-            },
-            params: Ext.applyIf({ node: parentNode.id }, 
-              {% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %}),
-            failure: uiAjaxFailMessage
-          });
-        }
-        else {
-          refreshTreeLoader();
-        }
-      });
+			child_win.on('closed_ok', function(event, target){
+		        // Если задан родительский узел, то перезаполнянм его дочерние
+		        // элементы и раскрываем его.
+		        if (parentNode) {
+		        	var params = Ext.applyIf({ node: parentNode.id }, {% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %});
+					// добавим глобальный контекст окна
+					params = Ext.applyIf(params, win.actionContextJson || {});
+		          var tree = Ext.getCmp('{{ component.tree.client_id }}');
+		          ajax.request({
+		            url: tree.getLoader().dataUrl,
+		            success: function (response, opts) {
+		                var nodes = Ext.util.JSON.decode(response.responseText);
+		                var isExpanded = !parentNode.childNodes.length || parentNode.isExpanded();
+		                parentNode.removeAll();
+		                parentNode.appendChild(nodes);
+		                if (isExpanded)
+		                  parentNode.expand();
+		            },
+		            params: params,
+		            failure: uiAjaxFailMessage
+		          });
+		        }
+		        else {
+		          refreshTreeLoader();
+		        }
+			});
 		};
 	}
 	
@@ -234,6 +247,9 @@ var ajax = Ext.Ajax;
 	 */
 	function newValueTreeRoot() {
 	    var tree = Ext.getCmp('{{ component.tree.client_id}}');
+	    var params = Ext.applyIf({'{{ component.contextTreeIdName }}': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+		// добавим глобальный контекст окна
+		params = Ext.applyIf(params, win.actionContextJson || {});
 	    var mask = new Ext.LoadMask(win.body);
 	    mask.show();
 		ajax.request({
@@ -242,7 +258,7 @@ var ajax = Ext.Ajax;
 				renderWindowTree(response, opts);
 				mask.hide();
 			}
-			,params: Ext.applyIf({'{{ component.contextTreeIdName }}': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+			,params: params
 			,failure: function(){ 
                 uiAjaxFailMessage.apply(win, arguments);
                 mask.hide();
@@ -259,6 +275,9 @@ var ajax = Ext.Ajax;
 			return;
 		};
 		var node = tree.getSelectionModel().getSelectedNode();
+		var params = Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+		// добавим глобальный контекст окна
+		params = Ext.applyIf(params, win.actionContextJson || {});
 		var mask = new Ext.LoadMask(win.body);
 		mask.show();
 		ajax.request({
@@ -267,7 +286,7 @@ var ajax = Ext.Ajax;
 				renderWindowTree(response, opts, node);
 				mask.hide();
 			}
-			,params: Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+			,params: params
             ,failure: function(){ 
                 uiAjaxFailMessage.apply(win, arguments);
                 mask.hide();
@@ -284,9 +303,12 @@ var ajax = Ext.Ajax;
 			return;
 		};
 		var node = tree.getSelectionModel().getSelectedNode();
+		var params = Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id}, {% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+		// добавим глобальный контекст окна
+		params = Ext.applyIf(params, win.actionContextJson || {});
 		ajax.request({
 			url: "{{ component.url_edit_tree }}"
-			,params: Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id}, {% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+			,params: params 
 			,success: function (response, opts) {
 				renderWindowTree(response, opts, node.parentNode);
 			}
@@ -302,6 +324,9 @@ var ajax = Ext.Ajax;
 		if (!isTreeSelected(tree, 'Удаление', 'Элемент не выбран') ) {
 			return;
 		};
+		var params = Ext.applyIf({ '{{ component.contextTreeIdName }}': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+		// добавим глобальный контекст окна
+		params = Ext.applyIf(params, win.actionContextJson || {});
 		
 		Ext.Msg.show({
 		   title:'Подтверждение',
@@ -312,7 +337,7 @@ var ajax = Ext.Ajax;
 		    	if (btn == 'yes') {
 	    			ajax.request({
 						url: "{{ component.url_delete_tree }}"
-						,params: Ext.applyIf({ 'id': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+						,params: params
 						,success: function(response, opts) {
 							// Удаляем из стора только если пришел success=true
 							renderWindowTree(response, opts);

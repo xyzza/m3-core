@@ -90,7 +90,7 @@ class TreeDeleteNodeAction(Action):
     '''
     url = '/delete_node$'
     def run(self, request, context):
-        id = utils.extract_int(request, 'id')
+        id = utils.extract_int(request, self.parent.contextTreeIdName)
         obj = self.parent.get_node(id)
         return self.parent.delete_node(obj)
 
@@ -154,13 +154,13 @@ class ListNewRowWindowAction(Action):
     url = '/grid_new_window$'
     
     def context_declaration(self):
-        return [ActionContextDeclaration(name='id', type=int, required=True, verbose_name=u'Код группы')]
+        return [ActionContextDeclaration(name=self.parent.contextTreeIdName, type=int, required=True, verbose_name=u'Код группы')]
     
     def run(self, request, context):
         base = self.parent
         # Создаем новую группу и биндим ее к форме
         obj = base.get_row()
-        setattr(obj, base.list_parent_field + '_id', context.id)
+        setattr(obj, base.list_parent_field + '_id', getattr(context,base.contextTreeIdName))
         win = base.edit_window(create_new = True)
         win.form.from_object(obj)
         # Донастраиваем форму
@@ -178,7 +178,7 @@ class TreeEditNodeWindowAction(Action):
     url = '/node_edit_window$'
     def run(self, request, context):
         base = self.parent
-        win = utils.bind_object_from_request_to_form(request, base.get_node, base.edit_node_window)
+        win = utils.bind_object_from_request_to_form(request, base.get_node, base.edit_node_window, base.contextTreeIdName)
         if not win.title:
             win.title = base.title
         win.form.url = base.save_node_action.get_absolute_url()
