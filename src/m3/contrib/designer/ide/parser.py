@@ -18,9 +18,12 @@ from advanced_ast import StringSpaces
 
 
 #===============================================================================
-# Класс исключительных ситуаций
+# Классы исключительных ситуаций
 class ParserError(Exception):
-    def __init__(self, text):
+    '''
+    Возможные ошибки парсера
+    '''
+    def __init__(self, text=''):
         self.text = text
 
     def __str__(self):
@@ -28,6 +31,12 @@ class ParserError(Exception):
     
     def __repr__(self):
         return self.text
+
+class UndefinedGeneratedFunc(ParserError):
+    '''
+    Не определена функция автогенерации
+    '''
+    pass
 
 #===============================================================================
 class Parser(object):
@@ -96,12 +105,12 @@ class Parser(object):
         source_code = Parser.get_source(self.path)
 
         node_module = ast.parse(source_code)
-        class_node, func_node = self._get_func_initialize(node_module, self.class_name)
+        class_node, func_node = Parser.get_func(node_module, self.class_name)
         
         self.base_class = self._get_base_class(class_node)
                    
         if not func_node:
-            raise ParserError('Функция автогенерации с названием "%s" не определена в классе "%s"' % 
+            raise UndefinedGeneratedFunc('Функция автогенерации "%s" не определена в классе "%s"' % 
                                 (Parser.GENERATED_FUNC, self.class_name)    )
                 
         self.config_cmp = {}
@@ -198,15 +207,19 @@ class Parser(object):
         '''
         Получает базовый класс
         '''
-        return class_node.bases[0].id
+        base = class_node.bases[0]
+        if isinstance(base, ast.Name):
+            return class_node.bases[0].id
+        elif isinstance(base, ast.Attribute):
+            return class_node.bases[0].attr
+        else:
+            raise ParserError('Базовый класс компонента не поддерживается')
     
     def _get_json_config(self, key):
         '''
         Возвращает конфигурацию компонента в качестве словаря
         '''
         properties, py_name = self._get_properties(key)
-
-        #print properties
 
         properties['type'] = py_name
         properties['id'] = key
@@ -362,7 +375,7 @@ class Parser(object):
         module_node = ast.parse(old_source_code)
         
         # Нахождение нужной функции GENERATED_FUNC
-        class_node, func_node = self._get_func_initialize(module_node, self.class_name)
+        class_node, func_node = Parser.get_func(module_node, self.class_name)
                 
         nodes = Node(json_dict).get_nodes(self._get_mapping())
 
@@ -376,14 +389,15 @@ class Parser(object):
         # Замена старого содержимого на новое сгенерированное 
         func_node.body = nodes + [StringSpaces(lines=2), ]
                 
-        begin_line, end_line = self._get_number_lines(module_node, class_node, func_node)
+        begin_line, end_line = Parser._get_number_lines(module_node, class_node, func_node)
 
         # Бакап файла на всякий пожарный случай и cохранение нового файла
         source_code = codegen.to_source(func_node, indentation=1)
         
         self._write_to_file(source_code, begin_line, end_line)
         
-    def _get_number_lines(self, module_node, class_node, func_node):
+    @staticmethod
+    def _get_number_lines(module_node, class_node, func_node):
         '''
         Возвращает начало и конец функции Parser.GENERATED_FUNC_DOCSTRING
         '''
@@ -475,7 +489,8 @@ class Parser(object):
         '''
         return mapping_list
         
-    def _get_func_initialize(self, node_module, class_name):
+    @staticmethod
+    def get_func(node_module, class_name):
         '''
         Поиск и возвращение функции GENERATED_FUNC 
         '''
@@ -485,7 +500,7 @@ class Parser(object):
                     if isinstance(nested_node, ast.FunctionDef) and nested_node.name == Parser.GENERATED_FUNC:
                         return node, nested_node
                 else:
-                    raise ParserError('Функция автогенерации с названием "%s" не \
+                    raise UndefinedGeneratedFunc('Функция автогенерации "%s" не \
                         определена в классе "%s"' % (Parser.GENERATED_FUNC, str(class_name)))
                     
     @staticmethod
@@ -538,6 +553,7 @@ class Parser(object):
                                     )
                                 )
                             )
+        
         node_initial = ast.Expr(
                                 ast.Call(
                                     ast.Attribute(
@@ -566,10 +582,29 @@ class Parser(object):
                                             [])
     
     
+
+        
+
+
+        initialize_func = Parser.generate_initialize()
+            
+        cl = ast.ClassDef(
+                    str(class_name), 
+                    [ast.Name(class_base, ast.Load())], 
+                    [constructor_func, initialize_func,], 
+                    [])
+        
+        return cl
+    
+    @staticmethod
+    def generate_initialize():
+        '''
+        Генерирует AST узел для функции автогенерации
+        '''        
         initial_args = ast.arguments([ast.Name('self', ast.Load())], 
-                                     None, 
-                                     None, 
-                                     [])
+                             None, 
+                             None, 
+                             [])
             
         initial_nodes = [ast.Assign(
                                 [ast.Attribute(
@@ -580,21 +615,15 @@ class Parser(object):
                                  ast.Str('auto')) ]
         
         doc_str = ast.Expr(
-                    ast.Str(Parser.GENERATED_FUNC_DOCSTRING)
-                    )
-        initialize_func = ast.FunctionDef(Parser.GENERATED_FUNC, 
-                                          initial_args, 
-                                          [doc_str,] + initial_nodes, 
-                                          [])
-            
-        cl = ast.ClassDef(
-                    str(class_name), 
-                    [ast.Name(class_base, ast.Load())], 
-                    [constructor_func, initialize_func,], 
-                    [])
+            ast.Str(Parser.GENERATED_FUNC_DOCSTRING)
+            )
         
-        return cl
-    
+        initialize_func = ast.FunctionDef(Parser.GENERATED_FUNC, 
+                          initial_args, 
+                          [doc_str,] + initial_nodes, 
+                          [])
+        
+        return initialize_func
     
     @staticmethod
     def generate_import():

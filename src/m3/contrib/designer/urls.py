@@ -16,6 +16,9 @@ urlpatterns = patterns('',
                        
     # Создание нового класса в файле    
     (r'^create-new-class$', 'designer.ide.views.create_class'),
+    
+    # Создание функции инициализации в классе
+    (r'^create-autogen-function$', 'designer.ide.views.create_initialize'),
                        
     # статичный контент проекта
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', 

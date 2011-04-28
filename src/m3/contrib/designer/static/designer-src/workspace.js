@@ -108,19 +108,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             }
         });
 
-        storage.on('load',
-                function(jsonObj){
-                	if (jsonObj.success) {
-	                    application.init(jsonObj.json);
-                   	} else {
-                   		Ext.Msg.show({
-						   title:'Ошибка'
-						   ,msg: jsonObj.json
-						   ,buttons: Ext.Msg.OK
-						   ,icon: Ext.MessageBox.WARNING
-						});
-                   	}
-                });
+        storage.on('load', this.onSuccessLoad);
 
         storage.on('save', function(jsonObj) {
 	        if (jsonObj.success) {
@@ -163,5 +151,17 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
     },
     loadModel: function(){
     	this.storage.loadModel();
+    },
+    onSuccessLoad: function(jsonObj){    	
+		if (jsonObj.success) { 
+	        this.application.init(jsonObj.json);	                    
+	   	} else {
+	   		Ext.Msg.show({
+			   title:'Ошибка'
+			   ,msg: jsonObj.json
+			   ,buttons: Ext.Msg.OK						   						   
+			   ,icon: Ext.MessageBox.WARNING
+			});
+        }                   	
     }
 });
