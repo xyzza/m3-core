@@ -1035,7 +1035,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 }
             },
             childTypesRestrictions: {
-                allowed:['treeNode','gridColumn']
+                allowed:['treeNode','gridColumn','toolbar']
             },
             toolboxData: {
                 category:'M3',
