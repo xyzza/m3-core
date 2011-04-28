@@ -215,12 +215,14 @@ function onClickNodePyFiles(node, fileAttr){
             tabPanel.add( codeEditor );
             tabPanel.activate(codeEditor);
 
+            /* findByType вернет список элементов, т.к у нас всего один
+            textarea забираем его по индексу */
+            var textArea = codeEditor.findByType('textarea')[0];
+
             /* async close tab && message */
             var userTakeChoise = true;
-            codeEditor.on('beforeclose', function(panel){
-                /* findByType вернет список элементов, т.к у нас всего один
-                textarea забираем его по индексу */
-                var textArea = panel.findByType('textarea')[0];
+            codeEditor.on('beforeclose', function(){
+
                 if (codeEditor.contentChanged){
                     var scope = this;
                     this.showMessage(function(buttonId){
@@ -261,20 +263,23 @@ function onClickNodePyFiles(node, fileAttr){
                             message = 'Изменения были успешно сохранены';
                         else if (!obj.success && obj.error){
                             message = 'Ошибка при сохранении файла\n'+obj.error;
-                            icon = Ext.MessageBox.QUESTION;
+                            icon = Ext.MessageBox.WARNING;
                         };
                          Ext.Msg.show({
                             title: title,
                             msg: message,
                             buttons: Ext.Msg.OK,
                             animEl: codeEditor.id,
-                            icon: Ext.MessageBox.QUESTION
+                            icon: icon
                          });
+                        codeEditor.contentChanged = false;
+                        codeEditor.onChange();
                     },
                     failure: uiAjaxFailMessage
                 });
             });
             codeEditor.on('update', function(){
+                var scope = this;
                 /*Запрос на обновление */
                 Ext.Ajax.request({
                     url:'/file-content',
@@ -284,10 +289,28 @@ function onClickNodePyFiles(node, fileAttr){
                     },
                     success: function(response, opts){
                         var obj = Ext.util.JSON.decode(response.responseText);
-                        codeEditor.codeMirrorEditor.setCode(obj.data.file_content);
-                        /* Изменение состояния изменения контета %) */
-                        codeEditor.contentChanged = false;
-                        codeEditor.onChange();
+                        if (codeEditor.contentChanged){
+                            var msg = 'Хотели бы вы сохранить ваши изменения?';
+                            codeEditor.showMessage(function(buttonId){
+                                if (buttonId=='yes') {
+                                   scope.onSave(function(){
+                                       codeEditor.codeMirrorEditor.setCode(obj.data.file_content);
+                                       codeEditor.contentChanged = false;
+                                   });
+                                }
+                                else if (buttonId=='no') {
+                                   codeEditor.codeMirrorEditor.setCode(obj.data.file_content);
+                                   codeEditor.contentChanged = false;
+                                }
+                                else if (buttonId=='cancel') {
+                                    userTakeChoise = !userTakeChoise;
+                                }
+                                userTakeChoise = !userTakeChoise;
+                            }, textArea.id, msg);
+                            codeEditor.onChange();
+                        }
+                        else userTakeChoise = !userTakeChoise;
+                        return !userTakeChoise;
                     },
                     failure: uiAjaxFailMessage
                 });
@@ -295,4 +318,4 @@ function onClickNodePyFiles(node, fileAttr){
         },
         failure: uiAjaxFailMessage
     });
-}
+};

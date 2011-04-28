@@ -81,20 +81,17 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
     },
     onSave:function() {
         this.fireEvent('save');
-        this.contentChanged = false;
-        this.onChange();
-
     },
     onUpdate:function() {
         this.fireEvent('update');
     },
 
     /* Показывает messagebox, о имеющихся изменениях*/
-    showMessage:function(fn, animElId, buttons){
+    showMessage:function(fn, animElId, msg){
         Ext.Msg.show({
                title:'Сохранить изменения?',
-               msg: 'Вы закрываете вкладку, в которой имеются изменения. Хотели бы вы сохранить ваши изменения?',
-               buttons: buttons? buttons :Ext.Msg.YESNOCANCEL,
+               msg: msg ? msg : 'Вы закрываете вкладку, в которой имеются изменения. Хотели бы вы сохранить ваши изменения?',
+               buttons: Ext.Msg.YESNOCANCEL,
                fn: fn,
                animEl: animElId,
                icon: Ext.MessageBox.QUESTION
