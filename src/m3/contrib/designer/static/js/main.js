@@ -167,26 +167,38 @@ var tabPanel = new Ext.TabPanel({
     }]
 });
 
+//Инициируем перехват нажатия ctrl+s для автоматического сохранения на сервер
+Ext.fly(document).on('keydown',function(e,t,o){
+   if (e.ctrlKey && (e.keyCode == 83)) {// кнопка S
+       var tab = tabPanel.getActiveTab();
+       if (tab && tab.saveOnServer &&
+               (typeof(tab.saveOnServer) == 'function')) {
+           tab.saveOnServer();
+           e.stopEvent();
+       }
+   }
+});
+
 function onClickNode(node) {					
 	var attr =  node.attributes;	            	
-	
-	var starter = new Bootstrapper();
-	var panel = starter.init({
-				dataUrl:'/designer/data',
-				saveUrl:'/designer/save',
-				path:attr['path'],
-				className:attr['class_name'],
-                previewUrl:'/designer/preview'});
-				   	 
-   	panel.setTitle(attr['class_name']); 
-	tabPanel.add(panel);
-	starter.loadModel();
 
-    tabPanel.activate(panel);
+    var workspace = new DesignerWorkspace({
+        dataUrl:'/designer/data',
+        saveUrl:'/designer/save',
+        path:attr['path'],
+        className:attr['class_name'],
+        previewUrl:'/designer/preview'
+    });
+
+   	workspace.setTitle(attr['class_name']);
+	tabPanel.add(workspace);
+	workspace.loadModel();
+
+    tabPanel.activate(workspace);
 
     // Прослушивает событие "tabchange", вызывает новое событие в дочерней панели
     tabPanel.on('tabchange', function(panel,newTab,currentTab){
-        starter.application.designPanel.fireEvent('tabchanged');
+        workspace.application.designPanel.fireEvent('tabchanged');
     });
 }
 

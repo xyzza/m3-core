@@ -35,6 +35,7 @@
         <script type="text/javascript" src="/static/designer-src/server.js"></script>
         <script type="text/javascript" src="/static/designer-src/code-viewers.js"></script>
         <script type="text/javascript" src='/static/designer-src/bootstrapper.js'></script>
+        <script type="text/javascript" src="/static/designer-src/workspace.js"></script>
         <script type="text/javascript" src='/static/designer-src/ui-mocks.js'></script>
 
         <script type="text/javascript">
@@ -44,16 +45,18 @@
             Ext.onReady(function(){
                 Ext.QuickTips.init();
 
-                var starter = new Bootstrapper();
-                new Ext.Viewport({
-                    layout:'fit',
-                    items:[starter.init( {
+                //var starter = new Bootstrapper();
+                var workspace = new DesignerWorkspace({
                                 dataUrl:'{{data_url}}',
                                 saveUrl:'{{save_url}}',
                                 previewUrl:'{{code_preview_url}}'
-                            })]
+                            });
+
+                new Ext.Viewport({
+                    layout:'fit',
+                    items:[workspace]
                 })
-                starter.loadModel();
+                workspace.loadModel();
             });
 
         </script>

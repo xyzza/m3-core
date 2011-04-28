@@ -1,13 +1,15 @@
-/**
+﻿/**
  * Crafted by ZIgi
  */
 
-/**
- * Это просто болванка UI для запуска приложения в черновом варианте.
- */
+DesignerWorkspace = Ext.extend(Ext.Panel, {
 
-Bootstrapper = Ext.extend(Object, {
-    init: function(cfg) {
+    layout:'border',
+    closable:true,
+
+    initComponent: function() {
+
+        DesignerWorkspace.superclass.initComponent.call(this);
 
         var designPanel = new Ext.Panel({
             layout:'fit',
@@ -30,7 +32,7 @@ Bootstrapper = Ext.extend(Object, {
             title:'Дерево компонентов',
             autoScroll: true,
             contextMenu: new Ext.menu.Menu({
-                items: [{                    
+                items: [{
                     text: 'Удалить',
                     iconCls:'delete_item',
                     handler: onTreeNodeDeleteClick
@@ -70,11 +72,11 @@ Bootstrapper = Ext.extend(Object, {
 
          var storage = new M3Designer.ServerStorage({
             id:0,
-            loadUrl:cfg.dataUrl,
-            saveUrl:cfg.saveUrl,
-            pathFile: cfg.path,
-            className: cfg.className,
-            previewUrl:cfg.previewUrl, 
+            loadUrl:this.dataUrl,
+            saveUrl:this.saveUrl,
+            pathFile: this.path,
+            className: this.className,
+            previewUrl:this.previewUrl,
             maskEl:Ext.getBody()
         });
 		this.storage = storage;
@@ -90,87 +92,74 @@ Bootstrapper = Ext.extend(Object, {
             items:[componentTree, toolbox]
         });
 
-        var workAreaWrapper = new Ext.Panel({
-            layout:'border',
-            closable: true,
-            items: [
-                designPanel, eastWrapper
-            ],
-            buttons:[
-                new Ext.Button({
-                    text:'Сохранить',
-                    iconCls:'icon-disk',
-                    handler: function() {
-                            storage.saveModel(application.getTransferObject());
-                    }
-                }),
-                new Ext.Button({
-                    text:'Предварительный просмотр кода',
-                    iconCls:'icon-page-white-put',
-                    handler: function() {
-                        storage.previewCode(application.getTransferObject());
-                    }
-                })
-            ]
+        this.add([designPanel,eastWrapper]);
+        this.addButton({
+            text:'Сохранить',
+            iconCls:'icon-disk',
+            handler: function() {
+                    storage.saveModel(application.getTransferObject());
+            }
         });
-        this.workAreaPanel = workAreaWrapper;
+        this.addButton({
+           text:'Предварительный просмотр кода',
+            iconCls:'icon-page-white-put',
+            handler: function() {
+                storage.previewCode(application.getTransferObject());
+            }
+        });
 
         storage.on('load',
                 function(jsonObj){
-                	if (jsonObj.success) { 
-	                    application.init(jsonObj.json);	                    
+                	if (jsonObj.success) {
+	                    application.init(jsonObj.json);
                    	} else {
                    		Ext.Msg.show({
 						   title:'Ошибка'
 						   ,msg: jsonObj.json
-						   ,buttons: Ext.Msg.OK						   						   
+						   ,buttons: Ext.Msg.OK
 						   ,icon: Ext.MessageBox.WARNING
 						});
-                   	}                   	
+                   	}
                 });
 
         storage.on('save', function(jsonObj) {
-	        if (jsonObj.success) {                
+	        if (jsonObj.success) {
                 Ext.Msg.show({
 				   title:'Сохранение формы'
 				   ,msg: 'Данные успешно сохранены'
-				   ,buttons: Ext.Msg.OK						   						   
+				   ,buttons: Ext.Msg.OK
 				   ,icon: Ext.MessageBox.INFO
 				});
            	} else {
            		Ext.Msg.show({
 				   title:'Ошибка'
 				   ,msg: jsonObj.json
-				   ,buttons: Ext.Msg.OK						   						   
+				   ,buttons: Ext.Msg.OK
 				   ,icon: Ext.MessageBox.WARNING
 				});
-           	}                 
-        });        
+           	}
+        });
 
         storage.on('preview', function(jsonObj) {
-        	if (jsonObj.success) {                
+        	if (jsonObj.success) {
            		var previewWindow = new M3Designer.code.PyCodeWindow();
             	previewWindow.show(jsonObj.json);
            	} else {
            		Ext.Msg.show({
 				   title:'Ошибка'
 				   ,msg: jsonObj.json
-				   ,buttons: Ext.Msg.OK						   						   
+				   ,buttons: Ext.Msg.OK
 				   ,icon: Ext.MessageBox.WARNING
 				});
-           	}     
-           	
-
+           	}
         });
 
         function onTreeNodeDeleteClick(item) {
             application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
-        }              
-        
-        return workAreaWrapper;
+        }
     },
-    getWorkArea:function() {
-        return this.workAreaPanel;
+    saveOnServer:function() {
+        this.storage.saveModel(this.application.getTransferObject());
     },
     loadModel: function(){
     	this.storage.loadModel();
