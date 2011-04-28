@@ -111,3 +111,9 @@ class M3JSONEncoder(json.JSONEncoder):
                 # просто передадим значение, оно будет закодировано в дальнейшем
                 cleaned_dict[attribute] = dict[attribute]
         return cleaned_dict
+
+
+def json_encode(f):
+    """ Декоратор, которым нужно отмечать сериализуемые в M3JSONEncoder методы """
+    f.json_encode = True
+    return f
