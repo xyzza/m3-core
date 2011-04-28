@@ -30,6 +30,7 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
 
 M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.ux.panel.CodeEditor,{
     autoScroll:true,
+    border:true,
     initComponent: function() {
         Ext.applyIf(this, {
             closable: true,

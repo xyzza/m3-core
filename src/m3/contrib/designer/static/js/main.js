@@ -220,7 +220,7 @@ function onClickNodePyFiles(node, fileAttr){
             var textArea = codeEditor.findByType('textarea')[0];
 
             /* async close tab && message */
-            var userTakeChoise = true;
+            var userTakeChoice = true;
             codeEditor.on('beforeclose', function(){
 
                 if (codeEditor.contentChanged){
@@ -234,13 +234,13 @@ function onClickNodePyFiles(node, fileAttr){
                            scope.fireEvent('close_tab', scope);
                         }
                         else if (buttonId=='cancel') {
-                            userTakeChoise = !userTakeChoise;
+                            userTakeChoice = !userTakeChoice;
                         }
-                        userTakeChoise = !userTakeChoise;
+                        userTakeChoice = !userTakeChoice;
                     }, textArea.id);
                 }
-                else userTakeChoise = !userTakeChoise;
-                return !userTakeChoise;
+                else userTakeChoice = !userTakeChoice;
+                return !userTakeChoice;
             });
 
             codeEditor.on('close_tab', function(tab){
@@ -303,14 +303,14 @@ function onClickNodePyFiles(node, fileAttr){
                                    codeEditor.contentChanged = false;
                                 }
                                 else if (buttonId=='cancel') {
-                                    userTakeChoise = !userTakeChoise;
+                                    userTakeChoice = !userTakeChoice;
                                 }
-                                userTakeChoise = !userTakeChoise;
+                                userTakeChoice = !userTakeChoice;
                             }, textArea.id, msg);
                             codeEditor.onChange();
                         }
-                        else userTakeChoise = !userTakeChoise;
-                        return !userTakeChoise;
+                        else userTakeChoice = !userTakeChoice;
+                        return !userTakeChoice;
                     },
                     failure: uiAjaxFailMessage
                 });
