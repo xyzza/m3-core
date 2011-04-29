@@ -8,7 +8,7 @@ Created on 29.01.2011
 from django.db import transaction
 from django.conf import settings
 
-from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult
+from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult, ACD
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.actions import utils
@@ -110,6 +110,9 @@ class DictEditWindowAction(Action):
     Редактирование элемента справочника
     '''
     url = '/edit-window$'
+    def context_declaration(self):
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
+    
     def run(self, request, context):
         base = self.parent
         # Получаем объект по id
@@ -133,6 +136,11 @@ class DictEditWindowAction(Action):
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             exclude_list = ['close_btn', 'cancel_btn']
             win.make_read_only(True, exclude_list)
+
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
+        if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
+            win.configure_for_dictpack(action=self, pack=self.parent,
+                                       request=request, context=context)
             
         return ExtUIScriptResult(base.get_edit_window(win))
 
