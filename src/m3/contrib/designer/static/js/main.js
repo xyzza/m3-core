@@ -17,8 +17,55 @@ function toolBarFuncWraper(fn){
     });
     };
 };
+
 /**
- * 
+ * Создает класс в файлах форм дизайнера
+ * @param node
+ * @param e
+ */
+function createClass(node,e){
+    Ext.MessageBox.prompt('Создание класса',
+        'Введите название класса',
+        function(btn, text){
+            if (btn == 'ok'){
+                var attr = node.attributes;
+                Ext.Ajax.request({
+                    url:'/create-new-class'
+                    ,params: {
+                        path: attr['path']
+                        ,className: text
+                    }
+                    ,success: function(response, opts){
+                        var obj = Ext.util.JSON.decode(response.responseText);
+                        if (obj.success) {
+                            var new_node = new Ext.tree.TreeNode({
+                                text: text
+                                ,path: attr['path']
+                                ,class_name: text
+                                ,iconCls: 'icon-class'
+                                ,leaf: true
+                            });
+
+                            node.appendChild(new_node);
+                        } else {
+                            Ext.Msg.show({
+                               title:'Ошибка'
+                               ,msg: obj.json
+                               ,buttons: Ext.Msg.OK
+                               ,icon: Ext.MessageBox.WARNING
+                            });
+                        };
+
+                    },
+                    failure: uiAjaxFailMessage
+                });
+            };
+        }
+    );
+};
+
+/**
+ * Дерево структуры проекта 
  */
 function createTreeView(rootNodeName){
 	var tree =  new Ext.tree.TreePanel({
@@ -101,50 +148,8 @@ function createTreeView(rootNodeName){
 		        	id: 'create-class'
 		            ,text: 'Добавить класс'
 		            ,iconCls: 'icon-cog-add'
-		            ,handler: function(item, e){
-
-						Ext.MessageBox.prompt('Создание класса',
-							'Введите название класса',
-							function(btn, text){
-								if (btn == 'ok'){
-									var node = item.parentMenu.contextNode;
-						            var attr = node.attributes;
-					            	Ext.Ajax.request({
-					            		url:'/create-new-class'
-					            		,params: {
-					            			path: attr['path']
-					            			,className: text
-					            		}
-					            		,success: function(response, opts){
-					            			var obj = Ext.util.JSON.decode(response.responseText);
-					            			if (obj.success) {
-						            			var new_node = new Ext.tree.TreeNode({
-						            				text: text
-						            				,path: attr['path']
-						            				,class_name: text
-						            				,iconCls: 'icon-class'
-						            				,leaf: true
-						            			});
-
-						            			node.appendChild(new_node);
-								           	} else {
-								           		Ext.Msg.show({
-												   title:'Ошибка'
-												   ,msg: obj.json
-												   ,buttons: Ext.Msg.OK
-												   ,icon: Ext.MessageBox.WARNING
-												});
-								           	}
-
-					            		},
-					            		failure: uiAjaxFailMessage
-					            	});
-					            }
-							}
-						);
-		            }
-		        }
-		        ]
+		            ,handler: function(item, e){createClass(item.parentMenu.contextNode,e)}
+		        }]
 		    }),
             contextFileMenu: new Ext.menu.Menu({
                 items: [{
@@ -359,7 +364,9 @@ function renameTarget(node, fileBool){
         };
         manipulationRequest(params, function(){
             node.setText(name);
-            node.parentNode.reload();
+            var parentNode = node.parentNode;
+            if (params.access) node.remove();
+            parentNode.reload();
         });
         };
     });
@@ -381,7 +388,7 @@ function manipulationRequest(params, fn){
             var obj = Ext.util.JSON.decode(response.responseText);
             if (obj.success && fn instanceof Function) fn(obj);
             else if (obj.error.msg && obj.error.type == errorTypeExist){
-                var additionalMessage = '. Зменить?';
+                var additionalMessage = '. Заменить?';
                 customMessage(obj, params, fn,additionalMessage)
             }
             else if (obj.error.msg){
@@ -441,8 +448,8 @@ Ext.fly(document).on('keydown',function(e,t,o){
                (typeof(tab.saveOnServer) == 'function')) {
            tab.saveOnServer();
            e.stopEvent();
-       }
-   }
+       };
+   };
 });
 
 function onClickNode(node) {					
@@ -455,7 +462,7 @@ function onClickNode(node) {
 	if(tab){				
 		tabPanel.setActiveTab(tab);
 		return;
-	}
+	};
 	
     var workspace = new DesignerWorkspace({
     	id: id,
@@ -480,7 +487,7 @@ function onClickNode(node) {
 			   ,fn: function(btn, text){
 			   		if (btn == 'yes'){
 			   			generateInitialize(node, attr['path'], attr['class_name']);
-			   		}			   		
+			   		};
 			   }
 			});
        		result = false;
@@ -506,11 +513,11 @@ function onClickNode(node) {
 			   ,icon: Ext.MessageBox.WARNING
 			});
 			result = false;
-       	}  
+       	};
        	
        return result;               	
      }, workspace);
-}
+};
 
 
 /**
@@ -528,7 +535,7 @@ function generateInitialize(node, path, className){
 		}
 		,failure: uiAjaxFailMessage
 	});
-}
+};
 
 /**
  * Вымогает у сервера некий файл
@@ -546,7 +553,7 @@ function onClickNodePyFiles(node, fileAttr){
 	if(tab){				
 		tabPanel.setActiveTab(tab);
 		return;
-	}
+	};
     
     /*Запрос содержимого файла по path на сервере*/
     Ext.Ajax.request({
@@ -611,7 +618,7 @@ function initCodeEditorHandlers(codeEditor, path){
         if (tab) { 
         	var tabPanel = Ext.getCmp('tab-panel');
         	tabPanel.remove(tab); 
-        }
+        };
     });
 
     /* Хендлер на событие сохранения */

@@ -188,12 +188,12 @@ def designer_structure_manipulation(request):
     Действия производятся как над файлами так и над директориями.
     '''
     #Типы
-    typeFile = 'file'
-    typeDir = 'dir'
+    type_file = 'file'
+    type_dir = 'dir'
     #Действия
-    actionDelete = 'delete'
-    actionRename = 'rename'
-    actionNew = 'new'
+    action_delete = 'delete'
+    action_rename = 'rename'
+    action_new = 'new'
     #Виды ошибок
     error_type_exist = 'exist'
     error_type_internal = 'internal'
@@ -221,17 +221,15 @@ def designer_structure_manipulation(request):
     if os.path.exists(current_path) and not access:
         error = {'msg':name+u' уже существует', 'type': error_type_exist}
         return JsonResponse({'success': success, 'error': error})
+    try:
+        # Создание новых файлов, директорий
+        if action == action_new:
+            # Если файл создается в директории то проверяем именно в ней
+            if os.path.isdir(path) and type == type_file:
+                current_path = os.path.join(path, name)
 
-    # Создание новых файлов, директорий
-    if action == actionNew:
-        # Если файл создается в директории то проверяем именно в ней
-        if os.path.isdir(path) and type == typeFile:
-            current_path = os.path.join(path, name)
-
-        #Создаем новую директорию
-        # TODO Доделать
-        if type == typeDir:
-            try:
+            #Создаем новую директорию
+            if type == type_dir:
                 if os.path.isdir(path):
                     current_path = os.path.join(path, name)
                     os.mkdir(current_path)
@@ -239,61 +237,42 @@ def designer_structure_manipulation(request):
                     os.mkdir(current_path)
                 success = True
                 data = {'path':current_path}
-            except IOError as (errno, strerror):
-                error =  {'msg':u"OSError error({0}): {1}".format(
-                    errno, strerror.decode('cp1251')),
-                           'type':error_type_internal}
 
-        #Создаем новый файл
-        elif type == typeFile:
-            if os.path.isdir(path) and type == typeFile:
-                current_path = os.path.join(path, name)
-            try:
+            #Создаем новый файл
+            elif type == type_file:
+                if os.path.isdir(path) and type == type_file:
+                    current_path = os.path.join(path, name)
                 with codecs.open( current_path, "w", "utf-8" ) as f:
                     f.write("#coding: utf-8")
                 success = True
                 data = {'path':current_path}
-            except IOError as (errno, strerror):
-                error =  {'msg':u"OSError error({0}): {1}".format(
-                    errno, strerror.decode('cp1251')),
-                           'type':error_type_internal}
 
-    # Удаление файлов, директорий
-    elif action == actionDelete:
-        if os.path.isdir(path):
-            try:
+        # Удаление файлов, директорий
+        elif action == action_delete:
+            if os.path.isdir(path):
+                #Удалается включая подпапки и файлы
                 shutil.rmtree(path)
                 success = True
-            except OSError as (errno, strerror):
-                error =  {'msg':u"OSError error({0}): {1}".format(
-                    errno, strerror.decode('cp1251')),
-                            'type':error_type_internal}
-        else:
-            try:
+            else:
                 os.remove(path)
                 success = True
-            except OSError as (errno, strerror):
-                error =  {'msg':u"OSError error({0}): {1}".format(
-                    errno, strerror.decode('cp1251')),
-                        'type':error_type_internal}
 
-    # Переименование файлов, директорий
-    elif action == actionRename:
-
-        #Хак т.к в виндах падает ошибка при попытке переименовать в сущ. файл
-        if access and os.sys.platform =='win32':
-            if os.path.isdir(current_path):
-                os.rmdir(current_path)
-            else:
-                os.remove(current_path)
-        #Файлы и Директории
-        try:
+        # Переименование файлов, директорий
+        elif action == action_rename:
+            #Хак т.к в виндах падает ошибка при попытке переименовать в сущ. файл
+            if access and os.sys.platform =='win32':
+                if os.path.isdir(current_path):
+                    shutil.rmtree(current_path)
+                else:
+                    os.remove(current_path)
+            #Файлы и Директории
             os.rename(path, current_path)
             success = True
-        except OSError as (errno, strerror):
-            error =  {'msg':u"OSError error({0}): {1}".format(
-                errno, strerror.decode('cp1251')),
-                    'type':error_type_internal}
 
+    except OSError as (errno, strerror):
+        if os.sys.platform =='win32':
+            strerror = strerror.decode('cp1251')
+        error =  {'msg':u"OSError error({0}): {1}".format(errno, strerror),
+                'type':error_type_internal}
 
     return JsonResponse({'success': success, 'data': data, 'error': error})
