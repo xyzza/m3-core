@@ -3854,8 +3854,22 @@ function includeInArr(arr, obj) {
     return (arr.indexOf(obj) != -1);
 }
 
+//Cообщения
+function showMessage(msg, title, icon){
+	title = title || 'Внимание';
+	msg = msg || '';
+	icon = icon || Ext.MessageBox.INFO;
+    Ext.Msg.show({
+        title: title,
+        msg: msg,
+        buttons: Ext.Msg.OK,
+        icon: icon
+    });
+}
 
-
+function showWarning(msg, title){
+	showMessage(msg, title, Ext.MessageBox.WARNING);
+}
 /**
  * Расширенный функционал комбобокса
  */
