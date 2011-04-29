@@ -108,7 +108,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             }
         });
 
-        storage.on('load', this.onSuccessLoad.createDelegate(this));
+        storage.on('load', this.onSuccessLoad);
 
         storage.on('save', function(jsonObj) {
 	        if (jsonObj.success) {

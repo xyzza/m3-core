@@ -78,7 +78,7 @@ class ExtToolBar(BaseExtContainer):
             return "{xtype: 'tbspacer', width: %d}" % self.width
     
     class TextItem(object):
-        def __init__(self, text):
+        def __init__(self, text=''):
             self.text = text
         
         def render(self):

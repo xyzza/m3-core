@@ -136,9 +136,9 @@
 		,"padding":"padding"
 		,"autoLoad":"auto_load"
 		,"bodyBorder":"body_border"
-		,"tbar":"tbar"
-		,"bbar":"bbar"
-		,"fbar":"fbar"
+		,"tbar":"top_bar"
+		,"bbar":"bottom_bar"
+		,"fbar":"footer_bar"
 	},
 	"parent": "container"
 },
@@ -166,9 +166,6 @@
 	},
 	"config": {
 		"store":"store"
-		,"tbar":"tbar"
-		,"bbar":"bbar"
-		,"fbar":"fbar"
 		,"columns":"columns"
 		,"autoExpandColumn":"auto_expand_column"
 		,"loadMask":"load_mask"
