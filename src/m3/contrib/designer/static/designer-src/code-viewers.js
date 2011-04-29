@@ -5,7 +5,7 @@
 Ext.namespace('M3Designer.code');
 
 M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
-    title:'Предварительный просмотр',
+    title:'Просмотр кода',
     width:600,
     height:500,
     layout:'fit',
@@ -16,14 +16,23 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
     },
     initComponent: function() {
         M3Designer.code.PyCodeWindow.superclass.initComponent.call(this);
+        
+        this.addEvents('loadcode');
     },
     show:function( code ) {
-        this.add(
-            new Ext.m3.CodeEditor({
+    	var codeEditor = new Ext.m3.CodeEditor({
                 sourceCode:code,
                 autoScroll:true
             })
-        );
+        
+        this.codeEditor = codeEditor;
+        
+        this.add(this.codeEditor);        
+        this.addButton({
+            text:'Загрузить код в форму',
+            iconCls:'icon-page-white-get',
+            handler: this.fireEvent.createDelegate(this, ['loadcode',this.codeEditor.sourceCode])            
+        });
         M3Designer.edit.PropertyWindow.superclass.show.call(this);
     }
 });

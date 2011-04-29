@@ -1,5 +1,71 @@
 /**
- * 
+ * Адаптер
+ * @param fn - Функция
+ */
+function toolBarFuncWraper(fn){
+    var cmp = Ext.getCmp('project-view');
+    var selectedNode = cmp.getSelectionModel().getSelectedNode();
+    if (selectedNode){
+        fn(selectedNode, true);
+    }
+    else{
+        Ext.Msg.show({
+        title: 'Информация',
+        msg: 'Для выполнения действия необходимо выделить узел дерева',
+        buttons: Ext.Msg.OK,
+        icon: Ext.Msg.INFO
+    });
+    };
+};
+
+/**
+ * Создает класс в файлах форм дизайнера
+ * @param node
+ * @param e
+ */
+function createClass(node,e){
+    Ext.MessageBox.prompt('Создание класса',
+        'Введите название класса',
+        function(btn, text){
+            if (btn == 'ok'){
+                var attr = node.attributes;
+                Ext.Ajax.request({
+                    url:'/create-new-class'
+                    ,params: {
+                        path: attr['path']
+                        ,className: text
+                    }
+                    ,success: function(response, opts){
+                        var obj = Ext.util.JSON.decode(response.responseText);
+                        if (obj.success) {
+                            var new_node = new Ext.tree.TreeNode({
+                                text: text
+                                ,path: attr['path']
+                                ,class_name: text
+                                ,iconCls: 'icon-class'
+                                ,leaf: true
+                            });
+
+                            node.appendChild(new_node);
+                        } else {
+                            Ext.Msg.show({
+                               title:'Ошибка'
+                               ,msg: obj.json
+                               ,buttons: Ext.Msg.OK
+                               ,icon: Ext.MessageBox.WARNING
+                            });
+                        };
+
+                    },
+                    failure: uiAjaxFailMessage
+                });
+            };
+        }
+    );
+};
+
+/**
+ * Дерево структуры проекта 
  */
 function createTreeView(rootNodeName){
 	var tree =  new Ext.tree.TreePanel({
@@ -15,14 +81,21 @@ function createTreeView(rootNodeName){
 		})
 		,tbar: new Ext.Toolbar({			
             items: [{
-            	iconCls: 'icon-script-add'
-            	,tooltip:'Создать файл'
+            	iconCls: 'icon-script-add',
+            	tooltip:'Создать файл',
+                handler: function(item, e){toolBarFuncWraper(newTarget)}
             },{
-            	iconCls: 'icon-script-edit'
-            	,tooltip:'Переименовать файл'
+            	iconCls: 'icon-script-edit',
+            	tooltip:'Переименовать файл',
+                handler: function(item, e){toolBarFuncWraper(renameTarget)}
             },{
-            	iconCls: 'icon-script-delete'
-            	,tooltip:'Удалить файл'
+            	iconCls: 'icon-script-delete',
+            	tooltip:'Удалить файл',
+                handler: function(item, e){toolBarFuncWraper(deleteFile)}
+            },{
+                tooltip: 'Редактировать файл',
+		        iconCls: 'icon-script-lightning',
+                handler: function(item, e){toolBarFuncWraper(editFile)}
             },{
             	xtype: 'tbseparator'
             },{
@@ -46,123 +119,93 @@ function createTreeView(rootNodeName){
 	    }
 		,contextMenu: new Ext.menu.Menu({
                 items: [{
-		            id: 'edit-file'
-		            ,text: 'Редактировать файл'
-		            ,iconCls: 'icon-script-lightning'
-                    ,handler: function(item, e){}
-		        },{
 		            id: 'create-file'
 		            ,text: 'Создать файл'
 		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'rename-file'
 		            ,text: 'Переименовать файл'
 		            ,iconCls: 'icon-script-edit'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'delete-file'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, true)}
+		        },{
+		            id: 'edit-file'
+		            ,text: 'Редактировать файл'
+		            ,iconCls: 'icon-script-lightning'
+                    ,handler: function(item, e){editFile(item.parentMenu.contextNode, true)}
+
 		        },'-',{
+		            id: 'create-dir1'
+		            ,text: 'Создать директорию'
+		            ,iconCls: 'icon-folder-add'
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
+                },'-',{
 		        	id: 'create-class'
 		            ,text: 'Добавить класс'
 		            ,iconCls: 'icon-cog-add'
-		            ,handler: function(item, e){
-
-						Ext.MessageBox.prompt('Создание класса',
-							'Введите название класса',
-							function(btn, text){
-								if (btn == 'ok'){
-									var node = item.parentMenu.contextNode;
-						            var attr = node.attributes;
-					            	Ext.Ajax.request({
-					            		url:'/create-new-class'
-					            		,params: {
-					            			path: attr['path']
-					            			,className: text
-					            		}
-					            		,success: function(response, opts){
-					            			var obj = Ext.util.JSON.decode(response.responseText);             
-					            			if (obj.success) {                
-						            			var new_node = new Ext.tree.TreeNode({
-						            				text: text
-						            				,path: attr['path']
-						            				,class_name: text
-						            				,iconCls: 'icon-class'	
-						            				,leaf: true			            				
-						            			});
-		
-						            			node.appendChild(new_node);
-								           	} else {
-								           		Ext.Msg.show({
-												   title:'Ошибка'
-												   ,msg: obj.json
-												   ,buttons: Ext.Msg.OK						   						   
-												   ,icon: Ext.MessageBox.WARNING
-												});
-								           	}    
-
-					            		},
-					            		failure: uiAjaxFailMessage
-					            	});
-					            }
-							}						
-						);
-		            }
-		        }
-		        ]
+		            ,handler: function(item, e){createClass(item.parentMenu.contextNode,e)}
+		        }]
 		    }),
             contextFileMenu: new Ext.menu.Menu({
                 items: [{
-		            id: 'edit-file1'
-		            ,text: 'Редактировать файл'
-		            ,iconCls: 'icon-script-lightning'
-                    ,handler: function(item, e){}
-		        },{
 		            id: 'create-file2'
 		            ,text: 'Создать файл'
 		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'rename-file2'
 		            ,text: 'Переименовать файл'
 		            ,iconCls: 'icon-script-edit'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'delete-file2'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){}
-		        }]
+                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, true)}
+		        },{
+		            id: 'edit-file1'
+		            ,text: 'Редактировать файл'
+		            ,iconCls: 'icon-script-lightning'
+                    ,handler: function(item, e){editFile(item.parentMenu.contextNode, true)}
+		        },'-',{
+		            id: 'create-dir2'
+		            ,text: 'Создать директорию'
+		            ,iconCls: 'icon-folder-add'
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, false)}
+                }]
             }),
             contextDirMenu: new Ext.menu.Menu({
                 items: [{
-		            id: 'create-file3'
-		            ,text: 'Создать файл'
-		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){}
-                },'-',{
 		            id: 'create-dir'
 		            ,text: 'Создать директорию'
 		            ,iconCls: 'icon-folder-add'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, false)}
 		        },{
 		            id: 'rename-dir'
 		            ,text: 'Переименовать директорию'
 		            ,iconCls: 'icon-folder-edit'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, false)}
 		        },{
 		            id: 'delete-dir'
 		            ,text: 'Удалить директорию'
 		            ,iconCls: 'icon-folder-delete'
-                    ,handler: function(item, e){}
-		        }]
+                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, false)}
+		        },'-',{
+		            id: 'create-file3'
+		            ,text: 'Создать файл'
+		            ,iconCls: 'icon-script-add'
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
+                }]
             }),
 		    listeners: {
 		        contextmenu: function(node, e) {
 		            node.select();
+                    var parentNodeText = node.parentNode.text;
                     /* Файл дизайна форм */
 		            if (node.text === 'ui.py' || node.text === 'forms.py' ) {
 			            var c = node.getOwnerTree().contextMenu;
@@ -170,29 +213,32 @@ function createTreeView(rootNodeName){
 			            c.showAt(e.getXY());						            	
 		            }
                     /* Файл */
-                    else if(node.leaf && (node.parentNode.text !== 'ui.py' && node.parentNode.text !== 'forms.py')) {
+                    else if(node.leaf && (parentNodeText !== 'ui.py' && parentNodeText !== 'forms.py')) {
                         var c = node.getOwnerTree().contextFileMenu;
 			            c.contextNode = node;
 			            c.showAt(e.getXY());
                     }
                     /* Директория */
-                    else if(!node.leaf && (node.parentNode.text !== 'ui.py' && node.parentNode.text !== 'forms.py')) {
+                    else if(!node.leaf && (parentNodeText !== 'ui.py' && parentNodeText !== 'forms.py')) {
                         var c = node.getOwnerTree().contextDirMenu;
 			            c.contextNode = node;
 			            c.showAt(e.getXY());
                     };
 		        },
 		        dblclick: function(node, e){
-		        	if (node.parentNode && (node.parentNode.text === 'ui.py' || node.parentNode.text === 'forms.py' ) ){
+                    var parentNodeText = node.parentNode.text;
+                    var fileType = node.text.split('.').slice(-1);
+		        	if (node.parentNode && (parentNodeText === 'ui.py' || parentNodeText === 'forms.py' ) ){
 			        	onClickNode(node);
 		        	}
                     /*Все файлы не являющиеся *.py и conf */
-                    else if(node.text.split('.').slice(-1) == 'py' || node.text.split('.').slice(-1) == 'conf'){
+                    else if(fileType == 'py' || fileType == 'conf'){
                         var fileAttr = {};
                         fileAttr['path'] = node.attributes.path;
                         fileAttr['fileName'] = node.attributes.text;
                         onClickNodePyFiles(node, fileAttr);
-                    };
+                    }
+                    else if(node.leaf) wrongFileTypeMessage(fileType);
 		        }
 		    }
 	});
@@ -218,10 +264,180 @@ function createTreeView(rootNodeName){
 	        layout: 'fit'
 	    }]
 	});
-	
-	
 	return accordion;
-}
+};
+
+/* Переменные манипуляций с Файловой Сиситемы */
+/* Можно сделать в виде объекта */
+var typeFile = 'file';
+var typeDir = 'dir';
+var actionDelete = 'delete';
+var actionRename = 'rename';
+var actionNew = 'new';
+
+/* Редактировать файл */
+function editFile(node, e){
+    var fileType = node.text.split('.').slice(-1);
+    if(fileType == 'py' || fileType == 'conf'){
+        var fileAttr = {};
+        fileAttr['path'] = node.attributes.path;
+        fileAttr['fileName'] = node.attributes.text;
+        onClickNodePyFiles(node, fileAttr);
+    }
+    else wrongFileTypeMessage(fileType);
+};
+
+/**
+ * Новый файл/директорию
+ * @param node - узел
+ * @param fileBool - boolean флаг файл иль нет
+ */
+function newTarget(node, fileBool){
+    Ext.MessageBox.prompt('Ноый '+(fileBool? 'файл': 'директория'),'Введите имя'+ (fileBool? 'файла': 'директории'),
+    function(btn, name){
+        if (btn == 'ok' && name){
+            var path = node.attributes['path'];
+            var params = {
+                path : path,
+                type: fileBool? typeFile: typeDir,
+                name : name,
+                action : actionNew
+            };
+            manipulationRequest(params, function(obj){
+                var new_node = new Ext.tree.TreeNode({
+                    text: name
+                    ,path: obj.data['path']
+                    ,iconCls: 'icon-page-white-py'
+                    ,leaf: true
+                });
+                node.appendChild(new_node);
+                node.parentNode.reload();
+            });
+        };
+    });
+};
+
+/**
+ * Удалить файл/директорию
+ * @param node - узел
+ * @param fileBool - boolean флаг файл иль нет
+ */
+function deleteFile(node, fileBool){
+    var path = node.attributes['path'];
+    var params = {
+        path : path,
+        type: fileBool? typeFile: typeDir,
+        action : actionDelete
+    };
+    Ext.Msg.show({
+        title:'Удалить '+(fileBool? 'файл': 'директорию'),
+        msg: 'Вы действительно хотите удалить '+ (fileBool? 'файл': 'директорию')+'?',
+        buttons: Ext.Msg.YESNOCANCEL,
+        icon: Ext.MessageBox.QUESTION,
+        fn: function(btn, text){
+            if (btn == 'yes'){
+                params.access = 1;
+                manipulationRequest(params, function(){
+                    node.remove();
+                });
+            };
+        }
+    });
+};
+
+/**
+ * Преименовать файл/директорию
+ * @param node - узел
+ * @param fileBool - boolean флаг файл иль нет
+ */
+function renameTarget(node, fileBool){
+    Ext.MessageBox.prompt('Переименование '+(fileBool? 'файла': 'директории'),
+            'Введите имя '+(fileBool? 'файла': 'директории'),
+    function(btn, name){
+        if (btn == 'ok' && name){
+        var path = node.attributes['path'];
+        var params = {
+            path : path,
+            type: fileBool? typeFile: typeDir,
+            action : actionRename,
+            name : name
+        };
+        manipulationRequest(params, function(){
+            node.setText(name);
+            var parentNode = node.parentNode;
+            if (params.access) node.remove();
+            parentNode.reload();
+        });
+        };
+    });
+};
+
+
+/**
+ * DRY
+ * @param params - Параметры запроса
+ * @param fn - Функция которая будет выполнена при success
+ */
+function manipulationRequest(params, fn){
+    var errorTypeExist = 'exist';
+    Ext.Ajax.request({
+        url:'/designer/project-manipulation',
+        method: 'GET',
+        params: params,
+        success: function(response, opts){
+            var obj = Ext.util.JSON.decode(response.responseText);
+            if (obj.success && fn instanceof Function) fn(obj);
+            else if (obj.error.msg && obj.error.type == errorTypeExist){
+                var additionalMessage = '. Заменить?';
+                customMessage(obj, params, fn,additionalMessage)
+            }
+            else if (obj.error.msg){
+                Ext.Msg.show({
+                   title:'Ошибка',
+                   msg: obj.error.msg,
+                   buttons: Ext.Msg.OK,
+                   icon: Ext.MessageBox.WARNING
+                   });
+            };
+        },
+        failure: uiAjaxFailMessage
+    });
+};
+
+/**
+ *
+ * @param obj - Объект ответа сервера
+ * @param params - Параметры запроса к серверу, для послед. запроса
+ * @param fn - Функция которая передается в рекурсивно вызывающийся запрос
+ * @param additionalMessage - добавочное сообщение
+ */
+function customMessage(obj, params, fn, additionalMessage){
+    Ext.Msg.show({
+        title:'Уведомление',
+        msg: obj.error.msg + additionalMessage,
+        buttons: Ext.Msg.YESNOCANCEL,
+        icon: Ext.MessageBox.QUESTION,
+        fn: function(btn, text){
+            if (btn == 'yes'){
+                params.access = 1;
+                manipulationRequest(params, fn);
+            }
+        }
+    });
+};
+
+/**
+ * Сообщение о неверности формата
+ * @param fileType - Тип файла (*.html, *.css, ...)
+ */
+function wrongFileTypeMessage(fileType){
+    Ext.Msg.show({
+            title: 'Открытие файла',
+            msg: 'Данный формат '+fileType+' не поддерживается',
+            buttons: Ext.Msg.OK,
+            icon: Ext.Msg.INFO
+    });
+};
 
 //Инициируем перехват нажатия ctrl+s для автоматического сохранения на сервер
 Ext.fly(document).on('keydown',function(e,t,o){
@@ -232,14 +448,24 @@ Ext.fly(document).on('keydown',function(e,t,o){
                (typeof(tab.saveOnServer) == 'function')) {
            tab.saveOnServer();
            e.stopEvent();
-       }
-   }
+       };
+   };
 });
 
 function onClickNode(node) {					
-	var attr =  node.attributes;	            	
+	var attr =  node.attributes;
+	            	
+	var tabPanel = Ext.getCmp('tab-panel');	
+	var id = attr['path'] + attr['class_name'];
 
+	var tab = tabPanel.getItem(id);
+	if(tab){				
+		tabPanel.setActiveTab(tab);
+		return;
+	};
+	
     var workspace = new DesignerWorkspace({
+    	id: id,
         dataUrl:'/designer/data',
         saveUrl:'/designer/save',
         path:attr['path'],
@@ -247,26 +473,11 @@ function onClickNode(node) {
         previewUrl:'/designer/preview'
     });
     
- 	workspace.loadModel();
+ 	workspace.loadModel();    
+	workspace.on('beforeload', function(jsonObj){
 
-    workspace.storage.un('load', workspace.onSuccessLoad);
-	workspace.storage.on('load', function(jsonObj){
-    	if (jsonObj.success) { 
-           	var tabPanel = Ext.getCmp('tab-panel');
+		if (jsonObj['not_autogenerated']) {
 
-			workspace.setTitle(attr['class_name']); 
-			
-			tabPanel.add(workspace);				
-		    tabPanel.activate(workspace);
-		
-		    // Прослушивает событие "tabchange", вызывает новое событие в дочерней панели
-		     tabPanel.on('tabchange', function(panel,newTab,currentTab){
-		         workspace.application.designPanel.fireEvent('tabchanged');
-	    	 });
-	    	
-	    	workspace.application.init(jsonObj.json);
-       	
-       	} else if (jsonObj['not_autogenerated']) {
        		// Может быть сгенерировать эту функцию в этом классе?
        		Ext.Msg.show({
 			   title:'Функция не определена'
@@ -276,10 +487,24 @@ function onClickNode(node) {
 			   ,fn: function(btn, text){
 			   		if (btn == 'yes'){
 			   			generateInitialize(node, attr['path'], attr['class_name']);
-			   		}			   		
+			   		};
 			   }
 			});
-       		
+       		result = false;
+       } else if (jsonObj.success) {
+
+			this.setTitle(attr['class_name']); 
+												
+			tabPanel.add(this);				
+		    tabPanel.activate(this);
+		
+		    // Прослушивает событие "tabchange", вызывает новое событие в дочерней панели
+		    tabPanel.on('tabchange', function(panel,newTab,currentTab){
+		        this.application.designPanel.fireEvent('tabchanged');
+    		}, this);
+			
+			result = true;
+			
        	} else {
        		Ext.Msg.show({
 			   title:'Ошибка'
@@ -287,9 +512,12 @@ function onClickNode(node) {
 			   ,buttons: Ext.Msg.OK						   						   
 			   ,icon: Ext.MessageBox.WARNING
 			});
-       	}                   	
-     });
-}
+			result = false;
+       	};
+       	
+       return result;               	
+     }, workspace);
+};
 
 
 /**
@@ -307,7 +535,7 @@ function generateInitialize(node, path, className){
 		}
 		,failure: uiAjaxFailMessage
 	});
-}
+};
 
 /**
  * Вымогает у сервера некий файл
@@ -317,6 +545,16 @@ function generateInitialize(node, path, className){
 function onClickNodePyFiles(node, fileAttr){
     var path = fileAttr.path;
     var fileName = fileAttr.fileName;
+        
+    var id = path + fileName;
+    
+    var tabPanel = Ext.getCmp('tab-panel');
+    var tab = tabPanel.getItem(id);
+	if(tab){				
+		tabPanel.setActiveTab(tab);
+		return;
+	};
+    
     /*Запрос содержимого файла по path на сервере*/
     Ext.Ajax.request({
         url:'/file-content',
@@ -327,11 +565,12 @@ function onClickNodePyFiles(node, fileAttr){
         ,success: function(response, opts){
             var obj = Ext.util.JSON.decode(response.responseText);
             var codeEditor = new M3Designer.code.ExtendedCodeEditor({
+            	id:id,
                 sourceCode : obj.data.content
             });
 
             codeEditor.setTitle(fileName);
-            var tabPanel = Ext.getCmp('tab-panel');
+            
             tabPanel.add( codeEditor );
             tabPanel.activate(codeEditor);
         
@@ -376,7 +615,10 @@ function initCodeEditorHandlers(codeEditor, path){
 
     /* Хендлер на событие закрытие таба таб панели */
     codeEditor.on('close_tab', function(tab){
-        if (tab) tabPanel.remove(tab);
+        if (tab) { 
+        	var tabPanel = Ext.getCmp('tab-panel');
+        	tabPanel.remove(tab); 
+        };
     });
 
     /* Хендлер на событие сохранения */
