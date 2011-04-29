@@ -230,11 +230,15 @@ def designer_structure_manipulation(request):
 
         #Создаем новую директорию
         # TODO Доделать
-        if os.path.isdir(path) and type == typeDir:
+        if type == typeDir:
             try:
-                os.mkdir(current_path)
+                if os.path.isdir(path):
+                    current_path = os.path.join(path, name)
+                    os.mkdir(current_path)
+                else:
+                    os.mkdir(current_path)
                 success = True
-#                data = {'path':current_path}
+                data = {'path':current_path}
             except IOError as (errno, strerror):
                 error =  {'msg':u"OSError error({0}): {1}".format(
                     errno, strerror.decode('cp1251')),
@@ -275,21 +279,21 @@ def designer_structure_manipulation(request):
 
     # Переименование файлов, директорий
     elif action == actionRename:
-        #Файлы
-        if type == typeFile:
-            try:
-                #Хак т.к в виндах падает ошибка при попытке переименовать в сущ. файл
-                if access and os.sys.platform =='win32':
-                    os.remove(current_path)
-                os.rename(path, current_path)
-                success = True
-            except OSError as (errno, strerror):
-                error =  {'msg':u"OSError error({0}): {1}".format(
-                    errno, strerror.decode('cp1251')),
-                        'type':error_type_internal}
-        #Директории
-        else:
-            pass
+
+        #Хак т.к в виндах падает ошибка при попытке переименовать в сущ. файл
+        if access and os.sys.platform =='win32':
+            if os.path.isdir(current_path):
+                os.rmdir(current_path)
+            else:
+                os.remove(current_path)
+        #Файлы и Директории
+        try:
+            os.rename(path, current_path)
+            success = True
+        except OSError as (errno, strerror):
+            error =  {'msg':u"OSError error({0}): {1}".format(
+                errno, strerror.decode('cp1251')),
+                    'type':error_type_internal}
 
 
     return JsonResponse({'success': success, 'data': data, 'error': error})

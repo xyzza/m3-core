@@ -6,7 +6,7 @@ function toolBarFuncWraper(fn){
     var cmp = Ext.getCmp('project-view');
     var selectedNode = cmp.getSelectionModel().getSelectedNode();
     if (selectedNode){
-        fn(selectedNode);
+        fn(selectedNode, true);
     }
     else{
         Ext.Msg.show({
@@ -36,11 +36,11 @@ function createTreeView(rootNodeName){
             items: [{
             	iconCls: 'icon-script-add',
             	tooltip:'Создать файл',
-                handler: function(item, e){toolBarFuncWraper(newFile)}
+                handler: function(item, e){toolBarFuncWraper(newTarget)}
             },{
             	iconCls: 'icon-script-edit',
             	tooltip:'Переименовать файл',
-                handler: function(item, e){toolBarFuncWraper(renameFile)}
+                handler: function(item, e){toolBarFuncWraper(renameTarget)}
             },{
             	iconCls: 'icon-script-delete',
             	tooltip:'Удалить файл',
@@ -75,23 +75,29 @@ function createTreeView(rootNodeName){
 		            id: 'create-file'
 		            ,text: 'Создать файл'
 		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){newFile(item.parentMenu.contextNode, e)}
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'rename-file'
 		            ,text: 'Переименовать файл'
 		            ,iconCls: 'icon-script-edit'
-                    ,handler: function(item, e){renameFile(item.parentMenu.contextNode, e)}
+                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'delete-file'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode,e)}
+                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'edit-file'
 		            ,text: 'Редактировать файл'
 		            ,iconCls: 'icon-script-lightning'
-                    ,handler: function(item, e){editFile(item.parentMenu.contextNode,e)}
+                    ,handler: function(item, e){editFile(item.parentMenu.contextNode, true)}
+
 		        },'-',{
+		            id: 'create-dir1'
+		            ,text: 'Создать директорию'
+		            ,iconCls: 'icon-folder-add'
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
+                },'-',{
 		        	id: 'create-class'
 		            ,text: 'Добавить класс'
 		            ,iconCls: 'icon-cog-add'
@@ -145,45 +151,50 @@ function createTreeView(rootNodeName){
 		            id: 'create-file2'
 		            ,text: 'Создать файл'
 		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){newFile(item.parentMenu.contextNode, e)}
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'rename-file2'
 		            ,text: 'Переименовать файл'
 		            ,iconCls: 'icon-script-edit'
-                    ,handler: function(item, e){renameFile(item.parentMenu.contextNode, e)}
+                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'delete-file2'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode,e)}
+                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'edit-file1'
 		            ,text: 'Редактировать файл'
 		            ,iconCls: 'icon-script-lightning'
-                    ,handler: function(item, e){editFile(item.parentMenu.contextNode,e)}
-		        }]
+                    ,handler: function(item, e){editFile(item.parentMenu.contextNode, true)}
+		        },'-',{
+		            id: 'create-dir2'
+		            ,text: 'Создать директорию'
+		            ,iconCls: 'icon-folder-add'
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, false)}
+                }]
             }),
             contextDirMenu: new Ext.menu.Menu({
                 items: [{
 		            id: 'create-dir'
 		            ,text: 'Создать директорию'
 		            ,iconCls: 'icon-folder-add'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, false)}
 		        },{
 		            id: 'rename-dir'
 		            ,text: 'Переименовать директорию'
 		            ,iconCls: 'icon-folder-edit'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, false)}
 		        },{
 		            id: 'delete-dir'
 		            ,text: 'Удалить директорию'
 		            ,iconCls: 'icon-folder-delete'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, false)}
 		        },'-',{
 		            id: 'create-file3'
 		            ,text: 'Создать файл'
 		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){newFile(item.parentMenu.contextNode, e)}
+                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
                 }]
             }),
 		    listeners: {
@@ -271,15 +282,19 @@ function editFile(node, e){
     else wrongFileTypeMessage(fileType);
 };
 
-/* Новый файл */
-function newFile(node, e){
-    Ext.MessageBox.prompt('Ноый файл','Введите имя файла',
+/**
+ * Новый файл/директорию
+ * @param node - узел
+ * @param fileBool - boolean флаг файл иль нет
+ */
+function newTarget(node, fileBool){
+    Ext.MessageBox.prompt('Ноый '+(fileBool? 'файл': 'директория'),'Введите имя'+ (fileBool? 'файла': 'директории'),
     function(btn, name){
         if (btn == 'ok' && name){
             var path = node.attributes['path'];
             var params = {
                 path : path,
-                type: typeFile,
+                type: fileBool? typeFile: typeDir,
                 name : name,
                 action : actionNew
             };
@@ -294,20 +309,24 @@ function newFile(node, e){
                 node.parentNode.reload();
             });
         };
-    }
-);
+    });
 };
-/* Удалить файл */
-function deleteFile(node, e){
+
+/**
+ * Удалить файл/директорию
+ * @param node - узел
+ * @param fileBool - boolean флаг файл иль нет
+ */
+function deleteFile(node, fileBool){
     var path = node.attributes['path'];
     var params = {
         path : path,
-        type: typeFile,
+        type: fileBool? typeFile: typeDir,
         action : actionDelete
     };
     Ext.Msg.show({
-        title:'Удалить файл',
-        msg: 'Вы действительно хотите удалить файл?',
+        title:'Удалить '+(fileBool? 'файл': 'директорию'),
+        msg: 'Вы действительно хотите удалить '+ (fileBool? 'файл': 'директорию')+'?',
         buttons: Ext.Msg.YESNOCANCEL,
         icon: Ext.MessageBox.QUESTION,
         fn: function(btn, text){
@@ -321,15 +340,20 @@ function deleteFile(node, e){
     });
 };
 
-/* Преименовать файл */
-function renameFile(node, e){
-    Ext.MessageBox.prompt('Переименование файла','Введите имя файла',
+/**
+ * Преименовать файл/директорию
+ * @param node - узел
+ * @param fileBool - boolean флаг файл иль нет
+ */
+function renameTarget(node, fileBool){
+    Ext.MessageBox.prompt('Переименование '+(fileBool? 'файла': 'директории'),
+            'Введите имя '+(fileBool? 'файла': 'директории'),
     function(btn, name){
         if (btn == 'ok' && name){
         var path = node.attributes['path'];
         var params = {
             path : path,
-            type: typeFile,
+            type: fileBool? typeFile: typeDir,
             action : actionRename,
             name : name
         };
@@ -341,9 +365,6 @@ function renameFile(node, e){
     });
 };
 
-/* Новая директория */
-/* Удалить директорию */
-/* Преименовать директорию */
 
 /**
  * DRY
