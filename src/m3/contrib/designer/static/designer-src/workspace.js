@@ -108,7 +108,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             }
         });
 
-        storage.on('load', this.onSuccessLoad);
+        storage.on('load', this.onSuccessLoad.createDelegate(this));
 
         storage.on('save', function(jsonObj) {
 	        if (jsonObj.success) {
@@ -154,7 +154,9 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
     },
     onSuccessLoad: function(jsonObj){    	
 		if (jsonObj.success) { 
-	        this.application.init(jsonObj.json);	                    
+			if (this.fireEvent('beforeload', jsonObj)){				
+				this.application.init(jsonObj.json);	
+			}	        	                    
 	   	} else {
 	   		Ext.Msg.show({
 			   title:'Ошибка'
