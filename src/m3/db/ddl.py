@@ -5,6 +5,9 @@ Created on 22.04.2011
 @author: akvarats
 '''
 
+from south.utils import ask_for_it_by_name
+from south.db import db, dbs
+
 #===============================================================================
 # Описание врапперов над структурой элементов базы данных (таблиц и их полей)
 #===============================================================================
@@ -13,8 +16,8 @@ class DBTable(object):
     '''
     Враппер над таблицами в базе данных
     '''
-    def __init__(self):
-        self.name = '' # имя таблицы в базе данных
+    def __init__(self, name=''):
+        self.name = name # имя таблицы в базе данных
         self.fields = [] # список полей для таблицы в базе данных
         
     def find_field(self, field_name):
@@ -34,28 +37,72 @@ class NullTable(DBTable):
     Данный класс необходим для того, чтобы дать понять механизмам миграции о том,
     что таблица не существует в базе данных
     '''
-    pass
+    def __init__(self):
+        super(NullTable, self).__init__(name='')
+
+#===============================================================================
+# Классы для описания полей таблиц базы данных
+#===============================================================================
 
 class DBField(object):
     '''
     Враппер над полем таблицы в базе данных
     '''
-    def __init__(self):
-        self.name = '' # наименование поля
+    def __init__(self, name, allow_blank=True, indexed=True):
+        self.name = name # наименование поля
         self.django_type = '' # имя в базе данных
-        self.indexed = False # признак создания индекса для поля
-        self.allow_blank = True
+        self.indexed = indexed # признак создания индекса для поля
+        self.allow_blank = allow_blank
         
+    def django_field(self):
+        '''
+        Возвращает выражение для создания поля в виде джанговской модели
+        '''
+        field_class = ask_for_it_by_name(self.django_type)
+        params = {'blank': self.allow_blank,
+                  'db_index': self.indexed,}
+        
+        params = self.set_params(params)
+        return field_class(**params)
+        
+    def set_params(self, params):
+        '''
+        Заполняет параметры поля, которые будут переданы в параметры 
+        конструктора при создании экземпляра django.db.models.fields.Field.
+        '''
+        return params
 
 class IDField(DBField):
     '''
     Поле, являющееся идентификатором записи в таблице базы данных
     '''
     def __init__(self):
-        self.name = 'id'
+        super(IDField, self).__init__(name='id', indexed=True, allow_blank=False)
         self.django_type = 'django.db.models.fields.AutoField'
-        self.indexed = True
-        self.allow_blank = False
+
+        
+    def set_params(self, params):
+        '''
+        Для данного поля необходимо, чтобы в параметрах конструктора было 
+        определено только primary_key = True 
+        '''
+        return {'primary_key': True}
+    
+class CharField(DBField):
+    '''
+    Поле со строковым типов в базе данных
+    '''
+    def __init__(self, name = '', max_length=100, allow_blank=True, indexed=True, default=''):
+        super(CharField, self).__init__(name=name, allow_blank=allow_blank, indexed=indexed)
+        self.max_length = max_length
+        self.django_type = 'django.db.models.fields.CharField'
+        self.default = default
+        
+    def set_params(self, params):
+        params['max_length'] = self.max_length
+        params['default'] = self.default
+        return params
+        
         
 #===============================================================================
 # Механизмы для миграции таблиц базы данных
@@ -65,17 +112,44 @@ class BaseMigrator(object):
     Базовый мигратор, выполняющий функции изменения структуры таблиц в базе 
     данных. 
     '''
-    def __init__(self):
-        pass
+    def __init__(self, db_name=''):
+        '''
+        @param db_name: ссылка на объект базы данных
+        '''
+        self.db_name = db_name
     
-    def migrate(self, table_name, to_version, from_version=None):
+    def migrate(self, to_version, from_version=None):
         '''
         Метод миграции структуры таблицы
         
         @param to_version: представляет собой объект типа DBTable, который хранит
         описание
         '''
-        pass
+        
+        # 1. получаем диффку между таблицами
+        commands = self._diff_versions(from_version, to_version)
+            
+        self._db().start_transaction()
+        # 2. выполняем команды на изменение базы данных
+        try:
+            for command in commands:
+                command.execute(self.db_name)
+        except:
+            self._db().rollback_transaction()
+            raise
+        else:
+            self._db().commit_transaction()
+            
+    
+    def _db(self):
+        '''
+        Вовзвращает базу данных, в которой необходимо выполнить команду.
+        
+        В случае, если dn_name не указано, то команда выполняется в базе данных
+        default.
+        '''
+        return dbs[self.db_name] if self.db_name else db
+        
     
     def _get_active_version(self, table_name):
         '''
@@ -126,7 +200,7 @@ class BaseMigrator(object):
             not isinstance(cleaned_right, DBTable)):
             raise Exception(u'При выполнении миграции либо в левой, либо в правой части должно находиться описание реальной таблицы (экземпляра класса DBTable)')
         
-        db_table = cleaned_left if isinstance(cleaned_left) else cleaned_right
+        db_table = cleaned_right if isinstance(cleaned_left, NullTable) else cleaned_left
         
         # 1. Если правая версия является NullTable, то мы имеем дело с 
         # командой на удаление таблицы, если левая версия - то создания таблицы
@@ -136,34 +210,41 @@ class BaseMigrator(object):
             return commands
         
         if isinstance(cleaned_left, NullTable):
-            commands.append(CreateTableCommand(cleaned_left))
+            commands.append(CreateTableCommand(cleaned_right))
+            return commands
         
         # 2. проходимся по полям левой таблицы
-        for left_field in cleaned_left:
+        for left_field in cleaned_left.fields:
             right_field = cleaned_right.find_field(left_field.name)
             
             if not right_field:
                 commands.append(RemoveFieldCommand(db_table, left_field))
                 continue
             
+            if ((left_field.indexed and not right_field.indexed) or
+                (right_field.indexed and not left_field.indexed) or
+                (left_field.allow_blank and not right_field.allow_blank) or
+                (right_field.allow_blank and not left_field.allow_blank)):
+                commands.append(AlterFieldCommand(db_table, right_field))
+            
             # формирование команд на изменение индексов
-            if left_field.indexed and not right_field.indexed:
-                commands.append(RemoveFieldIndexCommand(db_table, right_field))
+            #if left_field.indexed and not right_field.indexed:
+            #    commands.append(RemoveFieldIndexCommand(db_table, right_field))
                  
-            if right_field.indexed and not left_field.indexed:
-                commands.append(AppendFieldIndexCommand(db_table, right_field))
+            #if right_field.indexed and not left_field.indexed:
+            #    commands.append(AppendFieldIndexCommand(db_table, right_field))
                 
             # формирование команд на изменение обязательность
-            if left_field.allow_blank and not right_field.allow_blank:
-                commands.append(ForbidFieldBlankCommand(db_table, right_field))
+            #if left_field.allow_blank and not right_field.allow_blank:
+            #    commands.append(ForbidFieldBlankCommand(db_table, right_field))
                                 
-            if right_field.allow_blank and not left_field.allow_blank:
-                commands.append(AllowFieldBlankCommand(db_table, right_field))
+            #if right_field.allow_blank and not left_field.allow_blank:
+            #    commands.append(AllowFieldBlankCommand(db_table, right_field))
             
         # 3. проходимся по полям правой таблицы
-        for right_field in cleaned_right:
+        for right_field in cleaned_right.fields:
             left_field = cleaned_left.find_field(right_field.name)
-            if not right_field:
+            if not left_field:
                 commands.append(AppendFieldCommand(db_table, right_field))
         
         return commands
@@ -178,6 +259,21 @@ class DDLCommand(object):
         @param db_table: описание таблицы, над которой выполняется DDL команда
         '''
         self.db_table = db_table
+        
+    def execute(self, db_name=''):
+        '''
+        Метод выполнения команды
+        '''
+        raise NotImplemented(u'Метод DDLCommand.execute() необходимо перегружать в дочерних классах.')
+    
+    def _db(self, db_name=''):
+        '''
+        Вовзвращает базу данных, в которой необходимо выполнить команду.
+        
+        В случае, если dn_name не указано, то команда выполняется в базе данных
+        default.
+        '''
+        return dbs[db_name] if db_name else db
 
 
 class CreateTableCommand(DDLCommand):
@@ -187,12 +283,28 @@ class CreateTableCommand(DDLCommand):
     def __init__(self, db_table):
         super(CreateTableCommand, self).__init__(db_table)
         
+    def execute(self, db_name=''):
+        '''
+        Реализуется команда на создание таблицы в базе данных
+        '''
+        fields = []
+        for field in self.db_table.fields:
+            fields.append((field.name, field.django_field()))
+
+        self._db(db_name).create_table(self.db_table.name, tuple(fields))
+
+        
 class DropTableCommand(DDLCommand):
     '''
     Команда на удаление таблицы из базы данных
     '''
     def __init__(self, db_table):
         super(DropTableCommand, self).__init__(db_table)
+        
+    def execute(self, db_name=''):
+        
+        self._db(db_name).delete_table(self.db_table.name)
+
         
 class BaseFieldCommand(DDLCommand):
     '''
@@ -215,6 +327,9 @@ class AppendFieldCommand(BaseFieldCommand):
     def __init__(self, db_table, db_field):
         super(AppendFieldCommand, self).__init__(db_table, db_field)
         
+    def execute(self, db_name=''):
+        self._db(db_name).add_column(self.db_table.name, self.db_field.name, self.db_field.django_field())
+        
         
 class RemoveFieldCommand(BaseFieldCommand):
     '''
@@ -222,6 +337,21 @@ class RemoveFieldCommand(BaseFieldCommand):
     '''
     def __init__(self, db_table, db_field):
         super(RemoveFieldCommand, self).__init__(db_table, db_field)
+        
+    def execute(self, db_name=''):
+       
+        self._db(db_name).delete_column(self.db_table.name, self.db_field.name)
+
+class AlterFieldCommand(BaseFieldCommand):
+    '''
+    Команда на изменение параметров поля
+    '''
+    
+    def __init__(self, db_table, db_field):
+        super(AlterFieldCommand, self).__init__(db_table=db_table, db_field=db_field)
+        
+    def execute(self, db_name=''):
+        self._db(db_name).alter_column(self.db_table.name, self.db_field.name, self.db_field.django_field())
         
 class AppendFieldIndexCommand(BaseFieldCommand):
     '''
