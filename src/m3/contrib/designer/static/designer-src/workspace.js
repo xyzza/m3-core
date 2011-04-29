@@ -101,7 +101,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             }
         });
         this.addButton({
-           text:'Предварительный просмотр кода',
+           text:'Просмотр кода',
             iconCls:'icon-page-white-put',
             handler: function() {
                 storage.previewCode(application.getTransferObject());
@@ -131,6 +131,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
         storage.on('preview', function(jsonObj) {
         	if (jsonObj.success) {
            		var previewWindow = new M3Designer.code.PyCodeWindow();
+           		previewWindow.on('loadcode', this.uploadCode.createDelegate(this));
             	previewWindow.show(jsonObj.json);
            	} else {
            		Ext.Msg.show({
@@ -140,7 +141,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
 				   ,icon: Ext.MessageBox.WARNING
 				});
            	}
-        });
+        }, this);
 
         function onTreeNodeDeleteClick(item) {
             application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
@@ -165,5 +166,11 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
 			   ,icon: Ext.MessageBox.WARNING
 			});
         }                   	
+    },
+    /*
+     * Генерирует запрос на сервер, который впоследствии вставляется в model
+     */
+    uploadCode: function(sourceCode){
+    	console.log(sourceCode);	
     }
 });
