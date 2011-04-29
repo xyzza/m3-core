@@ -296,7 +296,11 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 },
                 fileUpload:{
                     defaultValue:false
-                }
+                },
+                urlShortName:{
+                    defaultValue:'',
+                    isQuickEditable:true
+                },
             },
             childTypesRestrictions:{
                 disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']

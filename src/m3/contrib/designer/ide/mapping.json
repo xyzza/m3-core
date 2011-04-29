@@ -155,6 +155,11 @@
 		,"labelAlign":"label_align"
 		,"fileUpload":"file_upload"
 		,"url":"url"
+		
+		,"urlShortName": {
+			"type":"shortname"
+			,"value":"url"
+		}
 	},
 	"parent": "panel"
 },

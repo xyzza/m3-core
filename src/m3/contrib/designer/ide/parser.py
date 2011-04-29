@@ -142,12 +142,10 @@ class Parser(object):
         return self._get_js()                                        
 
     def _get_js(self):
-        js_dict = {}        
-        #pprint.pprint(self.config_cmp) 
+        js_dict = {}                
         self._build_json(js_dict)        
         return js_dict
-        
-            
+                    
     def _build_json(self, js_dict, key='self'):
         
         item = self.extends_cmp.get(key)
@@ -238,9 +236,9 @@ class Parser(object):
         if not extjs_name:
             raise ParserError('Не определен класс маппинга "%s"' % py_name)
         
-        properties = dict(id= key) 
-        for k, v in conf.items():         
-            if isinstance(v, dict):
+        properties = dict(id=key) 
+        for k, v in conf.items():            
+            if isinstance(v, dict) and v.has_key('type'):                
                 # Обрабатываются комплексные компоненты
                 extjs_attr, value = self._get_json_complex_attr(k, v, extjs_name)
                 
