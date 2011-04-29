@@ -300,7 +300,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 urlShortName:{
                     defaultValue:'',
                     isQuickEditable:true
-                },
+                }
             },
             childTypesRestrictions:{
                 disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
