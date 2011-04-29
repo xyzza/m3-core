@@ -3,6 +3,7 @@
 import os
 import json
 import codecs
+import shutil
 
 from django.shortcuts import render_to_response
 
@@ -164,6 +165,19 @@ def designer_file_content_save(request):
 
     return JsonResponse({'success': success, 'error': error})
 
+def create_initialize(request):
+    '''
+    Генерирует функции для работы дизайнера
+    '''
+    class_name = request.POST.get('className')
+    path = request.POST.get('path')
+
+    try:
+        create_generation_func(path, class_name)
+    except ParserError, e:
+        return JsonResponse({'success': False, 'json': unicode(e)})
+
+
 def designer_structure_manipulation(request):
     '''
     Производит манипуляции над структурой проекта
@@ -173,25 +187,109 @@ def designer_structure_manipulation(request):
     success ( Результат )
     Действия производятся как над файлами так и над директориями.
     '''
+    #Типы
+    typeFile = 'file'
+    typeDir = 'dir'
+    #Действия
+    actionDelete = 'delete'
+    actionRename = 'rename'
+    actionNew = 'new'
+    #Виды ошибок
+    error_type_exist = 'exist'
+    error_type_internal = 'internal'
+    
     success = False
-    error =''
+    error = {}
+    data = {}
+
     path = request.GET.get('path')
     assert path, 'Path to source file is undefined'
+
     action = request.GET.get('action')
     assert action, 'Аction to target is undefined'
 
-    return JsonResponse({'success': success, 'error': error})
+    type = request.GET.get('type')
+    assert type, 'Type is undefined'
 
-def create_initialize(request):
-    '''
-    Генерирует функции для работы дизайнера
-    '''
-    class_name = request.POST.get('className')
-    path = request.POST.get('path')    
-    
-    try:
-        create_generation_func(path, class_name)
-    except ParserError, e:        
-        return JsonResponse({'success': False, 'json': unicode(e)})
-        
-    return JsonResponse({'success': True})
+    #Доступ на перезапись, удаление директорий с фалами или подпапками
+    access = request.GET.get('access', 0)
+    name = request.GET.get('name','')
+
+    dirpath = os.path.split(path)[0] # path head & tail
+    current_path = os.path.join(dirpath, name)
+
+    if os.path.exists(current_path) and not access:
+        error = {'msg':name+u' уже существует', 'type': error_type_exist}
+        return JsonResponse({'success': success, 'error': error})
+
+    # Создание новых файлов, директорий
+    if action == actionNew:
+        # Если файл создается в директории то проверяем именно в ней
+        if os.path.isdir(path) and type == typeFile:
+            current_path = os.path.join(path, name)
+
+        #Создаем новую директорию
+        # TODO Доделать
+        if os.path.isdir(path) and type == typeDir:
+            try:
+                os.mkdir(current_path)
+                success = True
+#                data = {'path':current_path}
+            except IOError as (errno, strerror):
+                error =  {'msg':u"OSError error({0}): {1}".format(
+                    errno, strerror.decode('cp1251')),
+                           'type':error_type_internal}
+
+        #Создаем новый файл
+        elif type == typeFile:
+            if os.path.isdir(path) and type == typeFile:
+                current_path = os.path.join(path, name)
+            try:
+                with codecs.open( current_path, "w", "utf-8" ) as f:
+                    f.write("#coding: utf-8")
+                success = True
+                data = {'path':current_path}
+            except IOError as (errno, strerror):
+                error =  {'msg':u"OSError error({0}): {1}".format(
+                    errno, strerror.decode('cp1251')),
+                           'type':error_type_internal}
+
+    # Удаление файлов, директорий
+    elif action == actionDelete:
+        if os.path.isdir(path):
+            try:
+                shutil.rmtree(path)
+                success = True
+            except OSError as (errno, strerror):
+                error =  {'msg':u"OSError error({0}): {1}".format(
+                    errno, strerror.decode('cp1251')),
+                            'type':error_type_internal}
+        else:
+            try:
+                os.remove(path)
+                success = True
+            except OSError as (errno, strerror):
+                error =  {'msg':u"OSError error({0}): {1}".format(
+                    errno, strerror.decode('cp1251')),
+                        'type':error_type_internal}
+
+    # Переименование файлов, директорий
+    elif action == actionRename:
+        #Файлы
+        if type == typeFile:
+            try:
+                #Хак т.к в виндах падает ошибка при попытке переименовать в сущ. файл
+                if access and os.sys.platform =='win32':
+                    os.remove(current_path)
+                os.rename(path, current_path)
+                success = True
+            except OSError as (errno, strerror):
+                error =  {'msg':u"OSError error({0}): {1}".format(
+                    errno, strerror.decode('cp1251')),
+                        'type':error_type_internal}
+        #Директории
+        else:
+            pass
+
+
+    return JsonResponse({'success': success, 'data': data, 'error': error})

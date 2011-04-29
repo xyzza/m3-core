@@ -1,4 +1,23 @@
 /**
+ * Адаптер
+ * @param fn - Функция
+ */
+function toolBarFuncWraper(fn){
+    var cmp = Ext.getCmp('project-view');
+    var selectedNode = cmp.getSelectionModel().getSelectedNode();
+    if (selectedNode){
+        fn(selectedNode);
+    }
+    else{
+        Ext.Msg.show({
+        title: 'Информация',
+        msg: 'Для выполнения действия необходимо выделить узел дерева',
+        buttons: Ext.Msg.OK,
+        icon: Ext.Msg.INFO
+    });
+    };
+};
+/**
  * 
  */
 function createTreeView(rootNodeName){
@@ -15,14 +34,21 @@ function createTreeView(rootNodeName){
 		})
 		,tbar: new Ext.Toolbar({			
             items: [{
-            	iconCls: 'icon-script-add'
-            	,tooltip:'Создать файл'
+            	iconCls: 'icon-script-add',
+            	tooltip:'Создать файл',
+                handler: function(item, e){toolBarFuncWraper(newFile)}
             },{
-            	iconCls: 'icon-script-edit'
-            	,tooltip:'Переименовать файл'
+            	iconCls: 'icon-script-edit',
+            	tooltip:'Переименовать файл',
+                handler: function(item, e){toolBarFuncWraper(renameFile)}
             },{
-            	iconCls: 'icon-script-delete'
-            	,tooltip:'Удалить файл'
+            	iconCls: 'icon-script-delete',
+            	tooltip:'Удалить файл',
+                handler: function(item, e){toolBarFuncWraper(deleteFile)}
+            },{
+                tooltip: 'Редактировать файл',
+		        iconCls: 'icon-script-lightning',
+                handler: function(item, e){toolBarFuncWraper(editFile)}
             },{
             	xtype: 'tbseparator'
             },{
@@ -46,25 +72,25 @@ function createTreeView(rootNodeName){
 	    }
 		,contextMenu: new Ext.menu.Menu({
                 items: [{
-		            id: 'edit-file'
-		            ,text: 'Редактировать файл'
-		            ,iconCls: 'icon-script-lightning'
-                    ,handler: function(item, e){}
-		        },{
 		            id: 'create-file'
 		            ,text: 'Создать файл'
 		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){newFile(item.parentMenu.contextNode, e)}
 		        },{
 		            id: 'rename-file'
 		            ,text: 'Переименовать файл'
 		            ,iconCls: 'icon-script-edit'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){renameFile(item.parentMenu.contextNode, e)}
 		        },{
 		            id: 'delete-file'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode,e)}
+		        },{
+		            id: 'edit-file'
+		            ,text: 'Редактировать файл'
+		            ,iconCls: 'icon-script-lightning'
+                    ,handler: function(item, e){editFile(item.parentMenu.contextNode,e)}
 		        },'-',{
 		        	id: 'create-class'
 		            ,text: 'Добавить класс'
@@ -84,31 +110,31 @@ function createTreeView(rootNodeName){
 					            			,className: text
 					            		}
 					            		,success: function(response, opts){
-					            			var obj = Ext.util.JSON.decode(response.responseText);             
-					            			if (obj.success) {                
+					            			var obj = Ext.util.JSON.decode(response.responseText);
+					            			if (obj.success) {
 						            			var new_node = new Ext.tree.TreeNode({
 						            				text: text
 						            				,path: attr['path']
 						            				,class_name: text
-						            				,iconCls: 'icon-class'	
-						            				,leaf: true			            				
+						            				,iconCls: 'icon-class'
+						            				,leaf: true
 						            			});
-		
+
 						            			node.appendChild(new_node);
 								           	} else {
 								           		Ext.Msg.show({
 												   title:'Ошибка'
 												   ,msg: obj.json
-												   ,buttons: Ext.Msg.OK						   						   
+												   ,buttons: Ext.Msg.OK
 												   ,icon: Ext.MessageBox.WARNING
 												});
-								           	}    
+								           	}
 
 					            		},
 					            		failure: uiAjaxFailMessage
 					            	});
 					            }
-							}						
+							}
 						);
 		            }
 		        }
@@ -116,34 +142,29 @@ function createTreeView(rootNodeName){
 		    }),
             contextFileMenu: new Ext.menu.Menu({
                 items: [{
-		            id: 'edit-file1'
-		            ,text: 'Редактировать файл'
-		            ,iconCls: 'icon-script-lightning'
-                    ,handler: function(item, e){}
-		        },{
 		            id: 'create-file2'
 		            ,text: 'Создать файл'
 		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){newFile(item.parentMenu.contextNode, e)}
 		        },{
 		            id: 'rename-file2'
 		            ,text: 'Переименовать файл'
 		            ,iconCls: 'icon-script-edit'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){renameFile(item.parentMenu.contextNode, e)}
 		        },{
 		            id: 'delete-file2'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){}
+                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode,e)}
+		        },{
+		            id: 'edit-file1'
+		            ,text: 'Редактировать файл'
+		            ,iconCls: 'icon-script-lightning'
+                    ,handler: function(item, e){editFile(item.parentMenu.contextNode,e)}
 		        }]
             }),
             contextDirMenu: new Ext.menu.Menu({
                 items: [{
-		            id: 'create-file3'
-		            ,text: 'Создать файл'
-		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){}
-                },'-',{
 		            id: 'create-dir'
 		            ,text: 'Создать директорию'
 		            ,iconCls: 'icon-folder-add'
@@ -158,11 +179,17 @@ function createTreeView(rootNodeName){
 		            ,text: 'Удалить директорию'
 		            ,iconCls: 'icon-folder-delete'
                     ,handler: function(item, e){}
-		        }]
+		        },'-',{
+		            id: 'create-file3'
+		            ,text: 'Создать файл'
+		            ,iconCls: 'icon-script-add'
+                    ,handler: function(item, e){newFile(item.parentMenu.contextNode, e)}
+                }]
             }),
 		    listeners: {
 		        contextmenu: function(node, e) {
 		            node.select();
+                    var parentNodeText = node.parentNode.text;
                     /* Файл дизайна форм */
 		            if (node.text === 'ui.py' || node.text === 'forms.py' ) {
 			            var c = node.getOwnerTree().contextMenu;
@@ -170,29 +197,32 @@ function createTreeView(rootNodeName){
 			            c.showAt(e.getXY());						            	
 		            }
                     /* Файл */
-                    else if(node.leaf && (node.parentNode.text !== 'ui.py' && node.parentNode.text !== 'forms.py')) {
+                    else if(node.leaf && (parentNodeText !== 'ui.py' && parentNodeText !== 'forms.py')) {
                         var c = node.getOwnerTree().contextFileMenu;
 			            c.contextNode = node;
 			            c.showAt(e.getXY());
                     }
                     /* Директория */
-                    else if(!node.leaf && (node.parentNode.text !== 'ui.py' && node.parentNode.text !== 'forms.py')) {
+                    else if(!node.leaf && (parentNodeText !== 'ui.py' && parentNodeText !== 'forms.py')) {
                         var c = node.getOwnerTree().contextDirMenu;
 			            c.contextNode = node;
 			            c.showAt(e.getXY());
                     };
 		        },
 		        dblclick: function(node, e){
-		        	if (node.parentNode && (node.parentNode.text === 'ui.py' || node.parentNode.text === 'forms.py' ) ){
+                    var parentNodeText = node.parentNode.text;
+                    var fileType = node.text.split('.').slice(-1);
+		        	if (node.parentNode && (parentNodeText === 'ui.py' || parentNodeText === 'forms.py' ) ){
 			        	onClickNode(node);
 		        	}
                     /*Все файлы не являющиеся *.py и conf */
-                    else if(node.text.split('.').slice(-1) == 'py' || node.text.split('.').slice(-1) == 'conf'){
+                    else if(fileType == 'py' || fileType == 'conf'){
                         var fileAttr = {};
                         fileAttr['path'] = node.attributes.path;
                         fileAttr['fileName'] = node.attributes.text;
                         onClickNodePyFiles(node, fileAttr);
-                    };
+                    }
+                    else if(node.leaf) wrongFileTypeMessage(fileType);
 		        }
 		    }
 	});
@@ -218,10 +248,168 @@ function createTreeView(rootNodeName){
 	        layout: 'fit'
 	    }]
 	});
-	
-	
 	return accordion;
-}
+};
+
+/* Переменные манипуляций с Файловой Сиситемы */
+/* Можно сделать в виде объекта */
+var typeFile = 'file';
+var typeDir = 'dir';
+var actionDelete = 'delete';
+var actionRename = 'rename';
+var actionNew = 'new';
+
+/* Редактировать файл */
+function editFile(node, e){
+    var fileType = node.text.split('.').slice(-1);
+    if(fileType == 'py' || fileType == 'conf'){
+        var fileAttr = {};
+        fileAttr['path'] = node.attributes.path;
+        fileAttr['fileName'] = node.attributes.text;
+        onClickNodePyFiles(node, fileAttr);
+    }
+    else wrongFileTypeMessage(fileType);
+};
+
+/* Новый файл */
+function newFile(node, e){
+    Ext.MessageBox.prompt('Ноый файл','Введите имя файла',
+    function(btn, name){
+        if (btn == 'ok' && name){
+            var path = node.attributes['path'];
+            var params = {
+                path : path,
+                type: typeFile,
+                name : name,
+                action : actionNew
+            };
+            manipulationRequest(params, function(obj){
+                var new_node = new Ext.tree.TreeNode({
+                    text: name
+                    ,path: obj.data['path']
+                    ,iconCls: 'icon-page-white-py'
+                    ,leaf: true
+                });
+                node.appendChild(new_node);
+                node.parentNode.reload();
+            });
+        };
+    }
+);
+};
+/* Удалить файл */
+function deleteFile(node, e){
+    var path = node.attributes['path'];
+    var params = {
+        path : path,
+        type: typeFile,
+        action : actionDelete
+    };
+    Ext.Msg.show({
+        title:'Удалить файл',
+        msg: 'Вы действительно хотите удалить файл?',
+        buttons: Ext.Msg.YESNOCANCEL,
+        icon: Ext.MessageBox.QUESTION,
+        fn: function(btn, text){
+            if (btn == 'yes'){
+                params.access = 1;
+                manipulationRequest(params, function(){
+                    node.remove();
+                });
+            };
+        }
+    });
+};
+
+/* Преименовать файл */
+function renameFile(node, e){
+    Ext.MessageBox.prompt('Переименование файла','Введите имя файла',
+    function(btn, name){
+        if (btn == 'ok' && name){
+        var path = node.attributes['path'];
+        var params = {
+            path : path,
+            type: typeFile,
+            action : actionRename,
+            name : name
+        };
+        manipulationRequest(params, function(){
+            node.setText(name);
+            node.parentNode.reload();
+        });
+        };
+    });
+};
+
+/* Новая директория */
+/* Удалить директорию */
+/* Преименовать директорию */
+
+/**
+ * DRY
+ * @param params - Параметры запроса
+ * @param fn - Функция которая будет выполнена при success
+ */
+function manipulationRequest(params, fn){
+    var errorTypeExist = 'exist';
+    Ext.Ajax.request({
+        url:'/designer/project-manipulation',
+        method: 'GET',
+        params: params,
+        success: function(response, opts){
+            var obj = Ext.util.JSON.decode(response.responseText);
+            if (obj.success && fn instanceof Function) fn(obj);
+            else if (obj.error.msg && obj.error.type == errorTypeExist){
+                var additionalMessage = '. Зменить?';
+                customMessage(obj, params, fn,additionalMessage)
+            }
+            else if (obj.error.msg){
+                Ext.Msg.show({
+                   title:'Ошибка',
+                   msg: obj.error.msg,
+                   buttons: Ext.Msg.OK,
+                   icon: Ext.MessageBox.WARNING
+                   });
+            };
+        },
+        failure: uiAjaxFailMessage
+    });
+};
+
+/**
+ *
+ * @param obj - Объект ответа сервера
+ * @param params - Параметры запроса к серверу, для послед. запроса
+ * @param fn - Функция которая передается в рекурсивно вызывающийся запрос
+ * @param additionalMessage - добавочное сообщение
+ */
+function customMessage(obj, params, fn, additionalMessage){
+    Ext.Msg.show({
+        title:'Уведомление',
+        msg: obj.error.msg + additionalMessage,
+        buttons: Ext.Msg.YESNOCANCEL,
+        icon: Ext.MessageBox.QUESTION,
+        fn: function(btn, text){
+            if (btn == 'yes'){
+                params.access = 1;
+                manipulationRequest(params, fn);
+            }
+        }
+    });
+};
+
+/**
+ * Сообщение о неверности формата
+ * @param fileType - Тип файла (*.html, *.css, ...)
+ */
+function wrongFileTypeMessage(fileType){
+    Ext.Msg.show({
+            title: 'Открытие файла',
+            msg: 'Данный формат '+fileType+' не поддерживается',
+            buttons: Ext.Msg.OK,
+            icon: Ext.Msg.INFO
+    });
+};
 
 //Инициируем перехват нажатия ctrl+s для автоматического сохранения на сервер
 Ext.fly(document).on('keydown',function(e,t,o){

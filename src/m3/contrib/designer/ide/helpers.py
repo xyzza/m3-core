@@ -42,10 +42,12 @@ def get_files(path):
                 
         # Никаких крокозябр - unicode(..)
         path_file = unicode( os.path.join(path, ffile) )
-        
+
         propertys_dict = dict(text=ffile)
-        
-        if os.path.isdir(path_file):                                    
+
+        propertys_dict['path'] = path_file
+
+        if os.path.isdir(path_file):
             propertys_dict['children'] = get_files(path_file)
             propertys_dict['leaf'] = False
 
@@ -53,8 +55,7 @@ def get_files(path):
                 ''' Признак что папка является packag'ом, изменяет иконку'''
                 propertys_dict['iconCls'] = Icons.PACKAGE_PY
 
-        else:            
-            propertys_dict['path'] = path_file
+        else:
             # Расширение файла (*.py, *.css, ...)
             file_type = ffile.split('.')[-1]
 
