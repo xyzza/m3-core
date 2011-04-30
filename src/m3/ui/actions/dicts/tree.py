@@ -49,7 +49,7 @@ class TreeGetNodesLikeRows(Action):
                 ActionContextDeclaration(name='branch_id', default=0, type=int, required=True)]
     
     def run(self, request, context):
-        result = self.parent.get_nodes_like_rows(context.filter, context.branch_id)
+        result = self.parent.get_nodes_like_rows(request, context, context.filter, context.branch_id)
         return PreJsonResult(result)
     
 
@@ -696,7 +696,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
 
         return self.filter_fields
     
-    def get_nodes_like_rows(self, filter, branch_id = None):
+    def get_nodes_like_rows(self, request, context, filter, branch_id = None):
         '''
         Возвращаются узлы дерева, предствленные в виде общего списка
         '''
@@ -713,7 +713,11 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
                 branch_node = self.tree_model.objects.get(id = branch_id)
                 nodes = branch_node.get_descendants()
             else:
-                nodes = self.tree_model.objects.all()            
+                nodes = self.tree_model.objects
+        # кастомная функция модификации запроса
+        # при реализации контестных справочников в большинстве случаев
+        # достаточно будет просто переопределить данную функцию  
+        nodes = self.modify_get_nodes(nodes, request, context)            
         # Для работы пейджинга нужно передавать общее количество записей
         total = len(nodes)  
         result = {'rows': list(nodes), 'total': total}
