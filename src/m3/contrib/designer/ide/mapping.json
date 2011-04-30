@@ -599,7 +599,8 @@
 	},
 	"config": {
 		"text":"text"
-		,"handler":"handler"		
+		,"handler":"handler"
+        ,"iconCls":"icon_cls"
 	}
 	,"parent":"component"
 },
