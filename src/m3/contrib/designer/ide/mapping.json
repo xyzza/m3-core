@@ -273,6 +273,7 @@
 		,"tooltip":"tooltip"
 		,"filter":"filter"
 		,"menuDisabled":"menu_disabled"
+		,"width": "width"
 	}	
 },
 
@@ -287,7 +288,8 @@
 		,"layout": "layout"	
 		,"width": "width"
 		,"height": "height"
-		,"items": "items"		
+		,"items": "items"
+        ,"bodyStyle": "body_style"		
 	},
 	"parent": "panel"
 },

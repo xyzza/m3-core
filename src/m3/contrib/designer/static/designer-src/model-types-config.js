@@ -189,6 +189,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                 bodyBorder : {
                     defaultValue: true
                 },
+				bodyStyle: {
+					defaultValue: ''
+				},
                 baseCls :{
                     defaultValue: 'x-panel'
                 },
@@ -879,6 +882,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     isInitProperty:true,
                     isQuickEditable: true
                 },
+				width: {
+					defaultValue: 0
+				},
                 menuDisabled: {
                     defaultValue:true,
                     isInitProperty:true
@@ -904,6 +910,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary,{
                     propertyType:'enum',
                     isQuickEditable: true
                 },
+				bodyStyle: {
+					defaultValue: 'padding:5px',
+					isInitProperty: true
+				},
                 title: {
                     defaultValue:'New window',
                     isInitProperty:true,
