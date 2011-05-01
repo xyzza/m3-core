@@ -137,6 +137,8 @@ class ListEditRowWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+        win.orig_request = request
+        win.orig_context = context
         if not win.title:
             win.title = base.title
         win.form.url = base.save_row_action.get_absolute_url()
@@ -162,6 +164,8 @@ class ListNewRowWindowAction(Action):
         obj = base.get_row()
         setattr(obj, base.list_parent_field + '_id', getattr(context,base.contextTreeIdName))
         win = base.edit_window(create_new = True)
+        win.orig_request = request
+        win.orig_context = context
         win.form.from_object(obj)
         # Донастраиваем форму
         if not win.title:
@@ -179,6 +183,8 @@ class TreeEditNodeWindowAction(Action):
     def run(self, request, context):
         base = self.parent
         win = utils.bind_object_from_request_to_form(request, base.get_node, base.edit_node_window, base.contextTreeIdName)
+        win.orig_request = request
+        win.orig_context = context
         if not win.title:
             win.title = base.title
         win.form.url = base.save_node_action.get_absolute_url()
@@ -204,6 +210,8 @@ class TreeNewNodeWindowAction(Action):
         obj = base.get_node()
         obj.parent_id = parent_id
         win = base.edit_node_window(create_new = True)
+        win.orig_request = request
+        win.orig_context = context
         win.form.from_object(obj)
         # Донастраиваем форму
         if not win.title:
@@ -325,6 +333,8 @@ class ListWindowAction(Action):
     
     def run(self, request, context):
         win = self.create_window(request, context, 0)
+        win.orig_request = request
+        win.orig_context = context
         self.configure_tree(win, request, context)
         self.configure_list(win, request, context)
         self.configure_other(win, request, context)        
@@ -344,6 +354,8 @@ class SelectWindowAction(ListWindowAction):
     def run(self, request, context):
         # Создаем окно выбора
         win = self.create_window(request, context, 1)
+        win.orig_request = request
+        win.orig_context = context
         win.modal = True
         # Добавляем отображаемые колонки
         base = self.parent
