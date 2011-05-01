@@ -180,13 +180,17 @@ class ActionContext(object):
         '''
         Рендеринг контекста в виде javascript объекта
         '''
-
         def encoder_extender(obj):
             if isinstance(obj, datetime.datetime):
+                result = obj.strftime('%d.%m.%Y')
+            # WTF? А где время в верхней строке?
+            if isinstance(obj, datetime.date):
                 result = obj.strftime('%d.%m.%Y')
             elif isinstance(obj, datetime.time):
                 result = obj.strftime('%H:%M')
             else:
                 result = unicode(repr(obj))
-
+                
+            return result
+        
         return json.dumps(self.__dict__, default=encoder_extender)
