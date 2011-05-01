@@ -3,7 +3,21 @@ var ajax = Ext.Ajax;
 
 {% if component.grid %}
 	/*========================================= Работает с гридом ============================================*/
-
+    win.addEvents(
+       /**
+        * Событие до создания новой строки в гриде
+        * @param grid - дерево Ext.grid.GridPanel
+        * @param params - словарь параметров, передаваемых Ajax запросу
+        */
+       'beforenewrow',
+	   /**
+        * Событие до редактирования строки в гриде
+        * @param grid - дерево Ext.grid.GridPanel
+        * @param params - словарь параметров, передаваемых Ajax запросу
+        */
+	   'beforeeditrow'
+    );
+	
 	/**
 	 * Стандартный рендеринг окна c добавлением обработчика. 
 	 */
@@ -24,6 +38,7 @@ var ajax = Ext.Ajax;
 	 *  Создание нового значения в справочнике по форме ExtDictionary
 	 */
 	function newValueGrid() {
+        var grid = Ext.getCmp('{{ component.grid.client_id}}');
 		var params = Ext.applyIf({'id': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		{% if component.tree %}
 			var tree = Ext.getCmp('{{ component.tree.client_id}}');
@@ -35,7 +50,10 @@ var ajax = Ext.Ajax;
 
 		// добавим глобальный контекст окна
 		params = Ext.applyIf(params, win.actionContextJson || {});
-                
+		
+		if (!win.fireEvent('beforenewrow', grid, params))
+		  return;
+        
         var mask = new Ext.LoadMask(win.body);			
         mask.show();
 		ajax.request({
@@ -64,7 +82,10 @@ var ajax = Ext.Ajax;
 		var params = Ext.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		// добавим глобальный контекст окна
 		params = Ext.applyIf(params, win.actionContextJson || {});
-
+        
+        if (!win.fireEvent('beforeeditrow', grid, params))
+		  return;
+		
 		var mask = new Ext.LoadMask(win.body);   
 		mask.show();
 		ajax.request({
@@ -178,6 +199,22 @@ var ajax = Ext.Ajax;
 	
 {% if component.tree %}
 	/*========================================== Работаем с деревом ===========================================*/
+	win.addEvents(
+	   /**
+	    * Событие до создания нового элемента дерева
+	    * @param tree - дерево Ext.tree.TreePanel
+	    * @param params - словарь параметров, передаваемых Ajax запросу
+	    */
+	   'beforenewnode',
+	   /**
+        * Событие до редактирования элемента дерева
+        * @param tree - дерево Ext.tree.TreePanel
+        * @param node - узел Ext.data.Node
+        * @param params - словарь параметров, передаваемых Ajax запросу
+        */
+	   'beforeeditnode'
+	);
+	
 	/**
 	 * Рендерит дочерние окна и навешивает обработчики
 	 * @param {String} response
@@ -194,7 +231,7 @@ var ajax = Ext.Ajax;
 					// добавим глобальный контекст окна
 					params = Ext.applyIf(params, win.actionContextJson || {});
 
-					var tree = Ext.getCmp('{{ component.tree.client_id }}');
+					var tree = Ext.getCmp('{{ component.tree.client_id }}');			
 					ajax.request({
 						url: tree.getLoader().dataUrl,
 						success: function (response, opts) {
@@ -250,6 +287,10 @@ var ajax = Ext.Ajax;
 	    var params = Ext.applyIf({'{{ component.contextTreeIdName }}': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 		// добавим глобальный контекст окна
 		params = Ext.applyIf(params, win.actionContextJson || {});
+		
+		if (!win.fireEvent('beforenewnode', tree, params))
+            return;
+		
 	    var mask = new Ext.LoadMask(win.body);
 	    mask.show();
 		ajax.request({
@@ -278,6 +319,10 @@ var ajax = Ext.Ajax;
 		var params = Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 		// добавим глобальный контекст окна
 		params = Ext.applyIf(params, win.actionContextJson || {});
+		
+		if (!win.fireEvent('beforenewnode', tree, params))
+            return;
+		
 		var mask = new Ext.LoadMask(win.body);
 		mask.show();
 		ajax.request({
@@ -300,12 +345,16 @@ var ajax = Ext.Ajax;
 	function editValueTree(){
 		var tree = Ext.getCmp('{{ component.tree.client_id}}');
 		if (!isTreeSelected(tree, 'Редактирование', 'Элемент не выбран') ) {
-			return;
+        	return;
 		};
 		var node = tree.getSelectionModel().getSelectedNode();
 		var params = Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id}, {% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 		// добавим глобальный контекст окна
 		params = Ext.applyIf(params, win.actionContextJson || {});
+		
+        if (!win.fireEvent('beforeeditnode', tree, node, params))
+            return;
+		
 		ajax.request({
 			url: "{{ component.url_edit_tree }}"
 			,params: params 
