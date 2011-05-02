@@ -65,6 +65,15 @@ class DictListWindowAction(Action):
             win.url_new_grid    = base.edit_window_action.get_absolute_url()
             win.url_edit_grid   = base.edit_window_action.get_absolute_url()
             win.url_delete_grid = base.delete_action.get_absolute_url()
+            
+    def configure_window(self, win, request, context):
+        win.orig_request = request
+        win.orig_context = context
+        
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
+        if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
+            win.configure_for_dictpack(action=self, pack=self.parent,
+                                       request=request, context=context)
     
     def run(self, request, context):
         win = self.create_window(request, context, mode=0)
@@ -76,6 +85,8 @@ class DictListWindowAction(Action):
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             win.make_read_only()
+        
+        self.configure_window(win, request, context)
         
         return ExtUIScriptResult(self.parent.get_list_window(win))
     
@@ -106,6 +117,8 @@ class DictSelectWindowAction(DictListWindowAction):
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             win.make_read_only()
+        
+        self.configure_window(win, request, context)
         
         return ExtUIScriptResult(self.parent.get_select_window(win))
 
