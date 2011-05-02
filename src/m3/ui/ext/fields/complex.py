@@ -179,12 +179,16 @@ class ExtDictSelectField(BaseExtTriggerField):
     def set_value_from_model(self, obj):
         """
         Устанавливает значения value и default_text по экземпляру модели obj.
+        Причем они могут быть методами, например обернутыми json_encode. 
         Это позволяет избежать двойного присваивания в коде.
         """
         assert isinstance(obj, models.Model), '%s must be a Django model instance.' % obj
         
-        self.value = getattr(obj, self.value_field)
-        self.default_text = getattr(obj, self.display_field)
+        value = getattr(obj, self.value_field)
+        self.value = value() if callable(value) else value 
+        
+        value = getattr(obj, self.display_field)
+        self.default_text = value() if callable(value) else value
     
     @property
     def pack(self):
