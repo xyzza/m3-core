@@ -7,7 +7,7 @@ Created on 27.02.2010
 '''
 
 from django.conf import settings
-from datetime import datetime
+from datetime import datetime, date
 
 from base import BaseExtField, BaseExtTriggerField
 
@@ -95,7 +95,7 @@ class ExtDateField(BaseExtField):
         self.init_component(*args, **kwargs)
     
     def render_base_config(self):
-        if isinstance(self.value, datetime):
+        if isinstance(self.value, datetime) or isinstance(self.value, date):
             try:
                 value = self.value.strftime(settings.DATE_FORMAT)
             except:
