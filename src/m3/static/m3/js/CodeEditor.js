@@ -109,6 +109,15 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         this.codeMirrorEditor = new CodeMirror.fromTextArea( Ext.getDom(oCmp.id).id, editorConfig);
     },
 
+    getCode: function(){
+        if (typeof this.codeMirrorEditor != "undefined"){
+            return this.codeMirrorEditor.getCode();
+        }
+        else{
+            return '';
+        }
+    },
+
     setTitleClass: function(){
         this.contentChanged = arguments[0] !== true;
     }
