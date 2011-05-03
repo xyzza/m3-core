@@ -123,7 +123,7 @@ def get_methods(path, class_name):
                          'func_name':  item.name,
                          'class_name':  child_item.name,
                          'path': path}
-                res.append(d)
+                    res.append(d)
             break
     return res
 
