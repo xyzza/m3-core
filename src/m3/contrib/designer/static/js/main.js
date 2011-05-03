@@ -319,7 +319,7 @@ function editFile(node, e){
  * @param fileBool - boolean флаг файл иль нет
  */
 function newTarget(node, fileBool){
-    Ext.MessageBox.prompt('Ноый '+(fileBool? 'файл': 'директория'),'Введите имя'+ (fileBool? 'файла': 'директории'),
+    Ext.MessageBox.prompt('Новый '+(fileBool? 'файл': 'директория'),'Введите имя '+ (fileBool? 'файла': 'директории'),
     function(btn, name){
         if (btn == 'ok' && name){
             var path = node.attributes['path'];
@@ -336,10 +336,10 @@ function newTarget(node, fileBool){
                     ,iconCls: fileBool? caseOfIncons(name): 'icon-folder'
                     ,leaf: fileBool? true : false
                 });
-                node.parentNode.appendChild(new_node, function(){
-                    this.parentNode.reload();
+                var currentNode = node.leaf ? node.parentNode: node;
+                currentNode.appendChild(new_node, function(){
+                    currentNode.reload();
                 });
-
             });
         };
     });
@@ -359,7 +359,7 @@ function deleteTarget(node, fileBool){
     };
     Ext.Msg.show({
         title:'Удалить '+(fileBool? 'файл': 'директорию'),
-        msg: 'Вы действительно хотите удалить '+ (fileBool? 'файл': 'директорию')+'?',
+        msg: 'Вы действительно хотите удалить '+ (fileBool? 'файл': 'директорию')+ ' '+node.text+'?',
         buttons: Ext.Msg.YESNOCANCEL,
         icon: Ext.MessageBox.QUESTION,
         fn: function(btn, text){
@@ -461,7 +461,7 @@ function customMessage(obj, params, fn, additionalMessage){
 function wrongFileTypeMessage(fileType){
     Ext.Msg.show({
             title: 'Открытие файла',
-            msg: 'Данный формат '+fileType+' не поддерживается',
+            msg: 'Расширение '+fileType+' не поддерживается',
             buttons: Ext.Msg.OK,
             icon: Ext.Msg.INFO
     });
@@ -498,7 +498,8 @@ function onClickNode(node) {
         saveUrl:'/designer/save',
         path:attr['path'],
         className:attr['class_name'],
-        previewUrl:'/designer/preview'
+        previewUrl:'/designer/preview',
+        uploadCodeUrl: 'designer/upload-code'
     });
     
  	workspace.loadModel();    

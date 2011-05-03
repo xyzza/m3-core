@@ -20,7 +20,7 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
     constructor: function(cfg){
         Ext.apply(this, cfg);
         M3Designer.ServerStorage.superclass.constructor.call(this);
-        this.addEvents('load','save','preview');
+        this.addEvents('load','save','preview', 'loadcode');
     },
     loadModel:function(){
         this.mask = new Ext.LoadMask(this.maskEl, {
@@ -35,8 +35,8 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
                path: this.pathFile,
                className: this.className
             },
-            success:this._onLoadSuccess.createDelegate(this),
-            failure:this._onLoadFailure.createDelegate(this)
+            success:this._onSuccessDefault.createDelegate(this, ['load'], true),
+            failure:this._onFailureDefault.createDelegate(this)
         });
     },
     saveModel:function(dataObj){
@@ -52,8 +52,8 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
                 path: this.pathFile,
                 className: this.className
             },
-            success:this._onSaveSuccess.createDelegate(this),
-            failure:this._onSaveFailure.createDelegate(this)
+            success:this._onSuccessDefault.createDelegate(this, ['save'], true),
+            failure:this._onFailureDefault.createDelegate(this)
         });
     },
     previewCode:function(dataObj) {
@@ -66,37 +66,31 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
             params:{
                 data:Ext.util.JSON.encode( dataObj )
             },
-            success:this._onPreviewSuccess.createDelegate(this),
-            failure:this._onPreviewFailure.createDelegate(this)
+            success:this._onSuccessDefault.createDelegate(this, ['preview'], true),
+            failure:this._onFailureDefault.createDelegate(this)
         });
     },
-    _onLoadSuccess:function(response, opts) {    	
+    uploadCode: function(dataObj){
+    	this.mask = new Ext.LoadMask(this.maskEl, {
+            msg:'Получаем код...'
+        });
+        this.mask.show();
+    	Ext.Ajax.request({
+    	    url:this.uploadCodeUrl,
+            params:{
+                data: Ext.util.JSON.encode(dataObj) 
+            },
+            success:this._onSuccessDefault.createDelegate(this, ['loadcode'], true),
+            failure:this._onFailureDefault.createDelegate(this),            
+    	})
+    },    
+    _onSuccessDefault:function(response, opts, eventName) {    	
     	this.mask.hide();        
         var obj = Ext.util.JSON.decode(response.responseText);                
-        this.fireEvent('load', obj);        
+        this.fireEvent(eventName, obj);        
     },
-    _onLoadFailure:function(response, opts){
+    _onFailureDefault:function(response, opts){
         this.mask.hide();
-        uiAjaxFailMessage(response, opts);
-        //Ext.Msg.alert('Ошибка','Произошла ошибка при формировании данных документа');
-    },
-    _onSaveSuccess:function(response, opts) {
-        this.mask.hide();
-        var obj = Ext.util.JSON.decode(response.responseText);
-        this.fireEvent('save', obj);
-    },
-    _onSaveFailure:function(response, opts) {
-        this.mask.hide();
-        uiAjaxFailMessage(response,opts);
-    },
-    _onPreviewSuccess:function(response, opts) {
-        this.mask.hide();
-        var obj = Ext.util.JSON.decode(response.responseText);
-        this.fireEvent('preview', obj);
-    },
-    _onPreviewFailure:function(response, opts) {
-        this.mask.hide();
-        uiAjaxFailMessage(response,opts);
+        uiAjaxFailMessage(response, opts);        
     }
-
 });

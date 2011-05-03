@@ -216,7 +216,7 @@ def designer_structure_manipulation(request):
     name = request.POST.get('name','')
 
     dirpath = os.path.split(path)[0] # path head & tail
-    current_path = os.path.join(dirpath, name)
+    current_path = os.path.join(path if os.path.isdir(path) else dirpath, name)
 
     if os.path.exists(current_path) and not access:
         error = {'msg':name+u' уже существует', 'type': error_type_exist}
@@ -240,8 +240,6 @@ def designer_structure_manipulation(request):
 
             #Создаем новый файл
             elif type == type_file:
-                if os.path.isdir(path) and type == type_file:
-                    current_path = os.path.join(path, name)
                 with codecs.open( current_path, "w", "utf-8" ) as f:
                     f.write("#coding: utf-8")
                 success = True
@@ -276,3 +274,18 @@ def designer_structure_manipulation(request):
                 'type':error_type_internal}
 
     return JsonResponse({'success': success, 'data': data, 'error': error})
+
+
+def upload_code(request):
+    '''
+    Конвертация python кода в js представление
+    '''    
+    source = request.POST.get('data')
+    
+    # Пока непонятно каким образом приходит текст, приходится писать нечто ниже
+    try:
+        data = Parser('','').to_designer_preview(source.replace('\u000a','\n')[1:-1])
+    except ParserError, e:
+        return JsonResponse({'success': False, 'json': repr(e)})
+    else:        
+        return JsonResponse({'success': True, 'data': data})

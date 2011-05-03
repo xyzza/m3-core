@@ -75,7 +75,7 @@ class Parser(object):
         self.class_name = class_name
         
         # Базовый класс для окон (Если нет в маппинге)
-        self.base_class = 'BaseExtWindow'
+        self.base_class = 'ExtWindow'
         
     @staticmethod
     def get_source(path):
@@ -95,7 +95,7 @@ class Parser(object):
                                     
         return ''.join(lines)                
     
-    def to_designer(self):
+    def to_designer(self, source_code=''):
         '''
         Отвечает за преобразования py-кода в json, понятный m3-дизайнеру.
         Возвращает json объект в виде строки.
@@ -104,7 +104,11 @@ class Parser(object):
         # AST не дружит в конечными пробельными строками, поэтому убираем их и все пробельные строки за одно
         source_code = Parser.get_source(self.path)
 
-        node_module = ast.parse(source_code)
+        try:
+            node_module = ast.parse(source_code)
+        except SyntaxError:
+            raise ParserError('Некорректный синтаксис файла')
+        
         class_node, func_node = Parser.get_func(node_module, self.class_name)
         
         self.base_class = self._get_base_class(class_node)
@@ -112,34 +116,8 @@ class Parser(object):
         if not func_node:
             raise UndefinedGeneratedFunc('Функция автогенерации "%s" не определена в классе "%s"' % 
                                 (Parser.GENERATED_FUNC, self.class_name)    )
-                
-        self.config_cmp = {}
-        self.extends_cmp = {}        
-        for node in func_node.body:
-            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):                                
-                # Игнорирование значений, которые просто прописываются в объект
-                if 'self' == node.targets[0].value.id:
-                    continue
-                
-                # Составление структуры конфигов и типов компонентов
-                parent, parent_item, item = self._get_attr(node)
-                self.extends_cmp.setdefault(parent, {})[parent_item] =  item
-            elif isinstance(node, ast.Assign):
-                
-                parent, attr, value = self._get_config_component(node)
-                self.config_cmp.setdefault(parent, {})[attr] = value
-                
-            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and node.value.args:
-
-                parent, parent_item, items = self._get_extends(node.value)
-                self.extends_cmp.setdefault(parent, {})[parent_item] =  items
-            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
-                # док. строки 
-                pass
-            else:
-                raise ParserError("Синтаксис файла не поддерживается")
-
-        return self._get_js()                                        
+              
+        return self._parse_nodes(func_node.body)
 
     def _get_js(self):
         js_dict = {}                
@@ -370,7 +348,10 @@ class Parser(object):
         # AST не дружит в конечными пробельными строками, поэтому убираем их и все пробельные строки за одно
         old_source_code = Parser.get_source(self.path)
         
-        module_node = ast.parse(old_source_code)
+        try:
+            module_node = ast.parse(old_source_code)
+        except SyntaxError:
+            raise ParserError('Некорректный синтаксис файла')
         
         # Нахождение нужной функции GENERATED_FUNC
         class_node, func_node = Parser.get_func(module_node, self.class_name)
@@ -413,6 +394,51 @@ class Parser(object):
                     return begin_line, module_node.body[j+1].lineno
             else:
                 return begin_line, None
+        
+    def to_designer_preview(self, source_code):
+        '''
+        Возвращает по py-коду js-представление
+        '''
+        try:
+            nodes = ast.parse(source_code)
+        except SyntaxError:
+            raise ParserError('Некорректный синтаксис файла')
+                
+        return self._parse_nodes(nodes.body)
+
+
+    def _parse_nodes(self, nodes):
+        '''
+        Парсит файл
+        '''
+        
+        self.config_cmp = {}
+        self.extends_cmp = {}        
+        for node in nodes:
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):                                
+                # Игнорирование значений, которые просто прописываются в объект
+                if 'self' == node.targets[0].value.id:
+                    continue
+                
+                # Составление структуры конфигов и типов компонентов
+                parent, parent_item, item = self._get_attr(node)
+                self.extends_cmp.setdefault(parent, {})[parent_item] =  item
+            elif isinstance(node, ast.Assign):
+                
+                parent, attr, value = self._get_config_component(node)
+                self.config_cmp.setdefault(parent, {})[attr] = value
+                
+            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and node.value.args:
+
+                parent, parent_item, items = self._get_extends(node.value)
+                self.extends_cmp.setdefault(parent, {})[parent_item] =  items
+            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
+                # док. строки 
+                pass
+            else:
+                raise ParserError("Синтаксис файла не поддерживается")
+
+        return self._get_js()
     
     @staticmethod
     def from_designer_preview(json_dict):

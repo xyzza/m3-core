@@ -362,5 +362,11 @@ M3Designer.controller.AppController = Ext.extend(Object, {
    },
    onModelUpdate:function() {
        this.refreshView();
+   },
+   /*
+    * Динамическое обновление содержимого модели
+    */
+   reloadModel: function(obj){
+       console.log(obj);
    }
 });
