@@ -202,18 +202,18 @@ def designer_structure_manipulation(request):
     error = {}
     data = {}
 
-    path = request.GET.get('path')
+    path = request.POST.get('path')
     assert path, 'Path to source file is undefined'
 
-    action = request.GET.get('action')
+    action = request.POST.get('action')
     assert action, 'Аction to target is undefined'
 
-    type = request.GET.get('type')
+    type = request.POST.get('type')
     assert type, 'Type is undefined'
 
     #Доступ на перезапись, удаление директорий с фалами или подпапками
-    access = request.GET.get('access', 0)
-    name = request.GET.get('name','')
+    access = request.POST.get('access', 0)
+    name = request.POST.get('name','')
 
     dirpath = os.path.split(path)[0] # path head & tail
     current_path = os.path.join(dirpath, name)

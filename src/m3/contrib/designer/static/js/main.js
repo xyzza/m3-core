@@ -91,7 +91,7 @@ function createTreeView(rootNodeName){
             },{
             	iconCls: 'icon-script-delete',
             	tooltip:'Удалить файл',
-                handler: function(item, e){toolBarFuncWraper(deleteFile)}
+                handler: function(item, e){toolBarFuncWraper(deleteTarget)}
             },{
                 tooltip: 'Редактировать файл',
 		        iconCls: 'icon-script-lightning',
@@ -132,7 +132,7 @@ function createTreeView(rootNodeName){
 		            id: 'delete-file'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, true)}
+                    ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'edit-file'
 		            ,text: 'Редактировать файл'
@@ -166,7 +166,7 @@ function createTreeView(rootNodeName){
 		            id: 'delete-file2'
 		            ,text: 'Удалить файл'
 		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, true)}
+                    ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, true)}
 		        },{
 		            id: 'edit-file1'
 		            ,text: 'Редактировать файл'
@@ -194,7 +194,7 @@ function createTreeView(rootNodeName){
 		            id: 'delete-dir'
 		            ,text: 'Удалить директорию'
 		            ,iconCls: 'icon-folder-delete'
-                    ,handler: function(item, e){deleteFile(item.parentMenu.contextNode, false)}
+                    ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, false)}
 		        },'-',{
 		            id: 'create-file3'
 		            ,text: 'Создать файл'
@@ -274,6 +274,32 @@ var typeDir = 'dir';
 var actionDelete = 'delete';
 var actionRename = 'rename';
 var actionNew = 'new';
+/**
+ * Возвращает класс иконки по типо расширения файла
+ * @param fileName
+ */
+function caseOfIncons(fileName){
+    var splitedFileNmae = fileName.split('.');
+    var fileExpansion = splitedFileNmae[splitedFileNmae.length-1];
+    var icon = '';
+    switch (fileExpansion) {
+      case 'py':
+        icon = 'icon-page-white-py';
+        break
+      case 'js':
+        icon = 'icon-page-white-js';
+        break
+      case 'css':
+        icon = 'icon-css';
+        break
+      case 'html':
+        icon = 'icon-html';
+        break
+      default:
+        icon = 'icon-page-white-text';
+    };
+    return icon;
+};
 
 /* Редактировать файл */
 function editFile(node, e){
@@ -307,11 +333,13 @@ function newTarget(node, fileBool){
                 var new_node = new Ext.tree.TreeNode({
                     text: name
                     ,path: obj.data['path']
-                    ,iconCls: 'icon-page-white-py'
-                    ,leaf: true
+                    ,iconCls: fileBool? caseOfIncons(name): 'icon-folder'
+                    ,leaf: fileBool? true : false
                 });
-                node.appendChild(new_node);
-                node.parentNode.reload();
+                node.parentNode.appendChild(new_node, function(){
+                    this.parentNode.reload();
+                });
+
             });
         };
     });
@@ -322,7 +350,7 @@ function newTarget(node, fileBool){
  * @param node - узел
  * @param fileBool - boolean флаг файл иль нет
  */
-function deleteFile(node, fileBool){
+function deleteTarget(node, fileBool){
     var path = node.attributes['path'];
     var params = {
         path : path,
@@ -364,9 +392,9 @@ function renameTarget(node, fileBool){
         };
         manipulationRequest(params, function(){
             node.setText(name);
-            var parentNode = node.parentNode;
-            if (params.access) node.remove();
-            parentNode.reload();
+            if (params.access) node.remove(function(){
+                this.parentNode.reload();
+            });
         });
         };
     });
@@ -382,7 +410,7 @@ function manipulationRequest(params, fn){
     var errorTypeExist = 'exist';
     Ext.Ajax.request({
         url:'/designer/project-manipulation',
-        method: 'GET',
+        method: 'POST',
         params: params,
         success: function(response, opts){
             var obj = Ext.util.JSON.decode(response.responseText);
