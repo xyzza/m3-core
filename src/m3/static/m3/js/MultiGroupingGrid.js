@@ -217,7 +217,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
                  * иначе неправльно добавлялись кирилические столбцы
                  */
                 calculateEntryIndex: function(e) {
-                    return 2;
+                    return -1;
                 },
                 createItem: function(data) {
                     var column = this.getColumnFromDragDrop(data);
@@ -316,7 +316,8 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 
         if (this.tbar)
             Ext.each(this.tbar.findByType('button'), function(button) {
-                columns.push(button.groupingData.field);
+                if (button.groupingData)
+                    columns.push(button.groupingData.field);
             }, this);
         
         return columns;
@@ -360,6 +361,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
      */
     onRender: function(){
         this.grid.elements +=',tbar';
+        this.grid.tbar = this.tbar
         this.grid.add(this.tbar);
         this.grid.groupingToolBar = this.tbar;
     	this.grid.doLayout();
@@ -656,7 +658,10 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			funcRowContMenu = Ext.emptyFn;
 		}
 		
-		var plugins = params.plugins || [];
+		// плугин для группировки колонок
+		var plugins = [new Ext.ux.grid.MultiGrouping()];
+		
+		plugins = plugins.concat(params.plugins || []);
 		var bundedColumns = params.bundedColumns;
 		if (bundedColumns && bundedColumns instanceof Array &&
 			bundedColumns.length > 0) {
@@ -666,8 +671,6 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 				})
 			);
 		}
-		// плугин для группировки колонок
-		plugins.push(new Ext.ux.grid.MultiGrouping());
 		
 		// объединение обработчиков
 		baseConfig.listeners = Ext.applyIf({
