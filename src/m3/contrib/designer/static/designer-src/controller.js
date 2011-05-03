@@ -299,22 +299,26 @@ M3Designer.controller.AppController = Ext.extend(Object, {
     onDesignerPanelDomClick: function(event, target, obj) {
         var el = event.getTarget('.designComponent');
         if (el) {
-           //Выделяет элемент в дереве компонентов
-           var nodeId = M3Designer.Utils.parseDomIdToNodeId(el.id);
-           this.tree.getNodeById(nodeId).select();
+            //Выделяет элемент в дереве компонентов
+            var nodeId = M3Designer.Utils.parseDomIdToNodeId(el.id);
+            var treeNode = this.tree.getNodeById(nodeId);
+            if (!treeNode.isExpanded()) {
+               treeNode.ensureVisible();
+            }
+            treeNode.select();
 
-           //Подсвечивает элементы выделения
-           this.highlightElement(el.id);
+            //Подсвечивает элементы выделения
+            this.highlightElement(el.id);
 
-           // Определение QuickPropertyWindow
-           var modelId = M3Designer.Utils.parseModelId(el.id);
-           var model = this._model.findModelById(modelId);
+            // Определение QuickPropertyWindow
+            var modelId = M3Designer.Utils.parseModelId(el.id);
+            var model = this._model.findModelById(modelId);
 
-           //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
-           var win = Ext.getCmp(this._lastQuickPropertyId);
-           if (win) win.close();
+            //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
+            var win = Ext.getCmp(this._lastQuickPropertyId);
+            if (win) win.close();
 
-           this._lastQuickPropertyId = this._editorManager.quickEditModel(model);
+            this._lastQuickPropertyId = this._editorManager.quickEditModel(model);
         }
     },
     onComponentTreeNodeClick:function(node, e) {
