@@ -70,13 +70,13 @@ class BaseEnumerate(object):
     
     @classmethod
     def get_choices(cls):
-        ''' Используется для ограничения полей ORM. '''
+        """
+        Используется для ограничения полей ORM и в качестве источника данных
+        в ArrayStore и DataStore ExtJS
+        """
         return cls.values.items()
     
-    @classmethod
-    def get_items(cls):
-        ''' Используется как источник данных в ArrayStore и DataStore ExtJS '''
-        return cls.values.items()
+    get_items = get_choices
 
     @classmethod
     def get_constant_value_by_name(cls, name):
