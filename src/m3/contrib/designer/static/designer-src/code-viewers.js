@@ -27,7 +27,7 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
         
         this.codeEditor = codeEditor;
         
-        this.add(this.codeEditor);        
+        this.add(this.codeEditor);
         this.addButton({
             text:'Загрузить код в форму',
             iconCls:'icon-page-white-get',

@@ -255,7 +255,8 @@ function createTreeView(rootNodeName){
 	});
 	
 	tree.getLoader().on("beforeload", function(treeLoader, node) {	
-    	treeLoader.baseParams['path'] = node.attributes.path;
+    	treeLoader.baseParams['path'] = node.attributes['path'];
+    	treeLoader.baseParams['class_name'] = node.attributes['class_name'];
 	}, this);
 	
 	var accordion = new Ext.Panel({

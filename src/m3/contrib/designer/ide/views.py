@@ -8,7 +8,7 @@ import shutil
 from django.shortcuts import render_to_response
 
 from helpers import JsonResponse, get_files, get_classess, restores, create_py_class, \
-    create_generation_func
+    create_generation_func, get_methods
 from parser import Parser, ParserError, UndefinedGeneratedFunc
 
 def workspace(request):
@@ -28,7 +28,11 @@ def get_project_files(request):
     '''
     Отдает файлы рабочего проекта как узлы дерева
     '''
-    if request.POST.get('path'):
+    
+    if request.POST.get('class_name') and request.POST.get('path'):
+        ui_methods = get_methods(request.POST.get('path'), request.POST.get('class_name')) 
+        return JsonResponse(ui_methods)
+    elif request.POST.get('path'):
         ui_classess = get_classess(request.POST.get('path')) 
         return JsonResponse(ui_classess)
     

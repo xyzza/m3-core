@@ -99,7 +99,7 @@ def get_classess(path):
     for item in ast_module.body:
         if isinstance(item, ast.ClassDef):
             d = {'text': item.name,
-                 'leaf': True,
+                 #'leaf': True,
                  'iconCls':  'icon-class',
                  'class_name':  item.name,
                  'path': path}
@@ -107,6 +107,25 @@ def get_classess(path):
         
     return res
 
+def get_methods(path, class_name):
+    '''
+    Возвращает набор методов в классе
+    '''
+    ast_module = ast.parse( Parser.get_source(path) )    
+    res = []
+    for item in ast_module.body:
+        if isinstance(item, ast.ClassDef) and item.name == class_name:
+            for child_item in item.body:
+                if isinstance(child_item, ast.FunctionDef):
+                    d = {'text': child_item.name,
+                         'leaf': True,
+                         'iconCls':  'icon-function',
+                         'func_name':  item.name,
+                         'class_name':  child_item.name,
+                         'path': path}
+                res.append(d)
+            break
+    return res
 
 def restores(data):
     '''

@@ -1,4 +1,7 @@
-﻿.icon-class {
+﻿.icon-function{
+    background-image:url(../images/icon-function.png) !important;
+}
+.icon-class {
     background-image:url(../images/icon_c.gif) !important;
 }
 
