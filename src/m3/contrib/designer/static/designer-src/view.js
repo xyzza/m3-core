@@ -75,7 +75,6 @@ M3Designer.view.DesignView = Ext.extend(M3Designer.view.BaseView, {
                     }
                 }
             }
-
             return newComponentCfg;
         };
 
@@ -97,6 +96,10 @@ M3Designer.view.ComponentTree = Ext.extend(M3Designer.view.BaseView, {
     constructor: function(tree, model) {
         this._tree = tree;
         M3Designer.view.ComponentTree.superclass.constructor.call(this, model);
+        //в переменной attributes.expanded сохраняется какие ноды в дереве раскрывал пользователь
+        //это учитывается при перерисовке чтобы дерево лишнего не расхлопывало
+        tree.on('expandnode', this.onNodeExpand.createDelegate(this));
+        tree.on('collapsenode',this.onNodeCollapse.createDelegate(this));
     },
     refresh:function() {
         var root = this._tree.root;
@@ -124,14 +127,28 @@ M3Designer.view.ComponentTree = Ext.extend(M3Designer.view.BaseView, {
         if (model.attributes.properties.fieldLabel) {
             nodeText += ' (' + model.attributes.properties.fieldLabel + ')'
         }
+
+        var expanded = model.attributes.expanded || false;
+        if (model.isRoot) {
+            expanded = true;
+        }
+
         return new Ext.tree.TreeNode({
                 text:nodeText,
                 id:model.id,
-                expanded:true,
+                expanded: expanded,
                 allowDrop:model.isContainer(),
                 orderIndex:model.attributes.orderIndex+'' || '0',
                 iconCls: iconCls,
                 type:model.attributes.type
             });
+    },
+    onNodeExpand:function(node) {
+        var componentModel = this._model.findModelById(node.id);
+        componentModel.attributes.expanded = true;
+    },
+    onNodeCollapse:function(node) {
+        var componentModel = this._model.findModelById(node.id);
+        componentModel.attributes.expanded = false;
     }
 });
