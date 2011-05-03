@@ -1,3 +1,16 @@
+/* Переменные манипуляций с Файловой Сиситемы */
+var typeFile = 'file';
+var typeDir = 'dir';
+var actionDelete = 'delete';
+var actionRename = 'rename';
+var actionNew = 'new';
+
+/* Переменные манипуляций в дереве структуры проекта */
+var fileForms = 'forms.py'
+var fileUi = 'ui.py'
+var filePython = 'py'
+var fileConf = 'conf'
+
 /**
  * Адаптер
  * @param fn - Функция
@@ -207,32 +220,30 @@ function createTreeView(rootNodeName){
 		            node.select();
                     var parentNodeText = node.parentNode.text;
                     /* Файл дизайна форм */
-		            if (node.text === 'ui.py' || node.text === 'forms.py' ) {
+		            if (node.text === fileUi || node.text === fileForms ) {
 			            var c = node.getOwnerTree().contextMenu;
-			            c.contextNode = node;
-			            c.showAt(e.getXY());						            	
 		            }
                     /* Файл */
-                    else if(node.leaf && (parentNodeText !== 'ui.py' && parentNodeText !== 'forms.py')) {
+                    else if(node.leaf && (parentNodeText !== fileUi && parentNodeText !== fileForms)) {
                         var c = node.getOwnerTree().contextFileMenu;
-			            c.contextNode = node;
-			            c.showAt(e.getXY());
                     }
                     /* Директория */
-                    else if(!node.leaf && (parentNodeText !== 'ui.py' && parentNodeText !== 'forms.py')) {
+                    else if(!node.leaf && (parentNodeText !== fileUi && parentNodeText !== fileForms)) {
                         var c = node.getOwnerTree().contextDirMenu;
-			            c.contextNode = node;
-			            c.showAt(e.getXY());
                     };
+                    if (c) {
+                        c.contextNode = node;
+			            c.showAt(e.getXY());
+                    }
 		        },
 		        dblclick: function(node, e){
                     var parentNodeText = node.parentNode.text;
                     var fileType = node.text.split('.').slice(-1);
-		        	if (node.parentNode && (parentNodeText === 'ui.py' || parentNodeText === 'forms.py' ) ){
+		        	if (parentNodeText === fileUi || parentNodeText === fileForms){
 			        	onClickNode(node);
 		        	}
                     /*Все файлы не являющиеся *.py и conf */
-                    else if(fileType == 'py' || fileType == 'conf'){
+                    else if(fileType == filePython || fileType == fileConf){
                         var fileAttr = {};
                         fileAttr['path'] = node.attributes.path;
                         fileAttr['fileName'] = node.attributes.text;
@@ -267,13 +278,6 @@ function createTreeView(rootNodeName){
 	return accordion;
 };
 
-/* Переменные манипуляций с Файловой Сиситемы */
-/* Можно сделать в виде объекта */
-var typeFile = 'file';
-var typeDir = 'dir';
-var actionDelete = 'delete';
-var actionRename = 'rename';
-var actionNew = 'new';
 /**
  * Возвращает класс иконки по типо расширения файла
  * @param fileName

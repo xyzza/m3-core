@@ -176,11 +176,14 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
 
         M3Designer.edit.QuickPropertyWindow.superclass.initComponent.call(this);
     },
-    anchorWinTo:function(modeId){
+    anchorWinTo:function(modelId){
         M3Designer.edit.QuickPropertyWindow.superclass.show.call(this);
+        var domElementId = M3Designer.Utils.parseDomId(modelId);
+        var collapsedHeigth = this.getHeight();
         this.collapse(false);
-        var domElementId = M3Designer.Utils.parseDomId(modeId);
         this.anchorTo(document.getElementById(domElementId), "tr-tr");
+        var panelSizeHeight = Ext.getCmp('tab-panel').getActiveTab().getSize().height;
+        this.y + collapsedHeigth > panelSizeHeight ? this.setPosition(this.x, this.y-(this.y + collapsedHeigth - panelSizeHeight)):0;
         this.setTitle(this.source['id']||'');
     },
     /**/
