@@ -78,6 +78,21 @@ M3Designer.model.FormModel = Ext.extend(Ext.data.Tree, {
         return this.root.findChild('id',id, true);
     },
     /*
+    * Поиск модели свойству
+    */
+    findModelByPropertyValue:function(name, value ) {
+        if (this.root.attributes.properties[name] == value ){
+            return this.root;
+        }
+        var fn = function(node) {
+            if (node.attributes.properties[name] &&
+                    node.attributes.properties[name] == value) {
+                return true;
+            }
+        };
+        return this.root.findChildBy(fn, this, true);
+    },
+    /*
     * Поиск кол-ва моделей определенного типа
     */
     countModelsByType:function(type) {

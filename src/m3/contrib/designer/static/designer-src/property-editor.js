@@ -19,6 +19,9 @@ M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         M3Designer.edit.PropertyEditorManager.superclass.constructor.call(this);
         this.addEvents('modelUpdate');
     },
+    /*
+    * Редактирование в окошке
+     */
     editModel:function(model) {
         var cfg = this.initConfig(model);
         var window = new M3Designer.edit.PropertyWindow({
@@ -58,7 +61,9 @@ M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
 	        }
         }
     },
-    /**/
+    /*
+    * Редактирование в квик эдиторе
+    */
     quickEditModel:function(model) {
         var cfg = this.initConfig(model, true);
         var window = new M3Designer.edit.QuickPropertyWindow({
@@ -70,10 +75,11 @@ M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         window.show();
         return window.id
     },
+    /*
+    * Инициализация
+    */
     initConfig:function(model, quickEditProperties){
         //конфиг объект для PropertyGrid'а
-        //getQuickEditProperties [boolean]
-        
         var modelAttrType = model.attributes.type;
         var modelAttrProperties = model.attributes.properties;
         
@@ -95,6 +101,9 @@ M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         }
         return cfg
     },
+    /*
+    * Сохранение модели
+    */
     saveModel:function(eventObj) {
         // в ивент обжекте приходят объект модели и объект source из грида
         // далее копируются свойства из сурса в атрибуты модели, при условии что пользователь
@@ -103,6 +112,17 @@ M3Designer.edit.PropertyEditorManager = Ext.extend( Ext.util.Observable, {
         var defaults = M3Designer.Types.getTypeDefaultProperties(eventObj.model.attributes.type);
         var model = eventObj.model;
         var source = eventObj.source;
+
+        //проверка на пересечение id моделей
+        if (source.id) {
+            var existingModel = model.ownerTree.findModelByPropertyValue('id', source.id);
+            if (existingModel) {
+                if (existingModel != model) {
+                    Ext.MessageBox.alert('Ошибка', 'id компонента совпадает с уже существующим значением');
+                    return undefined;
+                }
+            }
+        }
 
         for (var s in source) {
             if ((source[s] != defaults[s]) || ( model.attributes.properties.hasOwnProperty(s)) ) {
@@ -152,23 +172,6 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
 
         Ext.apply(this, {
             items: modelItems
-            /** Обработчики на события mouseover (раскрывает),
-             * mouseout(сворачивает) панель
-            **/
-//            listeners: {
-//                render: function(p, e) {
-//                    p.el.on('mouseover', function(e){
-//                        if(!e.within(Ext.get(p.el.id), true)) {
-//                            if (p.collapsed) p.expand();
-//                        }
-//                    }, this, p.el.id);
-//                    p.el.on('mouseout', function(e){
-//                        if(!e.within(Ext.get(p.el.id), true)) {
-//                            if (!p.collapsed) p.collapse();
-//                    }
-//                }, this, p.el.id);
-//              }
-//            }
         });
 
         M3Designer.edit.QuickPropertyWindow.superclass.initComponent.call(this);
@@ -263,11 +266,6 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
         var itemsObj = {};
         var nVal =  typeof newValue == 'object' ? newValue.id: newValue
         itemsObj[obj['fieldLabel']] = nVal;
-/* Если будет изменение более одного элемента*/
-//        var items = this.items.items;
-//        for (var i in items)
-//            itemsObj[items[i]['fieldLabel']] = items[i]['value']
-
         var eventObj = {
             source: itemsObj,
             model:this.model
