@@ -77,6 +77,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             pathFile: this.path,
             className: this.className,
             previewUrl:this.previewUrl,
+            uploadCodeUrl: this.uploadCodeUrl,
             maskEl:Ext.getBody()
         });
 		this.storage = storage;
@@ -131,7 +132,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
         storage.on('preview', function(jsonObj) {
         	if (jsonObj.success) {
            		var previewWindow = new M3Designer.code.PyCodeWindow();
-           		previewWindow.on('loadcode', this.uploadCode.createDelegate(this));
+           		previewWindow.on('loadcode', storage.uploadCode.createDelegate(storage));
             	previewWindow.show(jsonObj.json);
            	} else {
            		Ext.Msg.show({
@@ -142,6 +143,8 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
 				});
            	}
         }, this);
+        
+        storage.on('loadcode', this.uploadCode.createDelegate(this));
 
         function onTreeNodeDeleteClick(item) {
             application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
@@ -154,7 +157,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
     	this.storage.loadModel();
     },
     onSuccessLoad: function(jsonObj){    	
-		if (jsonObj.success) { 
+		if (jsonObj.success) {
 			if (this.fireEvent('beforeload', jsonObj)){				
 				this.application.init(jsonObj.json);	
 			}	        	                    
@@ -166,11 +169,17 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
 			   ,icon: Ext.MessageBox.WARNING
 			});
         }                   	
-    },
-    /*
-     * Генерирует запрос на сервер, который впоследствии вставляется в model
-     */
-    uploadCode: function(sourceCode){
-    	console.log(sourceCode);	
+    }
+    ,uploadCode: function(jsonObj){    	    
+    	if (jsonObj.success) {
+			this.application.reloadModel(jsonObj.data)	        	                    
+	   	} else {
+	   		Ext.Msg.show({
+			   title:'Ошибка'
+			   ,msg: jsonObj.json
+			   ,buttons: Ext.Msg.OK						   						   
+			   ,icon: Ext.MessageBox.WARNING
+			});
+        }   
     }
 });

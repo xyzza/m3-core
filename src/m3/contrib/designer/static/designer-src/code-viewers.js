@@ -31,7 +31,11 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
         this.addButton({
             text:'Загрузить код в форму',
             iconCls:'icon-page-white-get',
-            handler: this.fireEvent.createDelegate(this, ['loadcode',this.codeEditor.sourceCode])            
+            handler: function(){
+            	// Из-за того, что функция codeMirrorEditor появляется при рендеринге 
+            	this.fireEvent('loadcode',this.codeEditor.codeMirrorEditor.getCode());
+            },
+            scope: this            
         });
         M3Designer.edit.PropertyWindow.superclass.show.call(this);
     }

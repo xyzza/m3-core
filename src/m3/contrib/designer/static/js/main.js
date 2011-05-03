@@ -498,7 +498,8 @@ function onClickNode(node) {
         saveUrl:'/designer/save',
         path:attr['path'],
         className:attr['class_name'],
-        previewUrl:'/designer/preview'
+        previewUrl:'/designer/preview',
+        uploadCodeUrl: 'designer/upload-code'
     });
     
  	workspace.loadModel();    

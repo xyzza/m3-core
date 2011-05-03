@@ -276,3 +276,18 @@ def designer_structure_manipulation(request):
                 'type':error_type_internal}
 
     return JsonResponse({'success': success, 'data': data, 'error': error})
+
+
+def upload_code(request):
+    '''
+    Конвертация python кода в js представление
+    '''    
+    source = request.POST.get('data')
+    
+    # Пока непонятно каким образом приходит текст, приходится писать нечто ниже
+    try:
+        data = Parser('','').to_designer_preview(source.replace('\u000a','\n')[1:-1])
+    except ParserError, e:
+        return JsonResponse({'success': False, 'json': repr(e)})
+    else:        
+        return JsonResponse({'success': True, 'data': data})
