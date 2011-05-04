@@ -513,11 +513,10 @@ var ajax = Ext.Ajax;
 			id = tree.getSelectionModel().getSelectedNode().id;
 			displayText = tree.getSelectionModel().getSelectedNode().attributes.{{ component.column_name_on_select }};
 		{% endif %}
+		assert(id!=undefined, 'Справочник не определил id объекта. Поле выбора не будет работать');
+		assert(displayText!=undefined, 'Справочник не определил displayText объекта. Возможно он не приходит с ajax ответом, в JsonStore нет соответствующего поля, в гриде нет соотв. колонки или неправильно указан column_name_on_select!');
 		var win = Ext.getCmp('{{ component.client_id}}');
-		if (id!=undefined && displayText!=undefined){
-			win.fireEvent('select_value', id, displayText); // deprecated
-			win.fireEvent('closed_ok', id, displayText); 
-		};
+		win.fireEvent('closed_ok', id, displayText);
 		win.close();
 	}
 {%endif%}

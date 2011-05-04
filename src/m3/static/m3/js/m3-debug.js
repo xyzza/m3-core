@@ -7305,6 +7305,24 @@ Ext.apply(Ext.m3.CodeEditorConfig, {
         python: { // js code
             parserfile: ["parsepython.js"],
             stylesheet: Ext.m3.CodeEditorConfig.cssPath + "pythoncolors.css"
+        },
+        css: {
+            parserfile: ["parsecss.js"],
+            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "csscolors.css"
+        },
+        html: {
+            parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
+            stylesheet: [Ext.m3.CodeEditorConfig.cssPath+"xmlcolors.css",
+                        Ext.m3.CodeEditorConfig.cssPath+"javascriptcolors.css",
+                        Ext.m3.CodeEditorConfig.cssPath+"csscolors.css"]
+        },
+        javascript: {
+            parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "javascriptcolors.css"
+        },
+        sql: {
+            parserfile: ["parsesql.js"],
+            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "sqlcolors.css"
         }
     }
 });
@@ -7376,15 +7394,10 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
            onChange: function() {
                var sCode = oThis.codeMirrorEditor.getCode();
                oCmp.setValue(sCode);
-
-               if(oThis.oldSourceCode == sCode){
-                   oThis.setTitleClass(true);
-               }else{
-                   oThis.setTitleClass();
-               }
+               if(oThis.oldSourceCode == sCode) oThis.setTitleClass(true);
+               else oThis.setTitleClass();
                oThis.fireEvent('contentChaged', oThis);
            }
-//           ,onKeyEvent: function(){console.log('keypress')}
        }); 
 
         var sParserType = oThis.parser || 'python';
@@ -7668,6 +7681,74 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 })
 
 
+Ext.ns('Ext.ux.grid');
+
+Ext.ux.grid.Exporter = Ext.extend(Ext.util.Observable,{
+    title:'',
+    sendDatFromStore: true,
+    constructor: function(config){
+        Ext.ux.grid.Exporter.superclass.constructor.call(this);
+    },
+    init: function(grid){
+        if (grid instanceof Ext.grid.GridPanel){
+            this.grid = grid;
+            this.grid.on('afterrender', this.onRender, this);
+        }
+        this.dataUrl = this.grid.dataUrl;
+    },
+    onRender:function(){
+        //создадим top bar, если его нет
+        if (!this.grid.tbar){
+            this.grid.elements += ',tbar';
+            tbar = new Ext.Toolbar();
+            this.grid.tbar = tbar;
+            this.grid.add(tbar);
+            this.grid.doLayout();
+    }
+        //добавим кнопку
+        this.grid.tbar.insert(0, new Ext.Button({
+            text:'Экспорт',
+            iconCls:'icon-application-go',
+            listeners:{
+                scope:this,
+                click:this.exportData                
+            }
+        }));
+    },
+    exportData:function(){
+        console.log(this.grid.store);
+        columns = []
+        Ext.each(this.grid.colModel.config,function(column,index){
+            columns.push({
+                data_index:column.dataIndex,
+                header:column.header,
+                id:column.id,
+                is_column:column.isCoumn,
+                sortable:column.sortable,
+                width:column.width
+            })
+        });
+        data = []
+
+        if (this.sendDatFromStore){
+            Ext.each(this.grid.store.data.items,function(item,index){ data.push(item.data) });
+        }
+        params = {
+            columns: Ext.encode(columns),
+            title: this.title || this.grid.title || this.grid.id,
+            data: Ext.encode(data)
+        }
+        Ext.Ajax.request({
+            url : '/ui/exportgrid-export',
+            success : function(res,opt){                
+                location.href=res.responseText;
+            },
+            failure : function(){
+            },
+            params : params
+        });
+    }
+});
 /**
  * Окно показа контекстной помощи
  */
