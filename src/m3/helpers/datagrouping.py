@@ -6,8 +6,10 @@ Created on 14.04.2011
 '''
 from django.db.models import Q, Count, Avg, Max, Min, Sum
 
-class GroupingRecordBase(object):
-    data = None
+class RecordProxy(object):
+    '''
+    Прокси объект записи отображающей группировку
+    '''
     def __init__(self, *args, **kwargs):
         self.id = 0 # ID записи в базе
         self.index = 0 # индекс записи в раскрытом дереве (заполняется при выводе)
@@ -17,7 +19,7 @@ class GroupingRecordBase(object):
         self.expanded = False # признак что элемент развернут (заполняется при выводе)
         self.count = 0 # количество дочерних узлов, если они есть
         self.init_component(*args, **kwargs)
-
+        
     def init_component(self, *args, **kwargs):
         '''
         Заполняет атрибуты экземпляра значениями в kwargs, 
@@ -40,27 +42,64 @@ class GroupingRecordBase(object):
         Пост-обработка записи, когда все реквизиты заполнены
         '''
         pass
+    
+class GroupingRecordProvider(object):
+    '''
+    Базовый класс провайдера данных
+    '''
+    
+    def __init__(self, proxy = None, data = None):
+        if RecordProxy:
+            self.proxy_class = proxy
+        else:
+            self.proxy_class = RecordProxy
+        self.data_source = data
+    
+    def get_data(self, *args, **kwargs):
+        return self.data_source 
+    
+    def create_record(self, *args, **kwargs):
+        return self.proxy_class(*args, **kwargs) 
+    
+    def reader(self, *args, **kwargs):
+        pass
+    
+    def counter(self, *args, **kwargs):
+        pass
+    
+    def indexer(self, *args, **kwargs):
+        pass
+    
+    def get_elements(self, grouped, offset, level_index, level, begin, end, keys, aggregates, sorting):
+        '''
+        Основной метод получения данных
+        '''
+        return get_elements(grouped, offset, level_index, level, begin, end, keys, self, aggregates, sorting)
 
-class GroupingRecordModelProvider(GroupingRecordBase):
-    @staticmethod
-    def reader(*args, **kwargs):
+class GroupingRecordModelProvider(GroupingRecordProvider):
+    '''
+    Провайдер для модели
+    '''
+    def reader(self, *args, **kwargs):
         return read_model(*args, **kwargs)
-    @staticmethod
-    def counter(*args, **kwargs):
+    
+    def counter(self, *args, **kwargs):
         return count_model(*args, **kwargs)
-    @staticmethod
-    def indexer(*args, **kwargs):
+    
+    def indexer(self, *args, **kwargs):
         return index_model(*args, **kwargs)
 
-class GroupingRecordDataProvider(GroupingRecordBase):
-    @staticmethod
-    def reader(*args, **kwargs):
+class GroupingRecordDataProvider(GroupingRecordProvider):
+    '''
+    Провайдер для массива
+    '''
+    def reader(self, *args, **kwargs):
         return read_data(*args, **kwargs)
-    @staticmethod
-    def counter(*args, **kwargs):
+    
+    def counter(self, *args, **kwargs):
         return count_data(*args, **kwargs)
-    @staticmethod
-    def indexer(*args, **kwargs):
+    
+    def indexer(self, *args, **kwargs):
         return index_data(*args, **kwargs)
 
 
@@ -199,7 +238,7 @@ def count_model(grouped, level_index, level_keys, expandedItems, data_provider):
         for i in grouped:
             grouped_ranges.append(i)
 
-        query = data_provider.data.objects
+        query = data_provider.get_data()
         filter = None
         for lev in range(0, level_index):
             lev_field = grouped_ranges[lev]
@@ -216,7 +255,7 @@ def count_model(grouped, level_index, level_keys, expandedItems, data_provider):
         total_of_level = query.count()
 
     else:
-        total_of_level = data_provider.data.objects.count()
+        total_of_level = data_provider.get_data().count()
 
     # добавим к количеству также сумму раскрытых элементов
     exp_count = 0
@@ -282,19 +321,19 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
         if filter:
             if field:
                 if aggr:
-                    query = data_provider.data.objects.filter(filter).values(field).annotate(*aggr).annotate(count=Count(field))
+                    query = data_provider.get_data().filter(filter).values(field).annotate(*aggr).annotate(count=Count(field))
                 else:
-                    query = data_provider.data.objects.filter(filter).values(field).annotate(count=Count(field))
+                    query = data_provider.get_data().filter(filter).values(field).annotate(count=Count(field))
             else:
-                query = data_provider.data.objects.filter(filter)
+                query = data_provider.get_data().filter(filter)
         else:
             if field:
                 if aggr:
-                    query = data_provider.data.objects.values(field).annotate(*aggr).annotate(count=Count(field))
+                    query = data_provider.get_data().values(field).annotate(*aggr).annotate(count=Count(field))
                 else:
-                    query = data_provider.data.objects.values(field).annotate(count=Count(field))
+                    query = data_provider.get_data().values(field).annotate(count=Count(field))
             else:
-                query = data_provider.data.objects
+                query = data_provider.get_data()
 
 
         #сортировка 
@@ -314,7 +353,7 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
         index = 0
         for i in query.all()[begin:end + 1]:
             if field:
-                item = data_provider()
+                item = data_provider.create_record()
                 item.is_leaf = False
                 item.index = offset + index + begin
                 item.id = i[field]
@@ -342,7 +381,7 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
                         setattr(item, agg, i[agg + '__avg'])
                 item.calc()
             else:
-                item = data_provider()
+                item = data_provider.create_record()
                 item.is_leaf = True
                 item.index = offset + index + begin
                 item.indent = level_index
@@ -354,14 +393,14 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
     else:
         # вывести без группировки
         index = 0
-        query = data_provider.data.objects
+        query = data_provider.get_data()
         if len(sorting.keys()) == 1:
             if sorting.values()[0] == 'DESC':
                 query = query.order_by('-' + sorting.keys()[0])
             else:
                 query = query.order_by(sorting.keys()[0])
         for i in query.all()[begin:end + 1]:
-            item = data_provider()
+            item = data_provider.create_record()
             item.indent = 0
             item.is_leaf = True
             item.count = 0
@@ -389,9 +428,9 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_provide
     #print 'out_data(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
     # проведем сортировку собранного уровня
     if len(sorting.keys()) == 1:
-        sorted_data = sorted(data_provider.data, key=lambda k: getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
+        sorted_data = sorted(data_provider.get_data(), key=lambda k: getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
     else:
-        sorted_data = data_provider.data
+        sorted_data = data_provider.get_data()
     res = []
     if grouped:
         # для всех группировочных элементов будут использоваться ключи
@@ -447,7 +486,7 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_provide
         index = 0
         for i in ordered[begin:end + 1]:
             if field:
-                item = data_provider(index=offset + index + begin)
+                item = data_provider.create_record(index=offset + index + begin)
                 setattr(item, field, i)
                 item.id = i
                 item.indent = level_index
@@ -466,7 +505,7 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_provide
                     setattr(item, lev_field, key)
                 item.calc()
             else:
-                item = data_provider()
+                item = data_provider.create_record()
                 item.is_leaf = True
                 item.index = offset + index + begin
                 item.indent = level_index
@@ -479,7 +518,7 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_provide
         # вывести без группировки
         index = 0
         for i in sorted_data[begin:end + 1]:
-            item = data_provider()
+            item = data_provider.create_record()
             item.indent = 0
             item.is_leaf = True
             item.lindex = index + begin
@@ -522,7 +561,7 @@ def count_data(grouped, level_index, level_keys, expandedItems, data_provider):
             level = []
             # переберем элементы и сформируем уровень
             field = grouped[level_index]
-            for rec in data_provider.data:
+            for rec in data_provider.get_data():
                 group_value = getattr(rec, field)
                 if not group_value in level:
                     level.append(group_value)
@@ -536,7 +575,7 @@ def count_data(grouped, level_index, level_keys, expandedItems, data_provider):
             else:
                 field = grouped[level_index]
 
-            for rec in data_provider.data:
+            for rec in data_provider.get_data():
                 for lev in range(0, level_index):
                     lev_field = grouped[lev]
                     key = level_keys[lev]
@@ -554,7 +593,7 @@ def count_data(grouped, level_index, level_keys, expandedItems, data_provider):
                             level.append(rec)
             total_of_level = len(level)
     else:
-        total_of_level = len(data_provider.data)
+        total_of_level = len(data_provider.get_data())
 
     # добавим к количеству также сумму раскрытых элементов
     exp_count = 0
@@ -574,9 +613,9 @@ def index_data(grouped, level_index, level_keys, expandedItems, data_provider, s
     if grouped and len(expandedItems) > 0:
         # проведем сортировку уровня
         if len(sorting.keys()) == 1:
-            sorted_data = sorted(data_provider.data, key=lambda k: getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
+            sorted_data = sorted(data_provider.get_data(), key=lambda k: getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
         else:
-            sorted_data = data_provider.data
+            sorted_data = data_provider.get_data()
         # для всех группировочных элементов будут использоваться ключи
         level = {}
         field = grouped[level_index]
@@ -616,9 +655,9 @@ def index_model(grouped, level_index, level_keys, expandedItems, data_provider, 
             else:
                 filter = Q(**{lev_field:key})
         if filter:
-            query = data_provider.data.objects.filter(filter).values(field).distinct()
+            query = data_provider.get_data().filter(filter).values(field).distinct()
         else:
-            query = data_provider.data.objects.values(field).distinct()
+            query = data_provider.get_data().values(field).distinct()
         #сортировка 
         sort_fields = []
         if len(sorting.keys()) == 1:
