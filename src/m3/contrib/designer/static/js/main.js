@@ -6,11 +6,16 @@ var actionRename = 'rename';
 var actionNew = 'new';
 
 /* Переменные манипуляций в дереве структуры проекта */
-var fileForms = 'forms.py'
-var fileUi = 'ui.py'
-var filePython = 'py'
-var fileConf = 'conf'
+var designerFormFiles = ["forms.py","ui.py"];
+var codeViewFileTypes = ["py", "css", "js", "conf", "html", "sql"];
 
+/*добавляем(расширяем) функцию has в array*/
+Array.prototype.has = function() {
+    var	i = arguments.length,
+    result = [];
+    while(i) result.push(this.indexOf(arguments[--i]) !== -1);
+    return result.every(function(e){return e});
+};
 /**
  * Адаптер
  * @param fn - Функция
@@ -218,32 +223,35 @@ function createTreeView(rootNodeName){
 		    listeners: {
 		        contextmenu: function(node, e) {
 		            node.select();
-                    var parentNodeText = node.parentNode.text;
-                    /* Файл дизайна форм */
-		            if (node.text === fileUi || node.text === fileForms ) {
-			            var c = node.getOwnerTree().contextMenu;
-		            }
-                    /* Файл */
-                    else if(node.leaf && (parentNodeText !== fileUi && parentNodeText !== fileForms)) {
-                        var c = node.getOwnerTree().contextFileMenu;
-                    }
-                    /* Директория */
-                    else if(!node.leaf && (parentNodeText !== fileUi && parentNodeText !== fileForms)) {
-                        var c = node.getOwnerTree().contextDirMenu;
+                    if (node.parentNode) {
+                        var parentNodeText = node.parentNode.text;
+
+                        /* Файл дизайна форм */
+                        if (designerFormFiles.has(node.text)) {
+                            var c = node.getOwnerTree().contextMenu;
+                        }
+                        /* Файл */
+                        else if(node.leaf) {
+                            var c = node.getOwnerTree().contextFileMenu;
+                        }
+                        /* Директория */
+                        else if(!node.leaf) {
+                            var c = node.getOwnerTree().contextDirMenu;
+                        };
+                        if (c) {
+                            c.contextNode = node;
+                            c.showAt(e.getXY());
+                        };
                     };
-                    if (c) {
-                        c.contextNode = node;
-			            c.showAt(e.getXY());
-                    }
 		        },
 		        dblclick: function(node, e){
                     var parentNodeText = node.parentNode.text;
                     var fileType = node.text.split('.').slice(-1);
-		        	if (parentNodeText === fileUi || parentNodeText === fileForms){
+		        	if (designerFormFiles.has(parentNodeText)){
 			        	onClickNode(node);
 		        	}
                     /*Все файлы не являющиеся *.py и conf */
-                    else if(fileType == filePython || fileType == fileConf){
+                    else if(codeViewFileTypes.has(fileType[0])){
                         var fileAttr = {};
                         fileAttr['path'] = node.attributes.path;
                         fileAttr['fileName'] = node.attributes.text;
@@ -278,14 +286,21 @@ function createTreeView(rootNodeName){
 	});
 	return accordion;
 };
-
 /**
- * Возвращает класс иконки по типо расширения файла
+ * Возвращает расширение файла
+ * @param fileName
+ */
+function getfFileExpansion(fileName){
+    var splitedFileNmae = fileName.split('.');
+    var fileExpansion = splitedFileNmae[splitedFileNmae.length-1];
+    return fileExpansion;
+}
+/**
+ * Возвращает класс иконки по типу расширения файла
  * @param fileName
  */
 function caseOfIncons(fileName){
-    var splitedFileNmae = fileName.split('.');
-    var fileExpansion = splitedFileNmae[splitedFileNmae.length-1];
+    var fileExpansion = getfFileExpansion(fileName);
     var icon = '';
     switch (fileExpansion) {
       case 'py':
@@ -305,7 +320,34 @@ function caseOfIncons(fileName){
     };
     return icon;
 };
-
+/**
+ * Возвращает тип файла по расширения файла
+ * @param fileName
+ */
+function fileTypeByExpansion(fileName){
+    var fileExpansion = getfFileExpansion(fileName);
+    var type = '';
+    switch (fileExpansion) {
+      case 'py': 
+        type = 'python';
+        break
+      case 'js':
+        type = 'javascript';
+        break
+      case 'css':
+        type = 'css';
+        break
+      case 'html':
+        type = 'html';
+        break
+      case 'sql':
+        type = 'sql';
+        break
+      default:
+        type = 'python';
+    };
+    return type;
+};
 /* Редактировать файл */
 function editFile(node, e){
     var fileType = node.text.split('.').slice(-1);
@@ -598,9 +640,11 @@ function onClickNodePyFiles(node, fileAttr){
         }
         ,success: function(response, opts){
             var obj = Ext.util.JSON.decode(response.responseText);
+            var type = fileTypeByExpansion(fileName);
             var codeEditor = new M3Designer.code.ExtendedCodeEditor({
             	id:id,
-                sourceCode : obj.data.content
+                sourceCode : obj.data.content,
+                parser: type
             });
 
             codeEditor.setTitle(fileName);

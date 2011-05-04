@@ -21,6 +21,24 @@ Ext.apply(Ext.m3.CodeEditorConfig, {
         python: { // js code
             parserfile: ["parsepython.js"],
             stylesheet: Ext.m3.CodeEditorConfig.cssPath + "pythoncolors.css"
+        },
+        css: {
+            parserfile: ["parsecss.js"],
+            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "csscolors.css"
+        },
+        html: {
+            parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
+            stylesheet: [Ext.m3.CodeEditorConfig.cssPath+"xmlcolors.css",
+                        Ext.m3.CodeEditorConfig.cssPath+"javascriptcolors.css",
+                        Ext.m3.CodeEditorConfig.cssPath+"csscolors.css"]
+        },
+        javascript: {
+            parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "javascriptcolors.css"
+        },
+        sql: {
+            parserfile: ["parsesql.js"],
+            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "sqlcolors.css"
         }
     }
 });
