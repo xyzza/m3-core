@@ -33,7 +33,8 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
             method:'GET',
             params:{
                path: this.pathFile,
-               className: this.className
+               className: this.className,
+               funcName: this.funcName
             },
             success:this._onSuccessDefault.createDelegate(this, ['load'], true),
             failure:this._onFailureDefault.createDelegate(this)

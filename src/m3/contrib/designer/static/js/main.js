@@ -61,7 +61,7 @@ function createClass(node,e){
                                 ,path: attr['path']
                                 ,class_name: text
                                 ,iconCls: 'icon-class'
-                                ,leaf: true
+                                ,leaf: false
                             });
 
                             node.appendChild(new_node);
@@ -250,6 +250,10 @@ function createTreeView(rootNodeName){
 		        	if (designerFormFiles.has(parentNodeText)){
 			        	onClickNode(node);
 		        	}
+                    else if (node.attributes['func_name']){
+			        	onClickNode(node);
+		        	}
+
                     /*Все файлы не являющиеся *.py и conf */
                     else if(codeViewFileTypes.has(fileType[0])){
                         var fileAttr = {};
@@ -545,6 +549,7 @@ function onClickNode(node) {
         saveUrl:'/designer/save',
         path:attr['path'],
         className:attr['class_name'],
+        funcName:attr['func_name'],
         previewUrl:'/designer/preview',
         uploadCodeUrl: 'designer/upload-code'
     });

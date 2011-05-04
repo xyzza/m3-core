@@ -62,7 +62,7 @@ class Parser(object):
     # Откуда будут доступны все файлы
     IMPORT_ALL = 'm3.ui.ext.all_components'
     
-    def __init__(self, path, class_name):
+    def __init__(self, path, class_name, func_name=None):
         '''
         @param path: Путь до py файла
         @param class_name: Имя класса для генерации
@@ -73,6 +73,9 @@ class Parser(object):
         
         # Имя класса
         self.class_name = class_name
+
+        # Имя функции
+        self.func_name = func_name
         
         # Базовый класс для окон (Если нет в маппинге)
         self.base_class = 'ExtWindow'
@@ -108,8 +111,8 @@ class Parser(object):
             node_module = ast.parse(source_code)
         except SyntaxError:
             raise ParserError('Некорректный синтаксис файла')
-        
-        class_node, func_node = Parser.get_func(node_module, self.class_name)
+
+        class_node, func_node = Parser.get_func(node_module, self.class_name, self.func_name)
         
         self.base_class = self._get_base_class(class_node)
                    
@@ -268,19 +271,6 @@ class Parser(object):
         for item in self._get_mapping():
             if item['class'].has_key(type_obj):
                 return item['config']        
-        
-# append пока не поддерживается        
-#    def _get_nested_component(self, node_value):
-#        '''
-#        Распарсивается структура вида:
-#        self._items.append(panel)
-#        
-#        node_value.func.value.value.id - доступ к self
-#        node_value.args[0].elts[0].id - доступ к panel
-#        '''
-#        assert isinstance(node_value, ast.Call)
-#        
-#        return node_value.func.value.value.id, node_value.args[0].id
 
     def _get_value(self, node):
         '''
@@ -514,10 +504,13 @@ class Parser(object):
         return mapping_list
         
     @staticmethod
-    def get_func(node_module, class_name):
+    def get_func(node_module, class_name, func_name):
         '''
         Поиск и возвращение функции GENERATED_FUNC 
         '''
+
+        func_name = func_name or Parser.GENERATED_FUNC
+
         for node in node_module.body:        
             if isinstance(node, ast.ClassDef) and node.name == class_name:                
                 for nested_node in node.body:    

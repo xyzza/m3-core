@@ -76,6 +76,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             saveUrl:this.saveUrl,
             pathFile: this.path,
             className: this.className,
+            funcName: this.funcName,
             previewUrl:this.previewUrl,
             uploadCodeUrl: this.uploadCodeUrl,
             maskEl:Ext.getBody()

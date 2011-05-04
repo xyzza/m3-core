@@ -120,8 +120,8 @@ def get_methods(path, class_name):
                     d = {'text': child_item.name,
                          'leaf': True,
                          'iconCls':  'icon-function',
-                         'func_name':  item.name,
-                         'class_name':  child_item.name,
+                         'func_name':  child_item.name,
+                         'class_name': item.name,
                          'path': path}
                     res.append(d)
             break
