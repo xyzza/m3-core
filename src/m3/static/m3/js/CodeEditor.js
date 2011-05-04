@@ -110,15 +110,10 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
            onChange: function() {
                var sCode = oThis.codeMirrorEditor.getCode();
                oCmp.setValue(sCode);
-
-               if(oThis.oldSourceCode == sCode){
-                   oThis.setTitleClass(true);
-               }else{
-                   oThis.setTitleClass();
-               }
+               if(oThis.oldSourceCode == sCode) oThis.setTitleClass(true);
+               else oThis.setTitleClass();
                oThis.fireEvent('contentChaged', oThis);
            }
-//           ,onKeyEvent: function(){console.log('keypress')}
        }); 
 
         var sParserType = oThis.parser || 'python';

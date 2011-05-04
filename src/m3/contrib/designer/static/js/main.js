@@ -755,9 +755,8 @@ function initCodeEditorHandlers(codeEditor, path){
                            });
                         }
                         else if (buttonId=='no') {
-                           codeEditor.codeMirrorEditor.setCode(obj.data.content, function(){
-                               codeEditor.contentChanged = false;
-                           });
+                           codeEditor.codeMirrorEditor.setCode(obj.data.content);
+                           codeEditor.contentChanged = false;
                         }
                         else if (buttonId=='cancel') {
                             userTakeChoice = !userTakeChoice;
@@ -766,7 +765,12 @@ function initCodeEditorHandlers(codeEditor, path){
                     }, textArea.id, msg);
                     codeEditor.onChange();
                 }
-                else userTakeChoice = !userTakeChoice;
+                else {
+                    userTakeChoice = !userTakeChoice;
+                    codeEditor.codeMirrorEditor.setCode(obj.data.content);
+                    codeEditor.contentChanged = false;
+                    codeEditor.onChange();
+                }
                 return !userTakeChoice;
             },
             failure: uiAjaxFailMessage
