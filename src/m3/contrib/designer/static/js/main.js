@@ -9,30 +9,67 @@ var actionNew = 'new';
 var designerFormFiles = ["forms.py","ui.py"];
 var codeViewFileTypes = ["py", "css", "js", "conf", "html", "sql"];
 
-/*добавляем(расширяем) функцию has в array*/
+/*добавляем функцию has в array, функция возвращает true если хотябы один элемент встречается в массиве*/
 Array.prototype.has = function() {
     var	i = arguments.length,
     result = [];
     while(i) result.push(this.indexOf(arguments[--i]) !== -1);
     return result.every(function(e){return e});
 };
+
+/*==========================Перехват нажатий клавиш===========================*/
+//Инициируем перехват нажатия ctrl+s для автоматического сохранения на сервер
+Ext.fly(document).on('keydown',function(e,t,o){
+
+   if (e.ctrlKey && (e.keyCode == 83)) {// кнопка S
+   	   var tabPanel = Ext.getCmp('tab-panel');
+       var tab = tabPanel.getActiveTab();
+       if (tab && tab.saveOnServer &&
+               (typeof(tab.saveOnServer) == 'function')) {
+           tab.saveOnServer();
+           e.stopEvent();
+       };
+   };
+});
+function initAdditionalTreeEvents(id){
+    Ext.fly(id).on('keydown',function(e,t,o){
+        if(e.keyCode == 46){ //del
+            var selectedNode = projectViewTreeManipulation();
+            var isnotFormClass = !designerFormFiles.has(selectedNode.parentNode.text);
+            if (selectedNode && isnotFormClass){
+                var isFile = selectedNode.leaf;
+                deleteTarget(selectedNode, isFile);
+            };
+        };
+    });
+}
+/*============================================================================*/
+
 /**
- * Адаптер
- * @param fn - Функция
+ * Базовая функция внешнего воздействия на дерево структуры проекта.
+ * @param fn
  */
-function toolBarFuncWraper(fn){
+function projectViewTreeManipulation(){
     var cmp = Ext.getCmp('project-view');
     var selectedNode = cmp.getSelectionModel().getSelectedNode();
-    if (selectedNode){
-        fn(selectedNode, true);
-    }
-    else{
+    if (!selectedNode){
         Ext.Msg.show({
         title: 'Информация',
         msg: 'Для выполнения действия необходимо выделить узел дерева',
         buttons: Ext.Msg.OK,
         icon: Ext.Msg.INFO
     });
+    };
+    return selectedNode
+};
+/**
+ * Адаптер
+ * @param fn - Функция
+ */
+function toolBarFuncWraper(fn){
+    var selectedNode = projectViewTreeManipulation();
+    if (selectedNode){
+        fn(selectedNode, true);
     };
 };
 
@@ -41,7 +78,7 @@ function toolBarFuncWraper(fn){
  * @param node
  * @param e
  */
-function createClass(node,e){
+function createClass(node, e){
     Ext.MessageBox.prompt('Создание класса',
         'Введите название класса',
         function(btn, text){
@@ -288,6 +325,7 @@ function createTreeView(rootNodeName){
 	        layout: 'fit'
 	    }]
 	});
+    tree.on('afterrender', function(){initAdditionalTreeEvents(tree.id)});
 	return accordion;
 };
 /**
@@ -517,19 +555,6 @@ function wrongFileTypeMessage(fileType){
             icon: Ext.Msg.INFO
     });
 };
-
-//Инициируем перехват нажатия ctrl+s для автоматического сохранения на сервер
-Ext.fly(document).on('keydown',function(e,t,o){
-   if (e.ctrlKey && (e.keyCode == 83)) {// кнопка S
-   	   var tabPanel = Ext.getCmp('tab-panel');
-       var tab = tabPanel.getActiveTab();
-       if (tab && tab.saveOnServer &&
-               (typeof(tab.saveOnServer) == 'function')) {
-           tab.saveOnServer();
-           e.stopEvent();
-       };
-   };
-});
 
 function onClickNode(node) {					
 	var attr =  node.attributes;
