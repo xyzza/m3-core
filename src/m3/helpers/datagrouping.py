@@ -19,7 +19,7 @@ class RecordProxy(object):
         self.expanded = False # признак что элемент развернут (заполняется при выводе)
         self.count = 0 # количество дочерних узлов, если они есть
         self.init_component(*args, **kwargs)
-        
+
     def init_component(self, *args, **kwargs):
         '''
         Заполняет атрибуты экземпляра значениями в kwargs, 
@@ -42,34 +42,35 @@ class RecordProxy(object):
         Пост-обработка записи, когда все реквизиты заполнены
         '''
         pass
-    
+
 class GroupingRecordProvider(object):
     '''
     Базовый класс провайдера данных
     '''
-    
-    def __init__(self, proxy = None, data = None):
-        if RecordProxy:
+    proxy_class = RecordProxy
+    data_sorce = None
+
+    def __init__(self, proxy=None, data=None):
+        if proxy:
             self.proxy_class = proxy
-        else:
-            self.proxy_class = RecordProxy
-        self.data_source = data
-    
+        if data:
+            self.data_source = data
+
     def get_data(self, *args, **kwargs):
-        return self.data_source 
-    
+        return self.data_source
+
     def create_record(self, *args, **kwargs):
-        return self.proxy_class(*args, **kwargs) 
-    
+        return self.proxy_class(*args, **kwargs)
+
     def reader(self, *args, **kwargs):
         pass
-    
+
     def counter(self, *args, **kwargs):
         pass
-    
+
     def indexer(self, *args, **kwargs):
         pass
-    
+
     def get_elements(self, grouped, offset, level_index, level, begin, end, keys, aggregates, sorting):
         '''
         Основной метод получения данных
@@ -82,10 +83,10 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
     '''
     def reader(self, *args, **kwargs):
         return read_model(*args, **kwargs)
-    
+
     def counter(self, *args, **kwargs):
         return count_model(*args, **kwargs)
-    
+
     def indexer(self, *args, **kwargs):
         return index_model(*args, **kwargs)
 
@@ -95,10 +96,10 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
     '''
     def reader(self, *args, **kwargs):
         return read_data(*args, **kwargs)
-    
+
     def counter(self, *args, **kwargs):
         return count_data(*args, **kwargs)
-    
+
     def indexer(self, *args, **kwargs):
         return index_data(*args, **kwargs)
 
