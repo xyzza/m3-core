@@ -51,6 +51,7 @@ class DatabaseOperations(object):
     create_primary_key_string = "ALTER TABLE %(table)s ADD CONSTRAINT %(constraint)s PRIMARY KEY (%(columns)s)"
     delete_primary_key_sql = "ALTER TABLE %(table)s DROP CONSTRAINT %(constraint)s"
     backend_name = None
+    default_schema_name = "public"
 
     def __init__(self, db_alias):
         self.debug = False
@@ -59,7 +60,7 @@ class DatabaseOperations(object):
         self.pending_transactions = 0
         self.pending_create_signals = []
         self.db_alias = db_alias
-        self.connection_init()
+        self._initialised = False
     
     def _is_multidb(self):
         try: 
@@ -104,6 +105,18 @@ class DatabaseOperations(object):
         else:
             return True
 
+    def _get_schema_name(self):
+        try:
+            return self._get_setting('schema')
+        except (KeyError, AttributeError):
+            return self.default_schema_name
+
+    
+    def _possibly_initialise(self):
+        if not self._initialised:
+            self.connection_init()
+            self._initialised = True
+
     def connection_init(self):
         """
         Run before any SQL to let database-specific config be sent as a command,
@@ -122,14 +135,14 @@ class DatabaseOperations(object):
         Executes the given SQL statement, with optional parameters.
         If the instance's debug attribute is True, prints out what it executes.
         """
+        
+        self._possibly_initialise()
+        
         cursor = self._get_connection().cursor()
         if self.debug:
             print "   = %s" % sql, params
 
-        get_logger().debug('south execute "%s" with params "%s"' % (sql, params), extra={
-            'sql': sql,
-            'params': params,
-        })
+        get_logger().debug('south execute "%s" with params "%s"' % (sql, params))
 
         if self.dry_run:
             return []
@@ -341,7 +354,8 @@ class DatabaseOperations(object):
         # First, change the type
         params = {
             "column": self.quote_name(name),
-            "type": self._db_type_for_alter_column(field)            
+            "type": self._db_type_for_alter_column(field),            
+            "table_name": table_name
         }
 
         # SQLs is a list of (SQL, values) pairs.
@@ -401,11 +415,8 @@ class DatabaseOperations(object):
             ifsc_table = "constraint_column_usage"
         else:
             ifsc_table = "key_column_usage"
-            
-        if self._has_setting("SCHEMA"):
-            schema = self._get_setting("SCHEMA")
-        else:
-            schema = "public"
+
+        schema = self._get_schema_name()            
 
         # First, load all constraint->col mappings for this table.
         rows = self.execute("""
@@ -617,13 +628,15 @@ class DatabaseOperations(object):
         """
         Generate a unique name for the index
         """
+
+        table_name = table_name.replace('"', '').replace('.', '_')
         index_unique_name = ''
 
         if len(column_names) > 1:
             index_unique_name = '_%x' % abs(hash((table_name, ','.join(column_names))))
 
         # If the index name is too long, truncate it
-        index_name = ('%s_%s%s%s' % (table_name, column_names[0], index_unique_name, suffix))
+        index_name = ('%s_%s%s%s' % (table_name, column_names[0], index_unique_name, suffix)).replace('"', '').replace('.', '_')
         if len(index_name) > self.max_index_name_length:
             part = ('_%s%s%s' % (column_names[0], index_unique_name, suffix))
             index_name = '%s%s' % (table_name[:(self.max_index_name_length-len(part))], part)
