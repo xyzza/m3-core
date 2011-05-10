@@ -12,6 +12,7 @@ import re
 import codecs
 import uuid
 import string
+import xml.dom.minidom
 
 from django.utils.encoding import smart_unicode
 from django.db import models, transaction
@@ -114,6 +115,32 @@ def read_simple_DBF_dict_file(filename, encoding='utf-8',
 
     return (attrs, values,)
 
+def read_simple_xml_file(filename, fields={}):
+    '''
+    Чтение данных из файла формата xml.
+    fields: ключ - атрибут в узле, соответствуюший полю в таблице
+            значение - поле в таблице
+    '''
+    assert isinstance(filename, basestring), u"filename must be 'str'"
+
+    values = []
+    attrs = []
+    doc = xml.dom.minidom.parse(filename)
+    root_node = doc.childNodes
+    if root_node:
+        for node in root_node[0].childNodes:
+            values_list = []
+            for attr in node.attributes._attrs:
+                if fields.has_key(attr):
+                    values_list.append(node.attributes._attrs[attr].nodeValue)
+            values.append(values_list)
+    else:
+        raise DictLoadException(None, u'Исходные данные отсутствуют. Пустой XML-файл')
+
+    for attr in root_node[0].childNodes[0].attributes._attrs:
+        if fields.has_key(attr):
+            attrs.append(fields[attr])
+    return (attrs, values,)
 
 def read_simple_dict_file(filename):
     '''
