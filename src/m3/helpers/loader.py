@@ -121,25 +121,24 @@ def read_simple_xml_file(filename, fields={}):
     fields: ключ - атрибут в узле, соответствуюший полю в таблице
             значение - поле в таблице
     '''
-    assert isinstance(filename, basestring), u"filename must be 'str'"
+    assert isinstance(filename, basestring), u"filename must be basestring type"
 
     values = []
     attrs = []
     doc = xml.dom.minidom.parse(filename)
     root_node = doc.childNodes
-    if root_node:
+    if root_node[0]:
         for node in root_node[0].childNodes:
             values_list = []
             for attr in node.attributes._attrs:
-                if fields.has_key(attr):
+                if attr in fields:
+                    if not fields[attr] in attrs:
+                        attrs.append(fields[attr])
                     values_list.append(node.attributes._attrs[attr].nodeValue)
             values.append(values_list)
     else:
         raise DictLoadException(None, u'Исходные данные отсутствуют. Пустой XML-файл')
 
-    for attr in root_node[0].childNodes[0].attributes._attrs:
-        if fields.has_key(attr):
-            attrs.append(fields[attr])
     return (attrs, values,)
 
 def read_simple_dict_file(filename):
