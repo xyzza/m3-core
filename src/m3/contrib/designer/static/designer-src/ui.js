@@ -337,6 +337,7 @@ M3Designer.ui.ModelUIPresentaitionBuilder = function() {
          */
         build:function(model) {
             var cfg = Ext.apply({}, model.attributes.properties);
+            Ext.destroyMembers(cfg, 'disabled');
             cfg.id = M3Designer.Utils.parseDomId(model.id);
             if (M3Designer.Types.isTypeContainer(model.attributes.type)) {
                 cfg.cls = 'designContainer designComponent';

@@ -313,6 +313,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
             // Определение QuickPropertyWindow
             var modelId = M3Designer.Utils.parseModelId(el.id);
             var model = this._model.findModelById(modelId);
+            this._editorManager.editModelInline(model);
 
             //Закрываем окно предыдущие окно быстрого редактирования свойств (если оно есть)
             var win = Ext.getCmp(this._lastQuickPropertyId);
