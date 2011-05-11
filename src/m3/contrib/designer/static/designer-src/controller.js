@@ -171,7 +171,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
     reloadModel: function(formCfg){
         this._model = M3Designer.ModelTransfer.deserialize(formCfg);
         this._model.root.setId( this.designPanel.id);
-        this.refresh();
+        this.refreshView();
     },
     /*
     * Обработка дропа на деверева компонентов. Параметры две TreeNode и строка с положеним относитнльно
