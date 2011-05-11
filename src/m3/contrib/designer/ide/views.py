@@ -111,9 +111,9 @@ def designer_save(request):
     js = json.loads(data)    
     restores(js['model'])
     
-    # js['model'] -- Конфигурация для отображение в py
+    # js['model'] -- Конфигурация для отображение в py    
     try:
-        Parser(path, class_name).from_designer(js['model'])
+        Parser(path, class_name, request.POST.get('funcName')).from_designer(js['model'])
     except ParserError, e:
         return JsonResponse({'success': False, 'json': repr(e)})
     return JsonResponse({'success': True})

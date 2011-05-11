@@ -79,6 +79,9 @@ class Parser(object):
         
         # Базовый класс для окон (Если нет в маппинге)
         self.base_class = 'ExtWindow'
+                
+        #
+        self.base_class_name = None
         
     @staticmethod
     def get_source(path):
@@ -114,20 +117,75 @@ class Parser(object):
 
         class_node, func_node = Parser.get_func(node_module, self.class_name, self.func_name)
         
-        self.base_class = self._get_base_class(class_node)
+        if func_node.name == Parser.GENERATED_FUNC:
+            self.base_class = self._get_base_class(class_node)
+        else:
+            self.base_class = func_node.args.defaults[0].id
+            
+            # Название второго параметра, т.к. первый равен self
+            self.base_class_name = func_node.args.args[1].id            
                    
         if not func_node:
             raise UndefinedGeneratedFunc('Функция автогенерации "%s" не определена в классе "%s"' % 
                                 (Parser.GENERATED_FUNC, self.class_name)    )
               
-        return self._parse_nodes(func_node.body)
+        return self._parse_nodes(func_node)
 
-    def _get_js(self):
-        js_dict = {}                
-        self._build_json(js_dict)        
-        return js_dict
-                    
-    def _build_json(self, js_dict, key='self'):
+    def _parse_nodes(self, func_node):
+        '''
+        Парсит файл
+        '''
+        
+        self.config_cmp = {}
+        self.extends_cmp = {}
+        
+        nodes = func_node.body
+                
+        for node in nodes:
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):                                
+                # Игнорирование значений, которые просто прописываются в объект
+                if 'self' == node.targets[0].value.id:
+                    continue
+                
+                # Составление структуры конфигов и типов компонентов
+                parent, parent_item, item = self._get_attr(node)
+                self.extends_cmp.setdefault(parent, {})[parent_item] =  item
+            elif isinstance(node, ast.Assign):
+                
+                parent, attr, value = self._get_config_component(node)
+                
+                if value != self.base_class_name:
+                    # Если это тип встроенной функции, то не нужно учитывать
+                    self.config_cmp.setdefault(parent, {})[attr] = value 
+                                                
+            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and node.value.args:
+
+                parent, parent_item, items = self._get_extends(node.value)
+                self.extends_cmp.setdefault(parent, {})[parent_item] =  items
+            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
+                # док. строки 
+                pass
+            
+            elif func_node.name != Parser.GENERATED_FUNC:
+                pass
+        
+            else:
+                raise ParserError("Синтаксис файла не поддерживается")
+        
+        
+        pprint.pprint(self.config_cmp)
+        pprint.pprint(self.extends_cmp)
+        
+        parent_key = 'self' if func_node.name == Parser.GENERATED_FUNC else 'cont'
+        js_dict = {}         
+        self._build_json(js_dict, parent_key)
+        
+        pprint.pprint(js_dict)
+            
+        return js_dict                
+
+         
+    def _build_json(self, js_dict, key):
         
         item = self.extends_cmp.get(key)
         
@@ -209,7 +267,7 @@ class Parser(object):
         Возвращает кортеж: свойства контрола, имя контрола в натации дизайнера
         (extjs)
         '''
-        conf = self.config_cmp[key].copy()
+        conf = self.config_cmp[key].copy()        
         py_name = conf.pop('py_name') if conf.get('py_name') else self.base_class
         
         extjs_name = self._get_extjs_class(py_name)
@@ -329,6 +387,22 @@ class Parser(object):
             # Распарсивание свойства
             # parent, attr, value
             return node.targets[0].value.id, node.targets[0].attr, self._get_value(node.value)        
+        
+    def _create_insanse_node(self, id, instanse_name):
+        return ast.Assign([ast.Name( 
+                        id, 
+                        ast.Load()
+                  )], 
+                  ast.Call(
+                        ast.Name( 
+                            instanse_name, 
+                            ast.Load()
+                        ), 
+                        [], 
+                        [], 
+                        None, 
+                        None)
+                  )
     
     def from_designer(self, json_dict):
         '''
@@ -343,8 +417,8 @@ class Parser(object):
         except SyntaxError:
             raise ParserError('Некорректный синтаксис файла')
         
-        # Нахождение нужной функции GENERATED_FUNC
-        class_node, func_node = Parser.get_func(module_node, self.class_name)
+        # Нахождение нужной функции GENERATED_FUNC        
+        class_node, func_node = Parser.get_func(module_node, self.class_name, self.func_name)
                 
         nodes = Node(json_dict).get_nodes(self._get_mapping())
 
@@ -354,10 +428,14 @@ class Parser(object):
         if func_node and isinstance(func_node.body, list) and len(func_node.body) > 0 \
             and isinstance(func_node.body[0], ast.Expr):            
             nodes.insert(0, func_node.body[0])
+        
+        if self.func_name != Parser.GENERATED_FUNC:
+            nodes.insert(0, self._create_insanse_node(json_dict['id'], func_node.args.args[1].id))
+            nodes.extend([StringSpaces(), ast.Return(value=ast.Name(id=json_dict['id'], ctx=ast.Load()))])
             
         # Замена старого содержимого на новое сгенерированное 
         func_node.body = nodes + [StringSpaces(lines=2), ]
-                
+                        
         begin_line, end_line = Parser._get_number_lines(module_node, class_node, func_node)
 
         # Бакап файла на всякий пожарный случай и cохранение нового файла
@@ -394,41 +472,8 @@ class Parser(object):
         except SyntaxError:
             raise ParserError('Некорректный синтаксис файла')
                 
-        return self._parse_nodes(nodes.body)
+        return self._parse_nodes(nodes)
 
-
-    def _parse_nodes(self, nodes):
-        '''
-        Парсит файл
-        '''
-        
-        self.config_cmp = {}
-        self.extends_cmp = {}        
-        for node in nodes:
-            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):                                
-                # Игнорирование значений, которые просто прописываются в объект
-                if 'self' == node.targets[0].value.id:
-                    continue
-                
-                # Составление структуры конфигов и типов компонентов
-                parent, parent_item, item = self._get_attr(node)
-                self.extends_cmp.setdefault(parent, {})[parent_item] =  item
-            elif isinstance(node, ast.Assign):
-                
-                parent, attr, value = self._get_config_component(node)
-                self.config_cmp.setdefault(parent, {})[attr] = value
-                
-            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and node.value.args:
-
-                parent, parent_item, items = self._get_extends(node.value)
-                self.extends_cmp.setdefault(parent, {})[parent_item] =  items
-            elif isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
-                # док. строки 
-                pass
-            else:
-                raise ParserError("Синтаксис файла не поддерживается")
-
-        return self._get_js()
     
     @staticmethod
     def from_designer_preview(json_dict):
@@ -514,7 +559,8 @@ class Parser(object):
         for node in node_module.body:        
             if isinstance(node, ast.ClassDef) and node.name == class_name:                
                 for nested_node in node.body:    
-                    if isinstance(nested_node, ast.FunctionDef) and nested_node.name == Parser.GENERATED_FUNC:
+                    if isinstance(nested_node, ast.FunctionDef) and \
+                            nested_node.name == func_name:
                         return node, nested_node
                 else:
                     raise UndefinedGeneratedFunc('Функция автогенерации "%s" не \
@@ -598,11 +644,6 @@ class Parser(object):
                                             [node_constructor, node_initial], 
                                             [])
     
-    
-
-        
-
-
         initialize_func = Parser.generate_initialize()
             
         cl = ast.ClassDef(
@@ -697,14 +738,15 @@ class Node(object):
         
         return nodes
 
-    def walk(self, nodes, nodes_attr, nodes_extends, nodes_in_self):        
-          
+    def walk(self, nodes, nodes_attr, nodes_extends, nodes_in_self, deep=0):        
+        '''
+        '''
         for key, value in sorted(self.data.items(), key=Node.sort_items):
             if isinstance(value, list):
                 extends_list = []
                 for item in value:
                     if isinstance(item, dict) and item.has_key('id') and item.has_key('type'):
-                        Node(item).walk(nodes, nodes_attr, nodes_extends, nodes_in_self)
+                        Node(item).walk(nodes, nodes_attr, nodes_extends, nodes_in_self, deep+1)
                         extends_list.append(item['id'])
                     else:
                         ast_node = self._get_property(self.data['id'], key, value, self.data['type'])
@@ -715,21 +757,23 @@ class Node(object):
                     ast_node = self._get_extends(self.data['id'], key, extends_list, self.data['type'])                    
                     nodes_extends.append(ast_node)
             elif isinstance(value, dict) and value.has_key('type') and value.has_key('id'):                
-                Node(value).walk(nodes, nodes_attr, nodes_extends, nodes_in_self)             
+                Node(value).walk(nodes, nodes_attr, nodes_extends, nodes_in_self, deep+1)             
                 
                 ast_node = self._get_attr(self.data['id'], key, value['id'], self.data['type'])
                 
                 nodes_attr.append(ast_node)
             else:
-                if key == 'type' or value == 'self':
+                print deep
+                if key == 'type' or (deep == 0 and key == 'id'):                    
                     continue
-                elif key == 'id' and value != 'self':                                                   
+                elif key == 'id' and deep > 0:                                                   
                     ast_node = self._get_instanse(self.data['type'], value)                                        
                     nodes.extend([StringSpaces(), ast_node, ])
                     
                     in_self_node = self._add_cmp_in_self(value)                    
                     nodes_in_self.append(in_self_node)                                
-                else:                    
+                else:
+                    print self.data['id'], key, value, self.data['type']
                     ast_node = self._get_property(self.data['id'], key, value, self.data['type'])
                     nodes.append(ast_node)                            
      

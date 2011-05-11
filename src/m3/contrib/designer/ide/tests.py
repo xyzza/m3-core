@@ -92,5 +92,9 @@ class Claz(ExtWindow):
         self.gridColumn_1 = gridColumn_1
         self.gridColumn_2 = gridColumn_2
         
+    def create_panel(self, cont=ExtPanel()):
+        
+        return cont
+        
 def ata(a, b):
     panel_2.store = urls.get_action('vega-action').get_absolute_url()

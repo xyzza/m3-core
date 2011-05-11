@@ -284,10 +284,7 @@ function createTreeView(rootNodeName){
 		        dblclick: function(node, e){
                     var parentNodeText = node.parentNode.text;
                     var fileType = node.text.split('.').slice(-1);
-		        	if (designerFormFiles.has(parentNodeText)){
-			        	onClickNode(node);
-		        	}
-                    else if (node.attributes['func_name']){
+		        	if (node.attributes['func_name']){
 			        	onClickNode(node);
 		        	}
 
@@ -560,7 +557,7 @@ function onClickNode(node) {
 	var attr =  node.attributes;
 	            	
 	var tabPanel = Ext.getCmp('tab-panel');	
-	var id = attr['path'] + attr['class_name'];
+	var id = attr['path'] + attr['class_name'] + attr['func_name'];
 
 	var tab = tabPanel.getItem(id);
 	if(tab){				
@@ -599,7 +596,11 @@ function onClickNode(node) {
        		result = false;
        } else if (jsonObj.success) {
 
-			this.setTitle(attr['class_name']); 
+			var funcTitle = '';
+			if (attr['func_name']) { 
+				funcTitle = ' ('+ attr['func_name'] + ')';
+			} 
+			this.setTitle(attr['class_name'] + funcTitle); 
 												
 			tabPanel.add(this);				
 		    tabPanel.activate(this);
@@ -651,7 +652,7 @@ function generateInitialize(node, path, className){
 function onClickNodePyFiles(node, fileAttr){
     var path = fileAttr.path;
     var fileName = fileAttr.fileName;
-        
+  
     var id = path + fileName;
     
     var tabPanel = Ext.getCmp('tab-panel');
