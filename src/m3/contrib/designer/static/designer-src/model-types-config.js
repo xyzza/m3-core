@@ -1,1253 +1,1256 @@
 /**
  * Crafted by ZIgi
  */
-
 Ext.namespace('M3Designer.model');
 
-Ext.apply(M3Designer.model.ModelTypeLibrary,{
-    typesConfig:{
-        component:{
-            properties:{
-                style:{
-                    defaultValue:'undefined',
-                    propertyType:'object'
+/**
+ * Дополняет класс M3Designer.model.ModelTypeLibrary информацией о типах компонентов доступных в дизайнере
+ * Более подрубную иформацию смотреть в документации
+ */
+Ext.apply(M3Designer.model.ModelTypeLibrary, {
+    typesConfig: {
+        component: {
+            properties: {
+                style: {
+                    defaultValue: 'undefined',
+                    propertyType: 'object'
                 },
-                hidden:{
-                    defaultValue:false
+                hidden: {
+                    defaultValue: false
                 },
-                disabled:{
-                    defaultValue:false,
+                disabled: {
+                    defaultValue: false,
                     isQuickEditable: true
                 },
-                height:{
-                    defaultValue:0,
+                height: {
+                    defaultValue: 0,
                     isQuickEditable: true
                 },
-                width:{
-                    defaultValue:0,
+                width: {
+                    defaultValue: 0,
                     isQuickEditable: true
                 },
-                x:{
-                    defaultValue:0
+                x: {
+                    defaultValue: 0
                 },
-                y:{
-                    defaultValue:0
+                y: {
+                    defaultValue: 0
                 },
-                html:{
-                    defaultValue:''
+                html: {
+                    defaultValue: ''
                 },
-                region:{
-                    defaultValue:'',
-                    propertyType:'enum',
+                region: {
+                    defaultValue: '',
+                    propertyType: 'enum',
                     isQuickEditable: true
                 },
-                flex:{
-                    defaultValue:0
+                flex: {
+                    defaultValue: 0
                 },
-                maxHeight:{
-                    defaultValue:0
+                maxHeight: {
+                    defaultValue: 0
                 },
-                minHeight:{
-                    defaultValue:0
+                minHeight: {
+                    defaultValue: 0
                 },
-                maxWidth:{
-                    defaultValue:0
+                maxWidth: {
+                    defaultValue: 0
                 },
-                minWidth:{
-                    defaultValue:0
+                minWidth: {
+                    defaultValue: 0
                 },
-                name:{
-                    defaultValue:'',
+                name: {
+                    defaultValue: '',
                     isQuickEditable: true
                 },
-                anchor:{
-                    defaultValue:''
+                anchor: {
+                    defaultValue: ''
                 },
-                cls:{
-                    defaultValue:''
+                cls: {
+                    defaultValue: ''
                 },
-                autoScroll:{
-                    defaultValue:false
+                autoScroll: {
+                    defaultValue: false
                 }
             }
         },
 
-        /*
+/*
         * Простые компоненты
         */
         button: {
-            parent:'component',
+            parent: 'component',
             properties: {
-                id:{
-                    defaultValue:'btn_button',
-                    isInitProperty:true,
-                    isQuickEditable: true
-                },
-                text:{
-                    defaultValue:'New button',
-                    isInitProperty:true
-                },
-                iconCls:{
-                    defaultValue:''
-                },
-                handler: {
-                    defaultValue:'undefined'
-                }
-            },
-            toolboxData:{
-                category:'Standart',
-                text:'Button'
-            }
-        },
-        label: {
-            parent:'component',
-            properties: {
-                id:{
-                    defaultValue:'lbl_label',
-                    isInitProperty:true,
+                id: {
+                    defaultValue: 'btn_button',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 text: {
-                    defaultValue:'New label',
-                    isInitProperty:true,
-                    isQuickEditable: true
+                    defaultValue: 'New button',
+                    isInitProperty: true
+                },
+                iconCls: {
+                    defaultValue: ''
+                },
+                handler: {
+                    defaultValue: 'undefined'
                 }
             },
-            toolboxData:{
-                category:'Standart',
-                text:'Label'
+            toolboxData: {
+                category: 'Standart',
+                text: 'Button'
             }
         },
-        /*
-        * Контейнеры
-        */
-        container : {
-            isContainer:true,
-            parent:'component',
+        label: {
+            parent: 'component',
             properties: {
-                layout:{
-                    defaultValue:'auto',
-                    isInitProperty:true,
-                    propertyType:'enum',
-                    isQuickEditable: true
-                },
-                layoutConfig :{
-                    defaultValue:'undefined',
-                    propertyType:'object'
-                },
-                labelWidth:{
-                    defaultValue:0,
-                    isQuickEditable: true
-                },
-                labelAlign:{
-                    defaultValue:'left',
-                    propertyType:'enum',
-                    isQuickEditable: true
-                },
-                labelPad:{
-                    defaultValue:''
-                },
                 id: {
-                    defaultValue:'cnt_container',
-                    isInitProperty:true,
+                    defaultValue: 'lbl_label',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
+                text: {
+                    defaultValue: 'New label',
+                    isInitProperty: true,
                     isQuickEditable: true
                 }
             },
-            toolboxData:{
-                category:'Containers',
-                text:'Container'
-            },
-            childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
-            },
-            treeIconCls:'designer-container'
+            toolboxData: {
+                category: 'Standart',
+                text: 'Label'
+            }
         },
-        panel:{
-            isContainer:true,
-            parent:'container',
-            properties:{
-                title:{
-                    defaultValue:'New panel',
-                    isInitProperty:true,
+/*
+        * Контейнеры
+        */
+        container: {
+            isContainer: true,
+            parent: 'component',
+            properties: {
+                layout: {
+                    defaultValue: 'auto',
+                    isInitProperty: true,
+                    propertyType: 'enum',
                     isQuickEditable: true
                 },
-                id:{
-                    defaultValue:'pnl_panel',
-                    isInitProperty:true,
+                layoutConfig: {
+                    defaultValue: 'undefined',
+                    propertyType: 'object'
+                },
+                labelWidth: {
+                    defaultValue: 0,
+                    isQuickEditable: true
+                },
+                labelAlign: {
+                    defaultValue: 'left',
+                    propertyType: 'enum',
+                    isQuickEditable: true
+                },
+                labelPad: {
+                    defaultValue: ''
+                },
+                id: {
+                    defaultValue: 'cnt_container',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                }
+            },
+            toolboxData: {
+                category: 'Containers',
+                text: 'Container'
+            },
+            childTypesRestrictions: {
+                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
+            },
+            treeIconCls: 'designer-container'
+        },
+        panel: {
+            isContainer: true,
+            parent: 'container',
+            properties: {
+                title: {
+                    defaultValue: 'New panel',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
+                id: {
+                    defaultValue: 'pnl_panel',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 collapsible: {
-                    defaultValue:false
+                    defaultValue: false
                 },
-                collapsed : {
-                    defaultValue:false,
+                collapsed: {
+                    defaultValue: false,
                     isQuickEditable: true
                 },
                 border: {
                     defaultValue: true
                 },
-                bodyBorder : {
+                bodyBorder: {
                     defaultValue: true
                 },
-				bodyStyle: {
-					defaultValue: ''
-				},
-                baseCls :{
+                bodyStyle: {
+                    defaultValue: ''
+                },
+                baseCls: {
                     defaultValue: 'x-panel'
                 },
-                autoLoad : {
+                autoLoad: {
                     defaultValue: 'undefined'
                 },
-                padding:{
-                    defaultValue:'undefined',
+                padding: {
+                    defaultValue: 'undefined',
                     isQuickEditable: true
                 },
                 header: {
-                    defaultValue:true,
-                    isInitProperty:true
+                    defaultValue: true,
+                    isInitProperty: true
                 }
             },
-            childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
+            childTypesRestrictions: {
+                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
             },
-            toolboxData:{
-                text:'Panel',
-                category:'Containers'
+            toolboxData: {
+                text: 'Panel',
+                category: 'Containers'
             },
-            treeIconCls:'designer-panel'
+            treeIconCls: 'designer-panel'
         },
-        fieldSet:{
-            parent:'panel',
-            isContainer:true,
-            properties:{
-                layout:{
-                    defaultValue:'form',
-                    isInitProperty:true,
-                    propertyType:'enum',
-                    isQuickEditable: true
-                },
-                title:{
-                    defaultValue:'New fieldset',
-                    isInitProperty:true,
-                    isQuickEditable: true
-                },
-                id:{
-                    defaultValue:'fset_fieldset',
-                    isInitProperty:true,
-                    isQuickEditable: true
-                }
-            },
-            childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
-            },
-            toolboxData:{
-                text:'Field set',
-                category:'Containers'
-            },
-            treeIconCls:'designer-icon-fieldset'
-        },
-        tabPanel:{
-            parent:'panel',
-            isContainer:true,
-            properties:{
-                id:{
-                    defaultValue:'tab_tappanel',
-                    isInitProperty:true,
-                    isQuickEditable: true
-                },
-                activeTab:{
-                    defaultValue:0,
-                    isInitProperty:true
-                },
+        fieldSet: {
+            parent: 'panel',
+            isContainer: true,
+            properties: {
                 layout: {
-                    defaultValue:undefined,
-                    isInitProperty:true,
-                    isNotEditable:true,
-                    isQuickEditable:false
-                }
-            },
-            childTypesRestrictions:{
-                allowed:['panel', 'formPanel','fieldSet', 'gridPanel','objectGrid']
-            },
-            toolboxData:{
-                text:'Tab panel',
-                category:'Containers'
-            },
-            treeIconCls:'designer-tab-panel'
-        },
-        formPanel: {
-            parent:'panel',
-            isContainer:true,
-            properties : {
-                id : {
-                    defaultValue:'frm_formpanel',
-                    isInitProperty:true,
-                    isQuickEditable: true
-                },
-                layout: {
-                    defaultValue:'form',
-                    isInitProperty:true,
+                    defaultValue: 'form',
+                    isInitProperty: true,
+                    propertyType: 'enum',
                     isQuickEditable: true
                 },
                 title: {
-                    defaultValue:'',
-                    isInitProperty:true,
+                    defaultValue: 'New fieldset',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
+                id: {
+                    defaultValue: 'fset_fieldset',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                }
+            },
+            childTypesRestrictions: {
+                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
+            },
+            toolboxData: {
+                text: 'Field set',
+                category: 'Containers'
+            },
+            treeIconCls: 'designer-icon-fieldset'
+        },
+        tabPanel: {
+            parent: 'panel',
+            isContainer: true,
+            properties: {
+                id: {
+                    defaultValue: 'tab_tappanel',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
+                activeTab: {
+                    defaultValue: 0,
+                    isInitProperty: true
+                },
+                layout: {
+                    defaultValue: undefined,
+                    isInitProperty: true,
+                    isNotEditable: true,
+                    isQuickEditable: false
+                }
+            },
+            childTypesRestrictions: {
+                allowed: ['panel', 'formPanel', 'fieldSet', 'gridPanel', 'objectGrid']
+            },
+            toolboxData: {
+                text: 'Tab panel',
+                category: 'Containers'
+            },
+            treeIconCls: 'designer-tab-panel'
+        },
+        formPanel: {
+            parent: 'panel',
+            isContainer: true,
+            properties: {
+                id: {
+                    defaultValue: 'frm_formpanel',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
+                layout: {
+                    defaultValue: 'form',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
+                title: {
+                    defaultValue: '',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 url: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
-                fileUpload:{
-                    defaultValue:false
+                fileUpload: {
+                    defaultValue: false
                 },
-                urlShortName:{
-                    defaultValue:'',
-                    isQuickEditable:true
+                urlShortName: {
+                    defaultValue: '',
+                    isQuickEditable: true
                 }
             },
-            childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
+            childTypesRestrictions: {
+                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
             },
             toolboxData: {
-                category:'Containers',
-                text:'Form panel'
+                category: 'Containers',
+                text: 'Form panel'
             },
-            treeIconCls:'designer-formpanel'
+            treeIconCls: 'designer-formpanel'
         },
-        /*
+/*
         * Поля для ввода
         */
-        baseField : {
-            parent:'component',
-            properties:{
-                fieldLabel:{
-                    defaultValue:'',
+        baseField: {
+            parent: 'component',
+            properties: {
+                fieldLabel: {
+                    defaultValue: '',
                     isQuickEditable: true
                 },
                 value: {
-                    defaultValue:'',
+                    defaultValue: '',
                     isQuickEditable: true
                 },
-                labelStyle:{
-                    defaultValue:''
+                labelStyle: {
+                    defaultValue: ''
                 },
-                readOnly:{
-                    defaultValue:false
+                readOnly: {
+                    defaultValue: false
                 },
-                hideLabel :{
-                    defaultValue:false
+                hideLabel: {
+                    defaultValue: false
                 },
-                tabIndex:{
-                    defaultValue:0
+                tabIndex: {
+                    defaultValue: 0
                 },
-                invalidClass:{
-                    defaultValue:'m3-form-invalid',
-                    isInitValue:true
+                invalidClass: {
+                    defaultValue: 'm3-form-invalid',
+                    isInitValue: true
                 }
             }
         },
-        textArea:{
-            parent:'textField',
-            properties:{
-                id:{
-                    defaultValue:'tarea_textarea',
-                    isInitProperty:true,
+        textArea: {
+            parent: 'textField',
+            properties: {
+                id: {
+                    defaultValue: 'tarea_textarea',
+                    isInitProperty: true,
                     isQuickEditable: true
                 }
             },
-            toolboxData:{
-                text:'Text area',
-                category:'Fields'
+            toolboxData: {
+                text: 'Text area',
+                category: 'Fields'
             },
-            treeIconCls:'designer-textarea'
+            treeIconCls: 'designer-textarea'
         },
-        checkBox:{
-            parent:'baseField',
+        checkBox: {
+            parent: 'baseField',
             properties: {
                 id: {
-                    defaultValue:'chk_checkbox',
-                    isInitProperty:true,
+                    defaultValue: 'chk_checkbox',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 checked: {
-                    defaultValue:false,
+                    defaultValue: false,
                     isQuickEditable: true
                 },
                 boxLabel: {
-                    defaultValue:'',
+                    defaultValue: '',
                     isQuickEditable: true
                 }
             },
-            toolboxData:{
-                text:'Checkbox',
-                category:'Fields'
+            toolboxData: {
+                text: 'Checkbox',
+                category: 'Fields'
             },
-            treeIconCls:'designer-checkbox'
+            treeIconCls: 'designer-checkbox'
         },
         dateField: {
-            parent:'baseField',
+            parent: 'baseField',
             properties: {
-                id:{
-                    defaultValue:'date_datefield',
-                    isInitProperty:true,
+                id: {
+                    defaultValue: 'date_datefield',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                startDay : {
-                    defaultValue:0
+                startDay: {
+                    defaultValue: 0
                 }
             },
-            toolboxData:{
-                text:'Date field',
-                category:'Fields'
+            toolboxData: {
+                text: 'Date field',
+                category: 'Fields'
             },
-            treeIconCls:'designer-icon-datefield'
+            treeIconCls: 'designer-icon-datefield'
         },
-        timeField : {
-            parent:'baseField',
+        timeField: {
+            parent: 'baseField',
             properties: {
-                id:{
-                    defaultValue:'time_timefield',
-                    isInitProperty:true,
+                id: {
+                    defaultValue: 'time_timefield',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                format : {
-                    defaultValue:'g:i A',
+                format: {
+                    defaultValue: 'g:i A',
                     isQuickEditable: true
                 },
                 increment: {
-                    defaultValue:15,
+                    defaultValue: 15,
                     isQuickEditable: true
                 }
             },
-            toolboxData:{
-                text:'Time field',
-                category:'Fields'
+            toolboxData: {
+                text: 'Time field',
+                category: 'Fields'
             },
-            treeIconCls:'designer-timefield'
+            treeIconCls: 'designer-timefield'
         },
-        textField:{
-            parent:'baseField',
-            properties:{
-                id:{
-                    defaultValue:'str_stringfield',
-                    isInitProperty:true,
+        textField: {
+            parent: 'baseField',
+            properties: {
+                id: {
+                    defaultValue: 'str_stringfield',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                 allowBlank :{
-                    defaultValue:true,
+                allowBlank: {
+                    defaultValue: true,
                     isQuickEditable: true
                 },
-                 vtype: {
-                    defaultValue:''
+                vtype: {
+                    defaultValue: ''
                 },
                 emptyText: {
-                    defaultValue:'',
+                    defaultValue: '',
                     isQuickEditable: true
                 },
-                minLength:{
-                    defaultValue:0
+                minLength: {
+                    defaultValue: 0
                 },
-                minLengthText:{
-                    defaultValue:''
+                minLengthText: {
+                    defaultValue: ''
                 },
-                maxLength:{
-                    defaultValue:0
+                maxLength: {
+                    defaultValue: 0
                 },
-                maxLengthText:{
-                    defaultValue:''
+                maxLengthText: {
+                    defaultValue: ''
                 },
-                regex:{
-                    defaultValue:''
+                regex: {
+                    defaultValue: ''
                 },
-                regexText:{
-                    defaultValue:''
+                regexText: {
+                    defaultValue: ''
                 }
             },
-            toolboxData:{
-                text:'String field',
-                category:'Fields'
+            toolboxData: {
+                text: 'String field',
+                category: 'Fields'
             },
-            treeIconCls:'designer-icon-text'
+            treeIconCls: 'designer-icon-text'
         },
-        numberField:{
-            parent:'textField',
-            properties:{
-                id:{
-                    defaultValue:'nmbr_numberfield',
-                    isInitProperty:true,
+        numberField: {
+            parent: 'textField',
+            properties: {
+                id: {
+                    defaultValue: 'nmbr_numberfield',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                decimalSeparator:{
-                    defaultValue:'.'
+                decimalSeparator: {
+                    defaultValue: '.'
                 },
                 allowDecimal: {
-                    defaultValue:true,
+                    defaultValue: true,
                     isQuickEditable: true
                 },
                 allowNegative: {
-                    defaultValue:true,
+                    defaultValue: true,
                     isQuickEditable: true
                 },
                 decimalPrecision: {
-                    defaultValue:2
+                    defaultValue: 2
                 },
-                maxValue : {
-                    defaultValue:0
+                maxValue: {
+                    defaultValue: 0
                 },
                 maxText: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
-                minValue : {
-                    defaultValue:0
+                minValue: {
+                    defaultValue: 0
                 },
                 minText: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 selectOnFocus: {
                     defaultValue: false
                 }
 
             },
-            toolboxData:{
-                text:'Number field',
-                category:'Fields'
+            toolboxData: {
+                text: 'Number field',
+                category: 'Fields'
             },
-            treeIconCls:'designer-icon-number'
+            treeIconCls: 'designer-icon-number'
         },
         htmlEditor: {
-            parent:'baseField',
-            properties : {
+            parent: 'baseField',
+            properties: {
                 id: {
-                    defaultValue:'html_htmleditor',
-                    isInitProperty:true,
+                    defaultValue: 'html_htmleditor',
+                    isInitProperty: true,
                     isQuickEditable: true
                 }
 
             },
             toolboxData: {
-                category:'Fields',
-                text:'Html editor'
+                category: 'Fields',
+                text: 'Html editor'
             },
-            treeIconCls:'designer-htmleditor'
+            treeIconCls: 'designer-htmleditor'
         },
         comboBox: {
-            isContainer:true,
-            parent:'triggerField',
+            isContainer: true,
+            parent: 'triggerField',
             properties: {
-                id:{
-                    defaultValue:'cmb_combobox',
-                    isInitProperty:true,
+                id: {
+                    defaultValue: 'cmb_combobox',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                triggerAction:{
-                    defaultValue:'all',
-                    isInitProperty:true,
-                    propertyType:'enum',
+                triggerAction: {
+                    defaultValue: 'all',
+                    isInitProperty: true,
+                    propertyType: 'enum',
                     isQuickEditable: true
                 },
-                valueField:{
-                    defaultValue:'id',
-                    isInitProperty:true,
+                valueField: {
+                    defaultValue: 'id',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                displayField:{
-                    defaultValue:'name',
-                    isInitProperty:true
+                displayField: {
+                    defaultValue: 'name',
+                    isInitProperty: true
                 },
                 mode: {
-                    defaultValue:'local',
-                    propertyType:'enum',
-                    isInitProperty:true
+                    defaultValue: 'local',
+                    propertyType: 'enum',
+                    isInitProperty: true
                 },
                 hiddenName: {
-                    defaultValue:'undefined'
+                    defaultValue: 'undefined'
                 },
                 typeAhead: {
-                    defaultValue:false
+                    defaultValue: false
                 },
                 queryParam: {
-                    defaultValue:'query'
+                    defaultValue: 'query'
                 },
                 pageSize: {
-                    defaultValue:0
+                    defaultValue: 0
                 },
                 maxHeight: {
                     defaultValue: 300
                 },
                 minChars: {
-                    defaultValue:0
+                    defaultValue: 0
                 },
                 forceSelection: {
-                    defaultValue:false
+                    defaultValue: false
                 },
-                valueNotFoundText:{
-                    defaultValue:'undefined'
+                valueNotFoundText: {
+                    defaultValue: 'undefined'
                 }
             },
-            childTypesRestrictions:{
-                allowed:['arrayStore','jsonStore'],
-                single:['arrayStore','jsonStore']
+            childTypesRestrictions: {
+                allowed: ['arrayStore', 'jsonStore'],
+                single: ['arrayStore', 'jsonStore']
             },
-            toolboxData:{
-                text:'Combo box',
-                category:'Fields'
+            toolboxData: {
+                text: 'Combo box',
+                category: 'Fields'
             },
-            treeIconCls:'designer-icon-combo'
+            treeIconCls: 'designer-icon-combo'
         },
         triggerField: {
-            parent:'textField',
+            parent: 'textField',
             properties: {
                 id: {
-                    defaultValue:'New trigger field',
-                    isInitProperty:true,
+                    defaultValue: 'New trigger field',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 editable: {
-                    defaultValue:true,
-                    isInitProperty:true
+                    defaultValue: true,
+                    isInitProperty: true
                 },
-                hideTrigger : {
-                    defaultValue:false
+                hideTrigger: {
+                    defaultValue: false
                 }
             },
-            toolboxData:{
-                text:'Trigger field',
-                category:'Fields'
+            toolboxData: {
+                text: 'Trigger field',
+                category: 'Fields'
             },
-            treeIconCls:'designer-icon-combo'
+            treeIconCls: 'designer-icon-combo'
         },
         displayField: {
-            parent:'baseField',
+            parent: 'baseField',
             properties: {
-                id : {
-                    defaultValue:'dspl_displayfield',
-                    isInitProperty:true,
-                    isQuickEditable: true
-                },
-                value : {
-                    defaultValue:'New display field',
-                    isInitProperty:true,
-                    isQuickEditable: true
-                }
-            },
-            toolboxData:{
-                text:'Display field',
-                category:'Fields'
-            },
-            treeIconCls:'designer-displayfield'
-        },
-        hiddenField: {
-            properties: {
-                id : {
-                    defaultValue:'hdn_hiddenfield',
-                    isInitProperty:true,
-                    isQuickEditable: true
-                },
-                name : {
-                    defaultValue:'',
+                id: {
+                    defaultValue: 'dspl_displayfield',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 value: {
-                    defaultValue:'',
+                    defaultValue: 'New display field',
+                    isInitProperty: true,
                     isQuickEditable: true
                 }
             },
-            toolboxData:{
-                text:'Hidden field',
-                category:'Fields'
+            toolboxData: {
+                text: 'Display field',
+                category: 'Fields'
+            },
+            treeIconCls: 'designer-displayfield'
+        },
+        hiddenField: {
+            properties: {
+                id: {
+                    defaultValue: 'hdn_hiddenfield',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
+                name: {
+                    defaultValue: '',
+                    isQuickEditable: true
+                },
+                value: {
+                    defaultValue: '',
+                    isQuickEditable: true
+                }
+            },
+            toolboxData: {
+                text: 'Hidden field',
+                category: 'Fields'
             }
         },
-        /*
+/*
         * Тулбары
         */
         toolbar: {
-            isContainer:true,
-            parent:'container',
+            isContainer: true,
+            parent: 'container',
             properties: {
                 id: {
                     defaultValue: 'tb_toolbar',
-                    isInitProperty:true,
+                    isInitProperty: true,
                     isQuickEditable: false
                 },
                 parentDockType: {
-                    defaultValue:'tbar',
-                    isInitProperty:true,
-                    propertyType:'enum',
+                    defaultValue: 'tbar',
+                    isInitProperty: true,
+                    propertyType: 'enum',
                     isQuickEditable: true
                 },
                 layout: {
-                    defaultValue:'toolbar',
-                    isInitProperty:true,
+                    defaultValue: 'toolbar',
+                    isInitProperty: true,
                     isQuickEditable: false
                 }
             },
-            toolboxData:{
-                category:'Toolbar',
-                text:'Toolbar'
+            toolboxData: {
+                category: 'Toolbar',
+                text: 'Toolbar'
             },
-            childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
+            childTypesRestrictions: {
+                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
             }
         },
         tbfill: {
             properties: {
                 id: {
                     defaultValue: 'tbfill_toolbarfill',
-                    isInitProperty:true,
+                    isInitProperty: true,
                     isQuickEditable: true
                 }
             },
-            toolboxData:{
-                category:'Toolbar',
-                text:'Toolbar fill'
+            toolboxData: {
+                category: 'Toolbar',
+                text: 'Toolbar fill'
             }
         },
         tbseparator: {
             properties: {
                 id: {
                     defaultValue: 'tbsep_toolbarseparator',
-                    isInitProperty:true,
+                    isInitProperty: true,
                     isQuickEditable: true
                 }
             },
-            toolboxData:{
-                category:'Toolbar',
-                text:'Toolbar separator'
+            toolboxData: {
+                category: 'Toolbar',
+                text: 'Toolbar separator'
             }
         },
         tbspacer: {
             properties: {
                 id: {
                     defaultValue: 'tbsp_toolbarspacer',
-                    isInitProperty:true,
+                    isInitProperty: true,
                     isQuickEditable: true
                 }
             },
-            toolboxData:{
-                category:'Toolbar',
-                text:'Toolbar spacer'
+            toolboxData: {
+                category: 'Toolbar',
+                text: 'Toolbar spacer'
             }
         },
         tbtext: {
             properties: {
                 id: {
                     defaultValue: 'tbtxt_toolbartext',
-                    isInitProperty:true,
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 text: {
-                    defaultValue:'Toolbar text',
-                    isInitProperty:true
+                    defaultValue: 'Toolbar text',
+                    isInitProperty: true
                 }
             },
-            toolboxData:{
-                category:'Toolbar',
-                text:'Toolbar text item'
+            toolboxData: {
+                category: 'Toolbar',
+                text: 'Toolbar text item'
             }
         },
         pagingToolbar: {
             properties: {
                 id: {
                     defaultValue: 'pbr_pagingtoolbar',
-                    isInitProperty:true,
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 parentDockType: {
-                    defaultValue:'bbar',
-                    isInitProperty:true,
-                    propertyType:'enum',
+                    defaultValue: 'bbar',
+                    isInitProperty: true,
+                    propertyType: 'enum',
                     isQuickEditable: true
                 },
                 layout: {
-                    defaultValue:'toolbar',
-                    isInitProperty:true
+                    defaultValue: 'toolbar',
+                    isInitProperty: true
                 },
-                pageSize:{
-                    defaultValue:25,
-                    isQuickEditable:true
+                pageSize: {
+                    defaultValue: 25,
+                    isQuickEditable: true
                 },
                 displayMessage: {
-                    defaultValue:'Показано записей {0} - {1} из {2}'
+                    defaultValue: 'Показано записей {0} - {1} из {2}'
                 },
                 displayInfo: {
-                    defaultValue:true
+                    defaultValue: true
                 },
-                emptyMessage:{
-                    defaultValue:'Нет записей'
+                emptyMessage: {
+                    defaultValue: 'Нет записей'
                 }
             },
-            toolboxData:{
-                category:'Grid',
-                text:'Paging toolbar'
+            toolboxData: {
+                category: 'Grid',
+                text: 'Paging toolbar'
             }
         },
-        /*
+/*
         * Дерево
         */
-        treeNode:{
-            isContainer:true,
-            properties:{
-                items:{
-                    defaultValue:'undefined',
-                    propertyType:'object'
-                },
-                id: {
-                    defaultValue:'tnode_treenode',
-                    isInitProperty:true
-                },
-                text: {
-                    defaultValue:'New tree node',
-                    isInitProperty:true
-                },
-                iconCls:{
-                    defaultValue:''
-                },
-                leaf:{
-                    defaultValue:false,
-                    isInitProperty:true
-                },
-                expanded:{
-                    defaultValue:false
-                },
-                hasChildren:{
-                    defaultValue:false
-                },
-                autoCheck:{
-                    defaultValue:false
-                },
-                checked:{
-                    defaultValue:false
-                },
-                canCheck:{
-                    defaultValue:false
-                }
-            },
-            childTypesRestrictions:{
-                allowed:['treeNode']
-            },
-            toolboxData:{
-                category:'Tree',
-                text:'Tree node'
-            }
-        },
-        gridPanel:{
-            parent:'panel',
+        treeNode: {
             isContainer: true,
             properties: {
-                id:{
-                    defaultValue:'grd_gridpanel',
-                    isInitProperty:true,
+                items: {
+                    defaultValue: 'undefined',
+                    propertyType: 'object'
+                },
+                id: {
+                    defaultValue: 'tnode_treenode',
+                    isInitProperty: true
+                },
+                text: {
+                    defaultValue: 'New tree node',
+                    isInitProperty: true
+                },
+                iconCls: {
+                    defaultValue: ''
+                },
+                leaf: {
+                    defaultValue: false,
+                    isInitProperty: true
+                },
+                expanded: {
+                    defaultValue: false
+                },
+                hasChildren: {
+                    defaultValue: false
+                },
+                autoCheck: {
+                    defaultValue: false
+                },
+                checked: {
+                    defaultValue: false
+                },
+                canCheck: {
+                    defaultValue: false
+                }
+            },
+            childTypesRestrictions: {
+                allowed: ['treeNode']
+            },
+            toolboxData: {
+                category: 'Tree',
+                text: 'Tree node'
+            }
+        },
+        gridPanel: {
+            parent: 'panel',
+            isContainer: true,
+            properties: {
+                id: {
+                    defaultValue: 'grd_gridpanel',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 title: {
-                    defaultValue:'New grid',
-                    isInitProperty:true,
+                    defaultValue: 'New grid',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 autoExpandColumn: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 layout: {
-                    defaultValue:'auto',
-                    isInitProperty:true,
+                    defaultValue: 'auto',
+                    isInitProperty: true,
                     isQuickEditable: false
                 }
             },
-            childTypesRestrictions:{
-                allowed:['gridColumn','arrayStore', 'toolbar','jsonStore','pagingToolbar'],
-                single:['arrayStore','jsonStore','pagingToolbar']
+            childTypesRestrictions: {
+                allowed: ['gridColumn', 'arrayStore', 'toolbar', 'jsonStore', 'pagingToolbar'],
+                single: ['arrayStore', 'jsonStore', 'pagingToolbar']
             },
-            treeIconCls:'designer-grid-panel',
-            toolboxData:{
-                text:'Grid panel',
-                category:'Grid'
+            treeIconCls: 'designer-grid-panel',
+            toolboxData: {
+                text: 'Grid panel',
+                category: 'Grid'
             }
 
         },
-        gridColumn:{
+        gridColumn: {
             properties: {
-                id:{
+                id: {
                     //ATTENTION - пробелы в id ведут к багу при наведении мышки на хедер
-                    defaultValue:'clmn_gridColumn',
-                    isInitProperty:true,
+                    defaultValue: 'clmn_gridColumn',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                header:{
-                    defaultValue:'column',
-                    isInitProperty:true,
+                header: {
+                    defaultValue: 'column',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                dataIndex:{
-                    defaultValue:'Foo',
-                    isInitProperty:true,
+                dataIndex: {
+                    defaultValue: 'Foo',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-				width: {
-					defaultValue: 0
-				},
+                width: {
+                    defaultValue: 0
+                },
                 menuDisabled: {
-                    defaultValue:true,
-                    isInitProperty:true
+                    defaultValue: true,
+                    isInitProperty: true
                 }
             },
-            treeIconCls:'designer-grid-column',
+            treeIconCls: 'designer-grid-column',
             toolboxData: {
-                text:'Grid column',
-                category:'Grid'
+                text: 'Grid column',
+                category: 'Grid'
             }
         },
-        window:{
-            parent:'panel',
+        window: {
+            parent: 'panel',
             properties: {
-                id:{
-                    defaultValue:'win_window',
-                    isInitProperty:true,
+                id: {
+                    defaultValue: 'win_window',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
-                layout:{
-                    defaultValue:'fit',
-                    isInitProperty:true,
-                    propertyType:'enum',
+                layout: {
+                    defaultValue: 'fit',
+                    isInitProperty: true,
+                    propertyType: 'enum',
                     isQuickEditable: true
                 },
-				bodyStyle: {
-					defaultValue: 'padding:5px',
-					isInitProperty: true
-				},
+                bodyStyle: {
+                    defaultValue: 'padding:5px',
+                    isInitProperty: true
+                },
                 title: {
-                    defaultValue:'New window',
-                    isInitProperty:true,
+                    defaultValue: 'New window',
+                    isInitProperty: true,
                     isQuickEditable: true
                 }
             },
-            childTypesRestrictions:{
-                disallowed:['arrayStore','gridColumn','jsonStore','pagingToolbar']
+            childTypesRestrictions: {
+                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
             },
-            isContainer:true,
-            treeIconCls:'designer-icon-page'
+            isContainer: true,
+            treeIconCls: 'designer-icon-page'
         },
         baseStore: {
             properties: {
                 _baseParams: {
-                    defaultValue:'undefined',
-                    propertyType:'object'
+                    defaultValue: 'undefined',
+                    propertyType: 'object'
                 },
                 autoLoad: {
-                    defaultValue:false
+                    defaultValue: false
                 },
                 autoSave: {
                     defaultValue: true
                 },
                 url: {
-                    defaultValue:'',
-                    isQuickEditable:true
+                    defaultValue: '',
+                    isQuickEditable: true
                 }
             }
         },
-        arrayStore:{
-            parent:'baseStore',
-            properties : {
+        arrayStore: {
+            parent: 'baseStore',
+            properties: {
                 id: {
-                    defaultValue:'astore_arraystore',
-                    isInitProperty:true,
+                    defaultValue: 'astore_arraystore',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 storeId: {
-                    defaultValue:'New store',
-                    isInitProperty:true
+                    defaultValue: 'New store',
+                    isInitProperty: true
                 },
-                idIndex : {
-                    defaultValue:0,
-                    isInitProperty:true
+                idIndex: {
+                    defaultValue: 0,
+                    isInitProperty: true
                 },
                 data: {
-                    defaultValue:'undefined',
-                    propertyType:'object',
-                    isQuickEditable:true
+                    defaultValue: 'undefined',
+                    propertyType: 'object',
+                    isQuickEditable: true
                 }
             },
-            treeIconCls:'icon-database',
+            treeIconCls: 'icon-database',
             toolboxData: {
-                text:'Data store',
-                category:'Data'
+                text: 'Data store',
+                category: 'Data'
             }
         },
-        jsonStore:{
-            parent:'baseStore',
-            properties : {
+        jsonStore: {
+            parent: 'baseStore',
+            properties: {
                 id: {
-                    defaultValue:'jstore_jsonstore',
-                    isInitProperty:true,
+                    defaultValue: 'jstore_jsonstore',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 storeId: {
-                    defaultValue:'newJsonStore',
-                    isInitProperty:true
+                    defaultValue: 'newJsonStore',
+                    isInitProperty: true
                 },
-                idProperty : {
-                    defaultValue:'id',
-                    isInitProperty:true
+                idProperty: {
+                    defaultValue: 'id',
+                    isInitProperty: true
                 },
                 fields: {
-                    defaultValue:'undefined',
-                    propertyType:'object',
+                    defaultValue: 'undefined',
+                    propertyType: 'object',
                     isQuickEditable: true
                 },
                 root: {
-                    defaultValue:'undefined'
+                    defaultValue: 'undefined'
                 },
                 _start: {
                     defaultValue: 0
                 },
                 _limit: {
-                    defaultValue:-1
+                    defaultValue: -1
                 },
                 totalProperty: {
-                    defaultValue:'undefined'
+                    defaultValue: 'undefined'
                 }
             },
-            treeIconCls:'icon-database',
+            treeIconCls: 'icon-database',
             toolboxData: {
-                text:'Json store',
-                category:'Data'
+                text: 'Json store',
+                category: 'Data'
             }
         },
-        /*
+/*
         * М3
         */
-         treeGrid: {
-            isContainer:true,
-            parent:'panel',
+        treeGrid: {
+            isContainer: true,
+            parent: 'panel',
             properties: {
                 id: {
-                    defaultValue:'tree_treepanel',
-                    isInitProperty:true
+                    defaultValue: 'tree_treepanel',
+                    isInitProperty: true
                 },
-                rootText:{
-                    defaultValue:'Root',
-                    isInitProperty:true
+                rootText: {
+                    defaultValue: 'Root',
+                    isInitProperty: true
                 },
                 url: {
-                    defaultValue:'',
-                    isQuickEditable:true
+                    defaultValue: '',
+                    isQuickEditable: true
                 },
-                urlShortName:{
-                    defaultValue:'',
-                    isQuickEditable:true
+                urlShortName: {
+                    defaultValue: '',
+                    isQuickEditable: true
                 },
-                customLoad:{
-                    defaultValue:false
+                customLoad: {
+                    defaultValue: false
                 },
-                readOnly:{
-                    defaultValue:false
+                readOnly: {
+                    defaultValue: false
                 },
-                dragDrop:{
-                    defaultValue:false
+                dragDrop: {
+                    defaultValue: false
                 },
-                allowContainerDrop:{
-                    defaultValue:true
+                allowContainerDrop: {
+                    defaultValue: true
                 }
             },
             childTypesRestrictions: {
-                allowed:['treeNode','gridColumn','toolbar']
+                allowed: ['treeNode', 'gridColumn', 'toolbar']
             },
             toolboxData: {
-                category:'M3',
-                text:'Tree panel'
+                category: 'M3',
+                text: 'Tree panel'
             }
         },
-        dictSelect:{
-            parent:'comboBox',
+        dictSelect: {
+            parent: 'comboBox',
             properties: {
                 id: {
-                    defaultValue:'dsf_dictselectfield',
-                    isInitProperty:true
+                    defaultValue: 'dsf_dictselectfield',
+                    isInitProperty: true
                 },
                 hideTrigger: {
-                    defaultValue:true
+                    defaultValue: true
                 },
                 hideClearTrigger: {
-                    defaultValue:false
+                    defaultValue: false
                 },
                 hideEditTrigger: {
-                    defaultValue:false
+                    defaultValue: false
                 },
                 hideDictSelectTrigger: {
-                    defaultValue:false
+                    defaultValue: false
                 },
                 minChars: {
-                    defaultValue:2
+                    defaultValue: 2
                 },
                 width: {
-                    defaultValue:150
+                    defaultValue: 150
                 },
                 defaultText: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 askBeforeDelete: {
-                    defaultValue:true
+                    defaultValue: true
                 },
                 url: {
-                    defaultValue:'',
-                    isQuickEditable:true
+                    defaultValue: '',
+                    isQuickEditable: true
                 },
-                urlShortName:{
-                    defaultValue:'',
-                    isQuickEditable:true
+                urlShortName: {
+                    defaultValue: '',
+                    isQuickEditable: true
                 },
-                editUrl:{
-                    defaultValue:''
+                editUrl: {
+                    defaultValue: ''
                 },
                 editUrlShortName: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 autocompleteUrl: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 autocompleteUrlShortName: {
-                    defaultValue:''
+                    defaultValue: ''
                 }
 
             },
-            treeIconCls:'designer-icon-combo',
+            treeIconCls: 'designer-icon-combo',
             toolboxData: {
-                text:'Dictionary select field',
-                category:'M3'
+                text: 'Dictionary select field',
+                category: 'M3'
             }
         },
         objectGrid: {
-            parent:'grid',
+            parent: 'grid',
             isContainer: true,
             properties: {
-                id:{
-                    defaultValue:'ogrd_objectgrid',
-                    isInitProperty:true,
+                id: {
+                    defaultValue: 'ogrd_objectgrid',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 title: {
-                    defaultValue:'New object grid',
-                    isInitProperty:true,
+                    defaultValue: 'New object grid',
+                    isInitProperty: true,
                     isQuickEditable: true
                 },
                 autoExpandColumn: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 layout: {
-                    defaultValue:undefined,
-                    isInitProperty:false,
+                    defaultValue: undefined,
+                    isInitProperty: false,
                     isQuickEditable: false,
-                    isNotEditable:true
+                    isNotEditable: true
                 },
-                layoutConfig:{
-                    defaultValue:undefined,
-                    isNotEditable:true
+                layoutConfig: {
+                    defaultValue: undefined,
+                    isNotEditable: true
                 },
                 urlDataShortName: {
-                    defaultValue:'',
-                    isQuickEditable:true
+                    defaultValue: '',
+                    isQuickEditable: true
                 },
                 urlEditShortName: {
-                    defaultValue:'',
-                    isQuickEditable:true
+                    defaultValue: '',
+                    isQuickEditable: true
                 },
                 urlDeleteShortName: {
-                    defaultValue:'',
-                    isQuickEditable:true
+                    defaultValue: '',
+                    isQuickEditable: true
                 },
                 urlNewShortName: {
-                    defaultValue:'',
-                    isQuickEditable:true
+                    defaultValue: '',
+                    isQuickEditable: true
                 },
                 urlData: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 urlEdit: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 urlDelete: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 urlNew: {
-                    defaultValue:''
+                    defaultValue: ''
                 },
                 loadMask: {
-                    defaultValue:true
+                    defaultValue: true
                 },
                 rowIdName: {
-                    defaultValue:'row_id',
-                    isQuickEditable:true
+                    defaultValue: 'row_id',
+                    isQuickEditable: true
                 },
                 columnParamName: {
-                    defaultValue:'column'
+                    defaultValue: 'column'
                 },
                 allowPaging: {
-                    defaultValue:true
+                    defaultValue: true
                 },
                 header: {
-                    defaultValue:true
+                    defaultValue: true
                 }
             },
-            childTypesRestrictions:{
-                allowed:['gridColumn'],
-                disallowed:['arrayStore','jsonStore','pagingToolbar','toolbar']
+            childTypesRestrictions: {
+                allowed: ['gridColumn'],
+                disallowed: ['arrayStore', 'jsonStore', 'pagingToolbar', 'toolbar']
             },
-            treeIconCls:'designer-grid-panel',
-            toolboxData:{
-                text:'Object grid',
-                category:'M3'
+            treeIconCls: 'designer-grid-panel',
+            toolboxData: {
+                text: 'Object grid',
+                category: 'M3'
             }
         },
         fileUploadField: {
-            parent:'baseField',
+            parent: 'baseField',
             properties: {
                 id: {
-                    defaultValue:'fupf_fileuploadfield',
-                    isInitProperty:true
+                    defaultValue: 'fupf_fileuploadfield',
+                    isInitProperty: true
                 },
                 possibleFileExtensions: {
-                    defaultValue:'',
-                    isInitProperty:true
+                    defaultValue: '',
+                    isInitProperty: true
                 },
                 value: {
-                    defaultValue:'',
-                    isInitProperty:true
+                    defaultValue: '',
+                    isInitProperty: true
                 }
             },
-            toolboxData:{
-                text:'File upload field',
-                category:'M3'
+            toolboxData: {
+                text: 'File upload field',
+                category: 'M3'
             }
         },
         imageUploadField: {
-            parent:'baseField',
+            parent: 'baseField',
             properties: {
                 id: {
-                    defaultValue:'iupf_imageuploadfield',
-                    isInitProperty:true
+                    defaultValue: 'iupf_imageuploadfield',
+                    isInitProperty: true
                 },
                 possibleFileExtensions: {
                     defaultValue: 'png,jpeg,gif,bmp,jpg',
-                    isInitProperty:true
+                    isInitProperty: true
                 },
                 thumbnailSize: {
-                    defaultValue:[300,300],
-                    propertyType:'object'
+                    defaultValue: [300, 300],
+                    propertyType: 'object'
                 },
-                thumbnail:{
-                    defaultValue:true
+                thumbnail: {
+                    defaultValue: true
                 },
-                imageMaxSize:{
-                    defaultValue:[600,600],
-                    propertyType:'object'
+                imageMaxSize: {
+                    defaultValue: [600, 600],
+                    propertyType: 'object'
                 },
                 value: {
-                    defaultValue:'',
-                    isInitProperty:true
+                    defaultValue: '',
+                    isInitProperty: true
                 }
             },
-            toolboxData:{
-                text:'Image upload field',
-                category:'M3'
+            toolboxData: {
+                text: 'Image upload field',
+                category: 'M3'
             }
         }
     }

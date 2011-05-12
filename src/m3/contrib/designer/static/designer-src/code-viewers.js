@@ -8,8 +8,7 @@ Ext.namespace('M3Designer.code');
 /**
  * @class M3Designer.code.PyCodeWindow
  * Окно предварительного просмтора кода питона, генерируемого дизайнером. Возникает по кнопке
- * предварительный просмотр
- * @constructor
+ * предварительный просмотр кода
  */
 M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
     title: 'Просмотр кода',
@@ -43,7 +42,6 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
 /**
  * @class M3Designer.code.ExtendedCodeEditor
  * Редактор исходных кодов. Используется при двойном щелчке по файлу в дереве проекта
- * @constructor
  */
 M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
     autoScroll: true,
