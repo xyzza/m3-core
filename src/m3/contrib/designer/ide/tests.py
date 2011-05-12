@@ -92,9 +92,21 @@ class Claz(ExtWindow):
         self.gridColumn_1 = gridColumn_1
         self.gridColumn_2 = gridColumn_2
         
-    def create_panel(self, cont=ExtPanel()):
+    def create_a(self, c=ExtForm):
+        a = c()
+        a.padding = '10px'
+        a.layout = 'form'
         
-        return cont
+        date_datefield_1 = ExtDateField()
+        
+        chk_checkbox_1 = ExtCheckBox()
+        
+        a.items.extend([date_datefield_1, chk_checkbox_1])
+        
+        self.date_datefield_1 = date_datefield_1
+        self.chk_checkbox_1 = chk_checkbox_1
+        
+        return a
         
 def ata(a, b):
     panel_2.store = urls.get_action('vega-action').get_absolute_url()
