@@ -6515,6 +6515,13 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	, clearStreet: function() {		
     	this.street.setValue('');		
 	}
+    , afterRenderAddr: function(){
+        //вашем обработчик dbl click через DOM елемент
+        if (this.addr_visible) {
+            this.addr.getEl().on('dblclick', this.onDblClickAddr, this)
+        }
+    }
+
 	, initComponent: function(){
 		Ext.m3.AddrField.superclass.initComponent.call(this);		
 		this.mon(this.place, 'change', this.onChangePlace, this);
@@ -6532,6 +6539,10 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		if (this.level > 1) {
 			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
 		}
+        if (this.addr_visible) {
+    		this.addr.on('afterrender', this.afterRenderAddr, this)
+    	}
+		
 		this.addEvents(
             /**
              * @event change
@@ -6714,6 +6725,12 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	, beforePlaceQuery: function(qe) {
 		this.fireEvent('before_query_place', this, qe);
 	}
+    , onDblClickAddr: function(qe) {
+        if (this.addr_visible) {
+            this.addr.setReadOnly(false);
+        }
+    }
+            
 });
 
 /**
@@ -7656,6 +7673,74 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 })
 
 
+Ext.ns('Ext.ux.grid');
+
+Ext.ux.grid.Exporter = Ext.extend(Ext.util.Observable,{
+    title:'',
+    sendDatFromStore: true,
+    constructor: function(config){
+        Ext.ux.grid.Exporter.superclass.constructor.call(this);
+    },
+    init: function(grid){
+        if (grid instanceof Ext.grid.GridPanel){
+            this.grid = grid;
+            this.grid.on('afterrender', this.onRender, this);
+        }
+        this.dataUrl = this.grid.dataUrl;
+    },
+    onRender:function(){
+        //создадим top bar, если его нет
+        if (!this.grid.tbar){
+            this.grid.elements += ',tbar';
+            tbar = new Ext.Toolbar();
+            this.grid.tbar = tbar;
+            this.grid.add(tbar);
+            this.grid.doLayout();
+    }
+        //добавим кнопку
+        this.grid.tbar.insert(0, new Ext.Button({
+            text:'Экспорт',
+            iconCls:'icon-application-go',
+            listeners:{
+                scope:this,
+                click:this.exportData                
+            }
+        }));
+    },
+    exportData:function(){
+        console.log(this.grid.store);
+        columns = []
+        Ext.each(this.grid.colModel.config,function(column,index){
+            columns.push({
+                data_index:column.dataIndex,
+                header:column.header,
+                id:column.id,
+                is_column:column.isCoumn,
+                sortable:column.sortable,
+                width:column.width
+            })
+        });
+        data = []
+
+        if (this.sendDatFromStore){
+            Ext.each(this.grid.store.data.items,function(item,index){ data.push(item.data) });
+        }
+        params = {
+            columns: Ext.encode(columns),
+            title: this.title || this.grid.title || this.grid.id,
+            data: Ext.encode(data)
+        }
+        Ext.Ajax.request({
+            url : '/ui/exportgrid-export',
+            success : function(res,opt){                
+                location.href=res.responseText;
+            },
+            failure : function(){
+            },
+            params : params
+        });
+    }
+});
 /**
  * Окно показа контекстной помощи
  */
