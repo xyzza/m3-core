@@ -120,7 +120,10 @@ class Parser(object):
         if func_node.name == Parser.GENERATED_FUNC:
             self.base_class = self._get_base_class(class_node)
         else:
-            self.base_class = func_node.args.defaults[0].id
+            if func_node.args.defaults:
+                self.base_class = func_node.args.defaults[0].id
+            else:
+                raise ParserError('Синтаксис функции %s не поддерживается ' % str(self.func_name))
             
             # Название второго параметра, т.к. первый равен self
             self.base_class_name = func_node.args.args[1].id            
@@ -166,27 +169,50 @@ class Parser(object):
                 # док. строки 
                 pass
             
-            elif func_node.name != Parser.GENERATED_FUNC:
+            elif isinstance(node, ast.Return):
+                # Функции не initialize
                 pass
         
             else:
                 raise ParserError("Синтаксис файла не поддерживается")
         
+        # Находит корневой контейнер
+        parent_key = self._get_parent_key(self.extends_cmp)
+        if not parent_key:
+            # Если вложенных контейнеров нет
+            if func_node.name == Parser.GENERATED_FUNC:
+                parent_key = 'self'
+            else:
+                for node in sorted(nodes, reverse=True):
+                    if isinstance(node, ast.Return):
+                        parent_key = node.value.id
         
-        pprint.pprint(self.config_cmp)
-        pprint.pprint(self.extends_cmp)
-        
-        parent_key = 'self' if func_node.name == Parser.GENERATED_FUNC else 'cont'
         js_dict = {}         
         self._build_json(js_dict, parent_key)
-        
-        pprint.pprint(js_dict)
             
         return js_dict                
 
+    def _get_parent_key(self, extends_cmp):
+        '''
+        Возвращает корневой контейнер
+        '''
+        def check_key(verification_key):
+            for _, v in extends_cmp.items():
+                if isinstance(v, dict):
+                    vv = v.values()[0]
+                    if verification_key in vv:
+                        return True
+            else:
+                return False
+                            
+        for k, _ in extends_cmp.items():
+            if not check_key(k):                
+                return k        
          
     def _build_json(self, js_dict, key):
-        
+        '''
+        Возвращает вложенный словарь объектов со своими свойствами
+        '''
         item = self.extends_cmp.get(key)
         
         js_dict.update( self._get_json_config(key) )
@@ -762,8 +788,7 @@ class Node(object):
                 ast_node = self._get_attr(self.data['id'], key, value['id'], self.data['type'])
                 
                 nodes_attr.append(ast_node)
-            else:
-                print deep
+            else:                
                 if key == 'type' or (deep == 0 and key == 'id'):                    
                     continue
                 elif key == 'id' and deep > 0:                                                   
@@ -772,8 +797,7 @@ class Node(object):
                     
                     in_self_node = self._add_cmp_in_self(value)                    
                     nodes_in_self.append(in_self_node)                                
-                else:
-                    print self.data['id'], key, value, self.data['type']
+                else:                    
                     ast_node = self._get_property(self.data['id'], key, value, self.data['type'])
                     nodes.append(ast_node)                            
      
