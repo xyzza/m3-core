@@ -7405,7 +7405,14 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
                    editor.jumpToLine(iLineNmbr);
                }catch(e){
 //                   console.error(e);
-               }
+               };
+               /*Хендлер на save из iframe.textarea*/
+               Ext.fly(editor.win.document.body).on('keydown',function(e,t,o){
+                   if (e.ctrlKey && (e.keyCode == 83)) {
+                       oThis.fireEvent('save');
+                       e.stopEvent();
+                   };
+               });
            },
             /* Событие изменения контента */
            onChange: function() {
