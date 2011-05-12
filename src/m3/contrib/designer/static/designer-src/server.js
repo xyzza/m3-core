@@ -83,7 +83,7 @@ M3Designer.ServerStorage = Ext.extend(Ext.util.Observable, {
                 data: Ext.util.JSON.encode(dataObj) 
             },
             success:this._onSuccessDefault.createDelegate(this, ['loadcode'], true),
-            failure:this._onFailureDefault.createDelegate(this),            
+            failure:this._onFailureDefault.createDelegate(this)
     	})
     },    
     _onSuccessDefault:function(response, opts, eventName) {    	
