@@ -6515,6 +6515,13 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	, clearStreet: function() {		
     	this.street.setValue('');		
 	}
+    , afterRenderAddr: function(){
+        //вашем обработчик dbl click через DOM елемент
+        if (this.addr_visible) {
+            this.addr.getEl().on('dblclick', this.onDblClickAddr, this)
+        }
+    }
+
 	, initComponent: function(){
 		Ext.m3.AddrField.superclass.initComponent.call(this);		
 		this.mon(this.place, 'change', this.onChangePlace, this);
@@ -6532,6 +6539,10 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		if (this.level > 1) {
 			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
 		}
+        if (this.addr_visible) {
+    		this.addr.on('afterrender', this.afterRenderAddr, this)
+    	}
+		
 		this.addEvents(
             /**
              * @event change
@@ -6714,6 +6725,12 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	, beforePlaceQuery: function(qe) {
 		this.fireEvent('before_query_place', this, qe);
 	}
+    , onDblClickAddr: function(qe) {
+        if (this.addr_visible) {
+            this.addr.setReadOnly(false);
+        }
+    }
+            
 });
 
 /**
