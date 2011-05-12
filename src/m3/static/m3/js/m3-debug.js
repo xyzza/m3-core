@@ -6515,6 +6515,13 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	, clearStreet: function() {		
     	this.street.setValue('');		
 	}
+    , afterRenderAddr: function(){
+        //вашем обработчик dbl click через DOM елемент
+        if (this.addr_visible) {
+            this.addr.getEl().on('dblclick', this.onDblClickAddr, this)
+        }
+    }
+
 	, initComponent: function(){
 		Ext.m3.AddrField.superclass.initComponent.call(this);		
 		this.mon(this.place, 'change', this.onChangePlace, this);
@@ -6532,6 +6539,10 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		if (this.level > 1) {
 			this.mon(this.street, 'beforequery', this.beforeStreetQuery, this);
 		}
+        if (this.addr_visible) {
+    		this.addr.on('afterrender', this.afterRenderAddr, this)
+    	}
+		
 		this.addEvents(
             /**
              * @event change
@@ -6714,6 +6725,12 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	, beforePlaceQuery: function(qe) {
 		this.fireEvent('before_query_place', this, qe);
 	}
+    , onDblClickAddr: function(qe) {
+        if (this.addr_visible) {
+            this.addr.setReadOnly(false);
+        }
+    }
+            
 });
 
 /**
@@ -7388,7 +7405,14 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
                    editor.jumpToLine(iLineNmbr);
                }catch(e){
 //                   console.error(e);
-               }
+               };
+               /*Хендлер на save из iframe.textarea*/
+               Ext.fly(editor.win.document.body).on('keydown',function(e,t,o){
+                   if (e.ctrlKey && (e.keyCode == 83)) {
+                       oThis.fireEvent('save');
+                       e.stopEvent();
+                   };
+               });
            },
             /* Событие изменения контента */
            onChange: function() {
