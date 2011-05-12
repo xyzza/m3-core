@@ -289,7 +289,8 @@ def upload_code(request):
     
     # Пока непонятно каким образом приходит текст, приходится писать нечто ниже
     try:
-        data = Parser('','').to_designer_preview(source.replace('\u000a','\n')[1:-1])
+        text = source.replace('\u000a','\n').replace('\\n','\n')[1:-1]        
+        data = Parser('','').to_designer_preview(text)        
     except ParserError, e:
         return JsonResponse({'success': False, 'json': repr(e)})
     else:        
