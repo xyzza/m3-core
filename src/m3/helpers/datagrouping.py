@@ -53,7 +53,7 @@ class GroupingRecordProvider(object):
     def __init__(self, proxy=None, data=None):
         if proxy:
             self.proxy_class = proxy
-        if data:
+        if data is not None:
             self.data_source = data
 
     def get_data(self, *args, **kwargs):
