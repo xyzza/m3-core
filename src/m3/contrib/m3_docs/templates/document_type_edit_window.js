@@ -199,7 +199,7 @@ PropertyWindow = Ext.extend(Ext.Window, {
             items:[this._grid],
             buttons:[
                 new Ext.Button({text:'Сохранить',handler:this._onSave.createDelegate(this) }),
-                new Ext.Button({ text:'Отмена', handler:this._onClose.createDelegate(this) })
+                new Ext.Button({ text:'Отмена', handler:this.onClose.createDelegate(this) })
             ]
         });
         
@@ -218,7 +218,7 @@ PropertyWindow = Ext.extend(Ext.Window, {
         this.fireEvent('save', eventObj);
         this.hide();
     },
-    _onClose:function() {
+    onClose:function() {
         this.hide();
     }
 });
