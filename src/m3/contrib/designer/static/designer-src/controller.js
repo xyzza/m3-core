@@ -203,6 +203,10 @@ M3Designer.controller.AppController = Ext.extend(Object, {
      */
     reloadModel: function (formCfg) {
         this._model = M3Designer.ModelTransfer.deserialize(formCfg);
+        Ext.destroy(this._treeView);
+        Ext.destroy(this._designView);
+        this._treeView = new M3Designer.view.ComponentTree(this.tree, this._model);
+        this._designView = new M3Designer.view.DesignView(this.designPanel, this._model);
         this._model.root.setId(this.designPanel.id);
         this.refreshView();
     },

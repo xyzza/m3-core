@@ -88,18 +88,52 @@ M3Designer.view.DesignView = Ext.extend(M3Designer.view.BaseView, {
     }
 });
 
-/*
-* Обновляет содержимое дерева по модели
+/**
+ * @class M3Designer.view.ComponentTree
+ * Обновляет содержимое дерева компонентов по модели
  */
-
 M3Designer.view.ComponentTree = Ext.extend(M3Designer.view.BaseView, {
+    /**
+     * @constructor
+     * @param {Ext.tree.TreePanel} tree дерево компонентов
+     * @param {ComponentModel} model моделька
+     */
     constructor: function(tree, model) {
         this._tree = tree;
         M3Designer.view.ComponentTree.superclass.constructor.call(this, model);
+
+        //Дзен кодинг:
+        //мы сохраняем в отдельные поля текущего объекты ссылки на функции обработчики
+        //это нужно чтобы можно было удалить обработчики с дерева компонентов
+        //тк в качестве обраточиков в дерева компонентов используется createDelegate с
+        // изменением контекста исполнения заранее
+        //,а он в свою очередь внутри себя создает новую функцию с замыканием на
+        //объект this. Те нельзя удалить обработчик с дерева
+        //повторно вызвав createDelegate. А если обработчик не удалять при удалении объекта, то при создании
+        // новго экземпляра этого класса будет наблюдаться интересный
+        //эффект когда на раскрытие ноды будут отрабатывать две функции подряд, и одна из них делать
+        //это неправильно соответсвенно(и более того неудаленный обработчик будет
+        //подвешивать в память экземпляр объекта. Привет утечкам памяти)
+        // Если кто-то найдет более изящный способ реализовать это - сообщите мне
+        //У наследников Ext.Component кстати такие штуки предусмотрены через mon и mun
+        //и жизненный цикл с деструкторами
+        this.nodeExpandHandler = this.onNodeExpand.createDelegate(this);
+        this.nodeCollapseHandler = this.onNodeCollapse.createDelegate(this);
+
         //в переменной attributes.expanded сохраняется какие ноды в дереве раскрывал пользователь
         //это учитывается при перерисовке чтобы дерево лишнего не расхлопывало
-        tree.on('expandnode', this.onNodeExpand.createDelegate(this));
-        tree.on('collapsenode',this.onNodeCollapse.createDelegate(this));
+        tree.on('expandnode', this.nodeExpandHandler);
+        tree.on('collapsenode', this.nodeCollapseHandler);
+    },
+
+    /**
+     * @destructor
+     * Деструктор в моем джава скрипте ололо?
+     * На самом деле этот метод мог бы и по другому называться, но в объектной модели эксте так принято
+     */
+    destroy:function() {
+        this._tree.un('expandnode', this.nodeExpandHandler);
+        this._tree.un('collapsenode', this.nodeCollapseHandler);
     },
     refresh:function() {
         var root = this._tree.root;
