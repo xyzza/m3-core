@@ -18,7 +18,6 @@ from m3.ui.ext.controls import ExtButton
 from m3.ui.ext.containers.base import BaseExtContainer
 from m3.ui.ext.controls.base import BaseExtControl
 
-
 class BaseExtWindow(ExtUIComponent):
     '''
     Базовый класс для всех окон
@@ -281,7 +280,8 @@ class BaseExtWindow(ExtUIComponent):
                 # Обязательно проверяем, что пришел контейнер.
                 assert isinstance(bar, BaseExtContainer)
                 for item in bar._items:
-                    item.make_read_only(self.read_only, exclude_list, *args, **kwargs)
+                    if hasattr(item, 'make_read_only'):
+                        item.make_read_only(self.read_only, exclude_list, *args, **kwargs)
         # Перебираем кнопки.
         if self.__buttons and self.__buttons:
             for button in self.__buttons:
