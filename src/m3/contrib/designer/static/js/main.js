@@ -97,11 +97,30 @@ function createClass(node, e){
                                 text: text
                                 ,path: attr['path']
                                 ,class_name: text
-                                ,iconCls: 'icon-class'
-                                ,leaf: false
+                                ,iconCls: 'icon-class'                                
+                                ,children:[]
                             });
 
                             node.appendChild(new_node);
+
+							var nodes = [{
+                           		text: '__init__'
+                           		,path: attr['path']
+                            	,class_name: text
+                            	,func_name: '__init__'
+                            	,iconCls: 'icon-function'
+                            },{
+                            	text: 'initialize'
+                            	,path: attr['path']
+                            	,class_name: text
+                            	,func_name: 'initialize'
+                            	,iconCls: 'icon-function'
+                            }]
+
+							for (var i=0; i<nodes.length; i++) {
+								new_node.appendChild(new Ext.tree.TreeNode( nodes[i] ));	
+							}
+
                         } else {
                             Ext.Msg.show({
                                title:'Ошибка'
@@ -123,6 +142,113 @@ function createClass(node, e){
  * Дерево структуры проекта 
  */
 function createTreeView(rootNodeName){
+	
+	
+	var commands = 
+		{'create-file': {
+            text: 'Создать файл'
+            ,iconCls: 'icon-script-add'
+            ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
+        },
+        'rename-file': {
+            text: 'Переименовать файл'
+            ,iconCls: 'icon-script-edit'
+            ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, true)}
+        },
+        'delete-file':{
+            text: 'Удалить файл'
+            ,iconCls: 'icon-script-delete'
+            ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, true)}
+        },
+        'open-file':{
+            text: 'Редактировать файл'
+            ,iconCls: 'icon-script-lightning'
+            ,handler: function(item, e){editFile(item.parentMenu.contextNode, true)}
+		},
+        'create-dir':{
+            text: 'Создать директорию'
+            ,iconCls: 'icon-folder-add'
+            ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
+        },
+        'create-class': {
+        	text: 'Добавить класс'
+            ,iconCls: 'icon-cog-add'
+            ,handler: function(item, e){createClass(item.parentMenu.contextNode,e)}
+        },        
+        'rename-dir':{ 
+        	text: 'Переименовать директорию'
+            ,iconCls: 'icon-folder-edit'
+            ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, false)}
+	     },
+	     'delete-dir':{
+            text: 'Удалить директорию'
+            ,iconCls: 'icon-folder-delete'
+            ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, false)}
+	    },
+	    'create-init':{
+            text: 'Создать функцию инициализации'
+            ,iconCls: 'icon-award-star-add'
+            ,handler: function(item, e){generateInitialize(item.parentMenu.contextNode);}
+	    },
+	    'create-simple-func':{
+            text: 'Создать контейнерную функцию'
+            ,iconCls: 'icon-medal-gold-add'
+            ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, false)}
+	    }}
+	
+	
+	var contextMenuUiClass = new Ext.menu.Menu({
+        items: [
+        	commands['create-file'],
+        	commands['rename-file'],
+        	commands['delete-file'],
+        	commands['open-file'],
+        	'-',
+        	commands['create-dir'],
+        	'-',
+        	commands['create-class'],
+        ]
+	});
+	    
+    var contextFileMenu = new Ext.menu.Menu({
+        items: [
+        	commands['create-file'],
+        	commands['rename-file'],
+        	commands['delete-file'],
+        	commands['open-file'],
+        	'-',
+        	commands['create-dir'],
+		]
+    });
+    
+    var contextDirMenu = new Ext.menu.Menu({
+        items: [
+        	commands['create-dir'],
+        	commands['rename-dir'],
+        	commands['delete-dir'],
+        	commands['open-file'],
+        	'-',
+        	commands['create-file'],
+        ]
+    });
+	
+	var contextMenuClass = new Ext.menu.Menu({
+        items: [
+        	commands['create-class'],
+        	'-',
+        	commands['create-init'],
+        	commands['create-simple-func'],        	
+        ]
+    });
+    
+	var contextMenuFunc = new Ext.menu.Menu({
+        items: [
+        	commands['create-init'],
+        	commands['create-simple-func'],        	
+        ]
+    });
+	
+	
 	var tree =  new Ext.tree.TreePanel({
 		useArrows: true
 		,id:'project-view'
@@ -171,137 +297,62 @@ function createTreeView(rootNodeName){
 	        ,draggable: false
 	        ,id: 'source'
 	        ,expanded: true					     
-	    }
-		,contextMenu: new Ext.menu.Menu({
-                items: [{
-		            id: 'create-file'
-		            ,text: 'Создать файл'
-		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
-		        },{
-		            id: 'rename-file'
-		            ,text: 'Переименовать файл'
-		            ,iconCls: 'icon-script-edit'
-                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, true)}
-		        },{
-		            id: 'delete-file'
-		            ,text: 'Удалить файл'
-		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, true)}
-		        },{
-		            id: 'edit-file'
-		            ,text: 'Редактировать файл'
-		            ,iconCls: 'icon-script-lightning'
-                    ,handler: function(item, e){editFile(item.parentMenu.contextNode, true)}
-
-		        },'-',{
-		            id: 'create-dir1'
-		            ,text: 'Создать директорию'
-		            ,iconCls: 'icon-folder-add'
-                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
-                },'-',{
-		        	id: 'create-class'
-		            ,text: 'Добавить класс'
-		            ,iconCls: 'icon-cog-add'
-		            ,handler: function(item, e){createClass(item.parentMenu.contextNode,e)}
-		        }]
-		    }),
-            contextFileMenu: new Ext.menu.Menu({
-                items: [{
-		            id: 'create-file2'
-		            ,text: 'Создать файл'
-		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
-		        },{
-		            id: 'rename-file2'
-		            ,text: 'Переименовать файл'
-		            ,iconCls: 'icon-script-edit'
-                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, true)}
-		        },{
-		            id: 'delete-file2'
-		            ,text: 'Удалить файл'
-		            ,iconCls: 'icon-script-delete'
-                    ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, true)}
-		        },{
-		            id: 'edit-file1'
-		            ,text: 'Редактировать файл'
-		            ,iconCls: 'icon-script-lightning'
-                    ,handler: function(item, e){editFile(item.parentMenu.contextNode, true)}
-		        },'-',{
-		            id: 'create-dir2'
-		            ,text: 'Создать директорию'
-		            ,iconCls: 'icon-folder-add'
-                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, false)}
-                }]
-            }),
-            contextDirMenu: new Ext.menu.Menu({
-                items: [{
-		            id: 'create-dir'
-		            ,text: 'Создать директорию'
-		            ,iconCls: 'icon-folder-add'
-                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, false)}
-		        },{
-		            id: 'rename-dir'
-		            ,text: 'Переименовать директорию'
-		            ,iconCls: 'icon-folder-edit'
-                    ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, false)}
-		        },{
-		            id: 'delete-dir'
-		            ,text: 'Удалить директорию'
-		            ,iconCls: 'icon-folder-delete'
-                    ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, false)}
-		        },'-',{
-		            id: 'create-file3'
-		            ,text: 'Создать файл'
-		            ,iconCls: 'icon-script-add'
-                    ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
-                }]
-            }),
-		    listeners: {
-		        contextmenu: function(node, e) {
-		            node.select();
-                    if (node.parentNode) {
-                        var parentNodeText = node.parentNode.text;
-
-                        /* Файл дизайна форм */
-                        if (designerFormFiles.has(node.text)) {
-                            var c = node.getOwnerTree().contextMenu;
-                        }
-                        /* Файл */
-                        else if(node.leaf) {
-                            var c = node.getOwnerTree().contextFileMenu;
-                        }
-                        /* Директория */
-                        else if(!node.leaf) {
-                            var c = node.getOwnerTree().contextDirMenu;
-                        };
-                        if (c) {
-                            c.contextNode = node;
-                            c.showAt(e.getXY());
-                        };
-                    };
-		        },
-		        dblclick: function(node, e){
+	    }		
+		,listeners: {
+	        contextmenu: function(node, e) {
+	            node.select();
+                if (node.parentNode) {
                     var parentNodeText = node.parentNode.text;
-                    var fileType = node.text.split('.').slice(-1);
-                    
-                    if (designerFormFiles.has(parentNodeText)){
-			        	onClickNode(node);
-		        	}
-		        	if (node.attributes['func_name']){
-			        	onClickNode(node);
-		        	}
-
-                    /*Все файлы не являющиеся *.py и conf */
-                    else if(codeViewFileTypes.has(fileType[0])){
-                        var fileAttr = {};
-                        fileAttr['path'] = node.attributes.path;
-                        fileAttr['fileName'] = node.attributes.text;
-                        onClickNodePyFiles(node, fileAttr);
+					
+					var menu;
+					
+					// Узел для функции
+					if (node.attributes['class_name'] && node.attributes['func_name']){
+						menu = contextMenuFunc;
+					}							
+					// Узел для класса
+					else if (node.attributes['class_name']){
+						menu = contextMenuClass;
+					}							
+                    /* Файл дизайна форм */
+                    else if (designerFormFiles.has(node.text)) {
+                        menu = contextMenuUiClass;
                     }
-                    else if(node.leaf) wrongFileTypeMessage(fileType);
-		        }
-		    }
+                    /* Файл */
+                    else if(node.leaf) {
+                        menu = contextFileMenu;
+                    }
+                    /* Директория */
+                    else if(!node.leaf) {
+                        menu = contextDirMenu;
+                    };
+                    if (menu) {
+                        menu.contextNode = node;
+                        menu.showAt(e.getXY());
+                    };
+                };
+	        },
+	        dblclick: function(node, e){
+                var parentNodeText = node.parentNode.text;
+                var fileType = node.text.split('.').slice(-1);
+                
+                if (designerFormFiles.has(parentNodeText)){
+		        	onClickNode(node);
+	        	}
+	        	if (node.attributes['func_name']){
+		        	onClickNode(node);
+	        	}
+
+                /*Все файлы не являющиеся *.py и conf */
+                else if(codeViewFileTypes.has(fileType[0])){
+                    var fileAttr = {};
+                    fileAttr['path'] = node.attributes.path;
+                    fileAttr['fileName'] = node.attributes.text;
+                    onClickNodePyFiles(node, fileAttr);
+                }
+                else if(node.leaf) wrongFileTypeMessage(fileType);
+	        }
+	    }
 	});
 	
 	tree.getLoader().on("beforeload", function(treeLoader, node) {	
@@ -599,13 +650,12 @@ function onClickNode(node) {
 			   ,icon: Ext.MessageBox.QUESTION
 			   ,fn: function(btn, text){
 			   		if (btn == 'yes'){
-			   			generateInitialize(node, attr['path'], attr['class_name']);
+			   			generateInitialize(node);
 			   		};
 			   }
 			});
        		result = false;
        } else if (jsonObj.success) {
-
 
 			this.setTitle(attr['class_name'] + funcTitle); 
 												
@@ -637,14 +687,25 @@ function onClickNode(node) {
 /**
  * Генерирует функцию автогенерации для класса 
  */
-function generateInitialize(node, path, className){
+function generateInitialize(node){
 	Ext.Ajax.request({
 		url:'create-autogen-function'
 		,params:{
-			path: path,
-			className: className
+			path: node.attributes['path'],
+			className: node.attributes['class_name']
 		}
-		,success: function(response, opts){			
+		,success: function(response, opts){
+			var funcName = 'initialize';
+            var new_node = new Ext.tree.TreeNode({
+                text: funcName
+                ,path: node.attributes['path']
+                ,class_name: node.attributes['class_name']
+                ,func_name: funcName
+                ,iconCls: 'icon-function'                
+            });
+
+            node.appendChild(new_node);
+                            			
 			onClickNode(node);
 		}
 		,failure: uiAjaxFailMessage
