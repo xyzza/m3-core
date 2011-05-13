@@ -1,7 +1,6 @@
 /**
  * Crafted by ZIgi
  */
-
 Ext.namespace('M3Designer.ui');
 
 /*
@@ -9,11 +8,15 @@ Ext.namespace('M3Designer.ui');
 * Во первых чтобы не было оверхеда, во вторых большинство м3 кастомов написано криво и не поддерживают xtype
 */
 
+/**
+ * @class M3Designer.ui.DictSelectMock
+ * Фейк для выбора из справочника
+ */
 M3Designer.ui.DictSelectMock = Ext.extend(Ext.form.TwinTriggerField, {
-    width:150,
-    trigger1Class:'x-form-clear-trigger',
-    trigger2Class:'x-form-select-trigger',
-    initComponent:function() {
+    width: 150,
+    trigger1Class: 'x-form-clear-trigger',
+    trigger2Class: 'x-form-select-trigger',
+    initComponent: function () {
         M3Designer.ui.DictSelectMock.superclass.initComponent.call(this);
     }
 });
