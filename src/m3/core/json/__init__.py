@@ -23,10 +23,12 @@ class M3JSONEncoder(json.JSONEncoder):
             return obj.strftime('%H:%M')
         elif isinstance(obj, decimal.Decimal):
             return str(obj)
+        
         # Прошерстим методы и свойства, найдем те, которые могут передаваться на клиента
         # Клонирование словаря происходит потому, что сериализуемые методы переопределяются результатами своей работы
         cleaned_dict = {}
         dict = copy.copy(obj.__dict__)
+        
         # Для джанговских моделей функция dir дополнительно возвращает "ссылки" на 
         # связанные модели. Их не нужно сериализовать, а также при обращении к ним 
         # происходят запросы к БД. Причем на практике есть случаи, когда эти запросы 
@@ -106,6 +108,9 @@ class M3JSONEncoder(json.JSONEncoder):
                 #    cleaned_dict[attribute[1:len(attribute)-6] + '_ref_name'] = dict['name']
                 #except:
                 #    pass
+                pass
+            # Ибо нефиг сериализовать protected/private атрибуты!
+            if attribute.startswith('_'):
                 pass
             else:
                 # просто передадим значение, оно будет закодировано в дальнейшем
