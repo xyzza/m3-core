@@ -79,16 +79,9 @@ def copy_file(filepath, src_basepath, dst_basepath):
 #===============================================================================
 #  Основная процедура построения
 #===============================================================================
-if __name__ == '__main__':
-    
-    if len(sys.argv) != 4:
-        print u'usage: compile_to.py path_to_project_src path_to_temp output_file'
-        sys.exit()
-    
-    config_temp_dir = sys.argv[2]
-    config_result_file = sys.argv[3]
-    config_project_dir = sys.argv[1]
-    #config_m3_dir = sys.argv[2]
+
+def execute(config_temp_dir, config_result_file, config_project_dir):
+
     print '---------------------------------------'
     print 'dist-bulder'
     print 'current dir:', os.getcwd()
@@ -152,3 +145,13 @@ if __name__ == '__main__':
     except Exception as exc:
         print 'dist-builder aborted with message: ' 
         print exc.message
+    
+
+
+if __name__ == '__main__':   
+    if len(sys.argv) != 4:
+        print u'usage: compile_to.py path_to_project_src path_to_temp output_file'
+        sys.exit()
+
+    execute(sys.argv[2], sys.argv[1], sys.argv[3])
+    #config_m3_dir = sys.argv[2]
