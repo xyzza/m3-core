@@ -85,7 +85,38 @@ class ContragentBankDetailsGrid(panels.ExtObjectGrid):
         self.init_component(*args, **kwargs)
         
         
+class ContragentDulEditContainer(container_complex.ExtContainerTable):
+    '''
+    Класс контрола "Редактирование документа, удостоверяющего личность"
+    ''' 
+    def __init__(self, *args, **kwargs):
         
+        super(ContragentDulEditContainer, self).__init__(*args, **kwargs)
+        
+        self.rows_count = 2
+        self.columns_count = 4
+        self.label_width= 40
+        
+        self.type_field = fields.ExtDictSelectField(label=u'Тип', name='u_dul_type', 
+                                                    hide_dict_select_trigger = True, 
+                                                    hide_trigger=False)  
+        self.type_field.pack = 'DulType_DictPack'
+        
+        self.seria_field = fields.ExtStringField(label=u'Серия', name='u_dul_seria', 
+                                                 max_length=20)
+        self.number_field = fields.ExtStringField(label=u'Номер', name='u_dul_number', 
+                                                  max_length=40)
+        self.issue_by_field = fields.ExtStringField(label=u'Выдан', name='u_dul_issue_date', 
+                                                    max_length=200)
+        self.issue_date_field = fields.ExtDateField(label=u'Дата', name='u_dul_issue_by')
+        
+        self.set_item(0, 0, self.type_field, colspan=2)
+        self.set_item(0, 2, self.seria_field)
+        self.set_item(0, 3, self.number_field)
+        self.set_item(1, 0, self.issue_by_field, colspan=3)
+        self.set_item(1, 3, self.issue_date_field)
+        
+            
 #===============================================================================
 # Окна для детализированной информации
 #===============================================================================
@@ -298,9 +329,6 @@ class ContragentBankDetailsEditWindow(windows.ExtEditWindow):
             buttons.ExtButton(text=u'Закрыть', handler='cancelForm')
         ])                   
      
-    
-    
-    
     
     
     

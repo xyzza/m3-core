@@ -83,7 +83,13 @@ class Contragent(BaseObjectModel):
     f_oname = models.CharField(max_length=50, null=True, blank=True)
 
     f_inn = models.CharField(max_length=12, null=True, blank=True)
-    f_snils = models.CharField(max_length=11, null=True, blank=True) 
+    f_snils = models.CharField(max_length=11, null=True, blank=True)
+    
+    f_dul_type = models.ForeignKey('m3_dicts.DulType', null=True, blank=True) 
+    f_dul_seria = models.CharField(max_length = 20, db_index = True, null = True, blank = True)
+    f_dul_number = models.CharField(max_length = 40, db_index = True, null = True, blank = True)
+    f_dul_issue_date = models.DateField(null = True, blank = True)
+    f_dul_issue_by = models.CharField(max_length = 200, null = True, blank = True)
     
     def name(self):
         return self.u_short_name if self.contragent_type == ContragentTypeEnum.UL else \
