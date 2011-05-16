@@ -760,9 +760,9 @@ function onClickNode(node) {
 			tabPanel.add(this);				
 		    tabPanel.activate(this);
 		
-		    // Прослушивает событие "tabchange", вызывает новое событие в дочерней панели
-		    tabPanel.on('tabchange', function(panel,newTab,currentTab){
-		        this.application.designPanel.fireEvent('tabchanged');
+		    // Прослушивает событие "tabchange"
+		    tabPanel.on('tabchange', function(panel, newTab){
+                this.application.removeHighlight();
     		}, this);
 			
 			result = true;

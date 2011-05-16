@@ -185,14 +185,24 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
         var collapsedHeigth = this.getHeight();
         this.collapse(false);
         this.anchorTo(document.getElementById(domElementId), "tr-tr");
-        var panelSizeHeight = Ext.getCmp('tab-panel').getActiveTab().getSize().height; /*Если окно будет выходить за видимые границы, подвиним его*/
+        /*Если окно будет выходить за видимые границы, переместим его в видимую область*/
+        var panelSizeHeight = Ext.getCmp('tab-panel').getActiveTab().getSize().height;
         if (this.y + collapsedHeigth > panelSizeHeight) {
-            this.getEl().shift({
-                y: this.y - (this.y + collapsedHeigth - panelSizeHeight),
-                easing: 'easeOut',
-                duration: 0.35
+            this.on('expand', function(){
+                this.getEl().shift({
+                    y: this.y - (this.y + collapsedHeigth - panelSizeHeight),
+                    easing: 'easeOut',
+                    duration: 0.35
+                });
             });
-        }
+            this.on('collapse', function(){
+                this.getEl().shift({
+                    y: this.y,
+                    easing: 'easeIn',
+                    duration: 0.35
+                });
+            });
+        };
         this.setTitle(this.source.id || '');
     },
     /**/

@@ -61,34 +61,34 @@
             Ext.USE_NATIVE_JSON = true; 
             Ext.onReady(function(){
                 
-                	Ext.QuickTips.init();
-	
-					new Ext.Viewport({
-						title: 'Дизайнер UI m3'
-					    ,layout: 'border'
-					    ,items: [{
-					        region: 'west'
-					        ,collapsible: true					        
-					        ,title: 'М3 Дизайнер'
-					        ,split: true
-					        ,width: 300
-					        ,maxWidth: 300
-					        ,minWidth: 200
-					        ,layout: 'fit'
-					        ,items: [ createTreeView('{{ project_name }}') ]
-					    }, 
-					    new Ext.TabPanel({
-					    	id:'tab-panel',
-							region: 'center',
-						    xtype: 'tabpanel',
-                            idDelimiter: '___', //измененый разделитель id (причина __init__.py)
-						    activeTab: 0,
-						    items: [{
-						    	title: 'Обзор',
-						        html: '<iframe src="http://m3.bars-open.ru" width="100%" height="100%" style="border: 0px none;"></iframe>'
-						    }]
-						})]
-					});		                
+                Ext.QuickTips.init();
+
+                new Ext.Viewport({
+                    title: 'Дизайнер UI m3'
+                    ,layout: 'border'
+                    ,items: [{
+                        region: 'west'
+                        ,collapsible: true
+                        ,title: 'М3 Дизайнер'
+                        ,split: true
+                        ,width: 300
+                        ,maxWidth: 300
+                        ,minWidth: 200
+                        ,layout: 'fit'
+                        ,items: [ createTreeView('{{ project_name }}') ]
+                    },
+                    new Ext.TabPanel({
+                        id:'tab-panel',
+                        region: 'center',
+                        xtype: 'tabpanel',
+                        idDelimiter: '___', //измененый разделитель id (причина __init__.py)
+                        activeTab: 0,
+                        items: [{
+                            title: 'Обзор',
+                            html: '<iframe src="http://m3.bars-open.ru" width="100%" height="100%" style="border: 0px none;"></iframe>'
+                        }]
+                    })]
+                });
             });
 
         </script>

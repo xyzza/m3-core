@@ -50,8 +50,6 @@ M3Designer.controller.AppController = Ext.extend(Object, {
         this.initDesignDD(this.designPanel);
         //запустим обработку мышиных событий на панели дизайнера
         this.initDesignMouseEvents(this.designPanel);
-        //Иницализация "сторонних" событий панели
-        this.initDesignPanelEvents(this.designPanel);
 
         //обработчики событий
         this.tree.on('beforenodedrop', this.onComponentTreeBeforeNodeDrop.createDelegate(this));
@@ -134,17 +132,6 @@ M3Designer.controller.AppController = Ext.extend(Object, {
         el.on('click', this.onDesignerPanelDomClick.createDelegate(this)); /* Демократия товарищи */
         el.on('contextmenu', this.onDesignerPanelDomClick.createDelegate(this), null, {
             preventDefault: true
-        });
-    },
-
-    /**
-     * Cлушает событие "tabchanged", которое происходит в tabPanel
-     */
-    initDesignPanelEvents: function (panel) {
-        //TODO спросить Ильдара что за хрень вообще
-        var scope = this;
-        panel.on('tabchanged', function () {
-            scope.removeHighlight();
         });
     },
 
