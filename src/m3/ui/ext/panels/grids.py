@@ -254,18 +254,28 @@ class ExtObjectGrid(containers.ExtGrid):
         return self._get_params_str()
 
 class ExtMultiGroupinGrid(containers.ExtGrid):
+    '''
+    Грид с возможностью множественной группировки колонок.
+    Обработка группировки происходит на сервере (см. m3.helpers.datagrouping)
+    '''
+    # Поле в котором будет содержаться значение ключа группировки
+    # должно отличаться от ключевого поля Store, т.к. должно содержать совсем другие данные 
+    data_id_field = 'id'
+    # Поле отображаемое вместо идентификатора группировки (по-умолчанию отображается сам идентификатор)
+    data_display_field = 'id'    
+    # Поля группировки по-умолчанию (список имен полей)
+    grouped = None
+    
     def __init__(self, *args, **kwargs):
         super(ExtMultiGroupinGrid, self).__init__(*args, **kwargs)
         self.template = 'ext-grids/ext-multigrouping-grid.js'
         # Для данных
         self.action_data = None
-        # Стор для загрузки данных
-        self.store = misc.store.ExtMultiGroupingStore(auto_load=True, root='rows', id_property='id')
         # Признак того, маскировать ли грид при загрузки
         self.load_mask = True
-        # Поле в котором будет содержаться значение ключа группировки
-        # должно отличаться от ключевого поля Store, т.к. должно содержать совсем другие данные 
-        self.data_id_field = 'id'
+        # Стор для загрузки данных
+        self.store = misc.store.ExtMultiGroupingStore(auto_load=True, root='rows', id_property='index')
+        self.grouped = []
         self.init_component()
 
     def render(self):
@@ -284,9 +294,11 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         
         self._put_params_value('actions', {'dataUrl': data_url,
                                             'contextJson': context_json})
+        self._put_params_value('dataIdField', self.data_id_field)
+        self._put_params_value('dataDisplayField', self.data_display_field)
+        self._put_params_value('groupedColumns', lambda : '[%s]' % ','.join(["'%s'" % (col) for col in self.grouped]))
         
     def t_render_base_config(self):
-        self._put_config_value('dataIdField', self.data_id_field)
         return self._get_config_str()
     
     def t_render_params(self):
