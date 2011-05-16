@@ -31,6 +31,7 @@ Ext.fly(document).on('keydown',function(e,t,o){
        };
    };
 });
+/*Хендлер на keydown (del) в дереве структуры проекта, вызывает удаление объекта*/
 function initAdditionalTreeEvents(id){
     Ext.fly(id).on('keydown',function(e,t,o){
         if(e.keyCode == 46){ //del
@@ -47,7 +48,6 @@ function initAdditionalTreeEvents(id){
 
 /**
  * Базовая функция внешнего воздействия на дерево структуры проекта.
- * @param fn
  */
 function projectViewTreeManipulation(){
     var cmp = Ext.getCmp('project-view');
@@ -473,7 +473,17 @@ function createTreeView(rootNodeName){
 	        title: 'Свойства',
 	        id: 'property-panel',
 	        layout: 'fit'
-	    }]
+	    }],
+        listeners:{
+            clear: function(){
+                var panel = Ext.getCmp('property-panel');
+                panel.removeAll();
+                panel.setTitle('Свойства');
+                var accorditionView = panel.ownerCt;
+                if (accorditionView.items.itemAt(0).collapsed)
+                    accorditionView.items.itemAt(0).expand();
+            }
+        }
 	});
     tree.on('afterrender', function(){initAdditionalTreeEvents(tree.id)});
 	return accordion;
@@ -542,7 +552,7 @@ function fileTypeByExpansion(fileName){
 };
 /* Редактировать файл */
 function editFile(node, e){
-    var fileType = node.text.split('.').slice(-1);
+    var fileType = node.text.split('.').slice(-1)[0];
     if(fileType == 'py' || fileType == 'conf'){
         var fileAttr = {};
         fileAttr['path'] = node.attributes.path;
@@ -763,6 +773,7 @@ function onClickNode(node) {
 		    // Прослушивает событие "tabchange"
 		    tabPanel.on('tabchange', function(panel, newTab){
                 this.application.removeHighlight();
+                Ext.getCmp('accordition-view').fireEvent('clear');
     		}, this);
 			
 			result = true;
@@ -812,7 +823,6 @@ function generateInitialize(node){
 
 /**
  * Вымогает у сервера некий файл
- * @param path - путь к файлу
  * TODO: Сделать callBack'ами Ext.Ajax.request
  */
 function onClickNodePyFiles(node, fileAttr){

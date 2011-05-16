@@ -153,7 +153,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
 
         function onTreeNodeDeleteClick(item) {
             application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
-        }
+        };
     },
     saveOnServer: function () {
         this.storage.saveModel(this.application.getTransferObject());
