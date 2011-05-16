@@ -24,6 +24,11 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
      * Идентификатор поля в Store в котором содержатся идентификаторы записей (используется для разворачивания)
      */
     dataIdField: "id",
+    /**
+     * Идентификатор поля в Store в котором содержатся отображаемые идентификаторы сгруппированных записей (используется для разворачивания)
+     * Например, вместо id учреждения будет отображаться его название, или вместо true будет писаться Да
+     */
+    dataDisplayField: "id",
 	/**
      * Развернутые элементы верхнего уровня.
      * Элемент представляет собой объект вида:
@@ -38,7 +43,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	 * Перечень колонок, по которым производится группировка.
 	 * Если пусто, то нет группировки.
 	 */
-	groupedColums: [],
+	groupedColumns: [],
 	/**
      * Инициализация плагина
      *
@@ -46,13 +51,13 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
      */
 	init: function(grid) {
         if(grid instanceof Ext.grid.GridPanel){
-            this.grid = grid;
+        	this.grid = grid;
             this.cm = this.grid.getColumnModel();
             // добавим новый столбец, в котором будет отображаться группировка (если она будет)
             this.grouppingColumn = new Ext.grid.Column({header: this.groupFieldTitle, id: this.groupFieldId, width: 160, renderer: {fn:this.groupRenderer, scope: this}});
             var cmConfig = [this.grouppingColumn].concat(this.cm.config); 
             this.cm.setConfig(cmConfig);            
-            this.grouppingColumn.hidden=!(this.groupedColums.length>0);
+            this.grouppingColumn.hidden=!(this.groupedColumns.length>0);
 
             // повесимся на клик, чтобы раскрывать/скрывать уровни группировки
             this.grid.on('click', this.onNodeClick, this);
@@ -267,8 +272,24 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
                     return column;
                 }
             });
+            // настроим первоначальную группировку
+            var toolItems = [this.title];
+            if (this.groupedColumns.length > 0) {
+            	for (var colInd = 0; colInd < this.groupedColumns.length; colInd++) {
+            		var colName = this.groupedColumns[colInd];
+            		var colText = this.grid.colModel.getColumnHeader(this.grid.colModel.findColumnIndex(colName));
+            		var butt = this.createGroupingButton({
+                        text    : colText,
+                        groupingData: {
+                            field: colName
+                        }
+                    });
+                    toolItems.push(butt);
+            	};
+            };
+            toolItems.push('-');
             this.tbar = new Ext.Toolbar({
-                items  : [this.title, '-'],
+                items  : toolItems,
                 plugins: [reorderer, this.droppable],
                 listeners: {
                     scope    : this,
@@ -284,7 +305,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
      */
 	onNodeClick: function (e) {
 		// будем обрабатывать только если включена группировка
-		if (this.groupedColums.length > 0) {
+		if (this.groupedColumns.length > 0) {
 			var target = e.getTarget();
 			// найдем объект по которому щелкнули
 			var obj = Ext.fly(target);
@@ -390,10 +411,9 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 			var expanded = record._expanded;
 			var indent = record.json.indent;
 			var indent_str = "&#160;".repeat(indent*6);
-			var column = this.groupedColums[indent];
+			var column = this.groupedColumns[indent];
 			var count = record.json.count;
-			//v = record.get(column);
-			v = record.get(this.grid.dataIdField);
+			v = record.json[this.dataDisplayField];
 			var col_name = this.grid.colModel.getColumnHeader(this.grid.colModel.findColumnIndex(column));
 			var res = String.format('<b><span>{2}</span><span class="x-tree-elbow-{0}" style="margin-left:-4px;padding-left:18px;padding-top:3px;cursor:pointer"></span><span unselectable="on">{3}: {1} ({4})</span></b>',expanded ? 'minus':'plus', v, indent_str, col_name, count);
 		}
@@ -419,7 +439,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	 */
 	onLoad: function (st) {
 		this.expanding = null;
-		if (this.groupedColums.length > 0) {
+		if (this.groupedColumns.length > 0) {
 			for (var i = st.bufferRange[0]; i <= st.bufferRange[1]; i++) {
 				//var record = st.data.itemAt(i);
 				var record = st.getAt(i);
@@ -446,7 +466,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	onBeforeLoad: function (st, opts) {
 		var expanding = this.expanding;
 		var exp_par = Ext.util.JSON.encode(this.expandedItems);
-		var group_par = Ext.util.JSON.encode(this.groupedColums);
+		var group_par = Ext.util.JSON.encode(this.groupedColumns);
 		opts.params.expanding = expanding;
 		opts.params.exp = exp_par;
 		opts.params.grouped = group_par;
@@ -476,7 +496,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	 * @param {Number} rowIndex номер записи
 	 */
 	expandItem: function (rowIndex) {
-		if (this.groupedColums.length > 0) {
+		if (this.groupedColumns.length > 0) {
 			var row = this.grid.store.getAt(rowIndex);
 			if (!row._expanded) {
 		        row._expanded = true;
@@ -486,7 +506,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 		        // сформируем набор ключевых значений, чтобы узнать родительский раскрытый узел
 		        var keys = [];
 		        for (var i = 0; i < level; i++){
-		        	var col = this.groupedColums[i];
+		        	var col = this.groupedColumns[i];
 		        	var key = row.get(col);
 		        	keys.push(key);
 		        }
@@ -527,7 +547,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	 * @param {Number} rowIndex номер записи
 	 */
 	collapseItem: function (rowIndex) {
-		if (this.groupedColums.length > 0) {
+		if (this.groupedColumns.length > 0) {
 			var row = this.grid.store.getAt(rowIndex);
 			if (row._expanded) {
 		        row._expanded = false;
@@ -536,7 +556,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 		        // сформируем набор ключевых значений, чтобы узнать родительский раскрытый узел
 		        var keys = [];
 		        for (var i = 0; i < level; i++){
-		        	var col = this.groupedColums[i];
+		        	var col = this.groupedColumns[i];
 		        	var key = row.get(col);
 		        	keys.push(key);
 		        }
@@ -563,7 +583,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
     doGroup: function (columns) {
     	this.grid.colModel.setHidden(0, !(columns.length > 0));
         this.expandedItems = [];
-        this.groupedColums = columns;
+        this.groupedColumns = columns;
         this.grid.view.reset(true);
     },
 	/**
@@ -659,7 +679,12 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		}
 		
 		// плугин для группировки колонок
-		var plugins = [new Ext.ux.grid.MultiGrouping()];
+		var group_param = {
+			groupedColumns: params.groupedColumns,
+			dataIdField: params.dataIdField,
+			dataDisplayField: params.dataDisplayField
+		};
+		var plugins = [new Ext.ux.grid.MultiGrouping(group_param)];
 		
 		plugins = plugins.concat(params.plugins || []);
 		var bundedColumns = params.bundedColumns;
