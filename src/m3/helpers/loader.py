@@ -134,7 +134,7 @@ def read_simple_xml_file(filename, fields={}):
                 if attr in fields:
                     if not fields[attr] in attrs:
                         attrs.append(fields[attr])
-                    values_list.append(node.attributes._attrs[attr].nodeValue)
+                    values_list.append(smart_unicode(node.attributes._attrs[attr].nodeValue, encoding=doc.encoding))
             values.append(values_list)
     else:
         raise DictLoadException(None, u'Исходные данные отсутствуют. Пустой XML-файл')
