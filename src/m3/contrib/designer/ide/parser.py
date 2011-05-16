@@ -251,6 +251,12 @@ class Parser(object):
         
         
     def _get_extends(self, node):
+        '''
+        Возвращение вложенных объектов
+        parent - Название объекта-контейнера
+        parent_item - название поля, где находятся дочернии объекты
+        items - список дочерних объектов 
+        '''
         parent =  node.func.value.value.id
         parent_item =  node.func.value.attr
                 
@@ -261,6 +267,12 @@ class Parser(object):
         return parent, parent_item, items
     
     def _get_attr(self, node):
+        '''
+        Получение значения атрибуты
+        parent: Родительский контейнер
+        parent_item: Поле родительского контейнера
+        value: Значение поля  
+        '''
         value = node.value.id
         parent_item =  node.targets[0].attr
         parent =  node.targets[0].value.id
@@ -710,6 +722,70 @@ class Parser(object):
         return initialize_func
     
     @staticmethod
+    def generate_cont_func(name_func, type_func_ext, name_instanse='cont'):
+        '''
+        Генерирует контейнерную функцию вида:
+        
+        def <name_func>(self, clazz=<type_func_py>):
+            cont = clazz()
+            cont.layout = 'auto'
+            
+            return cont
+        '''
+        #TODO: вынести в общую функцию
+        def get_py_name(extjs_name):
+            for item in mapping_list:                
+                if item['class'].has_key(extjs_name):
+                    return item['class'][extjs_name]
+            else:
+                raise ParserError(u'Не определен объект маппинга %s' % extjs_name)
+        
+        args = ast.arguments(args=[
+                                   ast.Name('self', ast.Load()), 
+                                   ast.Name('clazz', ast.Load())
+                             ],
+                             defaults=[ast.Name( str(get_py_name(type_func_ext)) , ast.Load())], 
+                             kwarg=None, 
+                             vararg=None)
+            
+        nodes = [ast.Assign(targets=[ast.Name('cont', ast.Load())], 
+                            value=ast.Call(
+                                    ast.Name(
+                                        'clazz',
+                                        ast.Load()                                      
+                                    ),
+                                    [],     
+                                    [],
+                                    None,
+                                    None,
+                                )),
+                 
+                 
+                 ast.Assign(
+                    [ast.Attribute(
+                        ast.Name(name_instanse, ast.Load()), 
+                        'layout', 
+                        ast.Load()
+                      )],
+                     ast.Str('auto')),
+                 
+                 StringSpaces(),
+                 ast.Return(ast.Name(name_instanse, ast.Load()))
+                 ]
+        
+        doc_str = ast.Expr(
+            ast.Str(Parser.GENERATED_FUNC_DOCSTRING)
+            )
+        
+        initialize_func = ast.FunctionDef(str(name_func), 
+                              args, 
+                              [doc_str,] + nodes, 
+                              []
+                          )
+        
+        return initialize_func
+    
+    @staticmethod
     def generate_import():
         '''
         Генерирует узел AST, который преобразуется в 
@@ -719,14 +795,28 @@ class Parser(object):
         return ast.ImportFrom(Parser.IMPORT_ALL, [ast.alias(name='*')], 0)
         
 class Node(object):
- 
+    '''
+    Обрабатывает данные, пришедшие из дизайнера и возвращает список ast узлов
+    '''
+    
+    # Ссылка на маппинг
     mapping = None
  
-    def __init__(self, data):        
+    def __init__(self, data):
+        '''
+        @param data: Словарь, которые нужно представить как ast узлы
+        '''   
         self.data = data                            
 
     @staticmethod
     def sort_items(items):
+        '''
+        Сортировка по приоритеты: 
+        1. Список
+        2. Словарь
+        3. Если ключ является id
+        4. Все остальное 
+        '''
         key, item = items
         if isinstance(item, list):
             return 100
@@ -740,6 +830,7 @@ class Node(object):
 
     def get_nodes(self, mapping):
         '''
+        Генерирует и возвращает ast узлы
         '''
         Node.mapping = mapping
         
@@ -766,6 +857,13 @@ class Node(object):
 
     def walk(self, nodes, nodes_attr, nodes_extends, nodes_in_self, deep=0):        
         '''
+        Рекурсивно спускается по вложенному словарю и заполняет структуры данными
+        @param nodes: Общий список ast узлов
+        @param nodes_attr: Список ast узлов для компонентов один-к-одному (grid.store = my_store)
+        @param nodes_extends: Список ast узлов, для компонентов один-ко-многим 
+            (grid.columns.extend([grid_column1, grid_column2, grid_column3,]))
+        @param nodes_in_self: Список ast узлов, которые должны прописаться в self
+        @param deep: Глубина рекурсии для вычисления родительского компонента
         '''
         for key, value in sorted(self.data.items(), key=Node.sort_items):
             if isinstance(value, list):
@@ -802,6 +900,14 @@ class Node(object):
                     nodes.append(ast_node)                            
      
     def _add_cmp_in_self(self, field, parent_fields='self'):
+        '''
+        Генерирует узлы, который добавляют компонента внутрь self
+        
+        Например:
+        self.my_simple_form = my_simple_form
+        где:
+        @param field:  my_simple_form        
+        '''
         return ast.Assign(
                 [ast.Attribute(
                         ast.Name(parent_fields, ast.Load()), 
@@ -814,6 +920,7 @@ class Node(object):
     def _get_complex_field(self, py_attr, value):
         '''
         Преобразует сложные проперти
+        Пока шортнеймы
         '''
         if py_attr['type'] == 'shortname':
             # Преобразует шортнэймы
@@ -850,6 +957,15 @@ class Node(object):
             raise ParserError('Комплексное свойство "%s" не поддерживается') % py_attr['type']
     
     def _get_property(self, parent_field, extjs_attr, value, extjs_class):
+        '''
+        Генерация связи один ко одному с другим компонентом, например:
+        grid.store = my_data_store
+        где:
+        @param parent_field: grid
+        @param extjs_attr: store в натации extjs
+        @param value: my_data_store
+        @param extjs_class: Название класса, в котором нужно провдить поиск 
+        '''
         for item in self.mapping:
             if item['class'].has_key(extjs_class):
                                 
@@ -884,6 +1000,12 @@ class Node(object):
             raise ParserError("Не определен объект маппинга для класса '%s'" % extjs_class) 
     
     def _get_instanse(self, extjs_class, value):
+        '''
+        Генерирует конструкцию вида:
+        panel = ExtPanel()
+        @param extjs_class: Класс в натации extjs, который преобразуется в ExtPanel
+        @param value: panel 
+        '''
         for item in self.mapping:
             if item['class'].has_key(extjs_class):
                 instanse_name = item['class'][ extjs_class ]
@@ -909,6 +1031,15 @@ class Node(object):
             raise ParserError("Не определен объект маппинга для класса '%s'" % extjs_class) 
     
     def _get_attr(self, parent_field, extjs_attr, value, extjs_class):
+        '''
+        Генерирует узел для свойства объекта
+        Например: panel.layout = "auto"
+        где:
+        @param parent_field: panel в натации extjs
+        @param extjs_attr: layout в натации extjs
+        @param value: "auto"
+        @param extjs_class: Название класса, в котором нужно провдить поиск 
+        '''
         for item in self.mapping:
             if item['class'].has_key(extjs_class):
                                 
@@ -928,7 +1059,16 @@ class Node(object):
             raise ParserError('Не определен класс маппинга "%s"' % extjs_class)
     
 
-    def _get_extends(self, parent_field, extjs_name, list_cmp, extjs_class):        
+    def _get_extends(self, parent_field, extjs_name, list_cmp, extjs_class):      
+        '''
+        Генерирует узел для вложенных объектов
+        Например: panel.items.extend([item1, item2, item3])
+        где:
+        @param parent_field: panel в натации extjs
+        @param extjs_name: items в натации extjs 
+        @param extjs_class: Класс, в котором нужно проводить поиск
+        @param list_cmp: [item1, item2, item3] Список вложенных компонентов
+        '''  
         for item in self.mapping:
             if item['class'].has_key(extjs_class):
                                 
@@ -986,7 +1126,7 @@ class Node(object):
                     
 def update_with_inheritance(m_list, parent=None, config=None):
     '''
-    Обновляет маппинг объектов с учетом наследование, то есть дозополняет
+    Обновляет маппинг объектов с учетом наследования, то есть дозополняет
     свойствами объекты из унаследованных классов "parent"
     '''        
     

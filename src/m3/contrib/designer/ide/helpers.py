@@ -187,10 +187,11 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
     with open(path, 'w') as f:   
         cl = Parser.generate_class(class_name, base_class)     
         f.write(source + '\n\n\n' +  codegen.to_source(cl))
-    
-def create_generation_func(path, class_name):
+
+def generate_func(path, class_name, func_node):
     '''
-    Генерирует функцию для возможности работы с дизайнером форм
+    Генерирует функции
+    @param source: Исходный код функции
     '''
     source = Parser.get_source(path)
     
@@ -208,14 +209,25 @@ def create_generation_func(path, class_name):
 
     # Запись
     with open(path, 'w') as f:
-    
-        init_func = Parser.generate_initialize()
-        
-        print codegen.to_source(init_func, indentation=1)
+            
         if line_end:
             source_lines = source.split('\n')        
             f.write('\n'.join(source_lines[:line_end-1]) +
-                    '\n' +  codegen.to_source(init_func, indentation=1) + '\n' +
+                    '\n' +  codegen.to_source(func_node, indentation=1) + '\n' +
                     '\n'.join(source_lines[line_end-2:]) )
         else:            
-            f.write(source + '\n' +  codegen.to_source(init_func, indentation=1))
+            f.write(source + '\n\n' +  codegen.to_source(func_node, indentation=1))
+
+def create_generation_func(path, class_name):
+    '''
+    Генерирует функцию для возможности работы с дизайнером форм
+    '''
+    init_func = Parser.generate_initialize()
+    generate_func(path, class_name, init_func)
+
+def create_cont_func(path, class_name, name_func, type_func):
+    '''
+    Генерирует контейнерную функцию
+    '''
+    func = Parser.generate_cont_func(name_func, type_func)
+    generate_func(path, class_name, func)

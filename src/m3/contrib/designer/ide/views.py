@@ -8,7 +8,7 @@ import shutil
 from django.shortcuts import render_to_response
 
 from helpers import JsonResponse, get_files, get_classess, restores, create_py_class, \
-    create_generation_func, get_methods
+    create_generation_func, get_methods, create_cont_func
 from parser import Parser, ParserError, UndefinedGeneratedFunc
 
 def workspace(request):
@@ -295,3 +295,23 @@ def upload_code(request):
         return JsonResponse({'success': False, 'json': repr(e)})
     else:        
         return JsonResponse({'success': True, 'data': data})
+    
+def create_cont_func_view(request):
+    '''
+    Создание контейнерной функции
+    '''
+    class_name = request.POST.get('className')
+    path = request.POST.get('path')
+    
+    name_func = request.POST.get('name')
+    type_func = request.POST.get('type')
+    
+    assert name_func, 'Function name is undefined'
+    assert type_func, 'Function type is undefined'
+    
+    try:
+        create_cont_func(path, class_name, name_func, type_func)
+    except ParserError, e:
+        return JsonResponse({'success': False, 'json': unicode(e)})
+    else:
+        return JsonResponse({'success': True})

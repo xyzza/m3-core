@@ -107,6 +107,13 @@ class Claz(ExtWindow):
         self.chk_checkbox_1 = chk_checkbox_1
         
         return a
+    
+    
+    def asd(self, clazz=ExtForm):
+        cont = clazz()
+        cont.layout = 'auto'
+        
+        return cont
         
 def ata(a, b):
     panel_2.store = urls.get_action('vega-action').get_absolute_url()

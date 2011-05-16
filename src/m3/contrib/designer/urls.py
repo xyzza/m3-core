@@ -19,6 +19,9 @@ urlpatterns = patterns('',
     
     # Создание функции инициализации в классе
     (r'^create-autogen-function$', 'designer.ide.views.create_initialize'),
+    
+    # Создание контейнерной функции 
+    (r'^create-function$', 'designer.ide.views.create_cont_func_view'),
                            
     # Возвращает по питоновскому кода, js код
     (r'^designer/upload-code$', 'designer.ide.views.upload_code'),

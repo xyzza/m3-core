@@ -193,7 +193,105 @@ function createTreeView(rootNodeName){
 	    'create-simple-func':{
             text: 'Создать контейнерную функцию'
             ,iconCls: 'icon-medal-gold-add'
-            ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, false)}
+            ,handler: function(item, e){
+            	
+            	var store = new Ext.data.ArrayStore({				    
+				    autoDestroy: true,				    
+				    idIndex: 0,  
+				    fields: [
+				       'type',
+				       'descr'
+				    ]
+				    ,data: [
+					    ['container', 'Container'],
+					    ['panel', 'Panel'],
+					    ['formPanel', 'Form panel'],					    
+					]
+				});
+				            	
+            	
+            	var form = 
+            		new Ext.form.FormPanel({
+	    				padding: 10            				
+	    				,baseCls: 'x-plain'
+	    				,labelWidth: 100
+	    				,items:[
+	    					new Ext.form.TextField({
+	    						fieldLabel: 'Название'
+	    						,id:'func-name'	    						
+	    						,anchor: '100%'
+	    						,allowBlank: false
+	    						,maskRe: /[A-Za-z\_]+/
+	    						,name:'name'
+	    					}),
+	    					new Ext.form.ComboBox({
+	    						fieldLabel: 'Контейнерный класс'
+	    						,anchor: '100%'
+	    						,allowBlank: false
+								,mode:'local'
+	    						,store: store
+	    						,valueField: 'type'
+	    						,hiddenName: 'type'
+    							,displayField: 'descr'
+    							,editable: false
+    							,triggerAction: 'all'
+    							,name:'type'    							
+	    					})
+	    				]
+	    			});
+            	
+            	var node = item.parentMenu.contextNode;
+            	
+            	var win = new Ext.Window({
+            		title: 'Создание функции для класса - ' + node.text
+            		,resizable: false
+            		,modal: true
+            		            		
+            		,items:[ form ]
+            		,buttons: [
+            			new Ext.Button({
+            				text: 'Создать',
+            				handler: function(btn, e){
+            					
+            					form.getForm().submit({
+            						clientValidation: true
+            						,params:{
+            							path: node.attributes['path'],
+            							className: node.attributes['class_name']
+            						}
+            						,url: '/create-function'
+            						,success: function(form, action){            							
+
+            							var funcName = form.findField('func-name').getValue();
+            							
+							            var new_node = new Ext.tree.TreeNode({
+							                text: funcName
+							                ,path: node.attributes['path']
+							                ,class_name: node.attributes['class_name']
+							                ,func_name: funcName
+							                ,iconCls: 'icon-function'                
+							            });
+            							
+            							node.appendChild(new_node);
+            							
+            							win.close();
+            							
+            							onClickNode(new_node);
+            						}
+            						,failure: uiAjaxFailMessage
+            					});
+            				}
+            			}),
+            			new Ext.Button({
+            				text: 'Отмена',
+            				handler: function(btn, e){            					
+            					btn.ownerCt.ownerCt.close();
+            				}
+            			})
+            		]
+            	});
+            	win.show();
+            }
 	    }}
 	
 	
