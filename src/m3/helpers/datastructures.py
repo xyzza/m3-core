@@ -18,8 +18,8 @@ class TypedList(list):
         @param type: Тип значений, которые должны находится в списке
         '''
         super(TypedList, self).__init__()
-        self.__type = type
-        self.__exceptions = exceptions
+        self._type = type
+        self._exceptions = exceptions
         self.on_before_addition = on_before_addition
         self.on_after_addition = on_after_addition
         self.on_before_deletion = on_before_deletion
@@ -69,8 +69,8 @@ class TypedList(list):
             Сначало проверяется значение, то есть если значение "Разделитель" = "-" и тд, то дальнейшие проверки не осуществляются
             Иначе проверяется тип объекта.
         '''
-        if value not in self.__exceptions:
-            assert isinstance(value, self.__type), 'Type value "%s" isn\'t %s!' % (value, self.__type.__name__)
+        if value not in self._exceptions:
+            assert isinstance(value, self._type), 'Type value "%s" isn\'t %s!' % (value, self._type.__name__)
 
     def __do_before_addition(self, *arg, **kwargs):
         if self.__on_before_addition is not None:
