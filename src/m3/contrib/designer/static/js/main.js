@@ -246,7 +246,7 @@ function createTreeView(rootNodeName){
             		title: 'Создание функции для класса - ' + node.text
             		,resizable: false
             		,modal: true
-            		            		
+					,width: 400            		            		
             		,items:[ form ]
             		,buttons: [
             			new Ext.Button({

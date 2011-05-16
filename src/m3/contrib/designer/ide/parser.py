@@ -740,9 +740,11 @@ class Parser(object):
             else:
                 raise ParserError(u'Не определен объект маппинга %s' % extjs_name)
         
+        param_name = 'container_class'
+        
         args = ast.arguments(args=[
                                    ast.Name('self', ast.Load()), 
-                                   ast.Name('clazz', ast.Load())
+                                   ast.Name(param_name, ast.Load())
                              ],
                              defaults=[ast.Name( str(get_py_name(type_func_ext)) , ast.Load())], 
                              kwarg=None, 
@@ -751,7 +753,7 @@ class Parser(object):
         nodes = [ast.Assign(targets=[ast.Name('cont', ast.Load())], 
                             value=ast.Call(
                                     ast.Name(
-                                        'clazz',
+                                        param_name,
                                         ast.Load()                                      
                                     ),
                                     [],     
