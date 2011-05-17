@@ -99,6 +99,7 @@ INSTALLED_APPS = (
     #'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'm3.contrib.m3_storage',
     #'django.contrib.sites',
     # Test applications here
     #'history_test',
@@ -114,6 +115,7 @@ INSTALLED_APPS = (
 #    'tests.contrib.palo_olap',
     'tests.core.registry_tests',
     'tests.db.ddl_tests',
+    'tests.contrib.m3_storage_tests',
 )
 
 logger.init_logging('./logs')
