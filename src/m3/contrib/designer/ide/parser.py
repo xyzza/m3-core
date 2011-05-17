@@ -467,7 +467,7 @@ class Parser(object):
             and isinstance(func_node.body[0], ast.Expr):            
             nodes.insert(0, func_node.body[0])
         
-        if self.func_name != Parser.GENERATED_FUNC:
+        if self.func_name and self.func_name != Parser.GENERATED_FUNC:
             nodes.insert(0, self._create_insanse_node(json_dict['id'], func_node.args.args[1].id))
             nodes.extend([StringSpaces(), ast.Return(value=ast.Name(id=json_dict['id'], ctx=ast.Load()))])
             
