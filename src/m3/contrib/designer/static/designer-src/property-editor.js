@@ -170,13 +170,29 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
         for (i in customEditors) {
             if (customEditors.hasOwnProperty(i)) {
                 modelItems.push(customEditors[i]);
-            }
-        }
+            };
+        };
 
         Ext.apply(this, {
             items: modelItems
         });
-
+        this.on('beforeshow', function(){
+            this.fadeInWindow();
+        });
+        /* TODO понять причину и заставить работать*/
+//        this.on('beforeclose', function(){
+//            this.fadeOutCloseWindow();
+//        });
+        //
+        /*Закрытие окна по нажатию (ENTER, ESC)*/
+        this.on('afterrender', function(){
+            Ext.EventManager.on(this.getEl(), 'keydown', function(e){
+                if (e.getKey() == e.ENTER || e.getKey() == e.ESC) {
+                    e.stopEvent();
+                    this.close();
+                };
+            },this);
+        });
         M3Designer.edit.QuickPropertyWindow.superclass.initComponent.call(this);
     },
     anchorWinTo: function (modelId) {
@@ -295,13 +311,15 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
             model: this.model
         };
 
-        this.fireEvent('save', eventObj); /*Плавное скрытие окна*/
-        this.getEl().fadeOut({
-            endOpacity: 0,
-            easing: 'easeOut',
-            duration: 0.5,
-            remove: true
-        });
+        this.fireEvent('save', eventObj);
+    },
+    /*Плавное скрытие окна*/
+    fadeOutCloseWindow: function(){
+        this.getEl().fadeOut({ endOpacity: 0, easing: 'easeOut', duration: 0.35, remove: true});
+    },
+    /*Плавный показ окна*/
+    fadeInWindow: function(){
+        this.getEl().fadeIn({ endOpacity: 0, easing: 'easeIn', duration: 0.35});
     }
 });
 
