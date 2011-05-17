@@ -40,6 +40,7 @@
 Ext.namespace("Ext.ux");
 
 Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
+    toolsPanelWidth: 100,
     initComponent: function(config) {
         Ext.ux.StartMenu.superclass.initComponent.call(this, config);
 
@@ -184,7 +185,7 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
         posArray[1] = posArray[1] < 0 ? el.getHeight() : posArray[1]
         this.showAt(posArray ,parentMenu, false);
 
-        var tPanelWidth = 100;
+        var tPanelWidth = this.toolsPanelWidth;
         var box = this.menuBWrap.getBox();
         this.menuPanel.setWidth(box.width-tPanelWidth);
         this.menuPanel.setHeight(box.height);
