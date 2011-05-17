@@ -5,8 +5,31 @@ Created on 22.04.2011
 @author: akvarats
 '''
 
+#===============================================================================
+# TODO и оставшиеся непонятки
+# 1. Какое дефлтное значение должно быть у поля типа Date или DateTime
+# 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#===============================================================================
+
 from south.utils import ask_for_it_by_name
 from south.db import db, dbs
+
+
+
 
 #===============================================================================
 # Описание врапперов над структурой элементов базы данных (таблиц и их полей)
@@ -48,11 +71,12 @@ class DBField(object):
     '''
     Враппер над полем таблицы в базе данных
     '''
-    def __init__(self, name, allow_blank=True, indexed=True):
+    def __init__(self, name, allow_blank=True, indexed=True, default=None):
         self.name = name # наименование поля
         self.django_type = '' # имя в базе данных
         self.indexed = indexed # признак создания индекса для поля
         self.allow_blank = allow_blank
+        self.default = default
         
     def django_field(self):
         '''
@@ -60,7 +84,8 @@ class DBField(object):
         '''
         field_class = ask_for_it_by_name(self.django_type)
         params = {'blank': self.allow_blank,
-                  'db_index': self.indexed,}
+                  'db_index': self.indexed,
+                  'default': self.default,}
         
         params = self.set_params(params)
         return field_class(**params)
@@ -92,18 +117,70 @@ class CharField(DBField):
     '''
     Поле со строковым типов в базе данных
     '''
-    def __init__(self, name = '', max_length=100, allow_blank=True, indexed=True, default=''):
-        super(CharField, self).__init__(name=name, allow_blank=allow_blank, indexed=indexed)
+    def __init__(self, name = '', max_length=100, allow_blank=True, indexed=False, default=''):
+        super(CharField, self).__init__(name=name, allow_blank=allow_blank, indexed=indexed, default=default)
         self.max_length = max_length
         self.django_type = 'django.db.models.fields.CharField'
-        self.default = default
         
     def set_params(self, params):
         params['max_length'] = self.max_length
-        params['default'] = self.default
+        return params
+    
+class DateField(DBField):
+    
+    def __init__(self, name='', allow_blank=True, indexed=False, auto_now=False, auto_now_add=False, default=None):
+        super(DateField, self).__init__(name=name, allow_blank=allow_blank, indexed=indexed, default=None)
+        self.auto_now = True
+        self.auto_now_add = True
+        self.django_type = 'django.db.models.fields.DateField'
+        
+    def set_params(self, params):
+        params['auto_now'] = self.auto_now
+        params['auto_now_add'] = self.auto_now_add
         return params
         
+
+class DateTimeField(DateField):
+    
+    def __init__(self, name='', allow_blank=True, indexed=False, auto_now=False, auto_now_add=False, default=None):
+        super(DateTimeField, self).__init__(name=name, allow_blank=True, indexed=indexed, auto_now=False, auto_now_add=False, default=None)
+        self.django_type = 'django.db.models.fields.DateTimeField'
+
+class TextField(DBField):
+    
+    def __init__(self, name='', allow_blank=True, indexed=False):
+        super(TextField, self).__init__(name=name, allow_blank=allow_blank, indexed=indexed)
+        self.default = ''
+        self.django_type = 'django.db.models.fields.TextField'
         
+    def set_params(self, params):
+        
+        params['default'] = self.default
+        return params
+    
+class IntegerField(DBField):
+    '''
+    Поле с целочисленным значением
+    '''
+    def __init__(self, name='', indexed=False, default=0):
+        super(IntegerField, self).__init__(name=name, allow_blank=True, indexed=indexed, default=default)
+        self.django_type = 'django.db.models.fields.IntegerField'
+        
+class DecimalField(DBField):
+    '''
+    Числовое поле
+    '''
+    def __init__(self, name='', indexed=False, max_digits=15, decimal_places=2, default=0):
+        super(DecimalField, self).__init__(name=name, indexed=indexed, allow_blank=False, default=default)
+        self.max_digits = max_digits
+        self.decimal_places = decimal_places
+        self.django_type = 'django.db.models.fields.DecimalField'
+        
+    def set_params(self, params):
+        params['max_digits'] = self.max_digits
+        params['decimal_places'] = self.decimal_places
+        return params
+    
 #===============================================================================
 # Механизмы для миграции таблиц базы данных
 #===============================================================================
@@ -112,11 +189,32 @@ class BaseMigrator(object):
     Базовый мигратор, выполняющий функции изменения структуры таблиц в базе 
     данных. 
     '''
-    def __init__(self, db_name=''):
+    def __init__(self, db_name='', manual_transaction=False):
         '''
         @param db_name: ссылка на объект базы данных
         '''
         self.db_name = db_name
+        self.manual_transaction = manual_transaction
+    
+    def start_transaction(self):
+        '''
+        Метод, начинающий транзакцию по изменению таблиц базы данных 
+        '''
+        self._db().start_transaction()
+        
+    def commit_transaction(self):
+        '''
+        Метод, фиксирующий изменения в транзакции внесения изменений в структуру
+        таблиц.
+        '''
+        self._db().commit_transaction()
+        
+    def rollback_transaction(self):
+        '''
+        Откат изменений в таблицах базы данных.
+        '''
+        self._db().rollback_transaction()
+        
     
     def migrate(self, to_version, from_version=None):
         '''
@@ -129,16 +227,32 @@ class BaseMigrator(object):
         # 1. получаем диффку между таблицами
         commands = self._diff_versions(from_version, to_version)
             
-        self._db().start_transaction()
         # 2. выполняем команды на изменение базы данных
+        if not self.manual_transaction:
+            self.start_transaction()
         try:
             for command in commands:
                 command.execute(self.db_name)
         except:
-            self._db().rollback_transaction()
+            if not self.manual_transaction:
+                self.rollback_transaction()
             raise
         else:
-            self._db().commit_transaction()
+            if not self.manual_transaction:
+                self.commit_transaction()
+            
+            
+    def create_table(self, table):
+        '''
+        Обертка над BaseMigrator.migrate, которая создает базу данных
+        '''
+        self.migrate(to_version=table, from_version=NullTable())
+        
+    def drop_table(self, table):
+        '''
+        Обертка над BaseMigrator,migrate, которая удаляет базу данных
+        '''
+        self.migrate(to_version=NullTable(), from_version=table)
             
     
     def _db(self):
@@ -225,21 +339,9 @@ class BaseMigrator(object):
                 (right_field.indexed and not left_field.indexed) or
                 (left_field.allow_blank and not right_field.allow_blank) or
                 (right_field.allow_blank and not left_field.allow_blank)):
-                commands.append(AlterFieldCommand(db_table, right_field))
-            
-            # формирование команд на изменение индексов
-            #if left_field.indexed and not right_field.indexed:
-            #    commands.append(RemoveFieldIndexCommand(db_table, right_field))
-                 
-            #if right_field.indexed and not left_field.indexed:
-            #    commands.append(AppendFieldIndexCommand(db_table, right_field))
                 
-            # формирование команд на изменение обязательность
-            #if left_field.allow_blank and not right_field.allow_blank:
-            #    commands.append(ForbidFieldBlankCommand(db_table, right_field))
-                                
-            #if right_field.allow_blank and not left_field.allow_blank:
-            #    commands.append(AllowFieldBlankCommand(db_table, right_field))
+                # формируем команду на изменение параметров поля
+                commands.append(AlterFieldCommand(db_table, right_field))
             
         # 3. проходимся по полям правой таблицы
         for right_field in cleaned_right.fields:
@@ -356,6 +458,8 @@ class AlterFieldCommand(BaseFieldCommand):
 class AppendFieldIndexCommand(BaseFieldCommand):
     '''
     Команда на добавление индекса на поле таблицы
+    
+    @deprecated: эту хрень заменяет команда AlterFieldCommand
     '''
     def __init__(self, db_table, db_field):
         super(AppendFieldIndexCommand, self).__init__(db_table, db_field)
@@ -363,6 +467,8 @@ class AppendFieldIndexCommand(BaseFieldCommand):
 class RemoveFieldIndexCommand(BaseFieldCommand):
     '''
     Команда на добавление индекса на поле таблицы
+    
+    @deprecated: эту хрень заменяет команда AlterFieldCommand
     '''
     def __init__(self, db_table, db_field):
         super(RemoveFieldIndexCommand, self).__init__(db_table, db_field)
@@ -370,6 +476,8 @@ class RemoveFieldIndexCommand(BaseFieldCommand):
 class AllowFieldBlankCommand(BaseFieldCommand):
     '''
     Команда, которая разрешает заполнение поля пустыми значениями
+    
+    @deprecated: эту хрень заменяет команда AlterFieldCommand
     '''
     def __init__(self, db_table, db_field):
         super(AllowFieldBlankCommand, self).__init__(db_table, db_field)
@@ -377,6 +485,8 @@ class AllowFieldBlankCommand(BaseFieldCommand):
 class ForbidFieldBlankCommand(BaseFieldCommand):
     '''
     Команда, которая запрещает заполнение поля пустыми значениями
+    
+    @deprecated: эту хрень заменяет команда AlterFieldCommand
     '''
     def __init__(self, db_table, db_field):
         super(ForbidFieldBlankCommand, self).__init__(db_table, db_field)

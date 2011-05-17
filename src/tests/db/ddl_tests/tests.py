@@ -84,3 +84,33 @@ class DiffTests(TestCase):
             self.assertEqual(row[0], 0)
             
         migrator.migrate(from_version=table2, to_version=ddl.NullTable())
+        
+    def test_create_fields(self):
+        '''
+        '''
+        
+        table = ddl.DBTable('my_table_333')
+        table.fields.append(ddl.IDField())
+        table.fields.append(ddl.CharField(name='char1', max_length=200, allow_blank=False, indexed=False))
+        table.fields.append(ddl.CharField(name='char2', max_length=200, allow_blank=True, indexed=False))
+        table.fields.append(ddl.CharField(name='char3', max_length=200, allow_blank=False, indexed=True))
+        table.fields.append(ddl.CharField(name='char4', max_length=200, allow_blank=True, indexed=True))
+        
+        table.fields.append(ddl.DateField(name='date1'))
+        table.fields.append(ddl.DateTimeField(name='datetime1'))
+        
+        table.fields.append(ddl.TextField(name='text1'))
+        
+        table.fields.append(ddl.IntegerField(name='int1'))
+        table.fields.append(ddl.DecimalField(name='decimal1'))
+        
+        migrator = SimpleMigrator()
+        migrator.create_table(table)
+        
+        
+        cursor = connections['default'].cursor()
+        cursor.execute('SELECT id, char1, char2, char3, char4, date1, datetime1, text1, int1, decimal1 FROM %s' % table.name)
+        for row in cursor:
+            pass
+        
+        migrator.drop_table(table)
