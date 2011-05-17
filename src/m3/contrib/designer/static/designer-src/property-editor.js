@@ -51,9 +51,9 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
             panel.add(propertyGrid);
             panel.doLayout();
 
-            var accorditionView = panel.ownerCt;
-            if (accorditionView.items.itemAt(1).collapsed) {
-                accorditionView.items.itemAt(1).expand();
+            var accordionView = panel.ownerCt;
+            if (accordionView.items.itemAt(1).collapsed) {
+                accordionView.items.itemAt(1).expand();
             }
         }
     },
@@ -198,15 +198,15 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
     anchorWinTo: function (modelId) {
         M3Designer.edit.QuickPropertyWindow.superclass.show.call(this);
         var domElementId = M3Designer.Utils.parseDomId(modelId);
-        var collapsedHeigth = this.getHeight();
+        var collapsedHeight = this.getHeight();
         this.collapse(false);
         this.anchorTo(document.getElementById(domElementId), "tr-tr");
         /*Если окно будет выходить за видимые границы, переместим его в видимую область*/
         var panelSizeHeight = Ext.getCmp('tab-panel').getActiveTab().getSize().height;
-        if (this.y + collapsedHeigth > panelSizeHeight) {
+        if (this.y + collapsedHeight > panelSizeHeight) {
             this.on('expand', function(){
                 this.getEl().shift({
-                    y: this.y - (this.y + collapsedHeigth - panelSizeHeight),
+                    y: this.y - (this.y + collapsedHeight - panelSizeHeight),
                     easing: 'easeOut',
                     duration: 0.35
                 });
@@ -341,13 +341,13 @@ M3Designer.edit.PropertyWindow = Ext.extend(Ext.Window, {
     initComponent: function () {
         this.addEvents('save');
         var customEditors = {};
-        var customRenderers = {};
-        this.setupGridCustoms(customEditors, customRenderers);
+        var customRenders = {};
+        this.setupGridCustoms(customEditors, customRenders);
 
         this._grid = new Ext.grid.PropertyGrid({
             source: this.source,
             customEditors: customEditors,
-            customRenderers: customRenderers
+            customRenders: customRenders
         });
 
         Ext.apply(this, {
@@ -373,7 +373,7 @@ M3Designer.edit.PropertyWindow = Ext.extend(Ext.Window, {
     show: function () {
         M3Designer.edit.PropertyWindow.superclass.show.call(this);
     },
-    setupGridCustoms: function (customEditorsCfg, customRenderersCfg) {
+    setupGridCustoms: function (customEditorsCfg, customRendersCfg) {
         var objectRendererFunction = function () {
             return '{Object}';
         };
@@ -385,7 +385,7 @@ M3Designer.edit.PropertyWindow = Ext.extend(Ext.Window, {
                 var type = M3Designer.Types.getPropertyType(this.model.attributes.type, p);
                 if (type === 'object') {
                     customEditorsCfg[p] = this.getCodeEditor();
-                    customRenderersCfg[p] = objectRendererFunction; 
+                    customRendersCfg[p] = objectRendererFunction;
                 } else if (type === 'enum') {
                     customEditorsCfg[p] = this.getComboEditor(p);
                 }
@@ -451,19 +451,19 @@ M3Designer.edit.InlinePropertyGrid = Ext.extend(Ext.grid.PropertyGrid, {
         this.addEvents('save');
 
         var customEditors = {};
-        var customRenderers = {};
-        this.setupGridCustoms(customEditors, customRenderers);
+        var customRenders = {};
+        this.setupGridCustoms(customEditors, customRenders);
 
         Ext.apply(this, {
             customEditors: customEditors,
-            customRenderers: customRenderers
+            customRenders: customRenders
         });
 
         this.on('propertychange', this.onSave.createDelegate(this));
 
         M3Designer.edit.InlinePropertyGrid.superclass.initComponent.call(this);
     },
-    setupGridCustoms: function (customEditorsCfg, customRenderersCfg) {
+    setupGridCustoms: function (customEditorsCfg, customRendersCfg) {
         var p;
         var objectRendererFunction = function () {
             return '{Object}';
@@ -474,7 +474,7 @@ M3Designer.edit.InlinePropertyGrid = Ext.extend(Ext.grid.PropertyGrid, {
                 var type = M3Designer.Types.getPropertyType(this.model.attributes.type, p);
                 if (type === 'object') {
                     customEditorsCfg[p] = this.getCodeEditor();
-                    customRenderersCfg[p] = objectRendererFunction;
+                    customRendersCfg[p] = objectRendererFunction;
                 } else if (type === 'enum') {
                     customEditorsCfg[p] = this.getComboEditor(p);
                 }

@@ -205,7 +205,7 @@ function createTreeView(rootNodeName){
 				    ,data: [
 					    ['container', 'Container'],
 					    ['panel', 'Panel'],
-					    ['formPanel', 'Form panel'],					    
+					    ['formPanel', 'Form panel']
 					]
 				});
 				            	
@@ -304,7 +304,7 @@ function createTreeView(rootNodeName){
         	'-',
         	commands['create-dir'],
         	'-',
-        	commands['create-class'],
+        	commands['create-class']
         ]
 	});
 	    
@@ -315,7 +315,7 @@ function createTreeView(rootNodeName){
         	commands['delete-file'],
         	commands['open-file'],
         	'-',
-        	commands['create-dir'],
+        	commands['create-dir']
 		]
     });
     
@@ -326,7 +326,7 @@ function createTreeView(rootNodeName){
         	commands['delete-dir'],
         	commands['open-file'],
         	'-',
-        	commands['create-file'],
+        	commands['create-file']
         ]
     });
 	
@@ -335,14 +335,14 @@ function createTreeView(rootNodeName){
         	commands['create-class'],
         	'-',
         	commands['create-init'],
-        	commands['create-simple-func'],        	
+        	commands['create-simple-func']
         ]
     });
     
 	var contextMenuFunc = new Ext.menu.Menu({
         items: [
         	commands['create-init'],
-        	commands['create-simple-func'],        	
+        	commands['create-simple-func']
         ]
     });
 	
@@ -453,13 +453,13 @@ function createTreeView(rootNodeName){
 	    }
 	});
 	
-	tree.getLoader().on("beforeload", function(treeLoader, node) {	
+	tree.getLoader().on("beforeload", function(treeLoader, node) {
     	treeLoader.baseParams['path'] = node.attributes['path'];
     	treeLoader.baseParams['class_name'] = node.attributes['class_name'];
 	}, this);
 	
 	var accordion = new Ext.Panel({
-		id:'accordition-view',		   
+		id:'accordion-view',
 	    layout:'accordion',	    
 	    layoutConfig: {
 	        animate: true,
@@ -479,9 +479,9 @@ function createTreeView(rootNodeName){
                 var panel = Ext.getCmp('property-panel');
                 panel.removeAll();
                 panel.setTitle('Свойства');
-                var accorditionView = panel.ownerCt;
-                if (accorditionView.items.itemAt(0).collapsed)
-                    accorditionView.items.itemAt(0).expand();
+                var accordionView = panel.ownerCt;
+                if (accordionView.items.itemAt(0).collapsed)
+                    accordionView.items.itemAt(0).expand();
             }
         }
 	});
@@ -493,8 +493,8 @@ function createTreeView(rootNodeName){
  * @param fileName
  */
 function getfFileExpansion(fileName){
-    var splitedFileNmae = fileName.split('.');
-    var fileExpansion = splitedFileNmae[splitedFileNmae.length-1];
+    var splitedFileName = fileName.split('.');
+    var fileExpansion = splitedFileName[splitedFileName.length-1];
     return fileExpansion;
 }
 /**
@@ -773,7 +773,7 @@ function onClickNode(node) {
 		    // Прослушивает событие "tabchange"
 		    tabPanel.on('tabchange', function(panel, newTab){
                 this.application.removeHighlight();
-                Ext.getCmp('accordition-view').fireEvent('clear');
+                Ext.getCmp('accordion-view').fireEvent('clear');
     		}, this);
 			
 			result = true;
