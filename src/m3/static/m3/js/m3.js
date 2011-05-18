@@ -456,13 +456,13 @@ function sendRequest(url, desktop, params){
     var offset = real.length % 3;
 	
 	if (offset != 0) {
-		for (i; i < offset; i++) {
+		for (var i; i < offset; i++) {
 			retVal += real.charAt(i);
 		}
 		retVal += ' ';
 	}
 	
-    for (i; i < real.length; i++) {
+    for (var i; i < real.length; i++) {
         if (g % 3 == 0 && g != 0) {
             retVal += ' ';
         }
