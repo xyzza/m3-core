@@ -69,7 +69,7 @@ class Contragent(BaseObjectModel):
     
     u_inn = models.CharField(max_length=10, null=True, blank=True, verbose_name=u'ИНН юр. лица')
     u_kpp = models.CharField(max_length=10, null=True, blank=True, verbose_name=u'КПП юр. лица')
-    u_filial = models.CharField(max_length=20, null=True, blank=True, verbose_name='')
+    u_filial = models.CharField(max_length=20, null=True, blank=True, verbose_name=u'Номер филиала юр. лица')
     
     u_okved = models.CharField(max_length=10, null=True, blank=True, verbose_name=u'ОКВЭД юр. лица') # Общероссийский классификатор видов экономической деятельности
     u_ogrn  = models.CharField(max_length=13, null=True, blank=True, verbose_name=u'ОГРН юр. лица') # Основной государственный регистрационный номер
@@ -83,14 +83,14 @@ class Contragent(BaseObjectModel):
     f_oname = models.CharField(max_length=50, null=True, blank=True, verbose_name=u'Отчество физ. лица')
 
     f_inn = models.CharField(max_length=12, null=True, blank=True, verbose_name=u'ИНН физ. лица')
-    f_snils = models.CharField(max_length=11, null=True, blank=True, verbose_name=u'')
+    f_snils = models.CharField(max_length=11, null=True, blank=True, verbose_name=u'СНИЛС физ. лица')
     
-    f_dul_type = models.ForeignKey('m3_dicts.DulType', null=True, blank=True, verbose_name=u'')
-    f_dul_seria = models.CharField(max_length = 20, db_index = True, null = True, blank = True, verbose_name=u'')
-    f_dul_number = models.CharField(max_length = 40, db_index = True, null = True, blank = True, verbose_name=u'')
-    f_dul_issue_date = models.DateField(null = True, blank = True, verbose_name=u'')
-    f_dul_issue_by = models.CharField(max_length = 200, null = True, blank = True, verbose_name=u'')
-    
+    f_dul_type = models.ForeignKey('m3_dicts.DulType', null=True, blank=True, verbose_name=u'Тип документа, удостоверяющего личность')
+    f_dul_seria = models.CharField(max_length = 20, db_index = True, null = True, blank = True, verbose_name=u'Серия документа, удостоверяющего личность')
+    f_dul_number = models.CharField(max_length = 40, db_index = True, null = True, blank = True, verbose_name=u'Номер документа, удостоверяющего личность')
+    f_dul_issue_date = models.DateField(null = True, blank = True, verbose_name=u'Дата выдачи документа, удостоверяющего личность')
+    f_dul_issue_by = models.CharField(max_length = 200, null = True, blank = True, verbose_name=u'Кем выдан документ, удостоверяющий личность')
+
     def name(self):
         return self.u_short_name if self.contragent_type == ContragentTypeEnum.UL else \
                ((self.f_fname or '') + ' ' + (self.f_iname or '') + ' ' + (self.f_oname or '')).strip()
