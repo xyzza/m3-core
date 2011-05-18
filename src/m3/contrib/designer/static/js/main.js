@@ -11,10 +11,13 @@ var codeViewFileTypes = ["py", "css", "js", "conf", "html", "sql"];
 
 /*добавляем функцию has в array, функция возвращает true если хотябы один элемент встречается в массиве*/
 Array.prototype.has = function() {
-    var	i = arguments.length,
+    var	i = arguments.length;
     result = [];
-    while(i) result.push(this.indexOf(arguments[--i]) !== -1);
-    return result.every(function(e){return e});
+    while(i){
+        var x = this.indexOf(arguments[--i]) !== -1;
+        if(x) return true;
+    };
+    return false;
 };
 
 /*==========================Перехват нажатий клавиш===========================*/
