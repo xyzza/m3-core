@@ -206,8 +206,9 @@ class ExtObjectGrid(containers.ExtGrid):
             
         if self.url_data:
             self.store.url = self.url_data
-                            
-        assert self.store.url, 'Url for store or action_data is not define'        
+         
+        # Стор может быть пустой                   
+        #assert self.store.url, 'Url for store or action_data is not define'
         
         if self.allow_paging:
             self.store.start = 0
