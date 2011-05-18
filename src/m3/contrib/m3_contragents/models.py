@@ -85,7 +85,7 @@ class Contragent(BaseObjectModel):
     f_inn = models.CharField(max_length=12, null=True, blank=True, verbose_name=u'ИНН физ. лица')
     f_snils = models.CharField(max_length=11, null=True, blank=True, verbose_name=u'')
     
-    f_dul_type = models.ForeignKey('m3_dicts.DulType', null=True, blank=True) 
+    f_dul_type = models.ForeignKey('m3_dicts.DulType', null=True, blank=True)
     f_dul_seria = models.CharField(max_length = 20, db_index = True, null = True, blank = True)
     f_dul_number = models.CharField(max_length = 40, db_index = True, null = True, blank = True)
     f_dul_issue_date = models.DateField(null = True, blank = True)
