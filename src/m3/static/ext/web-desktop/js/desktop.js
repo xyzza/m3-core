@@ -276,7 +276,7 @@ Ext.extend(Ext.ux.TaskBar, Ext.util.Observable, {
     init : function(){
         this.startMenu = new Ext.ux.StartMenu(Ext.apply({
             iconCls: 'user',
-            height: 300,
+            height: 360,
             shadow: true,
             title: 'Jack Slocum',
             width: 300

@@ -59,31 +59,31 @@ class Contragent(BaseObjectModel):
     contragent_type = models.SmallIntegerField(choices = ContragentTypeEnum.get_choices(), 
                                                default = ContragentTypeEnum.UL)
     parent = models.ForeignKey('ContragentGroup', null=True, blank=True)
-    code = models.CharField(max_length=30, null=True, blank=True)
+    code = models.CharField(max_length=30, null=True, blank=True, verbose_name=u'Код')
     
     #==========================================================================
     # Атрибуты юридического лица
     #==========================================================================
-    u_short_name = models.CharField(max_length=200, null=True, blank=True)
-    u_full_name = models.CharField(max_length=500, null=True, blank=True)
+    u_short_name = models.CharField(max_length=200, null=True, blank=True, verbose_name=u'Краткое наименование юр. лица')
+    u_full_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=u'Полное наименование юр. лица')
     
-    u_inn = models.CharField(max_length=10, null=True, blank=True)
-    u_kpp = models.CharField(max_length=10, null=True, blank=True)
-    u_filial = models.CharField(max_length=20, null=True, blank=True)
+    u_inn = models.CharField(max_length=10, null=True, blank=True, verbose_name=u'ИНН юр. лица')
+    u_kpp = models.CharField(max_length=10, null=True, blank=True, verbose_name=u'КПП юр. лица')
+    u_filial = models.CharField(max_length=20, null=True, blank=True, verbose_name='')
     
-    u_okved = models.CharField(max_length=10, null=True, blank=True) # Общероссийский классификатор видов экономической деятельности
-    u_ogrn  = models.CharField(max_length=13, null=True, blank=True) # Основной государственный регистрационный номер
-    u_okpo  = models.CharField(max_length=8,  null=True, blank=True) # Общероссийский классификатор предприятий и организаций
+    u_okved = models.CharField(max_length=10, null=True, blank=True, verbose_name=u'ОКВЭД юр. лица') # Общероссийский классификатор видов экономической деятельности
+    u_ogrn  = models.CharField(max_length=13, null=True, blank=True, verbose_name=u'ОГРН юр. лица') # Основной государственный регистрационный номер
+    u_okpo  = models.CharField(max_length=8,  null=True, blank=True, verbose_name=u'ОКПО юр. лица') # Общероссийский классификатор предприятий и организаций
     
     #===========================================================================
     # Атрибуты физического лица
     #===========================================================================
-    f_fname = models.CharField(max_length=50, null=True, blank=True)
-    f_iname = models.CharField(max_length=50, null=True, blank=True)
-    f_oname = models.CharField(max_length=50, null=True, blank=True)
+    f_fname = models.CharField(max_length=50, null=True, blank=True, verbose_name=u'Фамилия физ. лица')
+    f_iname = models.CharField(max_length=50, null=True, blank=True, verbose_name=u'Имя физ. лица')
+    f_oname = models.CharField(max_length=50, null=True, blank=True, verbose_name=u'Отчество физ. лица')
 
-    f_inn = models.CharField(max_length=12, null=True, blank=True)
-    f_snils = models.CharField(max_length=11, null=True, blank=True)
+    f_inn = models.CharField(max_length=12, null=True, blank=True, verbose_name=u'ИНН физ. лица')
+    f_snils = models.CharField(max_length=11, null=True, blank=True, verbose_name=u'')
     
     f_dul_type = models.ForeignKey('m3_dicts.DulType', null=True, blank=True) 
     f_dul_seria = models.CharField(max_length = 20, db_index = True, null = True, blank = True)
