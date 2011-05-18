@@ -721,65 +721,54 @@ Ext.namespace("Ext.ux.grid");
  * Plugin that enables filters in columns headers.
  * 
  * To add a grid header filter, put the "filter" attribute in column configuration of the grid column model.
- * This attribute is the configuration of the Ext.form.Field to use as filter in the header:<br>
- * 
- * The filter configuration object can include some attributes to manage filter configuration:
- * "filterName": to specify the name of the filter and the corresponding HTTP parameter used to send filter value to server. 
- * 					If not specified column "dataIndex" attribute will be used.
- * "value": to specify default value for filter. If no value is provided for filter, this value will be used as default filter value
- * "filterEncoder": a function used to convert filter value returned by filter field "getValue" method to a string. Useful if the filter field getValue() method
- * 						returns an object that is not a string
- * "filterDecoder": a function used to convert a string to a valid filter field value. Useful if the filter field setValue(obj) method
- * 						needs an object that is not a string
- * "applyFilterEvent" (since 1.0.10): a string that specifies the event that starts filter application for this filter field. If not specified, the "applyMode" is used
- *
- * The GridHeaderFilter constructor accept a configuration object with these properties:
- * "stateful": Switch GridHeaderFilter plugin to attempt to save and restore filters values with the configured Ext.state.Provider. Default true.
- * "height": Height of filters header area. Default 26.
- * "padding": Padding of header filters cells. Default 4.
- * "highlightOnFilter": Enabled grid header highlight if at least one filter is set. Default true.
- * "highlightColor": Color to use when highlight header (see "highlightOnFilter"). Default "orange".
- * "applyMode": Sets how filters are applied. If equals to "auto" or "change" (default) the filter is applyed when filter field value changes (change, select, ENTER).
- * 				If set to "enter" the filters are applied only when user push "ENTER" on filter field. See also "applyFilterEvent" in column filter configuration.
- * "filters": Initial values for grid filters. These values always override grid status saved filters.
- * "ensureFilteredVisible" (since 1.0.11): a boolean value that force filtered columns to be made visible if hidden. Default = true.
- *
- * This plugin fires "render" event when the filters are rendered after grid rendering:
- * render(GridHeaderFiltersPlugin)
- * 
- * This plugin enables "filterupdate" event for the grid:
- * filterupdate(filtername, filtervalue, field)
- * 
+ * This attribute is the configuration of the Ext.form.Field to use as filter in the header or an array of fields configurations.<br>
+ * <br>
+ * The filter configuration object can include some special attributes to manage filter configuration:
+ * <ul>
+ * <li><code>filterName</code>: to specify the name of the filter and the corresponding HTTP parameter used to send filter value to server. 
+ * If not specified column "dataIndex" attribute will be used, if more than one filter is configured for the same column, the filterName will be the "dataIndex" followed by filter index (if index &gt; 0)</li>
+ * <li><code>value</code>: to specify default value for filter. If no value is provided for filter (in <code>filters</code> plugin configuration parameter or from loaded status), 
+ * this value will be used as default filter value</li>
+ * <li><code>filterEncoder</code>: a function used to convert filter value returned by filter field "getValue" method to a string. Useful if the filter field getValue() method
+ * returns an object that is not a string</li>
+ * <li><code>filterDecoder</code>: a function used to convert a string to a valid filter field value. Useful if the filter field setValue(obj) method
+ * 						needs an object that is not a string</li>
+ * <li><code>applyFilterEvent</code></li>: a string that specifies the event that starts filter application for this filter field. If not specified, the "applyMode" is used. (since 1.0.10)</li>
+ *	</ul>
+ * <br>
+ * Filter fields are rendered in the header cells within an <code>Ext.Panel</code> with <code>layout='form'</code>.<br>
+ * For each filter you can specify <code>fieldLabel</code> or other values supported by this layout type.<br>
+ * You can also override panel configuration using <code>containerConfig</code> attribute.<br>
+ * <br>
  * This plugin enables some new grid methods:
- * getHeaderFilter(name)
- * getHeaderFilterField(name) 
- * setHeaderFilter(name, value) 
- * setHeaderFilters(object, [bReset], [bReload])
- * resetHeaderFilters([bReload])
- * applyHeaderFilters([bReload])
+ * <ul>
+ * <li>getHeaderFilter(name)</li>
+ * <li>getHeaderFilterField(name)</li> 
+ * <li>setHeaderFilter(name, value)</li> 
+ * <li>setHeaderFilters(object, [bReset], [bReload])</li>
+ * <li>resetHeaderFilters([bReload])</li>
+ * <li>applyHeaderFilters([bReload])</li>
+ * </ul>
+ * The "name" is the filterName (see filterName in each filter configuration)
  * 
- * The "name" is the dataIndex of the corresponding column or to the filterName (if specified in filter cfg)
- * 
- * @constructor Create a new GridHeaderFilters plugin
- * @param cfg Plugin configuration.
  * @author Damiano Zucconi - http://www.isipc.it
- * @version 1.0.12 - 06/08/2010
+ * @version 2.0.6 - 03/03/2011
  */
 Ext.ux.grid.GridHeaderFilters = function(cfg){if(cfg) Ext.apply(this, cfg);};
 	
 Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable, 
 {
 	/**
-	 * @cfg {Number} height
-	 * Height of filter area in grid header. Default: 32px
+	 * @cfg {Number} fieldHeight
+	 * Height for each filter field used by <code>autoHeight</code>.
 	 */
-	height: 26,
+	fieldHeight: 22,
 	
 	/**
 	 * @cfg {Number} padding
-	 * Padding for filter header cells. Default: 2
+	 * Padding for filter fields. Default: 2
 	 */
-	padding: 2,
+	fieldPadding: 1,
 	
 	/**
 	 * @cfg {Boolean} highlightOnFilter
@@ -791,11 +780,14 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	 * @cfg {String} highlightColor
 	 * Color for highlighted grid header
 	 */
-	// M prefer 13.10.10
-	//highlightColor: 'orange',
-	// -->
 	highlightColor: 'yellow',
-	// M prefer <-
+	
+	/**
+	 * @cfg {String} highlightCls
+	 * Class to apply to filter header when filters are highlighted. If specified overrides highlightColor.
+	 * See <code>highlightOnFilter</code>. 
+	 */
+	highlightCls: null,
 	
 	/**
 	 * @cfg {Boolean} stateful
@@ -806,257 +798,526 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	/**
 	 * @cfg {String} applyMode
 	 * Sets how filters are applied. If equals to "auto" (default) the filter is applyed when filter field value changes (change, select, ENTER).
-	 * If set to "button" an apply button is rendered near each filter. When user push this button all filters are applied at the same time. This
-	 * could be useful if you want to set more than one filter before reload the store.
+	 * If set to "enter" the filters are applied only when user push "ENTER" on filter field.<br> 
+	 * See also <code>applyFilterEvent</code> in columnmodel filter configuration: if this option is specified in
+	 * filter configuration, <code>applyMode</code> value will be ignored and filter will be applied on specified event.
 	 * @since Ext.ux.grid.GridHeaderFilters 1.0.6
 	 */
 	applyMode: "auto",
 	
 	/**
 	 * @cfg {Object} filters
-	 * Initial values for filters. Overrides values loaded from grid status.
+	 * Initial values for filters (mapped with filters names). If this object is defined,
+	 * its attributes values overrides the corresponding filter values loaded from grid status or <code>value</code> specified in column model filter configuration.<br>
+	 * Values specified into column model configuration (filter <code>value</code> attribute) are ignored if this object is specified.<br>
+	 * See <code>filtersInitMode</code> to understand how these values are mixed with values loaded from grid status.
 	 * @since Ext.ux.grid.GridHeaderFilters 1.0.9
 	 */
 	filters: null,
 	
 	/**
+	 * @cfg {String} filtersInitMode
+	 * If <code>filters</code> config value is specified, this parameter defines how these values are used:
+	 * <ul>
+	 * <li><code>replace</code>: these values replace all values loaded from grid status (status is completely ignored)</li>
+	 * <li><code>merge</code>: these values overrides values loaded from status with the same name. Other status values are keeped and used to init filters.</li>
+	 * </ul>
+	 * This parameter doesn't affect how filter <code>value</code> attribute is managed: it will be always ignored if <code>filters</code> object is specified.<br>
+	 * Default = 'replace'
+	 */
+	filtersInitMode: 'replace',
+	
+	/**
 	 * @cfg {Boolean} ensureFilteredVisible
 	 * If true, forces hidden columns to be made visible if relative filter is set. Default = true.
-	 * @type Boolean
 	 */
 	ensureFilteredVisible: true,
 	
-	applyFiltersText: "Apply filters",
+	cfgFilterInit: false,
+	
+	/**
+	 * @cfg {Object} containerConfig
+	 * Base configuration for filters container of each column. With this attribute you can override filters <code>Ext.Container</code> configuration.
+	 */
+	containerConfig: null,
+	
+	/**
+	 * @cfg {Number} labelWidth
+	 * Label width for filter containers Form layout. Default = 50.
+	 */
+	labelWidth: 50,
+	
+	fcc: null,
+	
+	filterFields: null,
+	
+	filterContainers: null,
+	
+	filterContainerCls: 'x-ghf-filter-container',
+	
+	//kirov - признак того что идет изменение размеров колонок
+	inResizeProcess: false,
 	
 	init:function(grid) 
 	{
 		this.grid = grid;
-		this.gridView = null;
-		this.panels = [];
-		//I TD corrispondenti ai vari headers
-		this.headerCells = null;
-		this.grid.on("render", this.onRender, this);
-		this.grid.on("columnmove", this.renderFilters.createDelegate(this, [false]), this);
-		this.grid.on("columnresize", this.onColResize, this);
-		this.grid.on("resize", this.resizeAllFilterFields, this);
+		var gv = this.grid.getView();
+		gv.updateHeaders = gv.updateHeaders.createSequence(function(){
+			this.renderFilters.call(this);
+		},this).createInterceptor(function(){
+			// kirov - непонятно, зачем уничтожать фильтры если потом они рендерятся. иначе у нас не работают произвольные контролы в заголовке
+			//this.destroyFilters.call(this);
+			return true;
+		},this);
+		this.grid.on({
+			scope: this,
+			render: this.onRender,
+			resize: this.onResize,
+			columnresize: this.onColResize,
+			reconfigure: this.onReconfigure,
+			beforedestroy: this.destroyFilters
+		});
+		//this.grid.on("columnmove", this.renderFilters, this);
 		if(this.stateful)
 		{
 			this.grid.on("beforestatesave", this.saveFilters, this);
 			this.grid.on("beforestaterestore", this.loadFilters, this);
 		}
 		
+		//Column hide event managed
 		this.grid.getColumnModel().on("hiddenchange", this.onColHidden, this);
 		
-		this.grid.addEvents({"filterupdate": true});
-		this.addEvents({'render': true});
+		this.grid.addEvents(
+		/**
+      * @event filterupdate
+      * <b>Event enabled on the GridPanel</b>: fired when a filter is updated
+      * @param {String} name Filter name
+      * @param {Object} value Filter value
+      * @param {Ext.form.Field} el Filter field
+      */	
+		'filterupdate');
+		
+		this.addEvents(
+			/**
+	      * @event render
+	      * Fired when filters render on grid header is completed
+	      * @param {Ext.ux.grid.GridHeaderFilters} this
+	      */	
+			{'render': true}
+		);
+		
+		//Must ignore filter config value ?
+		this.cfgFilterInit = Ext.isDefined(this.filters) && this.filters !== null;
+		if(!this.filters)
+			this.filters = {};
+		
+		//Configuring filters
+		this.configure(this.grid.getColumnModel());
+			
 		Ext.ux.grid.GridHeaderFilters.superclass.constructor.call(this);
 		
-		this.grid.stateEvents[this.grid.stateEvents.length] = "filterupdate";
-		
-		this.grid.headerFilters = this;
-		
-		this.grid.getHeaderFilter = function(sName){
-			if(!this.headerFilters)
-				return null;
-			if(this.headerFilters.filterFields[sName])
-				return this.headerFilters.getFieldValue(this.headerFilters.filterFields[sName]);
-			else
-				return null;	
-		};
-		
-		this.grid.setHeaderFilter = function(sName, sValue){
-			if(!this.headerFilters)
-				return;
-			var fd = {};
-			fd[sName] = sValue;
-			this.setHeaderFilters(fd);
-		};
-		
-		this.grid.setHeaderFilters = function(obj, bReset, bReload)
+		if(this.stateful)
 		{
-			if(!this.headerFilters)
-				return;
-			if(bReset)
-				this.resetHeaderFilters(false);
-			if(arguments.length < 3)
-				var bReload = true;
-			var bOne = false;
-			for(var fn in obj)
+			if(!Ext.isArray(this.grid.stateEvents))
+				this.grid.stateEvents = [];
+			this.grid.stateEvents.push('filterupdate');
+		}
+		
+		//Enable new grid methods
+		Ext.apply(this.grid, {
+			headerFilters: this,
+			getHeaderFilter: function(sName){
+				if(!this.headerFilters)
+					return null;
+				return this.headerFilters.filters[sName];	
+			},
+			setHeaderFilter: function(sName, sValue){
+				if(!this.headerFilters)
+					return;
+				var fd = {};
+				fd[sName] = sValue;
+				this.setHeaderFilters(fd);
+			},
+			setHeaderFilters: function(obj, bReset, bReload)
 			{
+				if(!this.headerFilters)
+					return;
+				if(bReset)
+					this.resetHeaderFilters(false);
+				if(arguments.length < 3)
+					var bReload = true;
+				var bOne = false;
+				for(var fn in obj)
+				{
+					if(this.headerFilters.filterFields[fn])
+					{
+						var el = this.headerFilters.filterFields[fn];
+						this.headerFilters.setFieldValue(el,obj[fn]);
+						this.headerFilters.applyFilter(el, false);
+						bOne = true;
+					}
+				}
+				if(bOne && bReload)
+					this.headerFilters.storeReload();
+			},
+			getHeaderFilterField: function(fn)
+			{
+				if(!this.headerFilters)
+					return;
 				if(this.headerFilters.filterFields[fn])
+					return this.headerFilters.filterFields[fn];
+				else
+					return null;
+			},
+			resetHeaderFilters: function(bReload)
+			{
+				if(!this.headerFilters)
+					return;
+				if(arguments.length == 0)
+					var bReload = true; 
+				for(var fn in this.headerFilters.filterFields)
 				{
 					var el = this.headerFilters.filterFields[fn];
-					this.headerFilters.setFieldValue(el,obj[fn]);
+					if(Ext.isFunction(el.clearValue)) 
+					{
+						el.clearValue();
+					} 
+					else 
+					{
+						this.headerFilters.setFieldValue(el, '');
+					}
 					this.headerFilters.applyFilter(el, false);
-					bOne = true;
 				}
-			}
-			if(bOne && bReload)
-				this.headerFilters.storeReload();
-		};
-		
-		this.grid.getHeaderFilterField = function(fn)
-		{
-			if(!this.headerFilters)
-				return;
-			if(this.headerFilters.filterFields[fn])
-				return this.headerFilters.filterFields[fn];
-			else
-				return null;
-		};
-		
-		this.grid.resetHeaderFilters = function(bReload)
-		{
-			if(!this.headerFilters)
-				return;
-			if(arguments.length == 0)
-				var bReload = true; 
-			for(var fn in this.headerFilters.filterFields)
+				if(bReload)
+					this.headerFilters.storeReload();
+			},
+			applyHeaderFilters: function(bReload)
 			{
-				var el = this.headerFilters.filterFields[fn];
-				if(Ext.isFunction(el.clearValue)) 
-				{
-					el.clearValue();
-				} 
-				else 
-				{
-					this.headerFilters.setFieldValue(el, "");
-				}
-				this.headerFilters.applyFilter(el, false);
+				if(arguments.length == 0)
+					var bReload = true;
+				this.headerFilters.applyFilters(bReload);
 			}
-			if(bReload)
-				this.headerFilters.storeReload();
-		};
+		});
 		
-		this.grid.applyHeaderFilters = function(bReload)
-		{
-			if(arguments.length == 0)
-				var bReload = true;
-			this.headerFilters.applyFilters(bReload);
-		};
 	},
 	
-	renderFilters: function(bReload)
+	/**
+	 * @private
+	 * Configures filters and containers starting from grid ColumnModel
+	 * @param {Ext.grid.ColumnModel} cm The column model to use
+	 */
+	configure: function(cm)
 	{
-		//Eliminazione Fields di filtro esistenti
-		this.filterFields = {};
+		/*Filters config*/
+		var filteredColumns = cm.getColumnsBy(function(cc){
+			if(Ext.isObject(cc.filter) || Ext.isArray(cc.filter))
+				return true;
+			else
+				return false;
+		});
 		
-		//Elimino pannelli esistenti
-		for(var pId in this.panels)
+		/*Building filters containers configs*/
+		this.fcc = {};
+		for (var i = 0; i < filteredColumns.length; i++) 
 		{
-			if((this.panels[pId] != null) && (Ext.type(this.panels[pId].destroy) == "function"))
-				this.panels[pId].destroy();
+			var co = filteredColumns[i];
+			var fca = co.filter;
+			if(!Ext.isArray(fca))
+				fca = [fca];
+			for(var ci = 0; ci < fca.length; ci++)
+			{
+				var fc = Ext.apply({
+					filterName: ci > 0 ? co.dataIndex+ci : co.dataIndex
+				},fca[ci]);
+				Ext.apply(fc, {
+					columnId: co.id,
+					dataIndex: co.dataIndex,
+					//hideLabel: Ext.isEmpty(fc.fieldLabel),
+					hideLabel: true,
+					anchor: '100%'
+				});
+				
+				if(!this.cfgFilterInit && !Ext.isEmpty(fc.value))
+				{
+					this.filters[fc.filterName] = Ext.isFunction(fc.filterEncoder) ? fc.filterEncoder.call(this, fc.value) : fc.value;
+				}
+				delete fc.value;
+				
+				/*
+				 * Se la configurazione del field di filtro specifica l'attributo applyFilterEvent, il filtro verrà applicato
+				 * in corrispondenza di quest'evento specifico
+				 */
+				if(fc.applyFilterEvent)
+				{
+					fc.listeners = {scope: this};
+					fc.listeners[fc.applyFilterEvent] = function(field){this.applyFilter(field);};
+					delete fc.applyFilterEvent;
+				}
+				else
+				{
+					//applyMode: auto o enter
+					if(this.applyMode === 'auto' || this.applyMode === 'change' || Ext.isEmpty(this.applyMode))
+					{
+						//Legacy mode and deprecated. Use applyMode = "enter" or applyFilterEvent
+						// kirov - через листенеры удобно новые объекты делать, иначе через события
+						if (fc.hasListener != undefined) {
+							if (!fc.hasListener('change')) {
+								fc.on('change',function(field)
+									{
+										var t = field.getXType();
+										if(t=='combo' || t=='datefield'){ //avoid refresh twice for combo select 
+										return;
+										}else{
+										this.applyFilter(field);
+										}
+									}, this);
+							}
+							if (!fc.hasListener('specialkey')) {
+								fc.on('specialkey',function(el,ev)
+									{
+										ev.stopPropagation();
+										if(ev.getKey() == ev.ENTER) 
+											el.el.dom.blur();
+									}, this);
+							}
+							if (!fc.hasListener('select')) {
+								fc.on('select',function(field){this.applyFilter(field);}, this);
+							}
+						} else {
+							fc.listeners = 
+							{
+								change: function(field)
+								{
+									var t = field.getXType();
+									if(t=='combo' || t=='datefield'){ //avoid refresh twice for combo select 
+										return;
+									}else{
+										this.applyFilter(field);
+									}
+								},
+								// kirov - не обязательный походу обработчик
+								// specialkey: function(el,ev)
+								// {
+									// ev.stopPropagation();
+									// if(ev.getKey() == ev.ENTER) 
+										// el.el.dom.blur();
+								// },
+								select: function(field){
+									this.applyFilter(field);
+									},
+								scope: this	
+							};
+						}
+					}
+					else if(this.applyMode === 'enter')
+					{
+						fc.listeners = 
+						{
+							specialkey: function(el,ev)
+							{
+								ev.stopPropagation();
+								if(ev.getKey() == ev.ENTER) 
+								{
+									this.applyFilters();
+								}
+							},
+							scope: this
+						};
+					}
+				}
+				
+				//Looking for filter column index
+				var containerCfg = this.fcc[fc.columnId];
+				if(!containerCfg)
+				{
+					containerCfg = {
+						cls: this.filterContainerCls,
+						border: false,
+						bodyBorder: false,
+						bodyStyle: "background-color: transparent", //kirov - для нормального цвета
+						//layout: 'vbox',
+						//layoutConfig: {align: 'stretch', padding: this.padding},
+						labelSeparator: '', 
+						labelWidth: this.labelWidth,
+						layout: 'hbox', // kirov - вместо form, чтобы фильтры располагались горизонтально
+						style: {},
+						items: []
+					};
+					if(this.containerConfig)
+						Ext.apply(containerCfg, this.containerConfig);
+					this.fcc[fc.columnId] = containerCfg;
+				}
+				// kirov - для hbox лучше использовать еще один контейнер
+				var tempCont = { 
+					bodyStyle: "background-color: transparent",
+					border: false,
+					bodyBorder: false,
+					layout: 'form',
+					padding: 2,
+					margins: '0 0 -4 0',
+                    flex: 1,
+                    items: [fc]
+                };
+				
+				containerCfg.items.push(tempCont);
+			}
 		}
-		this.panels = [];
-		
-		this.cm = this.grid.getColumnModel();
-		this.gridView = this.grid.view;
-		this.headTr = Ext.DomQuery.selectNode("tr",this.gridView.mainHd.dom);
-		this.headerCells = Ext.query("td",this.headTr);
-		
-		var cols = this.cm.getColumnsBy(function(){return true;});
-		for ( var i = 0; i < cols.length; i++) 
+	},
+	
+	renderFilterContainer: function(columnId, fcc)
+	{
+		if(!this.filterContainers)
+			this.filterContainers = {};
+		//Associated column index
+		var ci = this.grid.getColumnModel().getIndexById(columnId);
+		//Header TD
+		var td = this.grid.getView().getHeaderCell(ci);
+		td = Ext.get(td);
+		//Patch for field text selection on Mozilla
+		if(Ext.isGecko)
+			td.dom.style.MozUserSelect = "text";
+		td.dom.style.verticalAlign = 'top';
+		//Render filter container
+		fcc.width = td.getWidth() - 3;
+		var fc = new Ext.Container(fcc);
+		fc.render(td);
+		//Container cache
+		this.filterContainers[columnId] = fc;
+		//Fields cache	
+		var height = 0;
+		if(!this.filterFields)
+			this.filterFields = {};
+		var fields = fc.findBy(function(cmp){return !Ext.isEmpty(cmp.filterName);});
+		if(!Ext.isEmpty(fields))
 		{
-			var co = cols[i];
-			this.panels[co.dataIndex] = this.createFilterPanel(co, this.grid);
+			for(var i=0;i<fields.length;i++)
+			{
+				var filterName = fields[i].filterName;
+				/*if(this.filterFields[filterName])
+				{
+					//Ext.destroy(this.filterFields[filterName])
+					delete this.filterFields[filterName];
+				}*/
+				this.filterFields[filterName] = fields[i];
+				height += fields[i].getHeight();
+			}
 		}
-		//Cleaning this.filters
 		
-		//Check if some filter is already active
-		if(this.isFiltered())
+		return fc;
+	},
+	
+	renderFilters: function()
+	{
+		if(!this.fcc)
+			return;
+		for(var cid in this.fcc)
 		{
-			//Apply filters
-			if(bReload)
-				this.storeReload();
-			//Highlight header
-			this.highlightFilters(true);
+			this.renderFilterContainer(cid, this.fcc[cid]);
 		}
+		this.setFilters(this.filters);
+		this.highlightFilters(this.isFiltered());
 	},
 	
 	onRender: function()
 	{
-		if(!this.filters)
-			this.filters = {};
-		this.renderFilters(true);
-		
-		/*
-		 * A prefer 13.10.10
-		 * Monkey pathcing наше все
-		 * по мотивам: 
-		 * http://www.sencha.com/forum/showthread.php?41658-Grid-header-filters&p=522074#post522074
-		 */
-		this.grid.store.on('load', function(store, records, opt){
-        this.renderFilters(false);
-		}, this);
-		// A prefer <
-		
+		this.renderFilters();
+		if(this.isFiltered())
+		{
+			this.applyFilters(false);
+		}
 		this.fireEvent("render", this);
 	},
 	
-	onRefresh: function(){
-		this.renderFilters(false);
+	getFilterField: function(filterName)
+	{
+		return this.filterFields ? this.filterFields[filterName] : null;
 	},
 	
-	resizeAllFilterFields: function(){
-	  for(var pId in this.panels)
-    {
-      var ind = this.cm.findColumnIndex(pId);
-      if (ind >= 0){
-        var width = this.cm.getColumnWidth(ind);
-        var panel = this.panels[pId];
-        if(panel && (panel != null) && (Ext.type(panel.doLayout) == "function")){
-          panel.setWidth(width-2);
-          panel.doLayout(false,true);
-        }
-      }
-    }
+	/**
+	 * Sets filter values by values specified into fo.
+	 * @param {Object} fo Object with attributes filterName = value
+	 * @param {Boolean} clear If current values must be cleared. Default = false
+	 */
+	setFilters: function(fo,clear)
+	{
+		this.filters = fo;
+		
+		if(this.filters && this.filterFields)
+		{
+			//Delete filters that doesn't match with any field
+			for(var fn in this.filters)
+			{
+				if(!this.filterFields[fn])
+					delete this.filters[fn];
+			}
+			
+			for(var fn in this.filterFields)
+			{
+				var field = this.filterFields[fn];
+				var value = this.filters[field.filterName];
+				if(Ext.isEmpty(value))
+				{
+					if(clear)
+						this.setFieldValue(field, '');
+				}
+				else
+					this.setFieldValue(field, value);
+			}
+		}
 	},
 	
 	onColResize: function(index, iWidth){
-		var colId = this.cm.getDataIndex(index);
-		var panel = this.panels[colId];
-		if(panel && (panel != null))
+		if(!this.filterContainers)
+			return;
+		// kirov - пошлем событие изменения размера всего грида, если колонки растянуты по ширине
+		if (!this.inResizeProcess) {
+			if (this.grid.viewConfig.forceFit) {
+				this.onResize();
+				return;
+			}
+		}
+		var colId = this.grid.getColumnModel().getColumnId(index);
+		var cnt = this.filterContainers[colId];
+		if(cnt)
 		{
 			if(isNaN(iWidth))
 				iWidth = 0;
-			var filterW = (iWidth < 2) ? 0 : (iWidth - 2);
-			panel.setWidth(filterW);
+			var filterW = (iWidth < 3) ? 0 : (iWidth - 3);
+			cnt.setWidth(filterW);
 			//Thanks to ob1
-			panel.doLayout(false,true);
-			if (index > 0) {
-			  var leftcolId = this.cm.getDataIndex(index-1);
-			  var leftpanel = this.panels[leftcolId];
-        if(leftpanel && (leftpanel != null) && (Ext.type(leftpanel.doLayout) == "function")){
-          var width = this.cm.getColumnWidth(index-1);
-          leftpanel.setWidth(width-2);
-          leftpanel.doLayout(false,true);
-        }
-			}
-			if (index+1 < this.cm.getColumnCount()) {
-        var rightcolId = this.cm.getDataIndex(index+1);
-        var rightpanel = this.panels[rightcolId];
-        if(rightpanel && (rightpanel != null) && (Ext.type(rightpanel.doLayout) == "function")){
-          var width = this.cm.getColumnWidth(index+1);
-          rightpanel.setWidth(width-2);
-          rightpanel.doLayout(false,true);
-        }
-      }
+			cnt.doLayout(false,true);
 		}
+	},
+	
+	/**
+	 * @private
+	 * Resize filters containers on grid resize
+	 * Thanks to dolittle
+	 */
+	onResize: function() 
+	{
+		this.inResizeProcess = true; // kirov - чтобы исключить повторный вызов
+		var n = this.grid.getColumnModel().getColumnCount();
+		for(var i=0; i<n; i++) {
+			var td = this.grid.getView().getHeaderCell(i);
+			td = Ext.get(td);
+			this.onColResize(i, td.getWidth());
+		}
+		this.inResizeProcess = false; // kirov
 	},
 	
 	onColHidden: function(cm, index, bHidden){
 		if(bHidden)
 			return;
-		var colId = cm.getDataIndex(index);
-		var panel = this.panels[colId];
-		if(panel && (panel != null))
-		{
-			var iWidth = cm.getColumnWidth(index);
-			var filterW = (iWidth < 2) ? 0 : (iWidth - 2);
-			panel.setWidth(filterW);
-			//Thanks to ob1
-			panel.doLayout(false,true);
-		}
+		var cw = this.grid.getColumnModel().getColumnWidth(index);
+		this.onColResize(index, cw);
+	},
+	
+	onReconfigure: function(grid, store, cm)
+	{
+		this.destroyFilters();
+		this.configure(cm);
+		this.renderFilters();
 	},
 	
 	saveFilters: function(grid, status)
@@ -1069,34 +1330,27 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		status["gridHeaderFilters"] = vals;
 		return true;
 	},
-    
+   
 	loadFilters: function(grid, status)
 	{
 		var vals = status.gridHeaderFilters;
 		if(vals)
 		{
-			if(!this.filters)
-				this.filters = {};
-			
-			Ext.applyIf(this.filters, vals);
-			/*var bOne = false;
-			for(var name in vals)
-			{
-				this.filters[name] = vals[name];
-				this.grid.store.baseParams[name] = vals[name];
-				bOne = true;
+			if(this.cfgFilterInit)
+			{					
+				if(this.filtersInitMode === 'merge')
+					Ext.apply(vals,this.filters);
 			}
-			/*if(bOne)
-				this.grid.store.reload();*/
+			else
+				this.filters = vals;
 		}
-		
 	},
 	
 	isFiltered: function()
 	{
 		for(var k in this.filters)
 		{
-			if(this.filterFields[k] && !Ext.isEmpty(this.filters[k]))
+			if(/*this.filterFields && this.filterFields[k] && */!Ext.isEmpty(this.filters[k]))
 				return true;
 		}
 		return false;
@@ -1106,20 +1360,60 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	{
 		if(!this.highlightOnFilter)
 			return;
-		var color = enable ? this.highlightColor : "transparent";
-		for(var fn in this.filterFields)
-    {
-      this.filterFields[fn].highlightCtrl.getEl().dom.style.backgroundColor = "transparent";
-      
-      if(!Ext.isEmpty(this.filters[fn])) { 
-        this.filterFields[fn].highlightCtrl.getEl().dom.style.backgroundColor = color;
-      }
-    }
+		if(!this.filterContainers)
+			return;
+		if(!this.grid.getView().mainHd)
+			return;
+			
+		// var tr = this.grid.getView().mainHd.child('.x-grid3-hd-row');
+		// if(!Ext.isEmpty(this.highlightCls))
+		// {
+			// if(enable)
+				// tr.addClass(this.highlightCls);
+			// else
+				// tr.removeClass(this.highlightCls);
+		// }
+		// else
+		// {
+			// tr.setStyle('background-color',enable ? this.highlightColor : '');
+		// }
+		// for(var i=0; i < this.grid.getColumnModel().getColumnCount(); i++) 
+		// {
+			// var hc = Ext.get(this.grid.getView().getHeaderCell(i));
+			// if(!Ext.isEmpty(this.highlightCls))
+			// {
+				// if(enable)
+					// hc.addClass(this.highlightCls);
+				// else
+					// hc.removeClass(this.highlightCls);
+			// }
+			// else
+			// {
+				// hc.setStyle('background-color',enable ? this.highlightColor : 'transparent');
+			// }
+		// }
+		var color = enable ? this.highlightColor : 'transparent';
+		for(var fn in this.filterContainers)
+		{
+			var fc = this.filterContainers[fn];
+			if(fc.rendered)
+			{
+				if(!Ext.isEmpty(this.highlightCls))
+				{
+					if(enable)
+						fc.getEl().addClass(this.highlightCls);
+					else
+						fc.getEl().removeClass(this.highlightCls);
+				}
+				else
+					fc.getEl().setStyle('backgroundColor',color);
+			}
+		}
 	},
 	
 	getFieldValue: function(eField)
 	{
-		if(Ext.type(eField.filterEncoder) == "function")
+		if(Ext.isFunction(eField.filterEncoder))
 			return eField.filterEncoder.call(eField, eField.getValue());
 		else
 			return eField.getValue();
@@ -1127,7 +1421,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	
 	setFieldValue: function(eField, value)
 	{
-		if(Ext.type(eField.filterDecoder) == "function")
+		if(Ext.isFunction(eField.filterDecoder))
 			value = eField.filterDecoder.call(eField, value);
 		eField.setValue(value);
 	},
@@ -1141,28 +1435,26 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 			
 		if(!el.isValid())
 			return;
+			
+		if(el.disabled && !Ext.isDefined(this.grid.store.baseParams[el.filterName]))
+			return;
 		
 		var sValue = this.getFieldValue(el);
 		
-		
-		if(Ext.isEmpty(sValue))
+		if(el.disabled || Ext.isEmpty(sValue))
 		{
-		  if (this.filters[el.filterName] == sValue)
-		    bLoad = false;
 			delete this.grid.store.baseParams[el.filterName];
 			delete this.filters[el.filterName];
 		}
 		else	
 		{
-		  if (this.filters[el.filterName] == sValue)
-        bLoad = false;
 			this.grid.store.baseParams[el.filterName] = sValue;
 			this.filters[el.filterName] = sValue;
 			
 			if(this.ensureFilteredVisible)
 			{
 				//Controllo che la colonna del filtro applicato sia visibile
-				var ci = this.grid.getColumnModel().findColumnIndex(el.dataIndex);
+				var ci = this.grid.getColumnModel().getIndexById(el.columnId);
 				if((ci >= 0) && (this.grid.getColumnModel().isHidden(ci)))
 						this.grid.getColumnModel().setHidden(ci, false);
 			}
@@ -1199,184 +1491,33 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		this.grid.store.load({params: slp});
 	},
 	
-	createFilterField: function(fDataIndex, fConfig)
+	getFilterContainer: function(columnId)
 	{
-	  //Configurazione widget filtro
-    var filterConfig = {};
-    Ext.apply(filterConfig, fConfig);
-    Ext.apply(filterConfig, {
-      dataIndex: fDataIndex,
-      stateful: false
-    });/*
-     * Se la configurazione del field di filtro specifica l'attributo applyFilterEvent, il filtro verrà applicato
-     * in corrispondenza di quest'evento specifico
-     */
-    if(filterConfig.applyFilterEvent)
-    {
-      filterConfig.listeners = {scope: this};
-      filterConfig.listeners[filterConfig.applyFilterEvent] = function(field){this.applyFilter(field);};
-    }
-    else
-    {
-      //applyMode: auto o enter
-      if(this.applyMode == "auto" || this.applyMode == "change" || Ext.isEmpty(this.applyMode))
-      {
-        //Legacy mode and deprecated. Use applyMode = "enter" or applyFilterEvent
-        filterConfig.listeners = 
-        {
-          change: function(field, newValue, oldValue){
-            if (newValue == oldValue) return;
-            var t = field.getXType();
-            if(t=='combo' || t=='datefield'){ //avoid refresh twice for combo select 
-            return;
-            }else{
-            this.applyFilter(field);
-            }
-          },
-          // specialkey: function(el,ev)
-          // {
-          //   //ev.stopPropagation();
-          //   //if(ev.getKey() == ev.ENTER) 
-          //   //  this.applyFilters();
-          //   //  el.el.dom.blur();
-          // },
-          select: function(field){
-             this.applyFilter(field);
-          },
-          scope: this 
-        };
-      }
-      else if(this.applyMode == "enter")
-      {
-        filterConfig.listeners = 
-        {
-          specialkey: function(el,ev)
-          {
-            ev.stopPropagation();
-            if(ev.getKey() == ev.ENTER) 
-            {
-              this.applyFilters();
-            }
-          },
-          scope: this
-        };
-      }
-    }
-    return filterConfig;
+		return this.filterContainers ? this.filterContainers[columnId] : null; 
 	},
 	
-	configureField: function(filterField)
+	destroyFilters: function()
 	{
-	  this.filterFields[filterField.filterName] = filterField;
-        if(!Ext.isEmpty(this.filters[filterField.filterName]))
-        {
-          this.setFieldValue(filterField,this.filters[filterField.filterName]);
-          this.applyFilter(filterField, false);            
-        }
-        else if(filterField.value)
-        {
-          filterField.setValue(filterField.value);
-          this.applyFilter(filterField, false);
-        }
-        if (!filterField.hasListener('change')) {
-            filterField.on('change', this.applyFilters, this);
-            filterField.on('specialkey', function(el,ev) {
-                ev.stopPropagation();
-                if(ev.getKey() == ev.ENTER) 
-                {
-                  this.applyFilters();
-                }
-            }, this);
-        }
-	},
-	
-  createFilterPanel: function(colCfg, grid)
-  {
-		// = this.cm.findColumnIndex(colCfg.dataIndex);
-		//Thanks to dzj
-		var iColIndex = this.cm.getIndexById(colCfg.id);
-    	//var headerTd = Ext.get(this.gridView.getHeaderCell(iColIndex));
-		var headerTd = Ext.get(this.headerCells[iColIndex]);
-		//Patch for field text selection on Mozilla
-		if(Ext.isGecko)
-			headerTd.dom.style.MozUserSelect = "text";
-		var filterPanel = null;
-			
-		if(colCfg.filter)
-    	{
-				var iColWidth = this.cm.getColumnWidth(iColIndex);
-				var iPanelWidth = iColWidth - 2;
-				
-				//Pannello filtri
-				var panelConfig = {
-						/*id: "filter-panel-"+colCfg.id,*/
-						width: iPanelWidth,
-						height: this.height,
-						border: false,
-						bodyStyle: "background-color: transparent; padding: "+this.padding+"px",
-						bodyBorder: false,
-						layout: "fit",
-						items: [],
-						stateful: false
-					};
-				
-			  // Проверим, вдруг несколько фильтров - тогда будет цикл
-			  if (colCfg.filter.constructor == Array)
-			  {
-			    var compositeConfig = {
-			      xtype: "compositefield",
-			      items: []
-			    };
-			    for(var cfgInd in colCfg.filter)
-			    {
-			      if (!colCfg.filter.hasOwnProperty(cfgInd)) continue;
-			      var cfgF = colCfg.filter[cfgInd];
-			      var filterConfig = this.createFilterField(colCfg.dataIndex, cfgF);
-			      var filterName = filterConfig.filterName ? filterConfig.filterName : colCfg.dataIndex;
-            filterConfig.filterName = filterName;
-            filterConfig.flex = 1;
-            compositeConfig.items.push(filterConfig);
-			    };
-			    panelConfig.items.push(compositeConfig);
-			  }
-			  else 
-			  {
-			    var cfgF = colCfg.filter;
-			    Ext.apply(cfgF, {      
-            margins: {top:2,left:2,right:2,bottom:2}
-          });
-			    var filterConfig = this.createFilterField(colCfg.dataIndex, cfgF);
-			    var filterName = filterConfig.filterName ? filterConfig.filterName : colCfg.dataIndex;
-          filterConfig.filterName = filterName;
-			    panelConfig.items.push(filterConfig);
-			  };				
-				
-				filterPanel = new Ext.Panel(panelConfig);
-				filterPanel.render(headerTd);
-				for(var filterInd=0; filterInd<filterPanel.items.length; filterInd++)
-				{
-				  var filterField = filterPanel.items.get(filterInd);
-				  var t = filterField.getXType();
-          if(t=='compositefield')
-          {
-            for(var fieldInd=0; fieldInd<filterField.items.length; fieldInd++)
-            {
-              var field = filterField.items.get(fieldInd)
-              field.highlightCtrl = filterField.ownerCt;
-              this.configureField(field);
-            }
-          }
-          else
-          {
-            filterField.highlightCtrl = filterField.ownerCt;
-            this.configureField(filterField);
-          }
-				};
-    	}
-		return filterPanel;
-    }
+		if(this.filterFields)
+		{
+			for(var ff in this.filterFields)
+			{
+				Ext.destroy(this.filterFields[ff]);
+				delete this.filterFields[ff];
+			}
+		}
+		
+		if(this.filterContainers)
+		{
+			for(var ff in this.filterContainers)
+			{
+				Ext.destroy(this.filterContainers[ff]);
+				delete this.filterContainers[ff];
+			}
+		}
+		
+	}
 });
-
 Ext.ns('Ext.ux.grid');
 
 Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
@@ -3823,13 +3964,13 @@ function sendRequest(url, desktop, params){
     var offset = real.length % 3;
 	
 	if (offset != 0) {
-		for (i; i < offset; i++) {
+		for (var i; i < offset; i++) {
 			retVal += real.charAt(i);
 		}
 		retVal += ' ';
 	}
 	
-    for (i; i < real.length; i++) {
+    for (var i; i < real.length; i++) {
         if (g % 3 == 0 && g != 0) {
             retVal += ' ';
         }
@@ -3870,6 +4011,7 @@ function showMessage(msg, title, icon){
 function showWarning(msg, title){
 	showMessage(msg, title, Ext.MessageBox.WARNING);
 }
+
 /**
  * Расширенный функционал комбобокса
  */
