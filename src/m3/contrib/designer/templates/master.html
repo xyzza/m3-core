@@ -25,6 +25,13 @@
     <link rel='stylesheet' type='text/css' href='/m3static/ext/css/lightbox.css'/>
 
     <script type="text/javascript" src="/m3static/vendor/extjs/adapter/ext/ext-base.js"></script>
+    <script type='text/javascript'>
+        // hack hack hackity hack
+        if (Ext.isIE6 && /msie 9/.test(navigator.userAgent.toLowerCase())) {
+            Ext.isIE6 = Ext.isIE = false;
+            Ext.isChrome = Ext.isIE9 = true;
+        };
+    </script>
     <script type='text/javascript' src='/m3static/vendor/extjs/ext-all-debug.js'></script>
     <script type='text/javascript' src='/m3static/vendor/extjs/ux-all-debug.js'></script>
     <script type='text/javascript' src='/m3static/vendor/extjs/locale/ext-lang-ru.js'></script>       
