@@ -24,6 +24,19 @@ class TypedList(list):
         self.on_after_addition = on_after_addition
         self.on_before_deletion = on_before_deletion
         self.on_after_deletion = on_after_deletion
+        
+    def __copy__(self):
+        """ Правильное клонирование TypedList, которое copy не может сделать автоматически """
+        result = TypedList(
+            type = self._type, 
+            exceptions = self._exceptions,
+            on_before_addition = self.on_before_addition,
+            on_after_addition = self.on_after_addition,
+            on_before_deletion = self.on_before_deletion,
+            on_after_deletion = self.on_after_deletion
+        )
+        result.extend(self[:])
+        return result
 
     def __setitem__(self, key, value):
         self.__check(value)
