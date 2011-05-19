@@ -879,6 +879,12 @@ function initCodeEditorHandlers(codeEditor, path){
     /* async close tab && message */
     var userTakeChoice = true;
 
+    codeEditor.on('contentChaged', function(){
+        window.onbeforeunload = function(){
+            if (codeEditor.contentChanged)
+                return 'Вы закрываете вкладку, в которой имеются изменения.'
+        };
+    });
     /* Хендлер на событие перед закрытием */
     codeEditor.on('beforeclose', function(){
         if (codeEditor.contentChanged){
