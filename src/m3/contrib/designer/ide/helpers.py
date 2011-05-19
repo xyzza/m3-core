@@ -158,7 +158,10 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
         
     if class_name.find(" ") > 0:
         raise ParserError(u'Наименование класса "%s" не должно содержать пробелов' % class_name)
-    
+
+    if not check_name_syntax(class_name):
+        raise ParserError(u'Наименование класса должна начинатся с буквы или "_"')
+
     try:
         str(class_name)
     except UnicodeEncodeError:
@@ -166,10 +169,15 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
     
     
     source = Parser.get_source(path)
-     
+
     # Чтение файла        
     module = ast.parse(source)
-    
+
+    #Проверка присутствует ли в модуле класс с именем class_name
+    for node in module.body:
+        if isinstance(node, ast.ClassDef) and node.name == class_name:
+            raise ParserError(u'Наименование класса "%s" уже используется.' % class_name)
+
     #Нужно добавить импорт всего, если этого импорта нет
     line = 1
     for node in module.body:
@@ -197,6 +205,13 @@ def generate_func(path, class_name, func_node):
     
     module = ast.parse(source)
     
+    if not check_name_syntax(func_node.name):
+        ParserError(u'Наименование функции должна начинатся с буквы или "_"')
+
+    for node in module.body:
+        if isinstance(node, ast.FunctionDef) and node.name == func_node.name:
+            raise ParserError(u'Наименование функции "%s" уже используется.' % func_node.name)
+
     for i, node in enumerate(module.body):
         if isinstance(node, ast.ClassDef) and node.name == class_name:
             if len(module.body) > i+1:
@@ -231,3 +246,14 @@ def create_cont_func(path, class_name, name_func, type_func):
     '''
     func = Parser.generate_cont_func(name_func, type_func)
     generate_func(path, class_name, func)
+
+def check_name_syntax(name):
+    '''
+    Проверяет имя переменной, которое должно начинаться на букву или '_'
+    Возвращает True если проверка прошла успешно.
+    '''
+    if not isinstance(name, basestring):
+        raise Exception('Name must be basestring descendant')
+    if name[0].isalpha() or name.startswith('_'):
+        return True
+    return False
