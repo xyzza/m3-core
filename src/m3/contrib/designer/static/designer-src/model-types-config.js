@@ -100,7 +100,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'Standart',
                 text: 'Button'
-            }
+            },
+            treeIconCls: 'designer-button'
         },
         label: {
             parent: 'component',
@@ -119,7 +120,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'Standart',
                 text: 'Label'
-            }
+            },
+            treeIconCls: 'designer-displayfield'
         },
 /*
         * Контейнеры
@@ -690,7 +692,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             },
             childTypesRestrictions: {
                 disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
-            }
+            },
+            treeIconCls: 'designer-toolbar'
         },
         tbfill: {
             properties: {
@@ -703,7 +706,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'Toolbar',
                 text: 'Toolbar fill'
-            }
+            },
+            treeIconCls: 'designer-toolbar-fill'
         },
         tbseparator: {
             properties: {
@@ -716,7 +720,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'Toolbar',
                 text: 'Toolbar separator'
-            }
+            },
+            treeIconCls: 'designer-toolbar-separator'
         },
         tbspacer: {
             properties: {
@@ -729,7 +734,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'Toolbar',
                 text: 'Toolbar spacer'
-            }
+            },
+            treeIconCls: 'designer-toolbar-spacer'
         },
         tbtext: {
             properties: {
@@ -746,7 +752,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'Toolbar',
                 text: 'Toolbar text item'
-            }
+            },
+            treeIconCls: 'designer-displayfield'
         },
         pagingToolbar: {
             properties: {
@@ -782,7 +789,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'Grid',
                 text: 'Paging toolbar'
-            }
+            },
+            treeIconCls: 'designer-toolbar'
         },
 /*
         * Дерево
@@ -831,7 +839,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'Tree',
                 text: 'Tree node'
-            }
+            },
+            treeIconCls: 'designer-tree-node'
+
         },
         gridPanel: {
             parent: 'panel',
@@ -1029,7 +1039,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: 'undefined'
                 }
             },
-            treeIconCls: 'icon-database',
+            treeIconCls: 'designer-store-json',
             toolboxData: {
                 text: 'Json store',
                 category: 'Data'
@@ -1077,7 +1087,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 category: 'M3',
                 text: 'Tree panel'
-            }
+            },
+            treeIconCls: 'designer-tree-panel'
         },
         dictSelect: {
             parent: 'comboBox',
@@ -1239,7 +1250,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 text: 'File upload field',
                 category: 'M3'
-            }
+            },
+            treeIconCls: 'icon-application-get'
         },
         imageUploadField: {
             parent: 'baseField',
@@ -1271,7 +1283,8 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             toolboxData: {
                 text: 'Image upload field',
                 category: 'M3'
-            }
+            },
+            treeIconCls: 'icon-image-add'
         }
     }
 });

@@ -1,61 +1,51 @@
-﻿.icon-function{
-    background-image:url(../images/icon-function.png) !important;
-}
-.icon-class {
-    background-image:url(../images/icon_c.gif) !important;
-}
+﻿.icon-function{ background-image:url(../images/icon-function.png) !important; }
+.icon-class { background-image:url(../images/icon_c.gif) !important; }
 
-.designer-icon-combo {
-    background-image:url(../images/combo-field.png) !important;
-}
-.designer-icon-fieldset {
-    background-image:url(../images/fieldset.png) !important;
-}
-.designer-icon-number {
-    background-image:url(../images/number-field.png) !important;
-}
-.designer-icon-text {
-    background-image:url(../images/text-field.png) !important;
-}
-.designer-icon-page {
-    background-image:url(../images/page.png) !important;
-}
-.designer-icon-datefield {
-    background-image:url(../images/date-field.png) !important;
-}
-.designer-panel {
-    background-image:url(../images/panel.png) !important;
-}
-.designer-tab-panel {
-    background-image:url(../images/tab-panel.png) !important;
-}
-.designer-grid-panel {
-    background-image:url(../images/grid.png) !important;
-}
-.designer-grid-column {
-    background-image:url(../images/grid-column.png) !important;
-}
-.designer-checkbox {
-    background-image:url(../images/checkbox.png) !important;
-}
-.designer-displayfield {
-    background-image:url(../images/display-field.png) !important;
-}
-.designer-textarea {
-    background-image:url(../images/textarea.png) !important;
-}
-.designer-formpanel {
-    background-image:url(../images/formpanel.png) !important;
-}
-.designer-htmleditor {
-    background-image:url(../images/htmleditor.png) !important;
-}
-.designer-timefield {
-    background-image:url(../images/timefield.png) !important;
-}
-.designer-container {
-    background-image:url(../images/container.png) !important;
-}
+/*Standart*/
+.designer-displayfield {background-image:url(../images/display-field.png) !important;}
+.designer-button { background-image:url(../images/button.png) !important;}
+
+/*Containers*/
+.designer-container {background-image:url(../images/container.png) !important;}
+.designer-panel {background-image:url(../images/panel.png) !important;}
+.designer-icon-fieldset { background-image:url(../images/fieldset.png) !important;}
+.designer-tab-panel {background-image:url(../images/tab-panel.png) !important;}
+.designer-formpanel {background-image:url(../images/formpanel.png) !important;}
+
+/*Fields*/
+.designer-textarea {background-image:url(../images/textarea.png) !important;}
+.designer-checkbox {background-image:url(../images/checkbox.png) !important;}
+.designer-icon-datefield {background-image:url(../images/date-field.png) !important;}
+.designer-timefield {background-image:url(../images/timefield.png) !important;}
+.designer-icon-text { background-image:url(../images/text-field.png) !important;}
+.designer-icon-number { background-image:url(../images/number-field.png) !important;}
+.designer-htmleditor {background-image:url(../images/htmleditor.png) !important;}
+.designer-icon-combo { background-image:url(../images/combo-field.png) !important;}
+
+/*Grig*/
+.designer-grid-panel {background-image:url(../images/grid.png) !important;}
+.designer-grid-column {background-image:url(../images/grid-column.png) !important;}
+
+/*Toolbar*/
+.designer-toolbar { background-image:url(../images/toolbar.png) !important; }
+.designer-toolbar-fill { background-image:url(../images/toolbar-fill.png) !important;}
+.designer-toolbar-separator { background-image:url(../images/toolbar-separator.png) !important;}
+.designer-toolbar-spacer { background-image:url(../images/toolbar-spacer.png) !important;}
+
+/*Data or store*/
+.designer-store-json { background-image:url(../images/store-json.png) !important; }
+.designer-store-array { background-image:url(../images/store-array.png) !important; }
+
+/*Tree*/
+.designer-tree-node { background-image:url(../images/tree-node.png) !important; }
+
+/*M3*/
+.designer-tree-panel { background-image:url(../images/tree-panel.png) !important; }
+
+/**/
+.designer-icon-page { background-image:url(../images/page.png) !important;}
+.designer-icon-page { background-image:url(../images/page.png) !important;}
+
 
 .selectedElement {
     border: 2px solid #710AF0
