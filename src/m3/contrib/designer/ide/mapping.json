@@ -289,6 +289,10 @@
 		,"width": "width"
 		,"height": "height"
 		,"items": "items"
+		,"closable": "closable"
+		,"maximizable": "maximizable"
+		,"minimizable": "minimizable"
+		,"template_globals": "template_globals"
         ,"bodyStyle": "body_style"		
 	},
 	"parent": "panel"
