@@ -183,9 +183,15 @@ class Parser(object):
             # self.layout = 'auto', откуда parent_key = self
             
             for node in nodes:
-                if isinstance(node, ast.Assign):                    
-                    parent_key = node.targets[0].value.id
-                    break
+                if isinstance(node, ast.Assign):
+                    if isinstance(node.targets[0], ast.Name):
+                        parent_key = node.targets[0].id
+                        break
+                    elif isinstance(node.targets[0], ast.Attribute):                    
+                        parent_key = node.targets[0].value.id
+                        break
+            else:
+                raise ParserError('Некорректный синтаксис файла')
         
         js_dict = {}         
         self._build_json(js_dict, parent_key)
