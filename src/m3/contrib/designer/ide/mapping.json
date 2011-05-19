@@ -292,6 +292,7 @@
 		,"closable": "closable"
 		,"maximizable": "maximizable"
 		,"minimizable": "minimizable"
+		,"maximized": "maximized"
 		,"template_globals": "template_globals"
         ,"bodyStyle": "body_style"		
 	},
