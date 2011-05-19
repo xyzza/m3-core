@@ -921,6 +921,22 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: 'New window',
                     isInitProperty: true,
                     isQuickEditable: true
+                },
+                minimizable: {
+                    defaultValue: false,
+                    isInitProperty: true
+                },
+                maximizable: {
+                    defaultValue: false,
+                    isInitProperty: true,
+                },
+                closable: {
+                    defaultValue: true,
+                    isInitProperty: true,
+                },
+                template_globals: {
+                    defaultValue: '',
+                    isInitProperty: true,
                 }
             },
             childTypesRestrictions: {
