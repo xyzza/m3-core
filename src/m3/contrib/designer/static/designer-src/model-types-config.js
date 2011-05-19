@@ -930,6 +930,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: false,
                     isInitProperty: true,
                 },
+                maximized: {
+                    defaultValue: false,
+                    isInitProperty: true,
+                },
                 closable: {
                     defaultValue: true,
                     isInitProperty: true,
