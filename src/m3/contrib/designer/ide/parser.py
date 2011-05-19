@@ -179,13 +179,13 @@ class Parser(object):
         # Находит корневой контейнер
         parent_key = self._get_parent_key(self.extends_cmp)
         if not parent_key:
-            # Если вложенных контейнеров нет
-            if func_node.name == Parser.GENERATED_FUNC:
-                parent_key = 'self'
-            else:
-                for node in sorted(nodes, reverse=True):
-                    if isinstance(node, ast.Return):
-                        parent_key = node.value.id
+            # Если вложенных контейнеров нет,  берем первую Assign конструкцию вида, например:
+            # self.layout = 'auto', откуда parent_key = self
+            
+            for node in nodes:
+                if isinstance(node, ast.Assign):                    
+                    parent_key = node.targets[0].value.id
+                    break
         
         js_dict = {}         
         self._build_json(js_dict, parent_key)
