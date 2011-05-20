@@ -18,6 +18,9 @@ class Command(BaseCommand):
     '''
     Позволяет запускать сервер дизайнера командой manage.py runide
     В INSTALLED_APPS приложения должно быть m3.Scontrib.designer
+    Пример добавления опции запуска
+    make_option('--noreload', action='store_false', dest='use_reloader', default=True,
+                help='Tells Django to NOT use the auto-reloader.'),
     '''
 
     # Подсказка        
@@ -25,13 +28,9 @@ class Command(BaseCommand):
 
     # Список опции для запуска
     option_list = BaseCommand.option_list + (
-        make_option('--port',            
-            dest='port',
-            default=7777,
-            help=u'Порт для запуска сервера дизайнера'),
-        )
+    )
 
-    def handle(self, *args, **options):
+    def handle(self, addrport='', *args, **options):
         '''
         Обработчик запуска команды: python manage.py <<command>>
         '''
@@ -42,10 +41,24 @@ class Command(BaseCommand):
         self.stdout.write('M3 Designer IDE starting... \n')
         
         # Путь до сервера дизайнера
-        cwd = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))                
-                       
+        cwd = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        if not addrport:
+            addr = ''
+            port = '7777'
+        else:
+            try:
+                addr, port = addrport.split(':')
+            except ValueError:
+                addr, port = '', addrport
+        if not addr:
+            addr = '127.0.0.1'
+
+        if not port.isdigit():
+            raise CommandError("%r is not a valid port number." % port)
+        print addr, int(port)
         popen = subprocess.Popen(
-                    'python manage.py runserver ' + str(options['port']),
+                    'python manage.py runserver ' + ':'.join([addr, port]),
                     shell = True,
                     cwd = cwd)
 
