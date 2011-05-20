@@ -551,17 +551,17 @@ class Parser(object):
         # файлы вида: .old.1, old.2, old.3
         # 3. Сохранение старого исходного кода с расширением old
         # 4. Перезапись файла новым содержимым
-        
+
         dir = os.path.dirname(self.path)
         dir_backup = os.path.join(dir, Parser.BACKUP_DIR_NAME)
         if not os.path.isdir(dir_backup):
             os.mkdir(dir_backup)
         else:
             # Могут быть бакупные файлы, обход по времени последнего изменения
-            for file_name in sorted(os.listdir(dir_backup), 
+            for file_name in sorted(os.listdir(dir_backup),
                                 key=lambda f: os.stat(  os.path.join(dir_backup, f) ).st_mtime):
                 file_path = os.path.join(dir_backup, file_name)
-                                                 
+
                 i = file_path.split('.')[-1]
                 try:
                     int(i)
@@ -569,21 +569,22 @@ class Parser(object):
                     os.rename(file_path, '%s.%d' % (file_path, 0) )
                 else:
                     if int(i)+1 > Parser.BACKUP_FILES_MAXIMUM:
-                        os.remove(file_path) 
-                    else:                       
+                        os.remove(file_path)
+                    else:
                         file_name_parts = file_path.split('.')
                         without_end = file_name_parts[:-1]
                         os.rename(file_path, '%s.%d' % ('.'.join(without_end), int(i)+1) )
-                    
-        new_path = os.path.join(dir_backup, os.path.basename(self.path))        
+
+        new_path = os.path.join(dir_backup, os.path.basename(self.path))
         shutil.copyfile(self.path, new_path + '.old')
 
         f_lines = open(self.path, 'r').readlines()
         
         # Включаем и свою строку и пробельную строку выше
         end_l = f_lines[end_line-2:] if end_line else []
-
-        with open(self.path, 'w') as f:            
+        
+        #файл пишется как бинарный "wb" и при сохранении не добавляется лишний знак перенова (CR)
+        with open(self.path, 'wb') as f:
             f.write(''.join(f_lines[:begin_line-1]) + source_code + ''.join(end_l))
 
     def _get_mapping(self):
