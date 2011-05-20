@@ -171,7 +171,7 @@ function createTreeView(rootNodeName){
         'create-dir':{
             text: 'Создать директорию'
             ,iconCls: 'icon-folder-add'
-            ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
+            ,handler: function(item, e){newTarget(item.parentMenu.contextNode, false)}
         },
         'create-class': {
         	text: 'Добавить класс'
