@@ -114,6 +114,11 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
         var source = eventObj.source;
         var s;
 
+        //Проверка указан ли центральный центральный регион 
+        if (source['layout'] == 'border' && !model.hasPropertyEqualTo('region','center')){
+            Ext.MessageBox.alert('Ошибка', 'Необходимо указать центральный регион');
+            return;
+        }
         //проверка на пересечение id моделей
         if (source.id) {
             var existingModel = model.ownerTree.findModelByPropertyValue('id', source.id);
@@ -121,9 +126,9 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
                 if (existingModel !== model) {
                     Ext.MessageBox.alert('Ошибка', 'id компонента совпадает с уже существующим значением');
                     return undefined;
-                }
-            }
-        }
+                };
+            };
+        };
 
         for (s in source) {
             if (source.hasOwnProperty(s) &&
@@ -132,9 +137,9 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
                     model.attributes.properties[s] = Ext.isEmpty(source[s]) ? undefined : Ext.util.JSON.decode(source[s]);
                 } else {
                     model.attributes.properties[s] = source[s];
-                }
-            }
-        }
+                };
+            };
+        };
         this.fireEvent('modelUpdate');
     }
 });

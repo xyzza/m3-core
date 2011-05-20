@@ -25,7 +25,15 @@ M3Designer.model.ComponentModel = Ext.extend(Ext.data.Node, {
     isContainer: function () {
         return M3Designer.Types.isTypeContainer(this.attributes.type);
     },
-
+    /*Проверяет на наличие свойста равному quealTo в дочерних элементах*/
+    hasPropertyEqualTo: function (propertyName, quealTo) {
+        var res = false;
+        for (var i=0; i<this.childNodes.length;i++){
+            if (this.childNodes[i].attributes.properties[propertyName] == quealTo)
+                res = true;
+        };
+        return res;
+    },
     /**
      * Проверка ограничений на допустимость вложенности
      * @param {string} childType тип совместимость с которым проверяем
