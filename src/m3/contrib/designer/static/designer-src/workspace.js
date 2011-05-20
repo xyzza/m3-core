@@ -152,6 +152,8 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
         storage.on('loadcode', this.uploadCode.createDelegate(this));
 
         function onTreeNodeDeleteClick(item) {
+            var accordion = Ext.getCmp('accordion-view');
+            if (accordion) accordion.fireEvent('clear');
             application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
         };
     },
