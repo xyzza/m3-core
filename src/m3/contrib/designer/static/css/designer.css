@@ -47,9 +47,9 @@
 
 
 .selectedElement {
-    border: 2px solid #710AF0
+    border: 2px solid #710AF0 !important
 }
-/*Custom'ый toolTip*/
+/*Custom окно аля toolTip*/
 .x-tipcustom{
     position:absolute;
     top:0;
