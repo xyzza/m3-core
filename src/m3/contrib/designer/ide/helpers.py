@@ -208,8 +208,10 @@ def generate_func(path, class_name, func_node):
     if not check_name_syntax(func_node.name):
         ParserError(u'Наименование функции должна начинатся с буквы или "_"')
 
-    for node in module.body:
-        if isinstance(node, ast.FunctionDef) and node.name == func_node.name:
+    class_list = filter(lambda x: isinstance(x, ast.ClassDef) and x.name == class_name,
+                        module.body)
+    for node in class_list and class_list[0].body:
+        if node and isinstance(node, ast.FunctionDef) and node.name == func_node.name:
             raise ParserError(u'Наименование функции "%s" уже используется.' % func_node.name)
 
     for i, node in enumerate(module.body):
@@ -246,6 +248,8 @@ def create_cont_func(path, class_name, name_func, type_func):
     '''
     func = Parser.generate_cont_func(name_func, type_func)
     generate_func(path, class_name, func)
+    
+    
 
 def check_name_syntax(name):
     '''

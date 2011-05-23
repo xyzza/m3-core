@@ -433,6 +433,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
         this.refreshView();
         /*Возвращаем Highlight элементу*/
         this.selectTreeNodeByElementId(this._lastHighlightedId);
+        /*Выделяем элемент в дереве*/
         this.highlightElement(this._lastHighlightedId);
     }
 });
