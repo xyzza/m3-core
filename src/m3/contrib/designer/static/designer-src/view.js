@@ -80,25 +80,25 @@ M3Designer.view.DesignView = Ext.extend(M3Designer.view.BaseView, {
         this._container.removeAll();
 
         var recursion = function (model) {
-                var newComponentCfg = this.createComponent(model);
-                var i;
+            var newComponentCfg = this.createComponent(model);
+            var i;
 
-                if (model.isContainer() && model.childNodes && model.childNodes.length > 0) {
-                    for (i = 0; i < model.childNodes.length; i++) {
-                        if (!(model.childNodes[i].attributes.properties.parentDockType
-                                && model.childNodes[i].attributes.properties.parentDockType !== '(none)')) {
-                            var newChild = recursion.call(this, model.childNodes[i]);
-                            if (newChild) {
-                                newComponentCfg.items.push(newChild);
-                            }
-                        } else {
-                            newComponentCfg[model.childNodes[i].attributes.properties.parentDockType] =
-                                (recursion.call(this, model.childNodes[i]));
+            if (model.isContainer() && model.childNodes && model.childNodes.length > 0) {
+                for (i = 0; i < model.childNodes.length; i++) {
+                    if (!(model.childNodes[i].attributes.properties.parentDockType
+                            && model.childNodes[i].attributes.properties.parentDockType !== '(none)')) {
+                        var newChild = recursion.call(this, model.childNodes[i]);
+                        if (newChild) {
+                            newComponentCfg.items.push(newChild);
                         }
+                    } else {
+                        newComponentCfg[model.childNodes[i].attributes.properties.parentDockType] =
+                            (recursion.call(this, model.childNodes[i]));
                     }
                 }
-                return newComponentCfg;
-            };
+            }
+            return newComponentCfg;
+        };
 
         var childCfg = recursion.call(this, this._model.root);
         this._container.add(childCfg);

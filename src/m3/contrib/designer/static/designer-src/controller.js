@@ -330,7 +330,13 @@ M3Designer.controller.AppController = Ext.extend(Object, {
             this._editorManager.editModel(model);
         }
     },
-
+    /*Выделяет узел дерева по id элемента*/
+    selectTreeNodeByElementId:function(elelmentId){
+        var nodeId = M3Designer.Utils.parseDomIdToNodeId(elelmentId);
+        var treeNode = this.tree.getNodeById(nodeId);
+        if (!treeNode.isExpanded()) treeNode.ensureVisible();
+        treeNode.select();
+    },
     /**
      * Один клик по компоненту в панели дизайна. Вызывает подсветку компонента, инлайн редактирование
      * и разворачивает узел в дереве компонентов
@@ -339,13 +345,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
         var el = event.getTarget('.designComponent');
         if (el) {
             //Выделяет элемент в дереве компонентов
-            var nodeId = M3Designer.Utils.parseDomIdToNodeId(el.id);
-            var treeNode = this.tree.getNodeById(nodeId);
-            if (!treeNode.isExpanded()) {
-                treeNode.ensureVisible();
-            }
-            treeNode.select();
-
+            this.selectTreeNodeByElementId(el.id);
             //Подсвечивает элементы выделения
             this.highlightElement(el.id);
 
@@ -431,5 +431,8 @@ M3Designer.controller.AppController = Ext.extend(Object, {
      */
     onModelUpdate: function () {
         this.refreshView();
+        /*Возвращаем Highlight элементу*/
+        this.selectTreeNodeByElementId(this._lastHighlightedId);
+        this.highlightElement(this._lastHighlightedId);
     }
 });
