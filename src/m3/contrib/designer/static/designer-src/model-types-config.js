@@ -938,19 +938,19 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 },
                 maximizable: {
                     defaultValue: false,
-                    isInitProperty: true,
+                    isInitProperty: true
                 },
                 maximized: {
                     defaultValue: false,
-                    isInitProperty: true,
+                    isInitProperty: true
                 },
                 closable: {
                     defaultValue: true,
-                    isInitProperty: true,
+                    isInitProperty: true
                 },
                 template_globals: {
                     defaultValue: '',
-                    isInitProperty: true,
+                    isInitProperty: true
                 }
             },
             childTypesRestrictions: {

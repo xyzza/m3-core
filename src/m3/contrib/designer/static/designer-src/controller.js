@@ -145,9 +145,11 @@ M3Designer.controller.AppController = Ext.extend(Object, {
 
     /**
      * Подствека в превью дизайнера компонента для элемента с id
+     * @id id Элемента
+     * @stayAliveQuickProperty bool значение, если true то QuickPropertyWindow не уничтожиться
      */
-    highlightElement: function (id) {
-        this.removeHighlight();
+    highlightElement: function (id, stayAliveQuickProperty) {
+        this.removeHighlight(stayAliveQuickProperty);
         var flyEl = Ext.fly(id);
         if (flyEl) {
             flyEl.addClass('selectedElement');
@@ -157,13 +159,14 @@ M3Designer.controller.AppController = Ext.extend(Object, {
 
     /**
      * Убрать подстветку
+     * @stayAliveQuickProperty bool значение, если true то QuickPropertyWindow не уничтожиться
      */
-    removeHighlight: function () {
+    removeHighlight: function (stayAliveQuickProperty) {
         if (!Ext.isEmpty(this._lastHighlightedId)) {
             var flyEl = Ext.fly(this._lastHighlightedId);
             var win = Ext.getCmp(this._lastQuickPropertyId);
 
-            if (win) win.close();
+            if (win && !stayAliveQuickProperty) win.close();
 
             if (flyEl) {
                 flyEl.removeClass('selectedElement');
@@ -350,10 +353,12 @@ M3Designer.controller.AppController = Ext.extend(Object, {
             this.highlightElement(el.id);
 
             // Определение QuickPropertyWindow
-            var modelId = M3Designer.Utils.parseModelId(el.id);
-            var model = this._model.findModelById(modelId);
-            this._editorManager.editModelInline(model);
-            this._lastQuickPropertyId = this._editorManager.quickEditModel(model);
+            if (!Ext.getCmp(this._lastQuickPropertyId)){
+                var modelId = M3Designer.Utils.parseModelId(el.id);
+                var model = this._model.findModelById(modelId);
+                this._editorManager.editModelInline(model);
+                this._lastQuickPropertyId = this._editorManager.quickEditModel(model);
+            }
         }
     },
 
@@ -434,6 +439,6 @@ M3Designer.controller.AppController = Ext.extend(Object, {
         /*Возвращаем Highlight элементу*/
         this.selectTreeNodeByElementId(this._lastHighlightedId);
         /*Выделяем элемент в дереве*/
-        this.highlightElement(this._lastHighlightedId);
+        this.highlightElement(this._lastHighlightedId, true);
     }
 });

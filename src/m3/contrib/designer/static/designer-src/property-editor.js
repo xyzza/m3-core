@@ -115,7 +115,7 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
         var s;
 
         //Проверка указан ли центральный центральный регион 
-        if (source['layout'] == 'border' && !model.hasPropertyEqualTo('region','center')){
+        if (source['layout'] == 'border' && !model.isPropertyInChildEqualTo('region','center')){
             Ext.MessageBox.alert('Ошибка', 'Необходимо указать центральный регион');
             return;
         }
@@ -181,23 +181,15 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
         Ext.apply(this, {
             items: modelItems
         });
+
         this.on('beforeshow', function(){
             this.fadeInWindow();
         });
-        /* TODO понять причину и заставить работать*/
-//        this.on('beforeclose', function(){
-//            this.fadeOutCloseWindow();
-//        });
-        //
         /*Закрытие окна по нажатию (ENTER, ESC)*/
         this.on('afterrender', function(){
-            Ext.EventManager.on(this.getEl(), 'keydown', function(e){
-                if (e.getKey() == e.ENTER || e.getKey() == e.ESC) {
-                    e.stopEvent();
-                    this.close();
-                };
-            },this);
+            this.keyDownHandierClosingWindow()
         });
+
         M3Designer.edit.QuickPropertyWindow.superclass.initComponent.call(this);
     },
     anchorWinTo: function (modelId) {
@@ -318,13 +310,22 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
 
         this.fireEvent('save', eventObj);
     },
-    /*Плавное скрытие окна*/
+    /*Плавное скрытие окна [не используется]*/
     fadeOutCloseWindow: function(){
         this.getEl().fadeOut({ endOpacity: 0, easing: 'easeOut', duration: 0.35, remove: true});
     },
     /*Плавный показ окна*/
     fadeInWindow: function(){
         this.getEl().fadeIn({ endOpacity: 0, easing: 'easeIn', duration: 0.35});
+    },
+    /*Обработчик нажатия на клавиш [ESC, ENTER], закрывает окно*/
+    keyDownHandierClosingWindow: function(){
+        Ext.EventManager.on(this.getEl(), 'keydown', function(e){
+            if (e.getKey() == e.ENTER || e.getKey() == e.ESC) {
+                e.stopEvent();
+                this.close();
+            };
+        },this);
     }
 });
 

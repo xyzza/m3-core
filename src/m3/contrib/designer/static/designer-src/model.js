@@ -25,11 +25,11 @@ M3Designer.model.ComponentModel = Ext.extend(Ext.data.Node, {
     isContainer: function () {
         return M3Designer.Types.isTypeContainer(this.attributes.type);
     },
-    /*Проверяет на наличие свойста равному quealTo в дочерних элементах*/
-    hasPropertyEqualTo: function (propertyName, quealTo) {
+    /*Проверяет на наличие свойста равному equalTo в дочерних элементах*/
+    isPropertyInChildEqualTo: function (propertyName, equalTo) {
         var res = false;
         for (var i=0; i<this.childNodes.length;i++){
-            if (this.childNodes[i].attributes.properties[propertyName] == quealTo)
+            if (this.childNodes[i].attributes.properties[propertyName] == equalTo)
                 res = true;
         };
         return res;
