@@ -63,6 +63,6 @@ class AuditManager(object):
         audit = self.get(audit_name, None)
         if audit:
             try:
-                audit.write(user=user, *args, **kwargs)
+                audit.write(user, *args, **kwargs)
             except:
                 logger.exception(u'Не удалось записать результаты аудита \'%s\'' % audit_name)
