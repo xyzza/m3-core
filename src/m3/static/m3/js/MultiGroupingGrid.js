@@ -403,7 +403,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
      * @param {Ext.data.Store} st Набор данных
      */
 	groupRenderer: function (v, p, record, rowIndex, colIndex, st) {
-		p.css += ' x-tree-no-lines';
+		p.css += 'x-tree-no-lines';
 		var is_leaf = record.json.is_leaf;
 		if (is_leaf) {
 			var res = '';
@@ -415,7 +415,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 			var count = record.json.count;
 			v = record.json[this.dataDisplayField];
 			var col_name = this.grid.colModel.getColumnHeader(this.grid.colModel.findColumnIndex(column));
-			var res = String.format('<b><span>{2}</span><span class="x-tree-elbow-{0}" style="margin-left:-4px;padding-left:18px;padding-top:3px;cursor:pointer"></span><span unselectable="on">{3}: {1} ({4})</span></b>',expanded ? 'minus':'plus', v, indent_str, col_name, count);
+			var res = String.format('<b><div class="x-tree-elbow-{0}" style="position:absolute;left:{5}px;margin-top:-3px;cursor:pointer"></div>{2}{3}: {1} ({4})</b>',expanded ? 'minus':'plus', v, indent_str, col_name, count, indent*18);
 		}
 		return res;
 	},
