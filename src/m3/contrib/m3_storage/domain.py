@@ -101,7 +101,8 @@ class StorageTable(object):
         '''
         Возвращает обертку над полем таблицы для подсистемы m3.db.ddl
         '''
-        field_type_map = {FieldTypeEnum.CHAR: ddl.CharField,
+        field_type_map = {FieldTypeEnum.PK: ddl.IDField,
+                          FieldTypeEnum.CHAR: ddl.CharField,
                           FieldTypeEnum.INTEGER: ddl.IntegerField,
                           FieldTypeEnum.DECIMAL: ddl.DecimalField,
                           FieldTypeEnum.TEXT: ddl.TextField,

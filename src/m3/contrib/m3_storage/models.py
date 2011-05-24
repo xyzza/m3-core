@@ -13,16 +13,18 @@ class FieldTypeEnum(BaseEnumerate):
     '''
     Перечисление типов полей, которые могут использоваться
     '''
-    CHAR = 1
-    INTEGER = 2
-    DECIMAL = 3
-    TEXT = 4
-    DATE = 5
-    DATETIME = 6
-    INNER_FK = 7
-    MODEL_FK = 8
+    PK = 1
+    CHAR = 2
+    INTEGER = 3
+    DECIMAL = 4
+    TEXT = 5
+    DATE = 6
+    DATETIME = 7
+    INNER_FK = 8
+    MODEL_FK = 9
     
-    values = {CHAR: u'Строка',
+    values = {PK: u'Первичный ключ',
+              CHAR: u'Строка',
               INTEGER: u'Целое',
               DECIMAL: u'Числовое',
               TEXT: u'Текст',
