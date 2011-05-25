@@ -26,16 +26,21 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Footer;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.util.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -94,6 +99,7 @@ class ReportGenerator{
 	static final String TAG_AUTOHIGHT = "#АВТОВЫСОТА";
 	static final String TAG_MERGE = "#ОБЪЕДИНИТЬ";
 	static final String TAG_MATRIX = "#МАТРИЦА";
+	static final String TAG_PICTURE = "#КАРТИНКА";
 	
 	public static ReportGenerator createFromFiles(String encoding, String JSON_filename)
 	throws IOException, InvalidFormatException, ParseException{
@@ -113,6 +119,7 @@ class ReportGenerator{
 	}
 
 	Workbook in_book;
+	CreationHelper helper;
 	JSONObject root;
 	Sheet in_sheet, out_sheet;
 	
@@ -129,6 +136,9 @@ class ReportGenerator{
 	// Список строк с тегами, которые нужно удалить после обработки листа
 	ArrayList<Integer> unusedTagRows = new ArrayList<Integer>();
 	
+	// Список ячеек, в которые нужно вставить картинки
+	ArrayList<CellWrap>	pictureCells = new ArrayList<CellWrap>();
+	
 	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
 	// Они запоминаются и используются в дальнейшем
 	Cell cell_repeat_tag_start = null;
@@ -141,6 +151,7 @@ class ReportGenerator{
 	    Workbook book = WorkbookFactory.create(inp);
 		
 		this.in_book = book;
+		this.helper = book.getCreationHelper();
 		this.root = json;
 		
 		// Инициализация всяких констант ;)
@@ -183,6 +194,14 @@ class ReportGenerator{
 				// Словарь используется чтобы не допустить повторное копирование матрицы при развертке региона
 				if (!matrixCells.containsKey(oldCell))
 					matrixCells.put(oldCell, cw);
+			}
+			
+			else if (text.substring(0, TAG_PICTURE.length()).equals(TAG_PICTURE)){
+				CellWrap cw = new CellWrap(newCell);
+				// Извлекаем имя переменной, хранящей путь к картинке
+				String varName = raw_text.substring(raw_text.lastIndexOf(" ") + 1);
+				cw.set("variable_name", varName);
+				pictureCells.add(cw);
 			}
 			
 			else if (text.substring(0, TAG_MERGE.length()).equals(TAG_MERGE)){
@@ -692,7 +711,6 @@ class ReportGenerator{
 			cell_text = cell_text.replace(token, str_value);
 		}
 
-
 		outCell.setCellValue(cell_text);
 	}
 	
@@ -1092,6 +1110,59 @@ class ReportGenerator{
 		}
 	}
 	
+	/*
+	 * Вставляет картинки в результирующие листы.
+	 * Выполняется в последнюю очередь, т.к. разрушаются все до этого существующие графические объекты.
+	 * Причина в багах POI:
+	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=45129
+	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=50696
+	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=48803
+	 */
+	private void insertPictures() throws Exception {
+		for (CellWrap cellWarp: pictureCells){
+			// Получение имени файла
+			String key = (String)cellWarp.get("variable_name");
+			String filename = (String)root.get(key);
+			
+			// Определяем формат по имени
+			String lowName = filename.toLowerCase();
+			int type;
+			if (lowName.endsWith(".jpg"))
+				type = Workbook.PICTURE_TYPE_JPEG;
+			else if (lowName.endsWith(".jpeg"))
+				type = Workbook.PICTURE_TYPE_JPEG;
+			else if (lowName.endsWith(".png"))
+				type = Workbook.PICTURE_TYPE_PNG;
+			else if (lowName.endsWith(".bmp"))
+				type = Workbook.PICTURE_TYPE_DIB;
+			else
+				throw new Exception("Unknown image format. Supported only jpg, png, bmp");
+			
+			// Чтение файла и добавление в ресурсы книги
+			int pictureIdx;
+			try{
+				InputStream is = new FileInputStream(filename);
+		    	byte[] bytes = IOUtils.toByteArray(is);
+		    	pictureIdx = in_book.addPicture(bytes, type);
+		    	is.close();
+			} catch (IOException e){
+		    	throw new Exception("Could not load picture '" + filename + 
+		    		"' for tag '" + key + "' with error: " + e.getMessage());
+		    }
+		    
+		    Cell cell = cellWarp.cell;
+			Sheet sheet = cell.getSheet();
+			Drawing drawing = sheet.createDrawingPatriarch();
+			ClientAnchor anchor = helper.createClientAnchor();
+			
+			// Эксперимент по вставке картинки
+			anchor.setCol1(cell.getColumnIndex());
+		    anchor.setRow1(cell.getRowIndex());
+		    Picture pict = drawing.createPicture(anchor, pictureIdx);
+		    pict.resize();			
+		}
+	}
+	
 	/**
 	 * Генерация отчета.
 	 * @throws Exception
@@ -1121,7 +1192,7 @@ class ReportGenerator{
 			
 			in_sheet = in_book.getSheetAt(sheet_index);
 			out_sheet = createShadowSheet(in_sheet);
-			
+
 			// Предварительная развертка горизонтальных регионов
 			grow_horizontal_regions();
 			
@@ -1165,6 +1236,8 @@ class ReportGenerator{
 		
 		// Устанавливаем повторяющиеся ячейки
 		setRepeatedArea(repeat_cells);
+		
+		insertPictures();
 		
 		// Возвращаем активность исходному листу
 		in_book.setActiveSheet(in_book.getSheetIndex(active_sheet_name));
