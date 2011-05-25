@@ -71,6 +71,7 @@ class StorageTable(object):
         
     def clear(self):
         self.name = ''
+        self.verbose_name = ''
         self.fields = []
         self.table_model = None   
     
@@ -86,6 +87,7 @@ class StorageTable(object):
             return
         
         self.name = self.table_model.name
+        self.verbose_name = self.table_model.verbose_name
         self.fields.extend(TableFieldModel.objects.filter(table = self.table_model))
         
     def ddl_wrapper(self):
@@ -138,6 +140,8 @@ class StorageTableRelation(object):
         '''
         Очищает существующий/подготавливает новый объект связи между двумя таблицами
         '''
+        self.name = '' # уникальное название отношения
+        self.verbose_name = '' # человеческое название отношения
         self.relation_model = None
         self.left_table = None
         self.right_table = None
@@ -154,6 +158,8 @@ class StorageTableRelation(object):
             return
         
         self.clear()
+        self.name = self.relation_model.name
+        self.verbose_name = self.relation_model.verbose_name
         self.relation_model = get_object_by_id(TableRelationModel, relation_model)
         if not self.relation_model:
             pass

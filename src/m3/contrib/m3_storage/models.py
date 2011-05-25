@@ -66,7 +66,7 @@ class StorageTableModel(models.Model):
     '''
     # ссылка на конфигурацию, в рамках которой доступна данная таблица
     configuration = models.ForeignKey(StorageConfigurationModel)
-    # наименование таблицы в базе данных
+    # уникальное в пределах конфигурации наименование таблицы в базе данных
     name = models.CharField(max_length=30, blank=False, db_index=True)
     # описательное название таблицы
     verbose_name = models.CharField(max_length=200, blank=True)
@@ -83,8 +83,10 @@ class TableFieldModel(models.Model):
     '''
     # ссылка на модель, описывающую таблицу
     table = models.ForeignKey(StorageTableModel)
-    # наименование поля
+    # уникальное в пределах таблицы наименование поля
     name = models.CharField(max_length=50, blank=False, db_index=True)
+    # человеческое наименование поля
+    verbose_name = models.CharField(max_length=200, blank=True)
     # указание на тип поля
     type = models.SmallIntegerField(choices = FieldTypeEnum.get_choices())
     # признак индексированного поля
@@ -112,6 +114,10 @@ class TableRelationModel(models.Model):
     '''
     # ссылка на конфигурацию, в рамках которой доступна данная таблица
     configuration = models.ForeignKey(StorageConfigurationModel)
+    # уникальное в пределах конфигурации наименование отношения 
+    name = models.CharField(max_length=100, blank=False, db_index=True)
+    # человеческое наименование отношения
+    verbose_name = models.CharField(max_length=200, blank=True)
     # левая (начальная) таблица в связи
     left_table = models.CharField(max_length=100, blank=True)
     # правая (конечная) таблица в связи

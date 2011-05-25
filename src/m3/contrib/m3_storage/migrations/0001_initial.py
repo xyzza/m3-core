@@ -32,6 +32,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('table', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['m3_storage.StorageTableModel'])),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=50, db_index=True)),
+            ('verbose_name', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
             ('type', self.gf('django.db.models.fields.SmallIntegerField')()),
             ('indexed', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('allow_blank', self.gf('django.db.models.fields.BooleanField')(default=True)),
@@ -45,6 +46,8 @@ class Migration(SchemaMigration):
         db.create_table('m3storage_relations', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('configuration', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['m3_storage.StorageConfigurationModel'])),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=100, db_index=True)),
+            ('verbose_name', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
             ('left_table', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
             ('right_table', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
             ('type', self.gf('django.db.models.fields.SmallIntegerField')()),
@@ -95,7 +98,8 @@ class Migration(SchemaMigration):
             'size': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'size_secondary': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'table': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['m3_storage.StorageTableModel']"}),
-            'type': ('django.db.models.fields.SmallIntegerField', [], {})
+            'type': ('django.db.models.fields.SmallIntegerField', [], {}),
+            'verbose_name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'})
         },
         'm3_storage.tablerelationmodel': {
             'Meta': {'object_name': 'TableRelationModel', 'db_table': "'m3storage_relations'"},
@@ -103,9 +107,11 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'left_key': ('django.db.models.fields.CharField', [], {'max_length': '300', 'blank': 'True'}),
             'left_table': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'db_index': 'True'}),
             'right_key': ('django.db.models.fields.CharField', [], {'max_length': '300', 'blank': 'True'}),
             'right_table': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'type': ('django.db.models.fields.SmallIntegerField', [], {})
+            'type': ('django.db.models.fields.SmallIntegerField', [], {}),
+            'verbose_name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'})
         }
     }
 
