@@ -10,12 +10,15 @@ Ext.namespace('M3Designer.model');
  */
 M3Designer.model.ModelTypeLibrary = Ext.apply({}, {
     enumConfig: {
-        layout: ['auto', 'fit', 'form', 'hbox', 'vbox', 'border', 'absolute'],
+        layout: ['auto', 'fit', 'form', 'hbox', 'vbox', 'border', 'absolute', 'accordion'],
         labelAlign: ['left', 'top'],
         region: ['north', 'south', 'center', 'east', 'west'],
         mode: ['local', 'remote'],
         triggerAction: ['query', 'all'],
-        parentDockType: ['tbar', 'bbar', 'fbar', '(none)']
+        parentDockType: ['tbar', 'bbar', 'fbar', '(none)'],
+        //addressField
+        level: ['place', 'street', 'house', 'flat'],
+        viewMode: ['one','two', 'three']
     },
 
     /**

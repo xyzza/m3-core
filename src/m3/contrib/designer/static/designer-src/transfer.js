@@ -86,6 +86,9 @@ M3Designer.ModelTransfer = Ext.apply({},{
             Ext.apply(node, model.attributes.properties);
             node.type = model.attributes.type;
             node.id = model.attributes.properties.id;
+            if (node.type == "addressField"){
+                M3Designer.Utils.setKladrOriginalValues(node);
+            };
             this.doToolbarSerializeWorkaround(node);
             if (model.hasChildNodes()) {
                 for (var i = 0; i < model.childNodes.length; i++){
@@ -171,6 +174,9 @@ M3Designer.ModelTransfer = Ext.apply({},{
 
         if (jsonObj.items) {
             for (var i = 0; i < jsonObj.items.length; i++) {
+                if (jsonObj.items[i].type == "addressField"){
+                    M3Designer.Utils.setKladrTemporaryValues(jsonObj.items[i]);
+                };
                 root.appendChild(callBack.call(this,jsonObj.items[i]))
             }
         }

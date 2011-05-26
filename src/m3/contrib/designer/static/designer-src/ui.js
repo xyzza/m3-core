@@ -151,6 +151,11 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
                 xtype: 'imageuploadfield'
             });
         },
+        addressField: function (model, cfg) {
+            return Ext.apply(cfg, {
+                xtype: 'designer-kladr-companent'
+            });
+        },
         tabPanel: function (model, cfg) {
             return Ext.apply(cfg, {
                 xtype: 'tabpanel',
