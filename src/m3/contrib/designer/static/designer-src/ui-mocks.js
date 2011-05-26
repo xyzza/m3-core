@@ -4,13 +4,13 @@
 Ext.namespace('M3Designer.ui');
 
 /*
-* Çäåñü ðàñïîëîæåíû êëàññû êîìïîíåíòîâ èìèòèðóþùèå ì3 êîìïîíåíòû. Ïî÷åìó íå èñïîëüçîâàòü íàñòîÿùèå?
-* Âî ïåðâûõ ÷òîáû íå áûëî îâåðõåäà, âî âòîðûõ áîëüøèíñòâî ì3 êàñòîìîâ íàïèñàíî êðèâî è íå ïîääåðæèâàþò xtype
+* Ð—Ð´ÐµÑÑŒ Ñ€Ð°ÑÐ¿Ð¾Ð»Ð¾Ð¶ÐµÐ½Ñ‹ ÐºÐ»Ð°ÑÑÑ‹ ÐºÐ¾Ð¼Ð¿Ð¾Ð½ÐµÐ½Ñ‚Ð¾Ð² Ð¸Ð¼Ð¸Ñ‚Ð¸Ñ€ÑƒÑŽÑ‰Ð¸Ðµ Ð¼3 ÐºÐ¾Ð¼Ð¿Ð¾Ð½ÐµÐ½Ñ‚Ñ‹. ÐŸÐ¾Ñ‡ÐµÐ¼Ñƒ Ð½Ðµ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ Ð½Ð°ÑÑ‚Ð¾ÑÑ‰Ð¸Ðµ?
+* Ð’Ð¾ Ð¿ÐµÑ€Ð²Ñ‹Ñ… Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð½Ðµ Ð±Ñ‹Ð»Ð¾ Ð¾Ð²ÐµÑ€Ñ…ÐµÐ´Ð°, Ð²Ð¾ Ð²Ñ‚Ð¾Ñ€Ñ‹Ñ… Ð±Ð¾Ð»ÑŒÑˆÐ¸Ð½ÑÑ‚Ð²Ð¾ Ð¼3 ÐºÐ°ÑÑ‚Ð¾Ð¼Ð¾Ð² Ð½Ð°Ð¿Ð¸ÑÐ°Ð½Ð¾ ÐºÑ€Ð¸Ð²Ð¾ Ð¸ Ð½Ðµ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶Ð¸Ð²Ð°ÑŽÑ‚ xtype
 */
 
 /**
  * @class M3Designer.ui.DictSelectMock
- * Ôåéê äëÿ âûáîðà èç ñïðàâî÷íèêà
+ * Ð¤ÐµÐ¹Ðº Ð´Ð»Ñ Ð²Ñ‹Ð±Ð¾Ñ€Ð° Ð¸Ð· ÑÐ¿Ñ€Ð°Ð²Ð¾Ñ‡Ð½Ð¸ÐºÐ°
  */
 M3Designer.ui.DictSelectMock = Ext.extend(Ext.form.TwinTriggerField, {
     width: 150,
@@ -22,3 +22,187 @@ M3Designer.ui.DictSelectMock = Ext.extend(Ext.form.TwinTriggerField, {
 });
 
 Ext.reg('designer-dict-select', M3Designer.ui.DictSelectMock);
+
+//TODO: ÐžÑ‚Ñ€ÐµÑ„Ð°ÐºÑ‚Ð¾Ñ€Ð¸Ñ‚ÑŒ
+M3Designer.ui.KladrCompanent = Ext.extend(Ext.Container,{
+    constructor: function(params){
+        var zipcode = {
+                    xtype: 'textfield',
+                    width: 55,
+                    emptyText: 'Ð¸Ð½Ð´ÐµÐºÑ'
+                    };
+        var place = {
+                    xtype: 'textfield',
+                    fieldLabel: params.placeLabel,
+                    allowBlank: params.placeAllowBlank,
+                    emptyText: 'Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð½Ð°ÑÐµÐ»ÐµÐ½Ð½Ñ‹Ð¹ Ð¿ÑƒÐ½ÐºÑ‚...'
+                    };
+        var street = {
+                    xtype: 'textfield',
+                    fieldLabel: params.streetLabel,
+                    allowBlank: params.streetAllowBlank,
+                    emptyText: 'Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÑƒÐ»Ð¸Ñ†Ñƒ...'
+                    };
+        var house = {
+                    xtype: 'textfield',
+                    allowBlank: params.houseAllowBlank,
+                    fieldLabel: params.houseLabel,
+                    emptyText: '',
+                    width: 40
+                    };
+        var flat = {
+                    xtype: 'textfield',
+                    fieldLabel: params.flatLabel,
+                    allowBlank: params.flatAllowBlank,
+                    emptyText: '',
+                    width: 40
+                    };
+        var addr = {
+                    xtype: 'textfield',
+                    anchor: '100%',
+                    fieldLabel: params.addrLabel,
+                    height: 36
+                    };
+        var level = M3Designer.model.ModelTypeLibrary.enumConfig.level.indexOf(params.level) + 1;
+        var viewMode = M3Designer.model.ModelTypeLibrary.enumConfig.viewMode.indexOf(params.viewMode) + 1;
+        var items = [];
+        if (viewMode == 1){
+                place.flex = 1;
+            if (level > 2) {
+                var row_items = [place, zipcode];
+            } else {
+                var row_items = [place];
+            }
+            if (level > 1) {
+                street.flex = 1;
+                row_items.push({
+                    xtype: 'label',
+                    style: {padding:'3px'},
+                    text: params.streetLabel+':'
+                }, street);
+
+                if (level > 2) {
+                house.fieldLabel = params.placeLabel;
+                row_items.push({
+                        xtype: 'label'
+                        ,style: {padding:'3px'}
+                        ,text: params.houseLabel+':'
+                    }, house);
+                if (level > 3) {
+                    flat.fieldLabel = params.placeLabel;
+                    row_items.push({
+                            xtype: 'label'
+                            ,style: {padding:'3px'}
+                            ,text: params.flatLabel+':'
+                        }, flat);
+                    }
+                }
+            }
+            var row = {
+                xtype: 'compositefield',
+                anchor: '100%',
+                fieldLabel: params.placeLabel,
+                items: row_items
+                };
+            items.push(row);
+        }
+        if (viewMode == 2){
+            // Ð’ Ð´Ð²Ðµ ÑÑ‚Ñ€Ð¾ÐºÐ¸
+            if (level > 2) {
+                place.flex = 1;
+                var row = {
+                    xtype: 'compositefield'
+                    , anchor: '100%'
+                    , fieldLabel: params.placeLabel
+                    , items: [place, zipcode]
+                };
+                items.push(row);
+            } else {
+                place.anchor = '100%';
+                items.push(place);
+            }
+            if (level > 1) {
+                street.flex = 1;
+                var row_items = [street];
+                if (level > 2) {
+                    house.fieldLabel = params.streetLabel;
+                    row_items.push({
+                            xtype: 'label'
+                            ,style: {padding:'3px'}
+                            ,text: params.houseLabel+':'
+                    }, house);
+                    if (level > 3) {
+                        flat.fieldLabel = params.streetLabel;
+                        row_items.push({
+                                xtype: 'label'
+                                ,style: {padding:'3px'}
+                                ,text: params.flatLabel+':'
+                        }, flat);
+                    }
+                }
+                var row = {
+                    xtype: 'compositefield'
+                    , anchor: '100%'
+                    , fieldLabel: params.streetLabel
+                    , items: row_items
+                };
+                items.push(row);
+            }
+        }
+        if (viewMode == 3){
+            // Ð’ Ñ‚Ñ€Ð¸ ÑÑ‚Ñ€Ð¾ÐºÐ¸
+            if (level > 2) {
+                place.flex = 1;
+                var row = {
+                    xtype: 'compositefield'
+                    , anchor: '100%'
+                    , fieldLabel: params.placeLabel
+                    , items: [place, zipcode]
+                };
+                items.push(row);
+            } else {
+                place.anchor = '100%';
+                items.push(place);
+            }
+            if (level > 1) {
+                street.anchor = '100%';
+                items.push(street);
+                if (level > 2) {
+                    var row_items = [{
+                        xtype: 'container'
+                        , layout: 'form'
+                        , items: house
+                        , style: {overflow: 'hidden'}
+                    }];
+                    if (level > 3) {
+                        row_items.push({
+                            xtype: 'container'
+                            , layout: 'form'
+                            , style: {padding: '0px 0px 0px 5px', overflow: 'hidden'}
+                            , items: flat
+                        });
+                    }
+                    var row = new Ext.Container({
+                        anchor: '100%'
+                        , layout: 'column'
+                        , items: row_items
+                        , style: {overflow: 'hidden'}
+                    });
+                    items.push(row);
+                }
+            }
+        }
+        if (items && params.addrVisible) {
+            items.push(addr);
+        }
+        Ext.apply(params, {
+                items: items
+            });
+        Ext.Container.superclass.constructor.call(this, params);
+    },
+    initComponent: function () {
+        M3Designer.ui.KladrCompanent.superclass.initComponent.call(this);
+    }
+})
+
+Ext.reg('designer-kladr-companent', M3Designer.ui.KladrCompanent);

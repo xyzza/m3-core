@@ -621,6 +621,33 @@
 		"text":"text"	
 	}
 	,"parent":"component"
+},
+{
+    "class":{
+        "addressField":"ExtAddrComponent"
+    },
+    "config":{
+        "placeFieldName": "place_field_name",
+        "streetFieldName": "street_field_name",
+        "houseFieldName": "house_field_name",
+        "flatFieldName": "flat_field_name",
+        "zipcodeFieldName": "zipcode_field_name",
+        "addrFieldName": "addr_field_name",
+        "placeLabel": "place_label",
+        "streetLabel": "street_label",
+        "houseLabel": "house_label",
+        "flatLabel": "flat_label",
+        "addrLabel": "addr_label",
+        "placeAllowBlank": "place_allow_blank",
+        "streetAllowBlank": "street_allow_blank",
+        "houseAllowBlank": "house_allow_blank",
+        "flatAllowBlank": "flat_allow_blank",
+        "addrVisible": "addr_visible",
+        "readOnly": "read_only",
+        "level": "level",
+        "viewMode": "view_mode"
+    },
+    "parent":"container"
 }
 
 ]

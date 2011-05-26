@@ -26,5 +26,19 @@ M3Designer.Utils = Ext.apply({},{
     parseDomIdToNodeId:function(domId) {
         // удаляем первые 4 символа из id > "cmp-"
         return domId.slice(4,domId.length)
+    },
+    /* Востанавливает оригинальные значения перед отправкой на сервер */
+    setKladrOriginalValues: function(obj){
+        var levelArray = M3Designer.model.ModelTypeLibrary.enumConfig.level;
+        var viewModeArray = M3Designer.model.ModelTypeLibrary.enumConfig.viewMode;
+        obj.level = levelArray.indexOf(obj.level) + 1;
+        obj.viewMode = viewModeArray.indexOf(obj.viewMode) + 1;
+    },
+    /* Устанавливает человеке читаемые значения */
+    setKladrTemporaryValues: function(obj){
+        var levelArray = M3Designer.model.ModelTypeLibrary.enumConfig.level;
+        var viewModeArray = M3Designer.model.ModelTypeLibrary.enumConfig.viewMode;
+        obj.level = levelArray[obj.level-1];
+        obj.viewMode = viewModeArray[obj.viewMode-1];
     }
 });

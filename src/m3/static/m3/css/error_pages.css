@@ -17,7 +17,7 @@ html, body {
 }
 .beautiful-text{
     text-shadow: 0px 1px 0px #e5e5ee;
-    /*для ie7*/
+    /*РґР»СЏ ie7*/
     filter: dropshadow(color=#e5e5ee,offX=0,of<span class="hilite">f</span>Y=1);
 }
 .message_header{

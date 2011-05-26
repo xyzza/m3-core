@@ -11,3 +11,5 @@ from menus import *
 from misc import *
 from panels import *
 from windows import *
+
+from m3.contrib.kladr.addrfield import ExtAddrComponent

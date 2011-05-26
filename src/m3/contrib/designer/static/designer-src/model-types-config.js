@@ -1285,6 +1285,97 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 category: 'M3'
             },
             treeIconCls: 'icon-image-add'
+        },
+        addressField: {
+            parent: 'container',
+            properties: {
+                id: {
+                    defaultValue: 'addrcmp_addrcompanent',
+                    isInitProperty: true
+                },
+                layout: {
+                    defaultValue: 'form',
+                    isNotEditable: true,
+                    isInitProperty: true
+                },
+                placeFieldName:{
+                    defaultValue: 'place'
+                },
+                streetFieldName:{
+                    defaultValue: 'street'
+                },
+                houseFieldName:{
+                    defaultValue: 'house'
+                },
+                flatFieldName:{
+                    defaultValue: 'flat'
+                },
+                zipcodeFieldName:{
+                    defaultValue: 'zipcode'
+                },
+                addrFieldName:{
+                    defaultValue: 'addr'
+                },
+                placeLabel:{
+                    defaultValue: 'Населенный пункт',
+                    isInitProperty: true
+                },
+                streetLabel:{
+                    defaultValue: 'Улица',
+                    isInitProperty: true
+                },
+                houseLabel:{
+                    defaultValue: 'Дом/Корпус',
+                    isInitProperty: true
+                },
+                flatLabel:{
+                    defaultValue: 'Квартира',
+                    isInitProperty: true
+                },
+                addrLabel:{
+                    defaultValue: 'Адрес',
+                    isInitProperty: true
+                },
+                placeAllowBlank:{
+                    defaultValue: true,
+                    isInitProperty: true
+                },
+                streetAllowBlank:{
+                    defaultValue: true
+                },
+                houseAllowBlank:{
+                    defaultValue: true
+                },
+                flatAllowBlank:{
+                    defaultValue: true
+                },
+                addrVisible:{
+                    defaultValue: true,
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
+                readOnly:{
+                    defaultValue: false,
+                    isQuickEditable: true
+                },
+                level:{
+                    propertyType: 'enum',
+                    defaultValue: 'place',
+                    isQuickEditable: true,
+                    isInitProperty: true
+                },
+                viewMode:{
+                    propertyType: 'enum',
+                    defaultValue: 'two',
+                    isQuickEditable: true,
+                    isInitProperty: true
+                }
+            },
+            toolboxData: {
+                text: 'Address field',
+                category: 'M3'
+            },
+            treeIconCls: 'icon-application-form'
         }
     }
 });

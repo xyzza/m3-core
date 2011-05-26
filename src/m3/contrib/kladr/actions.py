@@ -48,12 +48,18 @@ class KLADRPack(ActionPack):
 
     @classmethod
     def get_place_name(self, code):
-        place = KladrGeo.objects.select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').filter(code = code)
+        place = KladrGeo.objects.select_related('parent').\
+                select_related('parent__parent').\
+                select_related('parent__parent__parent').\
+                filter(code = code)
         return place[0].display_name() if place else ''
 
     @classmethod
     def get_place(self, code):
-        place = KladrGeo.objects.select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').filter(code = code)
+        place = KladrGeo.objects.select_related('parent').\
+                select_related('parent__parent').\
+                select_related('parent__parent__parent').\
+                filter(code = code)
         return M3JSONEncoder().encode(place[0]) if place else None
 
     @classmethod
@@ -85,17 +91,27 @@ class KLADRRowsAction(Action):
                     field = Q(**{field_name + '__icontains': word})
                     field_condition = field_condition | field if field_condition else field
                 condition = condition & field_condition if condition else field_condition
-            places = KladrGeo.objects.filter(condition).select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').order_by('level','name')[0:50]
+            places = KladrGeo.objects.filter(condition).select_related('parent').\
+                     select_related('parent__parent').\
+                     select_related('parent__parent__parent').\
+                     order_by('level','name')[0:50]
             # если не нашли, то будем искать с учетом родителей
             if len(places) == 0:
                 condition = None
                 for word in words:
                     field_condition = None
                     for field_name in fields:
-                        field = Q(**{field_name + '__icontains': word}) | Q(**{'parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__parent__' + field_name + '__icontains': word})
+                        field = Q(**{field_name + '__icontains': word}) |\
+                                Q(**{'parent__' + field_name + '__icontains': word}) |\
+                                Q(**{'parent__parent__' + field_name + '__icontains': word}) |\
+                                Q(**{'parent__parent__parent__' + field_name + '__icontains': word})
                         field_condition = field_condition | field if field_condition else field
                     condition = condition & field_condition if condition else field_condition
-                places = KladrGeo.objects.filter(condition).select_related('parent').select_related('parent__parent').select_related('parent__parent__parent').order_by('level','name')[0:50]
+                places = KladrGeo.objects.filter(condition).\
+                         select_related('parent').\
+                         select_related('parent__parent').\
+                         select_related('parent__parent__parent').\
+                         order_by('level','name')[0:50]
         else:
             places = []
         result = {'rows': list(places), 'total': len(places)}
@@ -127,22 +143,32 @@ class StreetRowsAction(Action):
                     field_condition = field_condition | field if field_condition else field
                 condition = condition & field_condition if condition else field_condition
             if place_id:
-                places = KladrStreet.objects.filter(condition, parent = place_id).select_related('parent').order_by('name')[0:50]
+                places = KladrStreet.objects.filter(condition, parent = place_id).\
+                         select_related('parent').\
+                         order_by('name')[0:50]
             else:
-                places = KladrStreet.objects.filter(condition).select_related('parent').order_by('name')[0:50]
+                places = KladrStreet.objects.filter(condition).\
+                         select_related('parent').\
+                         order_by('name')[0:50]
             # если не нашли, то будем искать с учетом родителей
             if len(places) == 0:
                 condition = None
                 for word in words:
                     field_condition = None
                     for field_name in fields:
-                        field = Q(**{field_name + '__icontains': word}) | Q(**{'parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__' + field_name + '__icontains': word}) | Q(**{'parent__parent__parent__' + field_name + '__icontains': word})
+                        field = Q(**{field_name + '__icontains': word}) |\
+                                Q(**{'parent__' + field_name + '__icontains': word}) |\
+                                Q(**{'parent__parent__' + field_name + '__icontains': word}) |\
+                                Q(**{'parent__parent__parent__' + field_name + '__icontains': word})
                         field_condition = field_condition | field if field_condition else field
                     condition = condition & field_condition if condition else field_condition
                 if place_id:
-                    places = KladrStreet.objects.filter(condition, parent = place_id).select_related('parent').order_by('name')[0:50]
+                    places = KladrStreet.objects.filter(condition, parent = place_id).\
+                             select_related('parent').order_by('name')[0:50]
                 else:
-                    places = KladrStreet.objects.filter(condition).select_related('parent').order_by('name')[0:50]
+                    places = KladrStreet.objects.filter(condition).\
+                             select_related('parent').\
+                             order_by('name')[0:50]
         else:
             places = []
         result = {'rows': list(places), 'total': len(places)}
