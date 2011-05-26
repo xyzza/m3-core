@@ -6,6 +6,7 @@ Created on 11.06.2010
 '''
 from django.db.models.query import QuerySet
 import inspect
+from copy import copy
 
 from django.db import transaction
 from django.contrib.auth.models import User
@@ -23,12 +24,16 @@ from m3.helpers import logger, urls
 from m3.ui.actions import ActionContextDeclaration, ControllerCache, ActionPack, Action
 from m3.ui.actions.context import ActionContext
 from m3.ui.ext.containers import ExtTree, ExtTreeNode
+from m3.contrib.m3_audit.manager import AuditManager
+from m3.contrib.m3_audit.models import RolesAuditModel
+
 from users import SelectUsersListWindow
 
 import helpers
 import models
 import metaroles
 import app_meta
+
 
 PERM_OBJECT_NOT_FOUND = u'** объект права не найден **'
 
@@ -469,7 +474,6 @@ class SaveRoleAction(actions.Action):
         ]
 
     def run(self, request, context):
-
         try:
             if(context.userrole_id > 0):
                 try:
@@ -478,6 +482,12 @@ class SaveRoleAction(actions.Action):
                     return actions.OperationResult(success=False, message=u'Роль с указанным идентификатором не найдена')
             else:
                 user_role = models.UserRole()
+            context.user_role = user_role
+            
+            # аудит
+            existing_permissions = self._get_existing_permissions(request, context)
+            supplied_permissions = self._get_supplied_permissions(request, context)
+            # end            
 
             window = RolesEditWindow()
             window.form.bind_to_request(request)
@@ -495,15 +505,77 @@ class SaveRoleAction(actions.Action):
                 else:
                     perm_obj = models.RolePermission(role=user_role, permission_code=perm['permission_code'])
                 perm_obj.disabled = perm['disabled']
-                perm_obj.save()
+                # self._handle_record_auditing(request, context, perm_obj, user_role) # аудит до сохранения,- TODO?                
+                perm_obj.save()                
+                
                 ids.append(perm_obj.id)
             # удалим те, которые не обновились
             models.RolePermission.objects.filter(role=user_role).exclude(id__in=ids).delete()
+
+            # аудит            
+            for i in self._added_permissions(existing_permissions, supplied_permissions):
+                AuditManager().write('roles', user=request.user,
+                                        role=user_role,
+                                        permission_or_code=i.permission_code,
+                                        type=RolesAuditModel.PERMISSION_ADDITION)
+            for i in self._deleted_permissions(existing_permissions, supplied_permissions):
+                AuditManager().write('roles', user=request.user,
+                                        role=user_role,
+                                        permission_or_code=i.permission_code,
+                                        type=RolesAuditModel.PERMISSION_REMOVAL)
+            # end
         except:
             logger.exception(u'Не удалось сохранить роль пользователя')
             return actions.OperationResult(success=False, message=u'Не удалось сохранить роль пользователя.')
 
-        return actions.OperationResult(success=True)
+        return actions.OperationResult(success=True)  
+    
+    def _get_role(self, request, context):
+        if(context.userrole_id > 0):
+            try:
+                user_role = models.UserRole.objects.get(id=context.userrole_id)
+            except models.UserRole.DoesNotExist:
+                return actions.OperationResult(success=False, message=u'Роль с указанным идентификатором не найдена')
+        else:
+            user_role = models.UserRole()
+        # только два скоупа в питоне ))
+        return user_role
+    
+    def _get_existing_permissions(self, request=None, context=None):
+        return models.RolePermission.objects.filter(role=context.user_role)
+    
+    # Есть копипаста
+    def _get_supplied_permissions(self, request, context):
+        result = []
+        for perm in context.perms:
+            code = perm['permission_code']
+            q = models.RolePermission.objects.filter(role=context.user_role, permission_code=code).all()
+            if len(q) > 0:
+                perm_obj = q[0]
+            else:
+                perm_obj = models.RolePermission(role=context.user_role, permission_code=perm['permission_code'])
+            perm_obj.disabled = perm['disabled']                
+            
+            result.append(perm_obj)
+        return result
+        
+    def _added_permissions(self, existing, supplied):
+        result = list(supplied)
+        for e in existing:
+            for s in supplied:
+                if e.id == s.id:
+                    result.remove(s)
+        return result
+                                            
+    def _deleted_permissions(self, existing, supplied):
+        result = list(existing)
+        for e in existing:
+            for s in supplied:
+                if e.id == s.id:
+                    result.remove(e)
+        return result
+        
+        
 
 class DeleteRoleAction(actions.Action):
 

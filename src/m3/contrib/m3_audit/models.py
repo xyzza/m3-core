@@ -165,3 +165,47 @@ class AuthAuditModel(BaseAuditModel):
         db_table = 'm3_audit_auth'
 
 AuditManager().register('auth', AuthAuditModel)
+
+## Структура данных аудита по действиям над ролями пользователей
+class RolesAuditModel(BaseAuditModel):
+    ''' Структура данных аудита действий над ролями пользователей '''
+    PERMISSION_ADDITION = 0
+    PERMISSION_REMOVAL = 1
+    PERMISSION_ENABLEMENT = 2
+    PERMISSION_DISABLEMENT = 3
+    
+    type = models.PositiveIntegerField(choices=((PERMISSION_ADDITION, u'Добавление прав'),
+                                                (PERMISSION_REMOVAL, u'Лишение прав'),
+                                                (PERMISSION_ENABLEMENT, u'Активация права'),
+                                                (PERMISSION_DISABLEMENT, u'Отключение права')
+                                                ))
+    role_id = models.PositiveIntegerField()
+    role_name = models.CharField(max_length=200)    
+    permission_code = models.CharField(max_length=200,
+                                        null=True, blank=True, default='')
+    @classmethod
+    def write(cls, user, role, permission_or_code=None, type=PERMISSION_ADDITION,
+               *args, **kwargs):
+        ''' Непосредственная запись '''
+        audit = RolesAuditModel(); audit.by_user(user)
+        
+        audit.type = type
+        audit.role = role
+        audit.permission_code = cls.parse_permission(permission_or_code)
+        audit.save()
+    
+    def get_role(self):
+        return RolesAuditModel.objects.get(self.role_id)
+    def set_role(self, role):
+        self.role_id = role.id
+        self.role_name = role.name
+    role = property(get_role, set_role)
+    
+    @classmethod
+    def parse_permission(cls, perm):    
+        permission_code = perm; return permission_code
+    
+    class Meta:
+        db_table = 'm3_audit_roles' 
+        
+AuditManager().register('roles', RolesAuditModel)
