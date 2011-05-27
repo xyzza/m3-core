@@ -12,6 +12,7 @@ Ext.namespace('M3Designer');
 M3Designer.ModelTransfer = Ext.apply({},{
     doToolbarDeserializeWorkaround:function(property, componentNode){
         //Ладно, кто бы что не говорил тулбары архитектурно некрасивы в 3 эксте кто бы что не говорил, я счетаю
+        console.log(componentNode.attributes.type)
         if (componentNode.attributes.type == 'toolbar' || componentNode.attributes.type == 'pagingToolbar' ) {
             if (property == 'tbar' || property == 'fbar' || property == 'bbar' ) {
                 componentNode.attributes.properties.parentDockType = property;
@@ -22,7 +23,7 @@ M3Designer.ModelTransfer = Ext.apply({},{
         }
     },
     doToolbarSerializeWorkaround:function(node) {
-        if (node.type == 'toolbar') {
+        if (node.type == 'toolbar' || node.type == 'pagingToolbar') {
             Ext.destroyMembers(node, 'parentDockType');
         }
     },

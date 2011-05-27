@@ -781,7 +781,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: 25,
                     isQuickEditable: true
                 },
-                displayMessage: {
+                displayMsg: {
                     defaultValue: 'Показано записей {0} - {1} из {2}'
                 },
                 displayInfo: {
