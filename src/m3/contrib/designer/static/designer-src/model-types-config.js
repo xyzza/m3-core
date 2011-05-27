@@ -399,6 +399,11 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 },
                 startDay: {
                     defaultValue: 0
+                },
+                emptyText:{
+                    defaultValue: 'Дата',
+                    isInitProperty: true,
+                    isQuickEditable: true
                 }
             },
             toolboxData: {

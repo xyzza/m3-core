@@ -622,6 +622,7 @@
 	}
 	,"parent":"component"
 },
+//Кладр
 {
     "class":{
         "addressField":"ExtAddrComponent"
