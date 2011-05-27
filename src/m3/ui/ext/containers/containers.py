@@ -68,7 +68,10 @@ class ExtToolBar(BaseExtContainer):
     
     class Separator(object):
         def render(self):
-            return '"-"'        
+            return '"-"'
+
+        def make_read_only(self, *args, **kwargs):
+            pass
     
     class Spacer(object):
         def __init__(self, width=2):
