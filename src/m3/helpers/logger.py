@@ -102,8 +102,9 @@ def exception(msg='', *args, **kwargs):
     msg = get_session_info(kwargs.get('request', None)) + 'Message: ' + msg + '\n'
 
     # FIXME: Отрефаторить нахер!!
+    exception_info = sys.exc_info()
     try:
-        e_type, e_value, e_traceback = sys.exc_info()
+        e_type, e_value, e_traceback = exception_info
         e_vars = e_traceback.tb_frame.f_locals
         res = [u'Variables:\n']
         
@@ -132,8 +133,22 @@ def exception(msg='', *args, **kwargs):
         send_mail_log(err_message, e_type.__name__)
       
     except:        
-        log.error(u'Некоррертная работа логера')        
+        _old_good_exception(msg, exception_info, *args, **kwargs)
             
+def _old_good_exception(msg, exception_info, *args, **kwargs):
+    """ 
+    Старый добрый способ вывода ошибки, без переменных, зато надежный.
+      msg - гневное сообщение разработчикам
+      exception_info - информация о оригинальной ошибке
+    """
+    log = logging.getLogger('error_logger')
+    msg = get_session_info(kwargs.get('request')) + msg
+    try:
+        tb = traceback.format_exception(*exception_info)
+        msg = force_unicode(msg) + '\n' + u''.join(tb)
+        log.error(msg)
+    except:
+        log.error(u'Некоррертная работа логера')
 
 def warning(msg, *args, **kwargs):
     log = logging.getLogger('warning_logger')
