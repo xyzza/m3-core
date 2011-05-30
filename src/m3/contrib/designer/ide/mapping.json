@@ -136,6 +136,7 @@
 		,"padding":"padding"
 		,"autoLoad":"auto_load"
 		,"bodyBorder":"body_border"
+        ,"bodyStyle": "body_style"
 		,"tbar":"top_bar"
 		,"bbar":"bottom_bar"
 		,"fbar":"footer_bar"
@@ -294,7 +295,6 @@
 		,"minimizable": "minimizable"
 		,"maximized": "maximized"
 		,"template_globals": "template_globals"
-        ,"bodyStyle": "body_style"		
 	},
 	"parent": "panel"
 },
