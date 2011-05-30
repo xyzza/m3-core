@@ -937,7 +937,7 @@ class Node(object):
             
             func = ast.Call(
                         func=ast.Attribute(
-                            attr='get_absolute_url'
+                            attr='absolute_url'
                             ,value=ast.Call(
                                     args=[ast.Str(value)]
                                     ,func=ast.Attribute(
