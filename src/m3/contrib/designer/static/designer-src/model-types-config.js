@@ -979,6 +979,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 url: {
                     defaultValue: '',
                     isQuickEditable: true
+                },
+                urlShortName: {
+                    defaultValue: '',
+                    isQuickEditable: true
                 }
             }
         },
