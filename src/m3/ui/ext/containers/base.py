@@ -103,7 +103,8 @@ class BaseExtContainer(ExtUIComponent):
         # Выключаем\включаем компоненты.
         if self._items:
             for item in self._items:
-                item.make_read_only(access_off, exclude_list, *args, **kwargs)
+                if hasattr(item, "make_read_only") and callable(item.make_read_only):
+                    item.make_read_only(access_off, exclude_list, *args, **kwargs)
     
         
 class BaseExtPanel(BaseExtContainer):
@@ -189,4 +190,5 @@ class BaseExtPanel(BaseExtContainer):
                 # Обязательно проверяем, что пришел контейнер.
                 assert isinstance(bar, BaseExtContainer)
                 for item in bar._items:
-                    item.make_read_only(access_off, exclude_list, *args, **kwargs)
+                    if hasattr(item, "make_read_only") and callable(item.make_read_only):
+                        item.make_read_only(access_off, exclude_list, *args, **kwargs)
