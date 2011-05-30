@@ -1,4 +1,4 @@
-#coding: utf-8
+#coding:utf-8
 '''
 Created on 25.05.2011
 
@@ -38,11 +38,13 @@ class EntityCache(object):
                             raise
                         continue
                                         
-                    cls._entities = [obj for _, obj in inspect.getmembers(module)
+                    entities_module = [obj for _, obj in inspect.getmembers(module)
                                         if inspect.isclass(obj)
                                             and hasattr(obj, '__module__') 
                                             and obj.__module__ == module.__name__
                                             and issubclass(obj, BaseEntity)]
+                    
+                    cls._entities.extend(entities_module)
 
                 cls._loaded = True
                 
