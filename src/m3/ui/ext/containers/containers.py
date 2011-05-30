@@ -60,28 +60,23 @@ class ExtToolBar(BaseExtContainer):
     '''
     Класс, имитирующий работу Ext.Toolbar
     '''
-    #===============================================================================
-    # Наборы классов, которые могут быть в качестве элементов тулбара
-    class CustomToolbarButton(object):
-        def make_read_only(self, *args, **kwargs):
-            pass
 
-    class Fill(CustomToolbarButton):
+    class Fill(object):
         def render(self):
             return '"->"'
 
-    class Separator(CustomToolbarButton):
+    class Separator(object):
         def render(self):
             return '"-"'
 
-    class Spacer(CustomToolbarButton):
+    class Spacer(object):
         def __init__(self, width=2):
             self.width = width
 
         def render(self):
             return "{xtype: 'tbspacer', width: %d}" % self.width
 
-    class TextItem(CustomToolbarButton):
+    class TextItem(object):
         def __init__(self, text=''):
             self.text = text
 
