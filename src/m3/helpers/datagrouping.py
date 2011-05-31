@@ -4,6 +4,10 @@ Created on 14.04.2011
 
 @author: kirov
 '''
+import os
+import uuid
+import xlwt
+from django.conf import settings
 from django.db.models import Q, Count, Avg, Max, Min, Sum
 
 class RecordProxy(object):
@@ -76,6 +80,81 @@ class GroupingRecordProvider(object):
         Основной метод получения данных
         '''
         return get_elements(grouped, offset, level_index, level, begin, end, keys, self, aggregates, sorting)
+    
+    def get_export_group_text(self, item, grouped_col_name):
+        '''
+        Форматирование колонки группировки
+        '''
+        indent_str = "   "*item.indent
+        value = item.id
+        return "%s %s: %s (%s)" % (indent_str, grouped_col_name, value, item.count)
+    
+    def export_to_xls (self, title, columns, total, grouped, expanded, aggregates, sorting):
+        '''
+        выгрузка таблицы в xls-файл
+        '''
+        w = xlwt.Workbook()
+        ws = w.add_sheet('grid')
+        title_style = xlwt.easyxf("font: bold on, height 400;")
+    
+        header_style = xlwt.easyxf(
+            "font: bold on, color-index white;"
+            "borders: left thick, right thick, top thick, bottom thick;"
+            "pattern: pattern solid, fore_colour gray80;"
+        )
+    
+        data_style = xlwt.easyxf(
+            "borders: left thin, right thin, top thin, bottom thin;"
+        )
+        col_count = 0
+        total_width = 0
+        for column in columns:
+            if not column.get("hidden"):
+                col_count += 1
+                total_width += column.get("width")
+    
+        page_width = 30000
+        ws.write_merge(0,0,0,col_count-1,title,title_style)
+        ws.row(0).height = 500
+        columns_cash = []
+        columns_title = {}
+        index = 0
+        for column in columns:
+            if not column.get("hidden"):
+                ws.write(1,index,column.get('header'),header_style)
+                ws.col(index).width = 1.0*column.get("width")*page_width/total_width
+                if "data_index" in column:
+                    columns_title[column["data_index"]] = column.get('header') 
+                    columns_cash.append(column["data_index"])
+                else:
+                    # значит это группировочная колонка
+                    columns_cash.append("__grouping__")
+                index += 1
+        
+        # запросим все данные
+        level = {'count': -1, 'id': None, 'expandedItems':expanded}
+        data, total = self.get_elements(grouped,0,0,level,0,total,[], aggregates, sorting)
+        # вывод данных
+        for item in data:
+            for idx,k in enumerate(columns_cash):
+                if k == "__grouping__":
+                    if item.is_leaf:
+                        v = ""
+                    else:
+                        col = grouped[item.indent]
+                        col_name = columns_title[col]
+                        v = self.get_export_group_text(item, col_name)
+                    ws.write(item.index+2,idx,v,data_style)
+                else:
+                    v = getattr(item, k)
+                    ws.write(item.index+2,idx,v,data_style)
+    
+        base_name = str(uuid.uuid4())[0:16]
+        xls_file_abs = os.path.join(settings.MEDIA_ROOT, base_name+'.xls')
+        w.save(xls_file_abs)
+        url = '%s/%s.xls' % (settings.MEDIA_URL, base_name)
+        return url
+
 
 class GroupingRecordModelProvider(GroupingRecordProvider):
     '''
