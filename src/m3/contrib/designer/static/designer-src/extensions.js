@@ -11,11 +11,17 @@ Ext.ux.NotificationMgr = {
 notifications: [],
 originalBodyOverflowY: null
 };
-
+/**
+ * Notification окна оповещения, создает цепочку окон оповещения с автоскрытием
+ *  принимает аргументы
+ *  title - заголовок,
+ *  html - содержание,
+ *  iconCls - иконка
+ */
 Ext.ux.Notification = Ext.extend(Ext.Window, {
     initComponent: function(){
         Ext.apply(this, {
-            iconCls: this.iconCls || 'x-icon-information',
+            iconCls: this.iconCls || 'icon-information',
             cls: 'x-notification',
             width: 200,
             autoHeight: true,
@@ -51,7 +57,7 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
         Ext.ux.Notification.superclass.afterShow.call(this);
         Ext.fly(this.body.dom).on('click', this.cancelHiding, this);
         if(this.autoDestroy) {
-            this.task.delay(this.hideDelay || 5000);
+            this.task.delay(this.hideDelay ? this.hideDelay*1000 : 3*1000);
        }
     },
     animShow: function() {
