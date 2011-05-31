@@ -6,6 +6,7 @@ Created on 26.05.2011
 '''
 from m3.helpers.datastructures import TypedList
 
+
 class Relation(object):
     '''
     Связь между сущностями
@@ -23,6 +24,36 @@ class Relation(object):
         self.table_second = entity_second
         self.key_second = key_second
         
+
+class Table(object):
+    '''
+    Для обозначения таблиц в схемах
+    '''        
+    pass
+
+
+class Model(object):
+    '''
+    Для обозначения моделей в схемах
+    '''
+    pass
+
+
+class Entity(object):
+    '''
+    Для обозначения сущности в схемах
+    '''
+    pass
+
+
+class Field(object):
+    '''
+    Для обозначения поля
+    '''
+    ALL_FIELDS = '*'
+    
+    pass
+
         
 class BaseEntity(object):
     '''
@@ -57,7 +88,3 @@ class BaseEntity(object):
     
     # Количество показываемых записей
     limit = None
-
-
-        
-        
