@@ -132,7 +132,10 @@ class DesktopLaunchGroup(BaseDesktopElement):
                 rendered = item.render()
                 if rendered:
                     res.append(rendered)
-        return '{items: [%s]}' % ','.join(res) 
+        return '{items: [%s]}' % ','.join(res)
+    
+    def __str__(self):
+        return u'Группа: "%s" at %s' % (self.name, id(self))
     
     
 class DesktopLauncher(BaseDesktopElement):
@@ -165,6 +168,9 @@ class DesktopLauncher(BaseDesktopElement):
         res += ',handler: function(){return sendRequest("%s", AppDesktop.getDesktop(), %s);}' % (self.url, self.t_render_context())
         res += ',scope: this'
         return '{%s}' % res
+    
+    def __str__(self):
+        return u'Ярлык: "%s" at %s' % (self.name, id(self))
 
 
 class DesktopShortcut(DesktopLauncher):
@@ -241,20 +247,26 @@ class DesktopLoader(object):
         def join_list(existing_list, in_list):
             '''
             Складывает два списка с объектами DesktopLaunchGroup и DesktopLauncher 
-            произвольного уровня вложенности
+            произвольного уровня вложенности.
+            Критерием равенства является имя элемента!
             '''
+            names_dict = {}
+            for existing_el in existing_list:
+                assert isinstance(existing_el, BaseDesktopElement)
+                names_dict[existing_el.name] = existing_el
+             
             for in_el in in_list:
-                if isinstance(in_el, DesktopLaunchGroup) and in_el in existing_list:
-                    for ex_el in existing_list:
-                        if ex_el == in_el:
-                            join_list(ex_el.subitems, in_el.subitems)
-                            break
-  
-                elif in_el in existing_list: #ищем элемент просто в списке, для скорости
+                assert isinstance(in_el, BaseDesktopElement)
+                # Группа ярлыков, которая уже есть в списке
+                if isinstance(in_el, DesktopLaunchGroup) and names_dict.has_key(in_el.name):
+                    # Запускаем рекурсивное слияние
+                    ex_el = names_dict[in_el.name]
+                    join_list(ex_el.subitems, in_el.subitems)
+                
+                # Если ярлык уже в списке, то добавлять повторно не нужно
+                elif names_dict.has_key(in_el.name):
                     continue
-                elif hasattr(in_el, 'name') and in_el.name in [getattr(e, 'name', None) for e in existing_list]: 
-                    #ищем элемент по имени, т.к. у нас добавляются копии элементов
-                    continue
+                
                 else:
                     existing_list.append(in_el)
         
