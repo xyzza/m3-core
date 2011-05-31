@@ -945,19 +945,18 @@ function initCodeEditorHandlers(codeEditor, path){
             },
             success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
-                var title = 'Сохранение', message ='', icon = '';
+                var title = 'Сохранение', message ='', icon = 'icon-accept';
                 if (obj.success)
                     message = 'Изменения были успешно сохранены';
                 else if (!obj.success && obj.error){
                     message = 'Ошибка при сохранении файла\n'+obj.error;
                     icon = 'icon-error';
                 };
-                showNotification({
+                new Ext.ux.Notification({
                     title: title,
                     html: message,
-                    animEl: codeEditor.id,
-                    icon: icon
-                });
+                    iconCls: icon
+                }).show(document); 
                 codeEditor.contentChanged = false;
                 codeEditor.onChange();
             },
@@ -1009,20 +1008,3 @@ function initCodeEditorHandlers(codeEditor, path){
         });
     });
 };
-/**
- *
- * @param icon иконка
- * @param title заголовок
- * @param html содержимое окна
- * @param delay в секундах
- */
-var showNotification = function(obj){
-    new Ext.ux.Notification({
-        iconCls: obj.icon || 'icon-accept',
-        title: obj.title || '',
-        html: obj.html || '',
-        autoDestroy: true,
-        hideDelay: parseInt(obj.delay) ? parseInt(obj.delay)*1000 : 1.5*1000,
-        animEl: obj.animEl
-    }).show(document);
-}
