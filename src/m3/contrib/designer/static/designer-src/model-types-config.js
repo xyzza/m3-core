@@ -976,6 +976,11 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 autoSave: {
                     defaultValue: true
                 },
+                fields: {
+                    defaultValue: 'undefined',
+                    propertyType: 'object',
+                    isQuickEditable: true
+                },
                 url: {
                     defaultValue: '',
                     isQuickEditable: true
@@ -995,7 +1000,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     isQuickEditable: true
                 },
                 storeId: {
-                    defaultValue: 'New store',
+                    defaultValue: 'newArrayStore',
                     isInitProperty: true
                 },
                 idIndex: {
@@ -1029,11 +1034,6 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 idProperty: {
                     defaultValue: 'id',
                     isInitProperty: true
-                },
-                fields: {
-                    defaultValue: 'undefined',
-                    propertyType: 'object',
-                    isQuickEditable: true
                 },
                 root: {
                     defaultValue: 'undefined'
