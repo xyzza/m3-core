@@ -727,3 +727,78 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		uiAjaxFailMessage(response, options);
 	}
 });
+
+Ext.ns('Ext.ux.livegrid');
+
+Ext.ux.livegrid.Exporter = Ext.extend(Ext.util.Observable,{
+    constructor: function(config){
+    	if (config) Ext.apply(this, config);
+        Ext.ux.livegrid.Exporter.superclass.constructor.call(this);
+    },
+    init: function(grid){
+    	// убедимся, что это нужный нам грид
+        if (grid instanceof Ext.ux.grid.livegrid.GridPanel){
+            this.grid = grid;
+            this.grid.on('afterrender', this.onRender, this);
+            // найдем плагин группировки
+            for (var i = 0; i <= this.grid.plugins.length; i++) {
+            	if (this.grid.plugins[i] instanceof Ext.ux.grid.MultiGrouping) {
+            		this.groupPlugin = this.grid.plugins[i];
+            		break;
+            	}
+            }
+        }
+    },
+    onRender:function(){
+        //создадим top bar, если его нет
+        if (!this.grid.tbar){
+            this.grid.elements += ',tbar';
+            tbar = new Ext.Toolbar();
+            this.grid.tbar = tbar;
+            this.grid.add(tbar);
+            this.grid.doLayout();
+        }
+        //добавим кнопку
+        this.grid.tbar.add(new Ext.Button({
+            text:'Экспорт',
+            listeners:{
+                scope:this,
+                click:this.exportData                
+            }
+        }));
+    },
+    exportData:function(){
+    	// соберем расположение колонок
+        columns = []
+        Ext.each(this.grid.colModel.config,function(column,index){
+            columns.push({
+                data_index:column.dataIndex,
+                header:column.header,
+                width:column.width,
+                hidden:column.hidden
+            })
+        });
+        params = {
+            columns: Ext.encode(columns),
+            title: this.title || this.grid.title || this.grid.id,
+            totalLength: this.grid.view.ds.totalLength
+        };
+        if (this.grid.getStore().sortInfo != undefined){
+        	params.sort = this.grid.getStore().sortInfo.field;
+        	params.dir = this.grid.getStore().sortInfo.direction;
+        }
+        if (this.groupPlugin != undefined) {
+        	params.grouped = Ext.util.JSON.encode(this.groupPlugin.groupedColumns);
+        	params.exp = Ext.util.JSON.encode(this.groupPlugin.expandedItems);
+        }
+        Ext.Ajax.request({
+            url : this.exportUrl,
+            success : function(res,opt){                
+                location.href=res.responseText;
+            },
+            failure : function(){
+            },
+            params : params
+        });
+    }
+});
