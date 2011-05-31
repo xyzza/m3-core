@@ -689,7 +689,7 @@ class RolesListWindow(windows.ExtWindow):
 
         self.title = u'Роли пользователей'
         self.layout = 'fit'
-        self.width = 500
+        self.width = 530
         self.height = 500
         self.template_globals = 'm3-users/roles-list-window.js'
 
@@ -706,6 +706,7 @@ class RolesListWindow(windows.ExtWindow):
         self.grid.action_edit = EditRoleWindowAction
         self.grid.action_delete = DeleteRoleAction
         self.grid.top_bar.button_new.text = u'Добавить новую роль'
+        self.grid.top_bar.items.append(controls.ExtButton(text=u'Показать пользователей', handler='contextMenu_ShowAssignedUsers'))
         self.grid.row_id_name = 'userrole_id'
 
         # дополнительные действия формы
