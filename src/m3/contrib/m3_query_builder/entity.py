@@ -29,30 +29,43 @@ class Table(object):
     '''
     Для обозначения таблиц в схемах
     '''        
-    pass
+    def __init__(self, name, alias=None, verbose_name=None):
+        self.name = name
+        self.alias = alias
+        self.verbose_name = verbose_name
 
 
 class Model(object):
     '''
     Для обозначения моделей в схемах
     '''
-    pass
+    
+    def __init__(self, name, alias=None, verbose_name=None):
+        self.name = name
+        self.alias = alias
+        self.verbose_name = verbose_name
 
 
 class Entity(object):
     '''
     Для обозначения сущности в схемах
     '''
-    pass
+    def __init__(self, name, alias=None, verbose_name=None):
+        self.name = name
+        self.alias = alias
+        self.verbose_name = verbose_name
 
 
 class Field(object):
     '''
     Для обозначения поля
     '''
+    
+    # Все поля
     ALL_FIELDS = '*'
     
-    pass
+    def __init__(self, name, alias=None, verbose_name=None):
+        pass
 
         
 class BaseEntity(object):
@@ -66,9 +79,7 @@ class BaseEntity(object):
     name = None
     
     # Список объектов (модели, сущности, имена таблиц), используемых во текущей
-    # сущности. Если нужны алиасы, то их необходимо использовать здесь в виде: 
-    # entities = [{'m1':'MyModel1'}, {'m2':'MyModel2'}, MyModel1'] 
-    # m1 - алиас модели MyModel1
+    # сущности.    
     entities = []
     
     # Типизированный список связей, над вышеупомянутами объектами
