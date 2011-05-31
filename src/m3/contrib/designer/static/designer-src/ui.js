@@ -214,10 +214,17 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
             //попробуем найти стор
             for (i = 0; i < model.childNodes.length; i++) {
                 if (model.childNodes[i].attributes.type === 'arrayStore') {
+                    //Добавляем филды для array сторе для правильного рендеринга
+                    var fieldsIndexes = ['id'];
+                    for (var i = 0; i<columns.length; i++){
+                        fieldsIndexes.push(columns[i].dataIndex);
+                    };
                     store = new Ext.data.ArrayStore(
-                        Ext.apply({},
-                            model.childNodes[i].attributes.properties
-                            )
+                        Ext.apply({
+                                fields: fieldsIndexes
+                                },
+                                model.childNodes[i].attributes.properties
+                        )
                     );
                 }
             }
