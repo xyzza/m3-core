@@ -890,6 +890,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     isInitProperty: true,
                     isQuickEditable: true
                 },
+                sortable:{
+                    defaultValue: false,
+                    isQuickEditable: true
+                },
                 header: {
                     defaultValue: 'column',
                     isInitProperty: true,
