@@ -41,7 +41,11 @@ def register_desktop_menu():
     try:
         if settings.DATABASES['readonly']:
             admin_root = DesktopLaunchGroup(name = u'Администрирование', icon='menu-dicts-16')
-            admin_root.subitems.append(DesktopLauncher(name = u'Консоль запросов', url=actions.QyeryConsoleWinAction.absolute_url()))
+            admin_root.subitems.append(
+                DesktopLauncher(name = u'Консоль запросов',
+                                url=actions.QyeryConsoleWinAction.absolute_url(),
+                                icon='icon-application-xp-terminal')
+            )
             
             DesktopLoader.add(ADMIN_METAROLE, DesktopLoader.START_MENU, admin_root)
             DesktopLoader.add(ADMIN_METAROLE, DesktopLoader.TOPTOOLBAR, admin_root)  
