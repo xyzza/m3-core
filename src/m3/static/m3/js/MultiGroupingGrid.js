@@ -52,6 +52,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	init: function(grid) {
         if(grid instanceof Ext.grid.GridPanel){
         	this.grid = grid;
+        	this.grid.loadMask = false; // не будем показывать стандартную маску - у нас есть своя
             this.cm = this.grid.getColumnModel();
             // добавим новый столбец, в котором будет отображаться группировка (если она будет)
             this.grouppingColumn = new Ext.grid.Column({header: this.groupFieldTitle, id: this.groupFieldId, width: 160, renderer: {fn:this.groupRenderer, scope: this}});
@@ -465,10 +466,11 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	 * @param {Number} totalLen Общий объем данных доступных для загрузки
 	 * @param {Object} opts Параменты запроса данных
 	 */
-	onBeforeBuffer: function (view, st, rowIndex, min, totalLen, opts) {	
+	onBeforeBuffer: function (view, st, rowIndex, min, totalLen, opts) {
 		this.onBeforeLoad(st, opts);
 	},
 	onBeforeLoad: function (st, opts) {
+		this.grid.view.showLoadMask(true);
 		var expanding = this.expanding;
 		var exp_par = Ext.util.JSON.encode(this.expandedItems);
 		var group_par = Ext.util.JSON.encode(this.groupedColumns);
@@ -801,14 +803,18 @@ Ext.ux.grid.MultiGroupingExporter = Ext.extend(Ext.util.Observable,{
         	params.grouped = Ext.util.JSON.encode(this.groupPlugin.groupedColumns);
         	params.exp = Ext.util.JSON.encode(this.groupPlugin.expandedItems);
         }
+        this.grid.view.showLoadMask(true);
         Ext.Ajax.request({
             url : this.exportUrl,
-            success : function(res,opt){                
+            success : function(res,opt){
+            	this.grid.view.showLoadMask(false);
                 location.href=res.responseText;
             },
             failure : function(){
+            	this.grid.view.showLoadMask(false);
             },
-            params : params
+            params : params,
+            scope: this
         });
     }
 });
