@@ -53,12 +53,15 @@ class GroupingRecordProvider(object):
     '''
     proxy_class = RecordProxy
     data_sorce = None
+    count_totals = False
 
-    def __init__(self, proxy=None, data=None):
+    def __init__(self, proxy=None, data=None, totals = None):
         if proxy:
             self.proxy_class = proxy
         if data is not None:
             self.data_source = data
+        if totals is not None:
+            self.count_totals = totals 
 
     def get_data(self, *args, **kwargs):
         return self.data_source
@@ -148,7 +151,16 @@ class GroupingRecordProvider(object):
                 else:
                     v = getattr(item, k)
                     ws.write(item.index+2,idx,v,data_style)
-    
+        # выпод итогов
+        if not isinstance(total, (int, long)):
+            total_row = total[1]
+            for idx,k in enumerate(columns_cash):
+                if k == "__grouping__":
+                    v = ""
+                else:
+                    v = getattr(total_row, k)
+                ws.write(total[0]+2,idx,v,header_style)
+                
         base_name = str(uuid.uuid4())[0:16]
         xls_file_abs = os.path.join(settings.MEDIA_ROOT, base_name+'.xls')
         w.save(xls_file_abs)
@@ -297,7 +309,13 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
 
 #    print 'get_elements()= total=%s, res_count=%s' % (total_len, len(res))
 #    print level
-    return (res, total_len)
+
+    # если это самый первый уровень и нужно считать общие итоги, то посчитаем выдадим
+    if level_index == 0 and data_provider.count_totals:
+        totals = data_provider.reader(grouped, 0, -1, [], 0, 1, data_provider, aggregates, sorting)
+        return (res, (total_len, totals))
+    else:
+        return (res, total_len)
 
 def count_model(grouped, level_index, level_keys, expandedItems, data_provider):
     # подсчет количества строк в раскрытом уровне
@@ -360,6 +378,46 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
 #    if cache_key in out_cache.keys():
 #        print 'cached data...........'
 #        return out_cache[cache_key]
+
+    # специальный режим, когда считается общий итог по всем записям - не важна сортировка и группировка
+    if level_index == -1:
+        aggr = []
+        # будем считать агрегаты
+        for agg in aggregates.keys():
+            agg_type = aggregates[agg]
+            if agg_type == 'sum':
+                aggr.append(Sum(agg))
+            elif agg_type == 'count':
+                aggr.append(Count(agg))
+            elif agg_type == 'min':
+                aggr.append(Min(agg))
+            elif agg_type == 'max':
+                aggr.append(Max(agg))
+            elif agg_type == 'avg':
+                aggr.append(Avg(agg))
+        query = data_provider.get_data().annotate(*aggr).annotate(count=Count())                
+        for i in query.all():
+            item = data_provider.create_record()
+            item.is_leaf = False
+            item.index = None
+            item.id = None
+            item.indent = None
+            item.lindex = None
+            item.count = i['count']
+            for agg in aggregates.keys():
+                agg_type = aggregates[agg]
+                if agg_type == 'sum':
+                    setattr(item, agg, i[agg + '__sum'])
+                elif agg_type == 'count':
+                    setattr(item, agg, i[agg + '__count'])
+                elif agg_type == 'min':
+                    setattr(item, agg, i[agg + '__min'])
+                elif agg_type == 'max':
+                    setattr(item, agg, i[agg + '__max'])
+                elif agg_type == 'avg':
+                    setattr(item, agg, i[agg + '__avg'])
+            item.calc()
+        return item
 
     #print 'read_model(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
     res = []
@@ -506,17 +564,54 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_provide
 #        return out_cache[cache_key]
 
     #print 'out_data(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
+
+    # специальный режим, когда считается общий итог по всем записям - не важна сортировка и группировка
+    if level_index == -1:
+        aggr_rec = {}
+        count = 0
+        for rec in data_provider.get_data():
+            # будем считать агрегаты
+            for agg in aggregates.keys():
+                agg_type = aggregates[agg]
+                agg_value = getattr(rec, agg)
+                if agg_type == 'sum':
+                    aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
+                elif agg_type == 'count':
+                    aggr_rec[agg] = 1 + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
+                elif agg_type == 'min':
+                    aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] > agg_value else aggr_rec[agg]
+                elif agg_type == 'max':
+                    aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] < agg_value else aggr_rec[agg]
+                elif agg_type == 'avg':
+                    aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
+            count += 1
+        item = data_provider.create_record()
+        item.id = None
+        item.indent = None
+        item.lindex = None
+        item.count = count
+        for agg in aggregates.keys():
+            # для средних - посчитаем среднее
+            if aggregates[agg] == 'avg':
+                setattr(item, agg, aggr_rec[agg] / item.count)
+            else:
+                setattr(item, agg, aggr_rec[agg])
+        item.calc()
+        return item
+
     # проведем сортировку собранного уровня
     if len(sorting.keys()) == 1:
         sorted_data = sorted(data_provider.get_data(), key=lambda k: getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
     else:
         sorted_data = data_provider.get_data()
     res = []
+    
     if grouped:
         # для всех группировочных элементов будут использоваться ключи
         level = {}
         aggregate_values = {}
         ordered = []
+                    
         # если берется уровень больший, чем количество группировок, то выдаем просто записи
         if level_index >= len(grouped):
             field = None
@@ -552,7 +647,7 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_provide
                         if agg_type == 'sum':
                             aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                         elif agg_type == 'count':
-                            aggr_rec[agg] = agg_value + (1 if aggr_rec.has_key(agg) else 0)
+                            aggr_rec[agg] = 1 + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                         elif agg_type == 'min':
                             aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] > agg_value else aggr_rec[agg]
                         elif agg_type == 'max':

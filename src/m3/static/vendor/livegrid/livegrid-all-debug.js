@@ -564,7 +564,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         var thd = this.mainWrap.dom.firstChild;
 	    this.mainHd = new E(thd);
 
-	    this.hdHeight = thd.offsetHeight;
+	    //this.hdHeight = thd.offsetHeight;//kirov
 
 	    this.innerHd = this.mainHd.dom.firstChild;
         this.scroller = new E(this.mainWrap.dom.childNodes[1]);
@@ -636,7 +636,8 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
             }
         }
 
-        this.liveScroller.dom.style.top = this.hdHeight+"px";
+        //this.liveScroller.dom.style.top = this.hdHeight+"px"; //kirov
+        this.liveScroller.dom.style.top = this.mainHd.getHeight()+"px";//kirov
 
         if(this.forceFit){
             if(this.lastViewWidth != vw){
@@ -647,11 +648,13 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
             this.autoExpand();
         }
 
+        this.onLayout(vw, vh); //kirov
+        
         // adjust the number of visible rows and the height of the scroller.
         this.adjustVisibleRows();
         this.adjustBufferInset();
 
-        this.onLayout(vw, vh);
+        //this.onLayout(vw, vh);//kirov
     },
 
     /**
@@ -1756,12 +1759,14 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         var scrollbar = this.cm.getTotalWidth()+this.getScrollOffset() > elWidth;
 
         // adjust the height of the scrollbar
+        /* kirov
         var contHeight = liveScrollerDom.parentNode.offsetHeight +
                          ((ds.totalLength > 0 && scrollbar)
                          ? - this.horizontalScrollOffset
-                         : 0)
-                         - this.hdHeight;
-
+                         : 0) - this.mainHd.getHeight(); //kirov
+                         //- this.hdHeight; //kirov
+		*/
+        contHeight = this.scroller.getHeight(); //kirov
         liveScrollerDom.style.height = Math.max(contHeight, this.horizontalScrollOffset*2)+"px";
 
         if (this.rowHeight == -1) {
@@ -1816,6 +1821,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         var cm    = this.cm;
         var size  = c.getSize();
         var width = size.width;
+        /* kirov
         var vh    = size.height;
         if (this.grid.groupingToolBar != undefined) { //kirov
         	vh -= this.grid.groupingToolBar.getHeight();
@@ -1829,6 +1835,8 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         }
 
         vh -= this.mainHd.getHeight();
+        */
+        vh = this.scroller.getHeight();//kirov
         
         var totalLength = ds.totalLength || 0;
 
@@ -1972,6 +1980,8 @@ Ext.extend(Ext.ux.grid.livegrid.JsonReader, Ext.data.JsonReader, {
             var v = this.getVersion(o);
             intercept.version = (v === undefined || v === "") ? null : v;
         }
+        // kirov
+        intercept.totalRow = o.totalRow;
 
         return intercept;
     }
@@ -3119,6 +3129,9 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
     // private
     loadRecords : function(o, options, success)
     {
+    	//kirov
+    	this.totalRow = o.totalRow;
+    	
         this.checkVersionChange(o, options, success);
 
         // we have to stay in sync with rows that may have been skipped while
