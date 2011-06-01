@@ -246,7 +246,7 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
         },
         objectGrid: function (model, cfg) {
             var columns = this.findGridColumns(model);
-            return Ext.apply(cfg, {
+            var config = {
                 xtype: 'grid',
                 cls: 'designContainer designComponent',
                 store: {
@@ -279,7 +279,9 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
                 colModel: new Ext.grid.ColumnModel({
                     columns: columns
                 })
-            });
+            }
+            if (cfg.allowPaging == false) delete config["bbar"];
+            return Ext.apply(cfg, config);
 
         },
         toolbar: function (model, cfg) {
