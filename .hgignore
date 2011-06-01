@@ -18,3 +18,5 @@ relre:class$
 glob:docs/build/
 glob:.project
 glob:.pydevproject
+syntax: regexp
+.form-backup
