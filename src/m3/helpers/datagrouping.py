@@ -56,7 +56,7 @@ class GroupingRecordProvider(object):
     count_totals = False
     aggregates = {}
 
-    def __init__(self, proxy=None, data=None, totals = None, aggregates = None):
+    def __init__(self, proxy=None, data=None, totals=None, aggregates=None):
         if proxy:
             self.proxy_class = proxy
         if data is not None:
@@ -85,16 +85,16 @@ class GroupingRecordProvider(object):
         '''
         Основной метод получения данных
         '''
-        return get_elements(grouped, begin, 0, {'count': -1, 'id': None, 'expandedItems':expanded}, begin, end, [], self, self.aggregates, sorting)
-    
+        return get_elements(grouped, begin, 0, {'count':-1, 'id': None, 'expandedItems':expanded}, begin, end, [], self, self.aggregates, sorting)
+
     def get_export_group_text(self, item, grouped_col_name):
         '''
         Форматирование колонки группировки
         '''
-        indent_str = "   "*item.indent
+        indent_str = "   " * item.indent
         value = item.id
         return "%s %s: %s (%s)" % (indent_str, grouped_col_name, value, item.count)
-    
+
     def export_to_xls (self, title, columns, total, grouped, expanded, sorting):
         '''
         выгрузка таблицы в xls-файл
@@ -102,13 +102,13 @@ class GroupingRecordProvider(object):
         w = xlwt.Workbook()
         ws = w.add_sheet('grid')
         title_style = xlwt.easyxf("font: bold on, height 400;")
-    
+
         header_style = xlwt.easyxf(
             "font: bold on, color-index white;"
             "borders: left thick, right thick, top thick, bottom thick;"
             "pattern: pattern solid, fore_colour gray80;"
         )
-    
+
         data_style = xlwt.easyxf(
             "borders: left thin, right thin, top thin, bottom thin;"
         )
@@ -118,30 +118,30 @@ class GroupingRecordProvider(object):
             if not column.get("hidden"):
                 col_count += 1
                 total_width += column.get("width")
-    
+
         page_width = 30000
-        ws.write_merge(0,0,0,col_count-1,title,title_style)
+        ws.write_merge(0, 0, 0, col_count - 1, title, title_style)
         ws.row(0).height = 500
         columns_cash = []
         columns_title = {}
         index = 0
         for column in columns:
             if not column.get("hidden"):
-                ws.write(1,index,column.get('header'),header_style)
-                ws.col(index).width = 1.0*column.get("width")*page_width/total_width
+                ws.write(1, index, column.get('header'), header_style)
+                ws.col(index).width = 1.0 * column.get("width") * page_width / total_width
                 if "data_index" in column:
-                    columns_title[column["data_index"]] = column.get('header') 
+                    columns_title[column["data_index"]] = column.get('header')
                     columns_cash.append(column["data_index"])
                 else:
                     # значит это группировочная колонка
                     columns_cash.append("__grouping__")
                 index += 1
-        
+
         # запросим все данные
-        data, total = self.get_elements(0,total,grouped, expanded, self.aggregates, sorting)
+        data, total = self.get_elements(0, total, grouped, expanded, self.aggregates, sorting)
         # вывод данных
         for item in data:
-            for idx,k in enumerate(columns_cash):
+            for idx, k in enumerate(columns_cash):
                 if k == "__grouping__":
                     if item.is_leaf:
                         v = ""
@@ -149,22 +149,22 @@ class GroupingRecordProvider(object):
                         col = grouped[item.indent]
                         col_name = columns_title[col]
                         v = self.get_export_group_text(item, col_name)
-                    ws.write(item.index+2,idx,v,data_style)
+                    ws.write(item.index + 2, idx, v, data_style)
                 else:
                     v = getattr(item, k)
-                    ws.write(item.index+2,idx,v,data_style)
+                    ws.write(item.index + 2, idx, v, data_style)
         # выпод итогов
         if not isinstance(total, (int, long)):
             total_row = total[1]
-            for idx,k in enumerate(columns_cash):
+            for idx, k in enumerate(columns_cash):
                 if k == "__grouping__":
                     v = ""
                 else:
                     v = getattr(total_row, k)
-                ws.write(total[0]+2,idx,v,header_style)
-                
+                ws.write(total[0] + 2, idx, v, header_style)
+
         base_name = str(uuid.uuid4())[0:16]
-        xls_file_abs = os.path.join(settings.MEDIA_ROOT, base_name+'.xls')
+        xls_file_abs = os.path.join(settings.MEDIA_ROOT, base_name + '.xls')
         w.save(xls_file_abs)
         url = '%s/%s.xls' % (settings.MEDIA_URL, base_name)
         return url
@@ -215,7 +215,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
             else:
                 # развернутый элемент отсутствует в уровне (видимо фильтр сработал, или что-то еще) - что делать?! 
                 level['expandedItems'].remove(exp)
-            
+
         #теперь выстроим в порядке индексов
         exp_sort = sorted(level['expandedItems'], key=lambda x: x['index'])
         level['expandedItems'] = exp_sort
@@ -402,28 +402,26 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
                 aggr.append(Max(agg))
             elif agg_type == 'avg':
                 aggr.append(Avg(agg))
-        query = data_provider.get_data().values().annotate(*aggr).annotate(count=Count('id'))                
-        for i in query.all():
-            item = data_provider.create_record()
-            item.is_leaf = False
-            item.index = None
-            item.id = None
-            item.indent = None
-            item.lindex = None
-            item.count = i['count']
-            for agg in aggregates.keys():
-                agg_type = aggregates[agg]
-                if agg_type == 'sum':
-                    setattr(item, agg, i[agg + '__sum'])
-                elif agg_type == 'count':
-                    setattr(item, agg, i[agg + '__count'])
-                elif agg_type == 'min':
-                    setattr(item, agg, i[agg + '__min'])
-                elif agg_type == 'max':
-                    setattr(item, agg, i[agg + '__max'])
-                elif agg_type == 'avg':
-                    setattr(item, agg, i[agg + '__avg'])
-            item.calc()
+        i = data_provider.get_data().aggregate(*aggr)
+        item = data_provider.create_record()
+        item.is_leaf = False
+        item.index = None
+        item.id = None
+        item.indent = None
+        item.lindex = None
+        for agg in aggregates.keys():
+            agg_type = aggregates[agg]
+            if agg_type == 'sum':
+                setattr(item, agg, i[agg + '__sum'])
+            elif agg_type == 'count':
+                setattr(item, agg, i[agg + '__count'])
+            elif agg_type == 'min':
+                setattr(item, agg, i[agg + '__min'])
+            elif agg_type == 'max':
+                setattr(item, agg, i[agg + '__max'])
+            elif agg_type == 'avg':
+                setattr(item, agg, i[agg + '__avg'])
+        item.calc()
         return item
 
     #print 'read_model(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
@@ -612,13 +610,13 @@ def read_data(grouped, offset, level_index, level_keys, begin, end, data_provide
     else:
         sorted_data = data_provider.get_data()
     res = []
-    
+
     if grouped:
         # для всех группировочных элементов будут использоваться ключи
         level = {}
         aggregate_values = {}
         ordered = []
-                    
+
         # если берется уровень больший, чем количество группировок, то выдаем просто записи
         if level_index >= len(grouped):
             field = None
