@@ -36,7 +36,7 @@ def register_desktop_menu():
     
     admin_root = DesktopLaunchGroup(name = u'Администрирование', icon='menu-dicts-16')
     admin_root.subitems.append(
-        DesktopLauncher(name = u'Конструктор запросов',
+        DesktopLauncher(name = u'Редактор запросов',
                         url=actions.QueryBuilderWindowAction.absolute_url(),
                         icon='icon-database-gear')
     )
