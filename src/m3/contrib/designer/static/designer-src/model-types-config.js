@@ -404,6 +404,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: 'Дата',
                     isInitProperty: true,
                     isQuickEditable: true
+                },
+                hideTodayBtn:{
+                    defaultValue: false,
+                    isQuickEditable: true
                 }
             },
             toolboxData: {
@@ -952,6 +956,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 maximized: {
                     defaultValue: false,
                     isInitProperty: true
+                },
+                modal: {
+                    defaultValue: false,
+                    isQuickEditable: true
                 },
                 closable: {
                     defaultValue: true,
