@@ -138,7 +138,7 @@ class GroupingRecordProvider(object):
                 index += 1
 
         # запросим все данные
-        data, total = self.get_elements(0, total, grouped, expanded, self.aggregates, sorting)
+        data, total = self.get_elements(0,total,grouped, expanded, sorting)
         # вывод данных
         for item in data:
             for idx, k in enumerate(columns_cash):
@@ -153,7 +153,7 @@ class GroupingRecordProvider(object):
                 else:
                     v = getattr(item, k)
                     ws.write(item.index + 2, idx, v, data_style)
-        # выпод итогов
+        # вывод итогов
         if not isinstance(total, (int, long)):
             total_row = total[1]
             for idx, k in enumerate(columns_cash):
