@@ -136,7 +136,6 @@ class GroupingRecordProvider(object):
                     # значит это группировочная колонка
                     columns_cash.append("__grouping__")
                 index += 1
-
         # запросим все данные
         data, total = self.get_elements(0,total,grouped, expanded, sorting)
         # вывод данных
@@ -166,7 +165,7 @@ class GroupingRecordProvider(object):
         base_name = str(uuid.uuid4())[0:16]
         xls_file_abs = os.path.join(settings.MEDIA_ROOT, base_name + '.xls')
         w.save(xls_file_abs)
-        url = '%s/%s.xls' % (settings.MEDIA_URL, base_name)
+        url = '%s%s.xls' % (settings.MEDIA_URL, base_name)
         return url
 
 

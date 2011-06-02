@@ -790,19 +790,24 @@ Ext.ux.grid.MultiGroupingExporter = Ext.extend(Ext.util.Observable,{
                 hidden:column.hidden
             })
         });
+        // передадим параметры колонок, заголовка и общего размера
         params = {
             columns: Ext.encode(columns),
             title: this.title || this.grid.title || this.grid.id,
             totalLength: this.grid.view.ds.totalLength
         };
+        // передадим параметры сортировки
         if (this.grid.getStore().sortInfo != undefined){
         	params.sort = this.grid.getStore().sortInfo.field;
         	params.dir = this.grid.getStore().sortInfo.direction;
         }
+        // передадим параметры группировки и раскрытых элементов
         if (this.groupPlugin != undefined) {
         	params.grouped = Ext.util.JSON.encode(this.groupPlugin.groupedColumns);
         	params.exp = Ext.util.JSON.encode(this.groupPlugin.expandedItems);
         }
+        // передадим параметры фильтров
+        params = Ext.applyIf(params, this.grid.getStore().baseParams);
         this.grid.view.showLoadMask(true);
         Ext.Ajax.request({
             url : this.exportUrl,
