@@ -122,7 +122,7 @@ class queryBuilderWindow(ExtWindow):
         delete_connection = ExtButton()
         delete_connection.name = 'deleteConnection'
         delete_connection.text = u'Удалить связь'
-        delete_connection.handler = 'delete_connection'
+        delete_connection.handler = 'deleteConnection'
         delete_connection.icon_cls = 'icon-link-delete'
 
         jstore_jsonstore_2 = ExtJsonStore()
