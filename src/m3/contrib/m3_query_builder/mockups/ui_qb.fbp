@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="ui_qb" version="1.0" id="y2bVn5mvyC" font="Arial" defaultPage="#pg_OYH6a" type="default" theme="SimplicityGray">
-  <Page width="960" height="1000" enabled="true" visible="true" id="#pg_OYH6a" clasz="com.flairbuilder.project::Page" label="" name="Home" backgroundColor="16777215">
+  <Page name="Home" width="960" height="1000" enabled="true" visible="true" id="#pg_OYH6a" clasz="com.flairbuilder.project::Page" label="" backgroundColor="16777215">
     <Component width="889" height="490" x="45" y="25" enabled="true" visible="true" id="fbc05UAm" clasz="com.flairbuilder.components::TitleWindow" bold="false" italic="false" underline="false" color="0" fontSize="12" textAlign="left" backgroundColor="13816016" borderColor="13816016" borderThickness="1" borderStyle="solid" label="Редактор запросов" title="Редактор запросов" headerHeight="21">
-      <Canvas enabled="true" visible="true" clasz="com.flairbuilder.canvas::FlairCanvas" label="">
+      <Canvas enabled="true" visible="true" id="fbc7j3a9" clasz="com.flairbuilder.canvas::FlairCanvas" label="">
         <Component name="Tabs1" width="869" height="421" x="10" y="5" enabled="true" visible="true" id="fbc6lKuZ" clasz="com.flairbuilder.components::TabNavigator" bold="false" italic="false" underline="false" color="0" fontSize="12" textAlign="left" backgroundColor="15658734" borderColor="0" borderThickness="1" tabWidth="134" tabHeight="24" position="top-left">
           <Component enabled="true" visible="true" id="fbchPjoP" clasz="com.flairbuilder.canvas::FlairCanvas" label="{page}Таблицы и связи">
             <Component width="253" height="372" x="15" y="15" enabled="true" visible="true" id="fbcXVp22" clasz="com.flairbuilder.components::Tree" bold="false" italic="false" underline="false" color="0" fontSize="12" borderColor="0" borderThickness="1" borderStyle="solid" cornerRadius="0">
@@ -56,14 +56,28 @@
         <Component width="80" height="24" x="710" y="435" enabled="true" visible="true" id="fbc8d2SF" clasz="com.flairbuilder.components::Button" bold="false" italic="false" underline="false" color="0" fontSize="12" textAlign="center" backgroundColor="15658734" borderColor="13421772" borderThickness="1" borderStyle="solid" cornerRadius="5" label="Сохранить" style="horizontalButton" direction="horizontal"/>
       </Canvas>
     </Component>
+    <Component width="322" height="282" x="45" y="560" enabled="true" visible="true" id="fbcV65dY" clasz="com.flairbuilder.components::TitleWindow" bold="false" italic="false" underline="false" color="0" fontSize="12" textAlign="left" backgroundColor="13816016" borderColor="13816016" borderThickness="1" borderStyle="solid" label="[-] Выбранные схемы" title="[-] Выбранные схемы" headerHeight="21">
+      <Canvas enabled="true" visible="true" clasz="com.flairbuilder.canvas::FlairCanvas" label="">
+        <Component width="150" height="180" x="10" y="5" enabled="true" visible="true" id="fbc0412o" clasz="com.flairbuilder.components::Tree" bold="false" italic="false" underline="false" color="0" fontSize="12" borderColor="0" borderThickness="1" borderStyle="solid" cornerRadius="0">
+          <data encoded="true">%5B-%5D%D0%A1%D1%85%D0%B5%D0%BC%D0%B0%201%0D-%D0%9A%D0%BB%D1%8E%D1%871%0D-%D0%9F%D0%BE%D0%BB%D0%B51%0D-%D0%9F%D0%BE%D0%BB%D0%B52%0D%5B+%5D%D0%A1%D1%85%D0%B5%D0%BC%D0%B0%202%0D-%D0%9A%D0%BB%D1%8E%D1%872%0D-%D0%9F%D0%BE%D0%BB%D0%B53%0D-%D0%9F%D0%BE%D0%BB%D0%B54</data>
+        </Component>
+        <Component width="150" height="180" x="165" y="5" enabled="true" visible="true" id="fbc139uY" clasz="com.flairbuilder.components::Tree" bold="false" italic="false" underline="false" color="0" fontSize="12" borderColor="0" borderThickness="1" borderStyle="solid" cornerRadius="0">
+          <data encoded="true">%5B+%5D%D0%A1%D1%85%D0%B5%D0%BC%D0%B0%201%0D-%D0%9A%D0%BB%D1%8E%D1%871%0D-%D0%9F%D0%BE%D0%BB%D0%B51%0D-%D0%9F%D0%BE%D0%BB%D0%B52%0D%5B-%5D%D0%A1%D1%85%D0%B5%D0%BC%D0%B0%202%0D-%D0%9A%D0%BB%D1%8E%D1%872%0D-%D0%9F%D0%BE%D0%BB%D0%B53%0D-%D0%9F%D0%BE%D0%BB%D0%B54</data>
+        </Component>
+        <Component width="68" height="24" x="240" y="225" enabled="true" visible="true" id="fbcIp7Ft" clasz="com.flairbuilder.components::Button" bold="false" italic="false" underline="false" color="0" fontSize="12" textAlign="center" backgroundColor="15658734" borderColor="13421772" borderThickness="1" borderStyle="solid" cornerRadius="5" label="Отмена" style="horizontalButton" direction="horizontal"/>
+        <Component width="68" height="24" x="160" y="225" enabled="true" visible="true" id="fbc3Hx79" clasz="com.flairbuilder.components::Button" bold="false" italic="false" underline="false" color="0" fontSize="12" textAlign="center" backgroundColor="15658734" borderColor="13421772" borderThickness="1" borderStyle="solid" cornerRadius="5" label="Выбрать" style="horizontalButton" direction="horizontal"/>
+        <Component width="124" height="20" x="10" y="195" enabled="true" visible="true" id="fbc5t8eh" clasz="com.flairbuilder.components::CheckBox" bold="false" italic="false" underline="false" color="0" fontSize="12" leading="0" label="[x]Внешняя связь" selected="false"/>
+        <Component width="124" height="20" x="165" y="195" enabled="true" visible="true" id="fbc02n87" clasz="com.flairbuilder.components::CheckBox" bold="false" italic="false" underline="false" color="0" fontSize="12" leading="0" label="[]Внешняя связь" selected="false"/>
+      </Canvas>
+    </Component>
     <CustomImages/>
     <FloatingPanes/>
   </Page>
-  <Page width="960" height="1000" enabled="true" visible="true" id="#pg_j45Kj" clasz="com.flairbuilder.project::Page" label="" name="Page 1" backgroundColor="16777215">
+  <Page name="Page 1" width="960" height="1000" enabled="true" visible="true" id="#pg_j45Kj" clasz="com.flairbuilder.project::Page" label="" backgroundColor="16777215">
     <CustomImages/>
     <FloatingPanes/>
   </Page>
-  <Page width="960" height="1000" enabled="true" visible="true" id="#pg_JP8Ik" clasz="com.flairbuilder.project::Page" label="" name="Page 2" backgroundColor="16777215">
+  <Page name="Page 2" width="960" height="1000" enabled="true" visible="true" id="#pg_JP8Ik" clasz="com.flairbuilder.project::Page" label="" backgroundColor="16777215">
     <CustomImages/>
     <FloatingPanes/>
   </Page>

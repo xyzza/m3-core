@@ -76,7 +76,58 @@ class Field(object):
         self.alias = alias
         self.verbose_name = verbose_name
 
+class Condition(object):
+    '''
+    Для условий в цепочке WHERE
+    '''
+    AND = 'and'
+    OR = 'or'
+    NOT = 'not'
+    
+    def __init__(self, left, op, right=None):
+        self.left = left
+        self.op = op
+        self.right = right
+
+
+class Where(object):
+    '''
+    Для условий
+    '''
+    
+    AND = 'and'
+    OR = 'or'
+    NOT = 'not'
+    
+    EQ = '=='
+    NE = '!='
+    LT = '<'
+    LE = '<='
+    GT = '>'
+    GE = '>='
+    
+    def __init__(self, left, op, right=None):
+        '''
+        @param left: Левый операнд
+        @param op: Оператор (=, !=, <, >, <=, >=, ...)
+        @param right: Правый операнд
+        '''
+        self.left = left
+        self.operator = op
+        self.right = right
+    
+    def __and__(self, other):
+        assert isinstance(other, Where), 'Value must be type is "Where"'
+        return Where(self, Where.AND, other)
+    
+    def __or__(self, other):
+        assert isinstance(other, Where), 'Value must be type is "Where"'
+        return Where(self, Where.OR, other)
         
+    def __invert__(self):
+        return Where(self, Where.NOT)
+
+    
 class BaseEntity(object):
     '''
     Базовый класс для сущностей/схемы/прокси/view - кому как удобно
