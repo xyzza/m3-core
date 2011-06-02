@@ -54,14 +54,17 @@ class GroupingRecordProvider(object):
     proxy_class = RecordProxy
     data_sorce = None
     count_totals = False
+    aggregates = {}
 
-    def __init__(self, proxy=None, data=None, totals = None):
+    def __init__(self, proxy=None, data=None, totals = None, aggregates = None):
         if proxy:
             self.proxy_class = proxy
         if data is not None:
             self.data_source = data
         if totals is not None:
-            self.count_totals = totals 
+            self.count_totals = totals
+        if aggregates is not None:
+            self.aggregates = aggregates
 
     def get_data(self, *args, **kwargs):
         return self.data_source
@@ -78,11 +81,11 @@ class GroupingRecordProvider(object):
     def indexer(self, *args, **kwargs):
         pass
 
-    def get_elements(self, grouped, offset, level_index, level, begin, end, keys, aggregates, sorting):
+    def get_elements(self, begin, end, grouped, expanded, sorting):
         '''
         Основной метод получения данных
         '''
-        return get_elements(grouped, offset, level_index, level, begin, end, keys, self, aggregates, sorting)
+        return get_elements(grouped, begin, 0, {'count': -1, 'id': None, 'expandedItems':expanded}, begin, end, [], self, self.aggregates, sorting)
     
     def get_export_group_text(self, item, grouped_col_name):
         '''
@@ -92,7 +95,7 @@ class GroupingRecordProvider(object):
         value = item.id
         return "%s %s: %s (%s)" % (indent_str, grouped_col_name, value, item.count)
     
-    def export_to_xls (self, title, columns, total, grouped, expanded, aggregates, sorting):
+    def export_to_xls (self, title, columns, total, grouped, expanded, sorting):
         '''
         выгрузка таблицы в xls-файл
         '''
@@ -135,8 +138,7 @@ class GroupingRecordProvider(object):
                 index += 1
         
         # запросим все данные
-        level = {'count': -1, 'id': None, 'expandedItems':expanded}
-        data, total = self.get_elements(grouped,0,0,level,0,total,[], aggregates, sorting)
+        data, total = self.get_elements(0,total,grouped, expanded, self.aggregates, sorting)
         # вывод данных
         for item in data:
             for idx,k in enumerate(columns_cash):
@@ -208,7 +210,12 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
 
         level['items'] = data_provider.indexer(grouped, level_index, keys + [level['id']] if level['id'] else [], level['expandedItems'], data_provider, sorting)
         for exp in level['expandedItems']:
-            exp['index'] = level['items'].index(exp['id'])
+            if exp['id'] in level['items']:
+                exp['index'] = level['items'].index(exp['id'])
+            else:
+                # развернутый элемент отсутствует в уровне (видимо фильтр сработал, или что-то еще) - что делать?! 
+                level['expandedItems'].remove(exp)
+            
         #теперь выстроим в порядке индексов
         exp_sort = sorted(level['expandedItems'], key=lambda x: x['index'])
         level['expandedItems'] = exp_sort
@@ -395,7 +402,7 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
                 aggr.append(Max(agg))
             elif agg_type == 'avg':
                 aggr.append(Avg(agg))
-        query = data_provider.get_data().annotate(*aggr).annotate(count=Count())                
+        query = data_provider.get_data().values().annotate(*aggr).annotate(count=Count('id'))                
         for i in query.all():
             item = data_provider.create_record()
             item.is_leaf = False
