@@ -145,10 +145,7 @@ class Parser(object):
         nodes = func_node.body
                 
         for node in nodes:
-            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):                                
-                # Игнорирование значений, которые просто прописываются в объект
-                if 'self' == node.targets[0].value.id:
-                    continue
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):                                                               
                 
                 # Составление структуры конфигов и типов компонентов
                 parent, parent_item, item = self._get_attr(node)
@@ -244,8 +241,11 @@ class Parser(object):
                 else: 
                     # Приходят property                    
                     extjs_item = self._get_json_attr(k, js_dict['type'])
-                    if not extjs_item:
-                        raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), js_dict['type']))  
+                    if not extjs_item:                                                                    
+                        # Если в маппинге нет такого объекта, то продолжаем дальше, т.к. нужно исключать объекты,
+                        # которые напрямую прописываются в self 
+                        
+                        continue  
 
                     # Объект может быть вложенный
                     if self.extends_cmp.get(v):                            
@@ -328,7 +328,7 @@ class Parser(object):
                 properties[extjs_attr] = value
             else:              
                 extjs_attr = self._get_json_attr(k, extjs_name)            
-                if not extjs_attr:
+                if not extjs_attr:                    
                     raise ParserError('Не определен объект маппинга "%s" для класса "%s"' % ( str(k), extjs_name))
                   
                 properties[extjs_attr] = v
