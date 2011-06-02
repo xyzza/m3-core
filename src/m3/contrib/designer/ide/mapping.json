@@ -292,8 +292,9 @@
 		,"items": "items"
 		,"closable": "closable"
 		,"maximizable": "maximizable"
-		,"minimizable": "minimizable"
 		,"maximized": "maximized"
+        ,"minimizable": "minimizable"
+		,"modal": "modal"
 		,"template_globals": "template_globals"
 	},
 	"parent": "panel"
@@ -376,6 +377,10 @@
 		,"url":"url"
 		,"editUrl":"edit_url"
 		,"autocompleteUrl":"autocomplete_url"
+        ,"urlShortName": {
+			"type":"shortname"
+			,"value":"url"
+		}
 	},
 	"parent":"triggerField"
 },
@@ -426,7 +431,8 @@
 		"inputType":"input_type"
 		,"maskRe":"mask_re"
 		,"selectOnFocus":"select_on_focus"
-		,"enableKeyEvents":"enable_key_events"		
+		,"enableKeyEvents":"enable_key_events"
+        ,"emptyText":"empty_text"
 	}
 	,"parent": "triggerField"
 },
@@ -438,7 +444,8 @@
 	},
 	"config": {
 		"format":"format"
-		,"startDay":"start_day"	
+		,"startDay":"start_day"
+        , "defaultValue":"hide_today_btn"
 	}
 	,"parent": "textField"
 },
