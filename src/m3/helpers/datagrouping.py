@@ -207,7 +207,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
     if not level.has_key('items'):
 #        import pdb; pdb.set_trace();
 
-        level['items'] = data_provider.indexer(grouped, level_index, keys + [level['id']] if level['id'] else [], level['expandedItems'], data_provider, sorting)
+        level['items'] = data_provider.indexer(grouped, level_index, keys + [level['id']] if not level['id'] is None else [], level['expandedItems'], data_provider, sorting)
         for exp in level['expandedItems']:
             if exp['id'] in level['items']:
                 exp['index'] = level['items'].index(exp['id'])
@@ -225,7 +225,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
 
         # на текущий момент необходимо вычислить количество дочерних элементов
         if exp['count'] == -1:
-            exp['count'] = data_provider.counter(grouped, level_index + 1, (keys + [level['id']] if level['id'] else []) + [exp['id']], exp['expandedItems'], data_provider)
+            exp['count'] = data_provider.counter(grouped, level_index + 1, (keys + [level['id']] if not level['id'] is None else []) + [exp['id']], exp['expandedItems'], data_provider)
 
 
         if all_out:
@@ -238,7 +238,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
             # выдать диапазон с begin по end
             #print '1) диапазон уже пройден'
             #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
-            list = data_provider.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if level['id'] else [], begin, end, data_provider, aggregates, sorting)
+            list = data_provider.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if not level['id'] is None else [], begin, end, data_provider, aggregates, sorting)
             # если выдали раскрытый элемент, то установим у него признак раскрытости
             if end == exp['index']:
                 list[-1].expanded = True
@@ -254,7 +254,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
             #print '2) интервал переходит с предыдущего'
             #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
             # выдадим известный диапазон, а остальное продолжим искать
-            list = data_provider.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if level['id'] else [], begin, exp['index'], data_provider, aggregates, sorting)
+            list = data_provider.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if not level['id'] is None else [], begin, exp['index'], data_provider, aggregates, sorting)
             # если выдали раскрытый элемент, то установим у него признак раскрытости
             list[-1].expanded = True
             res.extend(list)
@@ -266,7 +266,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
             #print '3) мы попадаем в раскрытый уровень'
             #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
             # переходим искать на след. уровень
-            list, total = get_elements(grouped, offset + len(res), level_index + 1, exp, begin - exp['index'] - 1, end - exp['index'] - 1, keys + [level['id']] if level['id'] else [], data_provider, aggregates, sorting)
+            list, total = get_elements(grouped, offset + len(res), level_index + 1, exp, begin - exp['index'] - 1, end - exp['index'] - 1, keys + [level['id']] if not level['id'] is None else [], data_provider, aggregates, sorting)
             #total_len = total_len+total # добавляем количество раскрытых элементов
             res.extend(list)
             # переходим к след. развернутому элементу
@@ -279,7 +279,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
             #print '4) частично попадаем в раскрытый'
             #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
             # часть переведем искать на след. уровень, остальное продолжим
-            list, total = get_elements(grouped, offset + len(res), level_index + 1, exp, begin - exp['index'] - 1, exp['count'] - 1, keys + [level['id']] if level['id'] else [], data_provider, aggregates, sorting)
+            list, total = get_elements(grouped, offset + len(res), level_index + 1, exp, begin - exp['index'] - 1, exp['count'] - 1, keys + [level['id']] if not level['id'] is None else [], data_provider, aggregates, sorting)
             #total_len = total_len+total # добавляем количество раскрытых элементов
             res.extend(list)
             delta = end - begin - len(list)
@@ -307,7 +307,7 @@ def get_elements(grouped, offset, level_index, level, begin, end, keys, data_pro
         #print 'begin=%s, end=%s, level[count]=%s, len(res)=%s, offset=%s, keys=%s' % (begin,end,level['count'], len(res), offset, keys)
         if end > level['count'] - 1:
             end = level['count'] - 1
-        list = data_provider.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if level['id'] else [], begin, end, data_provider, aggregates, sorting)
+        list = data_provider.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if not level['id'] is None else [], begin, end, data_provider, aggregates, sorting)
         res.extend(list)
 
     # можно уже не считать total выше
@@ -356,8 +356,11 @@ def count_model(grouped, level_index, level_keys, expandedItems, data_provider):
         if level_index < len(grouped_ranges):
             field = grouped_ranges[level_index]
             query = query.values(field).distinct()
-        total_of_level = query.count()
-
+            # т.к. count(distinct не считает поля с null, то будем считать ВЛОБ!
+            total_of_level = len(query) # query.count()
+        else:
+            total_of_level = query.count()
+        
     else:
         total_of_level = data_provider.get_data().count()
 
@@ -426,21 +429,16 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
     #print 'read_model(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
     res = []
     if grouped:
-        grouped_ranges = []
-        # определим порядок группировки
-        for i in grouped:
-            grouped_ranges.append(i)
-
         # для всех группировочных элементов будут использоваться ключи
         # если берется уровень больший, чем количество группировок, то выдаем просто записи
-        if level_index >= len(grouped_ranges):
+        if level_index >= len(grouped):
             field = None
         else:
-            field = grouped_ranges[level_index]
+            field = grouped[level_index]
 
         filter = None
         for lev in range(0, level_index):
-            lev_field = grouped_ranges[lev]
+            lev_field = grouped[lev]
             key = level_keys[lev]
             if filter:
                 filter = filter & Q(**{lev_field:key})
@@ -463,20 +461,19 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
         if filter:
             if field:
                 if aggr:
-                    query = data_provider.get_data().filter(filter).values(field).annotate(*aggr).annotate(count=Count(field))
+                    query = data_provider.get_data().filter(filter).values(field).annotate(*aggr).annotate(count=Count("id"))
                 else:
-                    query = data_provider.get_data().filter(filter).values(field).annotate(count=Count(field))
+                    query = data_provider.get_data().filter(filter).values(field).annotate(count=Count("id"))
             else:
                 query = data_provider.get_data().filter(filter)
         else:
             if field:
                 if aggr:
-                    query = data_provider.get_data().values(field).annotate(*aggr).annotate(count=Count(field))
+                    query = data_provider.get_data().values(field).annotate(*aggr).annotate(count=Count("id"))
                 else:
                     query = data_provider.get_data().values(field).annotate(count=Count(field))
             else:
                 query = data_provider.get_data()
-
 
         #сортировка 
         sort_fields = []
@@ -504,7 +501,7 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
                 item.count = i['count']
                 #установим все атрибуты из группировки
                 for lev in range(0, level_index):
-                    lev_field = grouped_ranges[lev]
+                    lev_field = grouped[lev]
                     key = level_keys[lev]
                     setattr(item, lev_field, key)
                 setattr(item, field, i[field])
