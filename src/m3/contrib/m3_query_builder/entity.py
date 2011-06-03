@@ -106,6 +106,9 @@ class Where(object):
     GT = '>'
     GE = '>='
     
+    IN = 'in'
+    BETWEEN = 'between'
+    
     def __init__(self, left, op, right=None):
         '''
         @param left: Левый операнд
