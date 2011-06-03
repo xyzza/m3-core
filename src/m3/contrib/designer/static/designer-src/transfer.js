@@ -195,8 +195,6 @@ M3Designer.ModelTransfer = Ext.apply({},{
                 }
             }
         }
-        
-        result.initOrderIndexes();
         return result;
     }
 });
