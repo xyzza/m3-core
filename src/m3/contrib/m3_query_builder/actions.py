@@ -3,28 +3,34 @@
 Date&Time: 01.06.11 10:38
 @author: kir
 '''
+import json
+
 from m3.ui import actions
 from m3.helpers import urls as m3urls
 
+from m3.contrib.m3_query_builder import EntityCache
+
 import ui
+
 
 class QueryBuilderActionsPack(actions.ActionPack):
     '''
     Экшенпак работы с конструктором запросов
     '''
-    url = '/main'
+    url = '/qb-pack'
     shortname = 'm3-query-builder-main-actions'
 
     def __init__(self):
         super(QueryBuilderActionsPack, self).__init__()
         self.actions.extend([QueryBuilderWindowAction(),
-                             SelectConnection()])
+                             SelectConnectionWindowAction(),
+                             EntitiesListAction()])
 
 class QueryBuilderWindowAction(actions.Action):
     '''
     Запрос на получение окна конструктора запросов
     '''
-    url = '/query-builder-window'
+    url = '/main-window'
     shortname = 'm3-query-builder-window'
 
     def run(self, request, context):
@@ -32,13 +38,26 @@ class QueryBuilderWindowAction(actions.Action):
         window = ui.queryBuilderWindow(params=params)
         return actions.ExtUIScriptResult(data=window)
 
-class SelectConnection(actions.Action):
+class SelectConnectionWindowAction(actions.Action):
     '''
     Запрос на получение окна выбора связи
     '''
-    url = '/query-builder-select-connection'
+    url = '/select-connection-window'
     shortname = 'm3-query-builder-select-connection'
 
     def run(self, request, context):
         win = ui.selectConnectionsWindow()
         return actions.ExtUIScriptResult(data=win)
+    
+
+class EntitiesListAction(actions.Action):
+    '''
+    Запрос на получение окна выбора связи
+    '''
+    url = '/entities-list'
+    shortname = 'm3-query-builder-entities-list'
+
+    def run(self, request, context):
+        entities = EntityCache.get_entities()        
+        data = {}
+        return actions.JsonResult(json.dumps(data))

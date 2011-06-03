@@ -9,7 +9,7 @@
 function selectConnection(){
     var loadMask = new Ext.LoadMask(win.body);
     loadMask.show();
-    debugger;
+    
     Ext.Ajax.request({
         url: '{{component.params.select_connections_url}}'
         ,success: function(response){
