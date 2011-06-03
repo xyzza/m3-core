@@ -147,6 +147,13 @@ class Parser(object):
         for node in nodes:
             if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and node.value.id not in ('True', 'False'):                                                               
                 
+                # Только в функции инициализации могут быть строки:
+                # self.top_bar = my_top_bar
+                # В других контейнерных функциях будет нечто ввиде:
+                # cont.top_bar = my_top_bar
+                if func_node.name != Parser.GENERATED_FUNC and 'self' == node.targets[0].value.id:
+                    continue
+                
                 # Составление структуры конфигов и типов компонентов
                 parent, parent_item, item = self._get_attr(node)
                 self.extends_cmp.setdefault(parent, {})[parent_item] =  item
@@ -175,6 +182,8 @@ class Parser(object):
         
         # Находит корневой контейнер
         parent_key = self._get_parent_key(self.extends_cmp)
+        print parent_key
+        
         if not parent_key:
             # Если вложенных контейнеров нет,  берем первую Assign конструкцию вида, например:
             # self.layout = 'auto', откуда parent_key = self
@@ -207,9 +216,10 @@ class Parser(object):
                         return True
             else:
                 return False
-                            
-        for k, _ in extends_cmp.items():
-            if not check_key(k):                
+                           
+        print extends_cmp 
+        for k, _ in extends_cmp.items():            
+            if not check_key(k):             
                 return k        
          
     def _build_json(self, js_dict, key):
@@ -299,7 +309,7 @@ class Parser(object):
     def _get_json_config(self, key):
         '''
         Возвращает конфигурацию компонента в качестве словаря
-        '''
+        '''        
         properties, py_name = self._get_properties(key)
 
         properties['type'] = py_name
@@ -311,6 +321,7 @@ class Parser(object):
         Возвращает кортеж: свойства контрола, имя контрола в натации дизайнера
         (extjs)
         '''
+
         conf = self.config_cmp[key].copy()        
         py_name = conf.pop('py_name') if conf.get('py_name') else self.base_class
         
