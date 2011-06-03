@@ -101,6 +101,7 @@ M3Designer.view.DesignView = Ext.extend(M3Designer.view.BaseView, {
         };
 
         var childCfg = recursion.call(this, this._model.root);
+
         this._container.add(childCfg);
         this._container.doLayout(true, true);
     },
@@ -194,7 +195,6 @@ M3Designer.view.ComponentTree = Ext.extend(M3Designer.view.BaseView, {
             id: model.id,
             expanded: expanded,
             allowDrop: model.isContainer(),
-            orderIndex: model.attributes.orderIndex ? String(model.attributes.orderIndex) : '0',
             iconCls: iconCls,
             type: model.attributes.type
         });

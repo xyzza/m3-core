@@ -914,6 +914,25 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 menuDisabled: {
                     defaultValue: true,
                     isInitProperty: true
+                },
+                hidden:{
+                    defaultValue: false,
+                    isQuickEditable: true
+                },
+                editor:{
+                    defaultValue: ''
+                },
+                //m3
+                readOnly:{
+                    defaultValue: false
+                },
+                fixed:{
+                    defaultValue: false,
+                    isQuickEditable: true
+                },
+                tooltip:{
+                    defaultValue: '',
+                    isQuickEditable: true
                 }
             },
             treeIconCls: 'designer-grid-column',

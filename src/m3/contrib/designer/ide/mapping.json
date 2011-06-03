@@ -275,6 +275,7 @@
 		,"filter":"filter"
 		,"menuDisabled":"menu_disabled"
 		,"width": "width"
+        ,"hidden":"hidden"
 	}	
 },
 
