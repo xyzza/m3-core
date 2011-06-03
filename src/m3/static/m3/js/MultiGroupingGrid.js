@@ -71,11 +71,11 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
             this.grid.store.on('beforeload', this.onBeforeLoad, this);
             this.grid.grouper = this;
             // обработка клавиш PgUp и PgDown
-            this.grid.on('keypress', this.onKeyPress, this);
+            this.grid.on('keydown', this.onKeyPress, this);
 
             grid.on('afterrender',this.onRender,this);
 
-            var reorderer = new Ext.ux.ToolbarReorderer({
+            this.reorderer = new Ext.ux.ToolbarReorderer({
                 owner:this,
                 createItemDD: function(button) {
                     if (button.dd != undefined) {
@@ -274,7 +274,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
                 }
             });
             // настроим первоначальную группировку
-            var toolItems = [this.title];
+            var toolItems = [new Ext.Toolbar.TextItem(this.title)];
             if (this.groupedColumns.length > 0) {
             	for (var colInd = 0; colInd < this.groupedColumns.length; colInd++) {
             		var colName = this.groupedColumns[colInd];
@@ -288,15 +288,29 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
                     toolItems.push(butt);
             	};
             };
-            toolItems.push('-');
-            this.tbar = new Ext.Toolbar({
-                items  : toolItems,
-                plugins: [reorderer, this.droppable],
-                listeners: {
-                    scope    : this,
-                    reordered: this.changeGroupingOrder
-                }
-            });
+            toolItems.push(new Ext.Toolbar.Separator());
+            
+            if (this.grid.getTopToolbar()){
+            	// тулбар уже есть, значит добавим в него при рендере
+            	this.tbar = this.grid.getTopToolbar();
+            	//this.tbar.items = toolItems;
+            	this.toolItems = toolItems;
+		    	if (this.tbar.plugins){
+	        		this.tbar.plugins.push(this.reorderer);
+	        		this.tbar.plugins.push(this.droppable);
+	        	} else {
+	        		this.tbar.plugins = [this.reorderer, this.droppable];
+	        	}
+            } else {
+	            this.tbar = new Ext.Toolbar({
+	                items  : toolItems,
+	                plugins: [this.reorderer, this.droppable],
+	                listeners: {
+	                    scope    : this,
+	                    reordered: this.changeGroupingOrder
+	                }
+	            });	
+            }
             this.expandedItems = [];
         }
 	},
@@ -383,12 +397,30 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
      * Событие отрисовки панели группировки
      */
     onRender: function(){
-        this.grid.elements +=',tbar';
-        this.grid.tbar = this.tbar
-        this.grid.add(this.tbar);
-        this.grid.groupingToolBar = this.tbar;
-    	this.grid.doLayout();
-        this.grid.enableDragDrop = true;
+    	var item;
+    	if (!this.grid.getTopToolbar()) { 
+	        this.grid.elements +=',tbar';
+	        this.grid.tbar = this.tbar
+	        this.grid.add(this.tbar);
+	    } else {
+            this.reorderer.init(this.tbar);
+            this.droppable.init(this.tbar);
+            this.droppable.createDropTarget();
+            this.tbar.on('reordered',this.changeGroupingOrder,this);
+            for (var ind = 0; ind < this.toolItems.length; ind++) {
+            	item = this.toolItems[ind];
+            	this.tbar.items.add(item);
+            }
+            // для корректной работы нужно перевставить элементы, иначе они не работают 
+            // (виновато то, что мы вставили их динамически после подключения новых плагинов)
+            for (var ind = 0; ind < this.toolItems.length; ind++) {
+            	item = this.toolItems[ind];
+            	this.tbar.remove(item,false);
+            	this.tbar.insert(3+ind, item);
+            }
+	    }
+	    this.grid.enableDragDrop = true;
+	    this.grid.doLayout();
 
         var dragProxy = this.grid.getView().columnDrag,
             ddGroup   = dragProxy.ddGroup;
@@ -710,14 +742,20 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			,rowcontextmenu: funcRowContMenu
 		}, baseConfig.listeners || {});
 
+		var mgView = new Ext.ux.grid.livegrid.GridView({
+		        nearLimit : 100 // количество соседних загружаемых элементов при буферизации
+		        ,loadMask  : { msg :  'Загрузка, подождите...' }
+		    });
 		var config = Ext.applyIf({
 			sm: selModel
 			,colModel: gridColumns
 			,plugins: plugins
-			,view: new Ext.ux.grid.livegrid.GridView({
-		        nearLimit : 100 // количество соседних загружаемых элементов при буферизации
-		        ,loadMask  : { msg :  'Загрузка, подождите...' }
-		    	})
+			,view: mgView
+		    ,tbar: new Ext.ux.grid.livegrid.Toolbar({
+    	        displayInfo: true,
+    	        view: mgView,
+    	        displayMsg: 'Показано {0}-{1} из {2}'
+	        })
 		}, baseConfig);
 		
 		Ext.m3.MultiGroupingGridPanel.superclass.constructor.call(this, config);
@@ -763,15 +801,23 @@ Ext.ux.grid.MultiGroupingExporter = Ext.extend(Ext.util.Observable,{
     },
     onRender:function(){
         //создадим top bar, если его нет
-        if (!this.grid.tbar){
-            this.grid.elements += ',tbar';
-            tbar = new Ext.Toolbar();
-            this.grid.tbar = tbar;
-            this.grid.add(tbar);
-            this.grid.doLayout();
-        }
+        var bar;
+        if (!this.grid.bbar){
+	        if (!this.grid.tbar){
+	            this.grid.elements += ',tbar';
+	            tbar = new Ext.Toolbar();
+	            this.grid.tbar = tbar;
+	            this.grid.add(tbar);
+	            this.grid.doLayout();
+	            bar = tbar;
+	        } else {
+	        	bar = this.grid.getTopToolbar();
+	        }
+	     } else {
+	     	bar = this.grid.getBottomToolbar();
+	     }
         //добавим кнопку
-        this.grid.tbar.add(new Ext.Button({
+        bar.insert(1,new Ext.Button({
             text:'Экспорт',
             listeners:{
                 scope:this,
