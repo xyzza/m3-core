@@ -4,10 +4,12 @@
 
 @author: akvarats
 '''
-
 import datetime
 import json
-from m3.helpers import logger, normalize
+from decimal import Decimal
+
+from m3.helpers import logger
+
 
 #==================================== ИСКЛЮЧЕНИЯ ===========================================
 
@@ -91,7 +93,13 @@ class ActionContext(object):
         value = None
         if arg_type == int:
             value = int(raw_value)
-
+            
+        elif arg_type == float:
+            value = float(raw_value)
+            
+        elif arg_type == Decimal:
+            value = Decimal(raw_value)
+            
         elif arg_type in [str, unicode]:
             value = unicode(raw_value)
 
@@ -113,16 +121,20 @@ class ActionContext(object):
         elif arg_type == datetime.time:
             d = datetime.datetime.strptime(raw_value, '%H:%M')
             value = datetime.time(d.hour, d.minute, 0)
+
         elif arg_type == bool:
             value = raw_value in ['true', 'True', 1, '1', 'on', True]
+        
         elif isinstance(arg_type, ActionContext.ValuesList):
             elements = raw_value.split(arg_type.separator)
             if not arg_type.allow_empty:
                 elements = [elem for elem in elements if elem]
             value = map(arg_type.type, elements)
+
         elif arg_type == object:
             # обработаем объект как JSON
             value = json.loads(raw_value)
+
         else:
             raise ConversionFailed(value=raw_value, type=arg_type)
 
