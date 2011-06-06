@@ -284,10 +284,11 @@ class BaseEntity(object):
         query = select(columns=select_columns, whereclause=whereclause, from_obj=[join_sequence])
         return query
 
-    def get_select_fields(self):
+    @classmethod
+    def get_select_fields(cls):
         """ Возвращает список всех полей entity.Field из SELECT """
         fields = []
-        for model_name, field in self.select.items():
+        for model_name, field in cls.select.items():
             if field == Field.ALL_FIELDS:
                 app, model = model_name.split('.')
                 model = cache.get_model(app, model)

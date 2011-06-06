@@ -11,6 +11,7 @@ from m3.helpers import urls as m3urls
 from m3.contrib.m3_query_builder import EntityCache
 
 import ui
+from api import get_entities
 
 
 class QueryBuilderActionsPack(actions.ActionPack):
@@ -57,7 +58,6 @@ class EntitiesListAction(actions.Action):
     url = '/entities-list'
     shortname = 'm3-query-builder-entities-list'
 
-    def run(self, request, context):
-        entities = EntityCache.get_entities()        
-        data = {}
-        return actions.JsonResult(json.dumps(data))
+    def run(self, request, context):           
+        entities = get_entities()                
+        return actions.JsonResult(json.dumps(entities))
