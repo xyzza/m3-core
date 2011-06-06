@@ -1271,7 +1271,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 			return;
 		// kirov - пошлем событие изменения размера всего грида, если колонки растянуты по ширине
 		if (!this.inResizeProcess) {
-			if (this.grid.viewConfig.forceFit) {
+			if (this.grid.viewConfig && this.grid.viewConfig.forceFit) {
 				this.onResize();
 				return;
 			}
