@@ -4,12 +4,13 @@ Created on 26.05.2011
 
 @author: prefer
 '''
+from sqlalchemy.sql.expression import join, select, _BinaryExpression
+
 from m3.helpers.datastructures import TypedList
 from m3.db.alchemy_wrapper import SQLAlchemyWrapper
 
 from django.conf import settings
 from django.db.models.loading import cache
-from sqlalchemy.sql.expression import join, select
 
 
 WRAPPER = SQLAlchemyWrapper(settings.DATABASES)
@@ -162,7 +163,22 @@ class BaseEntity(object):
     
     # Количество показываемых записей
     limit = None
-
+    
+    # Карта для перевода операций конструктора запросов в алхимию
+    OPERATION_MAP = {
+        Where.EQ: lambda x, y: x == y,
+        Where.NE: lambda x, y: x != y,
+        Where.LT: lambda x, y: x < y,
+        Where.LE: lambda x, y: x <= y,
+        Where.GT: lambda x, y: x > y,
+        Where.GE: lambda x, y: x >= y, 
+        Where.AND: lambda x, y: x & y,
+        Where.OR: lambda x, y: x | y,
+        Where.NOT: lambda x, y: ~x,
+        Where.IN: lambda x, y: x.in_(y),
+        Where.BETWEEN: lambda x, y: x.between(y[0], y[1]),
+    }
+    
     def __init__(self):
         self.metadata = WRAPPER.metadata
         self.session = WRAPPER.session
@@ -227,7 +243,7 @@ class BaseEntity(object):
             raise Exception(u'В модели %s не найдена колонка %s' % (model_name, field_name))
         return column
     
-    def create_query(self):
+    def create_query(self, params=None):
         """ Возвращает готовый запрос алхимии по параметрам Entity """       
 #        # А нафига мне это?
 #        tables = self.get_tables(entity)
@@ -279,9 +295,15 @@ class BaseEntity(object):
                 join_sequence = join_sequence.join(right_column.table, onclause)
         
         # Условия WHERE
-        whereclause = None
-        
+        params = params or {}
+        whereclause = self._create_where_expression(self.where, params)
+
         query = select(columns=select_columns, whereclause=whereclause, from_obj=[join_sequence])
+        
+        # Прочее
+        if self.limit > 0:
+            query = query.limit(self.limit)
+
         return query
 
     @classmethod
@@ -304,14 +326,44 @@ class BaseEntity(object):
                 fields.append(field)
         
         return fields
+
+    def _create_where_expression(self, where, params):
+        """ Преобразует выражение Where в логическое условие алхимии """
+        left, right = where.left, where.right
+        if isinstance(where.left, Where):
+            left = self._create_where_expression(left, params)
+            
+        if isinstance(where.right, Where):
+            right = self._create_where_expression(right, params)
+           
+        if not isinstance(left, _BinaryExpression):
+            if left.startswith('$'):
+                left = params.get(left)
+            else:
+                dotcom = left.rfind('.')
+                left = self._get_column(left[:dotcom], left[dotcom+1:])
+
+        if right is not None and not isinstance(right, _BinaryExpression):
+            if right.startswith('$'):
+                right = params.get(right)
+            else:
+                dotcom = right.rfind('.')
+                right = self._get_column(right[:dotcom], right[dotcom+1:])
+        
+        func = self.OPERATION_MAP.get(where.operator)
+        if not func:
+            raise NotImplementedError(u'Логическая операция "%s" не реализована в WHERE' % where.operator)
+        
+        exp = func(left, right)
+        return exp
     
-    def get_raw_sql(self):
+    def get_raw_sql(self, params=None):
         """ Возвращает текст SQL запроса для Entity """
-        return str(self.create_query())
+        return str(self.create_query(params))
     
-    def get_data(self):
+    def get_data(self, params=None):
         """ Возвращает данные, полученные в результатет выполения запроса """
-        query = self.create_query()
+        query = self.create_query(params)
         cursor = query.execute()
         data = cursor.fetchall()
         return data    
