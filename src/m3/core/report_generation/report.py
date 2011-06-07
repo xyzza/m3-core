@@ -331,16 +331,13 @@ def create_document(desktop, path):
         return desktop.getCurrentComponent()
              
              
-def save_document_as(document, path, property=None):
+def save_document_as(document, path, properties):
     '''
     Сохраняет документ по указанному пути со свойствами property. property - 
     объект com.sun.star.beans.PropertyValue
     '''           
     file_url = path_to_file_url(path)
-    if property:
-        document.storeToURL(file_url, (property,))
-    else:
-        document.storeToURL(file_url, ())
+    document.storeToURL(file_url, properties)
         
 
 def path_to_file_url(path):
@@ -355,36 +352,36 @@ def path_to_file_url(path):
 class DocumentReport(object):
     '''
     Класс для создания отчетов-текстовых документов.
-    
-    Допустимые значения фильтра: 
-    "writer_pdf_Export" - pdf
-    "MS Word 97" - doc
-    "Rich Text Format" - rtf
-    "HTML" - html
-    "Text" - txt
-    "writer8" - odt
     '''
-    def __init__(self, template_name, filter=None):
+    def __init__(self, template_name):
         if not template_name:
             raise ReportGeneratorException, "Не указан путь до шаблона"   
         self.desktop = OORunner.get_desktop(start=True)         
         template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
         self.document = create_document(self.desktop, template_path)
-        self.property = None
-        if filter:
-            property = PropertyValue()
-            property.Name = "FilterName"
-            property.Value = filter
-            self.property = property
         
-    def show(self, result_name, params):    
+    def show(self, result_name, params, filter=None):    
         '''
         Подставляет в документе шаблона на место строк-ключей словаря params 
         значения, соответствующие ключам. 
+        
+        Допустимые значения фильтра: 
+        "writer_pdf_Export" - pdf
+        "MS Word 97" - doc
+        "Rich Text Format" - rtf
+        "HTML" - html
+        "Text" - txt
+        "writer8" - odt
         '''
         assert isinstance(params, dict) 
         if not result_name:
             raise ReportGeneratorException, "Не указан путь до файла с отчетом"
+        properties = []
+        if filter:
+            filter_property = PropertyValue()
+            filter_property.Name = "FilterName"
+            filter_property.Value = filter
+            properties.append(filter_property)
         parser = OOParser()
         for key, value in params.items():
             if not isinstance(key, str):
@@ -393,4 +390,4 @@ class DocumentReport(object):
         #Если не все переменные в шаблоне были заменены, стираем оставшиеся
         parser.find_and_replace(self.document, VARIABLE_REGEX, '')
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
-        save_document_as(self.document, result_path, self.property)
+        save_document_as(self.document, result_path, tuple(properties))
