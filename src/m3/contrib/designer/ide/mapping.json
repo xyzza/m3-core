@@ -176,6 +176,8 @@
 		,"autoExpandColumn":"auto_expand_column"
 		,"loadMask":"load_mask"
 		,"cm":"cm"
+		,"enableDragDrop":"drag_drop"
+		,"ddGroup":"drag_drop_group"
 	}
 	,"parent": "panel"
 },
@@ -190,11 +192,12 @@
 		,"url":"url"
 		,"rootText":"root_text"
 		,"dragDrop":"drag_drop"
+		,"ddGroup":"drag_drop_group"
+		
 		,"customLoad":"custom_load"
 		,"readOnly":"read_only"
 		,"allowContainerDrop":"allow_container_drop"
-		,"nodes":"nodes"		
-		
+		,"nodes":"nodes"				
 		,"urlShortName": {
 			"type":"shortname"
 			,"value":"url"
