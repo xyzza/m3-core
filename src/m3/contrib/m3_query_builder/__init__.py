@@ -56,3 +56,14 @@ class EntityCache(object):
         '''
         cls.populate()        
         return cls._entities
+    
+    @classmethod
+    def get_entity(cls, name):
+        '''
+        Возвращает схему по имени класса
+        '''
+        cls.populate()
+        for entitiy in cls._entities:
+            if entitiy.__name__ == name:
+                return entitiy
+        
