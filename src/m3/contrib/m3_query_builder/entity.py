@@ -317,12 +317,16 @@ class BaseEntity(object):
                 assert model is not None
                 
                 for lf in model._meta.local_fields:
-                    new_field = Field(name=lf.attname, verbose_name=lf.verbose_name)
+                    # Django может подсунуть прокси из functools вместо строки
+                    verbose_name = lf.verbose_name if isinstance(lf.verbose_name, basestring) else ''
+                    new_field = Field(name=lf.attname, verbose_name=verbose_name)
                     fields.append(new_field)
                     
             else:
                 if not field.verbose_name:
-                    field.verbose_name = u'бла-бла-бла'
+                    m = cache.get_model(*model_name.split('.'))
+                    f = m._meta.get_field(field.name)
+                    field.verbose_name = f.verbose_name
                 fields.append(field)
         
         return fields
@@ -370,5 +374,4 @@ class BaseEntity(object):
 
 #TODO: Сортировать последовательность join'ов
 #TODO: Что-то делать с атрибутом entities 
-#TODO: Допилить получение verbose_name
 #TODO: Поддержка вложенных Entity
