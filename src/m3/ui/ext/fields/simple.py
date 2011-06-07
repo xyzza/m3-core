@@ -266,6 +266,13 @@ class ExtCheckBox(BaseExtField):
     def handler_check(self, function):
         self._listeners['check'] = function
         
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+        # Описание в базовом классе ExtUiComponent.
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+        # Выключаем\включаем компоненты.
+        self.disabled = access_off
+        
 #===============================================================================        
 class ExtComboBox(BaseExtTriggerField):
     '''
