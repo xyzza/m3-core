@@ -869,6 +869,12 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 autoExpandColumn: {
                     defaultValue: ''
                 },
+                enableDragDrop: {
+                	defaultValue: false
+                },
+                ddGroup: {
+                    defaultValue: ''
+                },
                 layout: {
                     defaultValue: 'auto',
                     isInitProperty: true,
@@ -1114,7 +1120,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 readOnly: {
                     defaultValue: false
                 },
-                dragDrop: {
+                ddGroup: {
+                    defaultValue: 'TreeDD'
+                },
+                enableDragDrop: {
                     defaultValue: false
                 },
                 allowContainerDrop: {
