@@ -5,109 +5,95 @@ import os
 import time
 import subprocess
 import shlex
+from django.conf import settings
+from django.utils import importlib
 from com.sun.star.beans import PropertyValue
 from com.sun.star.connection import NoConnectException
 
-IMAGE_TAG = '<img .*>'
+
+def __get_template_path():
+    ''' Ищем корневую папку проекта '''
+    mod = importlib.import_module(settings.SETTINGS_MODULE)
+    settings_abs_path = os.path.dirname(mod.__file__)
+    return settings_abs_path
+    
+DEFAULT_REPORT_TEMPLATE_PATH = __get_template_path()
+
+IMAGE_REGEX = '<img .*>'
+
+VARIABLE_REGEX  = '#[:alpha:]+((_)*[:digit:]*[:alpha:]*)*#'
 
 class ReportGeneratorException(Exception):
     pass
 
-class OOParserError(Exception):
+class OOParserException(Exception):
     pass
     
 class OORunner(object):
     '''
     Запускает, останавливает и соединяется с сервером OpenOffice
     '''
-    port = 8010
-        
-    def start_server(self):
+    # Порт, на котором будет запущен сервер
+    PORT = 8010
+    
+    CONTEXT = None
+    
+    # Количество попыток соединения с сервером 
+    CONNECTIONS_COUNT = 5
+    
+    @staticmethod    
+    def start_server():
         '''
         Запускает OpenOffice
         ''' 
         command = 'soffice -accept="socket,host=localhost,port=%d;urp;\
-                   StarOffice.ServiceManager" -norestore -nofirstwizard -nologo -headless' %self.port  
+                   StarOffice.ServiceManager" -norestore -nofirstwizard -nologo -headless' %OORunner.PORT  
         args = shlex.split(command)
         try:
             subprocess.Popen(args)
         except OSError as e:
             raise ReportGeneratorException, "Не удалось запустить сервер на порту %d: %s. \
-            Возможно, не установлен OpenOffice или не прописан путь в переменной окружения PATH" % (self.port, e.message)    
-        time.sleep(1)
+            Возможно, не установлен OpenOffice или не прописан путь в переменной окружения PATH" % (OORunner.PORT, e.message)    
         
-    def shutdown_desktop(self, desktop):
+    @staticmethod
+    def shutdown_desktop(desktop):
         '''
         Закрывает рабочую область OpenOffice
         '''     
         desktop.terminate()
         del desktop
         
-    def get_desktop(self, start=False):
+    @staticmethod
+    def get_desktop(start=False):
         '''
         Запускает сервер (если start = True), и возвращает объект Desktop
         '''        
         localContext = uno.getComponentContext()
         resolver = localContext.ServiceManager.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", localContext)
         if start:
-            self.start_server()    
-        try:
-            context = resolver.resolve("uno:socket,host=localhost,port=%d;urp;StarOffice.ComponentContext" % self.port)
-        except NoConnectException:
-            raise ReportGeneratorException, "Не удалось соединиться с сервером на порту %d" % self.port     
+            OORunner.start_server()   
         
-        desktop = context.ServiceManager.createInstanceWithContext("com.sun.star.frame.Desktop", context)
+        # Пытаемся соединиться с сервером
+        for i in range(OORunner.CONNECTIONS_COUNT):
+            try:
+                OORunner.CONTEXT = resolver.resolve("uno:socket,host=localhost,port=%d;urp;StarOffice.ComponentContext" % OORunner.PORT)
+            except NoConnectException:
+                time.sleep(1)
+                
+        # Количество попыток исчерпано        
+        if not OORunner.CONTEXT:        
+            raise ReportGeneratorException, "Не удалось соединиться с сервером на порту %d" % OORunner.PORT     
+        
+        desktop = OORunner.CONTEXT.ServiceManager.createInstanceWithContext("com.sun.star.frame.Desktop", OORunner.CONTEXT)
         if not desktop:
-            raise ReportGeneratorException, "Не удалось создать объект рабочей области Desktop на порту %d" % self.port
+            raise ReportGeneratorException, "Не удалось создать объект рабочей области Desktop на порту %d" % OORunner.PORT
         
-        return desktop 
-        
-        
-class OODocument(object):
-    '''
-    Класс, представляющий собой открытый документ. Может создаваться получением
-    текущего документа рабочей области или открытием документа из файла. Если
-    указанного файла не существует, будет создан новый, пустой.  
-    '''
-                               
-    def __init__(self, desktop, path):
-        if path:
-            #В windows, несмотря на режим запуска OO с опцией headless, новые 
-            # документы открываются в обычном режиме. Это свойство делает документ
-            # скрытым 
-            prop = PropertyValue()
-            prop.Name = "Hidden"
-            prop.Value = True
-            file_url = path_to_file_url(path)
-            self.document = desktop.loadComponentFromURL(file_url, "_blank", 0, (prop,))
-        else:
-            self.document = desktop.getCurrentComponent()
-            
-    def save_as(self, path, property=None):
-        '''
-        Сохраняет документ по указанному пути со свойствами property. property - 
-        объект com.sun.star.beans.PropertyValue
-        '''           
-        file_url = path_to_file_url(path)
-        if property:
-            self.document.storeToURL(file_url, (property,))
-        else:
-            self.document.storeToURL(file_url, ())
-        
-
-def path_to_file_url(path):
-    '''
-    Преобразует путь в url, понятный для uno.
-    '''
-    abs_path = os.path.abspath(path)
-    file_url = uno.systemPathToFileUrl(abs_path)
-    return file_url    
-                            
+        return desktop    
+                              
 
 class OOParser(object):
     '''
-    Этот класс будет всячески преобразовывать текст в соответствии с придуманным
-    нами языком шаблонов.
+    Этот класс будет преобразовывать текст в соответствии с языком шаблонов.
     '''        
     
     def replace_beans(self, text, dict):
@@ -140,7 +126,7 @@ class OOParser(object):
         found = document.findFirst(search)
         while found:
             result.append(found.String)
-            if replace:
+            if replace <> None:
                 found.String = replace
             found = document.findNext(found.End, search)
         return result 
@@ -151,6 +137,8 @@ class OOParser(object):
         и вертикальных секций. Считается, что горизонтальная секция начинается с 
         'горизонт', вертикальная  - с 'вертикаль'. На выходе - словарь
         {'горизонт':[секция1, секция2], 'вертикаль':[...]}
+        TODO: переделать функцию, секции не будут делиться на горизонтальные и
+        вертикальные
         '''   
         all_sections = {'горизонт':[], 'вертикаль':[]}
         annotations = document.getAnnotations()
@@ -184,16 +172,16 @@ class OOParser(object):
                         new_section.add_new_cell(position)
                         all_sections['вертикаль'].append(new_section)    
                 else:
-                    raise OOParserError, "Неверно задана секция в \
+                    raise OOParserException, "Неверно задана секция в \
                     ячейке c координатами (%s, %s)" %(position.Row+1, position.Column+1) 
-                for section in all_sections['горизонт']:
-                    if not section.is_valid():
-                        raise OOParserError, "Неверно задана горизонтальная \
-                        секция %s. Определена одна из двух ячеек" %self.name  
-                for section in all_sections['вертикаль']:
-                    if not section.is_valid():
-                        raise OOParserError, "Неверно задана вертикальная \
-                        секция %s. Определена одна из двух ячеек" %self.name     
+        for section in all_sections['горизонт']:
+            if not section.is_valid():
+                raise OOParserException, "Неверно задана горизонтальная \
+                секция %s. Определена одна из двух ячеек" %section.name  
+        for section in all_sections['вертикаль']:
+            if not section.is_valid():
+                raise OOParserException, "Неверно задана вертикальная \
+                секция %s. Определена одна из двух ячеек" %section.name     
         return all_sections                      
 
 
@@ -204,11 +192,11 @@ class Section(object):
     
     def __init__(self, name=None, left_cell_addr=None, right_cell_addr=None):
         #Название секции
-        name = name
+        self.name = name
         #Верхняя левая ячейка - объект com.sun.star.table.CellAddress
-        left_cell_addr = left_cell_addr
+        self.left_cell_addr = left_cell_addr
         #Нижняя правая ячейка - объект com.sun.star.table.CellAddress
-        right_cell_addr = right_cell_addr
+        self.right_cell_addr = right_cell_addr
         
     def add_new_cell(self, cell):
         '''
@@ -220,7 +208,7 @@ class Section(object):
             self.left_cell_addr = cell
         #Если пытаются добавить третью ячейку, ругаемся    
         elif self.left_cell_addr and self.right_cell_addr:
-            raise OOParserError, "Секция %s задается двумя ячейками, невозможно добавить третью." %self.name    
+            raise OOParserException, "Секция %s задается двумя ячейками, невозможно добавить третью." %self.name    
         #Если левая ячейка уже задана, определяем, действительно ли она левая    
         elif self.left_cell_addr:
             if (cell.Row > self.left_cell_addr.Row) and (cell.Column > self.left_cell_addr.Column):
@@ -230,7 +218,7 @@ class Section(object):
                 self.left_cell_addr = cell     
             # Секция задана неверно, не записываем такую ерунду
             else:    
-                raise Exception, "Неверно задана секция %s. \
+                raise OOParserException, "Неверно задана секция %s. \
                 Определите верхнюю левую и нижнюю правую ячейки" %self.name
         # И то же самое, если задана правая ячейка
         elif self.right_cell_addr:
@@ -241,7 +229,7 @@ class Section(object):
                 self.left_cell_addr = cell     
             # Секция задана неверно, не записываем такую ерунду
             else:    
-                raise OOParserError, "Неверно задана секция %s. \
+                raise OOParserException, "Неверно задана секция %s. \
                 Определите верхнюю левую и нижнюю правую ячейки" %self.name                 
             
     def is_valid(self):
@@ -249,6 +237,32 @@ class Section(object):
         Определяет, обе ли ячейки заданы
         '''        
         return self.left_cell_addr and self.right_cell_addr
+    
+    def copy(self, context, document, from_sheet, cell):
+        '''
+        Копирует секцию в документе из листа from_sheet начиная с ячейки cell
+        Ячейку можно получить из листа так: cell = sheet.getCellByPosition(2,5)     
+        '''
+    
+        dispatcher = context.ServiceManager.createInstanceWithContext("com.sun.star.frame.DispatchHelper", context) 
+        section_range = from_sheet.getCellRangeByPosition(self.left_cell_addr.Column,
+                                                      self.left_cell_addr.Row,
+                                                      self.right_cell_addr.Column,
+                                                      self.right_cell_addr.Row)
+        document.CurrentController.select(section_range)
+        prop = PropertyValue()
+        prop.Name = "Flags"
+        #Так задаются флаги: A - all or S - string V - value D - date, time F - formulas  
+        #N - notes T - formats
+        # Не копируем комментарии 
+        prop.Value = "SVDFT"
+        # Копируем выделенную секцию
+        dispatcher.executeDispatch(document.getCurrentController().getFrame(), ".uno:Copy", "", 0, ())
+        # Выделяем ячейку, в которую будет вставляться секция
+        document.CurrentController.select(cell)
+        # Вставляем секцию
+        dispatcher.executeDispatch(document.getCurrentController().getFrame(), ".uno:InsertContents", "", 0,(prop,))
+                    
                     
 class OOImage(object):
     '''
@@ -298,3 +312,85 @@ class OOImage(object):
         нужно передавать лист         
         '''       
         document.getDrawPage().add(image)  
+        
+                                 
+def create_document(desktop, path):
+    '''
+    Создает объект документа рабочей области из файла path.
+    '''
+    if path:
+        #В windows, несмотря на режим запуска OO с опцией headless, новые 
+        # документы открываются в обычном режиме. Это свойство делает документ
+        # скрытым 
+        prop = PropertyValue()
+        prop.Name = "Hidden"
+        prop.Value = True
+        file_url = path_to_file_url(path)
+        return desktop.loadComponentFromURL(file_url, "_blank", 0, (prop,))
+    else:
+        return desktop.getCurrentComponent()
+             
+             
+def save_document_as(document, path, property=None):
+    '''
+    Сохраняет документ по указанному пути со свойствами property. property - 
+    объект com.sun.star.beans.PropertyValue
+    '''           
+    file_url = path_to_file_url(path)
+    if property:
+        document.storeToURL(file_url, (property,))
+    else:
+        document.storeToURL(file_url, ())
+        
+
+def path_to_file_url(path):
+    '''
+    Преобразует путь в url, понятный для uno.
+    '''
+    abs_path = os.path.abspath(path)
+    file_url = uno.systemPathToFileUrl(abs_path)
+    return file_url 
+
+
+class DocumentReport(object):
+    '''
+    Класс для создания отчетов-текстовых документов.
+    
+    Допустимые значения фильтра: 
+    "writer_pdf_Export" - pdf
+    "MS Word 97" - doc
+    "Rich Text Format" - rtf
+    "HTML" - html
+    "Text" - txt
+    "writer8" - odt
+    '''
+    def __init__(self, template_name, filter=None):
+        if not template_name:
+            raise ReportGeneratorException, "Не указан путь до шаблона"   
+        self.desktop = OORunner.get_desktop(start=True)         
+        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
+        self.document = create_document(self.desktop, template_path)
+        self.property = None
+        if filter:
+            property = PropertyValue()
+            property.Name = "FilterName"
+            property.Value = filter
+            self.property = property
+        
+    def show(self, result_name, params):    
+        '''
+        Подставляет в документе шаблона на место строк-ключей словаря params 
+        значения, соответствующие ключам. 
+        '''
+        assert isinstance(params, dict) 
+        if not result_name:
+            raise ReportGeneratorException, "Не указан путь до файла с отчетом"
+        parser = OOParser()
+        for key, value in params.items():
+            if not isinstance(key, str):
+                raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым"
+            parser.find_and_replace(self.document, '#'+key+'#', str(value))    
+        #Если не все переменные в шаблоне были заменены, стираем оставшиеся
+        parser.find_and_replace(self.document, VARIABLE_REGEX, '')
+        result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
+        save_document_as(self.document, result_path, self.property)
