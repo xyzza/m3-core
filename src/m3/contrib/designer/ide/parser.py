@@ -182,7 +182,7 @@ class Parser(object):
         
         # Находит корневой контейнер
         parent_key = self._get_parent_key(self.extends_cmp)
-        print parent_key
+        
         
         if not parent_key:
             # Если вложенных контейнеров нет,  берем первую Assign конструкцию вида, например:
@@ -209,18 +209,22 @@ class Parser(object):
         Возвращает корневой контейнер
         '''
         def check_key(verification_key):
-            for _, v in extends_cmp.items():
-                if isinstance(v, dict):
-                    vv = v.values()[0]
-                    if verification_key in vv:
-                        return True
+            for _, v in extends_cmp.items():                
+                if isinstance(v, dict):     
+                    
+                    # Вложенный словарь может содержать множество свойств.
+                    # И пока здесь содержатся все атрибуты, который напрямую
+                    # прописываются в self               
+                    for item in v.values(): 
+                        if verification_key in item:
+                            return True
             else:
                 return False
-                           
-        print extends_cmp 
+                     
         for k, _ in extends_cmp.items():            
-            if not check_key(k):             
-                return k        
+            if not check_key(k):
+                return k
+     
          
     def _build_json(self, js_dict, key):
         '''
