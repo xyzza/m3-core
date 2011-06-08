@@ -4,8 +4,12 @@
  * Time: 13:49
  */
 
-var tree_entities = Ext.getCmp('{{ component.tree_entities.client_id }}');
-var grd_selected_entities = Ext.getCmp('{{ component.grd_selected_entities.client_id }}');
+var treeEntities = Ext.getCmp('{{ component.tree_entities.client_id }}');
+var grdSelectedEntities = Ext.getCmp('{{ component.grd_selected_entities.client_id }}');
+
+var treeAllFields = Ext.getCmp('{{ component.tree_all_fields.client_id }}');
+var treeGroupsFields = Ext.getCmp('{{ component.tree_groups_fields.client_id }}');
+var treeConditionsFields = Ext.getCmp('{{ component.tree_conditions_fields.client_id }}');
 
 /*Выбор связи*/
 function selectConnection(){
@@ -37,11 +41,11 @@ function winClose(){
 /**
  * D&d из дерева сущностей в выбранные сущности
  */
-var selectEntityDropTargetEl = grd_selected_entities.getView().scroller.dom;
+var selectEntityDropTargetEl = grdSelectedEntities.getView().scroller.dom;
 var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
     ddGroup    : 'TreeDD',
     notifyDrop : function(ddSource, e, data){                    
-        var selectedStore = grd_selected_entities.getStore(),
+        var selectedStore = grdSelectedEntities.getStore(),
         	entityId = data.node.id,
         	entityName = data.node.attributes['schemes'];
                 
@@ -49,16 +53,46 @@ var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
         var record = selectedStore.getById(entityId);
         if (!record && entityId && entityName){
 
-			var EntityRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
-			    {name: 'entityName', mapping: 'entityName'}
-			]);
-			
-			
-			var newEntityRecord = new EntityRecord(
-			    {entityName: entityName},
-			    entityId 
-			);
-        	selectedStore.add(newEntityRecord)
+
+			var url = '{{ component.params.entity_items_url }}';
+			assert(url, 'Url for child window is not define');
+
+			var loadMask = new Ext.LoadMask(win.body);
+			loadMask.show();
+			Ext.Ajax.request({
+				url: '{{ component.params.entity_items_url }}'
+				,params: {
+					'entity_name': entityId
+				}
+				,success: function(response, opt){
+					loadMask.hide();
+
+					var nodes = Ext.decode(response.responseText);
+					
+					// Заполняется грид на этой же вкладке - выбранные сущности
+					var EntityRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
+					    {name: 'entityName', mapping: 'entityName'}
+					]);
+					
+					
+					var newEntityRecord = new EntityRecord(
+					    {entityName: entityName},
+					    entityId 
+					);
+		        	selectedStore.add(newEntityRecord);
+
+		        	//Заполняется дерево на вкладке "Поля"
+		        	
+		        	//Заполняется дерево на вкладке "Группировка"
+		        	
+		        	//Заполняется дерево на вкладке "Условия" 
+					
+				}
+				,failure: function(){
+					loadMask.hide();
+            		uiAjaxFailMessage.apply(this, arguments);
+				}
+			});
         	
         }                
         return true;

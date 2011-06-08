@@ -389,50 +389,51 @@ class queryBuilderWindow(ExtWindow):
         cont = container_class()
         cont.layout = 'border'
         cont.title = u'Условия'
-
-        tree_entities = ExtTree()
-        tree_entities.flex = 0
-        tree_entities.layout = 'auto'
-        tree_entities.title = u'Все поля'
-        tree_entities.region = 'west'
-        tree_entities.root_text = 'Root'
-        tree_entities.header = True
-        tree_entities.width = 200
-
+        
+        tree_conditions_fields = ExtTree()
+        tree_conditions_fields.flex = 0
+        tree_conditions_fields.layout = 'auto'
+        tree_conditions_fields.title = u'Все поля'
+        tree_conditions_fields.region = 'west'
+        tree_conditions_fields.root_text = 'Root'
+        tree_conditions_fields.header = True
+        tree_conditions_fields.width = 200
+        
         clmn_gridColumn_2 = ExtGridColumn()
-        clmn_gridColumn_2.header = u'Схемы'
+        clmn_gridColumn_2.header = u'Условия'
+        clmn_gridColumn_2.data_index = 'conditions'
         clmn_gridColumn_2.menu_disabled = True
-        clmn_gridColumn_2.data_index = 'conditions_schemes'
-
+        
         grd_gridpanel_1 = ExtGrid()
         grd_gridpanel_1.layout = 'auto'
         grd_gridpanel_1.title = u'Условия'
         grd_gridpanel_1.region = 'center'
         grd_gridpanel_1.header = True
-
+        
         jstore_select_entities = ExtJsonStore()
         jstore_select_entities.id_property = 'id'
         jstore_select_entities.store_id = 'newJsonStore'
-
+        
         clmn_gridColumn_2 = ExtGridColumn()
         clmn_gridColumn_2.header = u'Условия'
         clmn_gridColumn_2.data_index = 'conditions'
         clmn_gridColumn_2.menu_disabled = True
-
+        
         grd_gridpanel_1.store = jstore_select_entities
-
-        tree_entities.columns.extend([clmn_gridColumn_2])
+        
+        tree_conditions_fields.columns.extend([clmn_gridColumn_2])
         grd_gridpanel_1.columns.extend([clmn_gridColumn_2])
-        cont.items.extend([tree_entities, grd_gridpanel_1])
-
-        self.tree_entities = tree_entities
+        cont.items.extend([tree_conditions_fields, grd_gridpanel_1])
+        
+        self.tree_conditions_fields = tree_conditions_fields
         self.clmn_gridColumn_2 = clmn_gridColumn_2
         self.grd_gridpanel_1 = grd_gridpanel_1
         self.jstore_select_entities = jstore_select_entities
         self.clmn_gridColumn_2 = clmn_gridColumn_2
-
+        
         return cont
 
+        
 class selectConnectionsWindow(ExtWindow):
 
     def __init__(self, *args, **kwargs):

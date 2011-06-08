@@ -6,13 +6,10 @@ Date&Time: 01.06.11 10:38
 import json
 
 from m3.ui import actions
-from m3.helpers import urls as m3urls
-
-from m3.contrib.m3_query_builder import EntityCache
+from m3.ui.actions import ACD
 
 import ui
-from api import get_entities
-
+from api import get_entities, get_entity_items
 
 class QueryBuilderActionsPack(actions.ActionPack):
     '''
@@ -25,7 +22,8 @@ class QueryBuilderActionsPack(actions.ActionPack):
         super(QueryBuilderActionsPack, self).__init__()
         self.actions.extend([QueryBuilderWindowAction(),
                              SelectConnectionWindowAction(),
-                             EntitiesListAction()])
+                             EntitiesListAction(), 
+                             EntitiyItemsListAction()])
 
 class QueryBuilderWindowAction(actions.Action):
     '''
@@ -35,7 +33,8 @@ class QueryBuilderWindowAction(actions.Action):
     shortname = 'm3-query-builder-window'
 
     def run(self, request, context):
-        params = {'select_connections_url': m3urls.get_action('m3-query-builder-select-connection').absolute_url()}
+        params = {'select_connections_url': SelectConnectionWindowAction.absolute_url(),
+                  'entity_items_url': EntitiyItemsListAction.absolute_url()}
         window = ui.queryBuilderWindow(params=params)
         return actions.ExtUIScriptResult(data=window)
 
@@ -60,4 +59,20 @@ class EntitiesListAction(actions.Action):
 
     def run(self, request, context):           
         entities = get_entities()                
-        return actions.JsonResult(json.dumps(entities))
+        return actions.JsonResult('[%s]' % ','.join(entities))
+    
+    
+class EntitiyItemsListAction(actions.Action):
+    '''
+    Запрос на получение окна выбора связи
+    '''
+    url = '/entity-items-list'
+    shortname = 'm3-query-builder-entity-items-list'
+
+    def context_declaration(self):
+        return [ACD(name='entity_name', type=unicode, required=True)]
+
+    def run(self, request, context):           
+        entity_items = get_entity_items(context.entity_name)
+        print entity_items            
+        return actions.JsonResult(json.dumps(entity_items))
