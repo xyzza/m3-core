@@ -298,8 +298,9 @@
 		,"maximizable": "maximizable"
 		,"maximized": "maximized"
         ,"minimizable": "minimizable"
+        ,"resizable": "resizable"
 		,"modal": "modal"
-		,"template_globals": "template_globals"
+		,"templateGlobals": "template_globals"
 	},
 	"parent": "panel"
 },

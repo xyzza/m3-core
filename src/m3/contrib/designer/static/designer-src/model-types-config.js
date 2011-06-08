@@ -990,9 +990,13 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: true,
                     isInitProperty: true
                 },
-                template_globals: {
+                templateGlobals: {
                     defaultValue: '',
                     isInitProperty: true
+                },
+                resizable:{
+                    defaultValue: true,
+                    isQuickEditable: true
                 }
             },
             childTypesRestrictions: {
