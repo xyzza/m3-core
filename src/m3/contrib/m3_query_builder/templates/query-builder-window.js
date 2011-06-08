@@ -33,6 +33,7 @@ function selectConnection(){
 function deleteConnection(){
     
 }
+
 /*Закрытие окна*/
 function winClose(){
     win.close();
@@ -82,10 +83,39 @@ var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
 		        	selectedStore.add(newEntityRecord);
 
 		        	//Заполняется дерево на вкладке "Поля"
+		        	console.log(treeAllFields);
+		        	console.log(nodes);
+		        	var loaderAllFields = treeAllFields.getLoader();
+		        	var rootNodeAllFields = treeAllFields.getRootNode();
 		        	
+		        	// loaderAllFields.load(nodes);
+		        	
+		        											
+		            for(var i = 0, len = nodes.length; i < len; i++){
+		                var n = new Ext.data.Node(nodes[i]);		                
+		                if(n){
+		                	console.log(n);
+		                    rootNodeAllFields.appendChild(n);
+		                }
+		            }
+		        	
+		        	// var rootNodeAllFields = treeAllFields.getRootNode();
+		        	// rootNodeAllFields.appendChild(nodes);
+		        	// loaderAllFields.load(rootNodeAllFields);
+		        	// rootNodeAllFields.expand();
+		        	console.log(loaderAllFields);
+		        	console.log(rootNodeAllFields);
+		        			        	
+		        			        	
+		        			        	
+		        			        	
 		        	//Заполняется дерево на вкладке "Группировка"
+		        	//console.log(treeGroupsFields);
+		        	treeGroupsFields.getRootNode().appendChild(nodes);
 		        	
 		        	//Заполняется дерево на вкладке "Условия" 
+					// console.log(treeConditionsFields);
+					treeConditionsFields.getRootNode().appendChild(nodes);
 					
 				}
 				,failure: function(){

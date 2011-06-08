@@ -167,7 +167,7 @@ class QueryBuilderWindow(ExtWindow):
         tree_entities.drag_drop_group = 'allEntities'
         tree_entities.root_text = 'Root'
         tree_entities.header = True
-        tree_entities.width = 200
+        tree_entities.width = 250
         tree_entities.drag_drop = True
         tree_entities.region = 'west'
         
@@ -207,54 +207,54 @@ class QueryBuilderWindow(ExtWindow):
         
         return cont
 
-                                                                                                                
+                                                                                                                        
     def init_fields(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
         cont.title = u'Поля'
         cont.padding = '10px'
-
-        cnt_container_2 = ExtContainer()
-        cnt_container_2.region = 'center'
-        cnt_container_2.layout = 'border'
-
-        tree_entities = ExtTree()
-        tree_entities.layout = 'auto'
-        tree_entities.header = False
-        tree_entities.region = 'west'
-        tree_entities.root_text = 'Root'
-        tree_entities.width = 150
-
+        
+        cnt_items_main = ExtContainer()
+        cnt_items_main.region = 'center'
+        cnt_items_main.layout = 'border'
+        
+        tree_all_fields = ExtTree()
+        tree_all_fields.layout = 'auto'
+        tree_all_fields.width = 150
+        tree_all_fields.region = 'west'
+        tree_all_fields.root_text = 'Root'
+        tree_all_fields.header = False
+        
         clmn_gridColumn_4 = ExtGridColumn()
         clmn_gridColumn_4.header = u'Схемы'
         clmn_gridColumn_4.data_index = 'fields_shemes'
         clmn_gridColumn_4.menu_disabled = True
-
-        grd_gridpanel_1 = ExtGrid()
-        grd_gridpanel_1.layout = 'auto'
-        grd_gridpanel_1.region = 'center'
-        grd_gridpanel_1.header = False
-
+        
+        grd_selected_fields = ExtGrid()
+        grd_selected_fields.layout = 'auto'
+        grd_selected_fields.region = 'center'
+        grd_selected_fields.header = False
+        
         jstore_select_entities = ExtJsonStore()
         jstore_select_entities.id_property = 'id'
         jstore_select_entities.store_id = 'newJsonStore'
-
+        
         clmn_gridColumn_1 = ExtGridColumn()
         clmn_gridColumn_1.header = u'Выбранное поле'
         clmn_gridColumn_1.data_index = 'selected_field'
         clmn_gridColumn_1.menu_disabled = True
-
+        
         clmn_gridColumn_2 = ExtGridColumn()
         clmn_gridColumn_2.header = u'Алиас'
         clmn_gridColumn_2.data_index = 'alias'
         clmn_gridColumn_2.menu_disabled = True
-
+        
         clmn_gridColumn_3 = ExtGridColumn()
         clmn_gridColumn_3.menu_disabled = True
         clmn_gridColumn_3.header = u'Сортировка'
         clmn_gridColumn_3.width = 80
         clmn_gridColumn_3.data_index = 'sorting'
-
+        
         pnl_panel_2 = ExtPanel()
         pnl_panel_2.layout = 'auto'
         pnl_panel_2.title = u'Опции'
@@ -262,115 +262,115 @@ class QueryBuilderWindow(ExtWindow):
         pnl_panel_2.height = 80
         pnl_panel_2.padding = '5px'
         pnl_panel_2.header = True
-
-        chk_checkbox_1 = ExtCheckBox()
-        chk_checkbox_1.box_label = 'Distinct'
-        chk_checkbox_1.checked = False
-
-        cnt_container_3 = ExtContainer()
-        cnt_container_3.layout = 'hbox'
-
-        chk_checkbox_2 = ExtCheckBox()
-        chk_checkbox_2.width = 80
-        chk_checkbox_2.box_label = 'Limit'
-
-        nmbr_numberfield_1 = ExtNumberField()
-        nmbr_numberfield_1.flex = 0
-
-        grd_gridpanel_1.store = jstore_select_entities
-
-        tree_entities.columns.extend([clmn_gridColumn_4])
-        grd_gridpanel_1.columns.extend([clmn_gridColumn_1, clmn_gridColumn_2, clmn_gridColumn_3])
-        cnt_container_2.items.extend([tree_entities, grd_gridpanel_1])
-        cnt_container_3.items.extend([chk_checkbox_2, nmbr_numberfield_1])
-        pnl_panel_2.items.extend([chk_checkbox_1, cnt_container_3])
-        cont.items.extend([cnt_container_2, pnl_panel_2])
-
-        self.cnt_container_2 = cnt_container_2
-        self.tree_entities = tree_entities
+        
+        chk_distinct = ExtCheckBox()
+        chk_distinct.box_label = u'Различные'
+        chk_distinct.checked = False
+        
+        cnt_limit = ExtContainer()
+        cnt_limit.layout = 'hbox'
+        
+        chk_limit = ExtCheckBox()
+        chk_limit.width = 150
+        chk_limit.box_label = u'Количество записей'
+        
+        nmbr_limit_count = ExtNumberField()
+        nmbr_limit_count.flex = 0
+        
+        grd_selected_fields.store = jstore_select_entities
+        
+        tree_all_fields.columns.extend([clmn_gridColumn_4])
+        grd_selected_fields.columns.extend([clmn_gridColumn_1, clmn_gridColumn_2, clmn_gridColumn_3])
+        cnt_items_main.items.extend([tree_all_fields, grd_selected_fields])
+        cnt_limit.items.extend([chk_limit, nmbr_limit_count])
+        pnl_panel_2.items.extend([chk_distinct, cnt_limit])
+        cont.items.extend([cnt_items_main, pnl_panel_2])
+        
+        self.cnt_items_main = cnt_items_main
+        self.tree_all_fields = tree_all_fields
         self.clmn_gridColumn_4 = clmn_gridColumn_4
-        self.grd_gridpanel_1 = grd_gridpanel_1
+        self.grd_selected_fields = grd_selected_fields
         self.jstore_select_entities = jstore_select_entities
         self.clmn_gridColumn_1 = clmn_gridColumn_1
         self.clmn_gridColumn_2 = clmn_gridColumn_2
         self.clmn_gridColumn_3 = clmn_gridColumn_3
         self.pnl_panel_2 = pnl_panel_2
-        self.chk_checkbox_1 = chk_checkbox_1
-        self.cnt_container_3 = cnt_container_3
-        self.chk_checkbox_2 = chk_checkbox_2
-        self.nmbr_numberfield_1 = nmbr_numberfield_1
-
+        self.chk_distinct = chk_distinct
+        self.cnt_limit = cnt_limit
+        self.chk_limit = chk_limit
+        self.nmbr_limit_count = nmbr_limit_count
+        
         return cont
 
-
+                                        
     def init_grouping(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
         cont.title = u'Группировка'
-
-        tree_entities = ExtTree()
-        tree_entities.layout = 'auto'
-        tree_entities.width = 200
-        tree_entities.region = 'west'
-        tree_entities.title = u'Дерево'
-        tree_entities.root_text = 'Root'
-        tree_entities.header = True
-
+        
+        tree_groups_fields = ExtTree()
+        tree_groups_fields.layout = 'auto'
+        tree_groups_fields.width = 200
+        tree_groups_fields.region = 'west'
+        tree_groups_fields.title = u'Поля'
+        tree_groups_fields.root_text = 'Root'
+        tree_groups_fields.header = False
+        
         clmn_gridColumn_1 = ExtGridColumn()
         clmn_gridColumn_1.header = u'Поля'
         clmn_gridColumn_1.data_index = 'grouping_fields'
         clmn_gridColumn_1.menu_disabled = True
-
+        
         cnt_container_1 = ExtContainer()
         cnt_container_1.region = 'center'
         cnt_container_1.layout = 'border'
-
+        
         grd_gridpanel_1 = ExtGrid()
         grd_gridpanel_1.layout = 'auto'
-        grd_gridpanel_1.title = u'Групповое поле'
+        grd_gridpanel_1.title = u'Групповые поля'
         grd_gridpanel_1.region = 'north'
         grd_gridpanel_1.height = 250
         grd_gridpanel_1.header = True
-
+        
         jstore_jsonstore_2 = ExtJsonStore()
         jstore_jsonstore_2.id_property = 'id'
         jstore_jsonstore_2.store_id = 'newJsonStore'
-
+        
         clmn_gridColumn_2 = ExtGridColumn()
         clmn_gridColumn_2.header = u'Наименование'
         clmn_gridColumn_2.data_index = 'name'
         clmn_gridColumn_2.menu_disabled = True
-
+        
         grd_gridpanel_2 = ExtGrid()
         grd_gridpanel_2.layout = 'auto'
-        grd_gridpanel_2.title = u'Суммируемое поле'
+        grd_gridpanel_2.title = u'Суммируемые поля'
         grd_gridpanel_2.region = 'center'
         grd_gridpanel_2.header = True
-
+        
         jstore_select_entities = ExtJsonStore()
         jstore_select_entities.id_property = 'id'
         jstore_select_entities.store_id = 'newJsonStore'
-
+        
         clmn_gridColumn_3 = ExtGridColumn()
         clmn_gridColumn_3.header = u'Суммируемое поле'
         clmn_gridColumn_3.data_index = 'summable_field'
         clmn_gridColumn_3.menu_disabled = True
-
+        
         clmn_gridColumn_4 = ExtGridColumn()
         clmn_gridColumn_4.header = u'Функцция'
         clmn_gridColumn_4.data_index = 'function'
         clmn_gridColumn_4.menu_disabled = True
-
+        
         grd_gridpanel_1.store = jstore_jsonstore_2
         grd_gridpanel_2.store = jstore_select_entities
-
-        tree_entities.columns.extend([clmn_gridColumn_1])
+        
+        tree_groups_fields.columns.extend([clmn_gridColumn_1])
         grd_gridpanel_1.columns.extend([clmn_gridColumn_2])
         grd_gridpanel_2.columns.extend([clmn_gridColumn_3, clmn_gridColumn_4])
         cnt_container_1.items.extend([grd_gridpanel_1, grd_gridpanel_2])
-        cont.items.extend([tree_entities, cnt_container_1])
-
-        self.tree_entities = tree_entities
+        cont.items.extend([tree_groups_fields, cnt_container_1])
+        
+        self.tree_groups_fields = tree_groups_fields
         self.clmn_gridColumn_1 = clmn_gridColumn_1
         self.cnt_container_1 = cnt_container_1
         self.grd_gridpanel_1 = grd_gridpanel_1
@@ -380,10 +380,10 @@ class QueryBuilderWindow(ExtWindow):
         self.jstore_select_entities = jstore_select_entities
         self.clmn_gridColumn_3 = clmn_gridColumn_3
         self.clmn_gridColumn_4 = clmn_gridColumn_4
-
+        
         return cont
 
-
+                        
     def init_conditions(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
