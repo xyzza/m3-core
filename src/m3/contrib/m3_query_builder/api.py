@@ -50,7 +50,7 @@ def get_entity_items(entity_name):
                 'id': entity.__name__, 
                 'leaf': False,
                 'iconCls': Icons.PLUGIN,
-                'schemes': entity.name,
+                'fields_entities': entity.name,                
                 'expanded': True}
 
         for field in fields:
@@ -58,7 +58,7 @@ def get_entity_items(entity_name):
             assert isinstance(field, Field)
             
             node = {'leaf': True,
-                    'schemes': field.verbose_name or field.name}
+                    'fields_entities': field.verbose_name or field.name}
             
             root_node.setdefault('children', []).append(node)
             
