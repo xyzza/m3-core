@@ -7,10 +7,10 @@ from m3.ui.ext.all_components import *
 
 from m3.helpers import urls
 
-class queryBuilderWindow(ExtWindow):
+class QueryBuilderWindow(ExtWindow):
 
     def __init__(self, params={}, *args, **kwargs):
-        super(queryBuilderWindow, self).__init__(*args, **kwargs)
+        super(QueryBuilderWindow, self).__init__(*args, **kwargs)
         self.initialize()
         #Как бы хак
         self.button_align = ExtWindow.align_left
@@ -95,7 +95,6 @@ class queryBuilderWindow(ExtWindow):
         grd_selected_entities.header = True
         
         store_selected_entities = ExtDataStore()
-        store_selected_entities.store_id = ''
         store_selected_entities.id_index = 0
         
         entity_name = ExtGridColumn()
@@ -434,10 +433,10 @@ class queryBuilderWindow(ExtWindow):
         return cont
 
         
-class selectConnectionsWindow(ExtWindow):
+class SelectConnectionsWindow(ExtWindow):
 
     def __init__(self, *args, **kwargs):
-        super(selectConnectionsWindow, self).__init__(*args, **kwargs)
+        super(SelectConnectionsWindow, self).__init__(*args, **kwargs)
         self.initialize()
 
     def initialize(self):
@@ -471,9 +470,7 @@ class selectConnectionsWindow(ExtWindow):
         tree_entities.flex = '1'
         tree_entities.layout = 'auto'
         tree_entities.root_text = 'Root'
-        tree_entities.anchor = ''
         tree_entities.header = False
-        tree_entities.height = ''
         
         scheme_1 = ExtGridColumn()
         scheme_1.header = u'Схема'
@@ -484,7 +481,6 @@ class selectConnectionsWindow(ExtWindow):
         tree_treepanel_2.flex = '1'
         tree_treepanel_2.layout = 'auto'
         tree_treepanel_2.root_text = 'Root'
-        tree_treepanel_2.height = ''
         tree_treepanel_2.header = False
         
         scheme_2 = ExtGridColumn()

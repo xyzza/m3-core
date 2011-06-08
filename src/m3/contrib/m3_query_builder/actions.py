@@ -35,7 +35,7 @@ class QueryBuilderWindowAction(actions.Action):
     def run(self, request, context):
         params = {'select_connections_url': SelectConnectionWindowAction.absolute_url(),
                   'entity_items_url': EntitiyItemsListAction.absolute_url()}
-        window = ui.queryBuilderWindow(params=params)
+        window = ui.QueryBuilderWindow(params=params)
         return actions.ExtUIScriptResult(data=window)
 
 class SelectConnectionWindowAction(actions.Action):
@@ -46,7 +46,7 @@ class SelectConnectionWindowAction(actions.Action):
     shortname = 'm3-query-builder-select-connection'
 
     def run(self, request, context):
-        win = ui.selectConnectionsWindow()
+        win = ui.SelectConnectionsWindow()
         return actions.ExtUIScriptResult(data=win)
     
 
