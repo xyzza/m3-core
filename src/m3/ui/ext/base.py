@@ -19,6 +19,12 @@ from django.conf import settings
 from m3.ui.ext import render_template, render_component
 from m3.helpers import js, generate_client_id, normalize
 
+class ExtComponentException(Exception):
+    """
+    Ошибка М3-шного экстового компонента.
+    """
+
+
 #===============================================================================
 class ExtUIScriptRenderer(object):
     '''
@@ -245,7 +251,7 @@ class BaseExtComponent(object):
         elif isinstance(item, bool):
             res = str(item).lower()
             
-        elif isinstance(item, (int, float, decimal.Decimal)):    
+        elif isinstance(item, (int, float, decimal.Decimal, long)):
             res = item
         
         elif isinstance(item, datetime.date):    
@@ -263,7 +269,8 @@ class BaseExtComponent(object):
 
         else:
             # Эээээ... Выводится для себя
-            assert False, '"%s":"%s" not support' % (extjs_name, item)
+            raise ExtComponentException(u'Тип переданного параметра не '
+                u'поддерживается: "%s":"%s"' % (extjs_name, item))
         
         if res:
             conf_dict[extjs_name] = res
