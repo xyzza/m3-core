@@ -187,11 +187,12 @@ class BaseEntity(object):
     def _create_app2models_map(self):
         """ Возвращает словарь из полных имен моделей и физических имен таблиц """
         result = {}
-        for model in cache.get_models():
-            full_name = model._meta.app_label + '.' + model._meta.object_name
+        for entity in self.entities:
+            full_name = entity.name
+            model = cache.get_model(*full_name.split('.'))
             table_name = model._meta.db_table
             table = self.metadata.tables[table_name]
-            
+
             result[full_name] = table
         
         return result
