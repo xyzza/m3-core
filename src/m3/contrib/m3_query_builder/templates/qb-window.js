@@ -6,6 +6,7 @@
 
 var treeEntities = Ext.getCmp('{{ component.tree_entities.client_id }}');
 var grdSelectedEntities = Ext.getCmp('{{ component.grd_selected_entities.client_id }}');
+var grdLinks = Ext.getCmp('{{ component.grd_links.client_id }}');
 
 var treeAllFields = Ext.getCmp('{{ component.tree_all_fields.client_id }}');
 var treeGroupsFields = Ext.getCmp('{{ component.tree_groups_fields.client_id }}');
@@ -18,9 +19,41 @@ function selectConnection(){
     
     Ext.Ajax.request({
         url: '{{component.params.select_connections_url}}'
+        ,params: win.actionContextJson || {}
         ,success: function(response){
             loadMask.hide();
-            smart_eval(response.responseText);
+            var childWin = smart_eval(response.responseText);
+            childWin.fireEvent('fillNodes', treeAllFields.getRootNode().childNodes );
+            
+            // Подпись на нажатие "Выбор" и обработка результатов запроса
+            childWin.on('selectLinks', function(resObj){
+
+				var LinkRecord = Ext.data.Record.create([
+				    {name: 'entityFirst', mapping: 'entityFirst'},
+				    {name: 'outerFirst', mapping: 'outerFirst'},
+				    {name: 'entitySecond', mapping: 'entitySecond'},
+				    {name: 'outerSecond', mapping: 'outerSecond'},
+				    {name: 'value', mapping: 'value'}
+				]);
+				
+				
+				var newLinkRecord = new LinkRecord(
+				    {
+				    	entityFirst: resObj['firstEntity']['fieldName'],
+				    	outerFirst: resObj['firstEntity']['outer'],
+				    	entitySecond: resObj['secondEntity']['fieldName'],
+				    	outerSecond: resObj['secondEntity']['outer'],
+				    	value: String.format('{0}.{1} = {2}.{3}', 				    	
+				    		resObj['firstEntity']['entityName'],
+				    		resObj['firstEntity']['fieldName'],
+				    		resObj['secondEntity']['entityName'],
+				    		resObj['secondEntity']['fieldName']				    					    	
+				    	)				    	
+				    }
+				);
+		
+	        	grdLinks.getStore().add(newLinkRecord);
+            });
         }
         ,failure: function(){
         	loadMask.hide();
@@ -30,8 +63,8 @@ function selectConnection(){
 };
 
 /*Удаление связи*/
-function deleteConnection(){
-    
+function deleteConnection(){    
+    grdLinks.getStore().remove( grdLinks.getSelectionModel().getSelections() );
 }
 
 /*Закрытие окна*/
@@ -57,12 +90,6 @@ var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
 			var url = '{{ component.params.entity_items_url }}';
 			assert(url, 'Url for child window is not define');
 
-
-			// var loaderAllFields = treeAllFields.getLoader();
-			// loaderAllFields.url = url;
-			// loaderAllFields.baseParams = {'entity_name': entityId};
-			// loaderAllFields.load( treeAllFields.getRootNode() );
-
 			var loadMask = new Ext.LoadMask(win.body);
 			loadMask.show();
 			Ext.Ajax.request({
@@ -85,15 +112,15 @@ var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
 					);
 		        	selectedStore.add(newEntityRecord);
 
-					var root_node;
+					var rootNode;
 					// Алгоритм заполнения деревьев всеми полями
 					var massOfTreeFields = [treeAllFields, treeGroupsFields, treeConditionsFields];
-					for (var i=0; i<massOfTreeFields.length;i++){
+					for (var i=0; i<massOfTreeFields.length; i++){
 
-						root_node = massOfTreeFields[i].getRootNode();
+						rootNode = massOfTreeFields[i].getRootNode();
 						
-				        processResponse(response,  root_node);
-				        root_node.loaded = true;
+				        processResponse(response,  rootNode);
+				        rootNode.loaded = true;
 					}
 					
 				}
@@ -115,11 +142,12 @@ var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
 function processResponse(response, node){
     var json = response.responseText;    
     var o = response.responseData || Ext.decode(json);
+    
     node.beginUpdate();
     for(var i = 0, len = o.length; i < len; i++){
         var n = new Ext.tree.TreeNode(o[i]);
         
-        node.getOwnerTree().getLoader().doPreload(n);        
+        node.getOwnerTree().getLoader().doPreload(n);                
         if(n){
             node.appendChild(n);
         }

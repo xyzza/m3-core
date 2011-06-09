@@ -47,7 +47,7 @@ class SelectConnectionWindowAction(actions.Action):
 
     def run(self, request, context):
         win = ui.SelectConnectionsWindow()
-        return actions.ExtUIScriptResult(data=win)
+        return actions.ExtUIScriptResult(win)
     
 
 class EntitiesListAction(actions.Action):
