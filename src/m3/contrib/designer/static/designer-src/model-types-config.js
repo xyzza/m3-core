@@ -163,7 +163,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 text: 'Container'
             },
             childTypesRestrictions: {
-                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
+                disallowed: ['arrayStore', 'gridColumn', 'treeNode', 'jsonStore', 'pagingToolbar']
             },
             treeIconCls: 'designer-container'
         },
@@ -213,7 +213,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 }
             },
             childTypesRestrictions: {
-                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
+                disallowed: ['arrayStore', 'gridColumn', 'treeNode', 'jsonStore', 'pagingToolbar']
             },
             toolboxData: {
                 text: 'Panel',
@@ -243,7 +243,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 }
             },
             childTypesRestrictions: {
-                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
+                disallowed: ['arrayStore', 'gridColumn', 'treeNode', 'jsonStore', 'pagingToolbar']
             },
             toolboxData: {
                 text: 'Field set',
@@ -311,7 +311,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 }
             },
             childTypesRestrictions: {
-                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
+                disallowed: ['arrayStore', 'gridColumn', 'treeNode', 'jsonStore', 'pagingToolbar']
             },
             toolboxData: {
                 category: 'Containers',
@@ -700,7 +700,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 text: 'Toolbar'
             },
             childTypesRestrictions: {
-                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
+                disallowed: ['arrayStore', 'gridColumn', 'treeNode', 'jsonStore', 'pagingToolbar']
             },
             treeIconCls: 'designer-toolbar'
         },
@@ -883,7 +883,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             },
             childTypesRestrictions: {
                 allowed: ['gridColumn', 'arrayStore', 'toolbar', 'jsonStore', 'pagingToolbar'],
-                single: ['arrayStore', 'jsonStore', 'pagingToolbar']
+                single: ['arrayStore', 'jsonStore', 'pagingToolbar', 'treeNode']
             },
             treeIconCls: 'designer-grid-panel',
             toolboxData: {
@@ -1000,7 +1000,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 }
             },
             childTypesRestrictions: {
-                disallowed: ['arrayStore', 'gridColumn', 'jsonStore', 'pagingToolbar']
+                disallowed: ['arrayStore', 'gridColumn', 'treeNode', 'jsonStore', 'pagingToolbar']
             },
             isContainer: true,
             treeIconCls: 'designer-icon-page'
@@ -1276,7 +1276,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             },
             childTypesRestrictions: {
                 allowed: ['gridColumn'],
-                disallowed: ['arrayStore', 'jsonStore', 'pagingToolbar', 'toolbar']
+                disallowed: ['arrayStore', 'jsonStore', 'treeNode', 'pagingToolbar', 'toolbar']
             },
             treeIconCls: 'designer-grid-panel',
             toolboxData: {

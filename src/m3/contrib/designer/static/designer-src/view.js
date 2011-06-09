@@ -103,7 +103,9 @@ M3Designer.view.DesignView = Ext.extend(M3Designer.view.BaseView, {
         var childCfg = recursion.call(this, this._model.root);
 
         this._container.add(childCfg);
-        this._container.doLayout(true, true);
+        //Legacy code, все уже забыли причины
+        //this._container.doLayout(true, true);
+        this._container.doLayout();
     },
     createComponent: function (model) {
         return M3Designer.ui.ModelUIPresentaitionBuilder.build(model);
