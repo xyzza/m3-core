@@ -11,6 +11,7 @@ from m3.db.alchemy_wrapper import SQLAlchemyWrapper
 
 from django.conf import settings
 from django.db.models.loading import cache
+from django.db.models.fields import AutoField
 
 
 WRAPPER = SQLAlchemyWrapper(settings.DATABASES)
@@ -320,6 +321,10 @@ class BaseEntity(object):
                 for lf in model._meta.local_fields:
                     # Django может подсунуть прокси из functools вместо строки
                     verbose_name = lf.verbose_name if isinstance(lf.verbose_name, basestring) else ''
+                    
+                    if isinstance(lf, AutoField):
+                        verbose_name = ''
+                    
                     new_field = Field(name=lf.attname, verbose_name=verbose_name)
                     fields.append(new_field)
                     
@@ -327,7 +332,9 @@ class BaseEntity(object):
                 if not field.verbose_name:
                     m = cache.get_model(*model_name.split('.'))
                     f = m._meta.get_field(field.name)
-                    field.verbose_name = f.verbose_name
+                    if not isinstance(f, AutoField):
+                        field.verbose_name = f.verbose_name
+                        
                 fields.append(field)
         
         return fields

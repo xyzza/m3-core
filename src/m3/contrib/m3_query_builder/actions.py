@@ -74,5 +74,4 @@ class EntitiyItemsListAction(actions.Action):
 
     def run(self, request, context):           
         entity_items = get_entity_items(context.entity_name)
-        print entity_items            
         return actions.JsonResult(json.dumps(entity_items))

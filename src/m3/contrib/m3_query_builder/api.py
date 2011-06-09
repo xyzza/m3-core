@@ -56,9 +56,9 @@ def get_entity_items(entity_name):
         for field in fields:
             
             assert isinstance(field, Field)
-            
+
             node = {'leaf': True,
-                    'fields_entities': field.verbose_name or field.name}
+                    'fields_entities': field.verbose_name or field.alias or field.name}
             
             root_node.setdefault('children', []).append(node)
             
