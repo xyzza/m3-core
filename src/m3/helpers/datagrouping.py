@@ -477,11 +477,14 @@ def read_model(grouped, offset, level_index, level_keys, begin, end, data_provid
 
         #сортировка 
         sort_fields = []
+        # TODO: пока сортировка сделана только по одному полю
         if len(sorting.keys()) == 1:
-            if sorting.values()[0] == 'DESC':
-                sort_fields.append('-' + sorting.keys()[0])
-            else:
-                sort_fields.append(sorting.keys()[0])
+            #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
+            if (field and sorting.keys()[0] in aggregates.keys()) or not field:
+                if sorting.values()[0] == 'DESC':
+                    sort_fields.append('-' + sorting.keys()[0])
+                else:
+                    sort_fields.append(sorting.keys()[0])
         if field and not field in sorting:
             #нет заданной сортировки, отсортируем по этому полю
             sort_fields.append(field)
@@ -836,11 +839,12 @@ def index_model(grouped, level_index, level_keys, expandedItems, data_provider, 
             query = data_provider.get_data().values(field).distinct()
         #сортировка 
         sort_fields = []
-        if len(sorting.keys()) == 1:
-            if sorting.values()[0] == 'DESC':
-                sort_fields.append('-' + sorting.keys()[0])
-            else:
-                sort_fields.append(sorting.keys()[0])
+#        нет необходимости сортировать по полям, которые не группировочные
+#        if len(sorting.keys()) == 1:
+#            if sorting.values()[0] == 'DESC':
+#                sort_fields.append('-' + sorting.keys()[0])
+#            else:
+#                sort_fields.append(sorting.keys()[0])
         if field and not field in sorting:
             #нет заданной сортировки, отсортируем по этому полю
             sort_fields.append(field)
