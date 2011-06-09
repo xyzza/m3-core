@@ -434,11 +434,17 @@ M3Designer.controller.AppController = Ext.extend(Object, {
     /**
      * Обработчик при обновлении модели - перерисовка превью
      */
-    onModelUpdate: function () {
+    onModelUpdate: function (model) {
         this.refreshView();
+        var domElementId = M3Designer.Utils.parseDomId(model.id);
+
+        // Можно просто брать id элемента из модели ( domElementId )
+        var highlightedId = domElementId ==  this._lastHighlightedId ?
+                                this._lastHighlightedId : domElementId;
+
         /*Возвращаем Highlight элементу*/
-        this.selectTreeNodeByElementId(this._lastHighlightedId);
+        this.selectTreeNodeByElementId(highlightedId);
         /*Выделяем элемент в дереве*/
-        this.highlightElement(this._lastHighlightedId, true);
+        this.highlightElement(highlightedId, true);
     }
 });

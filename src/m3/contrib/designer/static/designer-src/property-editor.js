@@ -140,7 +140,7 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
                 };
             };
         };
-        this.fireEvent('modelUpdate');
+        this.fireEvent('modelUpdate', model);
     }
 });
 
