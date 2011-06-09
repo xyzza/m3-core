@@ -216,8 +216,8 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
                 if (model.childNodes[i].attributes.type === 'arrayStore') {
                     //Добавляем филды для array сторе для правильного рендеринга
                     var fieldsIndexes = ['id'];
-                    for (var i = 0; i<columns.length; i++){
-                        fieldsIndexes.push(columns[i].dataIndex);
+                    for (var x = 0; x<columns.length; x++){
+                        fieldsIndexes.push(columns[x].dataIndex);
                     };
                     store = new Ext.data.ArrayStore(
                         Ext.apply({
