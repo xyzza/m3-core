@@ -114,7 +114,7 @@ class ExtForm(BaseExtPanel):
             '''
             Конвертирует и присваивает значение value в соответствии типу item.
             '''
-            if isinstance(item, (ExtStringField, ExtNumberField,)):
+            if isinstance(item, ExtStringField):
                 if value:
                     item.value = unicode(value)
                 else:
