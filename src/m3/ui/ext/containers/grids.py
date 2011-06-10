@@ -522,7 +522,7 @@ class BaseExtGridColumn(ExtUIComponent):
         # Ширина
         self.width = BaseExtGridColumn.GRID_COLUMN_DEFAULT_WIDTH
         
-        # Редакор, если колонка может быть редактируемой
+        # Редактор, если колонка может быть редактируемой
         self.editor = None
         
         # Список рендереров колонки

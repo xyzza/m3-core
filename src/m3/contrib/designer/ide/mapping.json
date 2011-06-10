@@ -197,7 +197,12 @@
 		,"customLoad":"custom_load"
 		,"readOnly":"read_only"
 		,"allowContainerDrop":"allow_container_drop"
-		,"nodes":"nodes"				
+		,"allowParentInsert":"allow_parent_insert"
+		,"enableDrag":"enable_drag"
+		,"enableDrop":"enable_drop"
+		
+		,"nodes":"nodes"	
+		,"enableDD":"drag_drop"			
 		,"urlShortName": {
 			"type":"shortname"
 			,"value":"url"
