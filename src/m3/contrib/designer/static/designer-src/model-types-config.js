@@ -965,6 +965,12 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: 'padding:5px',
                     isInitProperty: true
                 },
+                buttonAlign: {
+                    defaultValue: 'right',
+                    propertyType: 'enum',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                },
                 title: {
                     defaultValue: 'New window',
                     isInitProperty: true,
