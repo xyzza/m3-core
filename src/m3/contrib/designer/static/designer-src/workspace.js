@@ -117,18 +117,20 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
         storage.on('load', this.onSuccessLoad.createDelegate(this));
 
         storage.on('save', function (jsonObj) {
-            var title = 'Сохранение формы', message ='', icon = 'icon-accept';
             if (jsonObj.success) {
-                message = 'Данные успешно сохранены';
+                new Ext.ux.Notification({
+                    title: 'Сохранение формы',
+                    html: 'Данные успешно сохранены',
+                    iconCls: 'icon-accept'}).show(document);
             } else {
-                title = 'Ошибка';
-                message = jsonObj.json;
-                icon = 'icon-error';
+                Ext.Msg.show({
+                    title: 'Ошибка',
+                    msg: 'Ошибка при сохранении файла\n'+jsonObj.json,
+                    icon: Ext.MessageBox.WARNING,
+                    buttons: Ext.Msg.OK
+                });
             }
-            new Ext.ux.Notification({
-                        title: title,
-                        html: message,
-                        iconCls: icon}).show(document);
+
         });
 
         storage.on('preview', function (jsonObj) {

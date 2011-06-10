@@ -944,12 +944,20 @@ function initCodeEditorHandlers(codeEditor, path){
             },
             success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
-                var title = 'Сохранение', message ='', icon = 'icon-accept';
                 if (obj.success)
-                    message = 'Изменения были успешно сохранены';
+                    new Ext.ux.Notification({
+                        title: 'Сохранение',
+                        html: 'Изменения были успешно сохранены',
+                        iconCls: 'icon-accept'
+                    }).show(document);
                 else if (!obj.success && obj.error){
-                    message = 'Ошибка при сохранении файла\n'+obj.error;
-                    icon = 'icon-error';
+                    Ext.Msg.show({
+                        title: 'Ошибка',
+                        msg: 'Ошибка при сохранении файла\n'+obj.error,
+                        icon: Ext.MessageBox.WARNING,
+                        buttons: Ext.Msg.OK,
+                        animEl: codeEditor.id
+                    });
                 };
                 new Ext.ux.Notification({
                     title: title,
