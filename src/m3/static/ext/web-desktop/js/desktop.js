@@ -759,8 +759,14 @@ Ext.extend(Ext.ux.TaskBar.TaskButton, Ext.Button, {
 
 
 Ext.ux.Clock = Ext.extend(Ext.Toolbar.TextItem,{
-    currTime: function(){return new Date().format('d (D) M Y G:i:s')}
-    ,initComponent:function() {
+	shortdays: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+    currTime: function(){
+		var d = new Date();
+		var dateStr = d.format('d (XXX) M Y G:i:s');
+		var day = this.shortdays[d.getDay()];
+		return dateStr.replace('XXX', day);
+	}
+    ,initComponent: function() {
         Ext.apply(this, {
             text: this.currTime()
             ,cls: "x-text-icon"
@@ -768,15 +774,14 @@ Ext.ux.Clock = Ext.extend(Ext.Toolbar.TextItem,{
         });
         Ext.ux.Clock.superclass.initComponent.apply(this, arguments);
         
-        this.clock_updater= {
+        this.clock_updater = {
             run: this.update,
             scope: this,
             interval: 1000 //1 second
         }
         Ext.TaskMgr.start(this.clock_updater);
     }
-    ,update: function()
-    {
+    ,update: function() {
         this.setText(this.currTime())
     }
 });
