@@ -290,6 +290,7 @@
 	"config": {
 		"name": "name"
 		,"title": "title"
+        ,"buttonAlign": "button_align"
 		,"layout": "layout"	
 		,"width": "width"
 		,"height": "height"
@@ -301,6 +302,7 @@
         ,"resizable": "resizable"
 		,"modal": "modal"
 		,"templateGlobals": "template_globals"
+
 	},
 	"parent": "panel"
 },
