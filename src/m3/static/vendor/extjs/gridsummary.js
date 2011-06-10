@@ -230,7 +230,23 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
     updateSummaryWidth : function() {
         // all browsers add a 1 pixel space between the edges of the vert. and hori. scrollbars,
         // so subtract one from the grid header width before setting the summary row's width
-        this.getSummaryNode().setWidth(this.getGridHeader().getWidth() - 1);
+        //kirov this.getSummaryNode().setWidth(this.getGridHeader().getWidth() - 1);
+    	if (this.getSummaryNode()) {
+    		this.getSummaryNode().setWidth(this.view.getTotalWidth()); //kirov
+    	}
+    	// kirov
+    	if (Ext.isIE) {
+	    	var elWidth = this.grid.getGridEl().getSize().width;
+	    	if (this.grid.getColumnModel().getTotalWidth()+this.view.getScrollOffset() > elWidth){
+	    		//console.log('scroll');
+	    		//debugger;
+	    		this.view.summaryWrap.dom.style['overflow-y'] = 'hidden';
+	    		this.view.summaryWrap.setHeight(((Ext.getScrollBarWidth ? Ext.getScrollBarWidth() : this.scrollBarWidth) + 18 /* 18 = row-expander height */));
+	    	} else {
+	    		this.view.summaryWrap.dom.style['overflow-y'] = 'visible';
+	    		this.view.summaryWrap.setHeight((Ext.getScrollBarWidth ? Ext.getScrollBarWidth() : this.scrollBarWidth));
+	    	}
+    	}
     },
 
     // private
@@ -302,6 +318,12 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
     // private
     toggleGridHScroll : function(allowHScroll) {
         // toggle GridView's horizontal scrollbar
+    	//kirov
+		if (allowHScroll){
+    		this.view.scroller.dom.style.overflow = 'auto';
+    	} else {
+    		this.view.scroller.dom.style.overflow = 'hidden';
+    	}
         this.view.scroller[allowHScroll === undefined ? 'toggleClass' : allowHScroll ? 'removeClass' : 'addClass']('x-grid3-gridsummary-hide-hscroll');
     },
 
