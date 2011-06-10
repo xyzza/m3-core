@@ -59,11 +59,11 @@ def get_entity_items(entity_name):
 
             node = {'leaf': True,
                     'fields_entities': field.verbose_name or field.alias or field.name,
-                    'entity_name': entity_name}
+                    'entity_name': entity_name,
+                    'draggable':True}
             
             root_node.setdefault('children', []).append(node)
             
         res.append(root_node)
-    
-    print res
+        
     return res

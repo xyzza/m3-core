@@ -12,6 +12,10 @@ var treeAllFields = Ext.getCmp('{{ component.tree_all_fields.client_id }}');
 var treeGroupsFields = Ext.getCmp('{{ component.tree_groups_fields.client_id }}');
 var treeConditionsFields = Ext.getCmp('{{ component.tree_conditions_fields.client_id }}'); 
 
+
+var grdSelectedFields = Ext.getCmp('{{ component.grd_selected_fields.client_id }}'); 
+
+
 /*Выбор связи*/
 function selectConnection(){
     var loadMask = new Ext.LoadMask(win.body);
@@ -155,3 +159,87 @@ function processResponse(response, node){
     node.endUpdate();
 }
 
+
+/**
+ * D&d из дерева сущностей в выбранные сущности. Обработчик.
+ */
+grdSelectedFields.on('afterrender', function(){
+	var selectFieldsDropTargetEl = grdSelectedFields.getView().scroller.dom;
+	var selectFieldsDropTarget = new Ext.dd.DropTarget(selectFieldsDropTargetEl, {
+	    ddGroup    : 'TreeDD',
+	    notifyDrop : function(ddSource, e, data){  
+			__addSelectField(data.node);	 			 		
+	    }
+	});	
+})
+
+/**
+ * Обработчик кнопки добавить
+ */
+function addSelectField(){
+	var node = treeAllFields.getSelectionModel().getSelectedNode();	
+	if (node) {
+		__addSelectField(node);
+	}
+}
+
+/**
+ * Непосредственная логика добавления поля
+ */
+function __addSelectField(node){
+	var SelectedRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
+	    {name: 'selectedField', mapping: 'selectedField'},
+	    {name: 'entity', mapping: 'entity'},
+	]);
+
+	var selectedField = node.attributes['fields_entities'];
+	var entity = node.attributes['entity_name'];
+	
+	var newSelectedRecord = new SelectedRecord(
+	    {selectedField: selectedField,
+	    entity: entity}
+	);
+	grdSelectedFields.getStore().add(newSelectedRecord);
+}
+
+/**
+ * Поднимает вверх выбранное поле
+ */
+function fieldUp(){	
+	var rec = grdSelectedFields.getSelectionModel().getSelectedCell();
+	if (rec && rec[0] > 0){
+		var currentRecord = grdSelectedFields.getStore().getAt(rec[0]);
+		
+		grdSelectedFields.getStore().remove(currentRecord);		
+		grdSelectedFields.getStore().insert(rec[0] - 1, currentRecord);
+		
+		grdSelectedFields.getSelectionModel().select(rec[0] - 1, rec[1]);
+	}	
+}
+
+/**
+ * Опускает вниз выбранное поле
+ */
+function fieldDown(){
+	var rec = grdSelectedFields.getSelectionModel().getSelectedCell();
+
+	if (rec && rec[0] < grdSelectedFields.getStore().getCount()-1){
+		var currentRecord = grdSelectedFields.getStore().getAt(rec[0]);		
+		grdSelectedFields.getStore().remove(currentRecord);		
+		grdSelectedFields.getStore().insert(rec[0] + 1, currentRecord);
+		
+		grdSelectedFields.getSelectionModel().select(rec[0] + 1, rec[1]);
+	}	
+}
+
+/*Удаление поля в гриде выбранных полей*/
+function deleteSelectField(){    
+	var rec = grdSelectedFields.getSelectionModel().getSelectedCell();
+	if (rec) {
+		var currentRecord = grdSelectedFields.getStore().getAt(rec[0]);
+		 grdSelectedFields.getStore().remove(currentRecord);
+	}
+}
+
+// TODO: Сделать модель, которая будет определять добавление и удаление
+// полей сущности в деревья на вкладках "Поля", "Группировка", "Условия"
