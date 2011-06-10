@@ -112,6 +112,12 @@ M3Designer.ModelTransfer = Ext.apply({},{
                     }
                 }
             }
+            //Пробегаемся по всем свойствам, и уничтожаем пустые значения
+            for (p in node){
+                if (node[p] == ""){
+                    delete node[p];
+                };
+            };
             return node;
         };
 
