@@ -22,9 +22,16 @@ function(){
 	    ,useArrows: true
 	    ,autoScroll: false
 	    ,animate: true
-	    {% if component.drag_drop and not component.read_only%} 
-		,enableDD: true 
-		,dropConfig: {allowContainerDrop: {{ component.allow_container_drop|lower }} }
+
+		{% if component.drag_drop and not component.read_only%} 
+			,enableDD: true
+			,dropConfig: {
+				allowContainerDrop: {{ component.allow_container_drop|lower }},
+				allowParentInsert: {{ component.allow_parent_insert|lower }}
+			}
+		{% else %}
+			,enableDrop: {{ component.enable_drop|lower }} 
+			,enableDrag: {{ component.enable_drag|lower }} 	   		
 		{% endif %}
 	    ,containerScroll: true
 	    ,border: false

@@ -1133,11 +1133,20 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 ddGroup: {
                     defaultValue: 'TreeDD'
                 },
-                enableDragDrop: {
+                enableDD: {
                     defaultValue: false
                 },
                 allowContainerDrop: {
                     defaultValue: true
+                },
+                allowParentInsert: {
+                    defaultValue: false
+                },
+                enableDrag: {
+                    defaultValue: false
+                },
+                enableDrop: {
+                    defaultValue: false
                 }
             },
             childTypesRestrictions: {

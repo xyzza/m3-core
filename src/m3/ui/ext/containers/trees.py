@@ -35,7 +35,8 @@ class ExtTree(BaseExtPanel):
         # Текст для корневого элемента
         self.root_text = None
         
-        # Возможность использовать drag & drop
+        # Возможность использовать drag & drop.
+        # То есть одновременные
         self.drag_drop = False
         
         # Если выставлен данный атрибут, то работает схема:
@@ -49,6 +50,15 @@ class ExtTree(BaseExtPanel):
         
         # разрешить перетаскивать элементы в корень (путем кидания просто в контейнер)
         self.allow_container_drop = True 
+        
+        # Разрешает вставку узлов между родительскими элементами
+        self.allow_parent_insert = False
+                
+        # Разрешить только дропить (перемещать в дерево) 
+        self.enable_drop = False
+        
+        # Разрешить только драгить (перемещать из дерево) 
+        self.enable_drag = False
                 
         self.init_component(*args, **kwargs)
         
