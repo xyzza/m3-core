@@ -18,7 +18,8 @@ M3Designer.model.ModelTypeLibrary = Ext.apply({}, {
         parentDockType: ['tbar', 'bbar', 'fbar', '(none)'],
         //addressField
         level: ['place', 'street', 'house', 'flat'],
-        viewMode: ['one','two', 'three']
+        viewMode: ['one','two', 'three'],
+        buttonAlign: ['left', 'center', 'right']
     },
 
     /**
