@@ -674,6 +674,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
     }
 })
 
+Ext.ns('Ext.m3');
 /**
  * Грид с множественной серверной группировкой на базе Ext.ux.grid.livegrid.GridPanel
  * 
@@ -1175,9 +1176,10 @@ Ext.extend(Ext.ux.grid.MultiGroupingSummary, Ext.util.Observable, {
             ds      = g.store,
             cs      = this.view.getColumnData(),
             cm      = g.getColumnModel(),
-            rs      = ds.getRange(),
-            data	= ds.totalRow || {},//data    = this.calculate(rs, cm), //kirov
-            buf     = this.renderSummary({data: data}, cs, cm);
+            rs      = ds.getRange();
+
+		var data = (ds.reader.jsonData) ? ds.reader.jsonData.totalRow : {};
+		var buf = this.renderSummary({data: data}, cs, cm);
 
     	if (!this.view.summaryWrap) {
             this.view.summaryWrap = Ext.DomHelper.insertAfter(this.view.scroller, {
