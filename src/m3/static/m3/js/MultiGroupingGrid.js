@@ -447,6 +447,9 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 			var column = this.groupedColumns[indent];
 			var count = record.json.count;
 			v = record.json[this.dataDisplayField];
+			if (v == null) {
+				v = "";//"<пусто>";
+			}
 			var col_name = this.grid.colModel.getColumnHeader(this.grid.colModel.findColumnIndex(column));
 			// Различия для браузеров в отрисовке иконок разворачивания узла. Быть может можно привести к более общему формату, но разбираться пока времени нет
 			if (Ext.isIE6 || Ext.isIE7) {
@@ -539,7 +542,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 			var row = this.grid.store.getAt(rowIndex);
 			if (!row._expanded) {
 		        row._expanded = true;
-		        var obj = {index: row.json.lindex, id: row.data[this.dataIdField], count: -1, expandedItems:[]};
+		        var obj = {index: row.json.lindex, id: row.json[this.dataIdField], count: -1, expandedItems:[]};
 		        // нужно также учесть уровень, на котором располагается элемент
 		        var level = row.json.indent;
 		        // сформируем набор ключевых значений, чтобы узнать родительский раскрытый узел
