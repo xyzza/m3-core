@@ -32,6 +32,8 @@ cmbFunction.getStore().loadData(data);
 
 
 var treeConditionsFields = Ext.getCmp('{{ component.tree_conditions_fields.client_id }}');
+var grdConditionsFields = Ext.getCmp('{{ component.grd_conditions.client_id }}');
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Общие функции
@@ -319,6 +321,22 @@ function deleteGroupSummField(){
 
 ////////////////////////////////////////////////////////////////////////////////
 // Вкладка - Условия
+
+grdConditionsFields.on('afterrender', function(){
+	onAfterRenderGrid(grdConditionsFields);
+	
+	// TODO: Открывать окно, где можно выбрать различные условия
+});
+
+function addCondition(){
+	addFieldBtn(treeConditionsFields, grdConditionsFields);
+}
+
+
+function deleteCondition(){	
+	deleteField(grdConditionsFields);	
+}
+
 
 // TODO: Сделать модель, которая будет определять добавление и удаление
 // полей сущности в деревья на вкладках "Поля", "Группировка", "Условия"

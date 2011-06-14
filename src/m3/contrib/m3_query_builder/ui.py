@@ -101,9 +101,9 @@ class QueryBuilderWindow(ExtWindow):
         cont.layout = 'border'
         cont.title = u'Таблицы и связи'
         
-        cnt_container_2 = ExtContainer()
-        cnt_container_2.region = 'center'
-        cnt_container_2.layout = 'border'
+        cnt_entities = ExtContainer()
+        cnt_entities.region = 'center'
+        cnt_entities.layout = 'border'
         
         grd_selected_entities = ExtGrid()
         grd_selected_entities.drag_drop = True
@@ -115,7 +115,6 @@ class QueryBuilderWindow(ExtWindow):
         grd_selected_entities.header = True
         
         store_selected_entities = ExtDataStore()
-        store_selected_entities.id_index = 0
         
         entity_name = ExtGridColumn()
         entity_name.header = u'Наименование'
@@ -146,7 +145,7 @@ class QueryBuilderWindow(ExtWindow):
         dstore_links = ExtDataStore()
         
         clmn_entity_first = ExtGridColumn()
-        clmn_entity_first.header = u'Сущность 1'
+        clmn_entity_first.header = u'Поле 1'
         clmn_entity_first.data_index = 'entityFirst'
         clmn_entity_first.menu_disabled = True
         
@@ -157,7 +156,7 @@ class QueryBuilderWindow(ExtWindow):
         clmn_entity_first_type.data_index = 'outerFirst'
         
         clmn_entity_second = ExtGridColumn()
-        clmn_entity_second.header = u'Сущность 2'
+        clmn_entity_second.header = u'Поле 2'
         clmn_entity_second.data_index = 'entitySecond'
         clmn_entity_second.menu_disabled = True
         
@@ -179,13 +178,12 @@ class QueryBuilderWindow(ExtWindow):
         tree_entities.drag_drop_group = 'TreeDD'
         tree_entities.header = True
         tree_entities.width = 250
-        tree_entities.drag_drop = True
         tree_entities.region = 'west'
         
-        clmn_gridColumn_8 = ExtGridColumn()
-        clmn_gridColumn_8.header = u'Схемы'
-        clmn_gridColumn_8.data_index = 'schemes'
-        clmn_gridColumn_8.menu_disabled = True
+        clmn_entities = ExtGridColumn()
+        clmn_entities.header = u'Схемы'
+        clmn_entities.data_index = 'schemes'
+        clmn_entities.menu_disabled = True
         
         grd_selected_entities.store = store_selected_entities
         grd_links.top_bar = tb_selected_entities
@@ -194,11 +192,11 @@ class QueryBuilderWindow(ExtWindow):
         grd_selected_entities.columns.extend([entity_name])
         tb_selected_entities.items.extend([btn_select_link, btn_delete_link])
         grd_links.columns.extend([clmn_entity_first, clmn_entity_first_type, clmn_entity_second, clmn_entity_second_type, clmn_descr])
-        cnt_container_2.items.extend([grd_selected_entities, grd_links])
-        tree_entities.columns.extend([clmn_gridColumn_8])
-        cont.items.extend([cnt_container_2, tree_entities])
+        cnt_entities.items.extend([grd_selected_entities, grd_links])
+        tree_entities.columns.extend([clmn_entities])
+        cont.items.extend([cnt_entities, tree_entities])
         
-        self.cnt_container_2 = cnt_container_2
+        self.cnt_entities = cnt_entities
         self.grd_selected_entities = grd_selected_entities
         self.store_selected_entities = store_selected_entities
         self.entity_name = entity_name
@@ -213,11 +211,11 @@ class QueryBuilderWindow(ExtWindow):
         self.clmn_entity_second_type = clmn_entity_second_type
         self.clmn_descr = clmn_descr
         self.tree_entities = tree_entities
-        self.clmn_gridColumn_8 = clmn_gridColumn_8
+        self.clmn_entities = clmn_entities
         
         return cont
 
-                                                                                                                                                                        
+                                                                                                                                                                                
     def init_fields(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
@@ -477,49 +475,73 @@ class QueryBuilderWindow(ExtWindow):
         cont.title = u'Условия'
         
         tree_conditions_fields = ExtTree()
-        tree_conditions_fields.flex = 0
         tree_conditions_fields.layout = 'auto'
-        tree_conditions_fields.title = u'Все поля'
+        tree_conditions_fields.enable_drag = True
+        tree_conditions_fields.width = 250
         tree_conditions_fields.region = 'west'
+        tree_conditions_fields.title = u'Все поля'
         tree_conditions_fields.root_text = 'Root'
         tree_conditions_fields.header = True
-        tree_conditions_fields.width = 250
         
-        clmn_fields_entities = ExtGridColumn()
-        clmn_fields_entities.header = u'Условия'
-        clmn_fields_entities.data_index = 'fields_entities'
-        clmn_fields_entities.menu_disabled = True
+        clmn_cond_fields_entities = ExtGridColumn()
+        clmn_cond_fields_entities.header = u'Поля'
+        clmn_cond_fields_entities.data_index = 'fields_entities'
+        clmn_cond_fields_entities.menu_disabled = True
         
-        grd_gridpanel_1 = ExtGrid()
-        grd_gridpanel_1.layout = 'auto'
-        grd_gridpanel_1.title = u'Условия'
-        grd_gridpanel_1.region = 'center'
-        grd_gridpanel_1.header = True
+        grd_conditions = ExtGrid()
+        grd_conditions.layout = 'auto'
+        grd_conditions.title = u'Условия'
+        grd_conditions.region = 'center'
+        grd_conditions.header = True
         
-        jstore_select_entities = ExtJsonStore()
-        jstore_select_entities.id_property = 'id'
-        jstore_select_entities.store_id = 'newJsonStore'
+        tb_cond = ExtToolBar()
+        tb_cond.layout = 'toolbar'
         
-        clmn_gridColumn_2 = ExtGridColumn()
-        clmn_gridColumn_2.header = u'Условия'
-        clmn_gridColumn_2.data_index = 'conditions'
-        clmn_gridColumn_2.menu_disabled = True
+        btn_add_condition = ExtButton()
+        btn_add_condition.text = u'Добавить'
+        btn_add_condition.icon_cls = 'add_item'
+        btn_add_condition.handler = 'addCondition'
         
-        grd_gridpanel_1.store = jstore_select_entities
+        btn_del_condition = ExtButton()
+        btn_del_condition.text = u'Удалить'
+        btn_del_condition.icon_cls = 'delete_item'
+        btn_del_condition.handler = 'deleteCondition'
         
-        tree_conditions_fields.columns.extend([clmn_fields_entities])
-        grd_gridpanel_1.columns.extend([clmn_gridColumn_2])
-        cont.items.extend([tree_conditions_fields, grd_gridpanel_1])
+        astore_cond = ExtDataStore()
+        astore_cond.store_id = 'newArrayStore'
+        
+        clmn_cond_entity = ExtGridColumn()
+        clmn_cond_entity.menu_disabled = True
+        clmn_cond_entity.header = u'Сущность'
+        clmn_cond_entity.data_index = 'entityName'
+        clmn_cond_entity.hidden = True
+        
+        clmn_condition = ExtGridColumn()
+        clmn_condition.header = u'Условие'
+        clmn_condition.data_index = 'fieldName'
+        clmn_condition.menu_disabled = True
+        
+        grd_conditions.top_bar = tb_cond
+        grd_conditions.store = astore_cond
+        
+        tree_conditions_fields.columns.extend([clmn_cond_fields_entities])
+        tb_cond.items.extend([btn_add_condition, btn_del_condition])
+        grd_conditions.columns.extend([clmn_cond_entity, clmn_condition])
+        cont.items.extend([tree_conditions_fields, grd_conditions])
         
         self.tree_conditions_fields = tree_conditions_fields
-        self.clmn_fields_entities = clmn_fields_entities
-        self.grd_gridpanel_1 = grd_gridpanel_1
-        self.jstore_select_entities = jstore_select_entities
-        self.clmn_gridColumn_2 = clmn_gridColumn_2
+        self.clmn_cond_fields_entities = clmn_cond_fields_entities
+        self.grd_conditions = grd_conditions
+        self.tb_cond = tb_cond
+        self.btn_add_condition = btn_add_condition
+        self.btn_del_condition = btn_del_condition
+        self.astore_cond = astore_cond
+        self.clmn_cond_entity = clmn_cond_entity
+        self.clmn_condition = clmn_condition
         
         return cont
 
-                                                
+                                                                                                        
 class SelectConnectionsWindow(ExtWindow):
 
     def __init__(self, *args, **kwargs):
