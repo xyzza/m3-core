@@ -1,20 +1,102 @@
-/**
- * User: kirs
- * Date: 02.06.11
- * Time: 13:49
- */
 
 var treeEntities = Ext.getCmp('{{ component.tree_entities.client_id }}');
 var grdSelectedEntities = Ext.getCmp('{{ component.grd_selected_entities.client_id }}');
 var grdLinks = Ext.getCmp('{{ component.grd_links.client_id }}');
 
+
 var treeAllFields = Ext.getCmp('{{ component.tree_all_fields.client_id }}');
-var treeGroupsFields = Ext.getCmp('{{ component.tree_groups_fields.client_id }}');
-var treeConditionsFields = Ext.getCmp('{{ component.tree_conditions_fields.client_id }}'); 
-
-
 var grdSelectedFields = Ext.getCmp('{{ component.grd_selected_fields.client_id }}'); 
 
+
+var treeGroupsFields = Ext.getCmp('{{ component.tree_groups_fields.client_id }}');
+var grdGroupFields = Ext.getCmp('{{ component.grd_group_fields.client_id }}');
+var grdGroupSummFields = Ext.getCmp('{{ component.grd_gruop_summ_fields.client_id }}');
+
+
+
+var cmbFunction = Ext.getCmp('{{ component.combo_function.client_id }}');
+
+// Данные для суммируемых полей 
+var functionsObj = {
+	'Минимум': 'min',
+	'Максимум': 'max',
+	'Количество': 'count'
+} 
+
+var data = [];
+for (k in functionsObj){
+	data.push([functionsObj[k], k])	
+}
+
+cmbFunction.getStore().loadData(data);
+
+
+var treeConditionsFields = Ext.getCmp('{{ component.tree_conditions_fields.client_id }}');
+
+////////////////////////////////////////////////////////////////////////////////
+// Общие функции
+/*
+ * Удаление поля в произвольном гриде
+ */
+function deleteField(grid){	
+	var sm =  grid.getSelectionModel();
+	if (sm instanceof Ext.grid.RowSelectionModel){
+		 grid.getStore().remove( sm.getSelections() );
+	} else if (sm instanceof Ext.grid.CellSelectionModel) {
+		var rec = sm.getSelectedCell();
+		if (rec) {
+			var currentRecord = grid.getStore().getAt(rec[0]);
+			 grid.getStore().remove(currentRecord);
+		}
+	}
+}
+
+/**
+ * Добавление поля в произвольный грид c полями: 
+ * 	dataIndex='fieldName' 
+ * 	dataIndex='entityName'
+ */
+function addField(grid, node){
+	var Record = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
+	    {name: 'fieldName', mapping: 'fieldName'},
+	    {name: 'entityName', mapping: 'entityName'},
+	]);
+
+	var fieldName = node.attributes['fields_entities'];
+	var entityName = node.attributes['entity_name'];
+	
+	var newRecord = new Record(
+	    {'fieldName': fieldName,
+	    'entityName': entityName}
+	);
+	grid.getStore().add(newRecord);
+}
+
+/**
+ * D&d из дерева сущностей в произвольный грид. Общий обработчик.
+ */
+function onAfterRenderGrid(grid){
+	var fieldsDropTargetEl = grid.getView().scroller.dom;
+	var selectFieldsDropTarget = new Ext.dd.DropTarget(fieldsDropTargetEl, {
+	    ddGroup    : 'TreeDD',
+	    notifyDrop : function(ddSource, e, data){  
+			addField(grid, data.node);	 			 		
+	    }
+	});	
+}
+
+/**
+ * Обработчик произвольной кнопки добавить
+ */
+function addFieldBtn(tree, grid){
+	var node = tree.getSelectionModel().getSelectedNode();	
+	if (node) {
+		addField(grid, node);		
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Вкладка - Таблица и связи
 
 /*Выбор связи*/
 function selectConnection(){
@@ -67,8 +149,8 @@ function selectConnection(){
 };
 
 /*Удаление связи*/
-function deleteConnection(){    
-    grdLinks.getStore().remove( grdLinks.getSelectionModel().getSelections() );
+function deleteConnection(){
+	deleteField(grdLinks);       
 }
 
 /*Закрытие окна*/
@@ -159,47 +241,20 @@ function processResponse(response, node){
     node.endUpdate();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Вкладка - Поля
 
-/**
- * D&d из дерева сущностей в выбранные сущности. Обработчик.
- */
+
 grdSelectedFields.on('afterrender', function(){
-	var selectFieldsDropTargetEl = grdSelectedFields.getView().scroller.dom;
-	var selectFieldsDropTarget = new Ext.dd.DropTarget(selectFieldsDropTargetEl, {
-	    ddGroup    : 'TreeDD',
-	    notifyDrop : function(ddSource, e, data){  
-			__addSelectField(data.node);	 			 		
-	    }
-	});	
+	onAfterRenderGrid(grdSelectedFields);
 })
 
-/**
- * Обработчик кнопки добавить
- */
 function addSelectField(){
-	var node = treeAllFields.getSelectionModel().getSelectedNode();	
-	if (node) {
-		__addSelectField(node);
-	}
+	addFieldBtn(treeAllFields, grdSelectedFields);
 }
 
-/**
- * Непосредственная логика добавления поля
- */
-function __addSelectField(node){
-	var SelectedRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
-	    {name: 'selectedField', mapping: 'selectedField'},
-	    {name: 'entity', mapping: 'entity'},
-	]);
-
-	var selectedField = node.attributes['fields_entities'];
-	var entity = node.attributes['entity_name'];
-	
-	var newSelectedRecord = new SelectedRecord(
-	    {selectedField: selectedField,
-	    entity: entity}
-	);
-	grdSelectedFields.getStore().add(newSelectedRecord);
+function deleteSelectField(){
+	deleteField(grdSelectedFields);
 }
 
 /**
@@ -232,14 +287,38 @@ function fieldDown(){
 	}	
 }
 
-/*Удаление поля в гриде выбранных полей*/
-function deleteSelectField(){    
-	var rec = grdSelectedFields.getSelectionModel().getSelectedCell();
-	if (rec) {
-		var currentRecord = grdSelectedFields.getStore().getAt(rec[0]);
-		 grdSelectedFields.getStore().remove(currentRecord);
-	}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Вкладка - Группировка
+
+grdGroupFields.on('afterrender', function(){
+	onAfterRenderGrid(grdGroupFields);
+});
+
+grdGroupSummFields.on('afterrender', function(){
+	onAfterRenderGrid(grdGroupSummFields);
+});
+
+function addGroupField(){
+	addFieldBtn(treeGroupsFields, grdGroupFields);
 }
+
+function addGroupSummField(){
+	addFieldBtn(treeGroupsFields, grdGroupSummFields);
+}
+
+function deleteGroupField(){	
+	deleteField(grdGroupFields);	
+}
+
+function deleteGroupSummField(){	
+	deleteField(grdGroupSummFields);	
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Вкладка - Условия
 
 // TODO: Сделать модель, которая будет определять добавление и удаление
 // полей сущности в деревья на вкладках "Поля", "Группировка", "Условия"
