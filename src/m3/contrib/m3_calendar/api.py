@@ -1,9 +1,9 @@
 #coding:utf-8
-'''
+"""
 Created on 31.03.2011
 
 @author: Excinsky
-'''
+"""
 import calendar
 from datetime import date, timedelta, datetime
 from django.core.exceptions import ObjectDoesNotExist
