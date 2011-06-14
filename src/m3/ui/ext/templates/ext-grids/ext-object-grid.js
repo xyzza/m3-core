@@ -13,5 +13,6 @@
 	function topBarDelete(){ objGrid.onDeleteRecord();}
 	function topBarRefresh(){ objGrid.refreshStore(); }
 	function onEditRecord(){ objGrid.onEditRecord(); }
+	{{ component.render_globals }}
 	return objGrid;
 })()
