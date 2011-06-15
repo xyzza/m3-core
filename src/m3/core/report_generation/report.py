@@ -43,14 +43,12 @@ class OORunner(object):
     CONNECTION_RETRY_COUNT = 5            
 
     @staticmethod
-    def get_desktop(start=False):
+    def get_desktop():
         '''
         Запускает сервер (если start = True), и возвращает объект Desktop
         '''        
         localContext = uno.getComponentContext()
         resolver = localContext.ServiceManager.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", localContext)
-        if start:
-            OORunner.start_server()   
         
         # Пытаемся соединиться с сервером
         for i in range(OORunner.CONNECTION_RETRY_COUNT):
