@@ -23,7 +23,8 @@ class QueryBuilderActionsPack(actions.ActionPack):
         self.actions.extend([QueryBuilderWindowAction(),
                              SelectConnectionWindowAction(),
                              EntitiesListAction(), 
-                             EntitiyItemsListAction()])
+                             EntitiyItemsListAction(),
+                             ConditionWindowAction()])
 
 class QueryBuilderWindowAction(actions.Action):
     '''
@@ -34,7 +35,8 @@ class QueryBuilderWindowAction(actions.Action):
 
     def run(self, request, context):
         params = {'select_connections_url': SelectConnectionWindowAction.absolute_url(),
-                  'entity_items_url': EntitiyItemsListAction.absolute_url()}
+                  'entity_items_url': EntitiyItemsListAction.absolute_url(),
+                  'condition_url': ConditionWindowAction.absolute_url()}
         window = ui.QueryBuilderWindow(params=params)
         return actions.ExtUIScriptResult(data=window)
 
@@ -75,3 +77,15 @@ class EntitiyItemsListAction(actions.Action):
     def run(self, request, context):           
         entity_items = get_entity_items(context.entity_name)
         return actions.JsonResult(json.dumps(entity_items))
+    
+    
+class ConditionWindowAction(actions.Action):
+    '''
+    Запрос на получение окна выбора связи
+    '''
+    url = '/condition-window'
+    shortname = 'm3-query-builder-condition'
+
+    def run(self, request, context):
+        win = ui.ConditionWindow()
+        return actions.ExtUIScriptResult(win)

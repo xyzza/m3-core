@@ -323,18 +323,80 @@ function deleteGroupSummField(){
 // Вкладка - Условия
 
 grdConditionsFields.on('afterrender', function(){
-	onAfterRenderGrid(grdConditionsFields);
-	
-	// TODO: Открывать окно, где можно выбрать различные условия
+
+	var fieldsDropTargetEl = grdConditionsFields.getView().scroller.dom;
+	var selectFieldsDropTarget = new Ext.dd.DropTarget(fieldsDropTargetEl, {
+	    ddGroup    : 'TreeDD',
+	    notifyDrop : function(ddSource, e, data){  
+ 			openConditionWindow(data.node);
+	    }
+	});	
 });
 
-function addCondition(){
-	addFieldBtn(treeConditionsFields, grdConditionsFields);
-}
+/**
+ * Открывает окно для добавления нового условия
+ */
+function openConditionWindow(node){
+	var loadMask = new Ext.LoadMask(win.body);
+    loadMask.show();
+    
+    Ext.Ajax.request({
+        url: '{{component.params.condition_url}}'
+        ,params: win.actionContextJson || {}
+        ,success: function(response){
+            loadMask.hide();
+            var childWin = smart_eval(response.responseText);
+            childWin.fireEvent('loadData', {
+            	'field': node.attributes['fields_entities']
+            });
+            childWin.on('selectData', function(obj){
 
+         		var Record = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
+				    {name: 'fieldName', mapping: 'fieldName'},
+				    {name: 'entityName', mapping: 'entityName'},
+				    {name: 'condition', mapping: 'condition'},
+				    {name: 'parameter', mapping: 'parameter'},
+				    {name: 'expression', mapping: 'expression'},
+				]);
+			
+				var fieldName = node.attributes['fields_entities'];
+				var entityName = node.attributes['entity_name'];
+				
+				var condition = obj['condition'];
+				var parameter = obj['parameter'];
+				
+				var newRecord = new Record(
+				    {'fieldName': fieldName,
+				    'entityName': entityName,
+				    'condition':condition,
+				    'parameter':parameter,
+				    'expression': String.format('{0} {1} {2}', fieldName, condition, parameter)
+				    }
+				);
+				grdConditionsFields.getStore().add(newRecord);
+				
+            });		            
+		}
+		,failure: function(){
+        	loadMask.hide();
+            uiAjaxFailMessage.apply(this, arguments);
+        }
+	});	
+	
+}
 
 function deleteCondition(){	
 	deleteField(grdConditionsFields);	
+}
+
+/**
+ * Обработчик произвольной кнопки добавить
+ */
+function addCondition(){
+	var node = treeConditionsFields.getSelectionModel().getSelectedNode();	
+	if (node) {
+		openConditionWindow(node);		
+	}
 }
 
 
