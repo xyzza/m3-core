@@ -52,10 +52,11 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	init: function(grid) {
         if(grid instanceof Ext.grid.GridPanel){
         	this.grid = grid;
+        	grid.groupPlugin = this;
         	this.grid.loadMask = false; // не будем показывать стандартную маску - у нас есть своя
             this.cm = this.grid.getColumnModel();
             // добавим новый столбец, в котором будет отображаться группировка (если она будет)
-            this.grouppingColumn = new Ext.grid.Column({header: this.groupFieldTitle, id: this.groupFieldId, width: 160, renderer: {fn:this.groupRenderer, scope: this}});
+            this.grouppingColumn = new Ext.grid.Column({header: this.groupFieldTitle, dataIndex: this.groupFieldId, id: this.groupFieldId, width: 160, renderer: {fn:this.groupRenderer, scope: this}});
             var cmConfig = [this.grouppingColumn].concat(this.cm.config); 
             this.cm.setConfig(cmConfig);            
             this.grouppingColumn.hidden=!(this.groupedColumns.length>0);
@@ -74,6 +75,27 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
             this.grid.on('keydown', this.onKeyPress, this);
 
             grid.on('afterrender',this.onRender,this);
+            
+       		// Добавим плугин подсказок
+			var tipConf = [];
+			Ext.each(this.cm.columns,function(column,index){
+	            tipConf.push({
+	                field:column.dataIndex,
+	                tpl:'{'+column.dataIndex+'}'
+	            })
+	        });
+	        tipConf.push({
+	                field:this.groupFieldId,
+	                tpl:'{'+this.groupFieldId+'}',
+	                fn: function(params){
+				       	var rec = grid.getStore().getById(params[grid.getStore().idProperty]);
+				       	params[grid.groupPlugin.groupFieldId] = grid.groupPlugin.getGroupText(rec);
+				       	return params;
+					}
+	           });
+	        this.grid.tipPlugin = new Ext.ux.plugins.grid.CellToolTips(tipConf);
+	        this.grid.plugins.push(this.grid.tipPlugin);
+	        this.grid.tipPlugin.init(this.grid);
 
             this.reorderer = new Ext.ux.ToolbarReorderer({
                 owner:this,
@@ -444,19 +466,30 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 			var expanded = record._expanded;
 			var indent = record.json.indent;
 			var indent_str = "&#160;".repeat(indent*6);
-			var column = this.groupedColumns[indent];
-			var count = record.json.count;
-			v = record.json[this.dataDisplayField];
+			v = this.getGroupText(record);
+			// Различия для браузеров в отрисовке иконок разворачивания узла. Быть может можно привести к более общему формату, но разбираться пока времени нет
+			if (Ext.isIE6 || Ext.isIE7) {
+				res = String.format('<b style="cursor:pointer"><div class="x-tree-elbow-{0}" style="position:absolute;left:{3}px;margin-top:-3px"></div>{2}{1}</b>',expanded ? 'minus':'plus', v, indent_str, indent*18);
+			} else {
+				res = String.format('<b style="cursor:pointer"><span>{2}</span><span class="x-tree-elbow-{0}" style="margin-left:-18px;padding-left:18px;left:{3}px;padding-top:3px"></span>{1}</b>',expanded ? 'minus':'plus', v, indent_str, indent*18);
+			}
+		}
+		return res;
+	},
+	/**
+	 * Получение текста группировки
+	 */
+	getGroupText: function(record){
+		var res = '';
+		if (!record.json.is_leaf) {
+			var v = record.json[this.dataDisplayField];
 			if (v == null) {
 				v = "";//"<пусто>";
 			}
+			var column = this.groupedColumns[record.json.indent];
 			var col_name = this.grid.colModel.getColumnHeader(this.grid.colModel.findColumnIndex(column));
-			// Различия для браузеров в отрисовке иконок разворачивания узла. Быть может можно привести к более общему формату, но разбираться пока времени нет
-			if (Ext.isIE6 || Ext.isIE7) {
-				res = String.format('<b style="cursor:pointer"><div class="x-tree-elbow-{0}" style="position:absolute;left:{5}px;margin-top:-3px"></div>{2}{3}: {1} ({4})</b>',expanded ? 'minus':'plus', v, indent_str, col_name, count, indent*18);
-			} else {
-				res = String.format('<b style="cursor:pointer"><span>{2}</span><span class="x-tree-elbow-{0}" style="margin-left:-18px;padding-left:18px;left:{5}px;padding-top:3px"></span>{3}: {1} ({4})</b>',expanded ? 'minus':'plus', v, indent_str, col_name, count, indent*18);
-			}
+			var count = record.json.count;
+			res = String.format('{0}: {1} ({2})',col_name, v, count);
 		}
 		return res;
 	},
@@ -738,7 +771,6 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 				})
 			);
 		}
-		
 		// объединение обработчиков
 		baseConfig.listeners = Ext.applyIf({
 			contextmenu: funcContMenu
