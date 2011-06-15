@@ -78,19 +78,6 @@ class Field(object):
         self.alias = alias
         self.verbose_name = verbose_name
 
-class Condition(object):
-    '''
-    Для условий в цепочке WHERE
-    '''
-    AND = 'and'
-    OR = 'or'
-    NOT = 'not'
-    
-    def __init__(self, left, op, right=None):
-        self.left = left
-        self.op = op
-        self.right = right
-
 
 class Where(object):
     '''

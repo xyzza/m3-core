@@ -399,6 +399,50 @@ function addCondition(){
 	}
 }
 
+// Отправляет запрос на сервер и получает sql-запрос в качестве ответа
+function showQueryText(){
+	
+	var loadMask = new Ext.LoadMask(win.body);
+    loadMask.show();
+    
+	Ext.Ajax.request({
+		url: '{{component.params.query_text_url }}'
+		,param: buildParams()
+		,success: function(){
+			loadMask.hide();
+			console.log(123123);
+		}
+		,failure: function(){
+        	loadMask.hide();
+            uiAjaxFailMessage.apply(this, arguments);
+        }
+	});
+}
+
+// Сохраняет запрос
+function saveQuery(){
+
+	var loadMask = new Ext.LoadMask(win.body);
+    loadMask.show();
+    
+	Ext.Ajax.request({
+		url: '{{component.params.save_query_url }}'
+		,param: buildParams()
+		,success: function(){
+			loadMask.hide();
+			console.log(123123);
+		}
+		,failure: function(){
+        	loadMask.hide();
+            uiAjaxFailMessage.apply(this, arguments);
+        }
+	});
+}
+
+// Билдит параметры, для показа запроса и для сохранения запроса
+function buildParams(){
+	return {}
+}
 
 // TODO: Сделать модель, которая будет определять добавление и удаление
 // полей сущности в деревья на вкладках "Поля", "Группировка", "Условия"
