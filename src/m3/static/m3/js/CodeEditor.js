@@ -65,6 +65,9 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
                 enableKeyEvents: true
             }]
         });
+
+        this.addEvents('codeEditorKeyEvent');
+
         Ext.m3.CodeEditor.superclass.initComponent.apply(this, arguments);
     },
 
@@ -115,6 +118,8 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
            },
             /* Событие изменения контента */
            onChange: function() {
+               //FIXME!
+               return;
                var sCode = oThis.codeMirrorEditor.getCode();
                oCmp.setValue(sCode);
                if(oThis.oldSourceCode == sCode) oThis.setTitleClass(true);
@@ -123,10 +128,10 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
            }
        }); 
 
-        var sParserType = oThis.parser || 'python';
-        editorConfig = Ext.applyIf(editorConfig, Ext.m3.CodeEditorConfig.parser[sParserType]);
+        //var sParserType = oThis.parser || 'python';
+        //editorConfig = Ext.applyIf(editorConfig, Ext.m3.CodeEditorConfig.parser[sParserType]);
 
-        this.codeMirrorEditor = new CodeMirror.fromTextArea( Ext.getDom(oCmp.id).id, editorConfig);
+        this.codeMirrorEditor = new CodeMirror.fromTextArea( Ext.getDom(oCmp.id), editorConfig);
     },
 
     getCode: function(){
@@ -140,6 +145,10 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
 
     setTitleClass: function(){
         this.contentChanged = arguments[0] !== true;
+    },
+
+    getTextArea:function() {
+        return this.findByType('textarea')[0];
     }
 });
 
