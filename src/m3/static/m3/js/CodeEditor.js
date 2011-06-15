@@ -66,7 +66,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
             }]
         });
 
-        this.addEvents('codeEditorKeyEvent');
+        this.addEvents('editorkeyevent');
 
         Ext.m3.CodeEditor.superclass.initComponent.apply(this, arguments);
     },
@@ -81,6 +81,10 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
             single: true
         });
 
+    },
+
+    fireKeyEvent:function(i,e) {
+        this.fireEvent('editorkeyevent', i, e);
     },
 
     /** @private*/
@@ -99,6 +103,9 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
            basefiles: ['codemirror_base.js'],
            path: Ext.m3.CodeEditorConfig.jsPath,
            autoMatchParens: true,
+           onKeyEvent:this.fireKeyEvent.createDelegate(this),
+            
+
            initCallback: function(editor) {
                editor.win.document.body.lastChild.scrollIntoView();
                try {
