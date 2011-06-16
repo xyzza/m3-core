@@ -4,5 +4,3 @@ __author__ = 'Excinsky'
 class SSACCException(Exception):
     """Ошибка SSACC"""
     pass
-
-  

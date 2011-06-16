@@ -8,7 +8,8 @@ def register_urlpatterns():
     Регистрация конфигурации урлов для приложения
     """
     return patterns('',
-            (r'^ssacc/ping$','m3.contrib.ssacc_client.views.ssacc_ping'),
-            (r'^ssacc/ping2$','m3.contrib.ssacc_client.views.ssacc_ping2'),
+        (r'^ssacc/ping$', 'm3.contrib.ssacc_client.views.ssacc_ping'),
+        (r'^ssacc/profile/meta$',
+            'm3.contrib.ssacc_client.views.ssacc_profile_meta'),
     )
   

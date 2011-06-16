@@ -6,7 +6,13 @@ import m3.contrib.ssacc_client.api
 __author__ = 'Excinsky'
 
 def ssacc_ping(request):
+    """
+    Вьюшка пустого запроса.
+    """
     return ExtensionManager().execute('ssacc-ping')
 
-def ssacc_ping2(request):
-    return ExtensionManager().execute('ssacc-ping2')
+def ssacc_profile_meta(request):
+    """
+    Вьюшка метаинформации о создании профиля.
+    """
+    return ExtensionManager().execute('ssacc-profile-meta')
