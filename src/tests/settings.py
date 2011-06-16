@@ -95,18 +95,14 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+SSACC_SERVER = 'http://localhost:8000'
+
 INSTALLED_APPS = (
-    #'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'm3.contrib.m3_storage',
-    #'django.contrib.sites',
+    'm3.contrib.ssacc_client',
     # Test applications here
-    #'history_test',
-    #'inforeg_test',
-    #'report_test',
-    #'replica_test',
-    #'datareg_tests',
     'tests.data.caching_tests',
     'tests.data.mie_tests',
     'tests.ui.ext_tests',
@@ -115,7 +111,8 @@ INSTALLED_APPS = (
 #    'tests.contrib.palo_olap',
     'tests.core.registry_tests',
     'tests.db.ddl_tests',
-    'tests.contrib.m3_storage_tests',
+#    'tests.contrib.m3_storage_tests',
+    'tests.contrib.ssacc_client_tests',
 )
 
 logger.init_logging('./logs')
