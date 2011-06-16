@@ -9,7 +9,8 @@ from m3.ui import actions
 from m3.ui.actions import ACD
 
 import ui
-from api import get_entities, get_entity_items
+from api import get_entities, get_entity_items, build_entity, get_conditions, \
+    get_aggr_functions
 
 class QueryBuilderActionsPack(actions.ActionPack):
     '''
@@ -42,6 +43,7 @@ class QueryBuilderWindowAction(actions.Action):
                   'query_text_url': ShowQueryTextAction.absolute_url(),
                   'save_query_url': SaveQueryAction.absolute_url()}
         window = ui.QueryBuilderWindow(params=params)
+        window.set_aggr_functions( get_aggr_functions())
         return actions.ExtUIScriptResult(data=window)
 
 class SelectConnectionWindowAction(actions.Action):
@@ -52,7 +54,7 @@ class SelectConnectionWindowAction(actions.Action):
     shortname = 'm3-query-builder-select-connection'
 
     def run(self, request, context):
-        win = ui.SelectConnectionsWindow()
+        win = ui.SelectConnectionsWindow()        
         return actions.ExtUIScriptResult(win)
     
 
@@ -92,6 +94,7 @@ class ConditionWindowAction(actions.Action):
 
     def run(self, request, context):
         win = ui.ConditionWindow()
+        win.set_conditions( get_conditions() )
         return actions.ExtUIScriptResult(win)
     
     
@@ -102,12 +105,15 @@ class ShowQueryTextAction(actions.Action):
     url = '/sql-query'
     shortname = 'm3-query-builder-sql-query'
 
-#    def context_declaration(self):
-#        return [ACD(name='entity_name', type=unicode, required=True)]
+    def context_declaration(self):
+        return [ACD(name='objects', type=object, required=True)]
 
     def run(self, request, context):           
-        #entity_items = get_entity_items(context.entity_name)
-        return actions.JsonResult(json.dumps({}))
+        
+        entity = build_entity(context.objects)
+        sql = entity.get_raw_sql()
+                
+        return actions.JsonResult(json.dumps({'sql':sql}))
     
 
 class SaveQueryAction(actions.Action):
@@ -117,9 +123,13 @@ class SaveQueryAction(actions.Action):
     url = '/save'
     shortname = 'm3-query-builder-save'
 
-#    def context_declaration(self):
-#        return [ACD(name='entity_name', type=unicode, required=True)]
+    def context_declaration(self):
+        return [ACD(name='objects', type=object, required=True)]
 
     def run(self, request, context):           
-        #entity_items = get_entity_items(context.entity_name)
+        
+        entity = build_entity(context.objects)
+        
+        # Нужно сохранить объект
+        
         return actions.JsonResult(json.dumps({}))

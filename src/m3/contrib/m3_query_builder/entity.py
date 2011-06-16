@@ -20,18 +20,24 @@ class Relation(object):
     '''
     Связь между сущностями
     '''
-    def __init__(self, entity_first, key_first, entity_second, key_second):
+    def __init__(self, entity_first, key_first, entity_second, key_second,
+                  outer_first=False, outer_second=False):
         '''
         @param table_first: Первая сущность
         @param key_first: Первый ключ для связи
+        @param outer_first: Тип связи, внешняя, или внутренняя. True - внешняя
+        
         @param entity_second: Вторая сущность
-        @param key_second: Второй ключ для связи 
+        @param key_second: Второй ключ для связи
+        @param outer_second: Тип связи, внешняя, или внутренняя. True - внешняя 
         '''
         self.table_first = entity_first
         self.key_first = key_first
+        self.outer_first = outer_first
         
         self.table_second = entity_second
         self.key_second = key_second
+        self.outer_second = outer_second
         
 
 class Table(object):
@@ -88,17 +94,19 @@ class Where(object):
     OR = 'or'
     NOT = 'not'
     
-    EQ = '=='
+    EQ = '='
     NE = '!='
     LT = '<'
     LE = '<='
     GT = '>'
     GE = '>='
     
-    IN = 'in'
+    IN = 'Вхождение'
+    
+    # TODO: Пока не используется оператор between
     BETWEEN = 'between'
     
-    def __init__(self, left, op, right=None):
+    def __init__(self, left=None, op=None, right=None):
         '''
         @param left: Левый операнд
         @param op: Оператор (=, !=, <, >, <=, >=, ...)
@@ -118,8 +126,37 @@ class Where(object):
         
     def __invert__(self):
         return Where(self, Where.NOT)
-
     
+    
+    @staticmethod
+    def get_simple_conditions():
+        return {
+                'eq': Where.EQ,
+                'ne': Where.NE,
+                'lt': Where.LT,
+                'le': Where.LE,
+                'gt': Where.GT,
+                'ge': Where.GE,
+                'in': Where.IN,
+                }
+
+class Grouping():
+    '''
+    Для группировки
+    '''
+
+    MIN = u'Минимум'
+    MAX = u'Максимум'
+    COUNT = u'Количество'
+
+    @staticmethod
+    def get_aggr_functions():
+        return {
+                'min': Grouping.MIN,
+                'max': Grouping.MAX,
+                'count': Grouping.COUNT,                
+                }
+
 class BaseEntity(object):
     '''
     Базовый класс для сущностей/схемы/прокси/view - кому как удобно

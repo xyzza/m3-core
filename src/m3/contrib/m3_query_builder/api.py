@@ -9,8 +9,7 @@ from m3.ui.ext.containers.trees import ExtTreeNode
 from m3.contrib.m3_query_builder import EntityCache
 from m3.helpers.icons import Icons
 
-from entity import BaseEntity, Field
-
+from entity import BaseEntity, Field, Entity, Relation, Grouping, Where
 
 def get_entities():
     '''
@@ -50,7 +49,7 @@ def get_entity_items(entity_name):
                 'id': entity.__name__, 
                 'leaf': False,
                 'iconCls': Icons.PLUGIN,
-                'fields_entities': entity.name,                           
+                'verbose_field': entity.name,                           
                 'expanded': True}
 
         for field in fields:
@@ -58,12 +57,78 @@ def get_entity_items(entity_name):
             assert isinstance(field, Field)
 
             node = {'leaf': True,
-                    'fields_entities': field.verbose_name or field.alias or field.name,
-                    'entity_name': entity_name,
-                    'draggable':True}
+                    'verbose_field': field.verbose_name or field.alias or field.name,
+                    'id_field': field.alias or field.name,
+                    'entity_name': entity_name}
             
             root_node.setdefault('children', []).append(node)
             
         res.append(root_node)
         
     return res
+
+
+def build_entity(objs, separator='-'):    
+    '''
+    Создает объект сущности по данным формы редактора запроса
+    '''
+    entity = BaseEntity()
+    
+    # Используемые сущности
+        
+    entity.entities = map(lambda x: Entity(x), objs['entities'])
+    
+    # Список связей    
+    entity.relations = [             
+        Relation(entity_first=rel['entityFirst'],
+            key_first=rel['entityFirstField'],
+            outer_first=rel['outerFirst'],
+            entity_second=rel['entitySecond'],
+            key_second=rel['entitySecondField'],
+            outer_second=rel['outerSecond'],
+        ) for rel in objs['relations']]
+    
+    # Список группировки
+    entity.group_by = []
+    
+    # Список полей выборки
+    for select_field in objs['selected_fields']:
+        
+        entity_name, field_name = select_field['id'].split(separator)
+        
+        field = Field(name=field_name, 
+                      alias=select_field.get('alias'))
+        
+        entity.select[entity_name] = field
+            
+    # Список условий    
+    entity.where = Where()
+    for condition in objs['cond_fields']:
+        
+        entity_name, field_name = condition['id'].split(separator)
+        
+        entity_and_field = '%s.%s' % (entity_name, field_name) 
+                
+        entity.where &= Where(left=entity_and_field, op=condition['condition'], 
+                  right=condition['parameter'])                
+      
+      
+    entity.distinct = objs['distinct']
+    
+    if objs['limit']:
+        entity.limit = objs['limit']
+    
+    return entity
+
+def get_aggr_functions():
+    '''
+    Возвращает возможные функции для агригирования
+    '''
+    return Grouping.get_aggr_functions()
+    
+    
+def get_conditions():
+    '''
+    Возвращает возможные условия
+    '''
+    return Where.get_simple_conditions()

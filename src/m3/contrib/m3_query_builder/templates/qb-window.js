@@ -3,33 +3,16 @@ var treeEntities = Ext.getCmp('{{ component.tree_entities.client_id }}');
 var grdSelectedEntities = Ext.getCmp('{{ component.grd_selected_entities.client_id }}');
 var grdLinks = Ext.getCmp('{{ component.grd_links.client_id }}');
 
-
 var treeAllFields = Ext.getCmp('{{ component.tree_all_fields.client_id }}');
 var grdSelectedFields = Ext.getCmp('{{ component.grd_selected_fields.client_id }}'); 
+var distinctChk = Ext.getCmp('{{ component.chk_distinct.client_id }}');
+var limitChk = Ext.getCmp('{{ component.chk_limit.client_id }}');
+var limitCount = Ext.getCmp('{{ component.nmbr_limit_count.client_id }}');
 
 
 var treeGroupsFields = Ext.getCmp('{{ component.tree_groups_fields.client_id }}');
 var grdGroupFields = Ext.getCmp('{{ component.grd_group_fields.client_id }}');
-var grdGroupSummFields = Ext.getCmp('{{ component.grd_gruop_summ_fields.client_id }}');
-
-
-
-var cmbFunction = Ext.getCmp('{{ component.combo_function.client_id }}');
-
-// Данные для суммируемых полей 
-var functionsObj = {
-	'Минимум': 'min',
-	'Максимум': 'max',
-	'Количество': 'count'
-} 
-
-var data = [];
-for (k in functionsObj){
-	data.push([functionsObj[k], k])	
-}
-
-cmbFunction.getStore().loadData(data);
-
+var grdGroupAggrFields = Ext.getCmp('{{ component.grd_gruop_summ_fields.client_id }}');
 
 var treeConditionsFields = Ext.getCmp('{{ component.tree_conditions_fields.client_id }}');
 var grdConditionsFields = Ext.getCmp('{{ component.grd_conditions.client_id }}');
@@ -64,12 +47,14 @@ function addField(grid, node){
 	    {name: 'entityName', mapping: 'entityName'},
 	]);
 
-	var fieldName = node.attributes['fields_entities'];
+	var fieldName = node.attributes['verbose_field'];
 	var entityName = node.attributes['entity_name'];
+	var fieldID = node.attributes['id_field'];
 	
 	var newRecord = new Record(
 	    {'fieldName': fieldName,
-	    'entityName': entityName}
+	    'entityName': entityName},
+	    String.format('{0}-{1}', entityName, fieldID) 
 	);
 	grid.getStore().add(newRecord);
 }
@@ -118,8 +103,10 @@ function selectConnection(){
 
 				var LinkRecord = Ext.data.Record.create([
 				    {name: 'entityFirst', mapping: 'entityFirst'},
+				    {name: 'entityFirstField', mapping: 'entityFirstField'},
 				    {name: 'outerFirst', mapping: 'outerFirst'},
 				    {name: 'entitySecond', mapping: 'entitySecond'},
+				    {name: 'entitySecondField', mapping: 'entitySecondField'},
 				    {name: 'outerSecond', mapping: 'outerSecond'},
 				    {name: 'value', mapping: 'value'}
 				]);
@@ -127,9 +114,11 @@ function selectConnection(){
 				
 				var newLinkRecord = new LinkRecord(
 				    {
-				    	entityFirst: resObj['firstEntity']['fieldName'],
+				    	entityFirst: resObj['firstEntity']['entityName'],
+				    	entityFirstField: resObj['firstEntity']['fieldName'],
 				    	outerFirst: resObj['firstEntity']['outer'],
-				    	entitySecond: resObj['secondEntity']['fieldName'],
+				    	entitySecond: resObj['secondEntity']['entityName'],
+				    	entitySecondField: resObj['secondEntity']['fieldName'],
 				    	outerSecond: resObj['secondEntity']['outer'],
 				    	value: String.format('{0}.{1} = {2}.{3}', 				    	
 				    		resObj['firstEntity']['entityName'],
@@ -190,12 +179,11 @@ var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
 					
 					// Заполняется грид на этой же вкладке - выбранные сущности
 					var EntityRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
-					    {name: 'entityName', mapping: 'entityName'}
+					    {name: 'entityName', mapping: 'entityName'},					    
 					]);
 					
-					
 					var newEntityRecord = new EntityRecord(
-					    {entityName: entityName},
+					    {entityName: entityName},					    
 					    entityId 
 					);
 		        	selectedStore.add(newEntityRecord);
@@ -298,8 +286,8 @@ grdGroupFields.on('afterrender', function(){
 	onAfterRenderGrid(grdGroupFields);
 });
 
-grdGroupSummFields.on('afterrender', function(){
-	onAfterRenderGrid(grdGroupSummFields);
+grdGroupAggrFields.on('afterrender', function(){
+	onAfterRenderGrid(grdGroupAggrFields);
 });
 
 function addGroupField(){
@@ -307,7 +295,7 @@ function addGroupField(){
 }
 
 function addGroupSummField(){
-	addFieldBtn(treeGroupsFields, grdGroupSummFields);
+	addFieldBtn(treeGroupsFields, grdGroupAggrFields);
 }
 
 function deleteGroupField(){	
@@ -315,7 +303,7 @@ function deleteGroupField(){
 }
 
 function deleteGroupSummField(){	
-	deleteField(grdGroupSummFields);	
+	deleteField(grdGroupAggrFields);	
 }
 
 
@@ -347,7 +335,7 @@ function openConditionWindow(node){
             loadMask.hide();
             var childWin = smart_eval(response.responseText);
             childWin.fireEvent('loadData', {
-            	'field': node.attributes['fields_entities']
+            	'field': node.attributes['verbose_field']
             });
             childWin.on('selectData', function(obj){
 
@@ -359,8 +347,9 @@ function openConditionWindow(node){
 				    {name: 'expression', mapping: 'expression'},
 				]);
 			
-				var fieldName = node.attributes['fields_entities'];
+				var fieldName = node.attributes['verbose_field'];
 				var entityName = node.attributes['entity_name'];
+				var fieldID = node.attributes['id_field'];
 				
 				var condition = obj['condition'];
 				var parameter = obj['parameter'];
@@ -371,7 +360,8 @@ function openConditionWindow(node){
 				    'condition':condition,
 				    'parameter':parameter,
 				    'expression': String.format('{0} {1} {2}', fieldName, condition, parameter)
-				    }
+				   },
+				   String.format('{0}-{1}', entityName, fieldID) 				    
 				);
 				grdConditionsFields.getStore().add(newRecord);
 				
@@ -407,10 +397,12 @@ function showQueryText(){
     
 	Ext.Ajax.request({
 		url: '{{component.params.query_text_url }}'
-		,param: buildParams()
+		,params: {
+			'objects': Ext.encode( buildParams() )
+		}
 		,success: function(){
 			loadMask.hide();
-			console.log(123123);
+			console.log('sql');
 		}
 		,failure: function(){
         	loadMask.hide();
@@ -427,10 +419,12 @@ function saveQuery(){
     
 	Ext.Ajax.request({
 		url: '{{component.params.save_query_url }}'
-		,param: buildParams()
+		,params: {
+			'objects': Ext.encode( buildParams() )
+		}
 		,success: function(){
 			loadMask.hide();
-			console.log(123123);
+			console.log('save');
 		}
 		,failure: function(){
         	loadMask.hide();
@@ -441,8 +435,59 @@ function saveQuery(){
 
 // Билдит параметры, для показа запроса и для сохранения запроса
 function buildParams(){
-	return {}
+	function getElements(grid, exclusionFields){
+		exclusionFields = exclusionFields || [];
+		var mass = [];
+		var range = grid.getStore().getRange();
+		for (var i=0; i<range.length; i++){
+			mass.push(range[i].data);
+			
+			mass[mass.length-1]['id'] = range[i].id;
+			
+			for (var j=0; j<exclusionFields.length; j++){
+				delete mass[mass.length-1][exclusionFields[j]];				
+			}
+		}
+		return mass;
+	}
+	
+	// Сущности в запросе
+	var entities = getElements(grdSelectedEntities);
+	
+	// Связи в запросе
+	var relations = getElements(grdLinks, ['value']);
+			
+	// Поля в выборке
+	var selectedFields = getElements(grdSelectedFields, ['value']);	
+	
+	// Группируемые и агригируемые поля
+	var groupFields = getElements(grdGroupFields);	
+	
+	var groupAggrFields = getElements(grdGroupAggrFields);	
+	
+	// Условия
+	var condFields = getElements(grdConditionsFields, ['expression']);	
+
+	var limit;
+	if (limitChk.checked) {
+		limit = limitCount.getValue();
+	}
+
+	return {
+		'entities': entities,
+		'relations': relations, 
+		'selected_fields': selectedFields,
+		'group': {
+			'group_fields': groupFields,
+			'group_aggr_fields': groupAggrFields
+		},
+		'cond_fields': condFields,
+		'distinct': distinctChk.checked,
+		'limit': limit || -1		
+	}
 }
+
+
 
 // TODO: Сделать модель, которая будет определять добавление и удаление
 // полей сущности в деревья на вкладках "Поля", "Группировка", "Условия"

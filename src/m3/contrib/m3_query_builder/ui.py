@@ -31,14 +31,13 @@ class QueryBuilderWindow(ExtWindow):
 
         # Настройка редактирования колонок для выбора функций при группировки
         self.grd_gruop_summ_fields.editor = True        
-        
-        
-        
-        
+
         self.combo_function = ExtComboBox(display_field='function', 
                                           value_field='function',
                                           trigger_action=ExtComboBox.ALL)
-        self.combo_function.store = ExtDataStore()
+
+        
+        self.combo_function.editable = False                
         self.clmn_summ_function.editor = self.combo_function        
 
     def initialize(self):
@@ -144,10 +143,10 @@ class QueryBuilderWindow(ExtWindow):
         
         dstore_links = ExtDataStore()
         
-        clmn_entity_first = ExtGridColumn()
-        clmn_entity_first.header = u'Поле 1'
-        clmn_entity_first.data_index = 'entityFirst'
-        clmn_entity_first.menu_disabled = True
+        clmn_entity_first_field = ExtGridColumn()
+        clmn_entity_first_field.header = u'Поле 1'
+        clmn_entity_first_field.data_index = 'entityFirstField'
+        clmn_entity_first_field.menu_disabled = True
         
         clmn_entity_first_type = ExtGridColumn()
         clmn_entity_first_type.menu_disabled = True
@@ -155,10 +154,10 @@ class QueryBuilderWindow(ExtWindow):
         clmn_entity_first_type.width = 30
         clmn_entity_first_type.data_index = 'outerFirst'
         
-        clmn_entity_second = ExtGridColumn()
-        clmn_entity_second.header = u'Поле 2'
-        clmn_entity_second.data_index = 'entitySecond'
-        clmn_entity_second.menu_disabled = True
+        clmn_entity_second_field = ExtGridColumn()
+        clmn_entity_second_field.header = u'Поле 2'
+        clmn_entity_second_field.data_index = 'entitySecondField'
+        clmn_entity_second_field.menu_disabled = True
         
         clmn_entity_second_type = ExtGridColumn()
         clmn_entity_second_type.menu_disabled = True
@@ -170,6 +169,18 @@ class QueryBuilderWindow(ExtWindow):
         clmn_descr.header = u'Тип связи'
         clmn_descr.data_index = 'value'
         clmn_descr.menu_disabled = True
+        
+        clmn_entity_first = ExtGridColumn()
+        clmn_entity_first.menu_disabled = True
+        clmn_entity_first.header = 'column'
+        clmn_entity_first.data_index = 'entityFirst'
+        clmn_entity_first.hidden = True
+        
+        clmn_entity_second = ExtGridColumn()
+        clmn_entity_second.menu_disabled = True
+        clmn_entity_second.header = 'column'
+        clmn_entity_second.data_index = 'entitySecond'
+        clmn_entity_second.hidden = True
         
         tree_entities = ExtTree()
         tree_entities.title = u'Дерево схем'
@@ -191,7 +202,7 @@ class QueryBuilderWindow(ExtWindow):
         
         grd_selected_entities.columns.extend([entity_name])
         tb_selected_entities.items.extend([btn_select_link, btn_delete_link])
-        grd_links.columns.extend([clmn_entity_first, clmn_entity_first_type, clmn_entity_second, clmn_entity_second_type, clmn_descr])
+        grd_links.columns.extend([clmn_entity_first_field, clmn_entity_first_type, clmn_entity_second_field, clmn_entity_second_type, clmn_descr, clmn_entity_first, clmn_entity_second])
         cnt_entities.items.extend([grd_selected_entities, grd_links])
         tree_entities.columns.extend([clmn_entities])
         cont.items.extend([cnt_entities, tree_entities])
@@ -205,17 +216,19 @@ class QueryBuilderWindow(ExtWindow):
         self.btn_select_link = btn_select_link
         self.btn_delete_link = btn_delete_link
         self.dstore_links = dstore_links
-        self.clmn_entity_first = clmn_entity_first
+        self.clmn_entity_first_field = clmn_entity_first_field
         self.clmn_entity_first_type = clmn_entity_first_type
-        self.clmn_entity_second = clmn_entity_second
+        self.clmn_entity_second_field = clmn_entity_second_field
         self.clmn_entity_second_type = clmn_entity_second_type
         self.clmn_descr = clmn_descr
+        self.clmn_entity_first = clmn_entity_first
+        self.clmn_entity_second = clmn_entity_second
         self.tree_entities = tree_entities
         self.clmn_entities = clmn_entities
         
         return cont
 
-                                                                                                                                                                                
+                                                                                                                                                                                                                
     def init_fields(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
@@ -252,7 +265,7 @@ class QueryBuilderWindow(ExtWindow):
         
         clmn_fields_entities = ExtGridColumn()
         clmn_fields_entities.header = u'Схемы'
-        clmn_fields_entities.data_index = 'fields_entities'
+        clmn_fields_entities.data_index = 'verbose_field'
         clmn_fields_entities.menu_disabled = True
         
         grd_selected_fields = ExtGrid()
@@ -341,7 +354,7 @@ class QueryBuilderWindow(ExtWindow):
         
         return cont
 
-                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                
     def init_grouping(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
@@ -357,7 +370,7 @@ class QueryBuilderWindow(ExtWindow):
         
         clmn_group_fields = ExtGridColumn()
         clmn_group_fields.header = u'Поля'
-        clmn_group_fields.data_index = 'fields_entities'
+        clmn_group_fields.data_index = 'verbose_field'
         clmn_group_fields.menu_disabled = True
         
         cnt_group = ExtContainer()
@@ -387,8 +400,8 @@ class QueryBuilderWindow(ExtWindow):
         astore_group = ExtDataStore()
         
         clmn_group_table_name = ExtGridColumn()
-        clmn_group_table_name.menu_disabled = True
         clmn_group_table_name.header = u'Наименование сущности'
+        clmn_group_table_name.menu_disabled = True
         clmn_group_table_name.data_index = 'entityName'
         clmn_group_table_name.hidden = True
         
@@ -419,8 +432,8 @@ class QueryBuilderWindow(ExtWindow):
         astore_group_summ = ExtDataStore()
         
         clmn_group_summ_table_name = ExtGridColumn()
-        clmn_group_summ_table_name.menu_disabled = True
         clmn_group_summ_table_name.header = u'Наименование сущности'
+        clmn_group_summ_table_name.menu_disabled = True
         clmn_group_summ_table_name.data_index = 'entityName'
         clmn_group_summ_table_name.hidden = True
         
@@ -468,7 +481,7 @@ class QueryBuilderWindow(ExtWindow):
         
         return cont
 
-                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                
     def init_conditions(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
@@ -479,13 +492,13 @@ class QueryBuilderWindow(ExtWindow):
         tree_conditions_fields.enable_drag = True
         tree_conditions_fields.title = u'Все поля'
         tree_conditions_fields.region = 'west'
+        tree_conditions_fields.root_text = 'Root'
         tree_conditions_fields.header = True
         tree_conditions_fields.width = 250
-        tree_conditions_fields.root_text = 'Root'
         
         clmn_cond_fields_entities = ExtGridColumn()
         clmn_cond_fields_entities.header = u'Поля'
-        clmn_cond_fields_entities.data_index = 'fields_entities'
+        clmn_cond_fields_entities.data_index = 'verbose_field'
         clmn_cond_fields_entities.menu_disabled = True
         
         grd_conditions = ExtGrid()
@@ -517,27 +530,27 @@ class QueryBuilderWindow(ExtWindow):
         clmn_cond_entity.hidden = True
         
         clmn_cond_field = ExtGridColumn()
-        clmn_cond_field.menu_disabled = True
         clmn_cond_field.header = u'Поле'
+        clmn_cond_field.menu_disabled = True
         clmn_cond_field.data_index = 'fieldName'
         clmn_cond_field.hidden = True
         
         clmn_cond_condition = ExtGridColumn()
-        clmn_cond_condition.menu_disabled = True
         clmn_cond_condition.header = u'Условие'
+        clmn_cond_condition.menu_disabled = True
         clmn_cond_condition.data_index = 'condition'
         clmn_cond_condition.hidden = True
         
         clmn_cond_param = ExtGridColumn()
-        clmn_cond_param.menu_disabled = True
         clmn_cond_param.header = u'Параметр'
+        clmn_cond_param.menu_disabled = True
         clmn_cond_param.data_index = 'parameter'
         clmn_cond_param.hidden = True
         
         clmn_cond_expressions = ExtGridColumn()
         clmn_cond_expressions.header = u'Выражение'
-        clmn_cond_expressions.menu_disabled = True
         clmn_cond_expressions.data_index = 'expression'
+        clmn_cond_expressions.menu_disabled = True
         
         grd_conditions.top_bar = tb_cond
         grd_conditions.store = astore_cond
@@ -562,7 +575,15 @@ class QueryBuilderWindow(ExtWindow):
         
         return cont
 
-                                                                                                                                
+    def set_aggr_functions(self, aggr_functions):
+        '''
+        Устанавливает возможные функции агригирования
+        '''
+        self.combo_function.store = ExtDataStore (
+                [[k,v] for k,v in aggr_functions.items()] )
+        
+        self.combo_function.value = aggr_functions.get('min')
+                                                                                                                                                
 class SelectConnectionsWindow(ExtWindow):
 
     def __init__(self, *args, **kwargs):
@@ -572,15 +593,13 @@ class SelectConnectionsWindow(ExtWindow):
     def initialize(self):
         '''AUTOGENERATED'''
         self.layout = 'border'
-        self.modal = True
         self.title = u'Выбранные схемы'
         self.min_height = 300
         self.height = 450
         self.min_width = 400
         self.width = 550
-        self.maximizable = False
+        self.modal = True
         self.template_globals = 'qb-connection-window.js'
-        self.minimizable = False
         
         tb_buttons = ExtToolBar()
         tb_buttons.layout = 'toolbar'
@@ -603,22 +622,20 @@ class SelectConnectionsWindow(ExtWindow):
         tree_entities_fields_first.flex = '1'
         tree_entities_fields_first.layout = 'auto'
         tree_entities_fields_first.root_text = 'Root'
-        tree_entities_fields_first.header = False
         
         clmn_fields_entities_first = ExtGridColumn()
         clmn_fields_entities_first.header = u'Схема'
-        clmn_fields_entities_first.data_index = 'fields_entities'
+        clmn_fields_entities_first.data_index = 'verbose_field'
         clmn_fields_entities_first.menu_disabled = True
         
         tree_entities_fields_second = ExtTree()
         tree_entities_fields_second.flex = '1'
         tree_entities_fields_second.layout = 'auto'
         tree_entities_fields_second.root_text = 'Root'
-        tree_entities_fields_second.header = False
         
         clmn_fields_entities_second = ExtGridColumn()
         clmn_fields_entities_second.header = u'Схема'
-        clmn_fields_entities_second.data_index = 'fields_entities'
+        clmn_fields_entities_second.data_index = 'verbose_field'
         clmn_fields_entities_second.menu_disabled = True
         
         cnt_south = ExtContainer()
@@ -656,28 +673,15 @@ class SelectConnectionsWindow(ExtWindow):
         self.chk_link_first = chk_link_first
         self.chk_link_second = chk_link_second
 
-
-
+        
 class ConditionWindow(ExtWindow):
-
-    CONDITIONS = {'eq':'=',
-                  'ne':'!=',
-                  'lt':'>',
-                  'le':'>=',
-                  'gt':'<',
-                  'ge':'<=',
-                  'in':'Вхождение'}
 
     def __init__(self, *args, **kwargs):
         super(ConditionWindow, self).__init__(*args, **kwargs)
-        self.initialize()
-
-        self.astore_conditions.data = [[k,v] for k,v in ConditionWindow.CONDITIONS.items()]
+        self.initialize()        
         
         # Дизайнер не сабмитит False значения
-        self.cmb_simple_cond.editable = False
-        
-        self.cmb_simple_cond.value = ConditionWindow.CONDITIONS.get('eq')
+        self.cmb_simple_cond.editable = False            
 
     def initialize(self):
         '''AUTOGENERATED'''
@@ -807,4 +811,9 @@ class ConditionWindow(ExtWindow):
         self.cnt_complex_tarea = cnt_complex_tarea
         self.tarea_complex_cond = tarea_complex_cond
 
-        
+    def set_conditions(self, conditions):
+        '''
+        Устанавливает возможные простые условия
+        '''
+        self.astore_conditions.data = [[k,v] for k,v in conditions.items()]
+        self.cmb_simple_cond.value = conditions.get('eq')

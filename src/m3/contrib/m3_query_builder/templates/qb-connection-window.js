@@ -57,12 +57,12 @@ function selectLinks(){
 	
 	var resObj = {
 		'firstEntity': {
-			'fieldName': firstNode.attributes['fields_entities']
+			'fieldName': firstNode.attributes['verbose_field']
 			,'entityName': firstNode.attributes['entity_name']
 			,'outer': firstChkLink.checked
 		},
 		'secondEntity': {
-			'fieldName': secondNode.attributes['fields_entities']
+			'fieldName': secondNode.attributes['verbose_field']
 			,'entityName': secondNode.attributes['entity_name']
 			,'outer': secondChkLink.checked
 		},
