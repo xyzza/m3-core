@@ -7,6 +7,7 @@ import shutil
 
 from django.shortcuts import render_to_response
 
+from codeassist import get_code_proposals
 from helpers import JsonResponse, get_files, get_classess, restores, create_py_class, \
     create_generation_func, get_methods, create_cont_func
 from parser import Parser, ParserError, UndefinedGeneratedFunc
@@ -15,6 +16,7 @@ def workspace(request):
     '''
     Отдается основной шаблон. Точка входа.
     '''
+
     path_project = os.getenv('PROJECT_FOR_DESIGNER', None)
     base_name = os.path.basename(path_project)
     return render_to_response('master.html', {
@@ -117,7 +119,6 @@ def designer_save(request):
     except ParserError, e:
         return JsonResponse({'success': False, 'json': repr(e)})
     return JsonResponse({'success': True})
-
 
 def create_class(request):
     '''
@@ -280,7 +281,6 @@ def designer_structure_manipulation(request):
 
     return JsonResponse({'success': success, 'data': data, 'error': error})
 
-
 def upload_code(request):
     '''
     Конвертация python кода в js представление
@@ -315,3 +315,8 @@ def create_cont_func_view(request):
         return JsonResponse({'success': False, 'json': unicode(e)})
     else:
         return JsonResponse({'success': True})
+
+def codeassist(request):
+    data = json.loads( request.REQUEST['data'])
+    props = get_code_proposals(data['code'], data['offset'])
+    return JsonResponse({'success': True, 'proposal': props})

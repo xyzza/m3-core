@@ -42,4 +42,5 @@ urlpatterns = patterns('',
     (r'file-content$','designer.ide.views.designer_file_content'),
     (r'file-content/save$','designer.ide.views.designer_file_content_save'),
     (r'designer/project-manipulation$','designer.ide.views.designer_structure_manipulation'),
+    (r'designer/codeassist$','designer.ide.views.codeassist')
 )

@@ -3,8 +3,6 @@
  * В модуле находяться классы для отображения текстов исходных кодов.
  */
 
-Ext.namespace('M3Designer.code');
-
 /**
  * @class M3Designer.code.PyCodeWindow
  * Окно предварительного просмтора кода питона, генерируемого дизайнером. Возникает по кнопке
@@ -101,6 +99,8 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
     onUpdate: function () {
         this.fireEvent('update');
     },
+
+    plugins:[new M3Designer.code.CodeAssistPlugin()],
 
     /**
      * Показывает messagebox, о имеющихся изменениях
