@@ -892,7 +892,7 @@ function onClickNodePyFiles(node, fileAttr){
 function initCodeEditorHandlers(codeEditor, path){
     /* findByType вернет список элементов, т.к у нас всего один
     textarea забираем его по индексу */
-    var textArea = codeEditor.findByType('textarea')[0];
+    var textArea = codeEditor.getTextArea();
 
     /* async close tab && message */
     var userTakeChoice = true;

@@ -97,14 +97,22 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
                     iconCls: 'icon-cancel'
                 })
             ]
-        }); /*Хендлер на изменение кода*/
+        });
+        /*Хендлер на изменение кода*/
         this.on('contentChaged', function () {
             this.onChange();
         });
+        /*Хендлер на перехватывает keydown, если это ctrl+s то зажигается событие сохранить(save)*/
+        this.on("editorkeyevent", function(i, e){
+            if (e.ctrlKey && (e.keyCode == 83) && e.type == "keydown") {
+                this.fireEvent('save');
+                e.stop();
+            }
+        }, this);
         M3Designer.code.ExtendedCodeEditor.superclass.initComponent.call(this, arguments);
     },
     onClose: function () { /*Вероятно можно будет оптимизировать, т.к. дублирует поведение beforeclose у tabpanel (выше)*/
-        var textArea = this.findByType('textarea')[0]; /*Если есть именения в коде, выводим сообщения [ showMessage ]*/
+        var textArea = this.getTextArea(); /*Если есть именения в коде, выводим сообщения [ showMessage ]*/
         if (this.contentChanged) {
             var scope = this;
             this.showMessage(function (buttonId) {

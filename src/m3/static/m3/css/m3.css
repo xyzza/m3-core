@@ -133,11 +133,12 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 .CodeMirror {
   line-height: 14pt;
   font-family: Consolas, monospace;
+  height: 100%;
 }
 
 .CodeMirror-scroll {
   overflow: auto;
-  height: auto;
+  height: 100%;
 }
 
 .CodeMirror-gutter {
@@ -239,3 +240,4 @@ span.CodeMirror-selected {
 .cm-s-default span.cm-tag {color: #170;}
 .cm-s-default span.cm-attribute {color: #00c;}
 
+.cm-s-default { background: white;}
