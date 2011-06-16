@@ -10,12 +10,6 @@
  // Define a set of code type configurations
 
 Ext.ns('Ext.m3.CodeEditorConfig');
-
-Ext.apply(Ext.m3.CodeEditorConfig, {
-    cssPath: "m3static/vendor/codemirror/css/",
-    jsPath: "m3static/vendor/codemirror/js/"
-});
-
 Ext.apply(Ext.m3.CodeEditorConfig, {
     parser: {
         python: { mode: {name: "python", version: 2, singleLineStringErrors: false}},
@@ -86,7 +80,6 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         var editorConfig = Ext.applyIf(this.codeMirrorEditor || {}, {
             height: "100%",
             width: "100%",
-            mode: {name: "python", version: 2, singleLineStringErrors: false},
             theme: "default",
             lineNumbers: true,
             indentUnit: 4,
