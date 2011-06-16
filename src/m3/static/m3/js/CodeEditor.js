@@ -18,28 +18,11 @@ Ext.apply(Ext.m3.CodeEditorConfig, {
 
 Ext.apply(Ext.m3.CodeEditorConfig, {
     parser: {
-        python: { // js code
-            parserfile: ["parsepython.js"],
-            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "pythoncolors.css"
-        },
-        css: {
-            parserfile: ["parsecss.js"],
-            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "csscolors.css"
-        },
-        html: {
-            parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
-            stylesheet: [Ext.m3.CodeEditorConfig.cssPath+"xmlcolors.css",
-                        Ext.m3.CodeEditorConfig.cssPath+"javascriptcolors.css",
-                        Ext.m3.CodeEditorConfig.cssPath+"csscolors.css"]
-        },
-        javascript: {
-            parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
-            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "javascriptcolors.css"
-        },
-        sql: {
-            parserfile: ["parsesql.js"],
-            stylesheet: Ext.m3.CodeEditorConfig.cssPath + "sqlcolors.css"
-        }
+        python: { mode: {name: "python", version: 2, singleLineStringErrors: false}},
+        css: {mode: "css"},
+        html: {mode: "text/html", tabMode: "indent"},
+        javascript:{ mode:{ name: "javascript", json: true}},
+        sql: {lineNumbers: true, matchBrackets: true, indentUnit: 4, mode: "text/x-plsql"}
     }
 });
 
@@ -94,14 +77,15 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         var editorConfig = Ext.applyIf(this.codeMirrorEditor || {}, {
            height: "100%",
            width: "100%",
+           mode: {name: "python", version: 2, singleLineStringErrors: false},
+           theme: "default",
            lineNumbers: true,
+           indentUnit: 4,
+           tabMode: "shift",
+           matchBrackets: true,
            textWrapping: false,
            content: oCmp.getValue(),
-           indentUnit: 4,
-           tabMode: 'shift',
            readOnly: oCmp.readOnly,
-           basefiles: ['codemirror_base.js'],
-           path: Ext.m3.CodeEditorConfig.jsPath,
            autoMatchParens: true,
            onKeyEvent:this.fireKeyEvent.createDelegate(this),
             
@@ -125,25 +109,23 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
            },
             /* Событие изменения контента */
            onChange: function() {
-               //FIXME!
-               return;
-               var sCode = oThis.codeMirrorEditor.getCode();
+               var sCode = oThis.codeMirrorEditor.getValue();
                oCmp.setValue(sCode);
                if(oThis.oldSourceCode == sCode) oThis.setTitleClass(true);
                else oThis.setTitleClass();
                oThis.fireEvent('contentChaged', oThis);
            }
-       }); 
+       });
 
-        //var sParserType = oThis.parser || 'python';
-        //editorConfig = Ext.applyIf(editorConfig, Ext.m3.CodeEditorConfig.parser[sParserType]);
+      var sParserType = oThis.parser || 'python';
+      editorConfig = Ext.applyIf(editorConfig, Ext.m3.CodeEditorConfig.parser[sParserType]);
 
-        this.codeMirrorEditor = new CodeMirror.fromTextArea( Ext.getDom(oCmp.id), editorConfig);
+        this.codeMirrorEditor = new CodeMirror.fromTextArea(Ext.getDom(oCmp.id), editorConfig);
     },
 
     getCode: function(){
         if (typeof this.codeMirrorEditor != "undefined"){
-            return this.codeMirrorEditor.getCode();
+            return this.codeMirrorEditor.getValue();
         }
         else{
             return '';

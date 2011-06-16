@@ -940,7 +940,7 @@ function initCodeEditorHandlers(codeEditor, path){
             url:'/file-content/save',
             params: {
                 path: path,
-                content: codeEditor.codeMirrorEditor.getCode()
+                content: codeEditor.codeMirrorEditor.getValue()
             },
             success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
@@ -959,11 +959,6 @@ function initCodeEditorHandlers(codeEditor, path){
                         animEl: codeEditor.id
                     });
                 };
-                new Ext.ux.Notification({
-                    title: title,
-                    html: message,
-                    iconCls: icon
-                }).show(document); 
                 codeEditor.contentChanged = false;
                 codeEditor.onChange();
             },
@@ -988,12 +983,12 @@ function initCodeEditorHandlers(codeEditor, path){
                     codeEditor.showMessage(function(buttonId){
                         if (buttonId=='yes') {
                            scope.onSave(function(){
-                               codeEditor.codeMirrorEditor.setCode(obj.data.content);
+                               codeEditor.codeMirrorEditor.setValue(obj.data.content);
                                codeEditor.contentChanged = false;
                            });
                         }
                         else if (buttonId=='no') {
-                           codeEditor.codeMirrorEditor.setCode(obj.data.content);
+                           codeEditor.codeMirrorEditor.setValue(obj.data.content);
                            codeEditor.contentChanged = false;
                         }
                         else if (buttonId=='cancel') {
@@ -1005,7 +1000,7 @@ function initCodeEditorHandlers(codeEditor, path){
                 }
                 else {
                     userTakeChoice = !userTakeChoice;
-                    codeEditor.codeMirrorEditor.setCode(obj.data.content);
+                    codeEditor.codeMirrorEditor.setValue(obj.data.content);
                     codeEditor.contentChanged = false;
                     codeEditor.onChange();
                 }

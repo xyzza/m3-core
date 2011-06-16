@@ -44,10 +44,45 @@ M3Designer.code.PyCodeWindow = Ext.extend(Ext.Window, {
 M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
     autoScroll: true,
     border: true,
+    buttonAlign: 'left',
     initComponent: function () {
         Ext.applyIf(this, {
             closable: true,
             buttons: [
+                /*Комбо бокс выбора темы оформления codeEditor'а*/
+                {
+                    xtype: 'combo',
+                    fieldLabel: 'Theme',
+                    hiddenName: 'theme',
+                    mode : 'local',
+                    store: new Ext.data.SimpleStore({
+                        data: [
+                            [1, 'default'],
+                            [2, 'neat'],
+                            [3, 'night'],
+                            [4, 'elegant'],
+                        ],
+                        id: 0,
+                        fields: ['value', 'text']
+                    }),
+                    value: 'default',
+                    valueField: 'value',
+                    displayField: 'text',
+                    triggerAction: 'all',
+                    editable: false,
+                    listeners:{
+                        'select':{
+                                scope: this,
+                                fn: function(combo, record, index){
+                                    this.codeMirrorEditor.setOption("theme", record.data.text)
+                                }
+                        }
+                    }
+                },
+                /*Spacer отделяет комбо бокс от кнопок*/
+                {
+                    xtype: 'tbfill'
+                },
                 new Ext.Button({
                     text: 'Сохранить',
                     handler: this.onSave.createDelegate(this),
