@@ -32,7 +32,7 @@ class OOParserException(Exception):
     
 class OORunner(object):
     '''
-    Запускает, останавливает и соединяется с сервером OpenOffice
+    Cоединяется с сервером OpenOffice
     '''
     # Порт, на котором будет запущен сервер
     PORT = 8010
@@ -117,7 +117,6 @@ class OOParser(object):
             annotation = annotations_iter.nextElement()
             value = annotation.String
             position = annotation.Position
-            annotation.setString('')
             section_names = value.split()
             for section_name in section_names:
                 section_name = section_name.strip()
@@ -136,7 +135,9 @@ class OOParser(object):
         for section in all_sections.values():
             if not section.is_valid():
                 raise OOParserException, "Неверно задана секция %s. \
-                Определена одна из двух ячеек" %section.name    
+                Определена одна из двух ячеек" %section.name  
+        #Флаг 8 отвечает за удаление аннотаций.
+        document.clearContents(8)          
         return all_sections  
     
     def convert_value(self, value):
