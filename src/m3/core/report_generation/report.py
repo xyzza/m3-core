@@ -49,7 +49,7 @@ class OORunner(object):
         '''        
         localContext = uno.getComponentContext()
         resolver = localContext.ServiceManager.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", localContext)
-        
+    
         # Пытаемся соединиться с сервером
         for i in range(OORunner.CONNECTION_RETRY_COUNT):
             try:
@@ -117,6 +117,7 @@ class OOParser(object):
             annotation = annotations_iter.nextElement()
             value = annotation.String
             position = annotation.Position
+            annotation.setString('')
             section_names = value.split()
             for section_name in section_names:
                 section_name = section_name.strip()
@@ -207,32 +208,21 @@ class Section(object):
         Определяет, обе ли ячейки заданы
         '''        
         return self.left_cell_addr and self.right_cell_addr
-    
-    def copy(self, context, document, src_sheet, cell):
+        
+    def copy (self, src_sheet, dest_cell):
         '''
         Копирует секцию в документе из листа src_sheet начиная с ячейки cell
-        Ячейку можно получить из листа так: cell = sheet.getCellByPosition(2,5)     
+        Ячейку можно получить из листа так: cell = sheet.getCellByPosition(2,5) 
         '''
-    
-        dispatcher = context.ServiceManager.createInstanceWithContext("com.sun.star.frame.DispatchHelper", context) 
-        section_range = src_sheet.getCellRangeByPosition(self.left_cell_addr.Column,
+        src_section_range = src_sheet.getCellRangeByPosition(self.left_cell_addr.Column,
                                                       self.left_cell_addr.Row,
                                                       self.right_cell_addr.Column,
                                                       self.right_cell_addr.Row)
-        document.CurrentController.select(section_range)
-        prop = PropertyValue()
-        prop.Name = "Flags"
-        #Так задаются флаги: A - all or S - string V - value D - date, time F - formulas  
-        #N - notes T - formats
-        # Не копируем комментарии 
-        prop.Value = "SVDFT"
-        # Копируем выделенную секцию
-        dispatcher.executeDispatch(document.getCurrentController().getFrame(), ".uno:Copy", "", 0, ())
-        # Выделяем ячейку, в которую будет вставляться секция
-        document.CurrentController.select(cell)
-        # Вставляем секцию
-        dispatcher.executeDispatch(document.getCurrentController().getFrame(), ".uno:InsertContents", "", 0,(prop,))
+        src_section_addr = src_section_range.getRangeAddress()
+        dest_cell_addr = dest_cell.getCellAddress()
+        src_sheet.copyRange(dest_cell_addr, src_section_addr)
         
+            
     def flush(self, params, vertical=True):
         '''
         Выводит секцию в отчет
@@ -240,7 +230,6 @@ class Section(object):
         section_width = abs(self.left_cell_addr.Column - self.right_cell_addr.Column)+1
         section_height = abs(self.left_cell_addr.Row - self.right_cell_addr.Row)+1
         x, y = self.report_object.find_section_position(vertical, section_width, section_height)
-        context = self.report_object.context
         document = self.report_object.document
         #Лист с результатом - второй по счету
         dest_sheet = document.getSheets().getByIndex(1)
@@ -250,7 +239,7 @@ class Section(object):
         else:
             raise ReportGeneratorException, "Невозможно вывести секцию в отчет, \
             лист-шаблон отсутствует. Возможно, отчет уже был отображен."    
-        self.copy(context, document, src_sheet, dest_cell)
+        self.copy(src_sheet, dest_cell)
         section_range = dest_sheet.getCellRangeByPosition(x,y,x+section_width-1,y+section_height-1)
         parser = OOParser()
         for key, value in params.items():
@@ -461,7 +450,6 @@ class SpreadsheetReport(object):
         self.desktop = OORunner.get_desktop()         
         template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
         self.document = create_document(self.desktop, template_path)
-        self.context = OORunner.CONTEXT
         # Первый лист шаблона, в котором должны быть заданы секции
         template_sheet = self.document.getSheets().getByIndex(0)
         #Находим все секции в шаблоне
