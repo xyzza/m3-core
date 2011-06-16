@@ -59,16 +59,19 @@ class QueryBuilderWindow(ExtWindow):
         btn_query_text = ExtButton()
         btn_query_text.text = u'Показать текст запроса'
         btn_query_text.icon_cls = 'icon-script-code'
+        btn_query_text.handler = 'showQueryText'
         
         tbfill_tab = ExtToolBar.Fill()
         
         btn_run_query = ExtButton()
+        btn_run_query.disabled = True
         btn_run_query.text = u'Выполнить'
         btn_run_query.icon_cls = 'icon-script-lightning'
         
         btn_save_query = ExtButton()
         btn_save_query.text = u'Сохранить'
         btn_save_query.icon_cls = 'icon-script-save'
+        btn_save_query.handler = 'saveQuery'
         
         btn_close = ExtButton()
         btn_close.text = u'Закрыть'
@@ -76,11 +79,8 @@ class QueryBuilderWindow(ExtWindow):
         btn_close.handler = 'winClose'
         
         tab_main = ExtTabPanel()
-        tab_main.title = 'New panel'
-        tab_main.active_tab = 0
-        tab_main.body_border = False
         tab_main.header = True
-        tab_main.border = False
+        tab_main.title = 'New panel'
         
         self.footer_bar = tb_main_tabpanel
         
@@ -95,7 +95,7 @@ class QueryBuilderWindow(ExtWindow):
         self.btn_close = btn_close
         self.tab_main = tab_main
 
-                                        
+                                                
     def init_tables_and_connections(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'

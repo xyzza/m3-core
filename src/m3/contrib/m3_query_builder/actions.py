@@ -24,7 +24,9 @@ class QueryBuilderActionsPack(actions.ActionPack):
                              SelectConnectionWindowAction(),
                              EntitiesListAction(), 
                              EntitiyItemsListAction(),
-                             ConditionWindowAction()])
+                             ConditionWindowAction(),
+                             ShowQueryTextAction(),
+                             SaveQueryAction()])
 
 class QueryBuilderWindowAction(actions.Action):
     '''
@@ -36,7 +38,9 @@ class QueryBuilderWindowAction(actions.Action):
     def run(self, request, context):
         params = {'select_connections_url': SelectConnectionWindowAction.absolute_url(),
                   'entity_items_url': EntitiyItemsListAction.absolute_url(),
-                  'condition_url': ConditionWindowAction.absolute_url()}
+                  'condition_url': ConditionWindowAction.absolute_url(),
+                  'query_text_url': ShowQueryTextAction.absolute_url(),
+                  'save_query_url': SaveQueryAction.absolute_url()}
         window = ui.QueryBuilderWindow(params=params)
         return actions.ExtUIScriptResult(data=window)
 
@@ -89,3 +93,33 @@ class ConditionWindowAction(actions.Action):
     def run(self, request, context):
         win = ui.ConditionWindow()
         return actions.ExtUIScriptResult(win)
+    
+    
+class ShowQueryTextAction(actions.Action):
+    '''
+    Возвращает sql текст запроса
+    '''
+    url = '/sql-query'
+    shortname = 'm3-query-builder-sql-query'
+
+#    def context_declaration(self):
+#        return [ACD(name='entity_name', type=unicode, required=True)]
+
+    def run(self, request, context):           
+        #entity_items = get_entity_items(context.entity_name)
+        return actions.JsonResult(json.dumps({}))
+    
+
+class SaveQueryAction(actions.Action):
+    '''
+    Сохраняет полученый запрос
+    '''
+    url = '/save'
+    shortname = 'm3-query-builder-save'
+
+#    def context_declaration(self):
+#        return [ACD(name='entity_name', type=unicode, required=True)]
+
+    def run(self, request, context):           
+        #entity_items = get_entity_items(context.entity_name)
+        return actions.JsonResult(json.dumps({}))
