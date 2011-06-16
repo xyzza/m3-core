@@ -7453,12 +7453,6 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
  // Define a set of code type configurations
 
 Ext.ns('Ext.m3.CodeEditorConfig');
-
-Ext.apply(Ext.m3.CodeEditorConfig, {
-    cssPath: "m3static/vendor/codemirror/css/",
-    jsPath: "m3static/vendor/codemirror/js/"
-});
-
 Ext.apply(Ext.m3.CodeEditorConfig, {
     parser: {
         python: { mode: {name: "python", version: 2, singleLineStringErrors: false}},
@@ -7508,71 +7502,46 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         });
 
     },
-
+    /* Хендлер перехвата клавиатурных действий */
     fireKeyEvent:function(i,e) {
         this.fireEvent('editorkeyevent', i, e);
+    },
+    contentChange: function() {
+        var oCmp = this.getTextArea();
+        var sCode = this.codeMirrorEditor.getValue();
+
+        oCmp.setValue(sCode);
+        if(this.oldSourceCode == sCode) this.setTitleClass(true);
+        else this.setTitleClass();
+        this.fireEvent('contentChaged', this);
     },
 
     /** @private*/
     triggerCodeEditor: function() {
         var oThis = this;
-        var oCmp = this.findByType('textarea')[0];
+        var oCmp = this.getTextArea();
         var editorConfig = Ext.applyIf(this.codeMirrorEditor || {}, {
-           height: "100%",
-           width: "100%",
-           mode: {name: "python", version: 2, singleLineStringErrors: false},
-           theme: "default",
-           lineNumbers: true,
-           indentUnit: 4,
-           tabMode: "shift",
-           matchBrackets: true,
-           textWrapping: false,
-           content: oCmp.getValue(),
-           readOnly: oCmp.readOnly,
-           autoMatchParens: true,
-           onKeyEvent:this.fireKeyEvent.createDelegate(this),
-            
-
-           initCallback: function(editor) {
-               editor.win.document.body.lastChild.scrollIntoView();
-               try {
-                   var iLineNmbr = ((Ext.state.Manager.get("edcmr_" + oThis.itemId + '_lnmbr') !== undefined) ? Ext.state.Manager.get("edcmr_" + oThis.itemId + '_lnmbr') : 1);
-//                   console.log(iLineNmbr);
-                   editor.jumpToLine(iLineNmbr);
-               }catch(e){
-//                   console.error(e);
-               };
-               /*Хендлер на save из iframe.textarea*/
-               Ext.fly(editor.win.document.body).on('keydown',function(e,t,o){
-                   if (e.ctrlKey && (e.keyCode == 83)) {
-                       oThis.fireEvent('save');
-                       e.stopEvent();
-                   };
-               });
-           },
+            height: "100%",
+            width: "100%",
+            theme: "default",
+            lineNumbers: true,
+            indentUnit: 4,
+            tabMode: "shift",
+            matchBrackets: true,
+            textWrapping: false,
+            content: oCmp.getValue(),
+            readOnly: oCmp.readOnly,
+            autoMatchParens: true,
+            /* Событие нажатия клавиши */
+            onKeyEvent: this.fireKeyEvent.createDelegate(this),
             /* Событие изменения контента */
-           onChange: function() {
-               var sCode = oThis.codeMirrorEditor.getValue();
-               oCmp.setValue(sCode);
-               if(oThis.oldSourceCode == sCode) oThis.setTitleClass(true);
-               else oThis.setTitleClass();
-               oThis.fireEvent('contentChaged', oThis);
-           }
+            onChange: this.contentChange.createDelegate(this)
        });
 
-      var sParserType = oThis.parser || 'python';
-      editorConfig = Ext.applyIf(editorConfig, Ext.m3.CodeEditorConfig.parser[sParserType]);
+        var sParserType = oThis.parser || 'python';
+        editorConfig = Ext.applyIf(editorConfig, Ext.m3.CodeEditorConfig.parser[sParserType]);
 
         this.codeMirrorEditor = new CodeMirror.fromTextArea(Ext.getDom(oCmp.id), editorConfig);
-    },
-
-    getCode: function(){
-        if (typeof this.codeMirrorEditor != "undefined"){
-            return this.codeMirrorEditor.getValue();
-        }
-        else{
-            return '';
-        }
     },
 
     setTitleClass: function(){
