@@ -126,8 +126,7 @@ class Where(object):
         
     def __invert__(self):
         return Where(self, Where.NOT)
-    
-    
+        
     @staticmethod
     def get_simple_conditions():
         return {
@@ -140,7 +139,7 @@ class Where(object):
                 'in': Where.IN,
                 }
 
-class Grouping():
+class Grouping(object):
     '''
     Для группировки
     '''
