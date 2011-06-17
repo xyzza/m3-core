@@ -359,19 +359,20 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                 else:
                     filter = Q(**{lev_field:key})
             aggr = []
-            # будем считать агрегаты
-            for agg in aggregates.keys():
-                agg_type = aggregates[agg]
-                if agg_type == 'sum':
-                    aggr.append(Sum(agg))
-                elif agg_type == 'count':
-                    aggr.append(Count(agg))
-                elif agg_type == 'min':
-                    aggr.append(Min(agg))
-                elif agg_type == 'max':
-                    aggr.append(Max(agg))
-                elif agg_type == 'avg':
-                    aggr.append(Avg(agg))
+            if field:
+                # будем считать агрегаты
+                for agg in aggregates.keys():
+                    agg_type = aggregates[agg]
+                    if agg_type == 'sum':
+                        aggr.append(Sum(agg))
+                    elif agg_type == 'count':
+                        aggr.append(Count(agg))
+                    elif agg_type == 'min':
+                        aggr.append(Min(agg))
+                    elif agg_type == 'max':
+                        aggr.append(Max(agg))
+                    elif agg_type == 'avg':
+                        aggr.append(Avg(agg))
             if filter:
                 if field:
                     if aggr:
@@ -393,13 +394,18 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
             sort_fields = []
             # TODO: пока сортировка сделана только по одному полю
             if len(sorting.keys()) == 1:
+                sort_field = sorting.keys()[0]
+                sort_dir = sorting.values()[0]
                 #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
-                if (field and sorting.keys()[0] in aggregates.keys()) or not field:
-                    if sorting.values()[0] == 'DESC':
-                        sort_fields.append('-' + sorting.keys()[0])
+                if sort_field in aggregates.keys() or sort_field == field or not field:
+                    if sort_field in aggregates.keys() and field:
+                        # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
+                        sort_field = sort_field+'__'+aggregates[sort_field]
+                    if sort_dir == 'DESC':
+                        sort_fields.append('-' + sort_field)
                     else:
-                        sort_fields.append(sorting.keys()[0])
-            if field and not field in sorting:
+                        sort_fields.append(sort_field)
+            else:
                 #нет заданной сортировки, отсортируем по этому полю
                 sort_fields.append(field)
             if sort_fields:
@@ -451,10 +457,12 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
             index = 0
             query = self.get_data()
             if len(sorting.keys()) == 1:
-                if sorting.values()[0] == 'DESC':
-                    query = query.order_by('-' + sorting.keys()[0])
+                sort_field = sorting.keys()[0]
+                sort_dir = sorting.values()[0]
+                if sort_dir == 'DESC':
+                    query = query.order_by('-' + sort_field)
                 else:
-                    query = query.order_by(sorting.keys()[0])
+                    query = query.order_by(sort_field)
             for i in query.all()[begin:end + 1]:
                 item = self.create_record()
                 item.indent = 0
@@ -466,7 +474,6 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                 item.calc()
                 res.append(item)
                 index = index + 1
-        #print 'read_model()= total=%s, res_count=%s' % (total_of_level, len(res))
         #out_cache[cache_key] = (res,total_of_level)
         return res
 
@@ -546,13 +553,48 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                     filter = filter & Q(**{lev_field:key})
                 else:
                     filter = Q(**{lev_field:key})
+            aggr = []
+            # будем считать агрегаты - по ним тоже сортируют иногда
+            for agg in aggregates.keys():
+                agg_type = aggregates[agg]
+                if agg_type == 'sum':
+                    aggr.append(Sum(agg))
+                elif agg_type == 'count':
+                    aggr.append(Count(agg))
+                elif agg_type == 'min':
+                    aggr.append(Min(agg))
+                elif agg_type == 'max':
+                    aggr.append(Max(agg))
+                elif agg_type == 'avg':
+                    aggr.append(Avg(agg))
+                    
             if filter:
-                query = self.get_data().filter(filter).values(field).distinct()
+                if aggr:
+                    query = self.get_data().filter(filter).values(field).annotate(*aggr).annotate(count=Count("id"))
+                else:
+                    query = self.get_data().filter(filter).values(field).distinct()
             else:
-                query = self.get_data().values(field).distinct()
+                if aggr:
+                    query = self.get_data().values(field).annotate(*aggr).annotate(count=Count("id"))
+                else:
+                    query = self.get_data().values(field).distinct()
+                    
             #сортировка 
             sort_fields = []
-            if field and not field in sorting:
+            # TODO: пока сортировка сделана только по одному полю
+            if len(sorting.keys()) == 1:
+                sort_field = sorting.keys()[0]
+                sort_dir = sorting.values()[0]
+                #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
+                if sort_field in aggregates.keys() or sort_field == field:
+                    if sort_field in aggregates.keys():
+                        # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
+                        sort_field = sort_field+'__'+aggregates[sort_field]
+                    if sort_dir == 'DESC':
+                        sort_fields.append('-' + sort_field)
+                    else:
+                        sort_fields.append(sort_field)
+            else:
                 #нет заданной сортировки, отсортируем по этому полю
                 sort_fields.append(field)
             if sort_fields:
