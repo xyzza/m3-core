@@ -11,7 +11,6 @@ import inspect
 from django.conf import settings
 from django.utils.importlib import import_module
 
-from entity import BaseEntity
 
 class EntityCache(object):
     '''
@@ -38,11 +37,12 @@ class EntityCache(object):
                             raise
                         continue
                                         
-                    entities_module = [obj for _, obj in inspect.getmembers(module)
-                                        if inspect.isclass(obj)
-                                            and hasattr(obj, '__module__') 
-                                            and obj.__module__ == module.__name__
-                                            and issubclass(obj, BaseEntity)]
+                    entities_module = []
+                    for _, obj in inspect.getmembers(module):
+                        if inspect.isclass(obj) and hasattr(obj, '__module__') and obj.__module__ == module.__name__:
+                            # Чтобы не было кроссимпорта!
+                            if 'BaseEntity' in [x.__name__ for x in obj.__bases__]:
+                                entities_module.append(obj)
                     
                     cls._entities.extend(entities_module)
 
