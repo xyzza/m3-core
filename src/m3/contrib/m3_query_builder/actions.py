@@ -10,7 +10,7 @@ from m3.ui.actions import ACD
 
 import ui
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
-    get_aggr_functions
+    get_aggr_functions, save_query
 
 class QueryBuilderActionsPack(actions.ActionPack):
     '''
@@ -124,12 +124,12 @@ class SaveQueryAction(actions.Action):
     shortname = 'm3-query-builder-save'
 
     def context_declaration(self):
-        return [ACD(name='objects', type=object, required=True)]
+        return [ACD(name='objects', type=object, required=True),
+                ACD(name='name', type=str, required=True)]
 
     def run(self, request, context):           
         
-        entity = build_entity(context.objects)
-        
         # Нужно сохранить объект
+        save_query(context.name, context.objects)
         
         return actions.JsonResult(json.dumps({}))
