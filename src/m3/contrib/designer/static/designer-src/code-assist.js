@@ -47,7 +47,8 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
 
             onSuccessCodeAssistLoad:function(response, opts) {
                 var data = Ext.util.JSON.decode(response.responseText);
-                this.createCompletionBox(data.proposal);
+                //this.createCompletionBox(data.proposal);
+                this.createCompletionMenu(data.proposal);
             },
 
             onFailureCodeAssistLoad:function(response, opts) {
@@ -56,6 +57,16 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
                 } else {
                     Ext.MessageBox.alert('Ошибка', 'Произошла непредвиденная ошибка. Обратитесь к разработчикам');
                 }
+            },
+
+            createCompletionMenu:function(completions) {
+
+                var menu = new M3Designer.code.CompletionMenu({
+                    proposals:completions,
+                    editor:this.codeMirrorEditor
+                });
+
+                menu.showCompletions();
             },
 
             createCompletionBox:function(completions) {
@@ -126,6 +137,74 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
                 if (window.opera) setTimeout(function(){if (!done) sel.focus();}, 100);
             }
         });
+    }
+});
 
+/**
+ * Окошко для автокомплита
+ */
+M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
+
+    proposals:undefined,
+    
+    editor:undefined,
+
+    showSeparator:false,
+
+    initComponent:function() {
+
+        var items = [], i =0, items, text;
+
+        for (;i<this.proposals.length;i++) {
+            item = this.proposals[i];
+            text = item.text + ' (' + item.scope;
+            if (item.type && item.type != '') {
+                text += ',' + item.type + ')';
+            }
+            else {
+                text += ')';
+            };
+
+            items.push({
+                text: text,
+                data: item
+            });
+        };
+
+        this.items = items;
+        M3Designer.code.CompletionMenu.superclass.initComponent.call(this);
+        this.on('click', this.onClick, this);
+        this.on('hide', this.onHide, this);
+    },
+
+    onClick:function(menu, menuItem, e) {
+       this.insertCode(menuItem.data.text);
+       this.destroy();
+    },
+
+    onHide:function() {
+        //this.destroy();
+        this.editor.focus();
+    },
+
+    showCompletions:function() {
+        var pos = this.editor.cursorCoords();
+        this.editorCursor = this.editor.getCursor(false);
+        this.token = this.editor.getTokenAt(this.editorCursor);
+        if (this.token.string === '.') {
+            this.dot = true;
+        }
+        this.showAt([pos.x,pos.yBot]);
+    },
+
+    insertCode:function(code) {
+        this.editor.replaceRange(code, {
+                    line:this.editorCursor.line,
+                    ch: this.dot ? this.token.start + 1 : this.token.start
+                }, {
+                    line : this.editorCursor.line,
+                    ch: this.token.end
+                }
+        );
     }
 });

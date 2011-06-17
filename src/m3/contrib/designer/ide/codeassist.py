@@ -13,8 +13,12 @@ def get_code_proposals(code, offset):
     result = []
 
     for p in sorted:
-        s = p.name + ' (' + p.kind + ',' + p.scope +  ')'
-        result.append(s)
+        obj = {
+            'text':p.name,
+            'type':p.type,
+            'scope':p.scope
+        }
+        result.append(obj)
 
     #TODO
     #когда взываеццо код ассист надо отлавливать исключение, которое робе кидает в случае если в коде есть
