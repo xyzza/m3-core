@@ -404,7 +404,10 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     list_sort_order = None
     
     def get_rows(self, request, context, offset, limit, filter, user_sort=''):
-        sort_order = [user_sort] if user_sort else self.list_sort_order
+        if user_sort:
+            sort_order = [user_sort] if not isinstance(user_sort, (list, tuple,)) else user_sort
+        else:
+            sort_order =  self.list_sort_order
         filter_fields = self._default_filter()
         query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, filter_fields)
