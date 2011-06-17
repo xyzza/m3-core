@@ -109,7 +109,7 @@ class ShowQueryTextAction(actions.Action):
         return [ACD(name='objects', type=object, required=True)]
 
     def run(self, request, context):           
-        
+
         entity = build_entity(context.objects)
         sql = entity.get_raw_sql()
                 

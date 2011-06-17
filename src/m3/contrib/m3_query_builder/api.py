@@ -57,8 +57,8 @@ def get_entity_items(entity_name):
             assert isinstance(field, Field)
 
             node = {'leaf': True,
-                    'verbose_field': field.verbose_name or field.alias or field.name,
-                    'id_field': field.alias or field.name,
+                    'verbose_field': field.verbose_name or field.alias or field.field_name,
+                    'id_field': field.alias or field.field_name,
                     'entity_name': entity_name}
             
             root_node.setdefault('children', []).append(node)
@@ -88,7 +88,26 @@ def build_entity(objs, separator='-'):
         ) for rel in objs['relations']]
     
     # Список группировки
-    entity.group_by = []
+    group_fields = []
+    for group_field in objs['group']['group_fields']:
+        entity_name, field_name = group_field['id'].split(separator)
+        field = Field(entity_name, field_name)
+        
+        # Получение класса для агригирования. Например: Min, Max, Count
+        aggr_func = group_field.get('function')
+        if aggr_func:
+            aggr_class = get_aggr_functions()[aggr_func]
+            
+            group_fields.append(aggr_class(field))
+        
+    aggr_fields = []
+    for group_field in objs['group']['group_aggr_fields']:
+        entity_name, field_name = group_field['id'].split(separator)
+        field = Field(entity_name, field_name)
+        aggr_fields.append(field)
+    
+    entity.group_by = Grouping(group_fields=group_fields, 
+                               aggregate_fields=aggr_fields)
     
     # Список полей выборки
     for select_field in objs['selected_fields']:

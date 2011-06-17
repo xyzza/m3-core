@@ -580,9 +580,7 @@ class QueryBuilderWindow(ExtWindow):
         Устанавливает возможные функции агригирования
         '''
         self.combo_function.store = ExtDataStore (
-                [[k,v] for k,v in aggr_functions.items()] )
-        
-        self.combo_function.value = aggr_functions.get('min')
+                [[k, k] for k, _ in aggr_functions.items()] )                
                                                                                                                                                 
 class SelectConnectionsWindow(ExtWindow):
 

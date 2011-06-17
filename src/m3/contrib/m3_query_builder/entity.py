@@ -64,8 +64,8 @@ class Relation(object):
         @param field_second: Второе поле
         @param outer_second: Тип связи, внешняя, или внутренняя. True - внешняя 
         '''
-        assert isinstance(field_first, Field)
-        assert isinstance(field_second, Field)
+        assert isinstance(field_first, Field), '"field_first" must be "Field" type'
+        assert isinstance(field_second, Field), '"field_first" must be "Field" type'
                 
         self.field_first = field_first        
         self.outer_first = outer_first
@@ -115,7 +115,7 @@ class Field(object):
     
     def __init__(self, entity_name, field_name, alias=None, verbose_name=None):
         self.entity_name = entity_name
-        self.name = field_name
+        self.field_name = field_name
         self.alias = alias
         self.verbose_name = verbose_name
 
@@ -126,17 +126,17 @@ class Aggregate(object):
     '''
     class Max(object):
         def __init__(self, field):
-            assert isinstance(field, Field)
+            assert isinstance(field, Field), '"field" must be "Field" type'
             self.field = field
             
     class Min(object):
         def __init__(self, field):
-            assert isinstance(field, Field)
+            assert isinstance(field, Field), '"field" must be "Field" type'
             self.field = field
             
     class Count(object):
         def __init__(self, field):
-            assert isinstance(field, Field)
+            assert isinstance(field, Field), '"field" must be "Field" type'
             self.field = field
 
 class Where(object):
@@ -209,9 +209,9 @@ class Grouping(object):
     @staticmethod
     def get_aggr_functions():
         return {
-                'min': Grouping.MIN,
-                'max': Grouping.MAX,
-                'count': Grouping.COUNT,                
+                Grouping.MIN: Aggregate.Min,
+                Grouping.MAX: Aggregate.Max,
+                Grouping.COUNT: Aggregate.Count,                
                 }
 
 class BaseEntity(object):
@@ -232,13 +232,13 @@ class BaseEntity(object):
     relations = TypedList(type=Relation)
     
     # Список полей, по которым нужно проводить группировку
-    group_by = []
+    group_by = None
     
     # Объект условий
     where = None
     
     # Словарь с алиасами для полей в select'e запроса
-    select = {}
+    select = TypedList(type=Field)
     
     # Выводить повторяющиеся записи?
     distinct = None
@@ -338,16 +338,15 @@ class BaseEntity(object):
             raise Exception(u'Нет данных для SELECT')
         select_columns = []
         for field in self.select:
-            assert isinstance(field, Field)
+            assert isinstance(field, Field)            
             table = self._get_table_by_model(field.entity_name)
             
-            # Все поля
-            if field.name == Field.ALL_FIELDS:
+            if field.field_name == Field.ALL_FIELDS:
+                # Все поля
                 select_columns.append(table)
-            
-            # Отдельное поле
             else:
-                field_real_name = self._get_field_real_name(field.entity_name, field.name)
+                # Отдельное поле	
+                field_real_name = self._get_field_real_name(field.entity_name, field.field_name)
                 column = table.columns.get(field_real_name)
                 if column is None:
                     raise DBColumnNotFound(field.entity_name, field_real_name)
@@ -363,8 +362,8 @@ class BaseEntity(object):
         for rel in self.relations:
             assert isinstance(rel, Relation)           
 
-            left_column = self._get_column(rel.field_first.entity_name, rel.field_first.name)
-            right_column = self._get_column(rel.field_second.entity_name, rel.field_second.name)
+            left_column = self._get_column(rel.field_first.entity_name, rel.field_first.field_name)
+            right_column = self._get_column(rel.field_second.entity_name, rel.field_second.field_name)
             
             if join_sequence is None:
                 last_column = right_column
@@ -395,10 +394,12 @@ class BaseEntity(object):
         """ Возвращает список всех полей entity.Field из SELECT """
         fields = []
         for field in cls.select:
-            assert isinstance(field, Field)
-            
-            app, model = field.entity_name.split('.')
-            if field.name == Field.ALL_FIELDS:
+            assert isinstance(field, Field), '"field" must be "Field" type'
+            model_name, field_name = field.entity_name, field.field_name
+
+            app, model = model_name.split('.') 
+            if field_name == Field.ALL_FIELDS:
+
                 model = cache.get_model(app, model)
                 assert model is not None
                 
@@ -408,14 +409,17 @@ class BaseEntity(object):
                     
                     if isinstance(lf, AutoField):
                         verbose_name = ''
-                    
-                    new_field = Field(field.entity_name, lf.attname, verbose_name=verbose_name)
+                   
+                    new_field = Field(entity_name=model._meta.db_table, 
+                                      field_name=lf.attname, 
+                                      verbose_name=verbose_name)
+
                     fields.append(new_field)
                     
             else:
                 if not field.verbose_name:
                     m = cache.get_model(app, model)
-                    f = m._meta.get_field(field.name)
+                    f = m._meta.get_field(field.field_name)
                     if not isinstance(f, AutoField):
                         field.verbose_name = f.verbose_name
                         
