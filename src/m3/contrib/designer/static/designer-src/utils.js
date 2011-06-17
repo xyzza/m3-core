@@ -40,5 +40,25 @@ M3Designer.Utils = Ext.apply({},{
         var viewModeArray = M3Designer.model.ModelTypeLibrary.enumConfig.viewMode;
         obj.level = levelArray[obj.level-1];
         obj.viewMode = viewModeArray[obj.viewMode-1];
+    },
+    /*Единый successMessage в виде Notification*/
+    successMessage: function(options){
+        var opt = options || {};
+        new Ext.ux.Notification({
+            title: opt.title ||'Сохранение',
+            html: opt.message ||'Изменения были успешно сохранены',
+            iconCls: opt.icon ||'icon-accept'
+        }).show(document);
+    },
+    /*Единый failureMessage в виде MessageBox*/
+    failureMessage: function(options){
+        var opt = options || {};
+        Ext.Msg.show({
+                       title: opt.title || 'Ошибка'
+                       ,msg: opt.message || 'Во время выполнения операции произошла ошибка.'
+                       ,buttons: Ext.Msg.OK
+                       ,icon: Ext.MessageBox.WARNING
+                    });
     }
+
 });

@@ -143,7 +143,116 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
         this.fireEvent('modelUpdate', model);
     }
 });
+/**
+ * Базовый объект полей редактирования,
+ * содержит в себе осовные поля редактирования
+ */
+M3Designer.edit.Field = Ext.apply({},{
+    getTriggerField: function(propertyName){
+        return new Ext.grid.GridEditor(
+            new Ext.form.TwinTriggerField({
+                trigger1Class: 'x-form-clear-trigger',
+                trigger2Class: 'x-form-edit-trigger',
+	            'onTrigger1Click': function() {
+                    //Очищает содержимое поля
+                    this.setValue('');
+	            },
+                'onTrigger2Click': function() {
+                    //Редактирование, если файл не создан, создаем его
+                    if (!this.value){
+                        Ext.MessageBox.prompt('Создание templateGlobals', 'Введите имя файла',
+                            function(btn, text){
+                                if (btn == 'ok'){
+                                };
+                            }
+                        );
+                        /**
+                         * inputBox для ввода имени файла, выполним запрос
+                         * и создадим файл на сервере (templates/ui-js/имяфайла),
+                         * если все в порядке присвоим
+                         * полю имя файла, и выведим Notification
+                        */
+                    }
+                    else{
+                        /**
+                         * Если есть имя templateGlobals файла, выполним запрос
+                         * (текущее положение - templates/имяфайла или templates/ui-js/имяфайла)
+                         * для получнеия содержимого, если все ок, добавим новый
+                         * таб в таб панел
+                         */
+                        var tabPanel = Ext.getCmp('tab-panel'),
+                        path = tabPanel.getActiveTab().path,
+                        fileName = this.value;
+                        /*Запрос содержимого файла по path на сервере*/
+                        if (path && fileName)
+                            M3Designer.Requests.fileGTGetContent(path, fileName, tabPanel);
+                    }
+	            }
+            })
+        );
+    },
+    getNumberEditor: function (source, propertyName) {
+        return new Ext.form.NumberField({
+            width: 120,
+            fieldLabel: propertyName,
+            value: source[propertyName]
+        });
+    },
+    getStringEditor: function (source, propertyName) {
+        return new Ext.form.TextField({
+            width: 120,
+            fieldLabel: propertyName,
+            value: source[propertyName]
+        });
+    },
+    getBooleanEditor: function (source, propertyName) {
+        return new Ext.form.Checkbox({
+            fieldLabel: propertyName,
+            checked: source[propertyName]
+        });
+    },
+    getCodeEditor: function () {
+        return new Ext.grid.GridEditor(
+            new Ext.form.TextArea()
+        );
+    },
+    getComboEditorBase: function (propertyName) {
+        var data = [];
+        var ar = M3Designer.Types.getEnumValues(propertyName);
+        var i;
 
+        for (i = 0; i < ar.length; i++) {
+            data.push([ar[i]]);
+        }
+
+        var store = new Ext.data.ArrayStore({
+            autoDestroy: true,
+            idIndex: 0,
+            fields: ['name'],
+            data: data
+        });
+        return new Ext.form.ComboBox({
+            store: store,
+            displayField: 'name',
+            mode: 'local',
+            triggerAction: 'all',
+            editable: false,
+            selectOnFocus: true
+        });
+    },
+    getComboEditorQP:function(source, propertyName){
+        return Ext.applyIf(
+                this.getComboEditorBase(propertyName), {
+                    width: 120,
+                    fieldLabel: propertyName,
+                    value: source[propertyName]
+                    }
+        )
+    },
+    getComboEditorPG:function(source, propertyName){
+        return new Ext.grid.GridEditor(this.getComboEditorBase(propertyName));
+    }
+})
 /**
  * @class M3Designer.edit.QuickPropertyWindow
  * Окно быстрой настройки объекта
@@ -227,17 +336,19 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
                 var type = M3Designer.Types.getPropertyType(this.model.attributes.type, p);
 
                 if (type === 'object') {
-                    customEditorsCfg[p] = this.getCodeEditor(p);
+                    customEditorsCfg[p] = Ext.applyIf(M3Designer.edit.Field.getCodeEditor(), {value: '{Object}'});
                 } else if (type === 'enum') {
-                    customEditorsCfg[p] = this.getComboEditor(p);
+                    customEditorsCfg[p] = M3Designer.edit.Field.getComboEditorQP(this.source, p);
                     customEditorsCfg[p].on('select', this.onSave.createDelegate(this));
                 } else if (type === "number") {
-                    customEditorsCfg[p] = this.getNumberEditor(p);
+                    customEditorsCfg[p] = M3Designer.edit.Field.getNumberEditor(this.source, p);
                 } else if (type === "string") {
-                    customEditorsCfg[p] = this.getStringEditor(p);
+                    customEditorsCfg[p] = M3Designer.edit.Field.getStringEditor(this.source, p);
                 } else if (type === "boolean") {
-                    customEditorsCfg[p] = this.getBooleanEditor(p);
+                    customEditorsCfg[p] = M3Designer.edit.Field.getBooleanEditor(this.source, p);
                     customEditorsCfg[p].on('check', this.onSave.createDelegate(this));
+                } else if (p === 'templateGlobals') {
+                    customEditorsCfg[p] = M3Designer.edit.Field.getTriggerField(this.source, p);
                 }
 
                 if (type !== "undefined") {
@@ -245,59 +356,6 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
                 }
             }
         }
-    },
-    getNumberEditor: function (propertyName) {
-        return new Ext.form.NumberField({
-            width: 120,
-            fieldLabel: propertyName,
-            value: this.source[propertyName]
-        });
-    },
-    getStringEditor: function (propertyName) {
-        return new Ext.form.TextField({
-            width: 120,
-            fieldLabel: propertyName,
-            value: this.source[propertyName]
-        });
-    },
-    getBooleanEditor: function (propertyName) {
-        return new Ext.form.Checkbox({
-            fieldLabel: propertyName,
-            checked: this.source[propertyName]
-        });
-    },
-    getComboEditor: function (propertyName) {
-        var data = [];
-        var i;
-
-        var ar = M3Designer.Types.getEnumValues(propertyName);
-        for (i = 0; i < ar.length; i++) {
-            data.push([ar[i]]);
-        }
-
-        var store = new Ext.data.ArrayStore({
-            autoDestroy: true,
-            idIndex: 0,
-            fields: ['name'],
-            data: data
-        });
-
-        return new Ext.form.ComboBox({
-            width: 120,
-            fieldLabel: propertyName,
-            value: this.source[propertyName],
-            store: store,
-            displayField: 'name',
-            mode: 'local',
-            triggerAction: 'all',
-            editable: false,
-            selectOnFocus: true
-        });
-    },
-    getCodeEditor: function () {
-        return new Ext.grid.GridEditor(new Ext.form.TextArea({
-            value: '{Object}'
-        }));
     },
     onSave: function (obj, newValue) {
         var itemsObj = {};
@@ -390,43 +448,15 @@ M3Designer.edit.PropertyWindow = Ext.extend(Ext.Window, {
             if (this.source.hasOwnProperty(p)) {
                 var type = M3Designer.Types.getPropertyType(this.model.attributes.type, p);
                 if (type === 'object') {
-                    customEditorsCfg[p] = this.getCodeEditor();
+                    customEditorsCfg[p] = M3Designer.edit.Field.getCodeEditor();
                     customRendersCfg[p] = objectRendererFunction;
                 } else if (type === 'enum') {
-                    customEditorsCfg[p] = this.getComboEditor(p);
+                    customEditorsCfg[p] = M3Designer.edit.Field.getComboEditorPG(this.source, p);
+                } else if (p === 'templateGlobals') {
+                    customEditorsCfg[p] = M3Designer.edit.Field.getTriggerField(this.source, p);
                 }
             }
         }
-    },
-    getComboEditor: function (propertyName) {
-        var data = [];
-        var ar = M3Designer.Types.getEnumValues(propertyName);
-        var i;
-
-        for (i = 0; i < ar.length; i++) {
-            data.push([ar[i]]);
-        }
-
-        var store = new Ext.data.ArrayStore({
-            autoDestroy: true,
-            idIndex: 0,
-            fields: ['name'],
-            data: data
-        });
-        var result = new Ext.form.ComboBox({
-            store: store,
-            displayField: 'name',
-            mode: 'local',
-            triggerAction: 'all',
-            editable: false,
-            selectOnFocus: true
-        });
-        return new Ext.grid.GridEditor(result);
-    },
-    getCodeEditor: function () {
-        return new Ext.grid.GridEditor(
-            new Ext.form.TextArea()
-        );
     },
     onSave: function () {
         //TODO прикрутить валидацию
@@ -479,43 +509,15 @@ M3Designer.edit.InlinePropertyGrid = Ext.extend(Ext.grid.PropertyGrid, {
             if (this.source.hasOwnProperty(p)) {
                 var type = M3Designer.Types.getPropertyType(this.model.attributes.type, p);
                 if (type === 'object') {
-                    customEditorsCfg[p] = this.getCodeEditor();
+                    customEditorsCfg[p] = M3Designer.edit.Field.getCodeEditor();
                     customRendersCfg[p] = objectRendererFunction;
                 } else if (type === 'enum') {
-                    customEditorsCfg[p] = this.getComboEditor(p);
+                    customEditorsCfg[p] = new Ext.grid.GridEditor(M3Designer.edit.Field.getComboEditorPG(this.source, p));
+                } else if (p === 'templateGlobals') {
+                    customEditorsCfg[p] = M3Designer.edit.Field.getTriggerField(this.source, p);
                 }
             }
         }
-    },
-    getComboEditor: function (propertyName) {
-        var data = [];
-        var ar = M3Designer.Types.getEnumValues(propertyName);
-        var i;
-
-        for (i = 0; i < ar.length; i++) {
-            data.push([ar[i]]);
-        }
-
-        var store = new Ext.data.ArrayStore({
-            autoDestroy: true,
-            idIndex: 0,
-            fields: ['name'],
-            data: data
-        });
-        var result = new Ext.form.ComboBox({
-            store: store,
-            displayField: 'name',
-            mode: 'local',
-            triggerAction: 'all',
-            editable: false,
-            selectOnFocus: true
-        });
-        return new Ext.grid.GridEditor(result);
-    },
-    getCodeEditor: function () {
-        return new Ext.grid.GridEditor(
-            new Ext.form.TextArea()
-        );
     },
     onSave: function () {
         var eventObj = {

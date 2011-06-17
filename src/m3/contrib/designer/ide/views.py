@@ -4,6 +4,7 @@ import os
 import json
 import codecs
 import shutil
+import datetime
 
 from django.shortcuts import render_to_response
 
@@ -143,11 +144,50 @@ def designer_file_content(request):
     '''
     path = request.GET.get('path')
     assert path, 'Path to source file is undefined'
-
+    print path
     with codecs.open( path, "r", "utf-8" ) as f:
         result = f.read()
     
     return JsonResponse({'success': True, 'data':{'content':result}})
+
+def designer_global_template_content(request):
+    '''
+    Вьюшка для чтения/записи содержимого файлов templateGlobals
+    '''
+    path = request.GET.get('path')
+    f = request.GET.get('file')
+    crate_new = int(request.GET.get('crateNew')) #binnary bool
+
+    assert path, 'Path to source is undefined'
+    assert f, 'file is undefined'
+    
+    template_globals_folder = os.path.join('templates','ui-js')
+    template_globals_path = os.path.join(os.path.dirname(path), template_globals_folder)
+    path = os.path.join(template_globals_path, f)
+
+    success = True
+    error = ''
+    content = ''
+
+    if not os.path.exists(path):
+        if crate_new:
+            dt_str = datetime.datetime.strftime(datetime.datetime.now(), '%d.%m.%Y %H:%m')
+            with codecs.open(path, "wb", "utf-8" ) as f:
+                f.write("/*crated by degigner, at %s*/" % dt_str)
+            with codecs.open(path, "rb", "utf-8" ) as f:
+                content = f.read()
+        else:
+            error = u'notExists'
+            success = False
+    else:
+        with codecs.open(path, "rb", "utf-8" ) as f:
+            content = f.read()
+
+    return JsonResponse({'success': success, 'error': error,
+                         'data':{
+                             'content':content,
+                             'dir': template_globals_path,
+                             'path':path}})
 
 def designer_file_content_save(request):
     '''

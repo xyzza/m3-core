@@ -44,7 +44,6 @@ def get_files(path):
         path_file = unicode( os.path.join(path, ffile) )
 
         propertys_dict = dict(text=ffile)
-
         propertys_dict['path'] = path_file
 
         if os.path.isdir(path_file):
@@ -61,7 +60,7 @@ def get_files(path):
 
             #По дефолту является узлом
             propertys_dict['leaf'] = True
-            
+
             if ffile in POSIBLE_EDIT_FILES:
                 propertys_dict['iconCls'] = Icons.PAGE_WHITE_PY
                 propertys_dict['leaf'] = False

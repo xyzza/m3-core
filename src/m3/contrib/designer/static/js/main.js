@@ -80,60 +80,10 @@ function toolBarFuncWraper(fn){
  * @param e
  */
 function createClass(node, e){
-    Ext.MessageBox.prompt('Создание класса',
-        'Введите название класса',
+    Ext.MessageBox.prompt('Создание класса', 'Введите название класса',
         function(btn, text){
             if (btn == 'ok'){
-                var attr = node.attributes;
-                Ext.Ajax.request({
-                    url:'/create-new-class'
-                    ,params: {
-                        path: attr['path']
-                        ,className: text
-                    }
-                    ,success: function(response, opts){
-                        var obj = Ext.util.JSON.decode(response.responseText);
-                        if (obj.success) {
-                            var new_node = new Ext.tree.TreeNode({
-                                text: text
-                                ,path: attr['path']
-                                ,class_name: text
-                                ,iconCls: 'icon-class'                                
-                                ,children:[]
-                            });
-
-                            node.appendChild(new_node);
-
-							var nodes = [{
-                           		text: '__init__'
-                           		,path: attr['path']
-                            	,class_name: text
-                            	,func_name: '__init__'
-                            	,iconCls: 'icon-function'
-                            },{
-                            	text: 'initialize'
-                            	,path: attr['path']
-                            	,class_name: text
-                            	,func_name: 'initialize'
-                            	,iconCls: 'icon-function'
-                            }]
-
-							for (var i=0; i<nodes.length; i++) {
-								new_node.appendChild(new Ext.tree.TreeNode( nodes[i] ));	
-							}
-
-                        } else {
-                            Ext.Msg.show({
-                               title:'Ошибка'
-                               ,msg: obj.json
-                               ,buttons: Ext.Msg.OK
-                               ,icon: Ext.MessageBox.WARNING
-                            });
-                        };
-
-                    },
-                    failure: uiAjaxFailMessage
-                });
+                M3Designer.Requests.createClass(node, text);
             };
         }
     );
@@ -189,7 +139,9 @@ function createTreeView(rootNodeName){
 	    'create-init':{
             text: 'Создать функцию инициализации'
             ,iconCls: 'icon-award-star-add'
-            ,handler: function(item, e){generateInitialize(item.parentMenu.contextNode);}
+            ,handler: function(item, e){
+                M3Designer.Requests.generateInitialize(item.parentMenu.contextNode);
+            }
 	    },
 	    'create-simple-func':{
             text: 'Создать контейнерную функцию'
@@ -255,42 +207,7 @@ function createTreeView(rootNodeName){
             				handler: function(btn, e){
             					var funcName = form.getForm().findField('func-name').getValue();
             					var funcType = form.getForm().findField('type').getValue();
-            					Ext.Ajax.request({
-            						url: '/create-function'
-            						,params:{
-            							name: funcName,
-            							path: node.attributes['path'],
-            							className: node.attributes['class_name'],
-            							type: funcType
-            						}
-            						,success: function(response, opts){
-										var obj = Ext.util.JSON.decode(response.responseText);
-				                        if (obj.success) {
-
-								            var new_node = new Ext.tree.TreeNode({
-								                text: funcName
-								                ,path: node.attributes['path']
-								                ,class_name: node.attributes['class_name']
-								                ,func_name: funcName
-								                ,iconCls: 'icon-function'
-								            });
-
-		        							node.appendChild(new_node);
-
-		        							win.close();
-
-		        							onClickNode(new_node);
-		        						} else {
-						        			Ext.Msg.show({
-				                               title:'Ошибка'
-				                               ,msg: obj.json
-				                               ,buttons: Ext.Msg.OK
-				                               ,icon: Ext.MessageBox.WARNING
-				                            });
-				                        };
-            						}
-            						,failure: uiAjaxFailMessage
-            					});
+                                M3Designer.Requests.createFunction(funcName, funcType, node, win);
             				}
             			}),
             			new Ext.Button({
@@ -452,7 +369,7 @@ function createTreeView(rootNodeName){
 		        	onClickNode(node);
 	        	}
 
-                /*Все файлы не являющиеся *.py и conf */
+                /*Все типы фалов которые не входят в codeViewFileTypes */
                 else if(codeViewFileTypes.has(fileType[0])){
                     var fileAttr = {};
                     fileAttr['path'] = node.attributes.path;
@@ -589,7 +506,7 @@ function newTarget(node, fileBool){
                 name : name,
                 action : actionNew
             };
-            manipulationRequest(params, function(obj){
+            M3Designer.Requests.manipulation(params, function(obj){
                 var new_node = new Ext.tree.TreeNode({
                     text: name
                     ,path: obj.data['path']
@@ -625,7 +542,7 @@ function deleteTarget(node, fileBool){
         fn: function(btn, text){
             if (btn == 'yes'){
                 params.access = 1;
-                manipulationRequest(params, function(){
+                M3Designer.Requests.manipulation(params, function(){
                     node.remove();
                 });
             };
@@ -650,7 +567,7 @@ function renameTarget(node, fileBool){
             action : actionRename,
             name : name
         };
-        manipulationRequest(params, function(){
+        M3Designer.Requests.manipulation(params, function(){
             node.setText(name);
             if (params.access) node.remove(function(){
                 this.parentNode.reload();
@@ -660,37 +577,6 @@ function renameTarget(node, fileBool){
     });
 };
 
-
-/**
- * DRY
- * @param params - Параметры запроса
- * @param fn - Функция которая будет выполнена при success
- */
-function manipulationRequest(params, fn){
-    var errorTypeExist = 'exist';
-    Ext.Ajax.request({
-        url:'/designer/project-manipulation',
-        method: 'POST',
-        params: params,
-        success: function(response, opts){
-            var obj = Ext.util.JSON.decode(response.responseText);
-            if (obj.success && fn instanceof Function) fn(obj);
-            else if (obj.error.msg && obj.error.type == errorTypeExist){
-                var additionalMessage = '. Заменить?';
-                customMessage(obj, params, fn,additionalMessage)
-            }
-            else if (obj.error.msg){
-                Ext.Msg.show({
-                   title:'Ошибка',
-                   msg: obj.error.msg,
-                   buttons: Ext.Msg.OK,
-                   icon: Ext.MessageBox.WARNING
-                   });
-            };
-        },
-        failure: uiAjaxFailMessage
-    });
-};
 
 /**
  *
@@ -708,7 +594,7 @@ function customMessage(obj, params, fn, additionalMessage){
         fn: function(btn, text){
             if (btn == 'yes'){
                 params.access = 1;
-                manipulationRequest(params, fn);
+                M3Designer.Requests.manipulation(params, fn);
             }
         }
     });
@@ -729,7 +615,6 @@ function wrongFileTypeMessage(fileType){
 
 function onClickNode(node) {
 	var attr =  node.attributes;
-
 	var tabPanel = Ext.getCmp('tab-panel');
 
 	var funcTitle = ' (initialize)';
@@ -744,7 +629,7 @@ function onClickNode(node) {
 		tabPanel.setActiveTab(tab);
 		return;
 	};
-
+    
     var workspace = new DesignerWorkspace({
     	id: id,
         dataUrl:'/designer/data',
@@ -769,7 +654,7 @@ function onClickNode(node) {
 			   ,icon: Ext.MessageBox.QUESTION
 			   ,fn: function(btn, text){
 			   		if (btn == 'yes'){
-			   			generateInitialize(node);
+			   			M3Designer.Requests.generateInitialize(node);
 			   		};
 			   }
 			});
@@ -790,56 +675,12 @@ function onClickNode(node) {
 			result = true;
 
         } else {
-            Ext.Msg.show({
-               title:'Ошибка'
-               ,msg: jsonObj.json
-               ,buttons: Ext.Msg.OK
-               ,icon: Ext.MessageBox.WARNING
-            });
+            M3Designer.Utils.failureMessage({ "message": jsonObj.json });
             result = false;
         };
 
        return result;
      }, workspace);
-};
-
-
-/**
- * Генерирует функцию автогенерации для класса
- */
-function generateInitialize(node){
-	Ext.Ajax.request({
-		url:'create-autogen-function'
-		,params:{
-			path: node.attributes['path'],
-			className: node.attributes['class_name']
-		}
-		,success: function(response, opts){
-			var obj = Ext.util.JSON.decode(response.responseText);
-            if (obj.success) {
-				var funcName = 'initialize';
-	            var new_node = new Ext.tree.TreeNode({
-	                text: funcName
-	                ,path: node.attributes['path']
-	                ,class_name: node.attributes['class_name']
-	                ,func_name: funcName
-	                ,iconCls: 'icon-function'
-	            });
-
-	            node.appendChild(new_node);
-
-				onClickNode(node);
-			} else {
-                Ext.Msg.show({
-                   title:'Ошибка'
-                   ,msg: obj.json
-                   ,buttons: Ext.Msg.OK
-                   ,icon: Ext.MessageBox.WARNING
-                });
-            };
-		}
-		,failure: uiAjaxFailMessage
-	});
 };
 
 /**
@@ -860,30 +701,7 @@ function onClickNodePyFiles(node, fileAttr){
 	};
     
     /*Запрос содержимого файла по path на сервере*/
-    Ext.Ajax.request({
-        url:'/file-content',
-        method: 'GET',
-        params: {
-            path: path
-        }
-        ,success: function(response, opts){
-            var obj = Ext.util.JSON.decode(response.responseText);
-            var type = fileTypeByExpansion(fileName);
-            var codeEditor = new M3Designer.code.ExtendedCodeEditor({
-            	id:id,
-                sourceCode : obj.data.content,
-                parser: type
-            });
-
-            codeEditor.setTitle(fileName);
-            
-            tabPanel.add( codeEditor );
-            tabPanel.activate(codeEditor);
-        
-            initCodeEditorHandlers(codeEditor, path);
-        },
-        failure: uiAjaxFailMessage
-    });
+    M3Designer.Requests.fileGetContent(path, fileName, tabPanel);
 };
 /**
  * Иницализация хендлеров codeEditor'а
@@ -936,77 +754,13 @@ function initCodeEditorHandlers(codeEditor, path){
     /* Хендлер на событие сохранения */
     codeEditor.on('save', function(){
         /*Запрос на сохранения изменений */
-        Ext.Ajax.request({
-            url:'/file-content/save',
-            params: {
-                path: path,
-                content: codeEditor.codeMirrorEditor.getValue()
-            },
-            success: function(response, opts){
-                var obj = Ext.util.JSON.decode(response.responseText);
-                if (obj.success)
-                    new Ext.ux.Notification({
-                        title: 'Сохранение',
-                        html: 'Изменения были успешно сохранены',
-                        iconCls: 'icon-accept'
-                    }).show(document);
-                else if (!obj.success && obj.error){
-                    Ext.Msg.show({
-                        title: 'Ошибка',
-                        msg: 'Ошибка при сохранении файла\n'+obj.error,
-                        icon: Ext.MessageBox.WARNING,
-                        buttons: Ext.Msg.OK,
-                        animEl: codeEditor.id
-                    });
-                };
-                codeEditor.contentChanged = false;
-                codeEditor.onChange();
-            },
-            failure: uiAjaxFailMessage
-        });
+        M3Designer.Requests.fileSaveContent(codeEditor, path);
     });
 
     /* Хендлер на событие обновление */
     codeEditor.on('update', function(){
         var scope = this;
         /*Запрос на обновление */
-        Ext.Ajax.request({
-            url:'/file-content',
-            method: 'GET',
-            params: {
-                path: path
-            },
-            success: function(response, opts){
-                var obj = Ext.util.JSON.decode(response.responseText);
-                if (codeEditor.contentChanged){
-                    var msg = 'Хотели бы вы сохранить ваши изменения?';
-                    codeEditor.showMessage(function(buttonId){
-                        if (buttonId=='yes') {
-                           scope.onSave(function(){
-                               codeEditor.codeMirrorEditor.setValue(obj.data.content);
-                               codeEditor.contentChanged = false;
-                           });
-                        }
-                        else if (buttonId=='no') {
-                           codeEditor.codeMirrorEditor.setValue(obj.data.content);
-                           codeEditor.contentChanged = false;
-                        }
-                        else if (buttonId=='cancel') {
-                            userTakeChoice = !userTakeChoice;
-                        }
-                        userTakeChoice = !userTakeChoice;
-                    }, textArea.id, msg);
-                    codeEditor.onChange();
-                }
-                else {
-                    userTakeChoice = !userTakeChoice;
-                    codeEditor.codeMirrorEditor.setValue(obj.data.content);
-                    codeEditor.contentChanged = false;
-                    codeEditor.onChange();
-                }
-                return !userTakeChoice;
-            },
-            failure: uiAjaxFailMessage
-        });
+        M3Designer.Requests.fileUpdateContent(codeEditor, path, userTakeChoice, textArea);
     });
 };

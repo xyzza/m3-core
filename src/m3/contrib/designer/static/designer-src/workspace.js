@@ -118,17 +118,9 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
 
         storage.on('save', function (jsonObj) {
             if (jsonObj.success) {
-                new Ext.ux.Notification({
-                    title: 'Сохранение формы',
-                    html: 'Данные успешно сохранены',
-                    iconCls: 'icon-accept'}).show(document);
+                M3Designer.Utils.successMessage();
             } else {
-                Ext.Msg.show({
-                    title: 'Ошибка',
-                    msg: 'Ошибка при сохранении файла\n'+jsonObj.json,
-                    icon: Ext.MessageBox.WARNING,
-                    buttons: Ext.Msg.OK
-                });
+                M3Designer.Utils.failureMessage({ "message": 'Ошибка при сохранении файла\n'+jsonObj.json });
             }
 
         });
@@ -139,12 +131,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
                 previewWindow.on('loadcode', storage.uploadCode.createDelegate(storage));
                 previewWindow.show(jsonObj.json);
             } else {
-                Ext.Msg.show({
-                    title: 'Ошибка',
-                    msg: jsonObj.json,
-                    buttons: Ext.Msg.OK,
-                    icon: Ext.MessageBox.WARNING
-                });
+                M3Designer.Utils.failureMessage({ "message": jsonObj.json });
             }
         }, this);
 
@@ -168,24 +155,14 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
                 this.application.init(jsonObj.json);
             }
         } else {
-            Ext.Msg.show({
-                title: 'Ошибка',
-                msg: jsonObj.json,
-                buttons: Ext.Msg.OK,
-                icon: Ext.MessageBox.WARNING
-            });
+            M3Designer.Utils.failureMessage({ "message": jsonObj.json });
         }
     },
     uploadCode: function (jsonObj) {
         if (jsonObj.success) {
             this.application.reloadModel(jsonObj.data)
         } else {
-            Ext.Msg.show({
-                title: 'Ошибка',
-                msg: jsonObj.json,
-                buttons: Ext.Msg.OK,
-                icon: Ext.MessageBox.WARNING
-            });
+            M3Designer.Utils.failureMessage({ "message": jsonObj.json });
         }
     }
 });
