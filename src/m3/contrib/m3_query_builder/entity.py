@@ -13,9 +13,44 @@ from django.conf import settings
 from django.db.models.loading import cache
 from django.db.models.fields import AutoField
 
-
+#========================== КОНСТАНТЫ ============================
 WRAPPER = SQLAlchemyWrapper(settings.DATABASES)
 
+#========================== ИСКЛЮЧЕНИЯ ===========================
+class EntityException(Exception):
+    """ Базовое исключение для всех сущностей запросов """
+    pass
+
+
+class DjangoModelNotFound(EntityException):
+    def __init__(self, model_name, *a, **k):
+        super(DjangoModelNotFound, self).__init__(self, *a, **k)
+        self.model_name = model_name
+        
+    def __str__(self):
+        return u'В кэше моделей Django не удалось найти модель по имени %s ' % self.model_name
+
+
+class DBTableNotFound(EntityException):
+    def __init__(self, model_name, *a, **k):
+        super(DBTableNotFound, self).__init__(self, *a, **k)
+        self.model_name = model_name
+        
+    def __str__(self):
+        return u'SqlAlchemy не удалось определить таблицу БД для модели Django с именем %s' % self.model_name
+
+
+class DBColumnNotFound(EntityException):
+    def __init__(self, model_name, field_name, *a, **k):
+        super(DBTableNotFound, self).__init__(self, *a, **k)
+        self.model_name = model_name
+        self.field_name = field_name
+        
+    def __str__(self):
+        raise Exception(u'В модели %s не найдена колонка %s' % (self.model_name, self.field_name))
+        
+
+#=========================== КЛАССЫ ==============================
 class Relation(object):
     '''
     Связь между сущностями
@@ -23,12 +58,10 @@ class Relation(object):
     def __init__(self, field_first, field_second,
                   outer_first=False, outer_second=False):
         '''
-        @param table_first: Первая сущность
-        @param key_first: Первый ключ для связи
+        @param field_first: Первое поле
         @param outer_first: Тип связи, внешняя, или внутренняя. True - внешняя
         
-        @param entity_second: Вторая сущность
-        @param key_second: Второй ключ для связи
+        @param field_second: Второе поле
         @param outer_second: Тип связи, внешняя, или внутренняя. True - внешняя 
         '''
         assert isinstance(field_first, Field)
@@ -272,7 +305,7 @@ class BaseEntity(object):
         app_name, model_name = model_full_name.split('.')
         model = cache.get_model(app_name, model_name)
         if not model:
-            raise Exception(u'Не удалось найти модель по имени %s ' % model_full_name)
+            raise DjangoModelNotFound(model_name=model_full_name)
         
         field = model._meta.get_field(column_name)
         return field.get_attname()
@@ -281,7 +314,7 @@ class BaseEntity(object):
         """ Возвращает таблицу алхимии по имени модели Django """
         table = self.app2map.get(model_name)
         if table is None:
-            raise Exception(u'Не найдена таблица для модели с именем %s' % model_name)
+            raise DBTableNotFound(model_name=model_name)
         return table
     
     def _get_column(self, model_name, field_name):
@@ -290,7 +323,7 @@ class BaseEntity(object):
         real_name = self._get_field_real_name(model_name, field_name)
         column = table.columns.get(real_name)
         if column is None:
-            raise Exception(u'В модели %s не найдена колонка %s' % (model_name, field_name))
+            raise DBColumnNotFound(model_name, field_name)
         return column
     
     def create_query(self, params=None):
@@ -304,33 +337,34 @@ class BaseEntity(object):
         if not len(self.select):
             raise Exception(u'Нет данных для SELECT')
         select_columns = []
-        for model_name, field in self.select.items():
-            table = self._get_table_by_model(model_name)
+        for field in self.select:
+            assert isinstance(field, Field)
+            table = self._get_table_by_model(field.entity_name)
+            
+            # Все поля
+            if field.name == Field.ALL_FIELDS:
+                select_columns.append(table)
             
             # Отдельное поле
-            if isinstance(field, Field):
-                field_real_name = self._get_field_real_name(model_name, field.name)
+            else:
+                field_real_name = self._get_field_real_name(field.entity_name, field.name)
                 column = table.columns.get(field_real_name)
                 if column is None:
-                    raise Exception(u'В модели %s не найдено поле %s' % (model_name, field_real_name))
+                    raise DBColumnNotFound(field.entity_name, field_real_name)
                 
                 if field.alias:
                     column = column.label(field.alias)
                     
                 select_columns.append(column)
 
-            # Все поля
-            elif field == Field.ALL_FIELDS:
-                select_columns.append(table)
-        
         # Подготовка объединений JOIN. Важна последовательность!
         join_sequence = None
         last_column = None
         for rel in self.relations:
             assert isinstance(rel, Relation)           
 
-            left_column = self._get_column(rel.table_first, rel.key_first)
-            right_column = self._get_column(rel.table_second, rel.key_second)
+            left_column = self._get_column(rel.field_first.entity_name, rel.field_first.name)
+            right_column = self._get_column(rel.field_second.entity_name, rel.field_second.name)
             
             if join_sequence is None:
                 last_column = right_column
@@ -360,9 +394,11 @@ class BaseEntity(object):
     def get_select_fields(cls):
         """ Возвращает список всех полей entity.Field из SELECT """
         fields = []
-        for model_name, field in cls.select.items():
-            if field == Field.ALL_FIELDS:
-                app, model = model_name.split('.')
+        for field in cls.select:
+            assert isinstance(field, Field)
+            
+            app, model = field.entity_name.split('.')
+            if field.name == Field.ALL_FIELDS:
                 model = cache.get_model(app, model)
                 assert model is not None
                 
@@ -373,12 +409,12 @@ class BaseEntity(object):
                     if isinstance(lf, AutoField):
                         verbose_name = ''
                     
-                    new_field = Field(name=lf.attname, verbose_name=verbose_name)
+                    new_field = Field(field.entity_name, lf.attname, verbose_name=verbose_name)
                     fields.append(new_field)
                     
             else:
                 if not field.verbose_name:
-                    m = cache.get_model(*model_name.split('.'))
+                    m = cache.get_model(app, model)
                     f = m._meta.get_field(field.name)
                     if not isinstance(f, AutoField):
                         field.verbose_name = f.verbose_name
