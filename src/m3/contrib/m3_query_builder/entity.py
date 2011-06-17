@@ -20,7 +20,7 @@ class Relation(object):
     '''
     Связь между сущностями
     '''
-    def __init__(self, entity_first, key_first, entity_second, key_second,
+    def __init__(self, field_first, field_second,
                   outer_first=False, outer_second=False):
         '''
         @param table_first: Первая сущность
@@ -31,12 +31,13 @@ class Relation(object):
         @param key_second: Второй ключ для связи
         @param outer_second: Тип связи, внешняя, или внутренняя. True - внешняя 
         '''
-        self.table_first = entity_first
-        self.key_first = key_first
+        assert isinstance(field_first, Field)
+        assert isinstance(field_second, Field)
+                
+        self.field_first = field_first        
         self.outer_first = outer_first
         
-        self.table_second = entity_second
-        self.key_second = key_second
+        self.field_second = field_second        
         self.outer_second = outer_second
         
 
@@ -79,11 +80,31 @@ class Field(object):
     # Все поля
     ALL_FIELDS = '*'
     
-    def __init__(self, name, alias=None, verbose_name=None):
-        self.name = name
+    def __init__(self, entity_name, field_name, alias=None, verbose_name=None):
+        self.entity_name = entity_name
+        self.name = field_name
         self.alias = alias
         self.verbose_name = verbose_name
 
+
+class Aggregate(object):
+    '''
+    Набор классов для агригирования
+    '''
+    class Max(object):
+        def __init__(self, field):
+            assert isinstance(field, Field)
+            self.field = field
+            
+    class Min(object):
+        def __init__(self, field):
+            assert isinstance(field, Field)
+            self.field = field
+            
+    class Count(object):
+        def __init__(self, field):
+            assert isinstance(field, Field)
+            self.field = field
 
 class Where(object):
     '''
@@ -148,6 +169,10 @@ class Grouping(object):
     MAX = u'Максимум'
     COUNT = u'Количество'
 
+    def __init__(self, group_fields, aggregate_fields):
+        self.group_fields = group_fields
+        self.aggregate_fields = aggregate_fields
+        
     @staticmethod
     def get_aggr_functions():
         return {

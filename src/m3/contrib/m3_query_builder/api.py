@@ -80,11 +80,10 @@ def build_entity(objs, separator='-'):
     
     # Список связей    
     entity.relations = [             
-        Relation(entity_first=rel['entityFirst'],
-            key_first=rel['entityFirstField'],
-            outer_first=rel['outerFirst'],
-            entity_second=rel['entitySecond'],
-            key_second=rel['entitySecondField'],
+        Relation(
+            Field(rel['entityFirst'], rel['entityFirstField']),     
+            Field(rel['entitySecond'], rel['entitySecondField']),
+            outer_first=rel['outerFirst'],            
             outer_second=rel['outerSecond'],
         ) for rel in objs['relations']]
     
@@ -96,10 +95,11 @@ def build_entity(objs, separator='-'):
         
         entity_name, field_name = select_field['id'].split(separator)
         
-        field = Field(name=field_name, 
+        field = Field(entity_name = entity_name,
+                      field_name=field_name, 
                       alias=select_field.get('alias'))
         
-        entity.select[entity_name] = field
+        entity.select.append(field)
             
     # Список условий    
     entity.where = Where()
