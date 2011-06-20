@@ -206,3 +206,84 @@ class MetaParameterListItem(object):
             return '1'
         else:
             return '0'
+
+
+class LicenseMetaResultObjectTypeEnum(BaseEnumerate):
+    """
+    @enum
+    Тип объекта лицензирования
+    """
+    INT = 1
+    BOOL = 2
+
+    values = {INT: 'int', BOOL: 'bool'}
+
+
+class LicenseMetaObject(object):
+    def __init__(self, code, name, type=LicenseMetaResultObjectTypeEnum.INT):
+        """
+        @param code: Код объекта лицензирования
+        @type code: str
+        @param name: Название объекта лицензирования.
+        @type name: str
+        @param type: Тип объекта лицензирования
+        @type type: LicenseMetaResultObjectTypeEnum key
+        """
+        self._code = code
+        self._name = name
+        
+        if type not in LicenseMetaResultObjectTypeEnum.values.keys():
+            self._type = LicenseMetaResultObjectTypeEnum.INT
+        else:
+            self._type = type
+
+    def get_code(self):
+        return self._code
+
+    def get_name(self):
+        return self._name
+
+    def get_type(self):
+        return self._type
+
+    def get_type_as_string(self):
+        return LicenseMetaResultObjectTypeEnum.values[self._type]
+
+
+class ProfileRatesParam(object):
+    """
+    Параметр запроса о тарифном плане аккаунта
+    """
+    def __init__(self, code, min_value='', max_value=''):
+        """
+        @param code: Код.
+        @param min_value: Минимальное значение.
+        @param max_value: Максимальное значение.
+        """
+        self._code = code
+        self._min_value = min_value
+        self._max_value = max_value
+
+    def get_code(self):
+        """
+        Возвращает код параметра
+
+        @return: str
+        """
+        return self._code
+
+    def get_min_value(self):
+        """
+        Возвращает минимальное значение параметра
+
+        @return: str
+        """
+        return self._min_value
+
+    def get_max_value(self):
+        """
+        Возвращает максимальное значение параметра
+
+        @return: str
+        """
+        return self._max_value
