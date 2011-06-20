@@ -161,8 +161,10 @@ def designer_global_template_content(request):
     assert path, 'Path to source is undefined'
     assert f, 'file is undefined'
     
-    template_globals_folder = os.path.join('templates','ui-js')
-    template_globals_path = os.path.join(os.path.dirname(path), template_globals_folder)
+    template_globals_path = os.path.join(os.path.dirname(path), 'templates')
+    #Если нет директории создадим её
+    if not os.path.exists(template_globals_path):
+        os.mkdir(template_globals_path)
     path = os.path.join(template_globals_path, f)
 
     success = True

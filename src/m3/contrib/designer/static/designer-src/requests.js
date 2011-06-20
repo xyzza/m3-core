@@ -158,7 +158,7 @@ M3Designer.Requests = Ext.apply({}, {
                     if(obj.error == 'notExists'){
                         Ext.Msg.show({
                             title:'Файл не найден',
-                            msg: 'Файл '+fileName+' не был найден в директории '+obj.data.dir+'\n Создать файл ?',
+                            msg: 'Файл '+fileName+' не был найден в директории. Создать файл ?',
                             buttons: Ext.Msg.YESNOCANCEL,
                             icon: Ext.MessageBox.QUESTION,
                             fn: function(btn, text){
