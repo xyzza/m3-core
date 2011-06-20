@@ -348,6 +348,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 invalidClass: {
                     defaultValue: 'm3-form-invalid',
                     isInitValue: true
+                },
+                allowBlank:{
+                    defaultValue: true,
+                    isQuickEditable: true
                 }
             }
         },
@@ -445,10 +449,6 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 id: {
                     defaultValue: 'str_stringfield',
                     isInitProperty: true,
-                    isQuickEditable: true
-                },
-                allowBlank: {
-                    defaultValue: true,
                     isQuickEditable: true
                 },
                 vtype: {
