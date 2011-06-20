@@ -150,45 +150,7 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
 M3Designer.edit.Field = Ext.apply({},{
     getTriggerField: function(propertyName){
         return new Ext.grid.GridEditor(
-            new Ext.form.TwinTriggerField({
-                trigger1Class: 'x-form-clear-trigger',
-                trigger2Class: 'x-form-edit-trigger',
-	            'onTrigger1Click': function() {
-                    //Очищает содержимое поля
-                    this.setValue('');
-	            },
-                'onTrigger2Click': function() {
-                    //Редактирование, если файл не создан, создаем его
-                    if (!this.value){
-                        Ext.MessageBox.prompt('Создание templateGlobals', 'Введите имя файла',
-                            function(btn, text){
-                                if (btn == 'ok'){
-                                };
-                            }
-                        );
-                        /**
-                         * inputBox для ввода имени файла, выполним запрос
-                         * и создадим файл на сервере (templates/ui-js/имяфайла),
-                         * если все в порядке присвоим
-                         * полю имя файла, и выведим Notification
-                        */
-                    }
-                    else{
-                        /**
-                         * Если есть имя templateGlobals файла, выполним запрос
-                         * (текущее положение - templates/имяфайла или templates/ui-js/имяфайла)
-                         * для получнеия содержимого, если все ок, добавим новый
-                         * таб в таб панел
-                         */
-                        var tabPanel = Ext.getCmp('tab-panel'),
-                        path = tabPanel.getActiveTab().path,
-                        fileName = this.value;
-                        /*Запрос содержимого файла по path на сервере*/
-                        if (path && fileName)
-                            M3Designer.Requests.fileGTGetContent(path, fileName, tabPanel);
-                    }
-	            }
-            })
+            new Ext.ux.templateGlobalsSelectField()
         );
     },
     getNumberEditor: function (source, propertyName) {

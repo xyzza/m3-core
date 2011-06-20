@@ -148,10 +148,12 @@ M3Designer.Requests = Ext.apply({}, {
                     tabPanel.activate(codeEditor);
 
                     initCodeEditorHandlers(codeEditor, obj.data.path);
-                    
-                    M3Designer.Utils.successMessage({
+
+                    if (crateNew){
+                        M3Designer.Utils.successMessage({
                             "title": "Создание файла templateGlobals",
                             "message": "Файл "+fileName+" успешно создан в директории "+ obj.data['dir']});
+                    }
                 } else {
                     if(obj.error == 'notExists'){
                         Ext.Msg.show({

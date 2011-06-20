@@ -23,7 +23,7 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
         Ext.apply(this, {
             iconCls: this.iconCls || 'icon-information',
             cls: 'x-notification',
-            width: 200,
+            width: 250,
             autoHeight: true,
             plain: false,
             draggable: false,
@@ -74,7 +74,7 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
 			document.body.style.overflowY = 'hidden';
 		}
 
-        this.setSize(200, 100);
+        this.setSize(this.width, 100);
         pos = -5;
 
 		for (var i = 0; i < Ext.ux.NotificationMgr.notifications.length; i++)
@@ -110,4 +110,91 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
         });
     },
     focus: Ext.emptyFn
+});
+
+/**
+ * Кастомный селект филд
+ * Базовый класс
+**/
+Ext.ux.SelectField = Ext.extend(Ext.form.TwinTriggerField, {
+    initComponent : function(){
+        Ext.app.form.SearchField.superclass.initComponent.call(this);
+        this.on('specialkey', function(f, e){
+            if(e.getKey() == e.ENTER){
+                this.onTrigger2Click();
+            }
+        }, this);
+    }
+    ,validationEvent:false
+    ,validateOnBlur:false
+    ,trigger1Class: 'x-form-clear-trigger'
+    ,trigger2Class: 'x-form-edit-trigger'
+    ,hideTrigger1:true
+    ,hasSelect : false
+    ,listeners:{
+        beforeshow: function(){
+            if (this.getValue()) this.triggers[0].show();
+        }
+    }
+    ,onTrigger1Click : function(){
+        if(!this.hasSelect){
+        	this.reset();
+	        this.triggers[0].hide();
+	        this.hasSelect = false;
+            /*Вызываем сторонюю функцию*/
+            this.clear();
+        }
+    }
+    ,onTrigger2Click : function(){
+        var value = this.getRawValue();
+        if (value) {
+        	this.hasSelect = true;
+	    	this.triggers[0].show();
+        }
+        /*Вызываем сторонюю функцию*/
+        this.select(value);
+    }
+    /*Точки расширения*/
+    ,clear : function(){}
+    ,select: function(){}
+});
+
+/**
+ * Селект филд для templateGlobals
+ * добавлен фукнционал к обработчику выбора
+ */
+Ext.ux.templateGlobalsSelectField = Ext.extend(Ext.ux.SelectField,{
+    regexText: 'Расширния файла должно быть *.js',
+    invalidText:'Поле не прошло валидацию',
+    regex: /^\S+\.(js)$/i,
+    select:function(value){
+        var tabPanel = Ext.getCmp('tab-panel'),
+            path = tabPanel.getActiveTab().path;
+        if (!value){
+            /**
+             * создадим файл на сервере (templates/ui-js/имяфайла),
+             * если все в порядке присвоим * полю имя файла, и выведим Notification
+            */
+            Ext.MessageBox.prompt('Создание templateGlobals', 'Введите имя файла',
+                function(btn, text){
+                    if (btn == 'ok' && this.regex.test(text)){
+                        M3Designer.Requests.fileGTGetContent(path, text, tabPanel, true);
+                        this.setValue(text);
+                    }
+                    else if(text){
+                        M3Designer.Utils.failureMessage({"message": this.regexText})
+                    }
+                },
+            this);
+        }else{
+            /**
+             * Если есть имя templateGlobals файла, выполним запрос
+             * если все ок, добавим новый таб в таб панел
+             */
+            /*Запрос содержимого файла по path на сервере*/
+            if (path && value){
+                M3Designer.Requests.fileGTGetContent(path, value, tabPanel);
+            }
+        }
+    }
 });
