@@ -14,8 +14,10 @@ Array.prototype.has = function() {
     var	i = arguments.length;
     while(i){
         var x = this.indexOf(arguments[--i]) !== -1;
-        if(x) return true;
-    };
+        if(x) {
+            return true;
+        }
+    }
     return false;
 };
 /*==========================Перехват нажатий клавиш===========================*/
@@ -25,12 +27,11 @@ Ext.fly(document).on('keydown',function(e,t,o){
    if (e.ctrlKey && (e.keyCode == 83)) {// кнопка S
    	   var tabPanel = Ext.getCmp('tab-panel');
        var tab = tabPanel.getActiveTab();
-       if (tab && tab.saveOnServer &&
-               (typeof(tab.saveOnServer) == 'function')) {
+       if (tab && tab.saveOnServer && (typeof(tab.saveOnServer) == 'function')) {
            tab.saveOnServer();
            e.stopEvent();
-       };
-   };
+       }
+   }
 });
 /*Хендлер на keydown (del) в дереве структуры проекта, вызывает удаление объекта*/
 function initAdditionalTreeEvents(id){
@@ -41,10 +42,10 @@ function initAdditionalTreeEvents(id){
             if (selectedNode && isnotFormClass){
                 var isFile = selectedNode.leaf;
                 deleteTarget(selectedNode, isFile);
-            };
-        };
+            }
+        }
     });
-};
+}
 /*============================================================================*/
 
 /**
@@ -55,14 +56,14 @@ function projectViewTreeManipulation(){
     var selectedNode = cmp.getSelectionModel().getSelectedNode();
     if (!selectedNode){
         Ext.Msg.show({
-        title: 'Информация',
-        msg: 'Для выполнения действия необходимо выделить узел дерева',
-        buttons: Ext.Msg.OK,
-        icon: Ext.Msg.INFO
-    });
-    };
+            title: 'Информация',
+            msg: 'Для выполнения действия необходимо выделить узел дерева',
+            buttons: Ext.Msg.OK,
+            icon: Ext.Msg.INFO
+        });
+    }
     return selectedNode
-};
+}
 /**
  * Адаптер
  * @param fn - Функция
@@ -71,8 +72,8 @@ function toolBarFuncWraper(fn){
     var selectedNode = projectViewTreeManipulation();
     if (selectedNode){
         fn(selectedNode, true);
-    };
-};
+    }
+}
 
 /**
  * Создает класс в файлах форм дизайнера
@@ -84,144 +85,159 @@ function createClass(node, e){
         function(btn, text){
             if (btn == 'ok'){
                 M3Designer.Requests.createClass(node, text);
-            };
+            }
         }
     );
-};
+}
 
 /**
  * Дерево структуры проекта 
  */
 function createTreeView(rootNodeName){
 	
-	
-	var commands = 
-		{'create-file': {
+	var commands = {
+        'create-file': {
             text: 'Создать файл'
             ,iconCls: 'icon-script-add'
-            ,handler: function(item, e){newTarget(item.parentMenu.contextNode, true)}
+            ,handler: function(item, e) {
+                newTarget(item.parentMenu.contextNode, true)
+            }
         },
         'rename-file': {
             text: 'Переименовать файл'
             ,iconCls: 'icon-script-edit'
-            ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, true)}
+            ,handler: function(item, e) {
+                renameTarget(item.parentMenu.contextNode, true)
+            }
         },
         'delete-file':{
             text: 'Удалить файл'
             ,iconCls: 'icon-script-delete'
-            ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, true)}
+            ,handler: function(item, e) {
+                deleteTarget(item.parentMenu.contextNode, true)
+            }
         },
         'open-file':{
             text: 'Редактировать файл'
             ,iconCls: 'icon-script-lightning'
-            ,handler: function(item, e){editFile(item.parentMenu.contextNode, true)}
-		},
+            ,handler: function(item, e) {
+                editFile(item.parentMenu.contextNode, true)
+            }
+        },
         'create-dir':{
             text: 'Создать директорию'
             ,iconCls: 'icon-folder-add'
-            ,handler: function(item, e){newTarget(item.parentMenu.contextNode, false)}
+            ,handler: function(item, e) {
+                newTarget(item.parentMenu.contextNode, false)
+            }
         },
         'create-class': {
-        	text: 'Добавить класс'
+            text: 'Добавить класс'
             ,iconCls: 'icon-cog-add'
-            ,handler: function(item, e){createClass(item.parentMenu.contextNode,e)}
-        },        
-        'rename-dir':{ 
-        	text: 'Переименовать директорию'
+            ,handler: function(item, e) {
+                createClass(item.parentMenu.contextNode, e)
+            }
+        },
+        'rename-dir':{
+            text: 'Переименовать директорию'
             ,iconCls: 'icon-folder-edit'
-            ,handler: function(item, e){renameTarget(item.parentMenu.contextNode, false)}
-	     },
-	     'delete-dir':{
+            ,handler: function(item, e) {
+                renameTarget(item.parentMenu.contextNode, false)
+            }
+        },
+        'delete-dir':{
             text: 'Удалить директорию'
             ,iconCls: 'icon-folder-delete'
-            ,handler: function(item, e){deleteTarget(item.parentMenu.contextNode, false)}
-	    },
-	    'create-init':{
+            ,handler: function(item, e) {
+                deleteTarget(item.parentMenu.contextNode, false)
+            }
+        },
+        'create-init':{
             text: 'Создать функцию инициализации'
             ,iconCls: 'icon-award-star-add'
-            ,handler: function(item, e){
+            ,handler: function(item, e) {
                 M3Designer.Requests.generateInitialize(item.parentMenu.contextNode);
             }
-	    },
-	    'create-simple-func':{
+        },
+        'create-simple-func':{
             text: 'Создать контейнерную функцию'
             ,iconCls: 'icon-medal-gold-add'
-            ,handler: function(item, e){
-            	
-            	var store = new Ext.data.ArrayStore({				    
-				    autoDestroy: true,				    
-				    idIndex: 0,  
-				    fields: [
-				       'type',
-				       'descr'
-				    ]
-				    ,data: [
-					    ['container', 'Container'],
-					    ['panel', 'Panel'],
-					    ['formPanel', 'Form panel']
-					]
-				});
-				            	
-            	
-            	var form = 
-            		new Ext.form.FormPanel({
-	    				padding: 10            				
-	    				,baseCls: 'x-plain'
-	    				,labelWidth: 100
-	    				,items:[
-	    					new Ext.form.TextField({
-	    						fieldLabel: 'Название'
-	    						,id:'func-name'	    						
-	    						,anchor: '100%'
-	    						,allowBlank: false
-	    						,maskRe: /[A-Za-z\_]+/
-	    						,name:'name'
-	    					}),
-	    					new Ext.form.ComboBox({
-	    						fieldLabel: 'Контейнерный класс'
-	    						,anchor: '100%'
-	    						,allowBlank: false
-								,mode:'local'
-	    						,store: store
-	    						,valueField: 'type'
-	    						,hiddenName: 'type'
-    							,displayField: 'descr'
-    							,editable: false
-    							,triggerAction: 'all'
-    							,name:'type'    							
-	    					})
-	    				]
-	    			});
-            	
-            	var node = item.parentMenu.contextNode;
-            	
-            	var win = new Ext.Window({
-            		title: 'Создание функции для класса - ' + node.text
-            		,resizable: false
-            		,modal: true
-					,width: 400            		            		
-            		,items:[ form ]
-            		,buttons: [
-            			new Ext.Button({
-            				text: 'Создать',
-            				handler: function(btn, e){
-            					var funcName = form.getForm().findField('func-name').getValue();
-            					var funcType = form.getForm().findField('type').getValue();
-                                M3Designer.Requests.createFunction(funcName, funcType, node, win);
-            				}
-            			}),
-            			new Ext.Button({
-            				text: 'Отмена',
-            				handler: function(btn, e){
-            					btn.ownerCt.ownerCt.close();
-            				}
-            			})
-            		]
-            	});
-            	win.show();
-            }
-	    }}
+            ,handler: function(item, e) {
 
+                var store = new Ext.data.ArrayStore({
+                    autoDestroy: true,
+                    idIndex: 0,
+                    fields: [
+                        'type',
+                        'descr'
+                    ]
+                    ,data: [
+                        ['container', 'Container'],
+                        ['panel', 'Panel'],
+                        ['formPanel', 'Form panel']
+                    ]
+                });
+
+
+                var form =
+                        new Ext.form.FormPanel({
+                            padding: 10
+                            ,baseCls: 'x-plain'
+                            ,labelWidth: 100
+                            ,items:[
+                                new Ext.form.TextField({
+                                    fieldLabel: 'Название'
+                                    ,id:'func-name'
+                                    ,anchor: '100%'
+                                    ,allowBlank: false
+                                    ,maskRe: /[A-Za-z\_]+/
+                                    ,name:'name'
+                                }),
+                                new Ext.form.ComboBox({
+                                    fieldLabel: 'Контейнерный класс'
+                                    ,anchor: '100%'
+                                    ,allowBlank: false
+                                    ,mode:'local'
+                                    ,store: store
+                                    ,valueField: 'type'
+                                    ,hiddenName: 'type'
+                                    ,displayField: 'descr'
+                                    ,editable: false
+                                    ,triggerAction: 'all'
+                                    ,name:'type'
+                                })
+                            ]
+                        });
+
+                var node = item.parentMenu.contextNode;
+
+                var win = new Ext.Window({
+                    title: 'Создание функции для класса - ' + node.text
+                    ,resizable: false
+                    ,modal: true
+                    ,width: 400
+                    ,items:[ form ]
+                    ,buttons: [
+                        new Ext.Button({
+                            text: 'Создать',
+                            handler: function(btn, e) {
+                                var funcName = form.getForm().findField('func-name').getValue();
+                                var funcType = form.getForm().findField('type').getValue();
+                                M3Designer.Requests.createFunction(funcName, funcType, node, win);
+                            }
+                        }),
+                        new Ext.Button({
+                            text: 'Отмена',
+                            handler: function(btn, e) {
+                                btn.ownerCt.ownerCt.close();
+                            }
+                        })
+                    ]
+                });
+                win.show();
+            }
+        }
+    };
 
 	var contextMenuUiClass = new Ext.menu.Menu({
         items: [
@@ -351,12 +367,12 @@ function createTreeView(rootNodeName){
                     /* Директория */
                     else if(!node.leaf) {
                         menu = contextDirMenu;
-                    };
+                    }
                     if (menu) {
                         menu.contextNode = node;
                         menu.showAt(e.getXY());
-                    };
-                };
+                    }
+                }
 	        },
 	        dblclick: function(node, e){
                 var parentNodeText = node.parentNode.text;
@@ -408,76 +424,54 @@ function createTreeView(rootNodeName){
                 panel.removeAll();
                 panel.setTitle('Свойства');
                 var accordionView = panel.ownerCt;
-                if (accordionView.items.itemAt(0).collapsed)
+                if (accordionView.items.itemAt(0).collapsed){
                     accordionView.items.itemAt(0).expand();
+                }
             }
         }
 	});
     tree.on('afterrender', function(){initAdditionalTreeEvents(tree.id)});
 	return accordion;
-};
+}
 /**
  * Возвращает расширение файла
  * @param fileName
  */
-function getfFileExpansion(fileName){
+function getFileExpansion(fileName){
     var splitedFileName = fileName.split('.');
-    var fileExpansion = splitedFileName[splitedFileName.length-1];
-    return fileExpansion;
+    return splitedFileName[splitedFileName.length-1];
 }
 /**
  * Возвращает класс иконки по типу расширения файла
  * @param fileName
  */
 function caseOfIncons(fileName){
-    var fileExpansion = getfFileExpansion(fileName);
-    var icon = '';
-    switch (fileExpansion) {
-      case 'py':
-        icon = 'icon-page-white-py';
-        break
-      case 'js':
-        icon = 'icon-page-white-js';
-        break
-      case 'css':
-        icon = 'icon-css';
-        break
-      case 'html':
-        icon = 'icon-html';
-        break
-      default:
-        icon = 'icon-page-white-text';
+    var fileExpansion = getFileExpansion(fileName);
+    var fileExpansionIconsObj = {
+        "py": "icon-page-white-py",
+        "js": "icon-page-white-js",
+        "css": "icon-css",
+        "html": "html",
+        "default": "icon-page-white-text"
     };
-    return icon;
-};
+    return fileExpansionIconsObj[fileExpansion] ? fileExpansionIconsObj[fileExpansion] : fileExpansionIconsObj["default"];
+}
 /**
  * Возвращает тип файла по расширения файла
  * @param fileName
  */
 function fileTypeByExpansion(fileName){
-    var fileExpansion = getfFileExpansion(fileName);
-    var type = '';
-    switch (fileExpansion) {
-      case 'py':
-        type = 'python';
-        break
-      case 'js':
-        type = 'javascript';
-        break
-      case 'css':
-        type = 'css';
-        break
-      case 'html':
-        type = 'html';
-        break
-      case 'sql':
-        type = 'sql';
-        break
-      default:
-        type = 'python';
+    var fileExpansion = getFileExpansion(fileName);
+    var fileTypesObj = {
+        "py": "python",
+        "js": "javascript",
+        "css": "css",
+        "html": "html",
+        "sql": "sql",
+        "default": "python"
     };
-    return type;
-};
+    return fileTypesObj[fileExpansion] ? fileTypesObj[fileExpansion] : fileTypesObj["default"];
+}
 /* Редактировать файл */
 function editFile(node, e){
     var fileType = node.text.split('.').slice(-1)[0];
@@ -488,7 +482,7 @@ function editFile(node, e){
         onClickNodePyFiles(node, fileAttr);
     }
     else wrongFileTypeMessage(fileType);
-};
+}
 
 /**
  * Новый файл/директорию
@@ -518,9 +512,9 @@ function newTarget(node, fileBool){
                     currentNode.reload();
                 });
             });
-        };
+        }
     });
-};
+}
 
 /**
  * Удалить файл/директорию
@@ -545,10 +539,10 @@ function deleteTarget(node, fileBool){
                 M3Designer.Requests.manipulation(params, function(){
                     node.remove();
                 });
-            };
+            }
         }
     });
-};
+}
 
 /**
  * Преименовать файл/директорию
@@ -569,13 +563,15 @@ function renameTarget(node, fileBool){
         };
         M3Designer.Requests.manipulation(params, function(){
             node.setText(name);
-            if (params.access) node.remove(function(){
-                this.parentNode.reload();
-            });
+            if (params.access) {
+                node.remove(function(){
+                    this.parentNode.reload();
+                });
+            }
         });
-        };
+        }
     });
-};
+}
 
 
 /**
@@ -598,7 +594,7 @@ function customMessage(obj, params, fn, additionalMessage){
             }
         }
     });
-};
+}
 
 /**
  * Сообщение о неверности формата
@@ -611,7 +607,7 @@ function wrongFileTypeMessage(fileType){
             buttons: Ext.Msg.OK,
             icon: Ext.Msg.INFO
     });
-};
+}
 
 function onClickNode(node) {
 	var attr =  node.attributes;
@@ -628,7 +624,7 @@ function onClickNode(node) {
 	if(tab){
 		tabPanel.setActiveTab(tab);
 		return;
-	};
+	}
     
     var workspace = new DesignerWorkspace({
     	id: id,
@@ -643,7 +639,7 @@ function onClickNode(node) {
 
  	workspace.loadModel();
 	workspace.on('beforeload', function(jsonObj){
-
+        var result = false;
 		if (jsonObj['not_autogenerated']) {
 
        		// Может быть сгенерировать эту функцию в этом классе?
@@ -655,10 +651,9 @@ function onClickNode(node) {
 			   ,fn: function(btn, text){
 			   		if (btn == 'yes'){
 			   			M3Designer.Requests.generateInitialize(node);
-			   		};
+			   		}
 			   }
 			});
-       		result = false;
         } else if (jsonObj.success) {
 
 			this.setTitle(attr['class_name'] + funcTitle);
@@ -676,12 +671,11 @@ function onClickNode(node) {
 
         } else {
             M3Designer.Utils.failureMessage({ "message": jsonObj.json });
-            result = false;
-        };
+        }
 
        return result;
      }, workspace);
-};
+}
 
 /**
  * Вымогает у сервера некий файл
@@ -698,11 +692,11 @@ function onClickNodePyFiles(node, fileAttr){
 	if(tab){				
 		tabPanel.setActiveTab(tab);
 		return;
-	};
+	}
     
     /*Запрос содержимого файла по path на сервере*/
     M3Designer.Requests.fileGetContent(path, fileName, tabPanel);
-};
+}
 /**
  * Иницализация хендлеров codeEditor'а
  * @param codeEditor
@@ -717,8 +711,9 @@ function initCodeEditorHandlers(codeEditor, path){
 
     codeEditor.on('contentChaged', function(){
         window.onbeforeunload = function(){
-            if (codeEditor.contentChanged)
+            if (codeEditor.contentChanged){
                 return 'Вы закрываете вкладку, в которой имеются изменения.'
+            }
         };
     });
     /* Хендлер на событие перед закрытием */
@@ -739,7 +734,9 @@ function initCodeEditorHandlers(codeEditor, path){
                 userTakeChoice = !userTakeChoice;
             }, textArea.id);
         }
-        else userTakeChoice = !userTakeChoice;
+        else {
+            userTakeChoice = !userTakeChoice;
+        }
         return !userTakeChoice;
     });
 
@@ -748,12 +745,12 @@ function initCodeEditorHandlers(codeEditor, path){
         if (tab) { 
         	var tabPanel = Ext.getCmp('tab-panel');
         	tabPanel.remove(tab); 
-        };
+        }
     });
 
     /* Хендлер на событие сохранения */
     codeEditor.on('save', function(){
-        /*Запрос на сохранения изменений */
+        /*Запрос на сохранение изменений */
         M3Designer.Requests.fileSaveContent(codeEditor, path);
     });
 
@@ -763,4 +760,4 @@ function initCodeEditorHandlers(codeEditor, path){
         /*Запрос на обновление */
         M3Designer.Requests.fileUpdateContent(codeEditor, path, userTakeChoice, textArea);
     });
-};
+}

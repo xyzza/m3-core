@@ -30,7 +30,7 @@ M3Designer.Requests = Ext.apply({}, {
                      M3Designer.Utils.successMessage();
                 }else if (!obj.success && obj.error){
                     M3Designer.Utils.failureMessage({ "message": 'Ошибка при сохранении файла\n'+obj.error });
-                };
+                }
                 codeEditor.contentChanged = false;
                 codeEditor.onChange();
             },
@@ -81,7 +81,7 @@ M3Designer.Requests = Ext.apply({}, {
                             "icon": "icon-arrow-rotate-anticlockwise"});
                 }else if (!obj.success && obj.error){
                     M3Designer.Utils.failureMessage({ "message": 'Ошибка при обновлении файла\n'+obj.error });
-                };
+                }
                 return !userTakeChoice;
 
             },
@@ -169,7 +169,7 @@ M3Designer.Requests = Ext.apply({}, {
                         });
                     }
                     else M3Designer.Utils.failureMessage({"message": obj.error});
-                };
+                }
             },
             failure: uiAjaxFailMessage
         });
@@ -202,7 +202,7 @@ M3Designer.Requests = Ext.apply({}, {
                             "message": "Функция initialize успешно создана в классе "+ node.attributes['class_name']});
                 } else {
                     M3Designer.Utils.failureMessage({"message": obj.json});
-                };
+                }
             }
             ,failure: uiAjaxFailMessage
         })
@@ -223,14 +223,15 @@ M3Designer.Requests = Ext.apply({}, {
             success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
                 if (obj.success && fn instanceof Function)
+                {
                     fn(obj);
-                else if (obj.error.msg && obj.error.type == errorTypeExist){
+                }else if (obj.error.msg && obj.error.type == errorTypeExist){
                     var additionalMessage = '. Заменить?';
                     customMessage(obj, params, fn,additionalMessage)
                 }
                 else if (obj.error.msg){
                     M3Designer.Utils.failureMessage({"message": obj.error.msg});
-                };
+                }
             },
             failure: uiAjaxFailMessage
         });
@@ -248,7 +249,6 @@ M3Designer.Requests = Ext.apply({}, {
             ,success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
                 if (obj.success) {
-
                     var new_node = new Ext.tree.TreeNode({
                         text: funcName
                         ,path: node.attributes['path']
@@ -267,7 +267,7 @@ M3Designer.Requests = Ext.apply({}, {
 
                 } else {
                     M3Designer.Utils.failureMessage({"message":obj.json});
-                };
+                }
             }
             ,failure: uiAjaxFailMessage
         });
@@ -306,7 +306,7 @@ M3Designer.Requests = Ext.apply({}, {
                         ,class_name: text
                         ,func_name: 'initialize'
                         ,iconCls: 'icon-function'
-                    }]
+                    }];
 
                     for (var i=0; i<nodes.length; i++) {
                         new_node.appendChild(new Ext.tree.TreeNode( nodes[i] ));
@@ -316,7 +316,7 @@ M3Designer.Requests = Ext.apply({}, {
                         "message": "Класс "+text+" успешно создан"});
                 } else {
                     M3Designer.Utils.failureMessage({"message":obj.json});
-                };
+                }
 
             },
             failure: uiAjaxFailMessage
