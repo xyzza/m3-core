@@ -186,7 +186,7 @@ class ReportGenerator{
 			else if (text.equals(TAG_REPEAT_END))
 				cell_repeat_tag_end = newCell;
 			
-			else if (text.substring(0, TAG_MATRIX.length()).equals(TAG_MATRIX)){
+			else if (text.startsWith(TAG_MATRIX)){
 				CellWrap cw = new CellWrap(newCell);
 				// Извлекаем имя переменной, хранящей матрицу
 				String varName = raw_text.substring(raw_text.lastIndexOf(" ") + 1);
@@ -196,7 +196,7 @@ class ReportGenerator{
 					matrixCells.put(oldCell, cw);
 			}
 			
-			else if (text.substring(0, TAG_PICTURE.length()).equals(TAG_PICTURE)){
+			else if (text.startsWith(TAG_PICTURE)){
 				CellWrap cw = new CellWrap(newCell);
 				// Извлекаем имя переменной, хранящей путь к картинке
 				String varName = raw_text.substring(raw_text.lastIndexOf(" ") + 1);
@@ -204,7 +204,7 @@ class ReportGenerator{
 				pictureCells.add(cw);
 			}
 			
-			else if (text.substring(0, TAG_MERGE.length()).equals(TAG_MERGE)){
+			else if (text.startsWith(TAG_MERGE)){
 				// Извлекаем из тега номер области
 				String num = text.substring(TAG_MERGE.length() + 1);
 				Integer key = null;
