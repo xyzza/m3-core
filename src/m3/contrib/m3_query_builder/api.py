@@ -114,8 +114,8 @@ def build_entity(objs, separator='-'):
     for select_field in objs['selected_fields']:
         
         entity_name, field_name = select_field['id'].split(separator)
-        
-        field = Field(entity_name = entity_name,
+
+        field = Field(entity = Entity(entity_name),
                       field_name=field_name, 
                       alias=select_field.get('alias'))
         
@@ -158,5 +158,5 @@ def save_query(query_name, query_json):
     Сохранение запросов
     '''
     q = Query(name=query_name, query_json=query_json)
-    q.clean()
+    q.full_clean()
     q.save()

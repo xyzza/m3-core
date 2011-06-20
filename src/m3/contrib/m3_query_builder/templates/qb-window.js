@@ -413,23 +413,30 @@ function showQueryText(){
 
 // Сохраняет запрос
 function saveQuery(){
-
-	var loadMask = new Ext.LoadMask(win.body);
-    loadMask.show();
-    
-	Ext.Ajax.request({
-		url: '{{component.params.save_query_url }}'
-		,params: {
-			'objects': Ext.encode( buildParams() )
+	
+	// Получение имени запроса
+	Ext.Msg.prompt('Сохранение запроса', 'Введите название запроса:', function(btn, text){
+	    if (btn == 'ok'){
+	        
+			var loadMask = new Ext.LoadMask(win.body);
+		    loadMask.show();
+		    
+			Ext.Ajax.request({
+				url: '{{component.params.save_query_url }}'
+				,params: {
+					'objects': Ext.encode( buildParams() )
+					,'query_name': text
+				}
+				,success: function(){
+					loadMask.hide();
+					console.log('save');
+				}
+				,failure: function(){
+		        	loadMask.hide();
+		            uiAjaxFailMessage.apply(this, arguments);
+		        }
+			});
 		}
-		,success: function(){
-			loadMask.hide();
-			console.log('save');
-		}
-		,failure: function(){
-        	loadMask.hide();
-            uiAjaxFailMessage.apply(this, arguments);
-        }
 	});
 }
 

@@ -1,9 +1,8 @@
 #coding:utf-8 
-'''
-Date&Time: 01.06.11 10:38
-@author: kir
-'''
+
 import json
+
+from django.core.exceptions import ValidationError
 
 from m3.ui import actions
 from m3.ui.actions import ACD
@@ -11,6 +10,8 @@ from m3.ui.actions import ACD
 import ui
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query
+from m3.helpers import logger
+
 
 class QueryBuilderActionsPack(actions.ActionPack):
     '''
@@ -110,6 +111,9 @@ class ShowQueryTextAction(actions.Action):
 
     def run(self, request, context):           
 
+        import pprint
+        pprint.pprint(context.objects)
+
         entity = build_entity(context.objects)
         sql = entity.get_raw_sql()
                 
@@ -125,11 +129,16 @@ class SaveQueryAction(actions.Action):
 
     def context_declaration(self):
         return [ACD(name='objects', type=object, required=True),
-                ACD(name='name', type=str, required=True)]
+                ACD(name='query_name', type=str, required=True)]
 
     def run(self, request, context):           
         
         # Нужно сохранить объект
-        save_query(context.name, context.objects)
+        try:
+            save_query(context.query_name, context.objects)
+        except ValidationError:
+            logger.exception()
+            return actions.JsonResult(json.dumps({'success': False,
+                        'message': u'Не удалось сохранить запрос'}))
         
-        return actions.JsonResult(json.dumps({}))
+        return actions.JsonResult(json.dumps({'success': True}))
