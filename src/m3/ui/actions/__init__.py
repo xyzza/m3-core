@@ -55,20 +55,8 @@ class ActionUrlIsNotDefined(ActionException):
     def __str__(self):
         return 'Attribute "url" is not defined or empty in action "%s"' % self.clazz
     
-class ActionUrlAlreadyExists(ActionException):
-    """ Возникает при попытке зарегистрировать Action с полным URL,
-        который уже зарегистрирован в этом контроллере """
-    def __init__(self, clazz, collision, full_url, *args, **kwargs):
-        super(ActionUrlAlreadyExists, self).__init__(clazz)
-        self.full_url = full_url
-        self.collision = collision
-        
-    def __str__(self):
-        return 'While registering the action "%s" was what full URL "%s" already registered in "%s"' %\
-               (self.clazz, self.full_url, self.collision)
-    
-#===============================================================================
 
+#===============================================================================
     
 class Action(object):
     '''
@@ -406,10 +394,17 @@ class ActionController(object):
         self._packs_by_name[pack.__class__.__name__] = pack
         self._packs_by_type[pack.__class__] = pack
         
-    def _remove_action_from_search_dicts(self, action):
-        """ Удаляет экшен из словарей быстрого поиска """
-        del self._actions_by_type[action.__class__]
-        del self._actions_by_name[action.__class__.__name__]
+    def _rebuild_search_dicts(self):
+        """ 
+        Полностью перестраивает поисковые словари. 
+        Бывает нужно, если иерархия экшенов непредсказуемо изменяется 
+        """
+        self._actions_by_name.clear()
+        self._actions_by_type.clear()
+        for full_path, v in self._url_patterns.iteritems():
+            _, action = v
+            self._add_action_to_search_dicts(action, full_path)
+        # Обновлять _packs_by_name и _packs_by_type не нужно!
     
     #========================================================================================
     # Методы формирующие иерархию экшенов и паков
@@ -459,14 +454,7 @@ class ActionController(object):
         else:            
             clazz.controller = self
             full_path = self._build_full_path(stack, clazz)
-            
-            # URL экшен считается пересекающимся, только если у пересекаемого экшена другой класс
-            # Оставим для лучших времен 
-#            if self._url_patterns.has_key(full_path):
-#                _, collision = self._url_patterns[full_path]
-#                if collision.__class__ != clazz.__class__:
-#                    raise ActionUrlAlreadyExists(clazz, collision, full_path)
-            
+
             # Для быстрого поиска
             self._add_action_to_search_dicts(clazz, full_path)
             
@@ -636,32 +624,7 @@ class ActionController(object):
         @param packs: список объектов типа ActionPack, которые необходимо зарегистрировать в контроллере
         '''
         for pack in packs:
-            self.append_pack(pack)
-        
-    def remove_pack(self, type):
-        '''
-        Удаляет экшенпак из иерархии контроллера. Возвращает истину в случае успеха.
-        @param type: Класс экшенпака для удаления.
-        '''
-        raise NotImplementedError()
-        assert issubclass(type, ActionPack)
-        
-        # Получаем экземпляр пака, иначе его не можут быть в нашем контроллере
-        pack = self._packs_by_type.get(type)
-        if pack:
-            # Удаляем все паттерны урлов в стеке которых есть наш пак
-            for path, value in self._url_patterns.items():
-                stack = value[0]
-                if pack in stack:
-                    del self._url_patterns[path]
-
-            # Удаляем из словарей поиска
-            del self._packs_by_type[type]
-            del self._packs_by_name[type.__name__]
-            for action in pack.actions:
-                self._remove_action_from_search_dicts(action)
-        
-            return True    
+            self.append_pack(pack)   
 
     def _norm_url(self, url):
         '''
@@ -765,6 +728,8 @@ class ActionController(object):
         else:
             raise ActionPackNotFoundException(dest_pack)
         
+        self._rebuild_search_dicts()
+        
     
     def wrap_action(self, dest_pack, dest_action, wrap_pack):
         '''
@@ -817,6 +782,8 @@ class ActionController(object):
                 self._build_pack_node(action, current_packs_slice)
         else:
             raise ActionPackNotFoundException(dest_pack)
+        
+        self._rebuild_search_dicts()
             
     
     def dump_urls(self):
