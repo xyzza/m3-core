@@ -7486,7 +7486,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
             }]
         });
 
-        this.addEvents('editorkeyevent');
+        this.addEvents('editorkeyevent','editorfocus');
 
         Ext.m3.CodeEditor.superclass.initComponent.apply(this, arguments);
     },
@@ -7506,6 +7506,11 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
     fireKeyEvent:function(i,e) {
         this.fireEvent('editorkeyevent', i, e);
     },
+
+    fireFocusEvent:function() {
+        this.fireEvent('editorfocus');
+    },
+
     contentChange: function() {
         var oCmp = this.getTextArea();
         var sCode = this.codeMirrorEditor.getValue();
@@ -7535,7 +7540,9 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
             /* Событие нажатия клавиши */
             onKeyEvent: this.fireKeyEvent.createDelegate(this),
             /* Событие изменения контента */
-            onChange: this.contentChange.createDelegate(this)
+            onChange: this.contentChange.createDelegate(this),
+            /* Событие фокуса эдитора */
+            onFocus:this.fireFocusEvent.createDelegate(this)
        });
 
         var sParserType = oThis.parser || 'python';

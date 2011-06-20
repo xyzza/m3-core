@@ -7,7 +7,7 @@ Ext.namespace('M3Designer.code');
 
 M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
     codeAssistUrl:'designer/codeassist',
-    
+
     constructor:function(cfg) {
         Ext.apply(this, cfg);
         M3Designer.code.CodeAssistPlugin.superclass.constructor.call(this);
@@ -23,6 +23,13 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
                         this.loadProposals();
                       }
                },this);
+
+                this.on('editorfocus', function() {
+                    if (this.completionMenu) {
+                        this.completionMenu.destroy();
+                    }
+                });
+
             }),
 
             loadProposals:function() {
@@ -61,12 +68,17 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
 
             createCompletionMenu:function(completions) {
 
+                if (completions.length === 0) {
+                    return;
+                }
+
                 var menu = new M3Designer.code.CompletionMenu({
                     proposals:completions,
                     editor:this.codeMirrorEditor
                 });
 
                 menu.showCompletions();
+                this.completionMenu = menu;
             },
 
             createCompletionBox:function(completions) {
@@ -154,6 +166,8 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
     initComponent:function() {
 
         var items = [], i =0, items, text;
+        var clickFn = this.onItemClick.createDelegate(this);
+
 
         for (;i<this.proposals.length;i++) {
             item = this.proposals[i];
@@ -167,23 +181,29 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
 
             items.push({
                 text: text,
-                data: item
+                data: item,
+                listeners: {
+                    click : clickFn
+                }
             });
         };
 
         this.items = items;
         M3Designer.code.CompletionMenu.superclass.initComponent.call(this);
-        this.on('click', this.onClick, this);
         this.on('hide', this.onHide, this);
     },
 
-    onClick:function(menu, menuItem, e) {
+    onMenuClick:function(menu, menuItem, e) {
        this.insertCode(menuItem.data.text);
        this.destroy();
     },
 
+    onItemClick:function(item, e) {
+        this.insertCode(item.data.text);
+        this.destroy();
+    },
+
     onHide:function() {
-        //this.destroy();
         this.editor.focus();
     },
 
