@@ -68,6 +68,7 @@ class OOParser(object):
     '''
     Этот класс преобразовывает текст в соответствии с языком шаблонов.
     '''        
+    TIME_FORMAT = "%H:%M:%S" 
                 
     def find_image_tags(self, document):
         '''
@@ -140,12 +141,27 @@ class OOParser(object):
         document.clearContents(8)          
         return all_sections  
     
+    def strftime_less_1900(self, dt):
+        """ 
+        Превращает дату dt в строку формата <%d.%m.%Y>, 
+        т.к. штатный питонячий strftime не понимает даты меньше 1900 года
+        (Украдено из старого генератора отчетов)
+        """
+        day = str(dt.day).zfill(2)
+        month = str(dt.month).zfill(2)
+        year = str(dt.year).zfill(4)
+        return '%s.%s.%s' % (day, month, year)
+
     def convert_value(self, value):
         '''
         Преобразовывает значение в тип, подходящий для отображения в openoffice
-        '''       
-        if (isinstance(value, (datetime.date, datetime.datetime, datetime.time))):
-            return str(value)  
+        ''' 
+        if isinstance(value, datetime.datetime):
+            return "%s %s" % (self.strftime_less_1900(value), value.time().strftime(self.TIME_FORMAT))
+        elif isinstance(value, datetime.date):
+            return str(self.strftime_less_1900(value))
+        elif isinstance(value, datetime.time):
+            return str(value.strftime(self.TIME_FORMAT))   
         elif isinstance(value, basestring):
             return value    
         elif isinstance(value, (int, float, decimal.Decimal, long)):
@@ -230,7 +246,8 @@ class Section(object):
         '''
         section_width = abs(self.left_cell_addr.Column - self.right_cell_addr.Column)+1
         section_height = abs(self.left_cell_addr.Row - self.right_cell_addr.Row)+1
-        x, y = self.report_object.find_section_position(vertical, section_width, section_height)
+        x, y = self.report_object.get_section_render_position(vertical)
+        self.report_object.update_previous_render_info(vertical, (x,y), section_width, section_height)
         document = self.report_object.document
         #Лист с результатом - второй по счету
         dest_sheet = document.getSheets().getByIndex(1)
@@ -426,21 +443,24 @@ class SpreadsheetReport(object):
     def __init__(self, template_name):
         
         #Задаем начальное состояние конечного автомата, описывающего порядок
-        #размещения секций
-        #Выводится ли секция вертикально (вниз)
-        self.vertical = True
+        #размещения секций.
+        #На основе параметров последней выведенной секции работает алгоритм, 
+        #выводящий секции "построчно".
+        
+        #Выводилась ли последняя секция вертикально (вниз)
+        self.previous_vertical = True
         
         #Ширина последней выведенной секции
-        self.section_width = 0 
+        self.previous_width = 0 
         
         #Длина последней выведенной секции
-        self.section_height = 0
+        self.previous_height = 0
         
-        #Координата по оси X ячейки, с которой выводилась последняя секция
-        self.x = 0
+        #Координата ячейки, с которой выводилась последняя секция
+        self.previous_position = (0,0)
         
-        #Координата по оси Y ячейки, с которой выводилась последняя секция
-        self.y = 0
+        #Координата ячейки, с которой будет выводиться следующая секция
+        self.current_position = (None,None)
         
         #Номера колонок, ширина которых уже была задана
         self.defined_width_columns = []
@@ -494,31 +514,58 @@ class SpreadsheetReport(object):
         save_document_as(self.document, result_path, tuple(properties))
         
         
-    def find_section_position(self, vertical, section_width, section_height):
+    def find_section_position(self, vertical):
         '''
         Возвращает координаты позиции в листе, с которой должна выводиться секция. 
         '''
         # Определяем новые координаты на основе текущего состояния автомата
-        if self.vertical:
+        previous_x = self.previous_position[0]
+        previous_y = self.previous_position[1]
+        if self.previous_vertical:
             if vertical:
-                x = self.x
-                y = self.y + self.section_height
+                x = previous_x
+                y = previous_y + self.previous_height
             else:
-                x = self.section_width 
-                y = self.y
+                x = self.previous_width 
+                y = previous_y
         else:
             if vertical:
                 x = 0
-                y = self.section_height
+                y = previous_y + self.previous_height
             else:
-                x = self.x + self.section_width 
-                y = self.y
-              
-        #Меняем состояние
-        self.x = x
-        self.y = y
-        self.vertical = vertical
-        self.section_width = section_width 
-        self.section_height = section_height
-        return (x,y)              
+                x = previous_x + self.previous_width 
+                y = previous_y 
+        return (x,y)          
+    
+    def update_previous_render_info(self, vertical, section_position, section_width, section_height):
+        '''
+        Обновляем информацию о последней выведенной секции
+        '''
+        if self.current_position[0] is None or self.current_position[1] is None:
+            self.previous_position = section_position
+            self.previous_vertical = vertical
+            self.previous_width = section_width    
+            if vertical:
+                self.previous_height = section_height
+            else:
+                self.previous_height = max(self.previous_height, section_height)
+        else:
+            self.current_position = (None, None)                            
          
+    def get_section_render_position(self, vertical=True):
+        '''
+        Возвращает позицию ячейки на листе отчета, с которой будет выводиться секция
+        '''
+        if self.current_position[0] is None or self.current_position[1] is None:
+            return self.find_section_position(vertical)
+        else:
+            return self.current_position            
+       
+    def set_section_render_position(self, position_x, position_y):
+        '''
+        Устанавливает позицию ячейки на листе отчета, с которой будет выводиться секция
+        '''
+        assert isinstance(position_x, int)
+        assert isinstance(position_y, int)
+        self.current_position = (position_x, position_y)    
+             
