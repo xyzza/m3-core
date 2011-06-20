@@ -151,7 +151,10 @@ class Parser(object):
                 # self.top_bar = my_top_bar
                 # В других контейнерных функциях будет нечто ввиде:
                 # cont.top_bar = my_top_bar
-                if func_node.name != Parser.GENERATED_FUNC and 'self' == node.targets[0].value.id:
+                if (not self.path or # Генерация js из пришедшего кода в "просмотрщике" \
+                    isinstance(func_node, ast.FunctionDef) and  # Генерация js из файла \
+                    func_node.name != Parser.GENERATED_FUNC) and \
+                    'self' == node.targets[0].value.id:
                     continue
                 
                 # Составление структуры конфигов и типов компонентов
