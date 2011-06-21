@@ -232,11 +232,19 @@ WHEN (new.%(col_name)s IS NULL)
             return u''
         return force_unicode(value.read())
 
+    #kirov
+    KEY_WORDS_MAP = {'NUMBER':'NUMBER_KWD', 'DATE':'DATE_KWD', 
+                     'TIMESTAMP':'TIMESTAMP_KWD', 'FLOAT':'FLOAT_KWD'}
     def quote_name(self, name):
         # SQL92 requires delimited (quoted) names to be case-sensitive.  When
         # not quoted, Oracle has case-insensitive behavior for identifiers, but
         # always defaults to uppercase.
         # We simplify things by making Oracle identifiers always uppercase.
+
+        # kirov. Replace Oracle keywords in column to other name
+        if name.upper() in self.KEY_WORDS_MAP.keys():
+            name = self.KEY_WORDS_MAP[name.upper()]
+
         if not name.startswith('"') and not name.endswith('"'):
             name = '"%s"' % util.truncate_name(name.upper(),
                                                self.max_name_length())
