@@ -8688,9 +8688,6 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             if (params.possibleFileExtensions) {
                 this.possibleFileExtensions = params.possibleFileExtensions;
             }
-            else{
-                this.possibleFileExtensions = '';
-            }
         }
 
         Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
@@ -8756,14 +8753,14 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
         this.bindListeners();
         this.resizeEl = this.positionEl = this.wrap;
-        
-        if (this.readOnlyAll) {                      
-            this.buttonFile.setDisabled(true); 
+
+        if (this.readOnlyAll) {
+            this.buttonFile.setDisabled(true);
             // Перекрывает невидимый индекс
             this.buttonFile.getEl().setStyle('z-index', 3);
-            this.buttonClear.setDisabled(true); 
+            this.buttonClear.setDisabled(true);
             if (this.getHelperBtn() ) {
-                this.getHelperBtn().setDisabled(true); 
+                this.getHelperBtn().setDisabled(true);
             }
         }
 
@@ -8790,17 +8787,17 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.fileInput.on({
             scope: this,
             mouseenter: function() {
-                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
-             },
-             mouseleave: function(){
-                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
-             },
-             mousedown: function(){
-                 this.buttonFile.addClass('x-btn-click')
-             },
-             mouseup: function(){
-                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
-             },
+                this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+            },
+            mouseleave: function(){
+                this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+            },
+            mousedown: function(){
+                this.buttonFile.addClass('x-btn-click')
+            },
+            mouseup: function(){
+                this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+            },
              change: function(){
                  if (!this.isFileExtensionOK()){
                      Ext.Msg.show({
@@ -8810,7 +8807,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
                        ,fn: Ext.emptyFn
                        ,animEl: 'elId'
                        ,icon: Ext.MessageBox.WARNING
-                    });                     
+                    });
                      this.reset();
                      return;
                  }
@@ -8951,14 +8948,14 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         }
     }
     ,getFileName: function(){
-        return this.value.split('/').reverse()[0];
+        return this.getValue() ? this.getValue().split('/').reverse()[0] : "";
     }
     ,isFileExtensionOK: function(){
         var fileExtension = this.fileInput.dom.value.split('.');
         if (fileExtension.length > 0){
             //Поиск на существование элемента внутри массива
-            return this.possibleFileExtensions.split(',')
-                    .indexOf(fileExtension[fileExtension.length-1].toLowerCase()) != -1;
+            return this.possibleFileExtensions ? this.possibleFileExtensions.split(',')
+                    .indexOf(fileExtension[fileExtension.length-1].toLowerCase()) != -1 : true;
         }
         return false;
     }
@@ -9031,8 +9028,8 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
         
         Ext.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
     }     
-   ,renderHelperBtn: function(){
-       if (this.thumbnail) {
+    ,renderHelperBtn: function(){
+        if (this.thumbnail) {
             this.buttonPreview = new Ext.Button({
                 renderTo: this.wrap
                 ,width: 16
@@ -9050,12 +9047,11 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
     }
     ,getHelperBtn: function(){
         return this.buttonPreview;
-    }    
+    }
     ,clickHelperBtn: function(){
-            var el = this.getEl();
-            var xy = el.getXY()
-            this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
-
+        var el = this.getEl();
+        var xy = el.getXY()
+        this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
     }
     ,createFileInput : function() {
         this.fileInput = this.wrap.createChild({
