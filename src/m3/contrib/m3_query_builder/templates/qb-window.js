@@ -1,4 +1,7 @@
 
+var hdnID = Ext.getCmp('{{ component.hdn_id.client_id }}');
+var edtQueryName = Ext.getCmp('{{ component.str_name.client_id }}');
+
 var treeEntities = Ext.getCmp('{{ component.tree_entities.client_id }}');
 var grdSelectedEntities = Ext.getCmp('{{ component.grd_selected_entities.client_id }}');
 var grdLinks = Ext.getCmp('{{ component.grd_links.client_id }}');
@@ -414,30 +417,27 @@ function showQueryText(){
 // Сохраняет запрос
 function saveQuery(){
 	
-	// Получение имени запроса
-	Ext.Msg.prompt('Сохранение запроса', 'Введите название запроса:', function(btn, text){
-	    if (btn == 'ok'){
-	        
-			var loadMask = new Ext.LoadMask(win.body);
-		    loadMask.show();
-		    
-			Ext.Ajax.request({
-				url: '{{component.params.save_query_url }}'
-				,params: {
-					'objects': Ext.encode( buildParams() )
-					,'query_name': text
-				}
-				,success: function(){
-					loadMask.hide();
-					console.log('save');
-				}
-				,failure: function(){
-		        	loadMask.hide();
-		            uiAjaxFailMessage.apply(this, arguments);
-		        }
-			});
+	// Получение имени запроса	
+	var loadMask = new Ext.LoadMask(win.body);
+    loadMask.show();
+    
+	Ext.Ajax.request({
+		url: '{{component.params.save_query_url }}'
+		,params: {
+			'objects': Ext.encode( buildParams() )
+			,'query_name': edtQueryName.getValue() || ''
+			,'id': hdnID.getValue()
 		}
-	});
+		,success: function(){
+			loadMask.hide();
+			win.fireEvent('closed_ok');
+			win.close();
+		}
+		,failure: function(){
+        	loadMask.hide();
+            uiAjaxFailMessage.apply(this, arguments);
+        }
+	});		
 }
 
 // Билдит параметры, для показа запроса и для сохранения запроса

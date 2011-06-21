@@ -10,6 +10,7 @@ from m3.contrib.m3_query_builder import EntityCache
 from m3.helpers.icons import Icons
 
 from entity import BaseEntity, Field, Entity, Relation, Grouping, Where
+
 from models import Query
 
 def get_entities():
@@ -153,10 +154,16 @@ def get_conditions():
     '''
     return Where.get_simple_conditions()
 
-def save_query(query_name, query_json):
+def save_query(id, query_name, query_json):
     '''
     Сохранение запросов
     '''
-    q = Query(name=query_name, query_json=query_json)
+    if id:
+        q = Query.objects.get(id=id)
+        q.name = query_name
+        q.query_json = query_json
+    else:
+        q = Query(name=query_name, query_json=query_json)
+    
     q.full_clean()
     q.save()
