@@ -1220,7 +1220,6 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	
 	onRender: function()
 	{
-		this.renderFilters();
 		if(this.isFiltered())
 		{
 			this.applyFilters(false);
