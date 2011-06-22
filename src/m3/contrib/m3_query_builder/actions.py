@@ -155,10 +155,10 @@ class EntitiyItemsListAction(actions.Action):
     shortname = 'm3-query-builder-entity-items-list'
 
     def context_declaration(self):
-        return [ACD(name='entity_name', type=unicode, required=True)]
+        return [ACD(name='entities', type=object, required=True)]
 
     def run(self, request, context):           
-        entity_items = get_entity_items(context.entity_name)
+        entity_items = get_entity_items(context.entities)
         return actions.JsonResult(json.dumps(entity_items))
     
     
@@ -172,7 +172,7 @@ class ConditionWindowAction(actions.Action):
     def run(self, request, context):
         win = ui.ConditionWindow()
         win.set_conditions( get_conditions() )
-        return actions.ExtUIScriptResult(win)
+        return actions.ExtUIScriptResult(win)    
     
     
 class ShowQueryTextAction(actions.Action):

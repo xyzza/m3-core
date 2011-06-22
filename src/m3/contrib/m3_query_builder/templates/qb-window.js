@@ -22,6 +22,75 @@ var grdConditionsFields = Ext.getCmp('{{ component.grd_conditions.client_id }}')
 
 
 ////////////////////////////////////////////////////////////////////////////////
+/**
+ * Класс модели для сущностей и сразу же создание экземпляра 
+ */
+var entityModel = new function(){
+	
+	var trees = [treeAllFields, treeGroupsFields, treeConditionsFields];
+
+	/*
+	 * Добавляет сущность
+	 */
+	this.add = function(entities){
+		var url = '{{ component.params.entity_items_url }}';
+		assert(url, 'Url for child window is not define');
+
+		var loadMask = new Ext.LoadMask(win.body);
+		loadMask.show();
+		Ext.Ajax.request({
+			url: '{{ component.params.entity_items_url }}'
+			,params: {
+				'entities': Ext.encode(entities)
+			}
+			,success: function(response, opt){
+				loadMask.hide();
+				
+				var nodes = Ext.decode(response.responseText);
+
+				var node, rootNode;
+				for (var j=0; j<nodes.length; j++) {														
+					for (var i=0; i<trees.length; i++){
+	
+						rootNode = trees[i].getRootNode();
+						node = new Ext.tree.TreeNode(nodes[j]);
+					    
+					    rootNode.getOwnerTree().getLoader().doPreload(node);                
+					    if(node){
+					        rootNode.appendChild(node);
+					    }
+	    				        
+				        rootNode.loaded = true;
+					}
+				}
+				
+			}
+			,failure: function(){
+				loadMask.hide();
+        		uiAjaxFailMessage.apply(this, arguments);
+			}
+		});						
+	}
+
+
+	/*
+	 * Удаляет сущность
+	 */
+	this.remove = function (entities){
+		this.entities.push(2);
+		return this.entities;
+	}
+	
+	/*
+	 * Возвращает имеющиеся сущности
+	 */
+	this.getEntities = function (){
+		this.entities.push(2);
+		return this.entities;
+	}	
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Общие функции
 /*
  * Удаление поля в произвольном гриде
@@ -164,76 +233,26 @@ var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
         	entityName = data.node.attributes['schemes'];
                 
         
-        var record = selectedStore.getById(entityId);
-        console.log(record);
+        var record = selectedStore.getById(entityId);        
         if (!record && entityId && entityName){
 
-			var url = '{{ component.params.entity_items_url }}';
-			assert(url, 'Url for child window is not define');
-
-			var loadMask = new Ext.LoadMask(win.body);
-			loadMask.show();
-			Ext.Ajax.request({
-				url: '{{ component.params.entity_items_url }}'
-				,params: {
-					'entity_name': entityId
-				}
-				,success: function(response, opt){
-					loadMask.hide();
-					
-					// Заполняется грид на этой же вкладке - выбранные сущности
-					var EntityRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
-					    {name: 'entityName', mapping: 'entityName'},					    
-					]);
-					
-					var newEntityRecord = new EntityRecord(
-					    {entityName: entityName},					    
-					    entityId 
-					);
-		        	selectedStore.add(newEntityRecord);
-
-					var rootNode;
-					// Алгоритм заполнения деревьев всеми полями
-					var massOfTreeFields = [treeAllFields, treeGroupsFields, treeConditionsFields];
-					for (var i=0; i<massOfTreeFields.length; i++){
-
-						rootNode = massOfTreeFields[i].getRootNode();
-						
-				        processResponse(response,  rootNode);
-				        rootNode.loaded = true;
-					}
-					
-				}
-				,failure: function(){
-					loadMask.hide();
-            		uiAjaxFailMessage.apply(this, arguments);
-				}
-			});
+			// Заполняется грид на этой же вкладке - выбранные сущности
+			var EntityRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
+			    {name: 'entityName', mapping: 'entityName'},					    
+			]);
+			
+			var newEntityRecord = new EntityRecord(
+			    {entityName: entityName},					    
+			    entityId 
+			);
+        	selectedStore.add(newEntityRecord);
+        	
+        	entityModel.add([entityId]);
         	
         }                
         return true;
     }
 });
-
-/**
- * Загружает узел дерева
- * Взято из исходников TreeLoader и немного изменено
- */
-function processResponse(response, node){
-    var json = response.responseText;    
-    var o = response.responseData || Ext.decode(json);
-    
-    node.beginUpdate();
-    for(var i = 0, len = o.length; i < len; i++){
-        var n = new Ext.tree.TreeNode(o[i]);
-        
-        node.getOwnerTree().getLoader().doPreload(n);                
-        if(n){
-            node.appendChild(n);
-        }
-    }
-    node.endUpdate();
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Вкладка - Поля

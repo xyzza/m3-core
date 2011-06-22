@@ -34,39 +34,40 @@ def get_entities():
         
     return map(lambda item: item.render(), res)
 
-def get_entity_items(entity_name):
+def get_entity_items(entities):
     '''
     Возвращает список полей для схемы как узел дерева и список полей как дочерние
     узлы
     '''
     res = []
-    entity = EntityCache.get_entity(entity_name)
-    if entity:
-        fields = entity.get_select_fields()
-        
-        # Через словарики - это выявило одну проблему:
-        # TODO: Немного неудобно работать с ExtTreeNode, т.к. нужно
-        # учить json.dumps работать с этим объектом
-        root_node = {
-                'id': entity.__name__, 
-                'leaf': False,
-                'iconCls': Icons.PLUGIN,
-                'verbose_field': entity.name,                           
-                'expanded': True}
-
-        for field in fields:
+    for entity_name in entities:
+        entity = EntityCache.get_entity(entity_name)
+        if entity:
+            fields = entity.get_select_fields()
             
-            assert isinstance(field, Field)
-
-            node = {'leaf': True,
-                    'verbose_field': field.verbose_name or field.alias or field.field_name,
-                    'id_field': field.alias or field.field_name,
-                    'entity_name': entity_name}
+            # Через словарики - это выявило одну проблему:
+            # TODO: Немного неудобно работать с ExtTreeNode, т.к. нужно
+            # учить json.dumps работать с этим объектом
+            root_node = {
+                    'id': entity.__name__, 
+                    'leaf': False,
+                    'iconCls': Icons.PLUGIN,
+                    'verbose_field': entity.name,                           
+                    'expanded': True}
+    
+            for field in fields:
+                
+                assert isinstance(field, Field)
+    
+                node = {'leaf': True,
+                        'verbose_field': field.verbose_name or field.alias or field.field_name,
+                        'id_field': field.alias or field.field_name,
+                        'entity_name': entity_name}
+                
+                root_node.setdefault('children', []).append(node)
+                
+            res.append(root_node)
             
-            root_node.setdefault('children', []).append(node)
-            
-        res.append(root_node)
-        
     return res
 
 
