@@ -285,7 +285,7 @@ M3Designer.Requests = Ext.apply({}, {
                         ,children:[]
                     });
 
-                    node.appendChild(new_node);
+                    node.text === "ui.py" ? node.appendChild(new_node) : node.parentNode.appendChild(new_node);
 
                     var nodes = [{
                         text: '__init__'
