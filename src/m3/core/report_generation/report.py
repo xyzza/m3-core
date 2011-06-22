@@ -407,7 +407,7 @@ class DocumentReport(object):
         Подставляет в документе шаблона на место строк-ключей словаря params 
         значения, соответствующие ключам. 
         
-        Допустимые популярные значения фильтра (по умолчанию используется .odt): 
+        Некоторые допустимые значения фильтра (по умолчанию используется .odt): 
         "writer_pdf_Export" - pdf
         "MS Word 97" - doc
         "Rich Text Format" - rtf
@@ -457,10 +457,10 @@ class SpreadsheetReport(object):
         self.previous_height = 0
         
         #Координата ячейки, с которой выводилась последняя секция
-        self.previous_position = (0,0)
+        self.previous_position = (0, 0)
         
         #Координата ячейки, с которой будет выводиться следующая секция
-        self.current_position = (None,None)
+        self.current_position = (None, None)
         
         #Номера колонок, ширина которых уже была задана
         self.defined_width_columns = []
@@ -487,14 +487,16 @@ class SpreadsheetReport(object):
         Возвращает объект класса Section по значению атрибута name
         '''  
         try:
+            if isinstance(section_name, str):
+                section_name = section_name.decode('utf-8')
             return self.sections[section_name]
         except KeyError:
-            raise ReportGeneratorException, "Секция с именем %s не найдена. Список \
+            raise ReportGeneratorException, u"Секция с именем %s не найдена. Список \
             доступных секций: %s" %(section_name, self.sections.keys())
             
     def show(self, result_name, filter=None):    
         '''        
-        Допустимые популярные значения фильтра (по умолчанию используется .ods): 
+        Некоторые допустимые значения фильтра (по умолчанию используется .ods): 
         "writer_pdf_Export" - pdf
         "MS Excel 97" - xls
         "HTML (StarCalc)" - html
