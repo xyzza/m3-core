@@ -7,7 +7,7 @@ Created on 31.03.2011
 from datetime import datetime
 from m3.contrib.m3_calendar.api import M3Calendar
 from m3.contrib.m3_calendar.models import ExceptedDayTypeEnum
-from m3.contrib.m3_calendar.ui import M3CalendarWindow
+from m3.contrib.m3_calendar.ui import M3CalendarWindow, ExceptedDayEditWindow
 from m3.ui.actions import ActionPack, Action
 from m3.ui.actions.context import ActionContextDeclaration
 from m3.ui.actions.dicts.simple import BaseDictionaryModelActions
@@ -70,7 +70,7 @@ class GetDatesToUI(Action):
         dates = [workdays, dayoffs, holidays]
 
         def make_js_dates(date_list):
-           return [datetime.strftime(date,'%m/%d/%Y') for date in date_list]
+            return [datetime.strftime(date,'%m/%d/%Y') for date in date_list]
 
         [workdays, dayoffs, holidays] = map(make_js_dates, dates)
 
@@ -84,13 +84,21 @@ class ExceptedDay_DictPack(BaseDictionaryModelActions):
     '''
     url = '/excepted-days'
     shortname = 'm3-calendar-excepted-days'
-    
     model = ExceptedDay
-    
-    list_columns = [('day', 'Дата', 100),
-                    ('name', 'Название', 300),
-                    ('type', 'Тип', 300),]
-    filter_field = ['name',]
-    list_sort_order = ['-day',]
-    
+    add_window = edit_window = ExceptedDayEditWindow
+
+    list_sort_order = ['day', 'name']
+
+    list_columns = [('day', u'Дата', 100),
+                    ('name', u'Название', 300),
+                    ('type', u'Тип', 300),]
+    filter_field = ['day, name',]
+
     width, height = 700, 400
+    
+    def get_rows(self, request, context, offset, limit, filter, user_sort=''):
+        result = super(ExceptedDay_DictPack, self).get_rows(request, context, offset, limit, filter, user_sort)
+        if isinstance(result, dict) and result.has_key('rows'):
+            for row in result['rows']:
+                row.type = ExceptedDayTypeEnum.values[row.type]
+        return result
