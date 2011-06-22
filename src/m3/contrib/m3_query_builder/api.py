@@ -83,8 +83,8 @@ def build_entity(objs, separator='-'):
     # Список связей    
     entity.relations = [             
         Relation(
-            Field(rel['entityFirst'], rel['entityFirstField']),     
-            Field(rel['entitySecond'], rel['entitySecondField']),
+            Field(Entity(rel['entityFirst']), rel['entityFirstField']),     
+            Field(Entity(rel['entitySecond']), rel['entitySecondField']),
             outer_first=rel['outerFirst'],            
             outer_second=rel['outerSecond'],
         ) for rel in objs['relations']]
@@ -93,20 +93,21 @@ def build_entity(objs, separator='-'):
     group_fields = []
     for group_field in objs['group']['group_fields']:
         entity_name, field_name = group_field['id'].split(separator)
-        field = Field(entity_name, field_name)
+        field = Field(entity=Entity(entity_name),
+                      field_name=field_name,)
+        
+    aggr_fields = []
+    for group_field in objs['group']['group_aggr_fields']:
+        entity_name, field_name = group_field['id'].split(separator)
+        field = Field(entity=Entity(entity_name),
+                      field_name=field_name,)
         
         # Получение класса для агригирования. Например: Min, Max, Count
         aggr_func = group_field.get('function')
         if aggr_func:
             aggr_class = get_aggr_functions()[aggr_func]
             
-            group_fields.append(aggr_class(field))
-        
-    aggr_fields = []
-    for group_field in objs['group']['group_aggr_fields']:
-        entity_name, field_name = group_field['id'].split(separator)
-        field = Field(entity_name, field_name)
-        aggr_fields.append(field)
+            aggr_fields.append(aggr_class(field))
     
     entity.group_by = Grouping(group_fields=group_fields, 
                                aggregate_fields=aggr_fields)
@@ -116,7 +117,7 @@ def build_entity(objs, separator='-'):
         
         entity_name, field_name = select_field['id'].split(separator)
 
-        field = Field(entity = Entity(entity_name),
+        field = Field(entity=Entity(entity_name),
                       field_name=field_name, 
                       alias=select_field.get('alias'))
         
@@ -127,10 +128,11 @@ def build_entity(objs, separator='-'):
     for condition in objs['cond_fields']:
         
         entity_name, field_name = condition['id'].split(separator)
-        
-        entity_and_field = '%s.%s' % (entity_name, field_name) 
                 
-        entity.where &= Where(left=entity_and_field, op=condition['condition'], 
+        field = Field(entity=Entity(entity_name),
+                      field_name=field_name)
+                
+        entity.where &= Where(left=field, op=condition['condition'], 
                   right=condition['parameter'])                
       
       

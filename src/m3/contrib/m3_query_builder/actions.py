@@ -1,6 +1,7 @@
 #coding:utf-8 
 
 import json
+import uuid
 
 from django.core.exceptions import ValidationError
 
@@ -14,6 +15,7 @@ from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query
 
 from models import Query
+
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -70,25 +72,55 @@ class QueryBuilderWindowAction(actions.Action):
             query_str = query.query_json
 
             query_json = json.loads(query_str)
-            entity = build_entity( query_json )
-            
-            import pprint
-            pprint.pprint(query_json)
-            
-            window.configure_window(id=context.id,
+
+            window.configure_window(
+                             id=context.id,
                              name=name,
                              
-                             selected_entities=map(lambda x: [x['entityName'], x['entityName']], query_json['entities']),
-                             links=[],
+                             selected_entities=map(lambda x: [x['id'], 
+                                                              x['entityName']], 
+                                                   query_json['entities']),
+                                    
+                             links=map(lambda x: [ str(uuid.uuid4())[:8],# ID
+                                                  x['entityFirst'],
+                                                  x['entityFirstField'],  
+                                                  x['outerFirst'],
+                                                  
+                                                  x['entitySecond'],                                                    
+                                                  x['entitySecondField'],                                                                                                   
+                                                  x['outerSecond'],
+                                                  
+                                                  x['value'],], query_json['relations']),
+
                              
-                             distinct=entity.distinct,
-                             limit=entity.limit,
-                             selected_fields=[],
+                             distinct=query_json['distinct'],
+                             limit=query_json['limit'],
                              
-                             group_fields=[],
-                             aggr_fields=[],
+                             selected_fields=map(lambda x: [ 
+                                                  x['id'],
+                                                  x['fieldName'],  
+                                                  x.get('alias') or '',                                                  
+                                                  x.get('sorting') or '',                                                    
+                                                  #x['value'],
+                                                  ], query_json['selected_fields']),
                              
-                             conditions=[])        
+                             group_fields=map(lambda x: [ 
+                                                  x['id'],
+                                                  x['fieldName'],                                                                                                        
+                                                  ], query_json['group']['group_fields']),
+                             aggr_fields=map(lambda x: [ 
+                                                  x['id'],
+                                                  x['fieldName'],
+                                                  x.get('function') or '',
+                                                  ], query_json['group']['group_aggr_fields']),
+                             
+                             conditions=map(lambda x: [ 
+                                                  x['id'],
+                                                  x['fieldName'],
+                                                  x['condition'],
+                                                  x['parameter'],
+                                                  x['expression']
+                                                  ], query_json['cond_fields']),)        
         return actions.ExtUIScriptResult(data=window)
 
 class SelectConnectionWindowAction(actions.Action):

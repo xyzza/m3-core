@@ -15,7 +15,7 @@ var limitCount = Ext.getCmp('{{ component.nmbr_limit_count.client_id }}');
 
 var treeGroupsFields = Ext.getCmp('{{ component.tree_groups_fields.client_id }}');
 var grdGroupFields = Ext.getCmp('{{ component.grd_group_fields.client_id }}');
-var grdGroupAggrFields = Ext.getCmp('{{ component.grd_gruop_summ_fields.client_id }}');
+var grdGroupAggrFields = Ext.getCmp('{{ component.grd_gruop_aggr_fields.client_id }}');
 
 var treeConditionsFields = Ext.getCmp('{{ component.tree_conditions_fields.client_id }}');
 var grdConditionsFields = Ext.getCmp('{{ component.grd_conditions.client_id }}');
@@ -165,6 +165,7 @@ var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
                 
         
         var record = selectedStore.getById(entityId);
+        console.log(record);
         if (!record && entityId && entityName){
 
 			var url = '{{ component.params.entity_items_url }}';
@@ -297,7 +298,7 @@ function addGroupField(){
 	addFieldBtn(treeGroupsFields, grdGroupFields);
 }
 
-function addGroupSummField(){
+function addGroupAggrField(){
 	addFieldBtn(treeGroupsFields, grdGroupAggrFields);
 }
 
@@ -305,7 +306,7 @@ function deleteGroupField(){
 	deleteField(grdGroupFields);	
 }
 
-function deleteGroupSummField(){	
+function deleteGroupAggrField(){	
 	deleteField(grdGroupAggrFields);	
 }
 
@@ -462,10 +463,10 @@ function buildParams(){
 	var entities = getElements(grdSelectedEntities);
 	
 	// Связи в запросе
-	var relations = getElements(grdLinks, ['value']);
+	var relations = getElements(grdLinks);
 			
 	// Поля в выборке
-	var selectedFields = getElements(grdSelectedFields, ['value']);	
+	var selectedFields = getElements(grdSelectedFields);	
 	
 	// Группируемые и агригируемые поля
 	var groupFields = getElements(grdGroupFields);	
@@ -473,7 +474,7 @@ function buildParams(){
 	var groupAggrFields = getElements(grdGroupAggrFields);	
 	
 	// Условия
-	var condFields = getElements(grdConditionsFields, ['expression']);	
+	var condFields = getElements(grdConditionsFields);	
 
 	var limit;
 	if (limitChk.checked) {
