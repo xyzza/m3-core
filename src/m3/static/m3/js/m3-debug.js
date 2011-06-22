@@ -9558,7 +9558,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         }
     }
     ,getFileName: function(){
-        return this.getValue() ? this.getValue().split('/').reverse()[0] : "";
+    	return this.value ? this.value.split('/').reverse()[0] : "";
     }
     ,isFileExtensionOK: function(){
         var fileExtension = this.fileInput.dom.value.split('.');
