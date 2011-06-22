@@ -38,7 +38,7 @@ M3Designer.Requests = Ext.apply({}, {
         })
     },
     /*Запрос на обновление*/
-    fileUpdateContent:function(codeEditor, path, userTakeChoice, textArea){
+    fileUpdateContent:function(codeEditor, path){
         Ext.Ajax.request({
             url:'/designer/file-content',
             method: 'GET',
@@ -46,70 +46,63 @@ M3Designer.Requests = Ext.apply({}, {
                 path: path
             },
             success: function(response, opts){
-
                 var obj = Ext.util.JSON.decode(response.responseText);
                 if (codeEditor.contentChanged){
                     var msg = 'Хотели бы вы сохранить ваши изменения?';
                     codeEditor.showMessage(function(buttonId){
                         if (buttonId=='yes') {
-                           scope.onSave(function(){
+                           codeEditor.onSave(function(){
                                codeEditor.codeMirrorEditor.setValue(obj.data.content);
                                codeEditor.contentChanged = false;
                            });
                         }
                         else if (buttonId=='no') {
-                           codeEditor.codeMirrorEditor.setValue(obj.data.content);
-                           codeEditor.contentChanged = false;
+                            codeEditor.codeMirrorEditor.setValue(obj.data.content);
+                            codeEditor.contentChanged = false;
                         }
-                        else if (buttonId=='cancel') {
-                            userTakeChoice = !userTakeChoice;
-                        }
-                        userTakeChoice = !userTakeChoice;
-                    }, textArea.id, msg);
+                    }, msg);
                     codeEditor.onChange();
                 }
                 else {
-                    userTakeChoice = !userTakeChoice;
                     codeEditor.codeMirrorEditor.setValue(obj.data.content);
                     codeEditor.contentChanged = false;
                     codeEditor.onChange();
                 }
-                if (obj.success){
-                M3Designer.Utils.successMessage({
-                            "title": "Обнавление",
-                            "message": "Файл успешно обнавлен",
-                            "icon": "icon-arrow-rotate-anticlockwise"});
+                if (obj.success && !codeEditor.contentChanged){
+                    M3Designer.Utils.successMessage({
+                                "title": "Обнавление",
+                                "message": "Файл успешно обнавлен",
+                                "icon": "icon-arrow-rotate-anticlockwise"});
                 }else if (!obj.success && obj.error){
                     M3Designer.Utils.failureMessage({ "message": 'Ошибка при обновлении файла\n'+obj.error });
                 }
-                return !userTakeChoice;
-
             },
             failure: uiAjaxFailMessage
         });
     },
     /*Запрос содержимого файла по path на сервере*/
-    fileGetContent:function(path, fileName, tabPanel){
+    fileGetContent:function(fileAttr, tabPanel){
         Ext.Ajax.request({
             url:'/designer/file-content',
             method: 'GET',
             params: {
-                path: path
+                path: fileAttr.path
             }
             ,success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
-                var type = fileTypeByExpansion(fileName);
+                var type = fileTypeByExpansion(fileAttr.fileName);
 
                 var codeEditor = new M3Designer.code.ExtendedCodeEditor({
+                    id: fileAttr.path + fileAttr.fileName,
                     sourceCode : obj.data.content,
                     parser: type
                 });
 
-                codeEditor.setTitle(fileName);
+                codeEditor.setTitle(fileAttr.fileName);
                 tabPanel.add( codeEditor );
                 tabPanel.activate(codeEditor);
             
-                initCodeEditorHandlers(codeEditor, path);
+                initCodeEditorHandlers(codeEditor, fileAttr.path);
             },
             failure: uiAjaxFailMessage
         });
@@ -273,12 +266,12 @@ M3Designer.Requests = Ext.apply({}, {
         });
     },
     /*Запрос на cоздание нового класса в файле*/
-    createClass: function(node, attr, text){
-        var attr = node.attributes;
+    createClass: function(node, text){
+        var path = node.attributes['path'];
         Ext.Ajax.request({
             url:'/create-new-class'
             ,params: {
-                path: attr['path']
+                path: path
                 ,className: text
             }
             ,success: function(response, opts){
@@ -286,7 +279,7 @@ M3Designer.Requests = Ext.apply({}, {
                 if (obj.success) {
                     var new_node = new Ext.tree.TreeNode({
                         text: text
-                        ,path: attr['path']
+                        ,path: path
                         ,class_name: text
                         ,iconCls: 'icon-class'
                         ,children:[]
@@ -296,13 +289,13 @@ M3Designer.Requests = Ext.apply({}, {
 
                     var nodes = [{
                         text: '__init__'
-                        ,path: attr['path']
+                        ,path: path
                         ,class_name: text
                         ,func_name: '__init__'
                         ,iconCls: 'icon-function'
                     },{
                         text: 'initialize'
-                        ,path: attr['path']
+                        ,path: path
                         ,class_name: text
                         ,func_name: 'initialize'
                         ,iconCls: 'icon-function'

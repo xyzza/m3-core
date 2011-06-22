@@ -114,8 +114,8 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
         var source = eventObj.source;
         var s;
 
-        //Проверка указан ли центральный центральный регион 
-        if (source['layout'] == 'border' && !model.isPropertyInChildEqualTo('region','center')){
+        //Проверка указан ли центральный центральный регион
+        if (source['layout'] === 'border' && !model.isPropertyInChildEqualTo('region','center')){
             Ext.MessageBox.alert('Ошибка', 'Необходимо указать центральный регион');
             return;
         }
@@ -148,7 +148,7 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
  * содержит в себе осовные поля редактирования
  */
 M3Designer.edit.Field = Ext.apply({},{
-    getTriggerField: function(propertyName){
+    getTemplateGlobalsSelectField: function(propertyName){
         return new Ext.grid.GridEditor(
             new Ext.ux.templateGlobalsSelectField()
         );
@@ -208,7 +208,7 @@ M3Designer.edit.Field = Ext.apply({},{
                     width: 120,
                     fieldLabel: propertyName,
                     value: source[propertyName]
-                    }
+                }
         )
     },
     getComboEditorPG:function(source, propertyName){
@@ -309,8 +309,6 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
                 } else if (type === "boolean") {
                     customEditorsCfg[p] = M3Designer.edit.Field.getBooleanEditor(this.source, p);
                     customEditorsCfg[p].on('check', this.onSave.createDelegate(this));
-                } else if (p === 'templateGlobals') {
-                    customEditorsCfg[p] = M3Designer.edit.Field.getTriggerField(this.source, p);
                 }
 
                 if (type !== "undefined") {
@@ -415,7 +413,7 @@ M3Designer.edit.PropertyWindow = Ext.extend(Ext.Window, {
                 } else if (type === 'enum') {
                     customEditorsCfg[p] = M3Designer.edit.Field.getComboEditorPG(this.source, p);
                 } else if (p === 'templateGlobals') {
-                    customEditorsCfg[p] = M3Designer.edit.Field.getTriggerField(this.source, p);
+                    customEditorsCfg[p] = M3Designer.edit.Field.getTemplateGlobalsSelectField(this.source, p);
                 }
             }
         }
@@ -476,7 +474,7 @@ M3Designer.edit.InlinePropertyGrid = Ext.extend(Ext.grid.PropertyGrid, {
                 } else if (type === 'enum') {
                     customEditorsCfg[p] = new Ext.grid.GridEditor(M3Designer.edit.Field.getComboEditorPG(this.source, p));
                 } else if (p === 'templateGlobals') {
-                    customEditorsCfg[p] = M3Designer.edit.Field.getTriggerField(this.source, p);
+                    customEditorsCfg[p] = M3Designer.edit.Field.getTemplateGlobalsSelectField(this.source, p);
                 }
             }
         }

@@ -655,7 +655,6 @@ function onClickNode(node) {
 			   }
 			});
         } else if (jsonObj.success) {
-
 			this.setTitle(attr['class_name'] + funcTitle);
 
 			tabPanel.add(this);
@@ -679,66 +678,25 @@ function onClickNode(node) {
 
 /**
  * Вымогает у сервера некий файл
- * TODO: Сделать callBack'ами Ext.Ajax.request
  */
 function onClickNodePyFiles(node, fileAttr){
-    var path = fileAttr.path;
-    var fileName = fileAttr.fileName;
-  
-    var id = path + fileName;
-    
     var tabPanel = Ext.getCmp('tab-panel');
-    var tab = tabPanel.getItem(id);
+    var tab = tabPanel.getItem(fileAttr.path + fileAttr.fileName);
 	if(tab){				
 		tabPanel.setActiveTab(tab);
 		return;
 	}
     
     /*Запрос содержимого файла по path на сервере*/
-    M3Designer.Requests.fileGetContent(path, fileName, tabPanel);
+    M3Designer.Requests.fileGetContent(fileAttr, tabPanel);
 }
 /**
  * Иницализация хендлеров codeEditor'а
  * @param codeEditor
  */
 function initCodeEditorHandlers(codeEditor, path){
-    /* findByType вернет список элементов, т.к у нас всего один
-    textarea забираем его по индексу */
-    var textArea = codeEditor.getTextArea();
 
-    /* async close tab && message */
-    var userTakeChoice = true;
-
-    codeEditor.on('contentChaged', function(){
-        window.onbeforeunload = function(){
-            if (codeEditor.contentChanged){
-                return 'Вы закрываете вкладку, в которой имеются изменения.'
-            }
-        };
-    });
-    /* Хендлер на событие перед закрытием */
-    codeEditor.on('beforeclose', function(){
-        if (codeEditor.contentChanged){
-            var scope = this;
-            this.showMessage(function(buttonId){
-                if (buttonId=='yes') {
-                   scope.onSave();
-                   scope.fireEvent('close_tab', scope);
-                }
-                else if (buttonId=='no') {
-                   scope.fireEvent('close_tab', scope);
-                }
-                else if (buttonId=='cancel') {
-                    userTakeChoice = !userTakeChoice;
-                }
-                userTakeChoice = !userTakeChoice;
-            }, textArea.id);
-        }
-        else {
-            userTakeChoice = !userTakeChoice;
-        }
-        return !userTakeChoice;
-    });
+    initWorkSpaceCloseHandler(codeEditor);
 
     /* Хендлер на событие закрытие таба таб панели */
     codeEditor.on('close_tab', function(tab){
@@ -756,8 +714,61 @@ function initCodeEditorHandlers(codeEditor, path){
 
     /* Хендлер на событие обновление */
     codeEditor.on('update', function(){
-        var scope = this;
         /*Запрос на обновление */
-        M3Designer.Requests.fileUpdateContent(codeEditor, path, userTakeChoice, textArea);
+        M3Designer.Requests.fileUpdateContent(codeEditor, path);
+    });
+}
+/**
+ * Функция вешает на элемент события закрытия.
+ * @param element
+ */
+function initWorkSpaceCloseHandler(element){
+    /* async close tab && message */
+    var userTakeChoice = true;
+
+    /*Хендлер срабатывающий перед закрытием вкладки окна браузера*/
+    function onBeForeUnLoad(clearBool){
+        var clearBool = clearBool === undefined ? true: clearBool; // Дефолтное значение или аргумент
+        if (clearBool){
+            window.onbeforeunload = function(){
+               return 'Вы закрываете вкладку, в которой имеются изменения.'
+            }
+        }else{
+            /*Очищаем хендлер срабатывающий перед закрытием вкладки окна браузера*/
+            window.onbeforeunload = undefined;
+        }
+    }
+
+    element.on({
+        /* Хендлер на событие перед закрытием */
+        'contentChaged':{
+            fn: function(){
+                onBeForeUnLoad(element.contentChanged);
+            }
+        },
+        /* Хендлер на событие перед закрытием */
+        'beforeclose':{
+            fn: function(){
+                if (element.contentChanged){
+                    var scope = this;
+                    this.showMessage(function(buttonId){
+                        if (buttonId=='yes') {
+                           scope.onSave();
+                           scope.fireEvent('close_tab', scope);
+                        }
+                        else if (buttonId=='no') {
+                           scope.fireEvent('close_tab', scope);
+                        }
+                        else if (buttonId=='cancel') {
+                            userTakeChoice = !userTakeChoice;
+                        }
+                        userTakeChoice = !userTakeChoice;
+                    });
+                }else {
+                    userTakeChoice = !userTakeChoice;
+                }
+                return !userTakeChoice;
+            }
+        }
     });
 }

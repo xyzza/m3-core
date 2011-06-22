@@ -124,7 +124,7 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
                 } else if (buttonId === 'no') {
                     scope.fireEvent('close_tab', scope);
                 }
-            }, textArea.id);
+            });
         } else {
             this.fireEvent('close_tab', this);
         }
@@ -150,13 +150,12 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
     /**
      * Показывает messagebox, о имеющихся изменениях
      */
-    showMessage: function (fn, animElId, msg) {
+    showMessage: function (fn, msg) {
         Ext.Msg.show({
             title: 'Сохранить изменения?',
             msg: msg ? msg : 'Вы закрываете вкладку, в которой имеются изменения. Хотели бы вы сохранить ваши изменения?',
             buttons: Ext.Msg.YESNOCANCEL,
             fn: fn,
-            animEl: animElId,
             icon: Ext.MessageBox.QUESTION
         });
     }

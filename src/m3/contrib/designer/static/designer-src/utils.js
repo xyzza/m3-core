@@ -54,11 +54,11 @@ M3Designer.Utils = Ext.apply({},{
     failureMessage: function(options){
         var opt = options || {};
         Ext.Msg.show({
-                       title: opt.title || 'Ошибка'
-                       ,msg: opt.message || 'Во время выполнения операции произошла ошибка.'
-                       ,buttons: Ext.Msg.OK
-                       ,icon: Ext.MessageBox.WARNING
-                    });
+            title: opt.title || 'Ошибка'
+           ,msg: opt.message || 'Во время выполнения операции произошла ошибка.'
+           ,buttons: Ext.Msg.OK
+           ,icon: Ext.MessageBox.WARNING
+        });
     }
 
 });
