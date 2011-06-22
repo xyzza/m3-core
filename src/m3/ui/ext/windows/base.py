@@ -113,6 +113,9 @@ class BaseExtWindow(ExtUIComponent):
         # Экшен на закрытие окна
         self.close_action = None
 
+        # Атрибуты специфичные для form layout
+        self.label_width = self.label_align = self.label_pad = None
+
     def t_render_layout_config(self):
         '''
         Рендерит конфиг, если указан layout
@@ -142,6 +145,9 @@ class BaseExtWindow(ExtUIComponent):
         self._put_config_value('draggable', self.draggable)        
         self._put_config_value('keys', self.t_render_keys, self.keys)
         self._put_config_value('buttonAlign', self.button_align)
+        self._put_config_value('labelWidth', self.label_width)
+        self._put_config_value('labelAlign', self.label_align)
+        self._put_config_value('labelPad', self.label_pad)
 
         if self.layout_config:
             self._put_config_value('layoutConfig', self.t_render_layout_config)
