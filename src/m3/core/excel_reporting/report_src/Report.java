@@ -2,7 +2,7 @@
  * Excel report generator for platform BARS M3
  * Author: Safiullin Vadim
  * License: BSD
- * Version: 0.6 development in progress
+ * Version: 0.8 development in progress
  */
 
 import java.io.FileInputStream;
@@ -136,9 +136,6 @@ class ReportGenerator{
 	// Список строк с тегами, которые нужно удалить после обработки листа
 	ArrayList<Integer> unusedTagRows = new ArrayList<Integer>();
 	
-	// Список ячеек, в которые нужно вставить картинки
-	ArrayList<CellWrap>	pictureCells = new ArrayList<CellWrap>();
-	
 	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
 	// Они запоминаются и используются в дальнейшем
 	Cell cell_repeat_tag_start = null;
@@ -194,14 +191,6 @@ class ReportGenerator{
 				// Словарь используется чтобы не допустить повторное копирование матрицы при развертке региона
 				if (!matrixCells.containsKey(oldCell))
 					matrixCells.put(oldCell, cw);
-			}
-			
-			else if (text.startsWith(TAG_PICTURE)){
-				CellWrap cw = new CellWrap(newCell);
-				// Извлекаем имя переменной, хранящей путь к картинке
-				String varName = raw_text.substring(raw_text.lastIndexOf(" ") + 1);
-				cw.set("variable_name", varName);
-				pictureCells.add(cw);
 			}
 			
 			else if (text.startsWith(TAG_MERGE)){
@@ -449,7 +438,75 @@ class ReportGenerator{
 			
 			// Подстановка значений в скопированный ячейке
 			processReplaceTag(out_cell, obj, "");
+			processPictureTag(current_cell, out_cell, obj);
 		}
+	}
+	
+	/**
+	 * Обработка тега TAG_PICTURE вставки картинки
+	 * Разрушаются все до этого существующие графические объекты.
+	 * Причина в багах POI:
+	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=45129
+	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=50696
+	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=48803
+	 * @param current_cell Исходная ячейка
+	 * @param out_cell Новая ячейка
+	 * @param obj Контекст
+	 * @throws Exception
+	 */
+	private void processPictureTag(Cell current_cell, Cell out_cell, JSONObject obj) throws Exception{
+		// А есть ли коммент?
+		Comment comment = current_cell.getCellComment();
+		if (comment == null)
+			return;
+		
+		// А картинка ли в нём?
+		String raw_text = comment.getString().getString().trim();
+		if (!raw_text.toUpperCase().startsWith(TAG_PICTURE))
+			return;
+		
+		// Извлекаем имя переменной, хранящей путь к картинке
+		String key = raw_text.substring(raw_text.lastIndexOf(" ") + 1);
+		String filename = (String)obj.get(key);
+		if (filename == null || filename.isEmpty())
+			// Пропускаем, если ключ не найден или имени нет
+			return;
+		
+		// Определяем формат по имени
+		String lowName = filename.toLowerCase();
+		int type;
+		if (lowName.endsWith(".jpg"))
+			type = Workbook.PICTURE_TYPE_JPEG;
+		else if (lowName.endsWith(".jpeg"))
+			type = Workbook.PICTURE_TYPE_JPEG;
+		else if (lowName.endsWith(".png"))
+			type = Workbook.PICTURE_TYPE_PNG;
+		else if (lowName.endsWith(".bmp"))
+			type = Workbook.PICTURE_TYPE_DIB;
+		else
+			throw new Exception("Unknown image format. Supported only jpg, png, bmp");
+		
+		// Чтение файла и добавление в ресурсы книги
+		int pictureIdx;
+		try{
+			InputStream is = new FileInputStream(filename);
+	    	byte[] bytes = IOUtils.toByteArray(is);
+	    	pictureIdx = in_book.addPicture(bytes, type);
+	    	is.close();
+		} catch (IOException e){
+	    	throw new Exception("Could not load picture '" + filename + 
+	    		"' for tag '" + key + "' with error: " + e.getMessage());
+	    }
+	    
+		Sheet sheet = out_cell.getSheet();
+		Drawing drawing = sheet.createDrawingPatriarch();
+		ClientAnchor anchor = helper.createClientAnchor();
+		
+		// Эксперимент по вставке картинки
+		anchor.setCol1(out_cell.getColumnIndex());
+	    anchor.setRow1(out_cell.getRowIndex());
+	    Picture pict = drawing.createPicture(anchor, pictureIdx);
+	    pict.resize();	
 	}
 	
 	/*
@@ -1110,59 +1167,6 @@ class ReportGenerator{
 		}
 	}
 	
-	/*
-	 * Вставляет картинки в результирующие листы.
-	 * Выполняется в последнюю очередь, т.к. разрушаются все до этого существующие графические объекты.
-	 * Причина в багах POI:
-	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=45129
-	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=50696
-	 * https://issues.apache.org/bugzilla/show_bug.cgi?id=48803
-	 */
-	private void insertPictures() throws Exception {
-		for (CellWrap cellWarp: pictureCells){
-			// Получение имени файла
-			String key = (String)cellWarp.get("variable_name");
-			String filename = (String)root.get(key);
-			
-			// Определяем формат по имени
-			String lowName = filename.toLowerCase();
-			int type;
-			if (lowName.endsWith(".jpg"))
-				type = Workbook.PICTURE_TYPE_JPEG;
-			else if (lowName.endsWith(".jpeg"))
-				type = Workbook.PICTURE_TYPE_JPEG;
-			else if (lowName.endsWith(".png"))
-				type = Workbook.PICTURE_TYPE_PNG;
-			else if (lowName.endsWith(".bmp"))
-				type = Workbook.PICTURE_TYPE_DIB;
-			else
-				throw new Exception("Unknown image format. Supported only jpg, png, bmp");
-			
-			// Чтение файла и добавление в ресурсы книги
-			int pictureIdx;
-			try{
-				InputStream is = new FileInputStream(filename);
-		    	byte[] bytes = IOUtils.toByteArray(is);
-		    	pictureIdx = in_book.addPicture(bytes, type);
-		    	is.close();
-			} catch (IOException e){
-		    	throw new Exception("Could not load picture '" + filename + 
-		    		"' for tag '" + key + "' with error: " + e.getMessage());
-		    }
-		    
-		    Cell cell = cellWarp.cell;
-			Sheet sheet = cell.getSheet();
-			Drawing drawing = sheet.createDrawingPatriarch();
-			ClientAnchor anchor = helper.createClientAnchor();
-			
-			// Эксперимент по вставке картинки
-			anchor.setCol1(cell.getColumnIndex());
-		    anchor.setRow1(cell.getRowIndex());
-		    Picture pict = drawing.createPicture(anchor, pictureIdx);
-		    pict.resize();			
-		}
-	}
-	
 	/**
 	 * Генерация отчета.
 	 * @throws Exception
@@ -1236,8 +1240,6 @@ class ReportGenerator{
 		
 		// Устанавливаем повторяющиеся ячейки
 		setRepeatedArea(repeat_cells);
-		
-		insertPictures();
 		
 		// Возвращаем активность исходному листу
 		in_book.setActiveSheet(in_book.getSheetIndex(active_sheet_name));
@@ -1391,7 +1393,6 @@ class CellRangeList extends ArrayList<CellRangeAddress>{
 	}
 }
 
-//TODO: Копирование рисунков
 //TODO: Переписать все к чертям собачим
 //TODO: Прославиться на весь мир
 //TODO: Написать о себе статью в википедии
