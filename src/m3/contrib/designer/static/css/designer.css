@@ -62,7 +62,9 @@
 }
 .x-tipcustom > * {
     background: rgba(51, 51, 51, 0.7);
-
+    /*Fix для IE(8 and below), т.к. он не понимает альфа каналы*/
+    background: rgb(51, 51, 51)\9;
+    
     /*transition: background 0.3s linear 0.3s;*/
     /* Firefox 4 */
     /*-moz-transition:background 0.3s linear 0.3s;*/
