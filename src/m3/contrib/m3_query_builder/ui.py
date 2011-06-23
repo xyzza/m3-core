@@ -123,7 +123,7 @@ class QueryBuilderWindow(ExtWindow):
     def init_tables_and_connections(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
-        cont.title = u'Таблицы и связи'
+        cont.title = u'Сущности и связи'
         
         cnt_entities = ExtContainer()
         cnt_entities.region = 'center'
@@ -138,6 +138,19 @@ class QueryBuilderWindow(ExtWindow):
         grd_selected_entities.height = 200
         grd_selected_entities.header = True
         
+        tb_selected_entities = ExtToolBar()
+        tb_selected_entities.layout = 'toolbar'
+        
+        btn_add_entity = ExtButton()
+        btn_add_entity.text = u'Добавить'
+        btn_add_entity.icon_cls = 'add_item'
+        btn_add_entity.handler = 'onAddEntity'
+        
+        btn_delete_entity = ExtButton()
+        btn_delete_entity.text = u'Удалить'
+        btn_delete_entity.icon_cls = 'delete_item'
+        btn_delete_entity.handler = 'deleteEntity'
+        
         store_selected_entities = ExtDataStore()
         
         entity_name = ExtGridColumn()
@@ -151,8 +164,8 @@ class QueryBuilderWindow(ExtWindow):
         grd_links.region = 'center'
         grd_links.header = True
         
-        tb_selected_entities = ExtToolBar()
-        tb_selected_entities.layout = 'toolbar'
+        tb_link_entities = ExtToolBar()
+        tb_link_entities.layout = 'toolbar'
         
         btn_select_link = ExtButton()
         btn_select_link.text = u'Выбрать связь'
@@ -208,7 +221,7 @@ class QueryBuilderWindow(ExtWindow):
         clmn_descr.menu_disabled = True
         
         tree_entities = ExtTree()
-        tree_entities.title = u'Дерево схем'
+        tree_entities.title = u'Дерево сущностей'
         tree_entities.url = urls.get_action('m3-query-builder-entities-list').absolute_url()
         tree_entities.drag_drop = True
         tree_entities.drag_drop_group = 'TreeDD'
@@ -216,28 +229,43 @@ class QueryBuilderWindow(ExtWindow):
         tree_entities.width = 250
         tree_entities.region = 'west'
         
+        tb_entities = ExtToolBar()
+        tb_entities.layout = 'toolbar'
+        
+        btn_button_5 = ExtButton()
+        btn_button_5.text = u'Обновить'
+        btn_button_5.icon_cls = 'icon-arrow-refresh'
+        btn_button_5.handler = 'refreshEntities'
+        
         clmn_entities = ExtGridColumn()
         clmn_entities.header = u'Схемы'
         clmn_entities.data_index = 'schemes'
         clmn_entities.menu_disabled = True
         
+        grd_selected_entities.top_bar = tb_selected_entities
         grd_selected_entities.store = store_selected_entities
-        grd_links.top_bar = tb_selected_entities
+        grd_links.top_bar = tb_link_entities
         grd_links.store = dstore_links
+        tree_entities.top_bar = tb_entities
         
+        tb_selected_entities.items.extend([btn_add_entity, btn_delete_entity])
         grd_selected_entities.columns.extend([entity_name])
-        tb_selected_entities.items.extend([btn_select_link, btn_delete_link])
+        tb_link_entities.items.extend([btn_select_link, btn_delete_link])
         grd_links.columns.extend([clmn_entity_first, clmn_entity_first_field, clmn_entity_first_type, clmn_entity_second, clmn_entity_second_field, clmn_entity_second_type, clmn_descr])
         cnt_entities.items.extend([grd_selected_entities, grd_links])
+        tb_entities.items.extend([btn_button_5])
         tree_entities.columns.extend([clmn_entities])
         cont.items.extend([cnt_entities, tree_entities])
         
         self.cnt_entities = cnt_entities
         self.grd_selected_entities = grd_selected_entities
+        self.tb_selected_entities = tb_selected_entities
+        self.btn_add_entity = btn_add_entity
+        self.btn_delete_entity = btn_delete_entity
         self.store_selected_entities = store_selected_entities
         self.entity_name = entity_name
         self.grd_links = grd_links
-        self.tb_selected_entities = tb_selected_entities
+        self.tb_link_entities = tb_link_entities
         self.btn_select_link = btn_select_link
         self.btn_delete_link = btn_delete_link
         self.dstore_links = dstore_links
@@ -249,11 +277,13 @@ class QueryBuilderWindow(ExtWindow):
         self.clmn_entity_second_type = clmn_entity_second_type
         self.clmn_descr = clmn_descr
         self.tree_entities = tree_entities
+        self.tb_entities = tb_entities
+        self.btn_button_5 = btn_button_5
         self.clmn_entities = clmn_entities
         
         return cont
 
-                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                
     def init_fields(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'

@@ -25,12 +25,10 @@ function appendChildNode(node, childNodes){
 	var n, childNode, nChild;
 	for (var i=0; i<childNodes.length;i++){
 		childNode = childNodes[i];
-        n = new Ext.tree.TreeNode(childNode.attributes);
+        n = new Ext.tree.TreeNode(childNode);
         
-        for (var j=0; j<childNode.childNodes.length; j++){
-        	nChild = new Ext.tree.TreeNode(childNode.childNodes[j].attributes);
-        	n.appendChild(nChild);
-        }
+        node.getOwnerTree().getLoader().doPreload(n);  
+        
         node.appendChild(n);            
 	}
 }
