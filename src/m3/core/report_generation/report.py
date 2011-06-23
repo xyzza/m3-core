@@ -172,7 +172,9 @@ class OOParser(object):
 
 class Section(object):
     '''
-    Класс, описывающий секции в шаблоне Excel
+    Класс, объекты которого представляют собой секцию в шаблоне отчета. 
+    Секции получаются c помощью метода get_section объекта SpreadsheetReport. 
+    Секции существуют только в контексте объекта отчета SpreadSheetReport.
     '''
     
     def __init__(self, name=None, left_cell_addr=None, right_cell_addr=None, 
@@ -242,7 +244,13 @@ class Section(object):
             
     def flush(self, params, vertical=True):
         '''
-        Выводит секцию в отчет
+        Производит подстановку значений переменных в секции. 
+        Выводит секцию в заданном направлении. 
+        Первая секция выводится начиная с левого верхнего угла листа (с позиции (0,0)). 
+        Расположение выводимых секций определяется следующим образом. 
+        При выводе секции горизонтально секция выводится справа от последней 
+        выведенной секции. При выводе секции вертикально секция выводится начиная 
+        с левого края листа, ниже последней выведенной секции.
         '''
         section_width = abs(self.left_cell_addr.Column - self.right_cell_addr.Column)+1
         section_height = abs(self.left_cell_addr.Row - self.right_cell_addr.Row)+1
@@ -393,7 +401,9 @@ def path_to_file_url(path):
 
 class DocumentReport(object):
     '''
-    Класс для создания отчетов-текстовых документов.
+    Класс для представления отчета-текстового документа.
+    При инициализации объекта происходит соединение с сервером OpenOffice и 
+    открывается файл шаблона, заданный в параметре template_name.
     '''
     def __init__(self, template_name):
         if not template_name:
@@ -404,16 +414,10 @@ class DocumentReport(object):
         
     def show(self, result_name, params, filter=None):    
         '''
-        Подставляет в документе шаблона на место строк-ключей словаря params 
-        значения, соответствующие ключам. 
-        
-        Некоторые допустимые значения фильтра (по умолчанию используется .odt): 
-        "writer_pdf_Export" - pdf
-        "MS Word 97" - doc
-        "Rich Text Format" - rtf
-        "HTML" - html
-        "Text" - txt
-        "writer8" - odt
+        Производит подстановку значений переменных в шаблоне. 
+        Соответствие имен переменных и значений задается в словаре params. 
+        Сохраняет отчет в файл, указанный в result_name. 
+        Параметр filter задает формат результирующего файла
         '''
         assert isinstance(params, dict) 
         if not result_name:
@@ -438,7 +442,10 @@ class DocumentReport(object):
         
 class SpreadsheetReport(object): 
     '''
-    Класс для создания отчетов-электронных таблиц.
+    Класс для представления отчета-электронной таблицы.
+    При инициализации объекта происходит соединение с сервером OpenOffice, 
+    открывается файл шаблона, заданный в переменной template_name и из шаблона 
+    извлекается информация о заданных секциях. 
     '''       
     def __init__(self, template_name):
         
@@ -484,7 +491,7 @@ class SpreadsheetReport(object):
 
     def get_section(self, section_name):
         '''
-        Возвращает объект класса Section по значению атрибута name
+        Возвращает секцию по ее названию.
         '''  
         try:
             if isinstance(section_name, str):
@@ -496,11 +503,8 @@ class SpreadsheetReport(object):
             
     def show(self, result_name, filter=None):    
         '''        
-        Некоторые допустимые значения фильтра (по умолчанию используется .ods): 
-        "writer_pdf_Export" - pdf
-        "MS Excel 97" - xls
-        "HTML (StarCalc)" - html
-        "calc8" - ods
+        Сохраняет отчет в файл, указанный в result_name. 
+        Параметр filter задает формат результирующего файла.
         '''
         if not result_name:
             raise ReportGeneratorException, "Не указан путь до файла с отчетом"
@@ -556,7 +560,8 @@ class SpreadsheetReport(object):
          
     def get_section_render_position(self, vertical=True):
         '''
-        Возвращает позицию ячейки на листе отчета, с которой будет выводиться секция
+        Возвращает кортеж, пару координат (x,y) ячейки, начиная с которой  
+        будет выводиться следующая секция.
         '''
         if self.current_position[0] is None or self.current_position[1] is None:
             return self.find_section_position(vertical)
@@ -565,7 +570,8 @@ class SpreadsheetReport(object):
        
     def set_section_render_position(self, position_x, position_y):
         '''
-        Устанавливает позицию ячейки на листе отчета, с которой будет выводиться секция
+        Устанавливает координаты ячейки электронной таблицы, с которой будет 
+        выведена следующая секция. 
         '''
         assert isinstance(position_x, int)
         assert isinstance(position_y, int)
