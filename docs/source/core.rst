@@ -9,6 +9,7 @@ core
    excel_reporting.rst
    plugins_architecture.rst
    core/registry.rst
+   report_generation.rst
 
 history
 ---------------
