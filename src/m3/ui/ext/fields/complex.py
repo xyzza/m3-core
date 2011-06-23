@@ -323,6 +323,8 @@ class ExtFileUploadField(BaseExtField):
 
     def render_possible_file_extensions(self):
         p = self.possible_file_extensions
+        assert isinstance(p, (basestring, list, tuple)), \
+                    u'File extensions argument must be type of basestring, tuple or list'
         return ','.join(p) if not isinstance(p, basestring) else p
 
     def render_params(self):

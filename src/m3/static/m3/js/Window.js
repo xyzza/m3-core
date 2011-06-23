@@ -4,10 +4,7 @@
 
 Ext.m3.Window = Ext.extend(Ext.Window, {
 	constructor: function(baseConfig, params){
-//		console.log('Ext.m3.Window >>');
-//		console.log(baseConfig);
-//		console.log(params);
-		
+
 		// Ссылка на родительское окно
 		this.parentWindow = null;
 		
