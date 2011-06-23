@@ -54,8 +54,12 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
 
             onSuccessCodeAssistLoad:function(response, opts) {
                 var data = Ext.util.JSON.decode(response.responseText);
-                //this.createCompletionBox(data.proposal);
-                this.createCompletionMenu(data.proposal);
+                if (data.success) {
+                    this.createCompletionMenu(data.props);
+                }
+                else {
+                    Ext.Msg.alert('Ошибка синтаксиса', data.error.message);
+                }
             },
 
             onFailureCodeAssistLoad:function(response, opts) {
@@ -68,7 +72,7 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
 
             createCompletionMenu:function(completions) {
 
-                if (completions.length === 0) {
+                if (completions === undefined || completions.length === 0) {
                     return;
                 }
 
