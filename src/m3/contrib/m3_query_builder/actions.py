@@ -14,8 +14,7 @@ import ui
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query
 
-from models import Query
-
+from models import Query, Report
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -24,7 +23,7 @@ class QueryBuilderActionsPack(BaseDictionaryModelActions):
     '''
     url = '/qb-pack'
     
-    shortname = 'm3-query-builder-main-actions'
+    shortname = 'm3-query-builder'
     
     model = Query
 
@@ -43,7 +42,7 @@ class QueryBuilderActionsPack(BaseDictionaryModelActions):
                              ConditionWindowAction(),
                              ShowQueryTextAction(),
                              SaveQueryAction()])
-    
+
 class QueryBuilderWindowAction(actions.Action):
     '''
     Запрос на получение окна конструктора запросов
@@ -224,3 +223,45 @@ class SaveQueryAction(actions.Action):
                         'message': u'Не удалось сохранить запрос'}))
         
         return actions.JsonResult(json.dumps({'success': True}))
+    
+    
+    
+#===============================================================================
+class ReportBuilderActionsPack(BaseDictionaryModelActions):
+    '''
+    Экшенпак работы с конструктором запросов
+    '''
+    url = '/rb-pack'
+    
+    shortname = 'm3-report-builder'
+    
+    model = Report
+
+    title = u'Отчеты'
+
+    list_columns = [('name', u'Наименование')]
+
+    def __init__(self):
+        super(ReportBuilderActionsPack, self).__init__()        
+        self.actions.extend([ReportBuilderWindowAction()])
+    
+class ReportBuilderWindowAction(actions.Action):
+    '''
+    Запрос на получение окна конструктора отчетов
+    '''
+    url = '/edit-window'
+    shortname = 'm3-report-builder-edit-window'
+
+    def context_declaration(self):
+        return [ACD(name='id', type=int, required=False, 
+                        verbose_name=u'Идентификатор запроса')]
+
+    def run(self, request, context):
+#        params = {'select_connections_url': SelectConnectionWindowAction.absolute_url(),
+#                  'entity_items_url': EntitiyItemsListAction.absolute_url(),
+#                  'condition_url': ConditionWindowAction.absolute_url(),
+#                  'query_text_url': ShowQueryTextAction.absolute_url(),
+#                  'save_query_url': SaveQueryAction.absolute_url()}
+        window = ui.ReportBuilderWindow()
+        window.dsf_query.pack = QueryBuilderActionsPack
+        return actions.ExtUIScriptResult(data=window)

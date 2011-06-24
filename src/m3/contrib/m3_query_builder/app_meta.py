@@ -41,6 +41,12 @@ def register_desktop_menu():
                         icon='icon-database-gear')
     )
 
+    admin_root.subitems.append(
+        DesktopShortcut(name = u'Редактор отчетов',
+                        pack= actions.ReportBuilderActionsPack,
+                        icon='icon-database-gear')
+    )
+
     DesktopLoader.add(ADMIN_METAROLE, DesktopLoader.START_MENU, admin_root)
     DesktopLoader.add(ADMIN_METAROLE, DesktopLoader.TOPTOOLBAR, admin_root)
 
@@ -49,5 +55,6 @@ def register_actions():
     Метод регистрации Action'ов для приложения в котором описан
     '''
     m3_query_builder_controller.packs.extend([
-        actions.QueryBuilderActionsPack
+        actions.QueryBuilderActionsPack,
+        actions.ReportBuilderActionsPack,
     ])
