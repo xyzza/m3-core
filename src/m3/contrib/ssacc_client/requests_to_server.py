@@ -82,4 +82,17 @@ def server_ssacc_profile_rates(account_id):
     result = check_if_result_is_ok_and_return_parsed_result(result_xml,
         ProfileRatesResult)
     return result
+
+def server_ssacc_availability(account_id):
+    """
+    Обращение к системе за возможностью использования.
+
+    @return: AvailabilityResult or ErrorResult
+    """
+    profile_url = '/ssacc/profile/availability'
+    result_xml = try_to_connect_to_ssacc_url_and_get_request_result(profile_url)
+
+    result = check_if_result_is_ok_and_return_parsed_result(result_xml,
+        ProfileRatesResult)
+    return result
   

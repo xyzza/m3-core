@@ -20,6 +20,7 @@ class BaseResult(object):
         self._xml_response = minidom.Document()
         self._result_node = self._create_xml_response_node('result')
         self._append_node_to_xml_response(self._result_node)
+        self._is_result_status_ok = True
 
     def _get_xml_response(self):
         return self._xml_response
@@ -32,6 +33,14 @@ class BaseResult(object):
         Возвращает ответ в виде XML строки.
         """
         return self._get_xml_response().toprettyxml(indent='  ')
+
+    def is_result_status_ok(self):
+        """
+        Узнает, не ошибочный ли у результата статус.
+
+        @return bool
+        """
+        return self._is_result_status_ok
     
     def _append_node_to_xml_response(self, node):
         """
@@ -148,6 +157,8 @@ class ErrorResult(BaseResult):
         super(ErrorResult, self).__init__()
         self._message = message
         self._error_code = error_code
+
+        self._is_result_status_ok = False
 
     def return_response(self):
         self._get_result_node().setAttribute('status', 'error')
