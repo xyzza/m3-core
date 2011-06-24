@@ -83,74 +83,6 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
 
                 menu.showCompletions();
                 this.completionMenu = menu;
-            },
-
-            createCompletionBox:function(completions) {
-                var editor = this.codeMirrorEditor;
-
-                var complete = document.createElement("div");
-                complete.className = "completions";
-                var sel = complete.appendChild(document.createElement("select"));
-                sel.multiple = true;
-                for (var i = 0; i < completions.length; ++i) {
-                  var opt = sel.appendChild(document.createElement("option"));
-                  opt.appendChild(document.createTextNode(completions[i]));
-                }
-                sel.firstChild.selected = true;
-                sel.size = Math.min(10, completions.length);
-                var pos = editor.cursorCoords();
-                complete.style.left = pos.x + "px";
-                complete.style.top = pos.yBot + "px";
-                document.body.appendChild(complete);
-                // Hack to hide the scrollbar.
-                if (completions.length <= 10)
-                  complete.style.width = (sel.clientWidth - 1) + "px";
-
-                var done = false;
-                function close() {
-                  if (done) return;
-                  done = true;
-                  complete.parentNode.removeChild(complete);
-                }
-                function pick() {
-                  insert(sel.options[sel.selectedIndex].value);
-                  close();
-                  setTimeout(function(){editor.focus();}, 50);
-                }
-                var cur = editor.getCursor(false), token = editor.getTokenAt(cur), tprop = token;
-                function insert(str) {
-                    editor.replaceRange(str, {line: cur.line, ch: token.start}, {line: cur.line, ch: token.end});
-                }
-                function stopEvent() {
-                    if (this.preventDefault) {this.preventDefault(); this.stopPropagation();}
-                    else {this.returnValue = false; this.cancelBubble = true;}
-                  }
-                function addStop(event) {
-                    if (!event.stop) event.stop = stopEvent;
-                    return event;
-                  }
-                function connect(node, type, handler) {
-                    function wrapHandler(event) {handler(addStop(event || window.event));}
-                    if (typeof node.addEventListener == "function")
-                      node.addEventListener(type, wrapHandler, false);
-                    else
-                      node.attachEvent("on" + type, wrapHandler);
-                }
-
-                connect(sel, "blur", close);
-                connect(sel, "keydown", function(event) {
-                  var code = event.keyCode;
-                  // Enter and space
-                  if (code == 13 || code == 32) {event.stop(); pick();}
-                  // Escape
-                  else if (code == 27) {event.stop(); close(); editor.focus();}
-                  //else if (code != 38 && code != 40) {close(); editor.focus(); setTimeout(startComplete, 50);}
-                });
-                connect(sel, "dblclick", pick);
-
-                sel.focus();
-                // Opera sometimes ignores focusing a freshly created node
-                if (window.opera) setTimeout(function(){if (!done) sel.focus();}, 100);
             }
         });
     }
@@ -166,6 +98,8 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
     editor:undefined,
 
     showSeparator:false,
+
+    maxHeight:300,
 
     initComponent:function() {
 
@@ -202,6 +136,25 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
        this.destroy();
     },
 
+    /**
+     * Переопределенная функция  родительского класса - координата Y
+     * пересчитывается самостоятельно, тк в оргинальном вариант разработчиков ExtJS при
+     * использовании свойства maxHeight меню всегда показывается с Y = 0 если оно аппендится к боди
+     */
+    showAt:function(xy, parentMenu) {
+
+        var y = xy[1], parentEl, viewHeight;
+        M3Designer.code.CompletionMenu.superclass.showAt.call(this, xy,parentMenu);
+        parentEl = Ext.fly(this.el.dom.parentNode);
+        viewHeight = parentEl.getViewSize().height;
+        if ((y + this.el.getHeight()) > viewHeight) {
+            this.el.setXY([ xy[0], viewHeight - this.el.getHeight() - 25 ]);
+        }
+        else {
+            this.el.setXY( [xy[0], y]);    
+        }
+    },
+
     onItemClick:function(item, e) {
         this.insertCode(item.data.text);
         this.destroy();
@@ -215,7 +168,7 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
         var pos = this.editor.cursorCoords();
         this.editorCursor = this.editor.getCursor(false);
         this.token = this.editor.getTokenAt(this.editorCursor);
-        if (this.token.string === '.') {
+        if (this.token.string[0] === '.') {
             this.dot = true;
         }
         this.showAt([pos.x,pos.yBot]);

@@ -18,7 +18,7 @@ def get_code_proposals(code, offset):
 
     try:
         props = codeassist.code_assist(proj, code, offset, resource=None,
-                templates=None, maxfixes=0)
+                templates=None, maxfixes=1)
         props = codeassist.sorted_proposals(props)
     except ModuleSyntaxError as exc:
         result['success'] = False
