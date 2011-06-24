@@ -12,7 +12,7 @@ from m3.ui.actions.dicts.simple import BaseDictionaryModelActions
 
 import ui
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
-    get_aggr_functions, save_query
+    get_aggr_functions, save_query, get_query_params
 
 from models import Query, Report
 
@@ -21,16 +21,11 @@ class QueryBuilderActionsPack(BaseDictionaryModelActions):
     '''
     Экшенпак работы с конструктором запросов
     '''
-    url = '/qb-pack'
-    
-    shortname = 'm3-query-builder'
-    
+    url = '/qb-pack'    
+    shortname = 'm3-query-builder'    
     model = Query
-
     title = u'Запросы'
-
     edit_window = ui.QueryBuilderWindow
-
     list_columns = [('name', u'Наименование')]
 
     def __init__(self):
@@ -231,19 +226,16 @@ class ReportBuilderActionsPack(BaseDictionaryModelActions):
     '''
     Экшенпак работы с конструктором запросов
     '''
-    url = '/rb-pack'
-    
-    shortname = 'm3-report-builder'
-    
+    url = '/rb-pack'    
+    shortname = 'm3-report-builder'    
     model = Report
-
     title = u'Отчеты'
-
     list_columns = [('name', u'Наименование')]
 
     def __init__(self):
         super(ReportBuilderActionsPack, self).__init__()        
-        self.actions.extend([ReportBuilderWindowAction()])
+        self.actions.extend([ReportBuilderWindowAction(),
+                             ReportQueryParamsAction()])
     
 class ReportBuilderWindowAction(actions.Action):
     '''
@@ -257,11 +249,23 @@ class ReportBuilderWindowAction(actions.Action):
                         verbose_name=u'Идентификатор запроса')]
 
     def run(self, request, context):
-#        params = {'select_connections_url': SelectConnectionWindowAction.absolute_url(),
-#                  'entity_items_url': EntitiyItemsListAction.absolute_url(),
-#                  'condition_url': ConditionWindowAction.absolute_url(),
-#                  'query_text_url': ShowQueryTextAction.absolute_url(),
-#                  'save_query_url': SaveQueryAction.absolute_url()}
-        window = ui.ReportBuilderWindow()
+        params = {'query_params_url': ReportQueryParamsAction.absolute_url(),
+                  }
+        window = ui.ReportBuilderWindow(params=params)
         window.dsf_query.pack = QueryBuilderActionsPack
         return actions.ExtUIScriptResult(data=window)
+    
+class ReportQueryParamsAction(actions.Action):
+    '''
+    '''
+    url = '/params'
+    shortname = 'm3-report-builder-query-params'
+    
+    def context_declaration(self):
+        return [ACD(name='query_id', type=int, required=True, 
+                        verbose_name=u'Идентификатор запроса')]
+
+    def run(self, request, context):
+        params = get_query_params(context.query_id)
+        return actions.JsonResult(json.dumps(params))
+        

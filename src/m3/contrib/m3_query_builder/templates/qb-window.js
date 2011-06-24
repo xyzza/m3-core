@@ -41,7 +41,7 @@ var entityModel = new function(){
 			var loadMask = new Ext.LoadMask(win.body);
 			loadMask.show();
 			Ext.Ajax.request({
-				url: '{{ component.params.entity_items_url }}'
+				url: url
 				,params: {
 					'entities': Ext.encode(entities)
 				}

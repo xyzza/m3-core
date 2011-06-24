@@ -5,6 +5,8 @@ Created on 06.06.2011
 
 @author: prefer
 '''
+import json
+
 from m3.ui.ext.containers.trees import ExtTreeNode
 from m3.contrib.m3_query_builder import EntityCache
 from m3.helpers.icons import Icons
@@ -12,6 +14,7 @@ from m3.helpers.icons import Icons
 from entity import BaseEntity, Field, Entity, Relation, Grouping, Where
 
 from models import Query
+
 
 def get_entities():
     '''
@@ -170,3 +173,21 @@ def save_query(id, query_name, query_json):
     
     q.full_clean()
     q.save()
+    
+def get_query_params(query_id):
+    '''
+    Возвращает параметры запроса
+    @param query_id: Идентификатор запроса
+    '''
+    query = Query.objects.get(id=query_id)
+    query_json = json.loads(query.query_json)
+    
+    res = []
+    for condition in query_json['cond_fields']:        
+        
+        # Множественный выбор или нет, то есть используется ли 
+        # оператор IN или нет                        
+        res.append({'name': condition['parameter'], 
+                    'multiple_choice': condition['condition'] == Where.IN})
+        
+    return res
