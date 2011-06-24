@@ -290,8 +290,8 @@ class Section(object):
         section_range = dest_sheet.getCellRangeByPosition(x,y,x+section_width-1,y+section_height-1)
         parser = OOParser()
         for key, value in params.items():
-            if not isinstance(key, str):
-                raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым"
+            if not isinstance(key, basestring):
+                raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым: %s" % key
             value = parser.convert_value(value)
             parser.find_and_replace(section_range, u'#'+key+u'#', value)    
         #Если не все переменные в шаблоне были заменены, стираем оставшиеся
