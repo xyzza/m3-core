@@ -148,7 +148,7 @@ def _old_good_exception(msg, exception_info, *args, **kwargs):
         msg = force_unicode(msg) + '\n' + u''.join(tb)
         log.error(msg)
     except:
-        log.error(u'Некоррертная работа логера')
+        log.error(u'Некорректная работа логгера')
 
 def warning(msg, *args, **kwargs):
     log = logging.getLogger('warning_logger')
