@@ -1168,7 +1168,7 @@ def update_with_inheritance(m_list, parent=None, config=None):
         elif not parent and item.get('parent'):
             update_with_inheritance(m_list, item.get('parent'), item['config'])
 
-# Для избавления от комментов делим файл на строки
+
 def open_text_file(filename, mode='r', encoding = 'utf-8'):
     '''
     Для открытия файла, если он был сохранен под виндами. Бомы всякие удаляются.
