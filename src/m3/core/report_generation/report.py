@@ -1,11 +1,32 @@
 #coding:utf-8
 
-import uno
 import os
+import sys
 import datetime
 import decimal
+
 from django.conf import settings
 from django.utils import importlib
+
+# Подготовка к запуску pyuno под Windows
+# Если после этого не заработает, значит все плохо!
+# http://stackoverflow.com/questions/4270962/using-pyuno-with-my-existing-pythonn-installation
+if sys.platform.startswith('win'):
+    # Ищем исполняемый файл OpenOffice в PATH
+    for path in os.environ['PATH'].split(';'):
+        office_path = os.path.normpath(path)
+        if os.path.exists( os.path.join(office_path, 'soffice.exe') ):
+            break
+    else:
+        raise Exception(u'Unable to find OpenOffice soffice.exe executable in PATH variable')
+
+    # Добавляем переменные окружения необходимые для UNO
+    sys.path.append( os.path.join(office_path, '..\\Basis\\program') )
+    os.environ['URE_BOOTSTRAP'] = 'vnd.sun.star.pathname:' + os.path.join(office_path, 'fundamental.ini')
+    os.environ['UNO_PATH'] = office_path
+    os.environ['PATH'] = os.environ['PATH'] + ';' + os.path.join(office_path, '..\\URE\\bin')
+
+import uno
 from com.sun.star.beans import PropertyValue
 from com.sun.star.connection import NoConnectException
 
