@@ -8,6 +8,25 @@ Created on 17.06.2011
 from django.db import models
 
 
+class TypeField(object):
+    '''
+    Класс для данных типов полей
+    '''
+    
+    STRING_FIELD = 1
+    NUMBER_FIELD = 2
+    DICTIONARY_FIELD =3
+            
+
+    @staticmethod
+    def get_type_choices():
+        return (
+            (TypeField.STRING_FIELD, u'Текстовое поле'),
+            (TypeField.NUMBER_FIELD, u'Числовое поле'),
+            (TypeField.DICTIONARY_FIELD, u'Выбор из справочника'),    
+        )
+        
+
 class Query(models.Model):
     '''
     Модель для запросов
@@ -22,6 +41,10 @@ class Query(models.Model):
     class Meta():
         db_table = 'm3_query_builder'
         
+#REPORT_TYPE_CHOICES = (
+#    (0, 'xls'),
+#    (1, 'pdf'),                       
+#)
         
 class Report(models.Model):
     '''
@@ -32,17 +55,15 @@ class Report(models.Model):
     
     # Json представление запроса
     query = models.ForeignKey(Query) 
+#    
+#    # Тип отчета
+#    type = models.CharField(max_length=1, choices=REPORT_TYPE_CHOICES)
+#
+#    # Генерировать ли дополнительное окно с html информацией
+#    html_window = models.BooleanField(default=False)
         
     class Meta():
         db_table = 'm3_report_builder'
-        
-
-TYPE_CHOICES = (
-    (0, 'String field'),
-    (1, 'Numeric field'),
-    (2, 'Dict field'),            
-    (3, 'Combo field'),
-)
 
 class ReportParams(models.Model):
     '''
@@ -55,7 +76,7 @@ class ReportParams(models.Model):
     name = models.CharField(max_length=100, db_index=True)
     
     # Тип параметра
-    type = models.CharField(max_length=1, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=1, choices=TypeField.get_type_choices())
     
     # Значение параметра
     value = models.CharField(max_length=300)

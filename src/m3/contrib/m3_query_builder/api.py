@@ -15,7 +15,6 @@ from entity import BaseEntity, Field, Entity, Relation, Grouping, Where
 
 from models import Query
 
-
 def get_entities():
     '''
     Получение всех имеющихся схем и возвращение их как узлов в дереве

@@ -14,7 +14,7 @@ import ui
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params
 
-from models import Query, Report
+from models import Query, Report, TypeField
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -94,8 +94,7 @@ class QueryBuilderWindowAction(actions.Action):
                                                   x['id'],
                                                   x['fieldName'],  
                                                   x.get('alias') or '',                                                  
-                                                  x.get('sorting') or '',                                                    
-                                                  #x['value'],
+                                                  x.get('sorting') or '',                                                                                                      
                                                   ], query_json['selected_fields']),
                              
                              group_fields=map(lambda x: [ 
@@ -205,10 +204,7 @@ class SaveQueryAction(actions.Action):
     def run(self, request, context):           
         
         query_json = json.dumps(context.objects)
-        
-        import pprint        
-        pprint.pprint(query_json)
-        
+
         id = getattr(context, 'id', None)        
         try:
             save_query(id, context.query_name, query_json)
@@ -235,7 +231,9 @@ class ReportBuilderActionsPack(BaseDictionaryModelActions):
     def __init__(self):
         super(ReportBuilderActionsPack, self).__init__()        
         self.actions.extend([ReportBuilderWindowAction(),
-                             ReportQueryParamsAction()])
+                             ReportQueryParamsAction(), 
+                             ReportQuerySaveAction(),
+                             ReportEditParamsWindowAction()])
     
 class ReportBuilderWindowAction(actions.Action):
     '''
@@ -245,27 +243,62 @@ class ReportBuilderWindowAction(actions.Action):
     shortname = 'm3-report-builder-edit-window'
 
     def context_declaration(self):
-        return [ACD(name='id', type=int, required=False, 
-                        verbose_name=u'Идентификатор запроса')]
+        return [ACD(name='id', type=int, required=False, verbose_name=u'Идентификатор запроса')]
 
     def run(self, request, context):
         params = {'query_params_url': ReportQueryParamsAction.absolute_url(),
+                  'edit_window_params_url': ReportEditParamsWindowAction.absolute_url(),
                   }
         window = ui.ReportBuilderWindow(params=params)
         window.dsf_query.pack = QueryBuilderActionsPack
         return actions.ExtUIScriptResult(data=window)
-    
+
 class ReportQueryParamsAction(actions.Action):
     '''
+    Получение параметров для отчета у связанного запроса
     '''
     url = '/params'
     shortname = 'm3-report-builder-query-params'
     
     def context_declaration(self):
-        return [ACD(name='query_id', type=int, required=True, 
-                        verbose_name=u'Идентификатор запроса')]
+        return [ACD(name='query_id', type=int, required=True, verbose_name=u'Идентификатор запроса')]
 
     def run(self, request, context):
         params = get_query_params(context.query_id)
         return actions.JsonResult(json.dumps(params))
+
+class ReportQuerySaveAction(actions.Action):
+    '''
+    Сохранение отчета
+    '''
+    url = '/save'
+    shortname = 'm3-report-builder-query-save'
+
+    def context_declaration(self):
+        return [ACD(name='id', type=int, required=False, verbose_name=u'Идентификатор отчета'),
+                ACD(name='name', type=str, required=True, verbose_name=u'Наименование отчета'),
+                ACD(name='query_id', type=int, required=True, verbose_name=u'Идентификатор запроса'),]
+
+    def run(self, request, context):
+        id = getattr(context, 'id', None)
+        return actions.JsonResult(json.dumps({'success':True}))
+    
+    
+class ReportEditParamsWindowAction(actions.Action):
+    '''
+    Запрос на получение окна редактрирования параметров
+    '''
+    url = '/edit-window-params'
+    shortname = 'm3-report-builder-edit-window-params'
+
+    def context_declaration(self):
+        return [ACD(name='id', type=str, required=True, verbose_name=u'Идентификатор параметра'),]
+
+    def run(self, request, context):                
+        win = ui.ReportParamsWindow(types=TypeField.get_type_choices(), 
+                                    default_type_value=TypeField.STRING_FIELD)
         
+        print TypeField.DICTIONARY_FIELD
+        win.dict_value = TypeField.DICTIONARY_FIELD
+               
+        return actions.ExtUIScriptResult(win)
