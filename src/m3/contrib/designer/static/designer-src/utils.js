@@ -91,6 +91,12 @@ M3Designer.Utils = Ext.apply({},{
             fn: fn,
             icon: Ext.MessageBox.QUESTION
         });
+    },
+    /**
+     * Возвращает выделенный узел дерева структуры проекта
+     */
+    projectViewTreeGetSelectedNode: function(){
+        return Ext.getCmp('project-view').getSelectionModel().getSelectedNode();
     }
 
 });

@@ -176,7 +176,7 @@ Ext.ux.templateGlobalsSelectField = Ext.extend(Ext.ux.SelectField,{
             Ext.MessageBox.prompt('Создание templateGlobals', 'Введите имя файла',
                 function(btn, text){
                     if (btn == 'ok' && this.regex.test(text)){
-                        M3Designer.Requests.fileGTGetContent(path, text, tabPanel, true);
+                        M3Designer.Requests.fileTGGetContent(path, text, tabPanel, true);
                         this.setValue(text);
                     }
                     else if(text){
@@ -190,7 +190,7 @@ Ext.ux.templateGlobalsSelectField = Ext.extend(Ext.ux.SelectField,{
 
              //Запрос содержимого файла по path на сервере
             if (path && value){
-                M3Designer.Requests.fileGTGetContent(path, value, tabPanel);
+                M3Designer.Requests.fileTGGetContent(path, value, tabPanel);
             }
         }
     }

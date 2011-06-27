@@ -8,7 +8,6 @@
 /**
  * TODO:
  * 1. Вынести логику из запросов.
- * 2. Исправить создание класса (неправильное место добавления узла)
 */
 
 Ext.namespace('M3Designer');
@@ -133,7 +132,7 @@ M3Designer.Requests = Ext.apply({}, {
      * @param tabPanel
      * @param crateNew bool флаг на создание нового файла
      */
-    fileGTGetContent:function(path, fileName, tabPanel, crateNew){
+    fileTGGetContent:function(path, fileName, tabPanel, crateNew){
         var scope = this,
             crateNew = crateNew || false;
         Ext.Ajax.request({
@@ -147,6 +146,26 @@ M3Designer.Requests = Ext.apply({}, {
             ,success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
                 if (obj.success) {
+
+                    if (crateNew){
+                        var node = M3Designer.Utils.projectViewTreeGetSelectedNode();
+                        if (node){
+                            var new_node = new Ext.tree.TreeNode({
+                                text: fileName
+                                ,path: obj.data['path']
+                                ,iconCls: 'icon-page-white-js'
+                                ,leaf: true
+                            });
+                            var templatesNode = node.parentNode.parentNode.findChild('text', 'templates');
+                            templatesNode.expand();
+                            templatesNode.appendChild(new_node);
+                            new_node.select();
+                        }
+                        M3Designer.Utils.successMessage({
+                            "title": "Создание файла templateGlobals",
+                            "message": "Файл "+fileName+" успешно создан в директории "+ obj.data['dir']});
+                    }
+
                     var type = fileTypeByExpansion('js');
                     var codeEditor = new M3Designer.code.ExtendedCodeEditor({
                         sourceCode : obj.data.content,
@@ -159,14 +178,9 @@ M3Designer.Requests = Ext.apply({}, {
                     tabPanel.activate(codeEditor);
 
                     initCodeEditorHandlers(codeEditor, obj.data.path);
-
-                    if (crateNew){
-                        M3Designer.Utils.successMessage({
-                            "title": "Создание файла templateGlobals",
-                            "message": "Файл "+fileName+" успешно создан в директории "+ obj.data['dir']});
-                    }
+                    
                 } else {
-                    if(obj.error == 'notExists'){
+                    if(obj.error === 'notExists'){
                         Ext.Msg.show({
                             title:'Файл не найден',
                             msg: 'Файл '+fileName+' не был найден в директории. Создать файл ?',
@@ -174,7 +188,7 @@ M3Designer.Requests = Ext.apply({}, {
                             icon: Ext.MessageBox.QUESTION,
                             fn: function(btn, text){
                                 if (btn == 'yes'){
-                                    scope.fileGTGetContent(path, fileName, tabPanel, true)
+                                    scope.fileTGGetContent(path, fileName, tabPanel, true)
                                 };
                             }
                         });

@@ -59,8 +59,7 @@ function initAdditionalTreeEvents(id){
  * Базовая функция внешнего воздействия на дерево структуры проекта.
  */
 function projectViewTreeManipulation(){
-    var cmp = Ext.getCmp('project-view');
-    var selectedNode = cmp.getSelectionModel().getSelectedNode();
+    var selectedNode = M3Designer.Utils.projectViewTreeGetSelectedNode();
     if (!selectedNode){
         Ext.Msg.show({
             title: 'Информация',
@@ -688,7 +687,6 @@ function onClickNode(node) {
             }, this);
             
             this.on('beforeclose', function(){
-                window.onbeforeunload = undefined;
                 return initTabCloseHandler(this, this.application.changedState())
             });
             
@@ -697,6 +695,7 @@ function onClickNode(node) {
                 if (tab) {
                     var tabPanel = Ext.getCmp('tab-panel');
                     tabPanel.remove(tab);
+                    window.onbeforeunload = undefined;
                 }
             });
             
@@ -780,11 +779,11 @@ function initTabCloseHandler(element, chagedBool){
         var scope = element;
         M3Designer.Utils.showMessage(function(buttonId){
             if (buttonId==='yes') {
-               scope.onSave();
-               scope.fireEvent('close', scope);
+                scope.onSave();
+                scope.fireEvent('close', scope);
             }
             else if (buttonId==='no') {
-               scope.fireEvent('close', scope);
+                scope.fireEvent('close', scope);
             }
             else if (buttonId==='cancel') {
                 userTakeChoice = !userTakeChoice;
@@ -807,7 +806,8 @@ function initCodeEditorHandlers(codeEditor, path){
 
     /* Хендлер на событие закрытие таба таб панели */
     codeEditor.on('close', function(tab){
-        if (tab) { 
+        if (tab) {
+            window.onbeforeunload = undefined;
         	var tabPanel = Ext.getCmp('tab-panel');
         	tabPanel.remove(tab); 
         }
