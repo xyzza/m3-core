@@ -52,7 +52,7 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
 
             },
 
-            onSuccessCodeAssistLoad:function(response, opts) {
+            onSuccessCodeAssistLoad:function(response) {
                 var data = Ext.util.JSON.decode(response.responseText);
                 if (data.success) {
                     this.createCompletionMenu(data.props);
@@ -105,7 +105,7 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
 
     initComponent:function() {
 
-        var items = [], i =0, items, text;
+        var items = [], i =0, item, text;
         var clickFn = this.onItemClick.createDelegate(this);
 
         for (;i<this.proposals.length;i++) {
@@ -116,7 +116,7 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
             }
             else {
                 text += ')';
-            };
+            }
 
             items.push({
                 text: text,
@@ -125,18 +125,19 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
                     click : clickFn
                 }
             });
-        };
+        }
 
         this.items = items;
         M3Designer.code.CompletionMenu.superclass.initComponent.call(this);
         this.on('hide', this.onHide, this);
+        this.on('destroy', this.onDestroy, this);
 
         this.keyDownDelegate = this.keyDownHandler.createDelegate(this);
 
         Ext.EventManager.on(Ext.getBody(),'keydown',this.keyDownHandler, this);
     },
 
-    onMenuClick:function(menu, menuItem, e) {
+    onMenuClick:function(menu, menuItem) {
        this.insertCode(menuItem.data.text);
        this.destroy();
     },
@@ -147,7 +148,6 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
      * использовании свойства maxHeight меню всегда показывается с Y = 0 если оно аппендится к боди
      */
     showAt:function(xy, parentMenu) {
-
         var y = xy[1], parentEl, viewHeight;
         M3Designer.code.CompletionMenu.superclass.showAt.call(this, xy,parentMenu);
         parentEl = Ext.fly(this.el.dom.parentNode);
@@ -160,14 +160,17 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
         }
     },
 
-    onItemClick:function(item, e) {
+    onItemClick:function(item) {
         this.insertCode(item.data.text);
         this.destroy();
     },
 
     onHide:function() {
-        Ext.EventManager.un(Ext.getBody(),'keydown', this.keyDownDelegate);
-        this.editor.focus();
+        //
+    },
+
+    onDestroy:function() {
+        Ext.EventManager.un(Ext.getBody(),'keydown', this.keyDownHandler);
     },
 
     showCompletions:function() {
@@ -191,7 +194,7 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
         );
     },
 
-    keyDownHandler:function(e, el, obj) {
+    keyDownHandler:function(e) {
         var c = String.fromCharCode( e.getCharCode()).toLowerCase();
         var code;
 
@@ -202,10 +205,9 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
             code = this.token.string;
         }
 
-        Ext.EventManager.un(Ext.getBody(),'keydown', this.keyDownHandler);
         e.stopEvent();
         this.insertCode(code + c);
-        this.editor.focus();
+        this.destroy();
     }
     
 });
