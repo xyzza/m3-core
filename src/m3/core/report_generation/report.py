@@ -4,6 +4,8 @@ import os
 import sys
 import datetime
 import decimal
+from uuid import uuid4
+import tempfile
 
 from django.conf import settings
 from django.utils import importlib
@@ -399,8 +401,7 @@ def create_document(desktop, path):
         file_url = path_to_file_url(path)
         return desktop.loadComponentFromURL(file_url, "_blank", 0, (prop,))
     else:
-        return desktop.getCurrentComponent()
-             
+        return desktop.getCurrentComponent()   
              
 def save_document_as(document, path, properties):
     '''
@@ -408,8 +409,7 @@ def save_document_as(document, path, properties):
     объект com.sun.star.beans.PropertyValue
     '''           
     file_url = path_to_file_url(path)
-    document.storeToURL(file_url, properties)
-        
+    document.storeToURL(file_url, properties)        
 
 def path_to_file_url(path):
     '''
@@ -419,6 +419,33 @@ def path_to_file_url(path):
     file_url = uno.systemPathToFileUrl(abs_path)
     return file_url 
 
+def get_temporary_file_path(temporary_file_name):
+    '''
+    Возвращает путь к временному файлу
+    '''
+    temporary_path = getattr(settings, "REPORT_TEMPORARY_FILE_PATH", None)
+    if not temporary_path:
+        temporary_path = tempfile.gettempdir()
+    return os.path.join(temporary_path, temporary_file_name)
+
+def copy_document(desktop, src_file_path, dest_file_path, filter=None):
+    '''
+    Создает копию файла и возвращает объект документа созданного файла.
+    '''
+    properties = []
+    if filter:
+        filter_property = PropertyValue()
+        filter_property.Name = "FilterName"
+        filter_property.Value = filter
+        properties.append(filter_property)    
+    source_document = create_document(desktop, src_file_path)
+    try:
+        save_document_as(source_document, dest_file_path, tuple(properties))
+    finally:
+        source_document.close(True)
+    document = create_document(desktop, dest_file_path)
+    return document 
+    
 
 class DocumentReport(object):
     '''
@@ -430,8 +457,7 @@ class DocumentReport(object):
         if not template_name:
             raise ReportGeneratorException, "Не указан путь до шаблона"   
         self.desktop = OORunner.get_desktop()         
-        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
-        self.document = create_document(self.desktop, template_path)
+        self.document = self.get_template_document(template_name)
         
     def show(self, result_name, params, filter=None):    
         '''
@@ -459,8 +485,29 @@ class DocumentReport(object):
         parser.find_and_replace(self.document, VARIABLE_REGEX, '')
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
         save_document_as(self.document, result_path, tuple(properties))
+        # Удаление временного файла
+        self.clean_temporary_file()
         
-        
+    def get_template_document(self, template_name):
+        '''
+        Создает копию файла шаблона в директории для временных файлов и возвращает 
+        объект открытого документа шаблона.
+        '''
+        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
+        temporary_file_name = 'report_template_%s.odt' %str(uuid4())[:8]
+        self.temporary_file_path = get_temporary_file_path(temporary_file_name)
+        document = copy_document(self.desktop, template_path, self.temporary_file_path)
+        return document 
+    
+    def clean_temporary_file(self):
+        '''
+        Закрывает и удаляет временный файл шаблона.
+        '''
+        self.document.close(True)
+        if os.path.exists(self.document.Location):
+            os.remove(self.document.Location)
+            
+            
 class SpreadsheetReport(object): 
     '''
     Класс для представления отчета-электронной таблицы.
@@ -497,8 +544,7 @@ class SpreadsheetReport(object):
         self.defined_height_rows = []
         
         self.desktop = OORunner.get_desktop()         
-        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
-        self.document = create_document(self.desktop, template_path)
+        self.document = self.get_template_document(template_name)
         # Первый лист шаблона, в котором должны быть заданы секции
         template_sheet = self.document.getSheets().getByIndex(0)
         #Находим все секции в шаблоне
@@ -539,7 +585,8 @@ class SpreadsheetReport(object):
         if self.document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)
         save_document_as(self.document, result_path, tuple(properties))
-        
+        # Удаление временного файла
+        self.clean_temporary_file()        
         
     def find_section_position(self, vertical):
         '''
@@ -596,5 +643,24 @@ class SpreadsheetReport(object):
         '''
         assert isinstance(position_x, int)
         assert isinstance(position_y, int)
-        self.current_position = (position_x, position_y)    
+        self.current_position = (position_x, position_y)  
+        
+    def get_template_document(self, template_name):
+        '''
+        Создает копию файла шаблона в директории для временных файлов и возвращает 
+        объект открытого документа шаблона.
+        '''
+        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
+        temporary_file_name = 'report_template_%s.ods' %str(uuid4())[:8]
+        self.temporary_file_path = get_temporary_file_path(temporary_file_name)
+        document = copy_document(self.desktop, template_path, self.temporary_file_path)
+        return document 
+    
+    def clean_temporary_file(self):
+        '''
+        Закрывает и удаляет временный файл шаблона.
+        '''
+        self.document.close(True)
+        if os.path.exists(self.temporary_file_path):
+            os.remove(self.temporary_file_path)      
              
