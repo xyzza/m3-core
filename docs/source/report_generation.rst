@@ -20,6 +20,7 @@ OpenOffice должен быть запущен в качестве сервер
 -------------------
 
 Для работы генератора отчетов необходимо установить дистрибутив офисного пакета OpenOffice.org версии не ниже 3.2. 
+
 В Windows также необходимо добавить путь к файлу soffice.exe в переменную окружения PATH.
 
 Для того, чтобы сервер OpenOffice стартовал одновременно с запуском приложения, необходимо в файл manage_dev.py добавить:
@@ -32,8 +33,7 @@ OpenOffice должен быть запущен в качестве сервер
 
 
 * Функцию для запуска сервера *start_server()* 
-	Она должна располагаться перед вызовом функции *execute_manager*
-
+	Она должна располагаться перед вызовом функции *execute_manager*, после импорта модуля settings.
 
 	.. autofunction::  m3.core.report_generation.oo_admin.start_server
 	Параметр *headless_mode=True* запускает OpenOffice в режиме, в котором не происходит отображения действий над файлами на экране. 
@@ -44,20 +44,22 @@ OpenOffice должен быть запущен в качестве сервер
 
 Пример того, как может выглядеть запуск сервера в файле manage_dev.py::
 
-	# ------------- Связка с Платформой М3 ---------
-	import os,sys
-	
-	BARSOFFICE_PROJECT_PATH = os.path.dirname(__file__)
-	# связка в режиме разработки
-	sys.path.insert(0, os.path.join(BARSOFFICE_PROJECT_PATH, 'plugins/'))
-	sys.path.insert(0, os.path.join(BARSOFFICE_PROJECT_PATH, '../../../m3/src/m3/vendor/'))
-	sys.path.insert(0, os.path.join(BARSOFFICE_PROJECT_PATH, '../../../m3/src/'))
-	
+	from django.core.management import execute_manager
+	try:
+    	    import settings # Assumed to be in the same directory.
+	except ImportError:
+    	    import sys
+    	    sys.stderr.write("Error: Can't find the file 'settings.py' in the directory containing %r. It appears you've customized things.\nYou'll have to run django-admin.py, passing it your settings module.\n(If the file settings.py does indeed exist, it's causing an ImportError somehow.)\n" % __file__)
+    	    sys.exit(1)
+
 	#Запуск сервера OpenOffice, используется в генераторе отчетов
 	from m3.core.report_generation.oo_admin import start_server
 	start_server(headless_mode=False)
+	
+	if __name__ == "__main__":
+    	    execute_manager(settings)
 
-
+Генератор отчетов в процессе своей работы создает временные файлы. Расположение временных файлов может быть задано в settings.py в переменной REPORT_TEMPORARY_FILE_PATH. Если значение этой переменной не задано, по умолчанию файлы записываются в папку, которая возвращается функцией `tempfile.gettempdir()  <http://docs.python.org/library/tempfile.html#tempfile.gettempdir>`_. 
 
 Отчеты в виде текстовых документов
 ----------------------------------
@@ -69,9 +71,8 @@ OpenOffice должен быть запущен в качестве сервер
 .. module:: m3.core.report_generation.report
 
 .. autoclass:: DocumentReport
-   :members:
+   :members: show, clean_temporary_file
 
-Отчет может быть  последовательно сохранен в нескольких различных форматах, для этого достаточно вызвать метод show несколько раз с разным значением параметра filter. Значения параметра params при всех выводах отчета кроме первого не будет влиять на текст отчета.
 
 Возможности
 +++++++++++
@@ -155,9 +156,6 @@ OpenOffice должен быть запущен в качестве сервер
 
 .. autoclass:: SpreadsheetReport
    :members: get_section, get_section_render_position, set_section_render_position, show
-
-Отчет может быть сохранен последовательно в нескольких форматах, для этого достаточно вызвать метод show несколько раз с разным значением параметра filter. 
-Если у объекта отчета однажды уже был вызван метод show, в него не могут быть добавлены новые секции.
 
 .. autoclass:: Section
    :members: flush
