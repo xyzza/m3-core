@@ -733,31 +733,37 @@ function onClickNodePyFiles(node, fileAttr){
 }
 
 /**
- * Иницализация хендлеров codeEditor'а
- * @param codeEditor
+ * Функция слушает событие изменение контента елемента.
+ * @param element
+ * @param chagedBool
  */
-function initCodeEditorHandlers(codeEditor, path){
-
-    initWorkSpaceCloseHandler(codeEditor);
-
-    /* Хендлер на событие закрытие таба таб панели */
-    codeEditor.on('close', function(tab){
-        if (tab) { 
-        	var tabPanel = Ext.getCmp('tab-panel');
-        	tabPanel.remove(tab); 
+function initWorkSpaceCloseHandler(element, chagedBool){
+    //Хендлер на событие перед закрытием
+    element.on({
+        // Хендлер на событие перед закрытием
+        'contentchanged':{
+            fn: function(){
+                // Дефолтное значение или аргумент
+                var chagedBool = chagedBool === undefined ? element.contentChanged : chagedBool;
+                if (chagedBool === undefined){
+                    chagedBool = true;
+                }
+                if (chagedBool){
+                    window.onbeforeunload = function(){
+                        return 'Вы закрываете вкладку, в которой имеются изменения.'
+                    }
+                }else{
+                    //Очищаем хендлер срабатывающий перед закрытием вкладки окна браузера
+                    window.onbeforeunload = undefined;
+                }
+            }
+        },
+        // Хендлер на событие перед закрытием
+        'beforeclose':{
+            fn: function(){
+                return initTabCloseHandler(element);
+            }
         }
-    });
-
-    /* Хендлер на событие сохранения */
-    codeEditor.on('save', function(){
-        /*Запрос на сохранение изменений */
-        M3Designer.Requests.fileSaveContent(codeEditor, path);
-    });
-
-    /* Хендлер на событие обновление */
-    codeEditor.on('update', function(){
-        //Запрос на обновление
-        M3Designer.Requests.fileUpdateContent(codeEditor, path);
     });
 }
 
@@ -792,36 +798,31 @@ function initTabCloseHandler(element, chagedBool){
 }
 
 /**
- * Функция слушает событие изменение контента елемента.
- * @param element
- * @param chagedBool
+ * Иницализация хендлеров codeEditor'а
+ * @param codeEditor
  */
-function initWorkSpaceCloseHandler(element, chagedBool){
-    //Хендлер на событие перед закрытием
-    element.on({
-        // Хендлер на событие перед закрытием
-        'contentchaged':{
-            fn: function(){
-                // Дефолтное значение или аргумент
-                var chagedBool = chagedBool === undefined ? element.contentChanged : chagedBool;
-                if (chagedBool === undefined){
-                    chagedBool = true;
-                }
-                if (chagedBool){
-                    window.onbeforeunload = function(){
-                        return 'Вы закрываете вкладку, в которой имеются изменения.'
-                    }
-                }else{
-                    //Очищаем хендлер срабатывающий перед закрытием вкладки окна браузера
-                    window.onbeforeunload = undefined;
-                }
-            }
-        },
-        // Хендлер на событие перед закрытием
-        'beforeclose':{
-            fn: function(){
-                return initTabCloseHandler(element);
-            }
+function initCodeEditorHandlers(codeEditor, path){
+
+    initWorkSpaceCloseHandler(codeEditor);
+
+    /* Хендлер на событие закрытие таба таб панели */
+    codeEditor.on('close', function(tab){
+        if (tab) { 
+        	var tabPanel = Ext.getCmp('tab-panel');
+        	tabPanel.remove(tab); 
         }
     });
+
+    /* Хендлер на событие сохранения */
+    codeEditor.on('save', function(){
+        /*Запрос на сохранение изменений */
+        M3Designer.Requests.fileSaveContent(codeEditor, path);
+    });
+
+    /* Хендлер на событие обновление */
+    codeEditor.on('update', function(){
+        //Запрос на обновление
+        M3Designer.Requests.fileUpdateContent(codeEditor, path);
+    });
 }
+
