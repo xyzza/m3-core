@@ -97,6 +97,8 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
     
     editor:undefined,
 
+    keyDownDelegate:undefined,
+
     showSeparator:false,
 
     maxHeight:300,
@@ -105,7 +107,6 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
 
         var items = [], i =0, items, text;
         var clickFn = this.onItemClick.createDelegate(this);
-
 
         for (;i<this.proposals.length;i++) {
             item = this.proposals[i];
@@ -129,6 +130,10 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
         this.items = items;
         M3Designer.code.CompletionMenu.superclass.initComponent.call(this);
         this.on('hide', this.onHide, this);
+
+        this.keyDownDelegate = this.keyDownHandler.createDelegate(this);
+
+        Ext.EventManager.on(Ext.getBody(),'keydown',this.keyDownHandler, this);
     },
 
     onMenuClick:function(menu, menuItem, e) {
@@ -161,6 +166,7 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
     },
 
     onHide:function() {
+        Ext.EventManager.un(Ext.getBody(),'keydown', this.keyDownDelegate);
         this.editor.focus();
     },
 
@@ -183,5 +189,23 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
                     ch: this.token.end
                 }
         );
+    },
+
+    keyDownHandler:function(e, el, obj) {
+        var c = String.fromCharCode( e.getCharCode()).toLowerCase();
+        var code;
+
+        if (this.dot && this.token.string.length >= 1) {
+            code = this.token.string.substr(1, this.token.string.length);
+        }
+        else {
+            code = this.token.string;
+        }
+
+        Ext.EventManager.un(Ext.getBody(),'keydown', this.keyDownHandler);
+        e.stopEvent();
+        this.insertCode(code + c);
+        this.editor.focus();
     }
+    
 });
