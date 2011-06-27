@@ -118,12 +118,14 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
 
         storage.on('save', function (jsonObj) {
             if (jsonObj.success) {
+                application.changedState(false);
+                this.onChange();
                 M3Designer.Utils.successMessage();
             } else {
                 M3Designer.Utils.failureMessage({ "message": 'Ошибка при сохранении файла\n'+jsonObj.json });
             }
 
-        });
+        },this);
 
         storage.on('preview', function (jsonObj) {
             if (jsonObj.success) {
