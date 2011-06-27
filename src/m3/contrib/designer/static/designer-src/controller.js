@@ -10,7 +10,7 @@ Ext.namespace('M3Designer.controller');
  * пользовательского интерфейса.
  * @param {Object} конфиг объект
  */
-M3Designer.controller.AppController = Ext.extend(Object, {
+M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
     /**
      * @constructor
      * @cfg {Ext.tree.TreePanel} tree
@@ -21,6 +21,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
      * Дерево используемое в качестве панели инструментов
      */
     constructor: function (config) {
+        this.addEvents('contentchanged');
         Ext.apply(this, config);
     },
 
@@ -28,6 +29,8 @@ M3Designer.controller.AppController = Ext.extend(Object, {
     _lastHighlightedId: undefined,
     //id последнего быстроредактируемого компонента
     _lastQuickPropertyId: undefined,
+    //Изменено ли приложение ?
+    _changed: false,
 
     /**
      * Фактическая инициализация дизайнера
@@ -141,6 +144,15 @@ M3Designer.controller.AppController = Ext.extend(Object, {
     initToolbox: function (toolbox) {
         var root = toolbox.getRootNode();
         root.appendChild(M3Designer.Types.getToolboxData());
+    },
+
+    /**
+     *  Функция возвращает состояние,
+     *  если в аргументах пришло состояние оно будет присвоено переменной
+     */
+    changedState: function(stateBool){
+        this._changed = stateBool !== undefined ?   stateBool: this._changed
+        return this._changed
     },
 
     /**
@@ -438,13 +450,16 @@ M3Designer.controller.AppController = Ext.extend(Object, {
         this.refreshView();
         var domElementId = M3Designer.Utils.parseDomId(model.id);
 
-        // Можно просто брать id элемента из модели ( domElementId )
+        //Можно просто брать id элемента из модели ( domElementId )
         var highlightedId = domElementId ==  this._lastHighlightedId ?
                                 this._lastHighlightedId : domElementId;
-
-        /*Возвращаем Highlight элементу*/
+        //Возвращаем Highlight элементу
         this.selectTreeNodeByElementId(highlightedId);
-        /*Выделяем элемент в дереве*/
+        //Выделяем элемент в дереве
         this.highlightElement(highlightedId, true);
+        this.changedState(true);
+        //Зажигаем событие
+        this.fireEvent('contentchanged');
+
     }
 });

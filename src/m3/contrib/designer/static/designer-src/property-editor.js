@@ -256,7 +256,7 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
         this.on('beforeshow', function(){
             this.fadeInWindow();
         });
-        /*Закрытие окна по нажатию (ENTER, ESC)*/
+        //Закрытие окна по нажатию (ENTER, ESC)
         this.on('afterrender', function(){
             this.keyDownHandierClosingWindow()
         });
@@ -269,7 +269,7 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
         var collapsedHeight = this.getHeight();
         this.collapse(false);
         this.anchorTo(document.getElementById(domElementId), "tr-tr");
-        /*Если окно будет выходить за видимые границы, переместим его в видимую область*/
+        //Если окно будет выходить за видимые границы, переместим его в видимую область
         var panelSizeHeight = Ext.getCmp('tab-panel').getActiveTab().getSize().height;
         if (this.y + collapsedHeight > panelSizeHeight) {
             this.on('expand', function(){
@@ -328,15 +328,21 @@ M3Designer.edit.QuickPropertyWindow = Ext.extend(Ext.Window, {
 
         this.fireEvent('save', eventObj);
     },
-    /*Плавное скрытие окна [не используется]*/
+    /**
+     * Плавное скрытие окна [не используется]
+     * */
     fadeOutCloseWindow: function(){
         this.getEl().fadeOut({ endOpacity: 0, easing: 'easeOut', duration: 0.35, remove: true});
     },
-    /*Плавный показ окна*/
+    /**
+     * Плавный показ окна
+    **/
     fadeInWindow: function(){
         this.getEl().fadeIn({ endOpacity: 0, easing: 'easeIn', duration: 0.35});
     },
-    /*Обработчик нажатия на клавиш [ESC, ENTER], закрывает окно*/
+    /**
+     * Обработчик нажатия на клавиш [ESC, ENTER], закрывает окно
+     */
     keyDownHandierClosingWindow: function(){
         Ext.EventManager.on(this.getEl(), 'keydown', function(e){
             if (e.getKey() == e.ENTER || e.getKey() == e.ESC) {

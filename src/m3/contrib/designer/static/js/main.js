@@ -1,15 +1,18 @@
-/* Переменные манипуляций с Файловой Сиситемы */
+// Переменные манипуляций с Файловой Сиситемы
 var typeFile = 'file';
 var typeDir = 'dir';
 var actionDelete = 'delete';
 var actionRename = 'rename';
 var actionNew = 'new';
 
-/* Переменные манипуляций в дереве структуры проекта */
+// Переменные манипуляций в дереве структуры проекта
 var designerFormFiles = ["forms.py","ui.py"];
 var codeViewFileTypes = ["py", "css", "js", "conf", "html", "sql"];
 
-/*добавляем функцию has в array, функция возвращает true если хотябы один элемент встречается в массиве*/
+/**
+ * добавляем функцию has в array,
+ * функция возвращает true если хотябы один элемент встречается в массиве
+ */
 Array.prototype.has = function() {
     var	i = arguments.length;
     while(i){
@@ -20,20 +23,24 @@ Array.prototype.has = function() {
     }
     return false;
 };
+
 /*==========================Перехват нажатий клавиш===========================*/
 //Инициируем перехват нажатия ctrl+s для автоматического сохранения на сервер
 Ext.fly(document).on('keydown',function(e,t,o){
-
    if (e.ctrlKey && (e.keyCode == 83)) {// кнопка S
    	   var tabPanel = Ext.getCmp('tab-panel');
        var tab = tabPanel.getActiveTab();
-       if (tab && tab.saveOnServer && (typeof(tab.saveOnServer) == 'function')) {
-           tab.saveOnServer();
+       if (tab && tab.onSave && (typeof(tab.onSave) == 'function')) {
+           tab.onSave();
            e.stopEvent();
        }
    }
 });
-/*Хендлер на keydown (del) в дереве структуры проекта, вызывает удаление объекта*/
+
+/**
+ * Хендлер на keydown (del) в дереве структуры проекта, вызывает удаление объекта
+ * @param {string} id
+ */
 function initAdditionalTreeEvents(id){
     Ext.fly(id).on('keydown',function(e,t,o){
         if(e.keyCode == 46){ //del
@@ -64,6 +71,7 @@ function projectViewTreeManipulation(){
     }
     return selectedNode
 }
+
 /**
  * Адаптер
  * @param fn - Функция
@@ -356,15 +364,15 @@ function createTreeView(rootNodeName){
 					else if (node.attributes['class_name']){
 						menu = contextMenuClass;
 					}
-                    /* Файл дизайна форм */
+                    //Файл дизайна форм
                     else if (designerFormFiles.has(node.text)) {
                         menu = contextMenuUiClass;
                     }
-                    /* Файл */
+                    //Файл
                     else if(node.leaf) {
                         menu = contextFileMenu;
                     }
-                    /* Директория */
+                    //Директория
                     else if(!node.leaf) {
                         menu = contextDirMenu;
                     }
@@ -385,7 +393,7 @@ function createTreeView(rootNodeName){
 		        	onClickNode(node);
 	        	}
 
-                /*Все типы фалов которые не входят в codeViewFileTypes */
+                //Все типы фалов которые не входят в codeViewFileTypes
                 else if(codeViewFileTypes.has(fileType[0])){
                     var fileAttr = {};
                     fileAttr['path'] = node.attributes.path;
@@ -433,6 +441,7 @@ function createTreeView(rootNodeName){
     tree.on('afterrender', function(){initAdditionalTreeEvents(tree.id)});
 	return accordion;
 }
+
 /**
  * Возвращает расширение файла
  * @param fileName
@@ -441,6 +450,7 @@ function getFileExpansion(fileName){
     var splitedFileName = fileName.split('.');
     return splitedFileName[splitedFileName.length-1];
 }
+
 /**
  * Возвращает класс иконки по типу расширения файла
  * @param fileName
@@ -456,6 +466,7 @@ function caseOfIncons(fileName){
     };
     return fileExpansionIconsObj[fileExpansion] ? fileExpansionIconsObj[fileExpansion] : fileExpansionIconsObj["default"];
 }
+
 /**
  * Возвращает тип файла по расширения файла
  * @param fileName
@@ -472,7 +483,12 @@ function fileTypeByExpansion(fileName){
     };
     return fileTypesObj[fileExpansion] ? fileTypesObj[fileExpansion] : fileTypesObj["default"];
 }
-/* Редактировать файл */
+
+/**
+ * Функция редактирования файла
+ * @param node 
+ * @param e
+ */
 function editFile(node, e){
     var fileType = node.text.split('.').slice(-1)[0];
     if(fileType == 'py' || fileType == 'conf'){
@@ -575,7 +591,7 @@ function renameTarget(node, fileBool){
 
 
 /**
- *
+ * Сообщение
  * @param obj - Объект ответа сервера
  * @param params - Параметры запроса к серверу, для послед. запроса
  * @param fn - Функция которая передается в рекурсивно вызывающийся запрос
@@ -609,6 +625,10 @@ function wrongFileTypeMessage(fileType){
     });
 }
 
+/**
+ * Функция обрабатывает клик по ноде
+ * @param node - нода по которой был совершон клик
+ */
 function onClickNode(node) {
 	var attr =  node.attributes;
 	var tabPanel = Ext.getCmp('tab-panel');
@@ -625,7 +645,7 @@ function onClickNode(node) {
 		tabPanel.setActiveTab(tab);
 		return;
 	}
-    
+
     var workspace = new DesignerWorkspace({
     	id: id,
         dataUrl:'/designer/data',
@@ -638,6 +658,9 @@ function onClickNode(node) {
     });
 
  	workspace.loadModel();
+
+    initWorkSpaceCloseHandler(workspace.application);
+
 	workspace.on('beforeload', function(jsonObj){
         var result = false;
 		if (jsonObj['not_autogenerated']) {
@@ -660,6 +683,23 @@ function onClickNode(node) {
 			tabPanel.add(this);
 		    tabPanel.activate(this);
 
+            this.application.on('contentchanged', function(){
+                this.onChange();
+            }, this);
+            
+            this.on('beforeclose', function(){
+                window.onbeforeunload = undefined;
+                return initTabCloseHandler(this, this.application.changedState())
+            });
+            
+            //Хендлер на событие закрытие таба таб панели
+            this.on('close', function(tab){
+                if (tab) {
+                    var tabPanel = Ext.getCmp('tab-panel');
+                    tabPanel.remove(tab);
+                }
+            });
+            
 		    // Прослушивает событие "tabchange"
 		    tabPanel.on('tabchange', function(panel, newTab){
                 this.application.removeHighlight();
@@ -678,6 +718,8 @@ function onClickNode(node) {
 
 /**
  * Вымогает у сервера некий файл
+ * @param node
+ * @param fileAttr
  */
 function onClickNodePyFiles(node, fileAttr){
     var tabPanel = Ext.getCmp('tab-panel');
@@ -686,10 +728,10 @@ function onClickNodePyFiles(node, fileAttr){
 		tabPanel.setActiveTab(tab);
 		return;
 	}
-    
-    /*Запрос содержимого файла по path на сервере*/
+    //Запрос содержимого файла по path на сервере
     M3Designer.Requests.fileGetContent(fileAttr, tabPanel);
 }
+
 /**
  * Иницализация хендлеров codeEditor'а
  * @param codeEditor
@@ -699,7 +741,7 @@ function initCodeEditorHandlers(codeEditor, path){
     initWorkSpaceCloseHandler(codeEditor);
 
     /* Хендлер на событие закрытие таба таб панели */
-    codeEditor.on('close_tab', function(tab){
+    codeEditor.on('close', function(tab){
         if (tab) { 
         	var tabPanel = Ext.getCmp('tab-panel');
         	tabPanel.remove(tab); 
@@ -714,60 +756,71 @@ function initCodeEditorHandlers(codeEditor, path){
 
     /* Хендлер на событие обновление */
     codeEditor.on('update', function(){
-        /*Запрос на обновление */
+        //Запрос на обновление
         M3Designer.Requests.fileUpdateContent(codeEditor, path);
     });
 }
+
 /**
- * Функция вешает на элемент события закрытия.
+ * Хендлер на закрытие вкладки
  * @param element
+ * @param chagedBool
  */
-function initWorkSpaceCloseHandler(element){
-    /* async close tab && message */
+function initTabCloseHandler(element, chagedBool){
+    var chagedBool = element.contentChanged || chagedBool;
+    //async close tab && message
     var userTakeChoice = true;
-
-    /*Хендлер срабатывающий перед закрытием вкладки окна браузера*/
-    function onBeForeUnLoad(clearBool){
-        var clearBool = clearBool === undefined ? true: clearBool; // Дефолтное значение или аргумент
-        if (clearBool){
-            window.onbeforeunload = function(){
-               return 'Вы закрываете вкладку, в которой имеются изменения.'
+    if (chagedBool){
+        var scope = element;
+        M3Designer.Utils.showMessage(function(buttonId){
+            if (buttonId==='yes') {
+               scope.onSave();
+               scope.fireEvent('close', scope);
             }
-        }else{
-            /*Очищаем хендлер срабатывающий перед закрытием вкладки окна браузера*/
-            window.onbeforeunload = undefined;
-        }
+            else if (buttonId==='no') {
+               scope.fireEvent('close', scope);
+            }
+            else if (buttonId==='cancel') {
+                userTakeChoice = !userTakeChoice;
+            }
+            userTakeChoice = !userTakeChoice;
+        });
+    }else {
+        userTakeChoice = !userTakeChoice;
     }
+    return !userTakeChoice;
+}
 
+/**
+ * Функция слушает событие изменение контента елемента.
+ * @param element
+ * @param chagedBool
+ */
+function initWorkSpaceCloseHandler(element, chagedBool){
+    //Хендлер на событие перед закрытием
     element.on({
-        /* Хендлер на событие перед закрытием */
-        'contentChaged':{
+        // Хендлер на событие перед закрытием
+        'contentchaged':{
             fn: function(){
-                onBeForeUnLoad(element.contentChanged);
+                // Дефолтное значение или аргумент
+                var chagedBool = chagedBool === undefined ? element.contentChanged : chagedBool;
+                if (chagedBool === undefined){
+                    chagedBool = true;
+                }
+                if (chagedBool){
+                    window.onbeforeunload = function(){
+                        return 'Вы закрываете вкладку, в которой имеются изменения.'
+                    }
+                }else{
+                    //Очищаем хендлер срабатывающий перед закрытием вкладки окна браузера
+                    window.onbeforeunload = undefined;
+                }
             }
         },
-        /* Хендлер на событие перед закрытием */
+        // Хендлер на событие перед закрытием
         'beforeclose':{
             fn: function(){
-                if (element.contentChanged){
-                    var scope = this;
-                    this.showMessage(function(buttonId){
-                        if (buttonId=='yes') {
-                           scope.onSave();
-                           scope.fireEvent('close_tab', scope);
-                        }
-                        else if (buttonId=='no') {
-                           scope.fireEvent('close_tab', scope);
-                        }
-                        else if (buttonId=='cancel') {
-                            userTakeChoice = !userTakeChoice;
-                        }
-                        userTakeChoice = !userTakeChoice;
-                    });
-                }else {
-                    userTakeChoice = !userTakeChoice;
-                }
-                return !userTakeChoice;
+                return initTabCloseHandler(element);
             }
         }
     });

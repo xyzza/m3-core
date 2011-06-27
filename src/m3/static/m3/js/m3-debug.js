@@ -6249,10 +6249,7 @@ Ext.reg('Ext.ux.maximgb.tg.PagingToolbar', Ext.ux.maximgb.tg.PagingToolbar);
 
 Ext.m3.Window = Ext.extend(Ext.Window, {
 	constructor: function(baseConfig, params){
-//		console.log('Ext.m3.Window >>');
-//		console.log(baseConfig);
-//		console.log(params);
-		
+
 		// Ссылка на родительское окно
 		this.parentWindow = null;
 		
@@ -6295,8 +6292,6 @@ Ext.m3.Window = Ext.extend(Ext.Window, {
  */
 Ext.m3.AdvancedTreeGrid = Ext.extend(Ext.ux.maximgb.tg.GridPanel, {
 	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
 
 		// Проверки значений
 		assert(params.storeParams.url, "Некорректо задано url. \
@@ -7356,8 +7351,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
  */
 Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
 
 		// Базовый конфиг для тригеров
 		this.baseTriggers = [
@@ -7517,7 +7510,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         oCmp.setValue(sCode);
         if(this.oldSourceCode == sCode) this.setTitleClass(true);
         else this.setTitleClass();
-        this.fireEvent('contentChaged', this);
+        this.fireEvent('contentchanged', this);
     },
 
     /** @private*/
@@ -7855,7 +7848,6 @@ Ext.ux.grid.Exporter = Ext.extend(Ext.util.Observable,{
         }));
     },
     exportData:function(){
-        console.log(this.grid.store);
         columns = []
         Ext.each(this.grid.colModel.config,function(column,index){
             columns.push({

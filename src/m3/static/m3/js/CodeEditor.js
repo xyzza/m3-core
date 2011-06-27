@@ -75,7 +75,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         oCmp.setValue(sCode);
         if(this.oldSourceCode == sCode) this.setTitleClass(true);
         else this.setTitleClass();
-        this.fireEvent('contentChaged', this);
+        this.fireEvent('contentchanged', this);
     },
 
     /** @private*/

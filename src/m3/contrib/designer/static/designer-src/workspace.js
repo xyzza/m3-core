@@ -143,7 +143,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
         };
     },
-    saveOnServer: function () {
+    onSave: function () {
         this.storage.saveModel(this.application.getTransferObject());
     },
     loadModel: function () {
@@ -163,6 +163,16 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             this.application.reloadModel(jsonObj.data)
         } else {
             M3Designer.Utils.failureMessage({ "message": jsonObj.json });
+        }
+    },
+    onChange: function () {
+        var newTitle = '*' + this.orginalTitle;
+        if ((this.title !== newTitle) && this.application.changedState()) {
+            this.orginalTitle = this.title;
+            this.setTitle('*' + this.orginalTitle);
+        } else if (!this.application.changedState()) {
+            window.onbeforeunload = undefined;
+            this.setTitle(this.orginalTitle || this.title);
         }
     }
 });

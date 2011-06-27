@@ -16,7 +16,11 @@ Ext.namespace('M3Designer');
  * Объект для совершения запросов к серверу
  */
 M3Designer.Requests = Ext.apply({}, {
-    /*Запрос на сохранение */
+    /**
+     * Запрос на сохранение
+     * @param codeEditor
+     * @param path
+     */
     fileSaveContent:function(codeEditor, path){
         Ext.Ajax.request({
             url:'/designer/file-content/save',
@@ -37,8 +41,23 @@ M3Designer.Requests = Ext.apply({}, {
             failure: uiAjaxFailMessage
         })
     },
-    /*Запрос на обновление*/
+    /**
+     * Запрос на обновление
+     * @param codeEditor
+     * @param path
+     */
     fileUpdateContent:function(codeEditor, path){
+        /**
+         * Небольшая приватная функция, изменяет содержимое коде удитора,
+         * изменяет состояние изменения, меняет заголово вызовом функции onChange
+         * @param codeEditor
+         */
+        function setCodeEditorChanges(codeEditor, obj){
+            codeEditor.codeMirrorEditor.setValue(obj.data.content);
+            codeEditor.contentChanged = false;
+            codeEditor.onChange();
+        }
+
         Ext.Ajax.request({
             url:'/designer/file-content',
             method: 'GET',
@@ -49,24 +68,20 @@ M3Designer.Requests = Ext.apply({}, {
                 var obj = Ext.util.JSON.decode(response.responseText);
                 if (codeEditor.contentChanged){
                     var msg = 'Хотели бы вы сохранить ваши изменения?';
-                    codeEditor.showMessage(function(buttonId){
+                    M3Designer.Utils.showMessage(function(buttonId){
                         if (buttonId=='yes') {
                            codeEditor.onSave(function(){
                                codeEditor.codeMirrorEditor.setValue(obj.data.content);
                                codeEditor.contentChanged = false;
                            });
                         }
-                        else if (buttonId=='no') {
-                            codeEditor.codeMirrorEditor.setValue(obj.data.content);
-                            codeEditor.contentChanged = false;
+                        else if (buttonId==='no') {
+                            setCodeEditorChanges(codeEditor, obj);
                         }
                     }, msg);
-                    codeEditor.onChange();
                 }
                 else {
-                    codeEditor.codeMirrorEditor.setValue(obj.data.content);
-                    codeEditor.contentChanged = false;
-                    codeEditor.onChange();
+                    setCodeEditorChanges(codeEditor, obj);
                 }
                 if (obj.success && !codeEditor.contentChanged){
                     M3Designer.Utils.successMessage({
@@ -80,7 +95,11 @@ M3Designer.Requests = Ext.apply({}, {
             failure: uiAjaxFailMessage
         });
     },
-    /*Запрос содержимого файла по path на сервере*/
+    /**
+     * Запрос содержимого файла по path на сервере
+     * @param fileAttr {object} - содержит в себе fileName, path
+     * @param tabPanel
+     */
     fileGetContent:function(fileAttr, tabPanel){
         Ext.Ajax.request({
             url:'/designer/file-content',
@@ -107,14 +126,13 @@ M3Designer.Requests = Ext.apply({}, {
             failure: uiAjaxFailMessage
         });
     },
-    /*Запрос содержимого файла по path на сервере*/
-            /**
-             *
-             * @param path относительный пусть
-             * @param fileName имя файла
-             * @param tabPanel
-             * @param crateNew bool флаг на создание нового файла
-             */
+    /**
+     * Запрос содержимого файла templateGlobals по path на сервере
+     * @param path относительный пусть
+     * @param fileName имя файла
+     * @param tabPanel
+     * @param crateNew bool флаг на создание нового файла
+     */
     fileGTGetContent:function(path, fileName, tabPanel, crateNew){
         var scope = this,
             crateNew = crateNew || false;
@@ -167,7 +185,10 @@ M3Designer.Requests = Ext.apply({}, {
             failure: uiAjaxFailMessage
         });
     },
-    /* Генерирует функцию автогенерации для класса */
+    /**
+     * Генерирует функцию автогенерации для класса
+     * @param node
+     */
     generateInitialize:function(node){
         Ext.Ajax.request({
             url:'create-autogen-function'
@@ -229,7 +250,13 @@ M3Designer.Requests = Ext.apply({}, {
             failure: uiAjaxFailMessage
         });
     },
-    /*Запрос на создание новой контейнерной функции */
+    /**
+     * Запрос на создание новой контейнерной функции
+     * @param funcName {} имя функции
+     * @param funcType {} тип функции
+     * @param node {object}
+     * @param win {} окно
+     */
     createFunction:function(funcName, funcType, node, win){
         Ext.Ajax.request({
             url: '/create-function'
@@ -265,7 +292,11 @@ M3Designer.Requests = Ext.apply({}, {
             ,failure: uiAjaxFailMessage
         });
     },
-    /*Запрос на cоздание нового класса в файле*/
+    /**
+     * Запрос на cоздание нового класса в файле
+     * @param node {object}
+     * @param text {sting} имя нового класса
+     */
     createClass: function(node, text){
         var path = node.attributes['path'];
         Ext.Ajax.request({
