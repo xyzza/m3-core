@@ -12,9 +12,11 @@ from m3.ui.actions.dicts.simple import BaseDictionaryModelActions
 
 import ui
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
-    get_aggr_functions, save_query, get_query_params
+    get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
+    get_pack
 
 from models import Query, Report, TypeField
+from m3.contrib.m3_query_builder.models import ReportParams
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -27,6 +29,8 @@ class QueryBuilderActionsPack(BaseDictionaryModelActions):
     title = u'Запросы'
     edit_window = ui.QueryBuilderWindow
     list_columns = [('name', u'Наименование')]
+    
+    verbose_name = u'Конструктор запросов'
 
     def __init__(self):
         super(QueryBuilderActionsPack, self).__init__()        
@@ -220,20 +224,23 @@ class SaveQueryAction(actions.Action):
 #===============================================================================
 class ReportBuilderActionsPack(BaseDictionaryModelActions):
     '''
-    Экшенпак работы с конструктором запросов
+    Экшенпак работы с конструктором отчетов
     '''
     url = '/rb-pack'    
     shortname = 'm3-report-builder'    
     model = Report
     title = u'Отчеты'
     list_columns = [('name', u'Наименование')]
+    
+    verbose_name = u'Конструктор отчетов'
 
     def __init__(self):
         super(ReportBuilderActionsPack, self).__init__()        
         self.actions.extend([ReportBuilderWindowAction(),
                              ReportQueryParamsAction(), 
                              ReportQuerySaveAction(),
-                             ReportEditParamsWindowAction()])
+                             ReportEditParamsWindowAction(),
+                             GetPacksProjectAction()])
     
 class ReportBuilderWindowAction(actions.Action):
     '''
@@ -246,11 +253,43 @@ class ReportBuilderWindowAction(actions.Action):
         return [ACD(name='id', type=int, required=False, verbose_name=u'Идентификатор запроса')]
 
     def run(self, request, context):
+        
+        id = getattr(context, 'id', None)
+        
         params = {'query_params_url': ReportQueryParamsAction.absolute_url(),
-                  'edit_window_params_url': ReportEditParamsWindowAction.absolute_url(),
+                  'edit_window_params_url': ReportEditParamsWindowAction.absolute_url(),                 
                   }
         window = ui.ReportBuilderWindow(params=params)
         window.dsf_query.pack = QueryBuilderActionsPack
+        if id:
+            report = Report.objects.get(id=id)
+            
+            window.form.from_object(report)
+            
+            data = []
+            for param in ReportParams.objects.filter(report=id):
+
+                value, value_name = None, None                
+                if param.type == TypeField.DICTIONARY_FIELD:
+                    value = param.value                    
+                    pack = get_pack(value)
+                    
+                    if pack.verbose_name:                        
+                        assert isinstance(pack.verbose_name, unicode), 'Pack "%s" verbose name must be unicode ' % pack.__class__.__name__
+                    
+                    value_name = pack.verbose_name or pack.__class__.__name__
+
+                       
+                data.append([param.id,
+                             param.name, 
+                             param.type,
+                             TypeField.VALUES[int(param.type)],
+                             value or '',
+                             value_name or ''
+                             ])
+
+            window.astore_params.data = data
+        
         return actions.ExtUIScriptResult(data=window)
 
 class ReportQueryParamsAction(actions.Action):
@@ -277,10 +316,19 @@ class ReportQuerySaveAction(actions.Action):
     def context_declaration(self):
         return [ACD(name='id', type=int, required=False, verbose_name=u'Идентификатор отчета'),
                 ACD(name='name', type=str, required=True, verbose_name=u'Наименование отчета'),
-                ACD(name='query_id', type=int, required=True, verbose_name=u'Идентификатор запроса'),]
+                ACD(name='query_id', type=int, required=True, verbose_name=u'Идентификатор запроса'),
+                ACD(name='grid', type=object, required=True, verbose_name=u'Данные таблицы'),]
 
     def run(self, request, context):
         id = getattr(context, 'id', None)
+        
+        try:
+            save_report(id, context.name, context.query_id, context.grid)
+        except ValidationError:
+            logger.exception()
+            return actions.JsonResult(json.dumps({'success': False,
+                        'message': u'Не удалось сохранить запрос'}))
+            
         return actions.JsonResult(json.dumps({'success':True}))
     
     
@@ -294,11 +342,33 @@ class ReportEditParamsWindowAction(actions.Action):
     def context_declaration(self):
         return [ACD(name='id', type=str, required=True, verbose_name=u'Идентификатор параметра'),]
 
-    def run(self, request, context):                
+    def run(self, request, context):
+        params = {
+                  'get_packs_url': GetPacksProjectAction.absolute_url(),
+                  }
+                                
         win = ui.ReportParamsWindow(types=TypeField.get_type_choices(), 
-                                    default_type_value=TypeField.STRING_FIELD)
-        
-        print TypeField.DICTIONARY_FIELD
+                                    default_type_value=TypeField.STRING_FIELD,
+                                    params=params)
+                
         win.dict_value = TypeField.DICTIONARY_FIELD
                
         return actions.ExtUIScriptResult(win)
+    
+class GetPacksProjectAction(actions.Action):
+    '''
+    Возвращает все паки в проекте
+    '''
+    url = '/get-packs-project'
+    shortname = 'm3-report-builder-get-packs-project'
+    
+    def context_declaration(self):
+        return [ACD(name='type', type=int, required=True, 
+                    verbose_name=u'Идентификатор типа параметра'),]
+
+    def run(self, request, context):
+        data = None
+        if context.type == TypeField.DICTIONARY_FIELD:           
+            data = get_packs()
+               
+        return actions.JsonResult(json.dumps({'success': True, 'data': data}))

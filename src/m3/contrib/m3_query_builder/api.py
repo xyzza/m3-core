@@ -7,13 +7,15 @@ Created on 06.06.2011
 '''
 import json
 
+from django.db import transaction
+
 from m3.ui.ext.containers.trees import ExtTreeNode
 from m3.contrib.m3_query_builder import EntityCache
 from m3.helpers.icons import Icons
+from m3.ui.actions import ControllerCache
 
 from entity import BaseEntity, Field, Entity, Relation, Grouping, Where
-
-from models import Query
+from models import Query, Report, ReportParams
 
 def get_entities():
     '''
@@ -190,3 +192,50 @@ def get_query_params(query_id):
                     'multiple_choice': condition['condition'] == Where.IN})
         
     return res
+
+
+def get_packs():
+    '''
+    Возвращает все паки в проекте
+    '''
+    res = []
+    controllers = ControllerCache.get_controllers()
+    for cont in controllers:
+        res.extend([ [pack.__class__.__name__, 
+                      pack.verbose_name or pack.__class__.__name__] \
+                    for pack in cont.get_packs()])
+    return sorted(res)
+
+def get_pack(pack_name):
+    '''
+    Возвращает пак по имени
+    '''
+    return ControllerCache.find_pack(pack_name)
+
+@transaction.commit_on_success()
+def save_report(id, name, query_id, grid_data):
+    '''
+    Сохраняет отчет
+    '''
+    
+    if id:
+        q = Report.objects.get(id=id)
+        q.name = name
+        q.query_id = query_id
+    else:
+        q = Report(name=name, query_id=query_id)
+        
+    q.save()
+    
+    ReportParams.objects.filter(report=q).delete()
+    for item in grid_data:
+        report_params = ReportParams()
+        report_params.report_id = q.id
+        report_params.name = item['name']
+        report_params.type = item['type']
+        
+        if item.get('type_value'):
+            report_params.value = item['type_value']
+                
+        report_params.save()
+    

@@ -207,8 +207,7 @@ function refreshEntities(){
  */
 function onAddEntity(){
 	var node = treeEntities.getSelectionModel().getSelectedNode();	
-	if (node) {
-		console.log(node);
+	if (node) {		
 		addEntity(node);		
 	}
 }

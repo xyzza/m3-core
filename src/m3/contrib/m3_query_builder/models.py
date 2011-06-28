@@ -16,15 +16,16 @@ class TypeField(object):
     STRING_FIELD = 1
     NUMBER_FIELD = 2
     DICTIONARY_FIELD =3
-            
+    
+    VALUES = {
+        STRING_FIELD: u'Текстовое поле',
+        NUMBER_FIELD: u'Числовое поле',
+        DICTIONARY_FIELD: u'Выбор из справочника'
+    }
 
     @staticmethod
     def get_type_choices():
-        return (
-            (TypeField.STRING_FIELD, u'Текстовое поле'),
-            (TypeField.NUMBER_FIELD, u'Числовое поле'),
-            (TypeField.DICTIONARY_FIELD, u'Выбор из справочника'),    
-        )
+        return [ (k, v) for k, v in  TypeField.VALUES.items()]
         
 
 class Query(models.Model):
@@ -76,7 +77,7 @@ class ReportParams(models.Model):
     name = models.CharField(max_length=100, db_index=True)
     
     # Тип параметра
-    type = models.CharField(max_length=1, choices=TypeField.get_type_choices())
+    type = models.SmallIntegerField(choices=TypeField.get_type_choices())
     
     # Значение параметра
     value = models.CharField(max_length=300)
