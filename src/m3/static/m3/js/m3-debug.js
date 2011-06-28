@@ -7459,7 +7459,7 @@ Ext.apply(Ext.m3.CodeEditorConfig, {
 Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
     sourceCode: '/*Default code*/ ',
     readOnly: false,
-
+    theme:'default',
     constructor: function(baseConfig){
         Ext.m3.CodeEditor.superclass.constructor.call(this, baseConfig);
     },
@@ -7520,7 +7520,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         var editorConfig = Ext.applyIf(this.codeMirrorEditor || {}, {
             height: "100%",
             width: "100%",
-            theme: "default",
+            theme: this.theme,
             lineNumbers: true,
             indentUnit: 4,
             tabMode: "shift",

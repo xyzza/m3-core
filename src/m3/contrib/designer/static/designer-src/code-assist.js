@@ -195,6 +195,26 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
     },
 
     keyDownHandler:function(e) {
+        if (e.PAGE_DOWN === e.getCharCode()) {
+            if (!this.tryActivate( this.items.indexOf(this.activeItem) +5, 1  )) {
+                this.tryActivate(0,1);
+            }
+        }
+        else if(e.PAGE_UP === e.getCharCode()) {
+            if(!this.tryActivate(this.items.indexOf(this.activeItem)-5, -1)){
+                this.tryActivate(this.items.length-1, -1);
+            }
+        }
+        else if (e.ESC === e.getCharCode()) {
+            e.stopEvent();
+            this.destroy();
+            this.editor.focus();
+        }
+
+        if (e.isSpecialKey()) {
+            e.stopEvent();
+            return;
+        }
         var c = String.fromCharCode( e.getCharCode()).toLowerCase();
         var code;
 

@@ -48,6 +48,8 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
     border: true,
     buttonAlign: 'left',
     initComponent: function () {
+        this.theme = Ext.util.Cookies.get('m3editor-theme') || 'default';
+
         Ext.applyIf(this, {
             closable: true,
             buttons: [
@@ -67,7 +69,7 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
                         id: 0,
                         fields: ['value', 'text']
                     }),
-                    value: 'default',
+                    value: this.theme,
                     valueField: 'value',
                     displayField: 'text',
                     triggerAction: 'all',
@@ -76,7 +78,10 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
                         'select':{
                                 scope: this,
                                 fn: function(combo, record, index){
-                                    this.codeMirrorEditor.setOption("theme", record.data.text)
+                                    this.codeMirrorEditor.setOption("theme", record.data.text);
+                                    this.theme = record.data.text;
+                                    Ext.util.Cookies.set('m3editor-theme',record.data.text,
+                                            new Date(9999,9,9,9,9,9,9) );
                                 }
                         }
                     }
