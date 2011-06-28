@@ -559,7 +559,7 @@ class ActionController(object):
         """
         ControllerCache.populate()
 
-        if isinstance(type, str):
+        if isinstance(type, basestring):
             return self._packs_by_name.get(type)
         elif issubclass(type, ActionPack):
             return self._packs_by_type.get(type)
@@ -821,6 +821,12 @@ class ActionController(object):
                 if stack[0] not in top_packs:
                     top_packs.append(stack[0])
         return top_packs
+
+    def get_packs(self):
+        '''
+        Возвращение всех паков в контроллере
+        '''
+        return self._packs_by_name.values()
 
 class ControllerCache(object):
     '''
