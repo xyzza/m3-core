@@ -407,7 +407,8 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                         sort_fields.append(sort_field)
             else:
                 #нет заданной сортировки, отсортируем по этому полю
-                sort_fields.append(field)
+                if field:
+                    sort_fields.append(field)
             if sort_fields:
                 query = query.order_by(*sort_fields)
     
