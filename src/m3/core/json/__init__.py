@@ -34,10 +34,16 @@ class M3JSONEncoder(json.JSONEncoder):
         # происходят запросы к БД. Причем на практике есть случаи, когда эти запросы 
         # вызвают эксепешны(например, если изменен id'шник объекта)
         related_objs_attrs = []
+        manager_names = []
         if isinstance(obj, dj_models.Model):
             related_objs = obj._meta.get_all_related_objects()
             related_objs_attrs = [ro.var_name for ro in related_objs]
-
+            # Также соберем все атрибуты-менеджеры (их может быть несколько).
+            # Сюда попадет "objects", который исключаем из обработки ниже.
+            for attr in obj.__class__.__dict__:
+                if isinstance(getattr(obj.__class__, attr), dj_models.manager.Manager):
+                    manager_names.append(attr)
+            
         # если передали специальный список атрибутов, то пройдемся по ним 
         # атрибуты вложенных объектов разделены точкой
         # будут созданы вложенные объекты для кодирования
@@ -74,7 +80,9 @@ class M3JSONEncoder(json.JSONEncoder):
             # Во всех экземплярах моделей Django есть атрибут "objects", т.к. он является статик-атрибутом модели.
             # Но заботливые разработчики джанги позаботились о нас и выкидывают спицифичную ошибку 
             # "Manager isn't accessible via %s instances" при обращении из экземпляра. Поэтому "objects" нужно игнорировать.
-            if (not attr.startswith('_') and attr != 'objects' and attr != 'tree'
+            # Да и вообще все менеджеры надо игнорировать - их имена мы собираем выше.
+            # Также проигнорируем приватные и протектнутные атрибуты (начинаются с "_").
+            if (not attr.startswith('_') and attr not in manager_names and attr != 'tree'
                 and attr not in related_objs_attrs):
                 try:
                     if hasattr(getattr(obj, attr), 'json_encode'):

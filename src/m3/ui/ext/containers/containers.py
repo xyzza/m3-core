@@ -77,11 +77,15 @@ class ExtToolBar(BaseExtContainer):
             return "{xtype: 'tbspacer', width: %d}" % self.width
 
     class TextItem(object):
-        def __init__(self, text=''):
+        def __init__(self, text='', handler=None):
             self.text = text
+            self.handler = handler
 
         def render(self):
-            return '"%s"' % self.text
+            if self.handler:
+                return '{text:"%s", handler: %s}' % (self.text, self.handler)
+            else:
+                return '"%s"' % self.text
 
     def __init__(self, *args, **kwargs):
         super(ExtToolBar, self).__init__(*args, **kwargs)
@@ -313,3 +317,21 @@ class ExtButtonGroup(BaseExtContainer):
     def buttons(self):
         return self._items
 
+class ExtStatusBar(ExtToolBar):
+    '''
+    Рассширенный тулбар с иконкой, текстом статуса и другими причиндалами.
+    Примеры использования:
+    http://dev.sencha.com/deploy/ext-3.4.0/examples/statusbar/statusbar-demo.html
+    http://dev.sencha.com/deploy/ext-3.4.0/examples/statusbar/statusbar-advanced.html
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtStatusBar, self).__init__(*args, **kwargs)
+        self._ext_name = 'Ext.ux.StatusBar'
+        self.icon_cls = None
+        self.text = None
+        self.init_component(*args, **kwargs)
+        
+    def render_base_config(self):
+        super(ExtStatusBar, self).render_base_config()
+        self._put_config_value('iconCls', self.icon_cls)
+        self._put_config_value('text', self.text)
