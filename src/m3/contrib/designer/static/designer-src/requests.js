@@ -178,7 +178,7 @@ M3Designer.Requests = Ext.apply({}, {
                     tabPanel.activate(codeEditor);
 
                     initCodeEditorHandlers(codeEditor, obj.data.path);
-                    
+
                 } else {
                     if(obj.error === 'notExists'){
                         Ext.Msg.show({
@@ -189,7 +189,7 @@ M3Designer.Requests = Ext.apply({}, {
                             fn: function(btn, text){
                                 if (btn == 'yes'){
                                     scope.fileTGGetContent(path, fileName, tabPanel, true)
-                                };
+                                }
                             }
                         });
                     }

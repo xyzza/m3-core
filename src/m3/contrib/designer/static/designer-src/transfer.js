@@ -88,7 +88,7 @@ M3Designer.ModelTransfer = Ext.apply({},{
             node.id = model.attributes.properties.id;
             if (node.type == "addressField"){
                 M3Designer.Utils.setKladrOriginalValues(node);
-            };
+            }
             this.doToolbarSerializeWorkaround(node);
             if (model.hasChildNodes()) {
                 for (var i = 0; i < model.childNodes.length; i++){
@@ -116,8 +116,8 @@ M3Designer.ModelTransfer = Ext.apply({},{
             for (p in node){
                 if (node[p] === "" || node[p] === "undefined"){
                     delete node[p];
-                };
-            };
+                }
+            }
             return node;
         };
 
@@ -185,7 +185,7 @@ M3Designer.ModelTransfer = Ext.apply({},{
             for (var i = 0; i < jsonObj.items.length; i++) {
                 if (jsonObj.items[i].type === "addressField"){
                     M3Designer.Utils.setKladrTemporaryValues(jsonObj.items[i]);
-                };
+                }
                 root.appendChild(callBack.call(this,jsonObj.items[i]))
             }
         }
@@ -204,7 +204,6 @@ M3Designer.ModelTransfer = Ext.apply({},{
                 }
             }
         }
-        console.log(result)
         return result;
     }
 });

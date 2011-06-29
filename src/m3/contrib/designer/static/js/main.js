@@ -399,7 +399,9 @@ function createTreeView(rootNodeName){
                     fileAttr['fileName'] = node.attributes.text;
                     onClickNodePyFiles(node, fileAttr);
                 }
-                else if(node.leaf) wrongFileTypeMessage(fileType);
+                else if(node.leaf) {
+                    wrongFileTypeMessage(fileType);
+                }
 	        }
 	    }
 	});

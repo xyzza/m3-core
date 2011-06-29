@@ -143,7 +143,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             var accordion = Ext.getCmp('accordion-view');
             if (accordion) accordion.fireEvent('clear');
             application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
-        };
+        }
     },
     onSave: function () {
         this.storage.saveModel(this.application.getTransferObject());

@@ -30,9 +30,10 @@ M3Designer.model.ComponentModel = Ext.extend(Ext.data.Node, {
     isPropertyInChildEqualTo: function (propertyName, equalTo) {
         var res = false;
         for (var i=0; i<this.childNodes.length;i++){
-            if (this.childNodes[i].attributes.properties[propertyName] == equalTo)
+            if (this.childNodes[i].attributes.properties[propertyName] == equalTo){
                 res = true;
-        };
+            }
+        }
         return res;
     },
     /**

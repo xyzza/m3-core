@@ -188,7 +188,9 @@ M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
             var flyEl = Ext.fly(this._lastHighlightedId);
             var win = Ext.getCmp(this._lastQuickPropertyId);
 
-            if (win && !stayAliveQuickProperty) win.close();
+            if (win && !stayAliveQuickProperty){
+                win.close();
+            }
 
             if (flyEl) {
                 flyEl.removeClass('selectedElement');
