@@ -10,6 +10,10 @@ import tempfile
 from django.conf import settings
 from django.utils import importlib
 
+
+#FIXME: грязный хак для WIN и OSX
+can_use_uno = False
+
 # Подготовка к запуску pyuno под Windows
 # Если после этого не заработает, значит все плохо!
 # http://stackoverflow.com/questions/4270962/using-pyuno-with-my-existing-pythonn-installation
@@ -18,19 +22,37 @@ if sys.platform.startswith('win'):
     for path in os.environ['PATH'].split(';'):
         office_path = os.path.normpath(path)
         if os.path.exists( os.path.join(office_path, 'soffice.exe') ):
+            # Добавляем переменные окружения необходимые для UNO
+            sys.path.append( os.path.join(office_path, '..\\Basis\\program') )
+            os.environ['URE_BOOTSTRAP'] = 'vnd.sun.star.pathname:' + os.path.join(office_path, 'fundamental.ini')
+            os.environ['UNO_PATH'] = office_path
+            os.environ['PATH'] = os.environ['PATH'] + ';' + os.path.join(office_path, '..\\URE\\bin')
+            can_use_uno = True
             break
+elif sys.platform.startswith('darwin'):
+    office_path = '/Applications/OpenOffice.app/Contents'
+    if not os.path.exists( os.path.join(office_path, 'MacOS/soffice') ):
+        office_path = '/Applications/LibreOffice.app/Contents'
+        if os.path.exists( os.path.join(office_path, 'MacOS/soffice') ):
+            can_use_uno = True
     else:
-        raise Exception(u'Unable to find OpenOffice soffice.exe executable in PATH variable')
+        can_use_uno = True
+    if can_use_uno:
+        sys.path.append( os.path.join(office_path, 'basis-link/program') )
+        os.environ['URE_BOOTSTRAP'] = 'vnd.sun.star.pathname:' + os.path.join(office_path, 'MacOS/fundamentalrc')
+        os.environ['UNO_PATH'] = os.path.join(office_path, 'program')
+        os.environ['PATH'] = os.environ['PATH'] + ':' + os.path.join(office_path, 'basis-link/ure-link/lib')
+    can_use_uno = False  #FIXME: у меня мак 64-битный, а офиса нет 64-битного! только 32-битный. В итоге библиотека pyuno.so не грузится!
+else:
+    can_use_uno = True
 
-    # Добавляем переменные окружения необходимые для UNO
-    sys.path.append( os.path.join(office_path, '..\\Basis\\program') )
-    os.environ['URE_BOOTSTRAP'] = 'vnd.sun.star.pathname:' + os.path.join(office_path, 'fundamental.ini')
-    os.environ['UNO_PATH'] = office_path
-    os.environ['PATH'] = os.environ['PATH'] + ';' + os.path.join(office_path, '..\\URE\\bin')
 
-import uno
-from com.sun.star.beans import PropertyValue
-from com.sun.star.connection import NoConnectException
+if can_use_uno:
+    import uno
+    from com.sun.star.beans import PropertyValue
+    from com.sun.star.connection import NoConnectException
+#else:
+    #FIXME: убрал, чтобы хоть как-то работать!  raise Exception(u'Unable to find OpenOffice (LibreOffice) in PATH variable')
 
 
 def __get_template_path():
