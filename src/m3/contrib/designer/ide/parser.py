@@ -600,9 +600,11 @@ class Parser(object):
         
         # Включаем и свою строку и пробельную строку выше
         end_l = f_lines[end_line-2:] if end_line else []
-        
+
+        f_line = open(self.path, 'rb').readline()
+
         #файл пишется как бинарный "wb" и при сохранении не добавляется лишний знак перенова (CR)
-        with open(self.path, 'wb') as f:
+        with open(self.path, 'w' if '\r' in f_line else 'wb') as f:
             f.write(''.join(f_lines[:begin_line-1]) + source_code + ''.join(end_l))
 
     def _get_mapping(self):

@@ -204,8 +204,10 @@ def designer_file_content_save(request):
     error =''
 
     try:
-        with codecs.open( path, "w", "utf-8" ) as f:
-            f.write(content)
+        f_line = open(path, 'rb').readline()
+        
+        with codecs.open( path, 'w' if '\r' in f_line else 'wb') as f:
+            f.write(content.encode('utf-8'))
             success = True
     except IOError as (errno, strerror):
         error =  "I/O error({0}): {1}".format(errno, strerror)
@@ -288,7 +290,7 @@ def designer_structure_manipulation(request):
 
             #Создаем новый файл
             elif type == type_file:
-                with codecs.open( current_path, "w", "utf-8" ) as f:
+                with codecs.open( current_path, "wb", "utf-8" ) as f:
                     f.write("#coding: utf-8")
                 success = True
                 data = {'path':current_path}

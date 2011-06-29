@@ -223,16 +223,21 @@ def generate_func(path, class_name, func_node):
     else:
         raise ValueError('Класс "%s" неопределен' % str(class_name) )
 
+
+    to_source = codegen.to_source(func_node, indentation=1)
+
+    f_line = open(path, 'rb').readline()
+
     # Запись
-    with open(path, 'w') as f:
+    with open(path, 'w' if '\r' in f_line else 'wb') as f:
             
         if line_end:
-            source_lines = source.split('\n')        
+            source_lines = source.split('\n')
             f.write('\n'.join(source_lines[:line_end-1]) +
-                    '\n' +  codegen.to_source(func_node, indentation=1) + '\n' +
+                    '\n' +  to_source + '\n' +
                     '\n'.join(source_lines[line_end-2:]) )
         else:            
-            f.write(source + '\n\n' +  codegen.to_source(func_node, indentation=1))
+            f.write(source + '\n\n' +  to_source)
 
 def create_generation_func(path, class_name):
     '''
