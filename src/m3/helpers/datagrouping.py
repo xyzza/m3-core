@@ -278,10 +278,12 @@ class GroupingRecordProvider(object):
                     v = getattr(total_row, k)
                 ws.write(total[0] + 2, idx, v, header_style)
 
-        base_name = str(uuid.uuid4())[0:16]
-        xls_file_abs = os.path.join(settings.MEDIA_ROOT, base_name + '.xls')
+        base_name = str(uuid.uuid4())[0:16] + '.xls'
+
+        xls_file_abs = os.path.join(settings.MEDIA_ROOT, base_name)
         w.save(xls_file_abs)
-        url = '%s%s.xls' % (settings.MEDIA_URL, base_name)
+        join = lambda pieces:u'/'.join(s.strip('/') for s in pieces)
+        url = join([settings.MEDIA_URL, base_name])
         return url
 
 
