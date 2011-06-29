@@ -14,13 +14,15 @@ class TypeField(object):
     '''
     
     STRING_FIELD = 1
-    NUMBER_FIELD = 2
+    NUMBER_FIELD = 2    
     DICTIONARY_FIELD =3
+    DATE_FIELD = 4
     
     VALUES = {
         STRING_FIELD: u'Текстовое поле',
         NUMBER_FIELD: u'Числовое поле',
-        DICTIONARY_FIELD: u'Выбор из справочника'
+        DICTIONARY_FIELD: u'Выбор из справочника',
+        DATE_FIELD: u'Поле даты'
     }
 
     @staticmethod

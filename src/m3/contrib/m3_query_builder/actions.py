@@ -17,6 +17,8 @@ from api import get_entities, get_entity_items, build_entity, get_conditions, \
 
 from models import Query, Report, TypeField
 from m3.contrib.m3_query_builder.models import ReportParams
+from m3.ui.ext.controls.buttons import ExtButton
+from m3.ui.ext.containers.containers import ExtToolBar
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -241,6 +243,13 @@ class ReportBuilderActionsPack(BaseDictionaryModelActions):
                              ReportQuerySaveAction(),
                              ReportEditParamsWindowAction(),
                              GetPacksProjectAction()])
+        
+    def get_list_window(self, win):
+        win.template_globals = 'rb-report-list.js'              
+        win.buttons.insert(0, ExtButton(text=u'Показать форму отчета',
+                                        handler='openReportForm'
+                                        ))
+        return win
     
 class ReportBuilderWindowAction(actions.Action):
     '''
