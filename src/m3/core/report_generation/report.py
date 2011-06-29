@@ -47,6 +47,11 @@ VARIABLE_REGEX  = '#[:alpha:]+((_)*[:digit:]*[:alpha:]*)*#'
 
 TEMPORARY_SHEET_NAME = 'template_zw'
 
+OPENOFFICE_SERVER_PORT = getattr(settings, "OPENOFFICE_SERVER_PORT", None)
+if not OPENOFFICE_SERVER_PORT:
+    OPENOFFICE_SERVER_PORT = 8010
+
+
 class ReportGeneratorException(Exception):
     pass
 
@@ -58,7 +63,7 @@ class OORunner(object):
     Cоединяется с сервером OpenOffice
     '''
     # Порт, на котором будет запущен сервер
-    PORT = 8010
+    PORT = OPENOFFICE_SERVER_PORT
     
     CONTEXT = None
     

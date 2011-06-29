@@ -8,6 +8,8 @@ def start_server(port=8010, headless_mode=True):
     '''
     Запускает сервер OpenOffice.
     ''' 
+    if not port:
+        port = 8010
     command = 'soffice -accept="socket,host=localhost,port=%d;urp;\
                StarOffice.Service" -norestore -nofirstwizard -nologo' % port            
     args = shlex.split(command)
