@@ -1,11 +1,34 @@
 #coding:utf-8
 
-import uno
 import os
+import sys
 import datetime
 import decimal
+from uuid import uuid4
+import tempfile
+
 from django.conf import settings
 from django.utils import importlib
+
+# Подготовка к запуску pyuno под Windows
+# Если после этого не заработает, значит все плохо!
+# http://stackoverflow.com/questions/4270962/using-pyuno-with-my-existing-pythonn-installation
+if sys.platform.startswith('win'):
+    # Ищем исполняемый файл OpenOffice в PATH
+    for path in os.environ['PATH'].split(';'):
+        office_path = os.path.normpath(path)
+        if os.path.exists( os.path.join(office_path, 'soffice.exe') ):
+            break
+    else:
+        raise Exception(u'Unable to find OpenOffice soffice.exe executable in PATH variable')
+
+    # Добавляем переменные окружения необходимые для UNO
+    sys.path.append( os.path.join(office_path, '..\\Basis\\program') )
+    os.environ['URE_BOOTSTRAP'] = 'vnd.sun.star.pathname:' + os.path.join(office_path, 'fundamental.ini')
+    os.environ['UNO_PATH'] = office_path
+    os.environ['PATH'] = os.environ['PATH'] + ';' + os.path.join(office_path, '..\\URE\\bin')
+
+import uno
 from com.sun.star.beans import PropertyValue
 from com.sun.star.connection import NoConnectException
 
@@ -172,7 +195,9 @@ class OOParser(object):
 
 class Section(object):
     '''
-    Класс, описывающий секции в шаблоне Excel
+    Класс, объекты которого представляют собой секцию в шаблоне отчета. 
+    Секции получаются c помощью метода get_section объекта SpreadsheetReport. 
+    Секции существуют только в контексте объекта отчета SpreadSheetReport.
     '''
     
     def __init__(self, name=None, left_cell_addr=None, right_cell_addr=None, 
@@ -242,7 +267,13 @@ class Section(object):
             
     def flush(self, params, vertical=True):
         '''
-        Выводит секцию в отчет
+        Производит подстановку значений переменных в секции. 
+        Выводит секцию в заданном направлении. 
+        Первая секция выводится начиная с левого верхнего угла листа (с позиции (0,0)). 
+        Расположение выводимых секций определяется следующим образом. 
+        При выводе секции горизонтально секция выводится справа от последней 
+        выведенной секции. При выводе секции вертикально секция выводится начиная 
+        с левого края листа, ниже последней выведенной секции.
         '''
         section_width = abs(self.left_cell_addr.Column - self.right_cell_addr.Column)+1
         section_height = abs(self.left_cell_addr.Row - self.right_cell_addr.Row)+1
@@ -261,8 +292,8 @@ class Section(object):
         section_range = dest_sheet.getCellRangeByPosition(x,y,x+section_width-1,y+section_height-1)
         parser = OOParser()
         for key, value in params.items():
-            if not isinstance(key, str):
-                raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым"
+            if not isinstance(key, basestring):
+                raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым: %s" % key
             value = parser.convert_value(value)
             parser.find_and_replace(section_range, u'#'+key+u'#', value)    
         #Если не все переменные в шаблоне были заменены, стираем оставшиеся
@@ -370,8 +401,7 @@ def create_document(desktop, path):
         file_url = path_to_file_url(path)
         return desktop.loadComponentFromURL(file_url, "_blank", 0, (prop,))
     else:
-        return desktop.getCurrentComponent()
-             
+        return desktop.getCurrentComponent()   
              
 def save_document_as(document, path, properties):
     '''
@@ -379,8 +409,7 @@ def save_document_as(document, path, properties):
     объект com.sun.star.beans.PropertyValue
     '''           
     file_url = path_to_file_url(path)
-    document.storeToURL(file_url, properties)
-        
+    document.storeToURL(file_url, properties)        
 
 def path_to_file_url(path):
     '''
@@ -390,30 +419,52 @@ def path_to_file_url(path):
     file_url = uno.systemPathToFileUrl(abs_path)
     return file_url 
 
+def get_temporary_file_path(temporary_file_name):
+    '''
+    Возвращает путь к временному файлу
+    '''
+    temporary_path = getattr(settings, "REPORT_TEMPORARY_FILE_PATH", None)
+    if not temporary_path:
+        temporary_path = tempfile.gettempdir()
+    return os.path.join(temporary_path, temporary_file_name)
+
+def copy_document(desktop, src_file_path, dest_file_path, filter=None):
+    '''
+    Создает копию файла и возвращает объект документа созданного файла.
+    '''
+    properties = []
+    if filter:
+        filter_property = PropertyValue()
+        filter_property.Name = "FilterName"
+        filter_property.Value = filter
+        properties.append(filter_property)    
+    source_document = create_document(desktop, src_file_path)
+    try:
+        save_document_as(source_document, dest_file_path, tuple(properties))
+    finally:
+        source_document.close(True)
+    document = create_document(desktop, dest_file_path)
+    return document 
+    
 
 class DocumentReport(object):
     '''
-    Класс для создания отчетов-текстовых документов.
+    Класс для представления отчета-текстового документа.
+    При инициализации объекта происходит соединение с сервером OpenOffice и 
+    открывается файл шаблона, заданный в параметре template_name.
     '''
     def __init__(self, template_name):
         if not template_name:
             raise ReportGeneratorException, "Не указан путь до шаблона"   
         self.desktop = OORunner.get_desktop()         
-        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
-        self.document = create_document(self.desktop, template_path)
+        self.document = self.get_template_document(template_name)
         
     def show(self, result_name, params, filter=None):    
         '''
-        Подставляет в документе шаблона на место строк-ключей словаря params 
-        значения, соответствующие ключам. 
-        
-        Допустимые популярные значения фильтра (по умолчанию используется .odt): 
-        "writer_pdf_Export" - pdf
-        "MS Word 97" - doc
-        "Rich Text Format" - rtf
-        "HTML" - html
-        "Text" - txt
-        "writer8" - odt
+        Производит подстановку значений переменных в шаблоне. 
+        Соответствие имен переменных и значений задается в словаре params. 
+        Сохраняет отчет в файл, указанный в result_name. 
+        Параметр filter задает формат результирующего файла
         '''
         assert isinstance(params, dict) 
         if not result_name:
@@ -434,11 +485,35 @@ class DocumentReport(object):
         parser.find_and_replace(self.document, VARIABLE_REGEX, '')
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
         save_document_as(self.document, result_path, tuple(properties))
+        # Удаление временного файла
+        self.clean_temporary_file()
         
-        
+    def get_template_document(self, template_name):
+        '''
+        Создает копию файла шаблона в директории для временных файлов и возвращает 
+        объект открытого документа шаблона.
+        '''
+        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
+        temporary_file_name = 'report_template_%s.odt' %str(uuid4())[:8]
+        self.temporary_file_path = get_temporary_file_path(temporary_file_name)
+        document = copy_document(self.desktop, template_path, self.temporary_file_path)
+        return document 
+    
+    def clean_temporary_file(self):
+        '''
+        Закрывает и удаляет временный файл шаблона.
+        '''
+        self.document.close(True)
+        if os.path.exists(self.document.Location):
+            os.remove(self.document.Location)
+            
+            
 class SpreadsheetReport(object): 
     '''
-    Класс для создания отчетов-электронных таблиц.
+    Класс для представления отчета-электронной таблицы.
+    При инициализации объекта происходит соединение с сервером OpenOffice, 
+    открывается файл шаблона, заданный в переменной template_name и из шаблона 
+    извлекается информация о заданных секциях. 
     '''       
     def __init__(self, template_name):
         
@@ -457,10 +532,10 @@ class SpreadsheetReport(object):
         self.previous_height = 0
         
         #Координата ячейки, с которой выводилась последняя секция
-        self.previous_position = (0,0)
+        self.previous_position = (0, 0)
         
         #Координата ячейки, с которой будет выводиться следующая секция
-        self.current_position = (None,None)
+        self.current_position = (None, None)
         
         #Номера колонок, ширина которых уже была задана
         self.defined_width_columns = []
@@ -469,8 +544,7 @@ class SpreadsheetReport(object):
         self.defined_height_rows = []
         
         self.desktop = OORunner.get_desktop()         
-        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
-        self.document = create_document(self.desktop, template_path)
+        self.document = self.get_template_document(template_name)
         # Первый лист шаблона, в котором должны быть заданы секции
         template_sheet = self.document.getSheets().getByIndex(0)
         #Находим все секции в шаблоне
@@ -484,21 +558,20 @@ class SpreadsheetReport(object):
 
     def get_section(self, section_name):
         '''
-        Возвращает объект класса Section по значению атрибута name
+        Возвращает секцию по ее названию.
         '''  
         try:
+            if isinstance(section_name, str):
+                section_name = section_name.decode('utf-8')
             return self.sections[section_name]
         except KeyError:
-            raise ReportGeneratorException, "Секция с именем %s не найдена. Список \
+            raise ReportGeneratorException, u"Секция с именем %s не найдена. Список \
             доступных секций: %s" %(section_name, self.sections.keys())
             
     def show(self, result_name, filter=None):    
         '''        
-        Допустимые популярные значения фильтра (по умолчанию используется .ods): 
-        "writer_pdf_Export" - pdf
-        "MS Excel 97" - xls
-        "HTML (StarCalc)" - html
-        "calc8" - ods
+        Сохраняет отчет в файл, указанный в result_name. 
+        Параметр filter задает формат результирующего файла.
         '''
         if not result_name:
             raise ReportGeneratorException, "Не указан путь до файла с отчетом"
@@ -512,7 +585,8 @@ class SpreadsheetReport(object):
         if self.document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)
         save_document_as(self.document, result_path, tuple(properties))
-        
+        # Удаление временного файла
+        self.clean_temporary_file()        
         
     def find_section_position(self, vertical):
         '''
@@ -554,7 +628,8 @@ class SpreadsheetReport(object):
          
     def get_section_render_position(self, vertical=True):
         '''
-        Возвращает позицию ячейки на листе отчета, с которой будет выводиться секция
+        Возвращает кортеж, пару координат (x,y) ячейки, начиная с которой  
+        будет выводиться следующая секция.
         '''
         if self.current_position[0] is None or self.current_position[1] is None:
             return self.find_section_position(vertical)
@@ -563,9 +638,29 @@ class SpreadsheetReport(object):
        
     def set_section_render_position(self, position_x, position_y):
         '''
-        Устанавливает позицию ячейки на листе отчета, с которой будет выводиться секция
+        Устанавливает координаты ячейки электронной таблицы, с которой будет 
+        выведена следующая секция. 
         '''
         assert isinstance(position_x, int)
         assert isinstance(position_y, int)
-        self.current_position = (position_x, position_y)    
+        self.current_position = (position_x, position_y)  
+        
+    def get_template_document(self, template_name):
+        '''
+        Создает копию файла шаблона в директории для временных файлов и возвращает 
+        объект открытого документа шаблона.
+        '''
+        template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
+        temporary_file_name = 'report_template_%s.ods' %str(uuid4())[:8]
+        self.temporary_file_path = get_temporary_file_path(temporary_file_name)
+        document = copy_document(self.desktop, template_path, self.temporary_file_path)
+        return document 
+    
+    def clean_temporary_file(self):
+        '''
+        Закрывает и удаляет временный файл шаблона.
+        '''
+        self.document.close(True)
+        if os.path.exists(self.temporary_file_path):
+            os.remove(self.temporary_file_path)      
              

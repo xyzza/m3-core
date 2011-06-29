@@ -8,6 +8,7 @@
 		{% if component.label_align  %} ,labelAlign: '{{ component.label_align }}' {% endif %}
 		{% if component.label_pad  %} ,labelPad: {{ component.label_pad }} {% endif %}
 		
+		{% if component.padding  %} ,padding: {{ component.padding }} {% endif %}
     	{% if component.url %} ,url: '{{ component.url }}' {% endif %}
     	{% if component.auto_scroll %} ,autoScroll: true {% endif %}
     	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}

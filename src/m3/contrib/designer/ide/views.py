@@ -361,4 +361,4 @@ def create_cont_func_view(request):
 def codeassist(request):
     data = json.loads( request.REQUEST['data'])
     props = get_code_proposals(data['code'], data['offset'])
-    return JsonResponse({'success': True, 'proposal': props})
+    return JsonResponse(props)

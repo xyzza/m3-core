@@ -141,7 +141,7 @@ Ext.ux.SelectField = Ext.extend(Ext.form.TwinTriggerField, {
         	this.reset();
 	        this.triggers[0].hide();
 	        this.hasSelect = false;
-            /*Вызываем сторонюю функцию*/
+            //Вызываем сторонюю функцию
             this.clear();
         }
     }
@@ -151,10 +151,10 @@ Ext.ux.SelectField = Ext.extend(Ext.form.TwinTriggerField, {
         	this.hasSelect = true;
 	    	this.triggers[0].show();
         }
-        /*Вызываем сторонюю функцию*/
+        //Вызываем сторонюю функцию
         this.select(value);
     }
-    /*Точки расширения*/
+    //Точки расширения
     ,clear : function(){}
     ,select: function(){}
 });
@@ -171,14 +171,12 @@ Ext.ux.templateGlobalsSelectField = Ext.extend(Ext.ux.SelectField,{
         var tabPanel = Ext.getCmp('tab-panel'),
             path = tabPanel.getActiveTab().path;
         if (!value){
-            /**
-             * создадим файл на сервере (templates/ui-js/имяфайла),
-             * если все в порядке присвоим * полю имя файла, и выведим Notification
-            */
+             // Создадим файл на сервере (templates/ui-js/имяфайла),
+             // если все в порядке присвоим * полю имя файла, и выведим Notification
             Ext.MessageBox.prompt('Создание templateGlobals', 'Введите имя файла',
                 function(btn, text){
                     if (btn == 'ok' && this.regex.test(text)){
-                        M3Designer.Requests.fileGTGetContent(path, text, tabPanel, true);
+                        M3Designer.Requests.fileTGGetContent(path, text, tabPanel, true);
                         this.setValue(text);
                     }
                     else if(text){
@@ -187,13 +185,12 @@ Ext.ux.templateGlobalsSelectField = Ext.extend(Ext.ux.SelectField,{
                 },
             this);
         }else{
-            /**
-             * Если есть имя templateGlobals файла, выполним запрос
-             * если все ок, добавим новый таб в таб панел
-             */
-            /*Запрос содержимого файла по path на сервере*/
+             // Если есть имя templateGlobals файла, выполним запрос
+             // если все ок, добавим новый таб в таб панель
+
+             //Запрос содержимого файла по path на сервере
             if (path && value){
-                M3Designer.Requests.fileGTGetContent(path, value, tabPanel);
+                M3Designer.Requests.fileTGGetContent(path, value, tabPanel);
             }
         }
     }

@@ -88,7 +88,7 @@ M3Designer.ModelTransfer = Ext.apply({},{
             node.id = model.attributes.properties.id;
             if (node.type == "addressField"){
                 M3Designer.Utils.setKladrOriginalValues(node);
-            };
+            }
             this.doToolbarSerializeWorkaround(node);
             if (model.hasChildNodes()) {
                 for (var i = 0; i < model.childNodes.length; i++){
@@ -116,8 +116,8 @@ M3Designer.ModelTransfer = Ext.apply({},{
             for (p in node){
                 if (node[p] === "" || node[p] === "undefined"){
                     delete node[p];
-                };
-            };
+                }
+            }
             return node;
         };
 
@@ -146,6 +146,7 @@ M3Designer.ModelTransfer = Ext.apply({},{
     deserialize:function(jsonObj) {
         //обходим json дерево и строт цивилизованое дерево с нодами, событьями и проч
         var root = new M3Designer.model.ComponentModel(this._cleanConfig(jsonObj));
+        root.dirty = false;
 
         //Дочерние ноды следует добавлять к руту, который принадлежит дереву
         //иначе у дочерних элементов рута не будет проинициализировано свойство
@@ -154,7 +155,8 @@ M3Designer.ModelTransfer = Ext.apply({},{
 
         var callBack = function(jsonObj) {
             var newNode = new M3Designer.model.ComponentModel(this._cleanConfig(jsonObj));
-
+            newNode.dirty = false;
+            
             for (var p in jsonObj) {
                 if (this.childPropertyObjects.isPropertyMapedType(p)) {
                     if (this.childPropertyObjects.isPropertyMapedCollection(p)) {
@@ -175,14 +177,15 @@ M3Designer.ModelTransfer = Ext.apply({},{
                     newNode.appendChild(callBack.call(this, jsonObj.items[i]));
                 }
             }
+
             return newNode;
         };
 
         if (jsonObj.items) {
             for (var i = 0; i < jsonObj.items.length; i++) {
-                if (jsonObj.items[i].type == "addressField"){
+                if (jsonObj.items[i].type === "addressField"){
                     M3Designer.Utils.setKladrTemporaryValues(jsonObj.items[i]);
-                };
+                }
                 root.appendChild(callBack.call(this,jsonObj.items[i]))
             }
         }

@@ -118,12 +118,14 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
 
         storage.on('save', function (jsonObj) {
             if (jsonObj.success) {
+                application.changedState(false);
+                this.onChange();
                 M3Designer.Utils.successMessage();
             } else {
                 M3Designer.Utils.failureMessage({ "message": 'Ошибка при сохранении файла\n'+jsonObj.json });
             }
 
-        });
+        },this);
 
         storage.on('preview', function (jsonObj) {
             if (jsonObj.success) {
@@ -141,9 +143,9 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             var accordion = Ext.getCmp('accordion-view');
             if (accordion) accordion.fireEvent('clear');
             application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
-        };
+        }
     },
-    saveOnServer: function () {
+    onSave: function () {
         this.storage.saveModel(this.application.getTransferObject());
     },
     loadModel: function () {
@@ -163,6 +165,16 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
             this.application.reloadModel(jsonObj.data)
         } else {
             M3Designer.Utils.failureMessage({ "message": jsonObj.json });
+        }
+    },
+    onChange: function () {
+        var newTitle = '*' + this.orginalTitle;
+        if ((this.title !== newTitle) && this.application.changedState()) {
+            this.orginalTitle = this.title;
+            this.setTitle('*' + this.orginalTitle);
+        } else if (!this.application.changedState()) {
+            window.onbeforeunload = undefined;
+            this.setTitle(this.orginalTitle || this.title);
         }
     }
 });

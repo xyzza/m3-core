@@ -6,8 +6,6 @@
  */
 Ext.m3.AdvancedTreeGrid = Ext.extend(Ext.ux.maximgb.tg.GridPanel, {
 	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
 
 		// Проверки значений
 		assert(params.storeParams.url, "Некорректо задано url. \

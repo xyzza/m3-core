@@ -7,7 +7,7 @@ Ext.namespace('M3Designer.code');
 
 M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
     codeAssistUrl:'designer/codeassist',
-    
+
     constructor:function(cfg) {
         Ext.apply(this, cfg);
         M3Designer.code.CodeAssistPlugin.superclass.constructor.call(this);
@@ -23,6 +23,13 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
                         this.loadProposals();
                       }
                },this);
+
+                this.on('editorfocus', function() {
+                    if (this.completionMenu) {
+                        this.completionMenu.destroy();
+                    }
+                });
+
             }),
 
             loadProposals:function() {
@@ -45,10 +52,14 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
 
             },
 
-            onSuccessCodeAssistLoad:function(response, opts) {
+            onSuccessCodeAssistLoad:function(response) {
                 var data = Ext.util.JSON.decode(response.responseText);
-                //this.createCompletionBox(data.proposal);
-                this.createCompletionMenu(data.proposal);
+                if (data.success) {
+                    this.createCompletionMenu(data.props);
+                }
+                else {
+                    Ext.Msg.alert('Ошибка синтаксиса', data.error.message);
+                }
             },
 
             onFailureCodeAssistLoad:function(response, opts) {
@@ -61,80 +72,17 @@ M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
 
             createCompletionMenu:function(completions) {
 
+                if (completions === undefined || completions.length === 0) {
+                    return;
+                }
+
                 var menu = new M3Designer.code.CompletionMenu({
                     proposals:completions,
                     editor:this.codeMirrorEditor
                 });
 
                 menu.showCompletions();
-            },
-
-            createCompletionBox:function(completions) {
-                var editor = this.codeMirrorEditor;
-
-                var complete = document.createElement("div");
-                complete.className = "completions";
-                var sel = complete.appendChild(document.createElement("select"));
-                sel.multiple = true;
-                for (var i = 0; i < completions.length; ++i) {
-                  var opt = sel.appendChild(document.createElement("option"));
-                  opt.appendChild(document.createTextNode(completions[i]));
-                }
-                sel.firstChild.selected = true;
-                sel.size = Math.min(10, completions.length);
-                var pos = editor.cursorCoords();
-                complete.style.left = pos.x + "px";
-                complete.style.top = pos.yBot + "px";
-                document.body.appendChild(complete);
-                // Hack to hide the scrollbar.
-                if (completions.length <= 10)
-                  complete.style.width = (sel.clientWidth - 1) + "px";
-
-                var done = false;
-                function close() {
-                  if (done) return;
-                  done = true;
-                  complete.parentNode.removeChild(complete);
-                }
-                function pick() {
-                  insert(sel.options[sel.selectedIndex].value);
-                  close();
-                  setTimeout(function(){editor.focus();}, 50);
-                }
-                var cur = editor.getCursor(false), token = editor.getTokenAt(cur), tprop = token;
-                function insert(str) {
-                    editor.replaceRange(str, {line: cur.line, ch: token.start}, {line: cur.line, ch: token.end});
-                }
-                function stopEvent() {
-                    if (this.preventDefault) {this.preventDefault(); this.stopPropagation();}
-                    else {this.returnValue = false; this.cancelBubble = true;}
-                  }
-                function addStop(event) {
-                    if (!event.stop) event.stop = stopEvent;
-                    return event;
-                  }
-                function connect(node, type, handler) {
-                    function wrapHandler(event) {handler(addStop(event || window.event));}
-                    if (typeof node.addEventListener == "function")
-                      node.addEventListener(type, wrapHandler, false);
-                    else
-                      node.attachEvent("on" + type, wrapHandler);
-                }
-
-                connect(sel, "blur", close);
-                connect(sel, "keydown", function(event) {
-                  var code = event.keyCode;
-                  // Enter and space
-                  if (code == 13 || code == 32) {event.stop(); pick();}
-                  // Escape
-                  else if (code == 27) {event.stop(); close(); editor.focus();}
-                  //else if (code != 38 && code != 40) {close(); editor.focus(); setTimeout(startComplete, 50);}
-                });
-                connect(sel, "dblclick", pick);
-
-                sel.focus();
-                // Opera sometimes ignores focusing a freshly created node
-                if (window.opera) setTimeout(function(){if (!done) sel.focus();}, 100);
+                this.completionMenu = menu;
             }
         });
     }
@@ -149,11 +97,16 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
     
     editor:undefined,
 
+    keyDownDelegate:undefined,
+
     showSeparator:false,
+
+    maxHeight:300,
 
     initComponent:function() {
 
-        var items = [], i =0, items, text;
+        var items = [], i =0, item, text;
+        var clickFn = this.onItemClick.createDelegate(this);
 
         for (;i<this.proposals.length;i++) {
             item = this.proposals[i];
@@ -163,35 +116,68 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
             }
             else {
                 text += ')';
-            };
+            }
 
             items.push({
                 text: text,
-                data: item
+                data: item,
+                listeners: {
+                    click : clickFn
+                }
             });
-        };
+        }
 
         this.items = items;
         M3Designer.code.CompletionMenu.superclass.initComponent.call(this);
-        this.on('click', this.onClick, this);
         this.on('hide', this.onHide, this);
+        this.on('destroy', this.onDestroy, this);
+
+        this.keyDownDelegate = this.keyDownHandler.createDelegate(this);
+
+        Ext.EventManager.on(Ext.getBody(),'keydown',this.keyDownHandler, this);
     },
 
-    onClick:function(menu, menuItem, e) {
+    onMenuClick:function(menu, menuItem) {
        this.insertCode(menuItem.data.text);
        this.destroy();
     },
 
+    /**
+     * Переопределенная функция  родительского класса - координата Y
+     * пересчитывается самостоятельно, тк в оргинальном вариант разработчиков ExtJS при
+     * использовании свойства maxHeight меню всегда показывается с Y = 0 если оно аппендится к боди
+     */
+    showAt:function(xy, parentMenu) {
+        var y = xy[1], parentEl, viewHeight;
+        M3Designer.code.CompletionMenu.superclass.showAt.call(this, xy,parentMenu);
+        parentEl = Ext.fly(this.el.dom.parentNode);
+        viewHeight = parentEl.getViewSize().height;
+        if ((y + this.el.getHeight()) > viewHeight) {
+            this.el.setXY([ xy[0], viewHeight - this.el.getHeight() - 25 ]);
+        }
+        else {
+            this.el.setXY( [xy[0], y]);    
+        }
+    },
+
+    onItemClick:function(item) {
+        this.insertCode(item.data.text);
+        this.destroy();
+    },
+
     onHide:function() {
-        //this.destroy();
-        this.editor.focus();
+        //
+    },
+
+    onDestroy:function() {
+        Ext.EventManager.un(Ext.getBody(),'keydown', this.keyDownHandler);
     },
 
     showCompletions:function() {
         var pos = this.editor.cursorCoords();
         this.editorCursor = this.editor.getCursor(false);
         this.token = this.editor.getTokenAt(this.editorCursor);
-        if (this.token.string === '.') {
+        if (this.token.string[0] === '.') {
             this.dot = true;
         }
         this.showAt([pos.x,pos.yBot]);
@@ -206,5 +192,42 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
                     ch: this.token.end
                 }
         );
+    },
+
+    keyDownHandler:function(e) {
+        if (e.PAGE_DOWN === e.getCharCode()) {
+            if (!this.tryActivate( this.items.indexOf(this.activeItem) +5, 1  )) {
+                this.tryActivate(0,1);
+            }
+        }
+        else if(e.PAGE_UP === e.getCharCode()) {
+            if(!this.tryActivate(this.items.indexOf(this.activeItem)-5, -1)){
+                this.tryActivate(this.items.length-1, -1);
+            }
+        }
+        else if (e.ESC === e.getCharCode()) {
+            e.stopEvent();
+            this.destroy();
+            this.editor.focus();
+        }
+
+        if (e.isSpecialKey()) {
+            e.stopEvent();
+            return;
+        }
+        var c = String.fromCharCode( e.getCharCode()).toLowerCase();
+        var code;
+
+        if (this.dot && this.token.string.length >= 1) {
+            code = this.token.string.substr(1, this.token.string.length);
+        }
+        else {
+            code = this.token.string;
+        }
+
+        e.stopEvent();
+        this.insertCode(code + c);
+        this.destroy();
     }
+    
 });

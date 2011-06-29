@@ -8,7 +8,6 @@
 /**
  * TODO:
  * 1. Вынести логику из запросов.
- * 2. Исправить создание класса (неправильное место добавления узла)
 */
 
 Ext.namespace('M3Designer');
@@ -16,7 +15,11 @@ Ext.namespace('M3Designer');
  * Объект для совершения запросов к серверу
  */
 M3Designer.Requests = Ext.apply({}, {
-    /*Запрос на сохранение */
+    /**
+     * Запрос на сохранение
+     * @param codeEditor
+     * @param path
+     */
     fileSaveContent:function(codeEditor, path){
         Ext.Ajax.request({
             url:'/designer/file-content/save',
@@ -37,8 +40,23 @@ M3Designer.Requests = Ext.apply({}, {
             failure: uiAjaxFailMessage
         })
     },
-    /*Запрос на обновление*/
-    fileUpdateContent:function(codeEditor, path, userTakeChoice, textArea){
+    /**
+     * Запрос на обновление
+     * @param codeEditor
+     * @param path
+     */
+    fileUpdateContent:function(codeEditor, path){
+        /**
+         * Небольшая приватная функция, изменяет содержимое коде удитора,
+         * изменяет состояние изменения, меняет заголово вызовом функции onChange
+         * @param codeEditor
+         */
+        function setCodeEditorChanges(codeEditor, obj){
+            codeEditor.codeMirrorEditor.setValue(obj.data.content);
+            codeEditor.contentChanged = false;
+            codeEditor.onChange();
+        }
+
         Ext.Ajax.request({
             url:'/designer/file-content',
             method: 'GET',
@@ -46,83 +64,75 @@ M3Designer.Requests = Ext.apply({}, {
                 path: path
             },
             success: function(response, opts){
-
                 var obj = Ext.util.JSON.decode(response.responseText);
                 if (codeEditor.contentChanged){
                     var msg = 'Хотели бы вы сохранить ваши изменения?';
-                    codeEditor.showMessage(function(buttonId){
+                    M3Designer.Utils.showMessage(function(buttonId){
                         if (buttonId=='yes') {
-                           scope.onSave(function(){
+                           codeEditor.onSave(function(){
                                codeEditor.codeMirrorEditor.setValue(obj.data.content);
                                codeEditor.contentChanged = false;
                            });
                         }
-                        else if (buttonId=='no') {
-                           codeEditor.codeMirrorEditor.setValue(obj.data.content);
-                           codeEditor.contentChanged = false;
+                        else if (buttonId==='no') {
+                            setCodeEditorChanges(codeEditor, obj);
                         }
-                        else if (buttonId=='cancel') {
-                            userTakeChoice = !userTakeChoice;
-                        }
-                        userTakeChoice = !userTakeChoice;
-                    }, textArea.id, msg);
-                    codeEditor.onChange();
+                    }, msg);
                 }
                 else {
-                    userTakeChoice = !userTakeChoice;
-                    codeEditor.codeMirrorEditor.setValue(obj.data.content);
-                    codeEditor.contentChanged = false;
-                    codeEditor.onChange();
+                    setCodeEditorChanges(codeEditor, obj);
                 }
-                if (obj.success){
-                M3Designer.Utils.successMessage({
-                            "title": "Обнавление",
-                            "message": "Файл успешно обнавлен",
-                            "icon": "icon-arrow-rotate-anticlockwise"});
+                if (obj.success && !codeEditor.contentChanged){
+                    M3Designer.Utils.successMessage({
+                                "title": "Обнавление",
+                                "message": "Файл успешно обнавлен",
+                                "icon": "icon-arrow-rotate-anticlockwise"});
                 }else if (!obj.success && obj.error){
                     M3Designer.Utils.failureMessage({ "message": 'Ошибка при обновлении файла\n'+obj.error });
                 }
-                return !userTakeChoice;
-
             },
             failure: uiAjaxFailMessage
         });
     },
-    /*Запрос содержимого файла по path на сервере*/
-    fileGetContent:function(path, fileName, tabPanel){
+    /**
+     * Запрос содержимого файла по path на сервере
+     * @param fileAttr {object} - содержит в себе fileName, path
+     * @param tabPanel
+     */
+    fileGetContent:function(fileAttr, tabPanel){
         Ext.Ajax.request({
             url:'/designer/file-content',
             method: 'GET',
             params: {
-                path: path
+                path: fileAttr.path
             }
             ,success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
-                var type = fileTypeByExpansion(fileName);
+                var type = fileTypeByExpansion(fileAttr.fileName);
 
                 var codeEditor = new M3Designer.code.ExtendedCodeEditor({
+                    id: fileAttr.path + fileAttr.fileName,
                     sourceCode : obj.data.content,
                     parser: type
                 });
 
-                codeEditor.setTitle(fileName);
+                codeEditor.setTitle(fileAttr.fileName);
                 tabPanel.add( codeEditor );
                 tabPanel.activate(codeEditor);
             
-                initCodeEditorHandlers(codeEditor, path);
+                initCodeEditorHandlers(codeEditor, fileAttr.path);
             },
             failure: uiAjaxFailMessage
         });
     },
-    /*Запрос содержимого файла по path на сервере*/
-            /**
-             *
-             * @param path относительный пусть
-             * @param fileName имя файла
-             * @param tabPanel
-             * @param crateNew bool флаг на создание нового файла
-             */
-    fileGTGetContent:function(path, fileName, tabPanel, crateNew){
+    /**
+     * Запрос содержимого файла templateGlobals по path на сервере
+     * @param path относительный пусть
+     * @param fileName имя файла
+     * @param tabPanel
+     * @param crateNew bool флаг на создание нового файла
+     */
+    fileTGGetContent:function(path, fileName, tabPanel, crateNew){
         var scope = this,
             crateNew = crateNew || false;
         Ext.Ajax.request({
@@ -136,6 +146,26 @@ M3Designer.Requests = Ext.apply({}, {
             ,success: function(response, opts){
                 var obj = Ext.util.JSON.decode(response.responseText);
                 if (obj.success) {
+
+                    if (crateNew){
+                        var node = M3Designer.Utils.projectViewTreeGetSelectedNode();
+                        if (node){
+                            var new_node = new Ext.tree.TreeNode({
+                                text: fileName
+                                ,path: obj.data['path']
+                                ,iconCls: 'icon-page-white-js'
+                                ,leaf: true
+                            });
+                            var templatesNode = node.parentNode.parentNode.findChild('text', 'templates');
+                            templatesNode.expand();
+                            templatesNode.appendChild(new_node);
+                            new_node.select();
+                        }
+                        M3Designer.Utils.successMessage({
+                            "title": "Создание файла templateGlobals",
+                            "message": "Файл "+fileName+" успешно создан в директории "+ obj.data['dir']});
+                    }
+
                     var type = fileTypeByExpansion('js');
                     var codeEditor = new M3Designer.code.ExtendedCodeEditor({
                         sourceCode : obj.data.content,
@@ -149,13 +179,8 @@ M3Designer.Requests = Ext.apply({}, {
 
                     initCodeEditorHandlers(codeEditor, obj.data.path);
 
-                    if (crateNew){
-                        M3Designer.Utils.successMessage({
-                            "title": "Создание файла templateGlobals",
-                            "message": "Файл "+fileName+" успешно создан в директории "+ obj.data['dir']});
-                    }
                 } else {
-                    if(obj.error == 'notExists'){
+                    if(obj.error === 'notExists'){
                         Ext.Msg.show({
                             title:'Файл не найден',
                             msg: 'Файл '+fileName+' не был найден в директории. Создать файл ?',
@@ -163,8 +188,8 @@ M3Designer.Requests = Ext.apply({}, {
                             icon: Ext.MessageBox.QUESTION,
                             fn: function(btn, text){
                                 if (btn == 'yes'){
-                                    scope.fileGTGetContent(path, fileName, tabPanel, true)
-                                };
+                                    scope.fileTGGetContent(path, fileName, tabPanel, true)
+                                }
                             }
                         });
                     }
@@ -174,7 +199,10 @@ M3Designer.Requests = Ext.apply({}, {
             failure: uiAjaxFailMessage
         });
     },
-    /* Генерирует функцию автогенерации для класса */
+    /**
+     * Генерирует функцию автогенерации для класса
+     * @param node
+     */
     generateInitialize:function(node){
         Ext.Ajax.request({
             url:'create-autogen-function'
@@ -236,7 +264,13 @@ M3Designer.Requests = Ext.apply({}, {
             failure: uiAjaxFailMessage
         });
     },
-    /*Запрос на создание новой контейнерной функции */
+    /**
+     * Запрос на создание новой контейнерной функции
+     * @param funcName {} имя функции
+     * @param funcType {} тип функции
+     * @param node {object}
+     * @param win {} окно
+     */
     createFunction:function(funcName, funcType, node, win){
         Ext.Ajax.request({
             url: '/create-function'
@@ -272,13 +306,17 @@ M3Designer.Requests = Ext.apply({}, {
             ,failure: uiAjaxFailMessage
         });
     },
-    /*Запрос на cоздание нового класса в файле*/
-    createClass: function(node, attr, text){
-        var attr = node.attributes;
+    /**
+     * Запрос на cоздание нового класса в файле
+     * @param node {object}
+     * @param text {sting} имя нового класса
+     */
+    createClass: function(node, text){
+        var path = node.attributes['path'];
         Ext.Ajax.request({
             url:'/create-new-class'
             ,params: {
-                path: attr['path']
+                path: path
                 ,className: text
             }
             ,success: function(response, opts){
@@ -286,23 +324,23 @@ M3Designer.Requests = Ext.apply({}, {
                 if (obj.success) {
                     var new_node = new Ext.tree.TreeNode({
                         text: text
-                        ,path: attr['path']
+                        ,path: path
                         ,class_name: text
                         ,iconCls: 'icon-class'
                         ,children:[]
                     });
 
-                    node.appendChild(new_node);
+                    node.text === "ui.py" ? node.appendChild(new_node) : node.parentNode.appendChild(new_node);
 
                     var nodes = [{
                         text: '__init__'
-                        ,path: attr['path']
+                        ,path: path
                         ,class_name: text
                         ,func_name: '__init__'
                         ,iconCls: 'icon-function'
                     },{
                         text: 'initialize'
-                        ,path: attr['path']
+                        ,path: path
                         ,class_name: text
                         ,func_name: 'initialize'
                         ,iconCls: 'icon-function'

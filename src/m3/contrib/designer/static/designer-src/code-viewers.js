@@ -48,10 +48,12 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
     border: true,
     buttonAlign: 'left',
     initComponent: function () {
+        this.theme = Ext.util.Cookies.get('m3editor-theme') || 'default';
+
         Ext.applyIf(this, {
             closable: true,
             buttons: [
-                /*Комбо бокс выбора темы оформления codeEditor'а*/
+                //Комбо бокс выбора темы оформления codeEditor'а
                 {
                     xtype: 'combo',
                     fieldLabel: 'Theme',
@@ -62,12 +64,12 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
                             [1, 'default'],
                             [2, 'neat'],
                             [3, 'night'],
-                            [4, 'elegant'],
+                            [4, 'elegant']
                         ],
                         id: 0,
                         fields: ['value', 'text']
                     }),
-                    value: 'default',
+                    value: this.theme,
                     valueField: 'value',
                     displayField: 'text',
                     triggerAction: 'all',
@@ -76,12 +78,15 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
                         'select':{
                                 scope: this,
                                 fn: function(combo, record, index){
-                                    this.codeMirrorEditor.setOption("theme", record.data.text)
+                                    this.codeMirrorEditor.setOption("theme", record.data.text);
+                                    this.theme = record.data.text;
+                                    Ext.util.Cookies.set('m3editor-theme',record.data.text,
+                                            new Date(9999,9,9,9,9,9,9) );
                                 }
                         }
                     }
                 },
-                /*Spacer отделяет комбо бокс от кнопок*/
+                //Spacer отделяет комбо бокс от кнопок
                 {
                     xtype: 'tbfill'
                 },
@@ -100,11 +105,11 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
                 })
             ]
         });
-        /*Хендлер на изменение кода*/
-        this.on('contentChaged', function () {
+        //Хендлер на изменение кода
+        this.on('contentchanged', function () {
             this.onChange();
         });
-        /*Хендлер на перехватывает keydown, если это ctrl+s то зажигается событие сохранить(save)*/
+        //Хендлер на перехватывает keydown, если это ctrl+s то зажигается событие сохранить(save)
         this.on("editorkeyevent", function(i, e){
             if (e.ctrlKey && (e.keyCode == 83) && e.type == "keydown") {
                 this.fireEvent('save');
@@ -113,20 +118,22 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
         }, this);
         M3Designer.code.ExtendedCodeEditor.superclass.initComponent.call(this, arguments);
     },
-    onClose: function () { /*Вероятно можно будет оптимизировать, т.к. дублирует поведение beforeclose у tabpanel (выше)*/
-        var textArea = this.getTextArea(); /*Если есть именения в коде, выводим сообщения [ showMessage ]*/
+    onClose: function () {
+        //Вероятно можно будет оптимизировать, т.к. дублирует поведение beforeclose у tabpanel (выше)
+        //Если есть именения в коде, выводим сообщения [ showMessage ]
+        var textArea = this.getTextArea();
         if (this.contentChanged) {
             var scope = this;
-            this.showMessage(function (buttonId) {
+            M3Designer.Utils.showMessage(function (buttonId) {
                 if (buttonId === 'yes') {
                     scope.onSave();
-                    scope.fireEvent('close_tab', scope);
+                    scope.fireEvent('close', scope);
                 } else if (buttonId === 'no') {
-                    scope.fireEvent('close_tab', scope);
+                    scope.fireEvent('close', scope);
                 }
-            }, textArea.id);
+            });
         } else {
-            this.fireEvent('close_tab', this);
+            this.fireEvent('close', this);
         }
     },
     onChange: function () {
@@ -135,6 +142,7 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
             this.orginalTitle = this.title;
             this.setTitle('*' + this.orginalTitle);
         } else if (!this.contentChanged) {
+            window.onbeforeunload = undefined;
             this.setTitle(this.orginalTitle || this.title);
         }
     },
@@ -145,19 +153,5 @@ M3Designer.code.ExtendedCodeEditor = Ext.extend(Ext.m3.CodeEditor, {
         this.fireEvent('update');
     },
 
-    plugins:[new M3Designer.code.CodeAssistPlugin()],
-
-    /**
-     * Показывает messagebox, о имеющихся изменениях
-     */
-    showMessage: function (fn, animElId, msg) {
-        Ext.Msg.show({
-            title: 'Сохранить изменения?',
-            msg: msg ? msg : 'Вы закрываете вкладку, в которой имеются изменения. Хотели бы вы сохранить ваши изменения?',
-            buttons: Ext.Msg.YESNOCANCEL,
-            fn: fn,
-            animEl: animElId,
-            icon: Ext.MessageBox.QUESTION
-        });
-    }
+    plugins:[new M3Designer.code.CodeAssistPlugin()]
 });

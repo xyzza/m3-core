@@ -10,7 +10,7 @@ Ext.namespace('M3Designer.controller');
  * пользовательского интерфейса.
  * @param {Object} конфиг объект
  */
-M3Designer.controller.AppController = Ext.extend(Object, {
+M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
     /**
      * @constructor
      * @cfg {Ext.tree.TreePanel} tree
@@ -21,6 +21,7 @@ M3Designer.controller.AppController = Ext.extend(Object, {
      * Дерево используемое в качестве панели инструментов
      */
     constructor: function (config) {
+        this.addEvents('contentchanged');
         Ext.apply(this, config);
     },
 
@@ -57,7 +58,13 @@ M3Designer.controller.AppController = Ext.extend(Object, {
         this.tree.on('dblclick', this.onComponentTreeNodeDblClick.createDelegate(this));
         this.tree.on('click', this.onComponentTreeNodeClick.createDelegate(this));
         this.tree.on('nodedragover', this.onComponentTreeNodeDragOver.createDelegate(this));
+
         this._editorManager.on('modelUpdate', this.onModelUpdate.createDelegate(this));
+
+        this._model.on('append', this.beforeRefreshView.createDelegate(this));
+        this._model.on('insert', this.beforeRefreshView.createDelegate(this));
+        this._model.on('move', this.beforeRefreshView.createDelegate(this));
+        this._model.on('remove', this.beforeRefreshView.createDelegate(this));
 
         //в тулбокс ничего перетаскивать нельзя, можно только из него
         this.toolbox.on('nodedragover', function (dragOverEvent) {
@@ -144,6 +151,21 @@ M3Designer.controller.AppController = Ext.extend(Object, {
     },
 
     /**
+     * Функция возвращает состояние,
+     * если в аргументах пришло состояние оно будет присвоено переменной
+     * @param stateBool {Boolean} setter
+     */
+    changedState: function(stateBool){
+        if (stateBool !== undefined){
+            this._model.root.dirty = stateBool;
+            if (stateBool === false){
+                this._model.cleanChanges();
+            }
+        }
+        return this._model.root.dirty
+    },
+
+    /**
      * Подствека в превью дизайнера компонента для элемента с id
      * @id id Элемента
      * @stayAliveQuickProperty bool значение, если true то QuickPropertyWindow не уничтожиться
@@ -159,14 +181,16 @@ M3Designer.controller.AppController = Ext.extend(Object, {
 
     /**
      * Убрать подстветку
-     * @stayAliveQuickProperty bool значение, если true то QuickPropertyWindow не уничтожиться
+     * @stayAliveQuickProperty {Boolean} если true то QuickPropertyWindow не уничтожиться
      */
     removeHighlight: function (stayAliveQuickProperty) {
         if (!Ext.isEmpty(this._lastHighlightedId)) {
             var flyEl = Ext.fly(this._lastHighlightedId);
             var win = Ext.getCmp(this._lastQuickPropertyId);
 
-            if (win && !stayAliveQuickProperty) win.close();
+            if (win && !stayAliveQuickProperty){
+                win.close();
+            }
 
             if (flyEl) {
                 flyEl.removeClass('selectedElement');
@@ -438,13 +462,25 @@ M3Designer.controller.AppController = Ext.extend(Object, {
         this.refreshView();
         var domElementId = M3Designer.Utils.parseDomId(model.id);
 
-        // Можно просто брать id элемента из модели ( domElementId )
+        //Можно просто брать id элемента из модели ( domElementId )
         var highlightedId = domElementId ==  this._lastHighlightedId ?
                                 this._lastHighlightedId : domElementId;
-
-        /*Возвращаем Highlight элементу*/
+        //Возвращаем Highlight элементу
         this.selectTreeNodeByElementId(highlightedId);
-        /*Выделяем элемент в дереве*/
+        //Выделяем элемент в дереве
         this.highlightElement(highlightedId, true);
+
+        this.changedState(true);
+        //Зажигаем событие
+        this.fireEvent('contentchanged');
+    },
+    /**
+     * Хендлер, выполняется до синхронизации модели и предстовления
+     */
+    beforeRefreshView: function(){
+        //Меняем состояние
+        this.changedState(true);
+        //Зажигаем событие
+        this.fireEvent('contentchanged');
     }
 });

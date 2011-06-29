@@ -56,8 +56,8 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
         
         Ext.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
     }     
-   ,renderHelperBtn: function(){
-       if (this.thumbnail) {
+    ,renderHelperBtn: function(){
+        if (this.thumbnail) {
             this.buttonPreview = new Ext.Button({
                 renderTo: this.wrap
                 ,width: 16
@@ -75,12 +75,11 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
     }
     ,getHelperBtn: function(){
         return this.buttonPreview;
-    }    
+    }
     ,clickHelperBtn: function(){
-            var el = this.getEl();
-            var xy = el.getXY()
-            this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
-
+        var el = this.getEl();
+        var xy = el.getXY()
+        this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
     }
     ,createFileInput : function() {
         this.fileInput = this.wrap.createChild({

@@ -4,8 +4,6 @@
  */
 Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
 
 		// Базовый конфиг для тригеров
 		this.baseTriggers = [

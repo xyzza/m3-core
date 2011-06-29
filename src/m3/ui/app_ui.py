@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.utils.importlib import import_module
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 
 from m3.helpers.datastructures import TypedList
 from m3.helpers import logger
@@ -297,15 +297,18 @@ class DesktopLoader(object):
                 
                     
         assert isinstance(desktop, DesktopModel)
-        assert isinstance(user, User)
+        assert isinstance(user, (User, AnonymousUser))
 
         # Загрузка кеша
         if not cls._success:
             cls._load_desktop_from_apps()
 
-        assign_roles = get_assigned_metaroles_query(user)
-        if user.is_superuser:
-            add_el_to_desktop(cls, desktop, SUPER_ADMIN)
+        if not isinstance(user, AnonymousUser):
+            assign_roles = get_assigned_metaroles_query(user)
+            if user.is_superuser:
+                add_el_to_desktop(cls, desktop, SUPER_ADMIN)
+        else:
+            assign_roles = []
         add_el_to_desktop(cls, desktop, GENERIC_USER) #добавим все ярлычки обобщенного пользователя
         for role in assign_roles:
             add_el_to_desktop(cls, desktop, role)

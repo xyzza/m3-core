@@ -43,7 +43,7 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
     toolsPanelWidth: 100,
     initComponent: function(config) {
         Ext.ux.StartMenu.superclass.initComponent.call(this, config);
-
+		this.items = new Ext.util.MixedCollection();
         var tools = this.toolItems;
         this.toolItems = new Ext.util.MixedCollection();
         if(tools){

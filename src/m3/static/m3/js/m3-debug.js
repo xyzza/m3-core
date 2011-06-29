@@ -1220,7 +1220,6 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	
 	onRender: function()
 	{
-		this.renderFilters();
 		if(this.isFiltered())
 		{
 			this.applyFilters(false);
@@ -6250,10 +6249,7 @@ Ext.reg('Ext.ux.maximgb.tg.PagingToolbar', Ext.ux.maximgb.tg.PagingToolbar);
 
 Ext.m3.Window = Ext.extend(Ext.Window, {
 	constructor: function(baseConfig, params){
-//		console.log('Ext.m3.Window >>');
-//		console.log(baseConfig);
-//		console.log(params);
-		
+
 		// Ссылка на родительское окно
 		this.parentWindow = null;
 		
@@ -6296,8 +6292,6 @@ Ext.m3.Window = Ext.extend(Ext.Window, {
  */
 Ext.m3.AdvancedTreeGrid = Ext.extend(Ext.ux.maximgb.tg.GridPanel, {
 	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
 
 		// Проверки значений
 		assert(params.storeParams.url, "Некорректо задано url. \
@@ -7357,8 +7351,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
  */
 Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
 
 		// Базовый конфиг для тригеров
 		this.baseTriggers = [
@@ -7467,7 +7459,7 @@ Ext.apply(Ext.m3.CodeEditorConfig, {
 Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
     sourceCode: '/*Default code*/ ',
     readOnly: false,
-
+    theme:'default',
     constructor: function(baseConfig){
         Ext.m3.CodeEditor.superclass.constructor.call(this, baseConfig);
     },
@@ -7486,7 +7478,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
             }]
         });
 
-        this.addEvents('editorkeyevent');
+        this.addEvents('editorkeyevent','editorfocus');
 
         Ext.m3.CodeEditor.superclass.initComponent.apply(this, arguments);
     },
@@ -7506,6 +7498,11 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
     fireKeyEvent:function(i,e) {
         this.fireEvent('editorkeyevent', i, e);
     },
+
+    fireFocusEvent:function() {
+        this.fireEvent('editorfocus');
+    },
+
     contentChange: function() {
         var oCmp = this.getTextArea();
         var sCode = this.codeMirrorEditor.getValue();
@@ -7513,7 +7510,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         oCmp.setValue(sCode);
         if(this.oldSourceCode == sCode) this.setTitleClass(true);
         else this.setTitleClass();
-        this.fireEvent('contentChaged', this);
+        this.fireEvent('contentchanged', this);
     },
 
     /** @private*/
@@ -7523,7 +7520,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         var editorConfig = Ext.applyIf(this.codeMirrorEditor || {}, {
             height: "100%",
             width: "100%",
-            theme: "default",
+            theme: this.theme,
             lineNumbers: true,
             indentUnit: 4,
             tabMode: "shift",
@@ -7535,7 +7532,9 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
             /* Событие нажатия клавиши */
             onKeyEvent: this.fireKeyEvent.createDelegate(this),
             /* Событие изменения контента */
-            onChange: this.contentChange.createDelegate(this)
+            onChange: this.contentChange.createDelegate(this),
+            /* Событие фокуса эдитора */
+            onFocus:this.fireFocusEvent.createDelegate(this)
        });
 
         var sParserType = oThis.parser || 'python';
@@ -7849,7 +7848,6 @@ Ext.ux.grid.Exporter = Ext.extend(Ext.util.Observable,{
         }));
     },
     exportData:function(){
-        console.log(this.grid.store);
         columns = []
         Ext.each(this.grid.colModel.config,function(column,index){
             columns.push({
@@ -8681,9 +8679,6 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             if (params.possibleFileExtensions) {
                 this.possibleFileExtensions = params.possibleFileExtensions;
             }
-            else{
-                this.possibleFileExtensions = '';
-            }
         }
 
         Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
@@ -8749,14 +8744,14 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
         this.bindListeners();
         this.resizeEl = this.positionEl = this.wrap;
-        
-        if (this.readOnlyAll) {                      
-            this.buttonFile.setDisabled(true); 
+
+        if (this.readOnlyAll) {
+            this.buttonFile.setDisabled(true);
             // Перекрывает невидимый индекс
             this.buttonFile.getEl().setStyle('z-index', 3);
-            this.buttonClear.setDisabled(true); 
+            this.buttonClear.setDisabled(true);
             if (this.getHelperBtn() ) {
-                this.getHelperBtn().setDisabled(true); 
+                this.getHelperBtn().setDisabled(true);
             }
         }
 
@@ -8783,17 +8778,17 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.fileInput.on({
             scope: this,
             mouseenter: function() {
-                 this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
-             },
-             mouseleave: function(){
-                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
-             },
-             mousedown: function(){
-                 this.buttonFile.addClass('x-btn-click')
-             },
-             mouseup: function(){
-                 this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
-             },
+                this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+            },
+            mouseleave: function(){
+                this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+            },
+            mousedown: function(){
+                this.buttonFile.addClass('x-btn-click')
+            },
+            mouseup: function(){
+                this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+            },
              change: function(){
                  if (!this.isFileExtensionOK()){
                      Ext.Msg.show({
@@ -8803,7 +8798,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
                        ,fn: Ext.emptyFn
                        ,animEl: 'elId'
                        ,icon: Ext.MessageBox.WARNING
-                    });                     
+                    });
                      this.reset();
                      return;
                  }
@@ -8944,14 +8939,14 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         }
     }
     ,getFileName: function(){
-        return this.value.split('/').reverse()[0];
+    	return this.value ? this.value.split('/').reverse()[0] : "";
     }
     ,isFileExtensionOK: function(){
         var fileExtension = this.fileInput.dom.value.split('.');
         if (fileExtension.length > 0){
             //Поиск на существование элемента внутри массива
-            return this.possibleFileExtensions.split(',')
-                    .indexOf(fileExtension[fileExtension.length-1].toLowerCase()) != -1;
+            return this.possibleFileExtensions ? this.possibleFileExtensions.split(',')
+                    .indexOf(fileExtension[fileExtension.length-1].toLowerCase()) != -1 : true;
         }
         return false;
     }
@@ -9024,8 +9019,8 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
         
         Ext.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
     }     
-   ,renderHelperBtn: function(){
-       if (this.thumbnail) {
+    ,renderHelperBtn: function(){
+        if (this.thumbnail) {
             this.buttonPreview = new Ext.Button({
                 renderTo: this.wrap
                 ,width: 16
@@ -9043,12 +9038,11 @@ Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
     }
     ,getHelperBtn: function(){
         return this.buttonPreview;
-    }    
+    }
     ,clickHelperBtn: function(){
-            var el = this.getEl();
-            var xy = el.getXY()
-            this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
-
+        var el = this.getEl();
+        var xy = el.getXY()
+        this.previewTip.showAt([xy[0], xy[1] + el.getHeight()]);
     }
     ,createFileInput : function() {
         this.fileInput = this.wrap.createChild({

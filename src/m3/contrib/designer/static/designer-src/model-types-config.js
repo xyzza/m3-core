@@ -74,8 +74,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 }
             }
         },
-
-/*
+        /*
         * Простые компоненты
         */
         button: {
@@ -123,7 +122,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             },
             treeIconCls: 'designer-displayfield'
         },
-/*
+        /*
         * Контейнеры
         */
         container: {
@@ -319,7 +318,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             },
             treeIconCls: 'designer-formpanel'
         },
-/*
+        /*
         * Поля для ввода
         */
         baseField: {
@@ -671,7 +670,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 category: 'Fields'
             }
         },
-/*
+        /*
         * Тулбары
         */
         toolbar: {
@@ -801,7 +800,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             },
             treeIconCls: 'designer-toolbar'
         },
-/*
+        /*
         * Дерево
         */
         treeNode: {
@@ -1101,7 +1100,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 category: 'Data'
             }
         },
-/*
+        /*
         * М3
         */
         treeGrid: {

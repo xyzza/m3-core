@@ -33,7 +33,6 @@ Ext.ux.grid.Exporter = Ext.extend(Ext.util.Observable,{
         }));
     },
     exportData:function(){
-        console.log(this.grid.store);
         columns = []
         Ext.each(this.grid.colModel.config,function(column,index){
             columns.push({

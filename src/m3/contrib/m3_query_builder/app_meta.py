@@ -7,11 +7,11 @@ Date&Time: 01.06.11 10:38
 from django.conf import urls
 
 from m3.ui.actions import ActionController
-from m3.contrib.m3_query_builder  import actions
-from django.conf import settings
-
-from m3.ui.app_ui import DesktopLaunchGroup, DesktopLoader, DesktopLauncher
+from m3.ui.app_ui import DesktopLaunchGroup, DesktopLoader, \
+    DesktopShortcut
 from m3.contrib.m3_users.metaroles import get_metarole
+
+import actions
 
 m3_query_builder_controller = ActionController('/m3-query-builder')
 
@@ -36,8 +36,14 @@ def register_desktop_menu():
     
     admin_root = DesktopLaunchGroup(name = u'Администрирование', icon='menu-dicts-16')
     admin_root.subitems.append(
-        DesktopLauncher(name = u'Редактор запросов',
-                        url=actions.QueryBuilderWindowAction.absolute_url(),
+        DesktopShortcut(name = u'Редактор запросов',
+                        pack= actions.QueryBuilderActionsPack,
+                        icon='icon-database-gear')
+    )
+
+    admin_root.subitems.append(
+        DesktopShortcut(name = u'Редактор отчетов',
+                        pack= actions.ReportBuilderActionsPack,
                         icon='icon-database-gear')
     )
 
@@ -49,5 +55,6 @@ def register_actions():
     Метод регистрации Action'ов для приложения в котором описан
     '''
     m3_query_builder_controller.packs.extend([
-        actions.QueryBuilderActionsPack
+        actions.QueryBuilderActionsPack,
+        actions.ReportBuilderActionsPack,
     ])

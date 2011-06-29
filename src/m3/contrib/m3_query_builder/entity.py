@@ -184,7 +184,7 @@ class Field(object):
     ALL_FIELDS = '*'
     
     def __init__(self, entity, field_name, alias=None, verbose_name=''):
-        assert isinstance(entity, Model)
+        assert isinstance(entity, (Model, Entity))
         self.entity = entity
         self.field_name = field_name
         self.alias = alias

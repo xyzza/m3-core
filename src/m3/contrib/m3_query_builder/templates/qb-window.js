@@ -1,4 +1,7 @@
 
+var hdnID = Ext.getCmp('{{ component.hdn_id.client_id }}');
+var edtQueryName = Ext.getCmp('{{ component.str_name.client_id }}');
+
 var treeEntities = Ext.getCmp('{{ component.tree_entities.client_id }}');
 var grdSelectedEntities = Ext.getCmp('{{ component.grd_selected_entities.client_id }}');
 var grdLinks = Ext.getCmp('{{ component.grd_links.client_id }}');
@@ -9,14 +12,119 @@ var distinctChk = Ext.getCmp('{{ component.chk_distinct.client_id }}');
 var limitChk = Ext.getCmp('{{ component.chk_limit.client_id }}');
 var limitCount = Ext.getCmp('{{ component.nmbr_limit_count.client_id }}');
 
-
 var treeGroupsFields = Ext.getCmp('{{ component.tree_groups_fields.client_id }}');
 var grdGroupFields = Ext.getCmp('{{ component.grd_group_fields.client_id }}');
-var grdGroupAggrFields = Ext.getCmp('{{ component.grd_gruop_summ_fields.client_id }}');
+var grdGroupAggrFields = Ext.getCmp('{{ component.grd_gruop_aggr_fields.client_id }}');
 
 var treeConditionsFields = Ext.getCmp('{{ component.tree_conditions_fields.client_id }}');
 var grdConditionsFields = Ext.getCmp('{{ component.grd_conditions.client_id }}');
 
+
+////////////////////////////////////////////////////////////////////////////////
+/**
+ * Класс модели для сущностей и сразу же создание экземпляра 
+ */
+var entityModel = new function(){
+	
+	var _entities = [];
+	var trees = [treeAllFields, treeGroupsFields, treeConditionsFields];
+
+	return {
+		/*
+		 * Добавляет сущность
+		 */
+		add: function(entities){
+
+			var url = '{{ component.params.entity_items_url }}';
+			assert(url, 'Url for child window is not define');
+	
+			var loadMask = new Ext.LoadMask(win.body);
+			loadMask.show();
+			Ext.Ajax.request({
+				url: url
+				,params: {
+					'entities': Ext.encode(entities)
+				}
+				,success: function(response, opt){
+					loadMask.hide();
+					
+					var nodes = Ext.decode(response.responseText);
+	
+					var node, rootNode;
+														
+					for (var i=0; i<trees.length; i++){
+						
+						rootNode = trees[i].getRootNode();
+						rootNode.loaded = true;
+						
+						for (var j=0; j<nodes.length; j++) {		
+							
+							node = new Ext.tree.TreeNode(nodes[j]);
+						   
+						    rootNode.getOwnerTree().getLoader().doPreload(node);                
+						    if(node){
+						        rootNode.appendChild(node);
+						    }
+
+					        if (i==0){ // Заполняем ноды при заполнении одного дерева
+					        	_entities.push( nodes[j] );
+					        }
+						}					
+					}										
+				}
+				,failure: function(){
+					loadMask.hide();
+	        		uiAjaxFailMessage.apply(this, arguments);
+				}
+			});						
+		},
+		
+		/*
+		 * Удаляет сущность
+		 */
+		remove: function (entities){		
+			var removeInGrid = function(grid, entityField, entityName){
+				var store = grid.getStore();
+				var records = store.query(entityField, entityName).getRange();
+				if (records){
+					store.remove(records);	
+				}
+			}	
+			
+			// Нужно удалить выбранный массив id сущностей из всех деревьев
+			// Пробежаться по всем полям и удалить все поля, которые входят в удаляемую сущность
+			var grids = [grdSelectedFields, grdGroupFields, grdGroupAggrFields, grdConditionsFields];						
+						
+			
+			var rootNode;			
+			for (var j=0; j<entities.length; j++) {
+				
+				// Удаление всех имеющихся узлов 
+				for (var i=0; i<trees.length; i++){
+					rootNode = trees[i].getRootNode();
+					
+					var node = rootNode.findChild('id', entities[j]);
+					node.remove();					
+				}
+			
+				// Удаление записей в гридах, кроме грида связей
+				for (var k=0; k<grids.length; k++){
+					removeInGrid(grids[k], 'id', entities[j]);	
+				}
+				
+				removeInGrid(grdLinks, 'entityFirst', entities[j]);
+				removeInGrid(grdLinks, 'entitySecond', entities[j]);
+			}
+		},
+		
+		/*
+		 * Возвращает имеющиеся сущности
+		 */
+		getEntities:function (){			
+			return _entities;
+		}	
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Общие функции
@@ -31,7 +139,7 @@ function deleteField(grid){
 		var rec = sm.getSelectedCell();
 		if (rec) {
 			var currentRecord = grid.getStore().getAt(rec[0]);
-			 grid.getStore().remove(currentRecord);
+			grid.getStore().remove(currentRecord);
 		}
 	}
 }
@@ -85,6 +193,77 @@ function addFieldBtn(tree, grid){
 ////////////////////////////////////////////////////////////////////////////////
 // Вкладка - Таблица и связи
 
+/*
+ * Обновление сущностей
+ */
+function refreshEntities(){    
+	var rootNode = treeEntities.getRootNode();
+	treeEntities.getLoader().load(rootNode);
+	rootNode.expand();
+}
+
+/*
+ * Добавление сущности в проект
+ */
+function onAddEntity(){
+	var node = treeEntities.getSelectionModel().getSelectedNode();	
+	if (node) {		
+		addEntity(node);		
+	}
+}
+
+/*
+ * Хендлер на кнопку "Добавить сущность"
+ */
+function addEntity(node){
+    var selectedStore = grdSelectedEntities.getStore(),
+		entityId = node.id,
+		entityName = node.attributes['schemes'];
+            
+    
+    var record = selectedStore.getById(entityId);        
+    if (!record && entityId && entityName){
+
+		// Заполняется грид на этой же вкладке - выбранные сущности
+		var EntityRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
+		    {name: 'entityName', mapping: 'entityName'},					    
+		]);
+		
+		var newEntityRecord = new EntityRecord(
+		    {'entityName': entityName},					    
+		    entityId 
+		);
+    	selectedStore.add(newEntityRecord);
+    	
+    	entityModel.add([entityId]);    	
+    }   
+}
+
+/**
+ * D&d из дерева сущностей в выбранные сущности
+ */
+var selectEntityDropTargetEl = grdSelectedEntities.getView().scroller.dom;
+var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
+    ddGroup    : 'TreeDD',
+    notifyDrop : function(ddSource, e, data){                    
+		addEntity(data.node);             
+        return true;
+    }
+});
+
+/**
+ * Удаление сущностей
+ */
+function deleteEntity(){	
+	var sel = grdSelectedEntities.getSelectionModel().getSelections();
+	var massEntities = [];
+	for (var i=0; i<sel.length; i++){
+		massEntities.push(sel[i].id);
+	}
+	entityModel.remove(massEntities);
+	grdSelectedEntities.getStore().remove(sel);
+}
+
 /*Выбор связи*/
 function selectConnection(){
     var loadMask = new Ext.LoadMask(win.body);
@@ -95,8 +274,9 @@ function selectConnection(){
         ,params: win.actionContextJson || {}
         ,success: function(response){
             loadMask.hide();
-            var childWin = smart_eval(response.responseText);
-            childWin.fireEvent('fillNodes', treeAllFields.getRootNode().childNodes );
+            var childWin = smart_eval(response.responseText);                        
+            
+            childWin.fireEvent('fillNodes', entityModel.getEntities() );
             
             // Подпись на нажатие "Выбор" и обработка результатов запроса
             childWin.on('selectLinks', function(resObj){
@@ -147,88 +327,6 @@ function deleteConnection(){
 /*Закрытие окна*/
 function winClose(){
     win.close();
-}
-
-/**
- * D&d из дерева сущностей в выбранные сущности
- */
-var selectEntityDropTargetEl = grdSelectedEntities.getView().scroller.dom;
-var selectEntityDropTarget = new Ext.dd.DropTarget(selectEntityDropTargetEl, {
-    ddGroup    : 'TreeDD',
-    notifyDrop : function(ddSource, e, data){                    
-        var selectedStore = grdSelectedEntities.getStore(),
-        	entityId = data.node.id,
-        	entityName = data.node.attributes['schemes'];
-                
-        
-        var record = selectedStore.getById(entityId);
-        if (!record && entityId && entityName){
-
-			var url = '{{ component.params.entity_items_url }}';
-			assert(url, 'Url for child window is not define');
-
-			var loadMask = new Ext.LoadMask(win.body);
-			loadMask.show();
-			Ext.Ajax.request({
-				url: '{{ component.params.entity_items_url }}'
-				,params: {
-					'entity_name': entityId
-				}
-				,success: function(response, opt){
-					loadMask.hide();
-					
-					// Заполняется грид на этой же вкладке - выбранные сущности
-					var EntityRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
-					    {name: 'entityName', mapping: 'entityName'},					    
-					]);
-					
-					var newEntityRecord = new EntityRecord(
-					    {entityName: entityName},					    
-					    entityId 
-					);
-		        	selectedStore.add(newEntityRecord);
-
-					var rootNode;
-					// Алгоритм заполнения деревьев всеми полями
-					var massOfTreeFields = [treeAllFields, treeGroupsFields, treeConditionsFields];
-					for (var i=0; i<massOfTreeFields.length; i++){
-
-						rootNode = massOfTreeFields[i].getRootNode();
-						
-				        processResponse(response,  rootNode);
-				        rootNode.loaded = true;
-					}
-					
-				}
-				,failure: function(){
-					loadMask.hide();
-            		uiAjaxFailMessage.apply(this, arguments);
-				}
-			});
-        	
-        }                
-        return true;
-    }
-});
-
-/**
- * Загружает узел дерева
- * Взято из исходников TreeLoader и немного изменено
- */
-function processResponse(response, node){
-    var json = response.responseText;    
-    var o = response.responseData || Ext.decode(json);
-    
-    node.beginUpdate();
-    for(var i = 0, len = o.length; i < len; i++){
-        var n = new Ext.tree.TreeNode(o[i]);
-        
-        node.getOwnerTree().getLoader().doPreload(n);                
-        if(n){
-            node.appendChild(n);
-        }
-    }
-    node.endUpdate();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -294,7 +392,7 @@ function addGroupField(){
 	addFieldBtn(treeGroupsFields, grdGroupFields);
 }
 
-function addGroupSummField(){
+function addGroupAggrField(){
 	addFieldBtn(treeGroupsFields, grdGroupAggrFields);
 }
 
@@ -302,7 +400,7 @@ function deleteGroupField(){
 	deleteField(grdGroupFields);	
 }
 
-function deleteGroupSummField(){	
+function deleteGroupAggrField(){	
 	deleteField(grdGroupAggrFields);	
 }
 
@@ -413,7 +511,20 @@ function showQueryText(){
 
 // Сохраняет запрос
 function saveQuery(){
-
+	var queryName = edtQueryName.getValue();
+	if (!queryName) {
+		Ext.Msg.show({
+		   title:'Внимание',
+		   msg: 'Не введено название запроса',
+		   buttons: Ext.Msg.OK,
+		   animEl: 'elId',
+		   icon: Ext.MessageBox.WARNING
+		});
+		
+		return;
+	}
+	
+	// Получение имени запроса	
 	var loadMask = new Ext.LoadMask(win.body);
     loadMask.show();
     
@@ -421,16 +532,19 @@ function saveQuery(){
 		url: '{{component.params.save_query_url }}'
 		,params: {
 			'objects': Ext.encode( buildParams() )
+			,'query_name': queryName 
+			,'id': hdnID.getValue()
 		}
 		,success: function(){
 			loadMask.hide();
-			console.log('save');
+			win.fireEvent('closed_ok');
+			win.close();
 		}
 		,failure: function(){
         	loadMask.hide();
             uiAjaxFailMessage.apply(this, arguments);
         }
-	});
+	});		
 }
 
 // Билдит параметры, для показа запроса и для сохранения запроса
@@ -455,10 +569,10 @@ function buildParams(){
 	var entities = getElements(grdSelectedEntities);
 	
 	// Связи в запросе
-	var relations = getElements(grdLinks, ['value']);
+	var relations = getElements(grdLinks);
 			
 	// Поля в выборке
-	var selectedFields = getElements(grdSelectedFields, ['value']);	
+	var selectedFields = getElements(grdSelectedFields);	
 	
 	// Группируемые и агригируемые поля
 	var groupFields = getElements(grdGroupFields);	
@@ -466,7 +580,7 @@ function buildParams(){
 	var groupAggrFields = getElements(grdGroupAggrFields);	
 	
 	// Условия
-	var condFields = getElements(grdConditionsFields, ['expression']);	
+	var condFields = getElements(grdConditionsFields);	
 
 	var limit;
 	if (limitChk.checked) {
@@ -487,6 +601,22 @@ function buildParams(){
 	}
 }
 
+
+/*
+ * Если запрос открыт на редактирование, нужно из имеющихся сущностей 
+ * заполнить деревья полей
+ */
+(function (){
+	var mass = [],
+		range = grdSelectedEntities.getStore().getRange();
+	for (var i=0; i<range.length; i++){
+		mass.push(range[i].id);
+	}
+	
+	if (mass) {
+		entityModel.add(mass);
+	};
+})()
 
 
 // TODO: Сделать модель, которая будет определять добавление и удаление

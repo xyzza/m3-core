@@ -24,7 +24,7 @@ Ext.apply(Ext.m3.CodeEditorConfig, {
 Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
     sourceCode: '/*Default code*/ ',
     readOnly: false,
-
+    theme:'default',
     constructor: function(baseConfig){
         Ext.m3.CodeEditor.superclass.constructor.call(this, baseConfig);
     },
@@ -43,7 +43,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
             }]
         });
 
-        this.addEvents('editorkeyevent');
+        this.addEvents('editorkeyevent','editorfocus');
 
         Ext.m3.CodeEditor.superclass.initComponent.apply(this, arguments);
     },
@@ -63,6 +63,11 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
     fireKeyEvent:function(i,e) {
         this.fireEvent('editorkeyevent', i, e);
     },
+
+    fireFocusEvent:function() {
+        this.fireEvent('editorfocus');
+    },
+
     contentChange: function() {
         var oCmp = this.getTextArea();
         var sCode = this.codeMirrorEditor.getValue();
@@ -70,7 +75,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         oCmp.setValue(sCode);
         if(this.oldSourceCode == sCode) this.setTitleClass(true);
         else this.setTitleClass();
-        this.fireEvent('contentChaged', this);
+        this.fireEvent('contentchanged', this);
     },
 
     /** @private*/
@@ -80,7 +85,7 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
         var editorConfig = Ext.applyIf(this.codeMirrorEditor || {}, {
             height: "100%",
             width: "100%",
-            theme: "default",
+            theme: this.theme,
             lineNumbers: true,
             indentUnit: 4,
             tabMode: "shift",
@@ -92,7 +97,9 @@ Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
             /* Событие нажатия клавиши */
             onKeyEvent: this.fireKeyEvent.createDelegate(this),
             /* Событие изменения контента */
-            onChange: this.contentChange.createDelegate(this)
+            onChange: this.contentChange.createDelegate(this),
+            /* Событие фокуса эдитора */
+            onFocus:this.fireFocusEvent.createDelegate(this)
        });
 
         var sParserType = oThis.parser || 'python';
