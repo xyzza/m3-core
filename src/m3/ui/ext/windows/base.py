@@ -22,9 +22,15 @@ class BaseExtWindow(ExtUIComponent):
     '''
     Базовый класс для всех окон
     '''
+    
+    #deprecated: Использовать атрибуты с верхним регистром
     align_left = 'left'
     align_center = 'center'
     align_right = 'right'
+    
+    ALIGN_LEFT = align_left
+    ALIGN_CENTER = align_center
+    ALIGN_RIGHT = align_right
 
     def __init__(self, *args, **kwargs):
         super(BaseExtWindow, self).__init__(*args, **kwargs)
@@ -55,7 +61,7 @@ class BaseExtWindow(ExtUIComponent):
         self.__items = TypedList(type=ExtUIComponent)
         
         # Типизированный список кнопок
-        self.__buttons = TypedList(type=ExtButton)
+        self.__buttons = []
 
         # layout extjs. См. документацию
         self.layout = None
