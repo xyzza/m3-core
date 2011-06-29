@@ -160,6 +160,14 @@ class OOParser(object):
             if not section.is_valid():
                 raise OOParserException, "Неверно задана секция %s. \
                 Определена одна из двух ячеек" %section.name  
+            # Выставляем новые координаты правой ячейки на основе ширины и высоты
+            # секции с учетом объединенных ячеек      
+            real_width = section.get_real_width()
+            real_height = section.get_real_height() 
+            new_right_position = uno.createUnoStruct('com.sun.star.table.CellAddress')
+            new_right_position.Column = section.left_cell_addr.Column + real_width - 1
+            new_right_position.Row = section.left_cell_addr.Row + real_height - 1
+            section.right_cell_addr = new_right_position  
         #Флаг 8 отвечает за удаление аннотаций.
         document.clearContents(8)          
         return all_sections  
@@ -239,11 +247,55 @@ class Section(object):
                 self.left_cell_addr = self.right_cell_addr
                 self.right_cell_addr = cell
             elif (cell.Row < self.left_cell_addr.Row) and (cell.Column < self.left_cell_addr.Column):
-                self.left_cell_addr = cell     
+                self.left_cell_addr = cell 
             # Секция задана неверно, не записываем такую ерунду
             else:    
                 raise OOParserException, "Неверно задана секция %s. \
-                Определите верхнюю левую и нижнюю правую ячейки" %self.name                 
+                Определите верхнюю левую и нижнюю правую ячейки" %self.name    
+                
+    def get_real_width(self):
+        '''
+        Вычисляет "реальную" ширину секции. Т.е. ширину, в которой ширина
+        объединенных ячеек соответствует количеству ячеек, входящих в объединение,
+        а не равна единице.
+        '''
+        section_width = 0
+        document  = self.report_object.document
+        if document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
+            src_sheet = document.getSheets().getByName(TEMPORARY_SHEET_NAME)
+        else:
+            raise ReportGeneratorException, "Невозможно вывести секцию в отчет, \
+            лист-шаблон отсутствует. Возможно, отчет уже был отображен."    
+        column = self.left_cell_addr.Column    
+        while column <= self.right_cell_addr.Column:
+            cell = src_sheet.getCellByPosition(column, self.left_cell_addr.Row)
+            cursor = src_sheet.createCursorByRange(cell)
+            cursor.collapseToMergedArea()
+            section_width += cursor.Columns.Count
+            column += cursor.Columns.Count   
+        return section_width        
+                
+    def get_real_height(self):
+        '''
+        Вычисляет "реальную" высоту секции. Т.е. высоту, в которой высота
+        объединенных ячеек соответствует количеству ячеек, входящих в объединение,
+        а не равна единице.
+        '''
+        section_height = 0
+        document  = self.report_object.document
+        if document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
+            src_sheet = document.getSheets().getByName(TEMPORARY_SHEET_NAME)
+        else:
+            raise ReportGeneratorException, "Невозможно вывести секцию в отчет, \
+            лист-шаблон отсутствует. Возможно, отчет уже был отображен."
+        row = self.left_cell_addr.Row    
+        while row <= self.right_cell_addr.Row:
+            cell = src_sheet.getCellByPosition(self.left_cell_addr.Column, row)
+            cursor = src_sheet.createCursorByRange(cell)
+            cursor.collapseToMergedArea()
+            section_height += cursor.Rows.Count  
+            row += cursor.Rows.Count  
+        return section_height                  
             
     def is_valid(self):
         '''
@@ -275,13 +327,14 @@ class Section(object):
         выведенной секции. При выводе секции вертикально секция выводится начиная 
         с левого края листа, ниже последней выведенной секции.
         '''
+        document = self.report_object.document
+        dest_sheet = document.getSheets().getByIndex(1)
         section_width = abs(self.left_cell_addr.Column - self.right_cell_addr.Column)+1
         section_height = abs(self.left_cell_addr.Row - self.right_cell_addr.Row)+1
         x, y = self.report_object.get_section_render_position(vertical)
         self.report_object.update_previous_render_info(vertical, (x,y), section_width, section_height)
-        document = self.report_object.document
+        
         #Лист с результатом - второй по счету
-        dest_sheet = document.getSheets().getByIndex(1)
         dest_cell = dest_sheet.getCellByPosition(x,y)
         if document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             src_sheet = document.getSheets().getByName(TEMPORARY_SHEET_NAME)
@@ -504,8 +557,8 @@ class DocumentReport(object):
         Закрывает и удаляет временный файл шаблона.
         '''
         self.document.close(True)
-        if os.path.exists(self.document.Location):
-            os.remove(self.document.Location)
+        if os.path.exists(self.temporary_file_path):
+            os.remove(self.temporary_file_path)
             
             
 class SpreadsheetReport(object): 
@@ -547,14 +600,14 @@ class SpreadsheetReport(object):
         self.document = self.get_template_document(template_name)
         # Первый лист шаблона, в котором должны быть заданы секции
         template_sheet = self.document.getSheets().getByIndex(0)
-        #Находим все секции в шаблоне
-        parser = OOParser()
-        self.sections = parser.create_sections(template_sheet, self)
         #Вставляем новый лист с таким же названием, как лист шаблона, на вторую
         # позицию
         template_sheet_name = template_sheet.getName()
         template_sheet.setName(TEMPORARY_SHEET_NAME)
         self.document.getSheets().insertNewByName(template_sheet_name, 1)
+        #Находим все секции в шаблоне
+        parser = OOParser()
+        self.sections = parser.create_sections(template_sheet, self)
 
     def get_section(self, section_name):
         '''
