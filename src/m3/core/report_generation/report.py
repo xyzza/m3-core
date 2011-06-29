@@ -45,14 +45,13 @@ elif sys.platform.startswith('darwin'):
     can_use_uno = False  #FIXME: у меня мак 64-битный, а офиса нет 64-битного! только 32-битный. В итоге библиотека pyuno.so не грузится!
 else:
     can_use_uno = True
-
-
+  
 if can_use_uno:
     import uno
     from com.sun.star.beans import PropertyValue
     from com.sun.star.connection import NoConnectException
 #else:
-    #FIXME: убрал, чтобы хоть как-то работать!  raise Exception(u'Unable to find OpenOffice (LibreOffice) in PATH variable')
+    #FIXME: убрал, чтобы хоть как-то работать!  raise Exception(u'Unable to find OpenOffice (LibreOffice) in PATH variable') 
 
 
 def __get_template_path():
