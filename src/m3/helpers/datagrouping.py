@@ -86,13 +86,13 @@ class GroupingRecordProvider(object):
         '''
         Основной метод получения данных
         '''
-        return self.__get_elements(grouped, begin, 0, {'count':-1, 'id': -1, 'expandedItems':expanded}, begin, end, [], self.aggregates, sorting)
-    
+        return self.__get_elements(grouped, begin, 0, {'count':-1, 'id':-1, 'expandedItems':expanded}, begin, end, [], self.aggregates, sorting)
+
     def __get_elements(self, grouped, offset, level_index, level, begin, end, keys, aggregates, sorting):
         res = []
         all_out = False # признак того, что все необходимые элементы выведены, идет подсчет общего количества открытых элементов
         #print 'get_elements(): grouped=%s, offset=%s, level_index=%s, level=%s, begin=%s, end=%s, keys=%s' % (grouped, offset, level_index, level, begin, end, keys)
-    
+
         #необходимо узнавать индекс элемента с кодом exp['id'] в текущем уровне, при текущей сортировке и располагать элементы соответственно
         if not level.has_key('items'):
             level['items'] = self.indexer(grouped, level_index, keys + [level['id']] if level['id'] != -1 else [], level['expandedItems'], aggregates, sorting)
@@ -102,7 +102,7 @@ class GroupingRecordProvider(object):
                 else:
                     # развернутый элемент отсутствует в уровне (видимо фильтр сработал, или что-то еще) - что делать?! 
                     level['expandedItems'].remove(exp)
-    
+
             #теперь выстроим в порядке индексов
             exp_sort = sorted(level['expandedItems'], key=lambda x: x['index'])
             level['expandedItems'] = exp_sort
@@ -111,15 +111,15 @@ class GroupingRecordProvider(object):
         i = 0
         while i < len(level['expandedItems']):
             exp = level['expandedItems'][i]
-    
+
             # на текущий момент необходимо вычислить количество дочерних элементов
             if exp['count'] == -1:
                 exp['count'] = self.counter(grouped, level_index + 1, (keys + [level['id']] if level['id'] != -1 else []) + [exp['id']], exp['expandedItems'])
-            
+
             if all_out:
                 i = i + 1
                 continue
-    
+
             # 1) может диапазон уже пройден
             if end <= exp['index']:
                 # выдать диапазон с begin по end
@@ -134,7 +134,7 @@ class GroupingRecordProvider(object):
                 i = i + 1
                 all_out = True
                 continue
-    
+
             # 2) может интервал переходит с предыдущего
             if begin <= exp['index'] and end > exp['index']:
                 #print '2) интервал переходит с предыдущего'
@@ -146,7 +146,7 @@ class GroupingRecordProvider(object):
                 res.extend(list)
                 begin = exp['index'] + 1
                 continue
-    
+
             # 3) попадаем ли мы в раскрытый уровень
             if begin >= exp['index'] and end <= exp['index'] + exp['count']:
                 #print '3) мы попадаем в раскрытый уровень'
@@ -158,7 +158,7 @@ class GroupingRecordProvider(object):
                 i = i + 1
                 all_out = True
                 continue
-    
+
             # 4) если частично попадаем в раскрытый
             if begin <= exp['index'] + exp['count'] and end > exp['index'] + exp['count']:
                 #print '4) частично попадаем в раскрытый'
@@ -171,17 +171,17 @@ class GroupingRecordProvider(object):
                 end = begin + delta#end - len(list) # сократим верхнюю границу на количество выданных элементов
                 i = i + 1
                 continue
-    
+
             # 6) если еще не дошли
             if begin > exp['index'] + exp['count']:
                 #print '6) если еще не дошли'
                 #print 'offset=%s, begin=%s, end=%s, exp=%s, keys=%s' % (offset, begin, end, exp, keys)
                 begin = begin - exp['count']
                 end = end - exp['count']
-    
+
             # переходим к след. развернутому элементу
             i = i + 1
-    
+
         if level['count'] == -1:
             level['count'] = self.counter(grouped, level_index, keys, level['expandedItems'])
 
@@ -193,12 +193,12 @@ class GroupingRecordProvider(object):
                 end = level['count'] - 1
             list = self.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if level['id'] != -1 else [], begin, end, aggregates, sorting)
             res.extend(list)
-    
+
         # можно уже не считать total выше
         total_len = level['count']
-    
+
         #print 'get_elements()= total=%s, res_count=%s' % (total_len, len(res))
-    
+
         # если это самый первый уровень и нужно считать общие итоги, то посчитаем выдадим
         if level_index == 0 and self.count_totals:
             totals = self.reader(grouped, 0, -1, [], 0, 1, aggregates, sorting)
@@ -252,7 +252,7 @@ class GroupingRecordProvider(object):
                 columns_cash.append(column["data_index"])
                 index += 1
         # запросим все данные
-        data, total = self.get_elements(0,total,grouped, expanded, sorting)
+        data, total = self.get_elements(0, total, grouped, expanded, sorting)
         # вывод данных
         for item in data:
             for idx, k in enumerate(columns_cash):
@@ -301,7 +301,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
         #if cache_key in out_cache.keys():
         #    print 'cached data...........'
         #    return out_cache[cache_key]
-    
+
         # специальный режим, когда считается общий итог по всем записям - не важна сортировка и группировка
         if level_index == -1:
             aggr = []
@@ -339,7 +339,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                     setattr(item, agg, i[agg + '__avg'])
             item.calc()
             return item
-    
+
         #print 'read_model(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
         res = []
         if grouped:
@@ -349,7 +349,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                 field = None
             else:
                 field = grouped[level_index]
-    
+
             filter = None
             for lev in range(0, level_index):
                 lev_field = grouped[lev]
@@ -389,7 +389,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                         query = self.get_data().values(field).annotate(count=Count("id"))
                 else:
                     query = self.get_data()
-    
+
             #сортировка 
             sort_fields = []
             # TODO: пока сортировка сделана только по одному полю
@@ -400,7 +400,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                 if sort_field in aggregates.keys() or sort_field == field or not field:
                     if sort_field in aggregates.keys() and field:
                         # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
-                        sort_field = sort_field+'__'+aggregates[sort_field]
+                        sort_field = sort_field + '__' + aggregates[sort_field]
                     if sort_dir == 'DESC':
                         sort_fields.append('-' + sort_field)
                     else:
@@ -411,7 +411,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                     sort_fields.append(field)
             if sort_fields:
                 query = query.order_by(*sort_fields)
-    
+
             # теперь выведем запрошенные элементы уровня
             index = 0
             for i in query.all()[begin:end + 1]:
@@ -429,7 +429,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                         key = level_keys[lev]
                         setattr(item, lev_field, key)
                     setattr(item, field, i[field])
-    
+
                     for agg in aggregates.keys():
                         agg_type = aggregates[agg]
                         if agg_type == 'sum':
@@ -480,7 +480,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
 
     def counter(self, grouped, level_index, level_keys, expandedItems):
         return self.__count_model(grouped, level_index, level_keys, expandedItems)
-    
+
     def __count_model(self, grouped, level_index, level_keys, expandedItems):
         '''
         подсчет количества строк в раскрытом уровне
@@ -490,7 +490,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
         #if cache_key in count_cache.keys():
         #    print 'cached count...........'
         #    return count_cache[cache_key]
-        
+
         #print 'count_model(): grouped=%s, level_index=%s, level_keys=%s, expandedItems=%s' % (grouped, level_index, level_keys, expandedItems)
         total_of_level = 0
         if grouped:
@@ -498,7 +498,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
             # определим порядок группировки
             for i in grouped:
                 grouped_ranges.append(i)
-    
+
             query = self.get_data()
             filter = None
             for lev in range(0, level_index):
@@ -517,25 +517,25 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                 total_of_level = len(query) # query.count()
             else:
                 total_of_level = query.count()
-            
+
         else:
             total_of_level = self.get_data().count()
-    
+
         # добавим к количеству также сумму раскрытых элементов
         exp_count = 0
         for exp in expandedItems:
             if exp['count'] == -1:
                 exp['count'] = self.counter(grouped, level_index + 1, level_keys + [exp['id']], exp['expandedItems'])
             exp_count = exp_count + exp['count']
-    
+
         #count_cache[cache_key] = total_of_level+exp_count
-    
+
         #print 'count_model() = %s, total=%s, exp_count=%s' % (total_of_level + exp_count, total_of_level, exp_count)
         return total_of_level + exp_count
 
     def indexer(self, grouped, level_index, level_keys, expandedItems, aggregates, sorting):
         return self.__index_model(grouped, level_index, level_keys, expandedItems, aggregates, sorting)
-    
+
     def __index_model(self, grouped, level_index, level_keys, expandedItems, aggregates, sorting):
         '''
         построение индексов элементов в раскрытом уровне, только для группировок и для тех, которые раскрыты
@@ -545,7 +545,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
             # для всех группировочных элементов будут использоваться ключи
             # если берется уровень больший, чем количество группировок, то выдаем просто записи
             field = grouped[level_index]
-    
+
             filter = None
             for lev in range(0, level_index):
                 lev_field = grouped[lev]
@@ -568,7 +568,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                     aggr.append(Max(agg))
                 elif agg_type == 'avg':
                     aggr.append(Avg(agg))
-                    
+
             if filter:
                 if aggr:
                     query = self.get_data().filter(filter).values(field).annotate(*aggr).annotate(count=Count("id"))
@@ -579,7 +579,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                     query = self.get_data().values(field).annotate(*aggr).annotate(count=Count("id"))
                 else:
                     query = self.get_data().values(field).distinct()
-                    
+
             #сортировка 
             sort_fields = []
             # TODO: пока сортировка сделана только по одному полю
@@ -590,7 +590,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                 if sort_field in aggregates.keys() or sort_field == field:
                     if sort_field in aggregates.keys():
                         # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
-                        sort_field = sort_field+'__'+aggregates[sort_field]
+                        sort_field = sort_field + '__' + aggregates[sort_field]
                     if sort_dir == 'DESC':
                         sort_fields.append('-' + sort_field)
                     else:
@@ -612,7 +612,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
     '''
     def reader(self, grouped, offset, level_index, level_keys, begin, end, aggregates, sorting):
         return self.__read_data(grouped, offset, level_index, level_keys, begin, end, aggregates, sorting)
-    
+
     def __read_data(self, grouped, offset, level_index, level_keys, begin, end, aggregates, sorting):
         '''
         вывод элементов дерева группировок в зависимости от уровня, ключевых элементов и интервала в уровне
@@ -622,9 +622,9 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
         #    if cache_key in out_cache.keys():
         #        print 'cached data...........'
         #        return out_cache[cache_key]
-    
+
         #print 'out_data(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
-    
+
         # специальный режим, когда считается общий итог по всем записям - не важна сортировка и группировка
         if level_index == -1:
             aggr_rec = {}
@@ -658,7 +658,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                     setattr(item, agg, aggr_rec[agg])
             item.calc()
             return item
-    
+
         # проведем сортировку собранного уровня
         #if len(sorting.keys()) == 1:
         #    sorted_data = sorted(self.get_data(), key=lambda k: getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
@@ -668,19 +668,19 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
         raw_data = self.get_data()
         res = []
         pre_res = []
-    
+
         if grouped:
             # для всех группировочных элементов будут использоваться ключи
             level = {}
             aggregate_values = {}
             prepared = []
-    
+
             # если берется уровень больший, чем количество группировок, то выдаем просто записи
             if level_index >= len(grouped):
                 field = None
             else:
                 field = grouped[level_index]
-    
+
             for rec in raw_data:
                 finded = True
                 for lev in range(0, level_index):
@@ -771,7 +771,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
             item.lindex = index + begin
             res.append(item)
             index = index + 1
-            
+
         #print 'out_data()= total=%s, res_count=%s' % (total_of_level, len(res))
         #out_cache[cache_key] = (res,total_of_level)
         return res
@@ -788,7 +788,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
         #if cache_key in count_cache.keys():
         #    print 'cached count...........'
         #    return count_cache[cache_key]
-    
+
         #print 'count_exp_data(): grouped=%s, level_index=%s, level_keys=%s, expandedItems=%s' % (grouped, level_index, level_keys, expandedItems)
         total_of_level = 0
         if grouped:
@@ -810,7 +810,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                     field = None
                 else:
                     field = grouped[level_index]
-    
+
                 for rec in self.get_data():
                     for lev in range(0, level_index):
                         lev_field = grouped[lev]
@@ -830,18 +830,18 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                 total_of_level = len(level)
         else:
             total_of_level = len(self.get_data())
-    
+
         # добавим к количеству также сумму раскрытых элементов
         exp_count = 0
         for exp in expandedItems:
             if exp['count'] == -1:
                 exp['count'] = self.counter(grouped, level_index + 1, level_keys + [exp['id']], exp['expandedItems'])
             exp_count = exp_count + exp['count']
-    
+
         #count_cache[cache_key] = total_of_level+exp_count
         #print 'count_exp_data() = %s, total=%s, exp_count=%s' % (total_of_level+exp_count, total_of_level, exp_count) 
         return total_of_level + exp_count
-    
+
     def indexer(self, grouped, level_index, level_keys, expandedItems, aggregates, sorting):
         return self.__index_data(grouped, level_index, level_keys, expandedItems, aggregates, sorting)
 
@@ -858,7 +858,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
             aggregate_values = {}
             prepared = []
             field = grouped[level_index]
-    
+
             for rec in raw_data:
                 finded = True
                 for lev in range(0, level_index):
@@ -894,7 +894,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] < agg_value else aggr_rec[agg]
                         elif agg_type == 'avg':
                             aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
-            
+
             # придется обработать все записи уровня, т.к. требуется еще отсортировать их и лишь потом ограничить количество
             for i in prepared:
                 item = self.create_record()
