@@ -4,6 +4,7 @@ Created on 03.03.2011
 
 @author: akvarats
 '''
+from decimal import Decimal
 
 from django.db import models
 from django.utils.encoding import force_unicode
@@ -31,7 +32,8 @@ class SimpleModelImport(BaseDataExchange):
     INTEGER_FIELDS  = [models.IntegerField, models.PositiveIntegerField,
                        models.SmallIntegerField, models.PositiveSmallIntegerField,
                        models.BigIntegerField, models.AutoField,]
-    FLOAT_FIELDS    = [models.FloatField, models.DecimalField,]
+    FLOAT_FIELDS    = [models.FloatField,]
+    DECIMAL_FIELDS  = [models.DecimalField,]
     DATE_FIELDS     = [models.DateField,]
     DATETIME_FIELDS = [models.DateTimeField,]
     BOOLEAN_FIELDS  = [models.BooleanField,]
@@ -123,8 +125,9 @@ class SimpleModelImport(BaseDataExchange):
             result = int(external_value)
             
         elif field_cls in SimpleModelImport.FLOAT_FIELDS:
-            result = float(field_cls)
-            
+            result = float(external_value)
+        elif field_cls in SimpleModelImport.DECIMAL_FIELDS:
+            result = Decimal(force_unicode(external_value))
         elif (field_cls in SimpleModelImport.DATE_FIELDS or
               field_cls in SimpleModelImport.DATETIME_FIELDS):
             # вроде как джанговские бэкэнды читают дату и время корректно
