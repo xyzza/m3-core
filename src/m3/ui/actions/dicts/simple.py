@@ -29,7 +29,7 @@ class DictListWindowAction(Action):
     def create_window(self, request, context, mode):
         ''' Создаем и настраиваем окно '''
         base = self.parent
-        win = base.list_form(mode=mode, title=base.title)
+        win = base.list_form(mode=mode, title=base.title_plural if base.title_plural else base.title)
         win.height, win.width = base.height, base.width
         win.min_height, win.min_width = base.height, base.width
         
@@ -142,9 +142,10 @@ class DictEditWindowAction(Action):
         elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
             create_new = False
         if create_new and base.add_window:
-            win = utils.bind_object_from_request_to_form(request, base.get_row, base.add_window)
+            win = self.parent.object_to_form(request, context, base.get_row, base.add_window)
         else:
-            win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window)
+            win = self.parent.object_to_form(request, context, base.get_row, base.edit_window)
+            
         if not win.title:
             win.title = base.title
         win.form.url = base.save_action.get_absolute_url()
@@ -217,9 +218,9 @@ class DictSaveAction(Action):
     def run(self, request, context):
         id = utils.extract_int(request, 'id')
         if not id and self.parent.add_window:
-            obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.add_window)
+            obj = self.parent.form_to_object(request, context, self.parent.get_row, self.parent.add_window)
         else:
-            obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
+            obj = self.parent.form_to_object(request, context, self.parent.get_row, self.parent.edit_window)
         
         # Проверка корректности полей сохраняемого объекта    
         result = self.parent.validate_row(obj, request)
@@ -258,7 +259,9 @@ class BaseDictionaryActions(ActionPack):
     Пакет с действиями, специфичными для работы со справочниками
     '''
     # Заголовок окна справочника
-    title = ''
+    title = '' # для записи
+    title_plural = '' # для списка
+    
     # Список колонок состоящий из кортежей (имя json поля, имя колонки в окне)
     list_columns = []
     
@@ -387,6 +390,20 @@ class BaseDictionaryActions(ActionPack):
     def get_edit_window(self, win):
         ''' Возвращает настроенное окно редактирования элемента справочника '''
         return win
+    
+    def object_to_form(self, request, context, get_obj, win_cls):
+        '''
+        Заполнение элементов формы данными из объекта.
+        (вынесено для удобства переопределения)
+        '''
+        return utils.bind_object_from_request_to_form(request, get_obj, win_cls)
+    
+    def form_to_object(self, request, context, get_obj, win_cls):
+        '''
+        Заполнение атрибутов объекта данными из формы.
+        (вынесено для удобства переопределения)
+        '''
+        return utils.bind_request_form_to_object(request, get_obj, win_cls)
 
 class BaseDictionaryModelActions(BaseDictionaryActions):
     '''
