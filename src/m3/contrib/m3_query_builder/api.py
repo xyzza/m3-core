@@ -193,6 +193,11 @@ def get_query_params(query_id):
         
     return res
 
+def get_report_params(report_id):
+    '''
+    Возвращает параметры отчета
+    '''
+    report = ReportParams.objects.filter(report_id__in=report_id)
 
 def get_packs():
     '''

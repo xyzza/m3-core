@@ -9,6 +9,7 @@ from m3.ui import actions
 from m3.ui.actions import ACD
 from m3.helpers import logger
 from m3.ui.actions.dicts.simple import BaseDictionaryModelActions
+from m3.ui.ext.controls.buttons import ExtButton
 
 import ui
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
@@ -16,9 +17,9 @@ from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_pack
 
 from models import Query, Report, TypeField
-from m3.contrib.m3_query_builder.models import ReportParams
-from m3.ui.ext.controls.buttons import ExtButton
-from m3.ui.ext.containers.containers import ExtToolBar
+from models import ReportParams
+
+
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -242,10 +243,12 @@ class ReportBuilderActionsPack(BaseDictionaryModelActions):
                              ReportQueryParamsAction(), 
                              ReportQuerySaveAction(),
                              ReportEditParamsWindowAction(),
-                             GetPacksProjectAction()])
+                             GetPacksProjectAction(),
+                             GetReportFormAction()])
         
     def get_list_window(self, win):
-        win.template_globals = 'rb-report-list.js'              
+        win.template_globals = 'rb-report-list.js'
+        win.report_form_url = GetReportFormAction.absolute_url()      
         win.buttons.insert(0, ExtButton(text=u'Показать форму отчета',
                                         handler='openReportForm'
                                         ))
@@ -381,3 +384,21 @@ class GetPacksProjectAction(actions.Action):
             data = get_packs()
                
         return actions.JsonResult(json.dumps({'success': True, 'data': data}))
+    
+class GetReportFormAction(actions.Action):
+    '''
+    Возвращает форму отчета
+    '''
+    url = '/report-form'
+    shortname = 'm3-report-builder-report-from'
+
+    def context_declaration(self):
+        return [ACD(name='id', type=str, required=True, 
+                    verbose_name=u'Идентификатор отчета'),]
+
+    def run(self, request, context):
+        
+        context.id
+        
+        win = ui.ReportForm()
+        return actions.ExtUIScriptResult(win)
