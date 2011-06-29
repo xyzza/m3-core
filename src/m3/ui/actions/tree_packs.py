@@ -807,7 +807,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
                         except RelatedError, e:
                             message = e.args[0]
                     else:
-                        if not safe_delete(self.model, obj.id):
+                        if not safe_delete(obj):
                             message = u'Не удалось удалить элемент %s. Возможно на него есть ссылки.' % obj.id
                             break
             return OperationResult.by_message(message)
