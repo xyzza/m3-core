@@ -29,8 +29,6 @@ M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
     _lastHighlightedId: undefined,
     //id последнего быстроредактируемого компонента
     _lastQuickPropertyId: undefined,
-    //Изменено ли приложение ?
-    _changed: false,
 
     /**
      * Фактическая инициализация дизайнера
@@ -60,7 +58,13 @@ M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
         this.tree.on('dblclick', this.onComponentTreeNodeDblClick.createDelegate(this));
         this.tree.on('click', this.onComponentTreeNodeClick.createDelegate(this));
         this.tree.on('nodedragover', this.onComponentTreeNodeDragOver.createDelegate(this));
+
         this._editorManager.on('modelUpdate', this.onModelUpdate.createDelegate(this));
+
+        this._model.on('append', this.beforeRefreshView.createDelegate(this));
+        this._model.on('insert', this.beforeRefreshView.createDelegate(this));
+        this._model.on('move', this.beforeRefreshView.createDelegate(this));
+        this._model.on('remove', this.beforeRefreshView.createDelegate(this));
 
         //в тулбокс ничего перетаскивать нельзя, можно только из него
         this.toolbox.on('nodedragover', function (dragOverEvent) {
@@ -147,12 +151,18 @@ M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
     },
 
     /**
-     *  Функция возвращает состояние,
-     *  если в аргументах пришло состояние оно будет присвоено переменной
+     * Функция возвращает состояние,
+     * если в аргументах пришло состояние оно будет присвоено переменной
+     * @param stateBool {Boolean} setter
      */
     changedState: function(stateBool){
-        this._changed = stateBool !== undefined ?   stateBool: this._changed
-        return this._changed
+        if (stateBool !== undefined){
+            this._model.root.dirty = stateBool;
+            if (stateBool === false){
+                this._model.cleanChanges();
+            }
+        }
+        return this._model.root.dirty
     },
 
     /**
@@ -171,7 +181,7 @@ M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
 
     /**
      * Убрать подстветку
-     * @stayAliveQuickProperty bool значение, если true то QuickPropertyWindow не уничтожиться
+     * @stayAliveQuickProperty {Boolean} если true то QuickPropertyWindow не уничтожиться
      */
     removeHighlight: function (stayAliveQuickProperty) {
         if (!Ext.isEmpty(this._lastHighlightedId)) {
@@ -457,9 +467,18 @@ M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
         this.selectTreeNodeByElementId(highlightedId);
         //Выделяем элемент в дереве
         this.highlightElement(highlightedId, true);
+
         this.changedState(true);
         //Зажигаем событие
         this.fireEvent('contentchanged');
-
+    },
+    /**
+     * Хендлер, выполняется до синхронизации модели и предстовления
+     */
+    beforeRefreshView: function(){
+        //Меняем состояние
+        this.changedState(true);
+        //Зажигаем событие
+        this.fireEvent('contentchanged');
     }
 });

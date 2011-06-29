@@ -25,7 +25,6 @@ M3Designer.view.BaseView = Ext.extend(Object, {
         this._model.on('insert', this.beforeRefresh.createDelegate(this));
         this._model.on('move', this.beforeRefresh.createDelegate(this));
         this._model.on('remove', this.beforeRefresh.createDelegate(this));
-
     },
 
     /**
@@ -78,7 +77,6 @@ M3Designer.view.DesignView = Ext.extend(M3Designer.view.BaseView, {
     },
     refresh: function () {
         this._container.removeAll();
-
         var recursion = function (model) {
             var newComponentCfg = this.createComponent(model);
             var i;
@@ -102,6 +100,7 @@ M3Designer.view.DesignView = Ext.extend(M3Designer.view.BaseView, {
 
         var childCfg = recursion.call(this, this._model.root);
 
+        this._model.isDirty();
         this._container.add(childCfg);
         this._container.doLayout();
     },

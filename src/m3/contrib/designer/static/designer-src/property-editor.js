@@ -36,8 +36,7 @@ M3Designer.edit.PropertyEditorManager = Ext.extend(Ext.util.Observable, {
      */
     editModelInline: function (model) {
         // Грубый подбор компонента
-        var idCmp = 'property-panel';
-        var panel = Ext.getCmp(idCmp);
+        var panel = Ext.getCmp('property-panel');
         if (panel) {
             var cfg = this.initConfig(model);
             var propertyGrid = new M3Designer.edit.InlinePropertyGrid({

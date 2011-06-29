@@ -16,6 +16,7 @@ M3Designer.model.ComponentModel = Ext.extend(Ext.data.Node, {
      */
     constructor: function (config) {
         this.type = config.type || 'undefined';
+        this.dirty = true;
         M3Designer.model.ComponentModel.superclass.constructor.call(this, config);
     },
 
@@ -91,7 +92,30 @@ M3Designer.model.FormModel = Ext.extend(Ext.data.Tree, {
     constructor: function (root) {
         M3Designer.model.FormModel.superclass.constructor.call(this, root);
     },
-
+    /**
+     * Имеются ли в модели изменения
+     */
+    isDirty:function(){
+        var root = this.root;
+        root.cascade(function () {
+            if (this.dirty) {
+                root.dirty = this.dirty;
+                return false;
+            }
+        });
+        return root.dirty;
+    },
+    /**
+     * Изменяем состояние всех компанентов 
+     */
+    cleanChanges:function(){
+        this.root.dirty = false;
+        this.root.cascade(function () {
+            if (this.dirty) {
+                this.dirty = false;
+            }
+        });
+    },
     /**
      * Поиск модели по id. Это именно поиск с обходом. Может быть в дальнейшем стоит разобраться
      * со словарем nodeHash внутри дерева и его использовать для поиска по id(но это вряд ли, деревья маленькие)
