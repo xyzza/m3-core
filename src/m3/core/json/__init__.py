@@ -41,7 +41,7 @@ class M3JSONEncoder(json.JSONEncoder):
             # Также соберем все атрибуты-менеджеры (их может быть несколько).
             # Сюда попадет "objects", который исключаем из обработки ниже.
             for attr in obj.__class__.__dict__:
-                if isinstance(getattr(obj.__class__, attr), dj_models.manager.Manager):
+                if isinstance(obj.__class__.__dict__[attr], dj_models.manager.ManagerDescriptor):
                     manager_names.append(attr)
             
         # если передали специальный список атрибутов, то пройдемся по ним 
