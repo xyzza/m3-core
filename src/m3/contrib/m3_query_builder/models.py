@@ -17,12 +17,14 @@ class TypeField(object):
     NUMBER_FIELD = 2    
     DICTIONARY_FIELD =3
     DATE_FIELD = 4
+    BOOLEAN_FIELD = 5
     
     VALUES = {
-        STRING_FIELD: u'Текстовое поле',
-        NUMBER_FIELD: u'Числовое поле',
+        STRING_FIELD: u'Текст',
+        NUMBER_FIELD: u'Число',
         DICTIONARY_FIELD: u'Выбор из справочника',
-        DATE_FIELD: u'Поле даты'
+        DATE_FIELD: u'Дата',
+        BOOLEAN_FIELD: u'Флаг',
     }
 
     @staticmethod
@@ -43,12 +45,8 @@ class Query(models.Model):
     
     class Meta():
         db_table = 'm3_query_builder'
-        
-#REPORT_TYPE_CHOICES = (
-#    (0, 'xls'),
-#    (1, 'pdf'),                       
-#)
-        
+
+
 class Report(models.Model):
     '''
     Модель для отчетов
@@ -58,15 +56,10 @@ class Report(models.Model):
     
     # Json представление запроса
     query = models.ForeignKey(Query) 
-#    
-#    # Тип отчета
-#    type = models.CharField(max_length=1, choices=REPORT_TYPE_CHOICES)
-#
-#    # Генерировать ли дополнительное окно с html информацией
-#    html_window = models.BooleanField(default=False)
-        
+   
     class Meta():
         db_table = 'm3_report_builder'
+
 
 class ReportParams(models.Model):
     '''
@@ -77,6 +70,9 @@ class ReportParams(models.Model):
     
     # Название параметра
     name = models.CharField(max_length=100, db_index=True)
+    
+    # Название параметра
+    verbose_name = models.CharField(max_length=100, db_index=True)
     
     # Тип параметра
     type = models.SmallIntegerField(choices=TypeField.get_type_choices())

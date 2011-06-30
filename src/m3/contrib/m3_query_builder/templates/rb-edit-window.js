@@ -26,6 +26,7 @@ function submitForm(){
 	for (var i=0; i<range.length; i++){
 		res.push({
 			'name': range[i].get('name'),
+			'verbose_name': range[i].get('verbose_name'),
 			'type': range[i].get('type_id'),
 			'type_value': range[i].get('value_type_id'),
 		});
@@ -106,10 +107,13 @@ function editParamWindow(node){
             childWin.fireEvent('loadData', {
             	'id': record.get('name'),
             	'name': record.get('name'),
+            	'verboseName': record.get('verbose_name') || record.get('name'),
             	'type': record.get('type_id'),
             	'value': record.get('value_type_id')
             });
             childWin.on('selectData', function(obj){
+				
+				record.set('verbose_name', obj['verboseName']);
 				record.set('type', obj['typeName']);
 				record.set('type_id', obj['typeID']);
 				record.set('value_type', obj['valueName']);
@@ -123,54 +127,4 @@ function editParamWindow(node){
         }
 	});	
 	
-}
-
-/*
- * Открывает форму выбранного отчета
- */
-function openReportForm(){
-	var record =  grdParams.getSelectionModel().getSelected();
-	if (!record) {
-		Ext.Msg.show({
-		   title:'Внимание',
-		   msg: 'Не выбран параметр',
-		   buttons: Ext.Msg.OK,
-		   animEl: 'elId',
-		   icon: Ext.MessageBox.WARNING
-		});
-		
-		return;
-	}
-	
-	var loadMask = new Ext.LoadMask(win.body);
-    loadMask.show();
-
-    Ext.Ajax.request({
-        url: url
-        ,params: Ext.applyIf({
-        	'id': record.id
-        },
-        	win.actionContextJson || {})
-        ,success: function(response){
-            loadMask.hide();
-            var childWin = smart_eval(response.responseText);
-            childWin.fireEvent('loadData', {
-            	'id': record.get('name'),
-            	'name': record.get('name'),
-            	'type': record.get('type_id'),
-            	'value': record.get('value_type_id')
-            });
-            childWin.on('selectData', function(obj){
-				record.set('type', obj['typeName']);
-				record.set('type_id', obj['typeID']);
-				record.set('value_type', obj['valueName']);
-				record.set('value_type_id', obj['valueID']);
-         		record.commit();				
-            });		            
-		}
-		,failure: function(){
-        	loadMask.hide();
-            uiAjaxFailMessage.apply(this, arguments);
-        }
-	});	
 }

@@ -293,7 +293,8 @@ class ReportBuilderWindowAction(actions.Action):
 
                        
                 data.append([param.id,
-                             param.name, 
+                             param.name,
+                             param.verbose_name, 
                              param.type,
                              TypeField.VALUES[int(param.type)],
                              value or '',

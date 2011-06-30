@@ -1,6 +1,7 @@
 
 var hdnID = Ext.getCmp('{{ component.hdn_id.client_id }}');
 var strParamName = Ext.getCmp('{{ component.str_param_name.client_id }}');
+var strParamID = Ext.getCmp('{{ component.str_param_id.client_id }}');
 
 var comboValueType = Ext.getCmp('{{ component.cmb_value_type.client_id }}');
 var comboType = Ext.getCmp('{{ component.cmb_type.client_id }}');
@@ -10,7 +11,9 @@ var preHeightWin = '{{ component.height }}';
 
 win.on('loadData', function(obj){
 	hdnID.setValue(obj['id']);
-	strParamName.setValue(obj['name']);
+	
+	strParamID.setValue(obj['name']);
+	strParamName.setValue(obj['verboseName']);
 	
 	comboType.setValue(obj['type']);
 	if (obj['value']){
@@ -66,6 +69,8 @@ comboType.on('select', function(combo, record, index){
 // Обработчик кнопки "Ок" - выбрать значения
 function selectType(){
 	win.fireEvent('selectData', {
+		'verboseName': strParamName.getValue(),
+		
 		'typeID': comboType.getValue(),
 		'typeName': comboType.lastSelectionText, 
 		'valueID': comboValueType.getValue(),

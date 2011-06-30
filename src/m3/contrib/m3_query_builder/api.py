@@ -236,6 +236,7 @@ def save_report(id, name, query_id, grid_data):
     for item in grid_data:
         report_params = ReportParams()
         report_params.report_id = q.id
+        report_params.verbose_name = item['verbose_name']
         report_params.name = item['name']
         report_params.type = item['type']
         
