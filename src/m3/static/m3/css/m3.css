@@ -123,6 +123,17 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
     z-index: 3;
 }
 
+/*Класс для MultiCombo*/
+.x-multi-combo-item img {
+    width:16px;
+    height:16px;
+    float:left;
+    background-color: transparent;
+    background-position: -1px -1px !important;
+    background-repeat:no-repeat !important;
+}
+
+
 .m3-grey-field{
     border-color: #B5B8C8 !important;
     background-color: #f4f4f4 !important;

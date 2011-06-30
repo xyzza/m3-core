@@ -12,6 +12,7 @@ from django.conf import settings
 from base import BaseExtField
 
 from m3.ui import actions
+from m3.ui.ext.fields.simple import ExtComboBox
 from m3.ui.ext.misc import ExtJsonStore
 from m3.ui.ext.fields.base import BaseExtTriggerField
 from m3.ui.ext.base import BaseExtComponent
@@ -448,3 +449,18 @@ class ExtImageUploadField(ExtFileUploadField):
     @staticmethod
     def get_image_url(name):
         return '%s/%s' % (settings.MEDIA_URL, name)
+
+#===============================================================================
+class ExtMultiComboBox(ExtComboBox):
+    def __init__(self, *args, **kwargs):
+        super(ExtMultiComboBox, self).__init__(*args, **kwargs)
+
+    def render(self):
+        try:
+            self.render_base_config()
+
+        except Exception as msg:
+            raise Exception(msg)
+
+        base_config = self._get_config_str()
+        return 'new Ext.ux.form.MultiComboBox({%s})' % base_config
