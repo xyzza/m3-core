@@ -190,8 +190,10 @@ def create_py_class(path, class_name, base_class = 'ExtWindow'):
                 '\n\n' + codegen.to_source(Parser.generate_import()) + '\n'+ \
                 '\n'.join(source_lines[line:])
 
+    f_line = open(path, 'rb').readline()
+
     # Запись
-    with open(path, 'w') as f:   
+    with open(path, 'w' if '\r' in f_line else 'wb') as f:
         cl = Parser.generate_class(class_name, base_class)     
         f.write(source + '\n\n\n' +  codegen.to_source(cl))
 
@@ -230,7 +232,6 @@ def generate_func(path, class_name, func_node):
 
     # Запись
     with open(path, 'w' if '\r' in f_line else 'wb') as f:
-            
         if line_end:
             source_lines = source.split('\n')
             f.write('\n'.join(source_lines[:line_end-1]) +
