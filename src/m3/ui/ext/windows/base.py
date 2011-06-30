@@ -61,7 +61,7 @@ class BaseExtWindow(ExtUIComponent):
         self.__items = TypedList(type=ExtUIComponent)
         
         # Типизированный список кнопок
-        self.__buttons = []
+        self.__buttons = TypedList(type=ExtButton)
 
         # layout extjs. См. документацию
         self.layout = None
