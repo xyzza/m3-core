@@ -204,7 +204,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         при правильном дизайне один и тот же пак не должен быть в нескольких контроллерах одновременно. 
         @param ppack: Имя класса пака или класс пака.
         '''
-        assert isinstance(ppack, str) or hasattr(ppack, '__bases__'), 'Argument %s must be a string or class' % ppack
+        assert isinstance(ppack, basestring) or hasattr(ppack, '__bases__'), 'Argument %s must be a basestring or class' % ppack
         ppack = ControllerCache.find_pack(ppack)
         assert ppack, 'Pack %s not found in ControllerCache' % ppack
         self.__pack = ppack

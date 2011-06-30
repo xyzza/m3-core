@@ -12,14 +12,14 @@ from m3.ui.actions.dicts.simple import BaseDictionaryModelActions
 from m3.ui.ext.controls.buttons import ExtButton
 
 import ui
+from models import Query, Report, TypeField, ReportParams
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
-    get_pack
-
-from models import Query, Report, TypeField
-from models import ReportParams
-
-
+    get_pack, get_report_params
+from m3.ui.ext.fields.simple import ExtStringField, ExtNumberField, ExtDateField,\
+    ExtCheckBox
+from m3.ui.ext.fields.complex import ExtDictSelectField
+from m3.ui.actions.context import ActionContext
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -44,6 +44,7 @@ class QueryBuilderActionsPack(BaseDictionaryModelActions):
                              ConditionWindowAction(),
                              ShowQueryTextAction(),
                              SaveQueryAction()])
+
 
 class QueryBuilderWindowAction(actions.Action):
     '''
@@ -122,6 +123,7 @@ class QueryBuilderWindowAction(actions.Action):
                                                   x['expression']
                                                   ], query_json['cond_fields']),)        
         return actions.ExtUIScriptResult(data=window)
+
 
 class SelectConnectionWindowAction(actions.Action):
     '''
@@ -244,7 +246,8 @@ class ReportBuilderActionsPack(BaseDictionaryModelActions):
                              ReportQuerySaveAction(),
                              ReportEditParamsWindowAction(),
                              GetPacksProjectAction(),
-                             GetReportFormAction()])
+                             GetReportFormAction(),
+                             GenerateReportAction()])
         
     def get_list_window(self, win):
         win.template_globals = 'rb-report-list.js'
@@ -253,6 +256,7 @@ class ReportBuilderActionsPack(BaseDictionaryModelActions):
                                         handler='openReportForm'
                                         ))
         return win
+    
     
 class ReportBuilderWindowAction(actions.Action):
     '''
@@ -305,6 +309,7 @@ class ReportBuilderWindowAction(actions.Action):
         
         return actions.ExtUIScriptResult(data=window)
 
+
 class ReportQueryParamsAction(actions.Action):
     '''
     Получение параметров для отчета у связанного запроса
@@ -318,6 +323,7 @@ class ReportQueryParamsAction(actions.Action):
     def run(self, request, context):
         params = get_query_params(context.query_id)
         return actions.JsonResult(json.dumps(params))
+
 
 class ReportQuerySaveAction(actions.Action):
     '''
@@ -368,6 +374,7 @@ class ReportEditParamsWindowAction(actions.Action):
                
         return actions.ExtUIScriptResult(win)
     
+    
 class GetPacksProjectAction(actions.Action):
     '''
     Возвращает все паки в проекте
@@ -386,6 +393,7 @@ class GetPacksProjectAction(actions.Action):
                
         return actions.JsonResult(json.dumps({'success': True, 'data': data}))
     
+    
 class GetReportFormAction(actions.Action):
     '''
     Возвращает форму отчета
@@ -398,8 +406,49 @@ class GetReportFormAction(actions.Action):
                     verbose_name=u'Идентификатор отчета'),]
 
     def run(self, request, context):
-        
-        context.id
-        
+
         win = ui.ReportForm()
+        win.submit_data_url = GenerateReportAction.absolute_url()
+        
+        name, params = get_report_params(context.id)
+        
+        win.title = name
+        for param in params:
+            if param['type'] == TypeField.STRING_FIELD:
+                field = ExtStringField()
+            elif param['type'] == TypeField.NUMBER_FIELD:
+                field = ExtNumberField()
+            elif param['type'] == TypeField.DATE_FIELD:
+                field = ExtDateField()
+            elif param['type'] == TypeField.BOOLEAN_FIELD:
+                field = ExtCheckBox()
+            elif param['type'] == TypeField.DICTIONARY_FIELD:
+                field = ExtDictSelectField()
+                field.pack = param['value']
+            elif param['type'] == TypeField.NUMBER_FIELD:
+                field = ExtNumberField()                
+            else:
+                raise Exception('type "%s" is not define in class TypeField' % param['type'])
+            
+            field.anchor = '100%'
+            field.label = param['verbose_name']
+            field.name = param['name']
+            
+            win.height += 35
+            win.frm_form.items.append(field)
+        
         return actions.ExtUIScriptResult(win)
+       
+class GenerateReportAction(actions.Action):
+    '''
+    Формирует отчет
+    '''
+    url = '/generate-report'
+    shortname = 'm3-report-builder-generate-report'
+
+    def run(self, request, context):
+
+        import pprint
+        pprint.pprint(request.POST)
+               
+        return actions.JsonResult(json.dumps({'success': True}))

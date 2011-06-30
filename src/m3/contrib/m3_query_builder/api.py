@@ -16,6 +16,8 @@ from m3.ui.actions import ControllerCache
 
 from entity import BaseEntity, Field, Entity, Relation, Grouping, Where
 from models import Query, Report, ReportParams
+from m3.ui.actions.packs import BaseDictionaryActions
+from m3.ui.actions.tree_packs import BaseTreeDictionaryActions
 
 def get_entities():
     '''
@@ -197,7 +199,13 @@ def get_report_params(report_id):
     '''
     Возвращает параметры отчета
     '''
-    report = ReportParams.objects.filter(report_id__in=report_id)
+    
+    name = Report.objects.get(id=report_id).name
+    
+    params = ReportParams.objects.filter(report=report_id).\
+        values('name', 'verbose_name', 'type', 'value')
+
+    return name, params
 
 def get_packs():
     '''
@@ -208,7 +216,9 @@ def get_packs():
     for cont in controllers:
         res.extend([ [pack.__class__.__name__, 
                       pack.verbose_name or pack.__class__.__name__] \
-                    for pack in cont.get_packs()])
+                for pack in cont.get_packs() 
+                    if isinstance(pack, BaseDictionaryActions) \
+                        or isinstance(pack, BaseTreeDictionaryActions)])
     return sorted(res)
 
 def get_pack(pack_name):
