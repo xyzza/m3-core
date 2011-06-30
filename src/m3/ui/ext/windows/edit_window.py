@@ -14,6 +14,7 @@ class ExtEditWindow(BaseExtWindow):
     def __init__(self, *args, **kwargs):
         super(ExtEditWindow, self).__init__(*args, **kwargs)
         self.__form = None
+        self.data_url = None # адрес для загрузки данных формы
         self._ext_name = 'Ext.m3.EditWindow'
         self.renderer.template = 'ext-script/ext-editwindowscript.js' 
         self.init_component(*args, **kwargs)
@@ -50,6 +51,7 @@ class ExtEditWindow(BaseExtWindow):
             if isinstance(self.form, ExtForm):
                 self._put_params_value('form', {'id':self.form.client_id,
                                               'url':self.form.url})
+        self._put_params_value('dataUrl', self.data_url)
 
     # Данный код должен находится в базовом классе, но т.к. не вcе шаблоны 
     # переведены на новый рендеринг, остается пока в каждом 

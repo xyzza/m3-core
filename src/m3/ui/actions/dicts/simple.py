@@ -128,12 +128,14 @@ class DictEditWindowAction(Action):
     '''
     url = '/edit-window$'
     def context_declaration(self):
-        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника'),
+                ACD(name='isGetData', default=False, type=bool, required=True, verbose_name = u'признак загрузки данных')]
     
     def run(self, request, context):
         base = self.parent
         # Получаем объект по id
         id = utils.extract_int(request, 'id')
+        is_get_data = context.isGetData
         obj = base.get_row(id)
         # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
         create_new = True
@@ -149,6 +151,8 @@ class DictEditWindowAction(Action):
         if not win.title:
             win.title = base.title
         win.form.url = base.save_action.get_absolute_url()
+        # укажем адрес для чтения данных
+        win.data_url = base.edit_window_action.get_absolute_url()
         
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
@@ -162,8 +166,19 @@ class DictEditWindowAction(Action):
         if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
             win.configure_for_dictpack(action=self, pack=self.parent,
                                        request=request, context=context)
-            
-        return ExtUIScriptResult(base.get_edit_window(win))
+        if not is_get_data:
+            # если запрашивали не данные - вернем окно
+            return ExtUIScriptResult(base.get_edit_window(win))
+        else:
+            # если просили данные, то выжмем их из окна обратно в объект, 
+            # т.к. в окне могли быть и другие данных (не из этого объекта)
+            data_object = {}
+            # т.к. мы не знаем какие поля должны быть у объекта - создадим все, которые есть на форме
+            all_fields = win.form._get_all_fields(win)
+            for field in all_fields:
+                data_object[field.name] = None
+            win.form.to_object(data_object)
+            return PreJsonResult({'success': True, 'data': data_object})
 
 class DictRowsAction(Action):
     '''

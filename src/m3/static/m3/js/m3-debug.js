@@ -7577,9 +7577,14 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		this.formId = null;
 		
 		/**
-		 * url формы в окне дя сабмита
+		 * url формы в окне для сабмита
 		 */
 		this.formUrl = null;
+		
+		/**
+		 * url формы в окне для чтения данных
+		 */
+		this.dataUrl = null;
 		
 		/**
 		 * Количество измененных полей
@@ -7601,8 +7606,9 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 					this.formUrl = params.form.url;
 				}
 			}
-			
-
+			if (params.dataUrl){
+				this.dataUrl = params.dataUrl;
+			}
 		}
 
 		Ext.m3.EditWindow.superclass.constructor.call(this, baseConfig, params);
@@ -7636,6 +7642,19 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			 *   this - Сам компонент
 			 */
 			 ,'closing_canceled'
+			 /*
+			  * Генерируеются перед отправкой запроса на сервер за обновленными данными.
+			  * Можно изменить передаваемые параметры.
+			  *   this - Сам компонент
+			  *   @param {Object} load - Параметры ajax-запроса для отправки на сервер
+			  */
+			 ,'beforeloaddata'
+			 /*
+			  * Генерируеются после успешного запроса данных.
+			  *   this - Сам компонент
+			  *   @param {Object} action - Результаты запроса
+			  */
+			 ,'dataloaded'
 			)
 	
 	}
@@ -7810,9 +7829,35 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
             }
         }
     }
+    /*
+     * Динамическая загрузка данных формы
+     */
+    ,loadForm: function() {
+        assert(this.dataUrl, 'Не задан dataUrl для формы');
+        var form = this.getForm();
+        var mask = new Ext.LoadMask(this.body, {msg:'Чтение данных...'});
+        var load = {
+            url: this.dataUrl
+            ,params: Ext.applyIf({isGetData: true}, this.actionContextJson || {})
+            ,success: function(form, action){
+            	mask.hide();
+                this.disableToolbars(false);
+                this.fireEvent('dataloaded', action);
+            }
+            ,failure: function (){
+                uiAjaxFailMessage.apply(this, arguments);
+                mask.hide();
+                this.disableToolbars(false);
+           }
+           ,scope: this
+        };
+        this.disableToolbars(true);
+        mask.show();
+        if (this.fireEvent('beforeloaddata', load)) {
+        	form.doAction('load', load);
+        }
+    }
 })
-
-
 Ext.ns('Ext.ux.grid');
 
 Ext.ux.grid.Exporter = Ext.extend(Ext.util.Observable,{
