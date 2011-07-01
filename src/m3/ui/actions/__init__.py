@@ -827,6 +827,22 @@ class ActionController(object):
         Возвращение всех паков в контроллере
         '''
         return self._packs_by_name.values()
+    
+    def reset(self):
+        '''
+        HARD RESET всего что наделал контроллер с паками и экшенами
+        '''
+        for pack in self.top_level_packs:
+            if hasattr(pack, '_built'):
+                del(pack._built)
+        for url, value in self._url_patterns.iteritems():
+            if hasattr(value[1], '_built'):
+                del(value[1]._built)
+        self._actions_by_name.clear()
+        self._actions_by_type.clear()
+        self._packs_by_name.clear()
+        self._packs_by_type.clear()
+        self.top_level_packs = []
 
 class ControllerCache(object):
     '''
@@ -939,6 +955,8 @@ class ControllerCache(object):
         Сбрасывает внутренний флаг заполненности контроллера.
         Следующий запрос к контроллеру вызовет перестройку иерархии экшенов и паков. 
         """
+        for cont in cls.get_controllers():
+            cont.reset()
         cls._loaded = False
     
     @classmethod
