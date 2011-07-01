@@ -354,7 +354,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             grid.handler_contextmenu = ExtContextMenu()
             grid.top_bar = ExtToolBar()
             
-            search_grid = ExtSearchField(empty_text = u'Поиск', width=200, component_for_search = grid)
+            search_grid = ExtSearchField(empty_text = u'Поиск', width=180, component_for_search = grid)
             
             self.grid = grid
             self.search_text_grid = search_grid
