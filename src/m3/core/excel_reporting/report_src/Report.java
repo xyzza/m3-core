@@ -35,6 +35,7 @@ import org.apache.poi.ss.usermodel.Footer;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.PrintSetup;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -136,6 +137,9 @@ class ReportGenerator{
 	// Список строк с тегами, которые нужно удалить после обработки листа
 	ArrayList<Integer> unusedTagRows = new ArrayList<Integer>();
 	
+	// Список ячеек, в которые нужно записть примечание
+	ArrayList<CellWrap> cellsWithComments = new ArrayList<CellWrap>();
+	
 	// Во время генерации отчета происходит поиск некоторых специальных ячеек по их комментарию
 	// Они запоминаются и используются в дальнейшем
 	Cell cell_repeat_tag_start = null;
@@ -217,6 +221,12 @@ class ReportGenerator{
 					cw.set("region_index", key);
 					lazyMergedCells.add(cw);
 				}
+			}
+			
+			else if (text.startsWith("@")){
+				CellWrap cw = new CellWrap(newCell);
+				cw.set("text", text.substring(1));
+				cellsWithComments.add(cw);
 			}
 		}
 		
@@ -1168,6 +1178,35 @@ class ReportGenerator{
 	}
 	
 	/**
+	 * Создает на странице комментарии к ячейкам, текст которых на исходной
+	 * странице начинася с символа @
+	 * @param sheet Целевая страница
+	 */
+	private void createCellComments(Sheet sheet){
+		if (cellsWithComments.isEmpty())
+			return;
+		
+		Drawing drawing = sheet.createDrawingPatriarch();
+		for (CellWrap cw: cellsWithComments){
+			Cell cell = cw.cell;
+			Row row = cell.getRow();
+			
+			ClientAnchor anchor = helper.createClientAnchor();
+			// Поле видимости комментария 1x3 ячейки
+			anchor.setCol1(cell.getColumnIndex());
+		    anchor.setCol2(cell.getColumnIndex() + 1);
+		    anchor.setRow1(row.getRowNum());
+		    anchor.setRow2(row.getRowNum() + 3);
+		    
+		    Comment comment = drawing.createCellComment(anchor);
+		    RichTextString str = helper.createRichTextString("Hello, World!");
+		    comment.setString(str);
+		    
+		    cell.setCellComment(comment);
+		}
+	}
+	
+	/**
 	 * Генерация отчета.
 	 * @throws Exception
 	 */
@@ -1193,6 +1232,7 @@ class ReportGenerator{
 			lazyMergedCells.clear();
 			matrixCells.clear();
 			unusedTagRows.clear();
+			cellsWithComments.clear();
 			
 			in_sheet = in_book.getSheetAt(sheet_index);
 			out_sheet = createShadowSheet(in_sheet);
@@ -1216,6 +1256,8 @@ class ReportGenerator{
 			}
 			
 			imposeMatrix(out_sheet, root, matrixCells.values());
+			
+			createCellComments(out_sheet);
 			
 			// Установка повторяющихся строк. Как правило это шапка таблицы, одинковая для всех страниц
 			repeat_cells.add(new RepeatCells(out_sheet, cell_repeat_tag_start, cell_repeat_tag_end));
