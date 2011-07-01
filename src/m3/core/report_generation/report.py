@@ -94,7 +94,7 @@ class OORunner(object):
     @staticmethod
     def get_desktop():
         '''
-        Запускает сервер (если start = True), и возвращает объект Desktop
+        Запускает сервер и возвращает объект Desktop
         '''        
         localContext = uno.getComponentContext()
         resolver = localContext.ServiceManager.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", localContext)
@@ -186,14 +186,6 @@ class OOParser(object):
             if not section.is_valid():
                 raise OOParserException, "Неверно задана секция %s. \
                 Определена одна из двух ячеек" %section.name  
-            # Выставляем новые координаты правой ячейки на основе ширины и высоты
-            # секции с учетом объединенных ячеек      
-            real_width = section.get_real_width()
-            real_height = section.get_real_height() 
-            new_right_position = uno.createUnoStruct('com.sun.star.table.CellAddress')
-            new_right_position.Column = section.left_cell_addr.Column + real_width - 1
-            new_right_position.Row = section.left_cell_addr.Row + real_height - 1
-            section.right_cell_addr = new_right_position  
         #Флаг 8 отвечает за удаление аннотаций.
         document.clearContents(8)          
         return all_sections  
@@ -259,10 +251,10 @@ class Section(object):
         #Если левая ячейка уже задана, определяем, действительно ли она левая    
         elif self.left_cell_addr:
             if (cell.Row >= self.left_cell_addr.Row) and (cell.Column >= self.left_cell_addr.Column):
-                self.right_cell_addr = cell
+                self.set_right_cell_addr(cell)
             elif (cell.Row < self.left_cell_addr.Row) and (cell.Column < self.left_cell_addr.Column):   
-                self.right_cell_addr = self.left_cell_addr
-                self.left_cell_addr = cell     
+                self.left_cell_addr = cell  
+                self.set_right_cell_addr(self.left_cell_addr)   
             # Секция задана неверно, не записываем такую ерунду
             else:    
                 raise OOParserException, "Неверно задана секция %s. \
@@ -271,57 +263,40 @@ class Section(object):
         elif self.right_cell_addr:
             if (cell.Row >= self.right_cell_addr.Row) and (cell.Column >= self.right_cell_addr.Column):
                 self.left_cell_addr = self.right_cell_addr
-                self.right_cell_addr = cell
+                self.set_right_cell_addr(cell)
             elif (cell.Row < self.left_cell_addr.Row) and (cell.Column < self.left_cell_addr.Column):
                 self.left_cell_addr = cell 
             # Секция задана неверно, не записываем такую ерунду
             else:    
                 raise OOParserException, "Неверно задана секция %s. \
-                Определите верхнюю левую и нижнюю правую ячейки" %self.name    
-                
-    def get_real_width(self):
+                Определите верхнюю левую и нижнюю правую ячейки" %self.name       
+    
+    def set_right_cell_addr(self, cell_addr):
         '''
-        Вычисляет "реальную" ширину секции. Т.е. ширину, в которой ширина
-        объединенных ячеек соответствует количеству ячеек, входящих в объединение,
-        а не равна единице.
+        Устанавливает адрес правой ячейки секции. 
+        В случае, если ячейка объединена, ее адрес в опенофисе равен адресу левой 
+        верхней ячейки, входящей в объединение.
+        Эта функция находит адрес правой нижней ячейки, входящей в объединение.  
         '''
-        section_width = 0
         document  = self.report_object.document
         if document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             src_sheet = document.getSheets().getByName(TEMPORARY_SHEET_NAME)
         else:
-            raise ReportGeneratorException, "Невозможно вывести секцию в отчет, \
-            лист-шаблон отсутствует. Возможно, отчет уже был отображен."    
-        column = self.left_cell_addr.Column    
-        while column <= self.right_cell_addr.Column:
-            cell = src_sheet.getCellByPosition(column, self.left_cell_addr.Row)
-            cursor = src_sheet.createCursorByRange(cell)
+            raise ReportGeneratorException, "Лист-шаблон отсутствует. Возможно, отчет уже был отображен."
+        right_cell = src_sheet.getCellByPosition(cell_addr.Column, cell_addr.Row)
+        # Смотрим, объединена ли ячейка. Если да, адресом правой ячейки секции 
+        # будем считать адрес правой нижней ячейки 
+        if right_cell.IsMerged:
+            cursor = src_sheet.createCursorByRange(right_cell)
             cursor.collapseToMergedArea()
-            section_width += cursor.Columns.Count
-            column += cursor.Columns.Count   
-        return section_width        
-                
-    def get_real_height(self):
-        '''
-        Вычисляет "реальную" высоту секции. Т.е. высоту, в которой высота
-        объединенных ячеек соответствует количеству ячеек, входящих в объединение,
-        а не равна единице.
-        '''
-        section_height = 0
-        document  = self.report_object.document
-        if document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
-            src_sheet = document.getSheets().getByName(TEMPORARY_SHEET_NAME)
+            column = cell_addr.Column + cursor.Columns.Count - 1
+            row = cell_addr.Row + cursor.Rows.Count - 1
+            new_right_position = uno.createUnoStruct('com.sun.star.table.CellAddress')
+            new_right_position.Column = column
+            new_right_position.Row = row
         else:
-            raise ReportGeneratorException, "Невозможно вывести секцию в отчет, \
-            лист-шаблон отсутствует. Возможно, отчет уже был отображен."
-        row = self.left_cell_addr.Row    
-        while row <= self.right_cell_addr.Row:
-            cell = src_sheet.getCellByPosition(self.left_cell_addr.Column, row)
-            cursor = src_sheet.createCursorByRange(cell)
-            cursor.collapseToMergedArea()
-            section_height += cursor.Rows.Count  
-            row += cursor.Rows.Count  
-        return section_height                  
+            new_right_position = cell_addr 
+        self.right_cell_addr = new_right_position                
             
     def is_valid(self):
         '''
