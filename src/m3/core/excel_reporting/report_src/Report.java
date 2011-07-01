@@ -1190,16 +1190,17 @@ class ReportGenerator{
 		for (CellWrap cw: cellsWithComments){
 			Cell cell = cw.cell;
 			Row row = cell.getRow();
+			String text = (String) cw.get("text");
 			
 			ClientAnchor anchor = helper.createClientAnchor();
-			// Поле видимости комментария 1x3 ячейки
+			// Поле видимости комментария 3x3 ячейки
 			anchor.setCol1(cell.getColumnIndex());
-		    anchor.setCol2(cell.getColumnIndex() + 1);
+		    anchor.setCol2(cell.getColumnIndex() + 3);
 		    anchor.setRow1(row.getRowNum());
 		    anchor.setRow2(row.getRowNum() + 3);
 		    
 		    Comment comment = drawing.createCellComment(anchor);
-		    RichTextString str = helper.createRichTextString("Hello, World!");
+		    RichTextString str = helper.createRichTextString(text);
 		    comment.setString(str);
 		    
 		    cell.setCellComment(comment);
@@ -1257,12 +1258,12 @@ class ReportGenerator{
 			
 			imposeMatrix(out_sheet, root, matrixCells.values());
 			
-			createCellComments(out_sheet);
-			
 			// Установка повторяющихся строк. Как правило это шапка таблицы, одинковая для всех страниц
 			repeat_cells.add(new RepeatCells(out_sheet, cell_repeat_tag_start, cell_repeat_tag_end));
 			
 			clean_unused_tags(out_sheet);
+			
+			createCellComments(out_sheet);
 			
 			// Копируем область печати (больше не копируем - должна определяться сама при предв. просмотре в экселе)
 			//String area = in_book.getPrintArea(in_book.getSheetIndex(in_sheet));
