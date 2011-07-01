@@ -855,13 +855,26 @@ Ext.ux.grid.MultiGroupingExporter = Ext.extend(Ext.util.Observable,{
         //добавим кнопку
         bar.insert(1,new Ext.Button({
             text:'Экспорт',
-            listeners:{
-                scope:this,
-                click:this.exportData                
-            }
+            menu: new Ext.menu.Menu({
+            	items: [{
+            			text: 'XLS (Excel2003 до 65000 строк)'
+            			,exportType: 'xls'
+            			,listeners: {
+			            	scope:this,
+							click:this.exportData                
+						}
+            		},{
+            			text: 'CSV (разделитель ";")'
+            			,exportType: 'csv'
+            			,listeners: {
+			            	scope:this,
+							click:this.exportData                
+						} 
+            	}]
+            })
         }));
     },
-    exportData:function(){
+    exportData:function(item){
     	// соберем расположение колонок
         columns = []
         Ext.each(this.grid.colModel.config,function(column,index){
@@ -890,6 +903,9 @@ Ext.ux.grid.MultiGroupingExporter = Ext.extend(Ext.util.Observable,{
         }
         // передадим параметры фильтров
         params = Ext.applyIf(params, this.grid.getStore().baseParams);
+        // тип экспорта
+        params.exportType = item.exportType;
+        
         this.grid.view.showLoadMask(true);
         Ext.Ajax.request({
             url : this.exportUrl,
