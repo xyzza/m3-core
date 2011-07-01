@@ -15,7 +15,7 @@ from m3.ui import actions
 from m3.ui.ext.fields.simple import ExtComboBox
 from m3.ui.ext.misc import ExtJsonStore
 from m3.ui.ext.fields.base import BaseExtTriggerField
-from m3.ui.ext.base import BaseExtComponent
+from m3.ui.ext.base import BaseExtComponent, ExtUIComponent
 from m3.ui.actions import ControllerCache
 from m3.helpers.datastructures import TypedList
 
@@ -293,11 +293,24 @@ class ExtSearchField(BaseExtField):
     '''Поле поиска'''
     def __init__(self, *args, **kwargs):
         super(ExtSearchField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-search-field.js'
         self.query_param = None
-        self.empty_text =None
+        self.empty_text = None
         self.component_for_search = None
         self.init_component(*args, **kwargs)
+
+    def render_base_config(self):
+        super(ExtSearchField, self).render_base_config()
+        self._put_params_value('paramName', self.query_param)
+        self._put_params_value('emptyText', self.empty_text)
+
+    def render(self):
+        assert isinstance(self.component_for_search, ExtUIComponent)
+        self.render_base_config()
+        base_config = self._get_config_str()
+        # Строка рендера как в шаблоне
+        s = 'new Ext.app.form.SearchField({%s, getComponentForSearch: function(){return Ext.getCmp("%s");}})'\
+            % (base_config, self.component_for_search.client_id)
+        return s
 
 #===============================================================================
 class ExtFileUploadField(BaseExtField):
