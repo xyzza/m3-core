@@ -42,17 +42,18 @@ class Command(BaseCommand):
         
         # Путь до сервера дизайнера
         cwd = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        
+
+        def_port = '7777'
+        def_ip = '127.0.0.1'
+
         if not addrport:
-            addr = ''
-            port = '7777'
+            addr = def_ip
+            port = def_port
         else:
             try:
                 addr, port = addrport.split(':')
             except ValueError:
-                addr, port = '', addrport
-        if not addr:
-            addr = '127.0.0.1'
+                addr, port = def_ip, addrport
 
         if not port.isdigit():
             raise CommandError("%r is not a valid port number." % port)

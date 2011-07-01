@@ -17,8 +17,8 @@ Ext.namespace('M3Designer');
 M3Designer.Requests = Ext.apply({}, {
     /**
      * Запрос на сохранение
-     * @param codeEditor
-     * @param path
+     * @param codeEditor {object}
+     * @param path {string}
      */
     fileSaveContent:function(codeEditor, path){
         Ext.Ajax.request({
@@ -42,8 +42,8 @@ M3Designer.Requests = Ext.apply({}, {
     },
     /**
      * Запрос на обновление
-     * @param codeEditor
-     * @param path
+     * @param codeEditor {object}
+     * @param path {string}
      */
     fileUpdateContent:function(codeEditor, path){
         /**
@@ -97,7 +97,7 @@ M3Designer.Requests = Ext.apply({}, {
     /**
      * Запрос содержимого файла по path на сервере
      * @param fileAttr {object} - содержит в себе fileName, path
-     * @param tabPanel
+     * @param tabPanel {object}
      */
     fileGetContent:function(fileAttr, tabPanel){
         Ext.Ajax.request({
@@ -239,8 +239,8 @@ M3Designer.Requests = Ext.apply({}, {
      * Выполняет запрос на различные манипуляции с файловой сиситемой
      * (GET, DELETE, RENAME для директорий и файлов)
      * DRY
-     * @param params - Параметры запроса
-     * @param fn - Функция которая будет выполнена при success
+     * @param params {object} Параметры запроса
+     * @param fn {function} Функция которая будет выполнена при success
     */
     manipulation:function(params, fn){
         var errorTypeExist = 'exist';
@@ -266,8 +266,8 @@ M3Designer.Requests = Ext.apply({}, {
     },
     /**
      * Запрос на создание новой контейнерной функции
-     * @param funcName {} имя функции
-     * @param funcType {} тип функции
+     * @param funcName {string} имя функции
+     * @param funcType {string} тип функции
      * @param node {object}
      * @param win {} окно
      */

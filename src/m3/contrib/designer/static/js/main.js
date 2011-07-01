@@ -27,14 +27,14 @@ Array.prototype.has = function() {
 /*==========================Перехват нажатий клавиш===========================*/
 //Инициируем перехват нажатия ctrl+s для автоматического сохранения на сервер
 Ext.fly(document).on('keydown',function(e,t,o){
-   if (e.ctrlKey && (e.keyCode == 83)) {// кнопка S
-   	   var tabPanel = Ext.getCmp('tab-panel');
-       var tab = tabPanel.getActiveTab();
-       if (tab && tab.onSave && (typeof(tab.onSave) == 'function')) {
-           tab.onSave();
-           e.stopEvent();
-       }
-   }
+    if (e.ctrlKey && (e.keyCode == 83)) {// кнопка S
+        var tabPanel = Ext.getCmp('tab-panel');
+        var tab = tabPanel.getActiveTab();
+        if (tab && tab.onSave && (typeof(tab.onSave) == 'function')) {
+            tab.onSave();
+            e.stopEvent();
+        }
+    }
 });
 
 /**
@@ -101,8 +101,8 @@ function createClass(node, e){
  * Дерево структуры проекта 
  */
 function createTreeView(rootNodeName){
-	
-	var commands = {
+
+    var commands = {
         'create-file': {
             text: 'Создать файл'
             ,iconCls: 'icon-script-add'
@@ -246,123 +246,123 @@ function createTreeView(rootNodeName){
         }
     };
 
-	var contextMenuUiClass = new Ext.menu.Menu({
+    var contextMenuUiClass = new Ext.menu.Menu({
         items: [
-        	commands['create-file'],
-        	commands['rename-file'],
-        	commands['delete-file'],
-        	commands['open-file'],
-        	'-',
-        	commands['create-dir'],
-        	'-',
-        	commands['create-class']
+            commands['create-file'],
+            commands['rename-file'],
+            commands['delete-file'],
+            commands['open-file'],
+            '-',
+            commands['create-dir'],
+            '-',
+            commands['create-class']
         ]
-	});
+    });
 
     var contextFileMenu = new Ext.menu.Menu({
         items: [
-        	commands['create-file'],
-        	commands['rename-file'],
-        	commands['delete-file'],
-        	commands['open-file'],
-        	'-',
-        	commands['create-dir']
-		]
+            commands['create-file'],
+            commands['rename-file'],
+            commands['delete-file'],
+            commands['open-file'],
+            '-',
+            commands['create-dir']
+        ]
     });
 
     var contextDirMenu = new Ext.menu.Menu({
         items: [
-        	commands['create-dir'],
-        	commands['rename-dir'],
-        	commands['delete-dir'],
-        	commands['open-file'],
-        	'-',
-        	commands['create-file']
+            commands['create-dir'],
+            commands['rename-dir'],
+            commands['delete-dir'],
+            commands['open-file'],
+            '-',
+            commands['create-file']
         ]
     });
 
-	var contextMenuClass = new Ext.menu.Menu({
+    var contextMenuClass = new Ext.menu.Menu({
         items: [
-        	commands['create-class'],
-        	'-',
+            commands['create-class'],
+            '-',
+            commands['create-init'],
+            commands['create-simple-func']
+        ]
+    });
+
+    var contextMenuFunc = new Ext.menu.Menu({
+        items: [
         	commands['create-init'],
         	commands['create-simple-func']
         ]
     });
 
-	var contextMenuFunc = new Ext.menu.Menu({
-        items: [
-        	commands['create-init'],
-        	commands['create-simple-func']
-        ]
-    });
 
-
-	var tree =  new Ext.tree.TreePanel({
-		useArrows: true
-		,id:'project-view'
-	    ,autoScroll: true
-	    ,animate: true
-	    ,containerScroll: true
-	    ,border: false
-	    ,header: false
-	    ,loader: new Ext.tree.TreeLoader({
-			url: '/project-files'
-		})
-		,tbar: new Ext.Toolbar({
+    var tree =  new Ext.tree.TreePanel({
+        useArrows: true
+        ,id:'project-view'
+        ,autoScroll: true
+        ,animate: true
+        ,containerScroll: true
+        ,border: false
+        ,header: false
+        ,loader: new Ext.tree.TreeLoader({
+            url: '/project-files'
+        })
+        ,tbar: new Ext.Toolbar({
             items: [{
-            	iconCls: 'icon-script-add',
-            	tooltip:'Создать файл',
+                iconCls: 'icon-script-add',
+                tooltip:'Создать файл',
                 handler: function(item, e){toolBarFuncWraper(newTarget)}
             },{
-            	iconCls: 'icon-script-edit',
-            	tooltip:'Переименовать файл',
+                iconCls: 'icon-script-edit',
+                tooltip:'Переименовать файл',
                 handler: function(item, e){toolBarFuncWraper(renameTarget)}
             },{
-            	iconCls: 'icon-script-delete',
-            	tooltip:'Удалить файл',
+                iconCls: 'icon-script-delete',
+                tooltip:'Удалить файл',
                 handler: function(item, e){toolBarFuncWraper(deleteTarget)}
             },{
                 tooltip: 'Редактировать файл',
-		        iconCls: 'icon-script-lightning',
+                iconCls: 'icon-script-lightning',
                 handler: function(item, e){toolBarFuncWraper(editFile)}
             },{
-            	xtype: 'tbseparator'
+                xtype: 'tbseparator'
             },{
-            	iconCls: 'icon-arrow-refresh'
-            	,tooltip:'Обновить структуру проекта'
-            	,handler: function(){
-            		var cmp = Ext.getCmp('project-view');
-					var loader = cmp.getLoader();
-		        	var rootNode = cmp.getRootNode();
-		        	loader.load(rootNode);
-		        	rootNode.expand();
-            	}
+                iconCls: 'icon-arrow-refresh'
+                ,tooltip:'Обновить структуру проекта'
+                ,handler: function(){
+                    var cmp = Ext.getCmp('project-view');
+                    var loader = cmp.getLoader();
+                    var rootNode = cmp.getRootNode();
+                    loader.load(rootNode);
+                    rootNode.expand();
+                }
             }]
-		})
-	    ,root: {
-	        nodeType: 'async'
-	        ,text: rootNodeName
-	        ,draggable: false
-	        ,id: 'source'
-	        ,expanded: true
-	    }
-		,listeners: {
-	        contextmenu: function(node, e) {
-	            node.select();
+        })
+        ,root: {
+            nodeType: 'async'
+            ,text: rootNodeName
+            ,draggable: false
+            ,id: 'source'
+            ,expanded: true
+        }
+        ,listeners: {
+            contextmenu: function(node, e) {
+                node.select();
                 if (node.parentNode) {
                     var parentNodeText = node.parentNode.text;
 
-					var menu;
+                    var menu;
 
-					// Узел для функции
-					if (node.attributes['class_name'] && node.attributes['func_name']){
-						menu = contextMenuFunc;
-					}
-					// Узел для класса
-					else if (node.attributes['class_name']){
-						menu = contextMenuClass;
-					}
+                    // Узел для функции
+                    if (node.attributes['class_name'] && node.attributes['func_name']){
+                        menu = contextMenuFunc;
+                    }
+                    // Узел для класса
+                    else if (node.attributes['class_name']){
+                        menu = contextMenuClass;
+                    }
                     //Файл дизайна форм
                     else if (designerFormFiles.has(node.text)) {
                         menu = contextMenuUiClass;
@@ -380,17 +380,17 @@ function createTreeView(rootNodeName){
                         menu.showAt(e.getXY());
                     }
                 }
-	        },
-	        dblclick: function(node, e){
+            },
+            dblclick: function(node, e){
                 var parentNodeText = node.parentNode.text;
                 var fileType = node.text.split('.').slice(-1);
 
                 if (designerFormFiles.has(parentNodeText)){
-		        	onClickNode(node);
-	        	}
-	        	if (node.attributes['func_name']){
-		        	onClickNode(node);
-	        	}
+                    onClickNode(node);
+                }
+                if (node.attributes['func_name']){
+                    onClickNode(node);
+                }
 
                 //Все типы фалов которые не входят в codeViewFileTypes
                 else if(codeViewFileTypes.has(fileType[0])){
@@ -402,31 +402,31 @@ function createTreeView(rootNodeName){
                 else if(node.leaf) {
                     wrongFileTypeMessage(fileType);
                 }
-	        }
-	    }
-	});
+            }
+        }
+    });
 
-	tree.getLoader().on("beforeload", function(treeLoader, node) {
-    	treeLoader.baseParams['path'] = node.attributes['path'];
-    	treeLoader.baseParams['class_name'] = node.attributes['class_name'];
-	}, this);
+    tree.getLoader().on("beforeload", function(treeLoader, node) {
+        treeLoader.baseParams['path'] = node.attributes['path'];
+        treeLoader.baseParams['class_name'] = node.attributes['class_name'];
+    }, this);
 
-	var accordion = new Ext.Panel({
-		id:'accordion-view',
-	    layout:'accordion',
-	    layoutConfig: {
-	        animate: true,
-	        collapseFirst: true
-	    },
-	    items: [{
-	        title: 'Структура проекта',
-	        layout: 'fit',
-	        items: [tree]
-	    },{
-	        title: 'Свойства',
-	        id: 'property-panel',
-	        layout: 'fit'
-	    }],
+    var accordion = new Ext.Panel({
+        id:'accordion-view',
+        layout:'accordion',
+        layoutConfig: {
+            animate: true,
+            collapseFirst: true
+        },
+        items: [{
+            title: 'Структура проекта',
+            layout: 'fit',
+            items: [tree]
+        },{
+            title: 'Свойства',
+            id: 'property-panel',
+            layout: 'fit'
+        }],
         listeners:{
             clear: function(){
                 var panel = Ext.getCmp('property-panel');
@@ -438,9 +438,9 @@ function createTreeView(rootNodeName){
                 }
             }
         }
-	});
+    });
     tree.on('afterrender', function(){initAdditionalTreeEvents(tree.id)});
-	return accordion;
+    return accordion;
 }
 
 /**
@@ -631,24 +631,24 @@ function wrongFileTypeMessage(fileType){
  * @param node - нода по которой был совершон клик
  */
 function onClickNode(node) {
-	var attr =  node.attributes;
-	var tabPanel = Ext.getCmp('tab-panel');
+    var attr =  node.attributes;
+    var tabPanel = Ext.getCmp('tab-panel');
 
-	var funcTitle = ' (initialize)';
-	if (attr['func_name']) {
-		funcTitle = ' ('+ attr['func_name'] + ')';
-	}
+    var funcTitle = ' (initialize)';
+    if (attr['func_name']) {
+        funcTitle = ' ('+ attr['func_name'] + ')';
+    }
 
-	var id = attr['path'] + attr['class_name'] + funcTitle;
+    var id = attr['path'] + attr['class_name'] + funcTitle;
 
-	var tab = tabPanel.getItem(id);
-	if(tab){
-		tabPanel.setActiveTab(tab);
-		return;
-	}
+    var tab = tabPanel.getItem(id);
+    if(tab){
+        tabPanel.setActiveTab(tab);
+        return;
+    }
 
     var workspace = new DesignerWorkspace({
-    	id: id,
+        id: id,
         dataUrl:'/designer/data',
         saveUrl:'/designer/save',
         path:attr['path'],
@@ -658,40 +658,40 @@ function onClickNode(node) {
         uploadCodeUrl: 'designer/upload-code'
     });
 
- 	workspace.loadModel();
+    workspace.loadModel();
 
     initWorkSpaceCloseHandler(workspace.application);
 
-	workspace.on('beforeload', function(jsonObj){
+    workspace.on('beforeload', function(jsonObj){
         var result = false;
-		if (jsonObj['not_autogenerated']) {
+        if (jsonObj['not_autogenerated']) {
 
-       		// Может быть сгенерировать эту функцию в этом классе?
-       		Ext.Msg.show({
-			   title:'Функция не определена'
-			   ,msg: 'Функция автогенерация не определена в классе ' + attr['class_name'] + '. <br/> Сгенерировать данную функцию?'
-			   ,buttons: Ext.Msg.YESNO
-			   ,icon: Ext.MessageBox.QUESTION
-			   ,fn: function(btn, text){
-			   		if (btn == 'yes'){
-			   			M3Designer.Requests.generateInitialize(node);
-			   		}
-			   }
-			});
+            // Может быть сгенерировать эту функцию в этом классе?
+            Ext.Msg.show({
+               title:'Функция не определена'
+               ,msg: 'Функция автогенерация не определена в классе ' + attr['class_name'] + '. <br/> Сгенерировать данную функцию?'
+               ,buttons: Ext.Msg.YESNO
+               ,icon: Ext.MessageBox.QUESTION
+               ,fn: function(btn, text){
+                    if (btn == 'yes'){
+                        M3Designer.Requests.generateInitialize(node);
+                    }
+               }
+            });
         } else if (jsonObj.success) {
-			this.setTitle(attr['class_name'] + funcTitle);
+            this.setTitle(attr['class_name'] + funcTitle);
 
-			tabPanel.add(this);
-		    tabPanel.activate(this);
+            tabPanel.add(this);
+            tabPanel.activate(this);
 
             this.application.on('contentchanged', function(){
                 this.onChange();
             }, this);
-            
+
             this.on('beforeclose', function(){
                 return initTabCloseHandler(this, this.application.changedState())
             });
-            
+
             //Хендлер на событие закрытие таба таб панели
             this.on('close', function(tab){
                 if (tab) {
@@ -700,14 +700,14 @@ function onClickNode(node) {
                     window.onbeforeunload = undefined;
                 }
             });
-            
-		    // Прослушивает событие "tabchange"
-		    tabPanel.on('tabchange', function(panel, newTab){
+
+            // Прослушивает событие "tabchange"
+            tabPanel.on('tabchange', function(panel, newTab){
                 this.application.removeHighlight();
                 Ext.getCmp('accordion-view').fireEvent('clear');
-    		}, this);
+            }, this);
 
-			result = true;
+            result = true;
 
         } else {
             M3Designer.Utils.failureMessage({ "message": jsonObj.json });
@@ -725,10 +725,10 @@ function onClickNode(node) {
 function onClickNodePyFiles(node, fileAttr){
     var tabPanel = Ext.getCmp('tab-panel');
     var tab = tabPanel.getItem(fileAttr.path + fileAttr.fileName);
-	if(tab){				
-		tabPanel.setActiveTab(tab);
-		return;
-	}
+    if(tab){
+        tabPanel.setActiveTab(tab);
+        return;
+    }
     //Запрос содержимого файла по path на сервере
     M3Designer.Requests.fileGetContent(fileAttr, tabPanel);
 }
@@ -810,8 +810,8 @@ function initCodeEditorHandlers(codeEditor, path){
     codeEditor.on('close', function(tab){
         if (tab) {
             window.onbeforeunload = undefined;
-        	var tabPanel = Ext.getCmp('tab-panel');
-        	tabPanel.remove(tab); 
+            var tabPanel = Ext.getCmp('tab-panel');
+            tabPanel.remove(tab);
         }
     });
 

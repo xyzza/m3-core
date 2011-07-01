@@ -62,25 +62,25 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
        }
     },
     animShow: function() {
-		// save original body overflowY
-		if (Ext.ux.NotificationMgr.originalBodyOverflowY == null)
-		{
-			Ext.ux.NotificationMgr.originalBodyOverflowY = document.body.style.overflowY;
-		}
+        // save original body overflowY
+        if (Ext.ux.NotificationMgr.originalBodyOverflowY == null)
+        {
+            Ext.ux.NotificationMgr.originalBodyOverflowY = document.body.style.overflowY;
+        }
 
-		// if the body haven't horizontal scrollbar it should not appear
-		if (document.body.clientHeight == document.body.scrollHeight)
-		{
-			document.body.style.overflowY = 'hidden';
-		}
+        // if the body haven't horizontal scrollbar it should not appear
+        if (document.body.clientHeight == document.body.scrollHeight)
+        {
+            document.body.style.overflowY = 'hidden';
+        }
 
         this.setSize(this.width, 100);
         pos = -5;
 
-		for (var i = 0; i < Ext.ux.NotificationMgr.notifications.length; i++)
-		{
-			pos += Ext.ux.NotificationMgr.notifications[i].getSize().height + 15;
-		}
+        for (var i = 0; i < Ext.ux.NotificationMgr.notifications.length; i++)
+        {
+            pos += Ext.ux.NotificationMgr.notifications[i].getSize().height + 15;
+        }
 
         Ext.ux.NotificationMgr.notifications.push(this);
 
@@ -99,10 +99,10 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
             callback : function () {
                 Ext.ux.NotificationMgr.notifications.remove(this);
 
-				if (Ext.ux.NotificationMgr.notifications.length == 0)
-				{
-					document.body.style.overflowY = Ext.ux.NotificationMgr.originalBodyOverflowY;
-				}
+                if (Ext.ux.NotificationMgr.notifications.length == 0)
+                {
+                    document.body.style.overflowY = Ext.ux.NotificationMgr.originalBodyOverflowY;
+                }
 
                 this.destroy();
             }.createDelegate(this)
@@ -138,9 +138,9 @@ Ext.ux.SelectField = Ext.extend(Ext.form.TwinTriggerField, {
     }
     ,onTrigger1Click : function(){
         if(!this.hasSelect){
-        	this.reset();
-	        this.triggers[0].hide();
-	        this.hasSelect = false;
+            this.reset();
+            this.triggers[0].hide();
+            this.hasSelect = false;
             //Вызываем сторонюю функцию
             this.clear();
         }
@@ -148,8 +148,8 @@ Ext.ux.SelectField = Ext.extend(Ext.form.TwinTriggerField, {
     ,onTrigger2Click : function(){
         var value = this.getRawValue();
         if (value) {
-        	this.hasSelect = true;
-	    	this.triggers[0].show();
+            this.hasSelect = true;
+            this.triggers[0].show();
         }
         //Вызываем сторонюю функцию
         this.select(value);

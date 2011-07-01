@@ -478,12 +478,9 @@ class Parser(object):
             module_node = ast.parse(old_source_code)
         except SyntaxError:
             raise ParserError('Некорректный синтаксис файла')
-        
         # Нахождение нужной функции GENERATED_FUNC        
         class_node, func_node = Parser.get_func(module_node, self.class_name, self.func_name)
-                
         nodes = Node(json_dict).get_nodes(self._get_mapping())
-
         # self._set_class_name(class_node, json_dict['type']) -- Не используется в данный момент
         
         # Старая док строка не должна потеряться

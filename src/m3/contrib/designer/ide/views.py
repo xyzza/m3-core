@@ -189,7 +189,9 @@ def designer_global_template_content(request):
                          'data':{
                              'content':content,
                              'dir': template_globals_path,
-                             'path':path}})
+                             'path':path
+                         }
+    })
 
 def designer_file_content_save(request):
     '''
