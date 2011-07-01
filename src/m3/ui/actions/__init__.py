@@ -892,11 +892,7 @@ class ControllerCache(object):
         Выполняет регистрацию контроллера *controller* во внутреннем кеше.
         '''
         assert isinstance(controller, ActionController)
-        cls._write_lock.acquire()
-        try:
-            cls._controllers.add(controller)
-        finally:
-            cls._write_lock.acquire()
+        cls._controllers.add(controller)
 
     @classmethod
     def populate(cls):
