@@ -7,10 +7,40 @@ Created on 14.04.2011
 import os
 import uuid
 import xlwt
+import csv, cStringIO, codecs
 from django.conf import settings
 from django.db.models import Q, Count, Avg, Max, Min, Sum
 from django.db import connection
 
+class UnicodeWriter:
+    """
+    A CSV writer which will write rows to CSV file "f",
+    which is encoded in the given encoding.
+    """
+
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+        # Redirect output to a queue
+        self.queue = cStringIO.StringIO()
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.stream = f
+        self.encoder = codecs.getincrementalencoder(encoding)()
+
+    def writerow(self, row):
+        self.writer.writerow([unicode(s).encode("utf-8") for s in row])
+        # Fetch UTF-8 output from the queue ...
+        data = self.queue.getvalue()
+        data = data.decode("utf-8")
+        # ... and reencode it into the target encoding
+        data = self.encoder.encode(data)
+        # write to the target stream
+        self.stream.write(data)
+        # empty queue
+        self.queue.truncate(0)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+            
 class RecordProxy(object):
     '''
     Прокси объект записи отображающей группировку
@@ -214,6 +244,17 @@ class GroupingRecordProvider(object):
         value = item.id
         return "%s %s: %s (%s)" % (indent_str, grouped_col_name, value, item.count)
 
+    EXPORT_XLS = 'xls'
+    EXPORT_CSV = 'csv'
+    
+    def export_to_file (self, title, columns, total, grouped, expanded, sorting, export_type = EXPORT_XLS):
+        if export_type == self.EXPORT_XLS:
+            return self.export_to_xls(title, columns, total, grouped, expanded, sorting)
+        elif export_type == self.EXPORT_CSV:
+            return self.export_to_csv(title, columns, total, grouped, expanded, sorting)
+        else:
+            return None
+    
     def export_to_xls (self, title, columns, total, grouped, expanded, sorting):
         '''
         выгрузка таблицы в xls-файл
@@ -286,6 +327,65 @@ class GroupingRecordProvider(object):
         url = join([settings.MEDIA_URL, base_name])
         return url
 
+    def export_to_csv (self, title, columns, total, grouped, expanded, sorting):
+        '''
+        выгрузка таблицы в csv-файл
+        '''
+        base_name = str(uuid.uuid4())[0:16] + '.csv'
+        file_abs = os.path.join(settings.MEDIA_ROOT, base_name)        
+        #ws = UnicodeWriter(open(file_abs, 'wb'), delimiter='|', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        ws = UnicodeWriter(open(file_abs, 'wb'), delimiter=';', encoding="cp1251")
+        col_count = 0
+        for column in columns:
+            if not column.get("hidden"):
+                col_count += 1
+
+        ws.writerow([title])
+        columns_cash = []
+        columns_title = {}
+        index = 0
+        row = []
+        for column in columns:
+            if not column.get("hidden"):
+                row.append(column.get('header'))
+                columns_title[column["data_index"]] = column.get('header')
+                columns_cash.append(column["data_index"])
+                index += 1
+        ws.writerow(row)
+        # запросим все данные
+        data, total = self.get_elements(0, total, grouped, expanded, sorting)
+        # вывод данных
+        for item in data:
+            row = []
+            for idx, k in enumerate(columns_cash):
+                # значит это группировочная колонка
+                if k == "grouping":
+                    if item.is_leaf:
+                        v = ""
+                    else:
+                        col = grouped[item.indent]
+                        col_name = columns_title[col]
+                        v = self.get_export_group_text(item, col_name)
+                    row.append(v if v else '')
+                else:
+                    v = getattr(item, k)
+                    row.append(v if v else '')
+            ws.writerow(row)
+        # вывод итогов
+        if not isinstance(total, (int, long)):
+            row = []
+            total_row = total[1]
+            for idx, k in enumerate(columns_cash):
+                if k == "grouping":
+                    v = ""
+                else:
+                    v = getattr(total_row, k)
+                row.append(v if v else '')
+            ws.writerow(row)
+
+        join = lambda pieces:u'/'.join(s.strip('/') for s in pieces)
+        url = join([settings.MEDIA_URL, base_name])
+        return url
 
 class GroupingRecordModelProvider(GroupingRecordProvider):
     '''
