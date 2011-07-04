@@ -49,7 +49,12 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
                     c.contextNode = node;
                     c.showAt(e.getXY());
                 }
-            }
+            },
+            keys : [{
+                key : Ext.EventObject.DELETE,
+                    fn : onTreeNodeDeleteClick,
+                    scope : this
+            }]
         });
 
         var toolbox = new Ext.tree.TreePanel({
@@ -138,11 +143,22 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
         }, this);
 
         storage.on('loadcode', this.uploadCode.createDelegate(this));
-
+        
+        /**
+         * Хендлер на удаление узла из дерева компанентов
+         */
         function onTreeNodeDeleteClick(item) {
-            var accordion = Ext.getCmp('accordion-view');
-            if (accordion) accordion.fireEvent('clear');
-            application.onComponentTreeNodeDeleteClick(item.parentMenu.contextNode);
+            var selectedNode = componentTree.getSelectionModel().selNode;
+            var childNodesMessage = selectedNode.hasChildNodes() ? '</br>'+selectedNode.text+' Имеет дочерние узлы, они так же будут удалены.' : '';
+            Ext.Msg.confirm('Удаление', 'Вы действительно хотите удалить '+selectedNode.text+'?'+ childNodesMessage,
+                function(btn, text){
+                    if (btn == 'yes'){
+                        var accordion = Ext.getCmp('accordion-view');
+                        if (accordion) accordion.fireEvent('clear');
+                        application.onComponentTreeNodeDeleteClick(selectedNode);
+                    }
+                }
+            )
         }
     },
     onSave: function () {
