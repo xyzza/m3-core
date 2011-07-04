@@ -1,6 +1,6 @@
 #coding:utf-8
 
-from django.db import models, connection, transaction, IntegrityError, router
+from django.db import models, connection, transaction, IntegrityError, router, connections
 from django.db.models.query import QuerySet
 from django.db.models.deletion import Collector
 
@@ -164,5 +164,59 @@ class BaseObjectModel(models.Model):
         collector.delete()
         return True
 
+    class Meta:
+        abstract = True
+
+##############################################################
+# По мотивам https://coderanger.net/2011/01/select-for-update/
+#
+class ForUpdateQuerySet(QuerySet):
+    def for_update(self):
+        if 'sqlite' in connections[self.db].settings_dict['ENGINE'].lower():
+            # Noop on SQLite since it doesn't support FOR UPDATE
+            return self
+        sql, params = self.query.get_compiler(self.db).as_sql()
+        return self.model._default_manager.raw(sql.rstrip() + ' FOR UPDATE', params)
+
+class ForUpdateManager(models.Manager):
+    def get_query_set(self):
+        return ForUpdateQuerySet(self.model, using=self._db)
+#
+##############################################################
+
+class ConcurrentEditError(Exception):
+    """Исключение возникающее при попытке сохранения записи, которая была изменена после ее чтения."""
+    pass
+
+class BaseObjectModelWVersion(BaseObjectModel):
+    '''
+    Базовый класс для версионных записей. Нужен для реализации оптимистичной обработки блокировки
+    '''
+    
+    objects = ForUpdateManager()
+    
+    version = models.IntegerField(null=False, blank=False, default=0, db_index=True)
+    
+    def do_lock(self):
+        if self.id:
+            # блокируем запись с нашей версией от изменения
+            q = self.__class__.objects.filter(id = self.id, version = self.version).for_update()
+            # если удачно блокировали, то можем делать с ней что угодно в рамках транзакции
+            if len(list(q)) == 1:
+                return True
+            else:
+                # если блокировать нечего, то значит кто-то ее поменял
+                return False
+        else:
+            return True
+        
+    def save_with_lock(self):
+        if self.do_lock():
+            if self.id:
+                self.version += 1
+            self.save()
+        else:
+            raise ConcurrentEditError("Record already has been changed")
+            
     class Meta:
         abstract = True
