@@ -64,6 +64,8 @@ DEFAULT_REPORT_TEMPLATE_PATH = __get_template_path()
 
 IMAGE_REGEX = '<img .*>'
 
+IMAGE_TAG = '<img %s>'
+
 VARIABLE_REGEX  = '#[:alpha:]+((_)*[:digit:]*[:alpha:]*)*#'
 
 TEMPORARY_SHEET_NAME = 'template_zw'
@@ -119,11 +121,12 @@ class OOParser(object):
     '''        
     TIME_FORMAT = "%H:%M:%S" 
                 
-    def find_image_tags(self, document):
+    def find_image_tags(self, document, image_name):
         '''
         Находит, и возвращает в списке все теги изображений. 
         ''' 
-        return self.find_regex(document, IMAGE_TAG)        
+        image_tag = IMAGE_TAG %image_name
+        return self.find_regex_cells(document, image_tag)        
                
     def find_and_replace(self, document, regex, replace):
         '''
@@ -138,11 +141,11 @@ class OOParser(object):
         replace_descriptor.ReplaceString = replace
         document.replaceAll(replace_descriptor)
     
-    def find_regex(self, document, regex):
+    def find_regex_cells(self, document, regex):
         '''
         Находит все строки, соответствующие регулярному выражению(задается строкой,
         по правилам опенофиса). 
-        Возвращает список удовлетворяющих регулярному выражению строк.
+        Возвращает список ячеек таблицы, в которых было найдено совпадение.
         '''
         result = []
         search_descriptor = document.createSearchDescriptor()
@@ -150,7 +153,7 @@ class OOParser(object):
         search_descriptor.SearchString = regex
         found = document.findFirst(search_descriptor)
         while found:
-            result.append(found.String)
+            result.append(found)
             found = document.findNext(found.End, search_descriptor)
         return result
     
@@ -236,6 +239,8 @@ class Section(object):
         self.right_cell_addr = right_cell_addr
         #Объект отчета, в контексте которого будет выводиться секция
         self.report_object = report_object
+        #Список вставленных в секцию изображений
+        self.images = []
         
     def add_new_cell(self, cell):
         '''
@@ -349,9 +354,13 @@ class Section(object):
             if not isinstance(key, basestring):
                 raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым: %s" % key
             value = parser.convert_value(value)
-            parser.find_and_replace(section_range, u'#'+key+u'#', value)    
+            parser.find_and_replace(section_range, u'#'+key+u'#', value) 
+        #Вставка изображений в секцию
+        self.flush_images(dest_sheet, section_range)       
         #Если не все переменные в шаблоне были заменены, стираем оставшиеся
         parser.find_and_replace(section_range, VARIABLE_REGEX, '')
+        #Если не все теги изображений в шаблоне были заменены, стираем оставшиеся
+        parser.find_and_replace(section_range, IMAGE_REGEX, '')
         #Задаем размеры строк и столбцов
         self.set_columns_width(x, src_sheet, dest_sheet)
         self.set_rows_height(y, src_sheet, dest_sheet)
@@ -388,7 +397,28 @@ class Section(object):
                 dest_sheet.getColumns().getByIndex(dest_column_index).Width = \
                 src_sheet.getColumns().getByIndex(src_column_index).Width
                 self.report_object.defined_width_columns.append(dest_column_index)
-            dest_column_index+=1                     
+            dest_column_index+=1          
+            
+    def create_image(self, name):
+         '''
+         Возвращает изображение для вставки в документ.
+         '''       
+         image = OOImage(name, self.report_object.document)
+         self.images.append(image)
+         return image   
+     
+    def flush_images(self, dest_sheet, section_range):
+        '''
+        Вставляет изображения в отчет.
+        '''
+        for image in self.images:
+            parser = OOParser()
+            image_tags = parser.find_image_tags(section_range, image.name)  
+            for image_tag in image_tags:
+                image.create_graphic_shape()
+                image.set_image_location(image.position[0]+image_tag.Position.X, image.position[1]+image_tag.Position.Y)
+                image.set_image_size(image.width, image.height)
+                image.insert_into_document(dest_sheet)                   
                         
                     
 class OOImage(object):
@@ -396,32 +426,35 @@ class OOImage(object):
     Класс для удобной работы с изображениями. 
     '''    
     
-    def __init__(self, path, document):
+    def __init__(self, name, document):
+        self.document = document
+        self.name = name
+        self.image = None
+        self.width = 1000
+        self.height = 1000
+        self.position = (0, 0)
+        self.path = None
+    
+    def load_from_file(self, path):
         '''
-        Создает объект com.sun.star.drawing.GraphicObjectShape, который может
-        быть встроен в документ(а не просто выставлен линк на изображение).
-        Нужно для того, чтобы не быть "привязанным" к тому компьютеру, где документ 
-        был изначально создан.
+        Загружает изображение из файла и помещает его в BitmapTable.
         '''  
+        self.path = path
         image_url = path_to_file_url(path)        
-        image = document.createInstance("com.sun.star.drawing.GraphicObjectShape") 
-        bitmap = document.createInstance( "com.sun.star.drawing.BitmapTable" )
-        #Просто рандомное имя image; это такой хитрый трюк получить само изображение,
-        #а не ссылку на него
-        if not bitmap.hasByName('image'):
-            bitmap.insertByName('image', image_url)
-        image_url = bitmap.getByName( 'image' )
-        image.GraphicURL = image_url
-        self.image = image
+        bitmap = self.document.createInstance( "com.sun.star.drawing.BitmapTable" )
+        #Это такой хитрый трюк получить само изображение, а не ссылку на него
+        if not bitmap.hasByName(str(path)):
+            bitmap.insertByName(str(path), image_url)
                 
     def set_image_size(self, width, height):
         '''
         Задает свойства ширина и высота для изображения в единицах 1/100 миллиметра
-        '''                
+        '''
         size = uno.createUnoStruct('com.sun.star.awt.Size')
         size.Width = width
         size.Height = height
-        self.image.Size = size
+        self.image.setSize(size)
+        self.image.SizeProtect = True
         
     def set_image_location(self, x, y):
         '''
@@ -433,12 +466,25 @@ class OOImage(object):
         point.Y = y
         self.image.Position = point 
         
-    def insert_into_text_document(self, document):
+    def create_graphic_shape(self):
+        '''
+        Создает объект com.sun.star.drawing.GraphicObjectShape, который может
+        быть встроен в документ(а не просто выставлен линк на изображение).
+        Нужно для того, чтобы не быть "привязанным" к тому компьютеру, где документ 
+        был изначально создан.
+        '''
+        image = self.document.createInstance("com.sun.star.drawing.GraphicObjectShape") 
+        bitmap = self.document.createInstance( "com.sun.star.drawing.BitmapTable" )
+        image_url = bitmap.getByName(self.path)
+        image.GraphicURL = image_url
+        self.image = image
+            
+    def insert_into_document(self, document):
         '''
         Вставляет в документ изображение.В случае вставки в электронную таблицу
         нужно передавать лист         
         '''       
-        document.getDrawPage().add(image)  
+        document.getDrawPage().add(self.image) 
         
                                  
 def create_document(desktop, path):
