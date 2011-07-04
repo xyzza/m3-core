@@ -95,8 +95,16 @@ M3Designer.Utils = Ext.apply({},{
     /**
      * Возвращает выделенный узел дерева структуры проекта
      */
-    projectViewTreeGetSelectedNode: function(){
-        return Ext.getCmp('project-view').getSelectionModel().getSelectedNode();
+    getProjectViewTreeSelectedNode: function(){
+        var selectedNode = Ext.getCmp('project-view').getSelectionModel().getSelectedNode();
+        if (!selectedNode){
+            Ext.Msg.show({
+                title: 'Информация',
+                msg: 'Для выполнения действия необходимо выделить узел дерева',
+                buttons: Ext.Msg.OK,
+                icon: Ext.Msg.INFO
+            });
+        }
+        return selectedNode;
     }
-
 });

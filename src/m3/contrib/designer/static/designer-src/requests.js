@@ -99,7 +99,7 @@ M3Designer.Requests = Ext.apply({}, {
      * @param fileAttr {object} - содержит в себе fileName, path
      * @param tabPanel {object}
      */
-    fileGetContent:function(fileAttr, tabPanel){
+    fileGetContent:function(fileAttr, node, tabPanel){
         Ext.Ajax.request({
             url:'/designer/file-content',
             method: 'GET',
@@ -112,6 +112,8 @@ M3Designer.Requests = Ext.apply({}, {
 
                 var codeEditor = new M3Designer.code.ExtendedCodeEditor({
                     id: fileAttr.path + fileAttr.fileName,
+                    treeNodeId: node.id, // нода в дереве "струкрура проекта"
+                    silent: true, // Признак обработки ивентов
                     sourceCode : obj.data.content,
                     parser: type
                 });
@@ -119,7 +121,8 @@ M3Designer.Requests = Ext.apply({}, {
                 codeEditor.setTitle(fileAttr.fileName);
                 tabPanel.add( codeEditor );
                 tabPanel.activate(codeEditor);
-            
+                codeEditor.silent = false;
+                
                 initCodeEditorHandlers(codeEditor, fileAttr.path);
             },
             failure: uiAjaxFailMessage
@@ -148,7 +151,7 @@ M3Designer.Requests = Ext.apply({}, {
                 if (obj.success) {
 
                     if (crateNew){
-                        var node = M3Designer.Utils.projectViewTreeGetSelectedNode();
+                        var node = M3Designer.Utils.getProjectViewTreeSelectedNode();
                         if (node){
                             var new_node = new Ext.tree.TreeNode({
                                 text: fileName

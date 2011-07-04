@@ -14,7 +14,7 @@ var codeViewFileTypes = ["py", "css", "js", "conf", "html", "sql"];
  * функция возвращает true если хотябы один элемент встречается в массиве
  */
 Array.prototype.has = function() {
-    var	i = arguments.length;
+    var i = arguments.length;
     while(i){
         var x = this.indexOf(arguments[--i]) !== -1;
         if(x) {
@@ -23,6 +23,29 @@ Array.prototype.has = function() {
     }
     return false;
 };
+
+/**
+ * Функция которая возвращает листнеры для таб панели
+ * Основной листнер смена таба, при смене выполняется
+ * поиск, раскрытие родителей, выделение узла
+ */
+function tabPanelListners(){
+    return {
+        tabchange: function (panel, tab) {
+            if (!tab.silent){
+                var projectView = Ext.getCmp('project-view');
+                var RootNode = projectView.getRootNode();
+                var tab = RootNode.findChild('id', tab.treeNodeId, true);
+                if (tab && !tab.isSelected() ){
+                    tab.parentNode.ensureVisible(function(){
+                        tab.parentNode.expand();
+                        tab.select();
+                    });
+                }
+            }
+        }
+    }
+}
 
 /*==========================Перехват нажатий клавиш===========================*/
 //Инициируем перехват нажатия ctrl+s для автоматического сохранения на сервер
@@ -44,7 +67,7 @@ Ext.fly(document).on('keydown',function(e,t,o){
 function initAdditionalTreeEvents(id){
     Ext.fly(id).on('keydown',function(e,t,o){
         if(e.keyCode == 46){ //del
-            var selectedNode = projectViewTreeManipulation();
+            var selectedNode = M3Designer.Utils.getProjectViewTreeSelectedNode();
             var isnotFormClass = !designerFormFiles.has(selectedNode.parentNode.text);
             if (selectedNode && isnotFormClass){
                 var isFile = selectedNode.leaf;
@@ -56,27 +79,11 @@ function initAdditionalTreeEvents(id){
 /*============================================================================*/
 
 /**
- * Базовая функция внешнего воздействия на дерево структуры проекта.
- */
-function projectViewTreeManipulation(){
-    var selectedNode = M3Designer.Utils.projectViewTreeGetSelectedNode();
-    if (!selectedNode){
-        Ext.Msg.show({
-            title: 'Информация',
-            msg: 'Для выполнения действия необходимо выделить узел дерева',
-            buttons: Ext.Msg.OK,
-            icon: Ext.Msg.INFO
-        });
-    }
-    return selectedNode
-}
-
-/**
  * Адаптер
  * @param fn - Функция
  */
 function toolBarFuncWraper(fn){
-    var selectedNode = projectViewTreeManipulation();
+    var selectedNode = M3Designer.Utils.getProjectViewTreeSelectedNode();
     if (selectedNode){
         fn(selectedNode, true);
     }
@@ -292,8 +299,8 @@ function createTreeView(rootNodeName){
 
     var contextMenuFunc = new Ext.menu.Menu({
         items: [
-        	commands['create-init'],
-        	commands['create-simple-func']
+            commands['create-init'],
+            commands['create-simple-func']
         ]
     });
 
@@ -337,6 +344,20 @@ function createTreeView(rootNodeName){
                     var rootNode = cmp.getRootNode();
                     loader.load(rootNode);
                     rootNode.expand();
+                }
+            },{
+                iconCls: 'icon-arrow-out'
+                ,tooltip:'Развернуть узлы'
+                ,handler: function(){
+                    var selectedNode = M3Designer.Utils.getProjectViewTreeSelectedNode();
+                    selectedNode.expand(true);
+                }
+            },{
+                iconCls: 'icon-arrow-in'
+                ,tooltip:'Свернуть узлы'
+                ,handler: function(){
+                    var selectedNode = M3Designer.Utils.getProjectViewTreeSelectedNode();
+                    selectedNode.collapse(true);
                 }
             }]
         })
@@ -649,6 +670,8 @@ function onClickNode(node) {
 
     var workspace = new DesignerWorkspace({
         id: id,
+        treeNodeId: node.id, // нода в дереве "струкрура проекта"
+        silent: true, // Признак обработки ивентов
         dataUrl:'/designer/data',
         saveUrl:'/designer/save',
         path:attr['path'],
@@ -657,7 +680,6 @@ function onClickNode(node) {
         previewUrl:'/designer/preview',
         uploadCodeUrl: 'designer/upload-code'
     });
-
     workspace.loadModel();
 
     initWorkSpaceCloseHandler(workspace.application);
@@ -683,6 +705,7 @@ function onClickNode(node) {
 
             tabPanel.add(this);
             tabPanel.activate(this);
+            this.silent = false;
 
             this.application.on('contentchanged', function(){
                 this.onChange();
@@ -730,7 +753,7 @@ function onClickNodePyFiles(node, fileAttr){
         return;
     }
     //Запрос содержимого файла по path на сервере
-    M3Designer.Requests.fileGetContent(fileAttr, tabPanel);
+    M3Designer.Requests.fileGetContent(fileAttr, node,tabPanel);
 }
 
 /**

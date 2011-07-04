@@ -869,7 +869,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: ''
                 },
                 enableDragDrop: {
-                	defaultValue: false
+                    defaultValue: false
                 },
                 ddGroup: {
                     defaultValue: ''

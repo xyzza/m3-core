@@ -143,7 +143,7 @@ DesignerWorkspace = Ext.extend(Ext.Panel, {
         }, this);
 
         storage.on('loadcode', this.uploadCode.createDelegate(this));
-        
+
         /**
          * Хендлер на удаление узла из дерева компанентов
          */
