@@ -4,9 +4,10 @@ Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
 
     delimeter:',',
 
-    checkedItems:[],
-    
     initComponent:function() {
+
+        this.checkedItems = [];
+        
         this.editable = false;
 
         if (!this.tpl) {
@@ -22,30 +23,47 @@ Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
         Ext.ux.form.MultiComboBox.superclass.initComponent.apply(this);
     },
 
-    getValue : function () {
-		var values = [], i = 0 ;
-
-        for (;i < this.checkedItems.length;i++) {
-            values.push( this.checkedItems[i].get(this.valueField))
+    setValue:function(v) {
+        if (!v) {
+            return;
         }
 
-        return values.join(this.delimeter);
+        v = this.normalizeStringValues(v);
 
-//		Ext.each(this.checkedRecords, function (record) {
-//			value.push(record.get(field || this.valueField));
-//		}, this);
-//
-//		return value.join(this.delimiter);
+        var values = v.split(this.delimeter);
+
+        this.value = this.getValue();
+        this.setRawValue(this.getText());
+
+        if (this.hiddenField) {
+            this.hiddenField.value = this.value;
+        }
+
+        if (this.el) {
+            this.el.removeClass(this.emptyClass);
+        }
+
+    },
+
+    getValue : function () {
+        var value = [];
+
+		Ext.each(this.checkedItems, function (record) {
+			value.push(record.get(this.valueField));
+		}, this);
+
+		return value.join(this.delimiter);
+
 	},
 
-//    setValue:function() {
-//        alert('!set!');
-//    },
+    getText : function () {
+		var value = [];
+		Ext.each(this.checkedItems, function (record) {
+			value.push(record.get(this.displayField));
+		}, this);
 
-    getText:function() {
-        console.log('get text');
-        Ext.ux.form.MultiComboBox.superclass.getText.apply(this, arguments);
-    },
+		return value.join(this.delimeter + ' ');
+	},
 
     getCheckboxCls:function(record) {
         var i = 0;
@@ -84,11 +102,7 @@ Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
 
             this.refreshItem(record);
 
-//			if (this.store.isFiltered()) {
-//				this.doQuery(this.allQuery);
-//			}
-
-//			this.setValue(this.getValue());
+			this.setValue(this.getValue());
             this.fireEvent("select", this, record, index);
         }
 	},
