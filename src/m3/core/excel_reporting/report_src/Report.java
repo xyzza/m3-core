@@ -400,6 +400,8 @@ class ReportGenerator{
 	    		// Ищем конец региона
 	    		int end_region = searchEndOfRange(inner_range, row_num + 1, range.end_row);
 	    		JSONArray arr = (JSONArray)obj.get(inner_range.name);
+	    		if (arr == null)
+	    			throw new Exception("Cant find key " + inner_range.name + " for vertical expanding tag(#..##)");
 	    		for (int i = 0; i < arr.size(); i++){
 	    			Object new_obj = arr.get(i);
 	    			int writed = renderRange((JSONObject)new_obj, inner_range, write_to_row + inserted_rows);
@@ -719,7 +721,7 @@ class ReportGenerator{
 			return;
         String cell_text = outCell.getStringCellValue();
 
-		Matcher m = TAG_REGEX_REPLACE.matcher(cell_text);	
+		Matcher m = TAG_REGEX_REPLACE.matcher(cell_text);
 		HashMap<String, Object> keys = new HashMap<String, Object>();
 		while (m.find()){
 			// Извлекаем ключ из найденного выражения
@@ -732,7 +734,7 @@ class ReportGenerator{
 					continue;
 				else
 					key = key.substring(token_prefix.length());
-			
+
 			Object value = obj.get(key);
 			// Значение для переменной не найдено, значит разработчики так и задумали (оптимистично)
 			if (value == null)
@@ -749,8 +751,7 @@ class ReportGenerator{
             cell_text = cell_text.replace(token, key);
         }
 		
-		if (keys.isEmpty())
-        {
+		if (keys.isEmpty()) {
 		    outCell.setCellValue(cell_text);
 			return;
         }
@@ -1078,7 +1079,7 @@ class ReportGenerator{
 					if (text.toUpperCase().equals(token.toUpperCase()))
 						return cell;
 				}else if (mode == TagMatchMode.FIRST){
-					if (text.substring(0, token.length()).equals(token))
+					if (text.startsWith(token))
 						return cell;
 				}
 			}
