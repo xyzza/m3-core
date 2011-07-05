@@ -195,7 +195,7 @@ class BaseObjectModelWVersion(BaseObjectModel):
     
     objects = ForUpdateManager()
     
-    version = models.IntegerField(null=False, blank=False, default=0, db_index=True)
+    version = models.IntegerField(null=False, blank=False, default=0)
     
     def do_lock(self):
         if self.id:
