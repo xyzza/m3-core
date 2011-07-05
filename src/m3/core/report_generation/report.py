@@ -154,7 +154,8 @@ class OOParser(object):
         found = document.findFirst(search_descriptor)
         while found:
             result.append(found)
-            found = document.findNext(found.End, search_descriptor)
+            found.String = ''
+            found = document.findFirst(search_descriptor)
         return result
     
     def create_sections(self, document, report_object):
@@ -187,7 +188,7 @@ class OOParser(object):
                     должны начинаться со знака '+' или '-'" %(position.Row+1, position.Column+1)            
         for section in all_sections.values():
             if not section.is_valid():
-                raise OOParserException, "Неверно задана секция %s. \
+                raise OOParserException, u"Неверно задана секция %s. \
                 Определена одна из двух ячеек" %section.name  
         #Флаг 8 отвечает за удаление аннотаций.
         document.clearContents(8)          
@@ -354,16 +355,16 @@ class Section(object):
             if not isinstance(key, basestring):
                 raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым: %s" % key
             value = parser.convert_value(value)
-            parser.find_and_replace(section_range, u'#'+key+u'#', value) 
-        #Вставка изображений в секцию
-        self.flush_images(dest_sheet, section_range)       
+            parser.find_and_replace(section_range, u'#'+key+u'#', value)      
         #Если не все переменные в шаблоне были заменены, стираем оставшиеся
         parser.find_and_replace(section_range, VARIABLE_REGEX, '')
-        #Если не все теги изображений в шаблоне были заменены, стираем оставшиеся
-        parser.find_and_replace(section_range, IMAGE_REGEX, '')
         #Задаем размеры строк и столбцов
         self.set_columns_width(x, src_sheet, dest_sheet)
         self.set_rows_height(y, src_sheet, dest_sheet)
+        #Вставка изображений в секцию
+        self.flush_images(dest_sheet, section_range)  
+        #Если не все теги изображений в шаблоне были заменены, стираем оставшиеся
+        parser.find_and_replace(section_range, IMAGE_REGEX, '')
         
     def set_rows_height(self, y, src_sheet, dest_sheet):
         '''
@@ -400,12 +401,12 @@ class Section(object):
             dest_column_index+=1          
             
     def create_image(self, name):
-         '''
-         Возвращает изображение для вставки в документ.
-         '''       
-         image = OOImage(name, self.report_object.document)
-         self.images.append(image)
-         return image   
+        '''
+        Возвращает изображение для вставки в документ.
+        '''       
+        image = OOImage(name, self.report_object.document)
+        self.images.append(image)
+        return image   
      
     def flush_images(self, dest_sheet, section_range):
         '''
@@ -414,6 +415,10 @@ class Section(object):
         for image in self.images:
             parser = OOParser()
             image_tags = parser.find_image_tags(section_range, image.name)  
+            if not image_tags:
+                error_message = u"В секции %s не найден тег, соответствующий \
+                                изображению с именем %s" %(self.name, image.name)
+                raise ReportGeneratorException, error_message 
             for image_tag in image_tags:
                 image.create_graphic_shape()
                 image.set_image_location(image.position[0]+image_tag.Position.X, image.position[1]+image_tag.Position.Y)
