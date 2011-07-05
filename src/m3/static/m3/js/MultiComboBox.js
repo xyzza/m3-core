@@ -52,9 +52,27 @@ Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
 			value.push(record.get(this.valueField));
 		}, this);
 
-		return value.join(this.delimiter);
+		return value.join(',');
 
 	},
+
+    initValue:function() {
+        if (this.store && this.value) {
+            var values = Ext.util.JSON.decode(this.value);
+            
+            this.store.each(function (r) {
+			    Ext.each(values, function (value) {
+			        if (r.get(this.valueField) == value) {
+			            this.checkedItems.push(r);
+			            return false;
+			        }
+			    }, this);					
+		    }, this);
+        }
+
+        Ext.ux.form.MultiComboBox.superclass.initValue.call(this);
+
+    },
 
     getText : function () {
 		var value = [];

@@ -5,6 +5,7 @@ Created on 27.02.2010
 @author: prefer
 '''
 import os
+import json
 
 from django.db import models
 from django.conf import settings
@@ -465,8 +466,31 @@ class ExtImageUploadField(ExtFileUploadField):
 
 #===============================================================================
 class ExtMultiComboBox(ExtComboBox):
+    '''
+    Комбобокс со множественным выбором
+    '''
     def __init__(self, *args, **kwargs):
+        self.delimeter = ','
+
+        self._value = ''
+        self._init_flag = True
+        
         super(ExtMultiComboBox, self).__init__(*args, **kwargs)
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        if self._init_flag:
+            self._init_flag = False
+            return
+
+        if isinstance(value, (list, tuple)):
+            self._value = json.dumps(value)
+        else:
+            raise TypeError(u'MultiComboBox value must be list or tuple of values')
 
     def render(self):
         try:
@@ -477,3 +501,9 @@ class ExtMultiComboBox(ExtComboBox):
 
         base_config = self._get_config_str()
         return 'new Ext.ux.form.MultiComboBox({%s})' % base_config
+
+    def render_base_config(self):
+        self.pre_render()
+
+        super(ExtMultiComboBox, self).render_base_config()
+        self._put_config_value('delimeter', self.delimeter)
