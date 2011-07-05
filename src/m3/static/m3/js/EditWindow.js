@@ -29,18 +29,18 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		 * url формы в окне для чтения данных
 		 */
 		this.dataUrl = null;
-		
+
 		/**
 		 * Количество измененных полей
 		 */
 		this.changesCount = 0;
-		
+
 		/**
 		 * Оргинальный заголовок
 		 */
 		this.originalTitle = null;
-		
-		
+
+
 		if (params) {
 			if (params.form) {
 				if (params.form.id){
@@ -62,12 +62,12 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 */
 	,initComponent: function(){
 		Ext.m3.EditWindow.superclass.initComponent.call(this);
-		
+
 		// Устанавливает функции на изменение значения
 		this.items.each(function(item){
 			this.setFieldOnChange(item, this);
 		}, this);
-	
+
 		this.addEvents(
 			/**
 			 * Генерируется сообщение до начала запроса на сохранение формы
@@ -100,16 +100,28 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			  */
 			 ,'dataloaded'
 			)
-	
+
 	}
 	/**
 	 * Получает форму по formId
 	 */
 	,getForm: function() {
 		assert(this.formId, 'Не задан formId для формы');
-		
+
 		return Ext.getCmp(this.formId).getForm();
 	}
+	/**
+	 * Проверяет форму на наличие некорректных полей, отдает список label'ов этих полей
+	 */
+    ,getInvalidNames: function(submittedForm){
+                var invalidNames = [];
+                submittedForm.items.each(function(f){
+                   if(!f.validate()){
+                       invalidNames.push('<br>- ' + f.fieldLabel)
+                   }
+                });
+                return invalidNames
+            }
 	/**
 	 * Сабмит формы
 	 * @param {Object} btn
@@ -120,15 +132,17 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		assert(this.formUrl, 'Не задан url для формы');
 
 		var form = Ext.getCmp(this.formId).getForm();
-		if (form && !form.isValid()) {
-			Ext.Msg.show({
-				title: 'Проверка формы',
-				msg: 'На форме имеются некорректно заполненные поля',
-				buttons: Ext.Msg.OK,
-				icon: Ext.Msg.WARNING
-			});
-			
-			return;
+		if (form){
+            invalidNames = this.getInvalidNames(form);
+            if (invalidNames.length){
+                Ext.Msg.show({
+                    title: 'Проверка формы',
+                    msg: 'На форме имеются некорректно заполненные поля:' + invalidNames.toString() + '.',
+                    buttons: Ext.Msg.OK,
+                    icon: Ext.Msg.WARNING
+                });
+			    return;
+            }
 		}
 				
         var scope = this;
