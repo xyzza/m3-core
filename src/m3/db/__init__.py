@@ -3,6 +3,7 @@
 from django.db import models, connection, transaction, IntegrityError, router, connections
 from django.db.models.query import QuerySet
 from django.db.models.deletion import Collector
+from django.utils.translation import ugettext as _
 
 from m3.core.exceptions import RelatedError
 
@@ -195,7 +196,7 @@ class BaseObjectModelWVersion(BaseObjectModel):
     
     objects = ForUpdateManager()
     
-    version = models.IntegerField(null=False, blank=False, default=0)
+    version = models.IntegerField(_(u'Версия записи'),null=False, blank=False, default=0)
     
     def do_lock(self):
         if self.id:
@@ -220,3 +221,88 @@ class BaseObjectModelWVersion(BaseObjectModel):
             
     class Meta:
         abstract = True
+
+class ObjectState(BaseEnumerate):
+    '''
+    Состояние объекта
+    Используется для определения логики использования записи:
+    - если запись "Действует", значит нет ограничений на ее использование
+    - если запись "Закрыта", значит ее нельзя использовать в новых документах, но можно выводить в отчетах и уже существующих данных
+    - если запись "Черновик", значит ее нельзя использовать в логике приложения и в отчетах. По сути, это означает что запись введена не полностью и не утверждена
+    '''
+    VALID = 0
+    CLOSED = 1
+    DRAFT = 2
+    values = {VALID: _(u'Действует'), CLOSED: _(u'Закрыта'), DRAFT: _(u'Черновик')}
+    
+class ObjectManager(models.Manager):
+    '''
+    Менеджер запросов к записям справочника
+    Фильтрует записи по периоду действия и состоянию
+    '''
+    def get_default_state(self):
+        '''
+        Для прикладного переопределения состояний, выбираемых по-умолчанию
+        '''
+        return [ObjectState.VALID]
+    
+    def __init__(self, date = None, state = None):
+        super(StateObjectManager, self).__init__()
+        self.query_on_date = date
+        if state:
+            if isinstance(state, type([])):
+                self.query_state = state
+            else:
+                self.query_state = [state]
+        else:
+            self.query_state = self.get_default_state()
+        
+    def get_query_set(self):
+        # если указывали дату, то отфильтруем на дату, иначе только по состоянию
+        if self.query_on_date:
+            return super(StateObjectManager, self).get_query_set().filter(begin__lte = self.query_on_date, end__gt = self.query_on_date, state__in = self.query_state)
+        else:
+            return super(StateObjectManager, self).get_query_set().filter(state__in = self.query_state)
+
+class BaseObjectModelWState(BaseObjectModel):
+    '''
+    Базовый класс для всех моделей состоянием и периодом действия
+    '''
+
+    @classmethod
+    def get_state_choices(cls):
+        '''
+        Для возможности переопределения прикладных состояний записи
+        '''
+        return ObjectState.get_choices()
+    
+    @classmethod
+    def get_state_default(cls):
+        '''
+        Для возможности переопределения прикладного состояния по-умолчанию
+        '''
+        return ObjectState.DRAFT
+    
+    state = models.SmallIntegerField(_(u'Состояние'), choices = get_state_choices, default = get_state_default)
+    begin = models.DateTimeField(_(u'Начало действия'), null = True, blank = True, db_index = True, default = datetime.date.min)
+    end = models.DateTimeField(_(u'Окончание действия'), null = True, blank = True, db_index = True, default = datetime.date.max)
+    
+    @classmethod
+    def get_objects_on_date(cls, date = None):
+        '''
+        Получает менеджер с параметрами.
+        Можно писать так: Model.objects_on_date(datetime.today).filter....
+        '''
+        return ObjectManager(date = date)
+    
+    objects_on_date = get_objects_on_date
+    
+    class Meta:
+        abstract = True
+        
+#class BaseRecordModel(BaseObjectModelWVersion, BaseObjectModelWState):
+#    '''
+#    Базовый класс записей справочников с состоянием и версионностью
+#    '''
+#    class Meta:
+#        abstract = True
