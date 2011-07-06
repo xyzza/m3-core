@@ -158,7 +158,10 @@ OpenOffice должен быть запущен в качестве сервер
    :members: get_section, get_section_render_position, set_section_render_position, show
 
 .. autoclass:: Section
-   :members: flush
+   :members: flush, create_image
+
+.. autoclass:: OOImage
+   :members: load_from_file   
 
 Возможности
 +++++++++++
@@ -194,6 +197,31 @@ OpenOffice должен быть запущен в качестве сервер
 	Если в одном столбце было выведено несколько ячеек с разными значениями ширины,   в результате ширина столбца будет соответствовать значению ширины в первой выведенной в столбце ячейке.
 9. Вывод секции в заданную ячейку.
 	По умолчанию секции выводятся правее (при выводе горизонтально) или ниже (при выводе вертикально) предыдущих выведенных секций. Для того, чтобы задать координаты ячейки, которая будет соответствовать левому верхнему углу следующей выводимой секции, существует метод  set_section_render_position объекта SpreadsheetReport. Установленная с помощью данного метода позиция будет актуальна только для следующей выведенной в отчет секции. После вывода одной секции вывод вновь будет осуществляться по стандартному алгоритму, без учета секции, выведенной в произвольную ячейку. При этом разработчик должен сам следить за тем, чтобы выведенные секции не перезаписывали друг друга. Получить координаты ячейки, с которой будет выводиться в отчет следующая секция, можно с помощью метода get_section_render_position объекта *SpreadsheetReport*.
+10. Вывод картинки из файла в секцию.
+	Для того, чтобы вывести секцию с картинкой, необходимо: 
+
+	* В файле шаблона в одной из ячеек секции добавить тег в формате *<img image_name>*. Где параметр *img_name* - название картинки, по которому будет осуществляться доступ к картинке из программы. 
+	* Получить объект картинки *OOImage* в программе. Для этого у секции необходимо вызвать метод *create_image(name)* с аргументом *image_name*. 
+	* Загрузить в полученную из секции картинку файл с помощью метода *load_from_file(path)*. 
+	* Задать высоту картинки (в единицах 1/100 сантиметра): ``image.height = 1000`` 
+	* Задать ширину картинки (в единицах 1/100 сантиметра): ``image.width = 1000`` 
+	* Задать расположение картинки. Расположение задается смещением картинки относительно левого верхнего угла ячейки, в которой был задан соответствующий ей тег (в единицах 1/100 сантиметра): ``image.position = (50, 50)``
+
+	Если изображения должны меняться при каждом выводе секции, нет необходимости каждый раз создавать объект картинки, достаточно загружать новый файл с помощью метода *load_from_file(path)*. 
+	
+	Если в одной секции заданы несколько одинаковых тегов для картинок, изображение автоматически загрузиться во все ячейки с одинаковыми тегами.
+	
+	Таким образом, код программы для вставки картинки может выглядеть так:
+::
+
+	report = SpreadsheetReport(temp_path)
+	header = report.get_section(u'Шапка')
+	pupil_image = header.create_image('pupil')
+	pupil_image.load_from_file(pupil_path)
+	pupil_image.width = 1500
+	pupil_image.height = 1500
+	pupil_image.position = (100,100)
+	header.flush({data})	
 
 Примеры использования
 +++++++++++++++++++++
@@ -251,4 +279,36 @@ OpenOffice должен быть запущен в качестве сервер
 Результат:
 
 .. image:: images/report_generation/excel_complex_result.png
+
+3) Шаблон:
+
+.. image:: images/report_generation/excel_images_template.png
+
+Код программы::
+
+        report = SpreadsheetReport(temp_path)
+        header = report.get_section(u'Шапка')
+        header_img = header.create_image('planets')
+        header_img.load_from_file('planets/images.jpg')
+        header_img.width = 2500
+        header_img.height = 2500
+        header.flush({})
+        planet_name = report.get_section(u'Название')
+        info = report.get_section(u'Информация')
+        info_img = info.create_image('planet')
+        info_img.width = 2000
+        info_img.height = 2000
+        info_img.position = (2000,150)
+        num = 0
+        for planet in planets:                   
+            num+=1
+            planet_name.flush({'planet_name':planet['name']})
+            info_img.load_from_file('planets/'+planet['image'])
+            info.flush(planet)                  
+        report.show(xls_file_url, 'MS Excel 97')
+
+Результат:
+
+.. image:: images/report_generation/excel_images_result.png
+
 

@@ -444,12 +444,14 @@ class OOImage(object):
         '''
         Загружает изображение из файла и помещает его в BitmapTable.
         '''  
-        self.path = path
+        self.path = str(path)
         image_url = path_to_file_url(path)        
         bitmap = self.document.createInstance( "com.sun.star.drawing.BitmapTable" )
         #Это такой хитрый трюк получить само изображение, а не ссылку на него
-        if not bitmap.hasByName(str(path)):
-            bitmap.insertByName(str(path), image_url)
+        if not bitmap.hasByName(self.path):
+            bitmap.insertByName(self.path, image_url)
+        if not bitmap.hasByName(self.path):
+            raise ReportGeneratorException, u"Не удалось загрузить изображение %s по адресу %s" %(self.name, path)                
                 
     def set_image_size(self, width, height):
         '''
