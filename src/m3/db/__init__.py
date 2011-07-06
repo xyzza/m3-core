@@ -1,5 +1,6 @@
 #coding:utf-8
 
+import datetime
 from django.db import models, connection, transaction, IntegrityError, router, connections
 from django.db.models.query import QuerySet
 from django.db.models.deletion import Collector
@@ -268,22 +269,8 @@ class BaseObjectModelWState(BaseObjectModel):
     '''
     Базовый класс для всех моделей состоянием и периодом действия
     '''
-
-    @classmethod
-    def get_state_choices(cls):
-        '''
-        Для возможности переопределения прикладных состояний записи
-        '''
-        return ObjectState.get_choices()
     
-    @classmethod
-    def get_state_default(cls):
-        '''
-        Для возможности переопределения прикладного состояния по-умолчанию
-        '''
-        return ObjectState.DRAFT
-    
-    state = models.SmallIntegerField(_(u'Состояние'), choices = get_state_choices, default = get_state_default)
+    state = models.SmallIntegerField(_(u'Состояние'), choices = ObjectState.get_choices(), default = ObjectState.DRAFT)
     begin = models.DateTimeField(_(u'Начало действия'), null = True, blank = True, db_index = True, default = datetime.date.min)
     end = models.DateTimeField(_(u'Окончание действия'), null = True, blank = True, db_index = True, default = datetime.date.max)
     
