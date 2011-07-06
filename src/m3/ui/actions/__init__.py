@@ -835,9 +835,9 @@ class ActionController(object):
         for pack in self.top_level_packs:
             if hasattr(pack, '_built'):
                 del(pack._built)
-        for url, value in self._url_patterns.iteritems():
-            if hasattr(value[1], '_built'):
-                del(value[1]._built)
+                for action in pack.actions:
+                    if hasattr(action, '_built'):
+                        del(action._built)
         self._actions_by_name.clear()
         self._actions_by_type.clear()
         self._packs_by_name.clear()
