@@ -3010,4 +3010,9 @@
 .icon-package-py {
     background-image:url(../icons/package_py.png) !important;
 }
-
+.icon-tree-expand{
+    background-image:url(../icons/tree_expand.png) !important;
+}
+.icon-tree-collapse{
+    background-image:url(../icons/tree_collapse.png) !important;
+}

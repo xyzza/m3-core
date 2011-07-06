@@ -346,14 +346,14 @@ function createTreeView(rootNodeName){
                     rootNode.expand();
                 }
             },{
-                iconCls: 'icon-arrow-out'
+                iconCls: 'icon-tree-expand'
                 ,tooltip:'Развернуть узлы'
                 ,handler: function(){
                     var selectedNode = M3Designer.Utils.getProjectViewTreeSelectedNode();
                     selectedNode.expand(true);
                 }
             },{
-                iconCls: 'icon-arrow-in'
+                iconCls: 'icon-tree-collapse'
                 ,tooltip:'Свернуть узлы'
                 ,handler: function(){
                     var selectedNode = M3Designer.Utils.getProjectViewTreeSelectedNode();
