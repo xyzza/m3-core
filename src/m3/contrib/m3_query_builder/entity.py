@@ -206,7 +206,20 @@ class Entity(X):
         return column
     
     def get_fields(self):
-        raise NotImplementedError()
+        entity = EntityCache.get_entity(self.name)
+        if entity is None:
+            raise EntityNotFound(entity_name=self.name)
+
+        fields = []
+        for f in entity.select:
+            if f.field_name == Field.ALL_FIELDS:
+                flist = f.entity.get_fields()
+                fields.extend(flist)
+
+            else:
+                fields.append(f)
+
+        return fields
 
 class Field(object):
     '''
