@@ -5,6 +5,7 @@ Created on 26.05.2011
 @author: prefer
 '''
 from sqlalchemy.sql.expression import join, select, _BinaryExpression
+from sqlalchemy import bindparam
 
 from m3.helpers.datastructures import TypedList
 from m3.db.alchemy_wrapper import SQLAlchemyWrapper
@@ -43,7 +44,7 @@ class DBTableNotFound(EntityException):
 
 class EntityNotFound(EntityException):
     def __init__(self, entity_name, *a, **k):
-        super(DBTableNotFound, self).__init__(self, *a, **k)
+        super(EntityNotFound, self).__init__(self, *a, **k)
         self.entity_name = entity_name
         
     def __str__(self):
@@ -52,7 +53,7 @@ class EntityNotFound(EntityException):
 
 class DBColumnNotFound(EntityException):
     def __init__(self, model_name, field_name, *a, **k):
-        super(DBTableNotFound, self).__init__(self, *a, **k)
+        super(DBColumnNotFound, self).__init__(self, *a, **k)
         self.model_name = model_name
         self.field_name = field_name
         
@@ -94,21 +95,37 @@ class Table(object):
         self.verbose_name = verbose_name
 
 
-class Model(object):
-    '''
-    Для обозначения моделей в схемах
-    '''
-    TYPE_MODEL = 1
-    TYPE_ENTITY = 2
-    
+class X(object):
+    __ent_cache = {}
+
     def __init__(self, name, alias=None, verbose_name=None):
+        assert isinstance(name, basestring)
         self.name = name
         self.alias = alias
         self.verbose_name = verbose_name
-        
-        # Определяем типо модели по имени
-        self.type = self.TYPE_MODEL if name.find('.') > 0 else self.TYPE_ENTITY
+
+        c = self.__ent_cache.get(self.name)
+        if c:
+            self.__dict__ = c.__dict__
+        else:
+            self.table = self._get_alchemy_table()
+            self.aliased_table = self.table.alias(self.alias)
+            self.__ent_cache[self.name] = self
     
+    def _get_alchemy_table(self):
+        raise NotImplementedError
+            
+    def get_subquery(self):
+        return self.aliased_table
+
+
+class Model(X):
+    '''
+    Для обозначения моделей в схемах
+    '''
+    def __init__(self, name, alias=None, verbose_name=None):
+        super(Model, self).__init__(name, alias, verbose_name)
+
     def _get_django_model(self):
         """ Возвращает модель Django по имени """
         app, model = self.name.split('.')
@@ -117,63 +134,79 @@ class Model(object):
             raise DjangoModelNotFound(model_name=self.name)
         return model
     
-    def get_alchemy_table(self):
+    def _get_alchemy_table(self):
         """ Возвращает таблицу в формате SqlAlchemy """
-        if self.type == self.TYPE_MODEL:
-            model = self._get_django_model()
-            table_name = model._meta.db_table
-            table = WRAPPER.metadata.tables.get(table_name)
-            if table is None:
-                raise DBTableNotFound(model_name=table_name)
-            return table
+        model = self._get_django_model()
+        table_name = model._meta.db_table
+        table = WRAPPER.metadata.tables.get(table_name)
+        if table is None:
+            raise DBTableNotFound(model_name=table_name)
+        return table
+    
+    def get_alchemy_field(self, field_name, field_alias=''):
+        model = self._get_django_model()
         
-        elif self.type == self.TYPE_ENTITY:
-            entity = EntityCache.get_entity(self.name)
-            if entity is None:
-                raise EntityNotFound(self.name)
-            subquery = entity().create_query().subquery()
-            return subquery
-        
-        else:
-            raise NotImplementedError()
+        field = model._meta.get_field(field_name)
+        field_real_name = field.get_attname()
+        column = self.aliased_table.columns.get(field_real_name)
+        if column is None:
+            raise DBColumnNotFound(field_name, field_real_name)
+
+        if field_alias:
+            column = column.label(field_alias)
+
+        return column
         
     def get_fields(self):
         """ Возвращает колонки в формате Entity """
-        if self.type == self.TYPE_MODEL:
-            model = self._get_django_model()
-            fields = []
-            for lf in model._meta.local_fields:
-                # Django может подсунуть прокси из functools вместо строки
-                verbose_name = lf.verbose_name if isinstance(lf.verbose_name, basestring) else ''
-                
-                if isinstance(lf, AutoField):
-                    verbose_name = ''
-               
-                new_field = Field(
-                    entity = self,
-                    field_name = lf.attname, 
-                    verbose_name = verbose_name)
+        model = self._get_django_model()
+        fields = []
+        for lf in model._meta.local_fields:
+            # Django может подсунуть прокси из functools вместо строки
+            verbose_name = lf.verbose_name if isinstance(lf.verbose_name, basestring) else ''
+            
+            if isinstance(lf, AutoField):
+                verbose_name = ''
+           
+            new_field = Field(
+                entity = self,
+                field_name = lf.attname, 
+                verbose_name = verbose_name)
 
-                fields.append(new_field)
-            return fields
-        
-        elif self.type == self.TYPE_ENTITY:
-            table = self.get_alchemy_table()
-            raise NotImplementedError()
-        
-        else:
-            raise NotImplementedError()
+            fields.append(new_field)
+        return fields
         
 
-class Entity(object):
+class Entity(X):
     '''
-    Для обозначения сущности в схемах
+    Для обозначения сущности в схемах.
+    Опа! А почему у нас две энтити?
     '''
     def __init__(self, name, alias=None, verbose_name=None):
-        self.name = name
-        self.alias = alias
-        self.verbose_name = verbose_name
+        super(Entity, self).__init__(name, alias, verbose_name)
 
+    def _get_alchemy_table(self):
+        entity = EntityCache.get_entity(self.name)
+        if entity is None:
+            raise EntityNotFound(self.name)
+
+        e = entity()
+        query = e.create_query()
+        
+        if self.alias:
+            query = query.label(self.alias)
+        
+        return query
+    
+    def get_alchemy_field(self, field_name, field_alias=''):
+        column = self.aliased_table.columns[field_name]
+        if self.alias:
+            column = column.label(field_alias)
+
+        return column
+    
+    def get_fields(self):
+        raise NotImplementedError()
 
 class Field(object):
     '''
@@ -192,26 +225,8 @@ class Field(object):
     
     def get_alchemy_field(self):
         """ Возвращает поле в формате SqlAlchemy """
-        table = self.entity.get_alchemy_table()
-        type = self.entity.type
-        if type == Model.TYPE_MODEL:
-            model = self.entity._get_django_model()
-            field = model._meta.get_field(self.field_name)
-            field_real_name = field.get_attname()
-            column = table.columns.get(field_real_name)
-            if column is None:
-                raise DBColumnNotFound(self.name, field_real_name)
-            
-            if self.alias:
-                column = column.label(self.alias)
-            
-            return column
-        
-        elif type == Model.TYPE_ENTITY:
-            raise NotImplementedError()
-        
-        else:
-            raise NotImplementedError()
+        field = self.entity.get_alchemy_field(self.field_name, self.alias)
+        return field
 
 
 class Aggregate(object):
@@ -274,6 +289,9 @@ class Where(object):
         
     def __invert__(self):
         return Where(self, Where.NOT)
+    
+    def is_empty(self):
+        return self.left is None and self.right is None
         
     @staticmethod
     def get_simple_conditions():
@@ -351,7 +369,7 @@ class BaseEntity(object):
         Where.AND: lambda x, y: x & y,
         Where.OR: lambda x, y: x | y,
         Where.NOT: lambda x, y: ~x,
-        Where.IN: lambda x, y: x.in_(y),
+        Where.IN: lambda x, y: x.in_([y]),
         Where.BETWEEN: lambda x, y: x.between(y[0], y[1]),
     }
     
@@ -402,7 +420,7 @@ class BaseEntity(object):
             raise DBColumnNotFound(model_name, field_name)
         return column
     
-    def create_query(self, params=None):
+    def create_query(self):
         """ Возвращает готовый запрос алхимии по параметрам Entity """       
         
         # Подготовка колонок для выбора SELECT
@@ -414,7 +432,7 @@ class BaseEntity(object):
 
             if field.field_name == Field.ALL_FIELDS:
                 # Все поля
-                table = field.entity.get_alchemy_table()
+                table = field.entity.get_subquery()
                 select_columns.append(table)
             else:
                 # Отдельное поле
@@ -442,11 +460,12 @@ class BaseEntity(object):
                 onclause = (last_column == right_column) # _BinaryExpression
                 join_sequence = join_sequence.join(right_column.table, onclause)
         
+        join_sequence = None if join_sequence is None else [join_sequence]
+                
         # Условия WHERE
-        params = params or {}
-        whereclause = self._create_where_expression(self.where, params)
+        whereclause = self._create_where_expression(self.where)
 
-        query = select(columns=select_columns, whereclause=whereclause, from_obj=[join_sequence])
+        query = select(columns=select_columns, whereclause=whereclause, from_obj=join_sequence)
         
         # Прочее
         if self.limit > 0:
@@ -468,36 +487,33 @@ class BaseEntity(object):
                 fields.extend(ff)
             
             # Отдельное поле
-            else:
-                if not field.verbose_name and field.entity.type == Model.TYPE_MODEL:
-                    model = field.entity._get_django_model()
-                    f = model._meta.get_field(field.field_name)
-                    if not isinstance(f, AutoField):
-                        field.verbose_name = f.verbose_name
-                        
+            else:       
                 fields.append(field)
         
         return fields
 
-    def _create_where_expression(self, where, params):
+    def _create_where_expression(self, where):
         """ Преобразует выражение Where в логическое условие алхимии """
+        if where.is_empty():
+            return
+        
         left, right = where.left, where.right
         if isinstance(where.left, Where):
-            left = self._create_where_expression(left, params)
+            left = self._create_where_expression(left)
             
         if isinstance(where.right, Where):
-            right = self._create_where_expression(right, params)
+            right = self._create_where_expression(right)
            
         if not isinstance(left, _BinaryExpression):
             if left.startswith('$'):
-                left = params.get(left, 123)
+                left = bindparam(left, required=True)
             else:
                 dotcom = left.rfind('.')
                 left = self._get_column(left[:dotcom], left[dotcom+1:])
 
         if right is not None and not isinstance(right, _BinaryExpression):
             if right.startswith('$'):
-                right = params.get(right, 123)
+                right = bindparam(right, required=True)
             else:
                 dotcom = right.rfind('.')
                 right = self._get_column(right[:dotcom], right[dotcom+1:])
@@ -510,12 +526,12 @@ class BaseEntity(object):
         exp = func(left, right)
         return exp
     
-    def get_raw_sql(self, params=None):
+    def get_raw_sql(self):
         """ Возвращает текст SQL запроса для Entity """
-        return str(self.create_query(params))
+        return str(self.create_query())
     
     def get_data(self, params=None):
-        """ Возвращает данные, полученные в результатет выполения запроса """
+        """ Возвращает данные, полученные в результатет выполнения запроса """
         query = self.create_query(params)
         cursor = query.execute()
         data = cursor.fetchall()

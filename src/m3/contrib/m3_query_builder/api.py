@@ -85,7 +85,7 @@ def build_entity(objs, separator='-'):
     
     # Используемые сущности
         
-    entity.entities = map(lambda x: Entity(x), objs['entities'])
+    entity.entities = map(lambda x: Entity(x['id']), objs['entities'])
     
     # Список связей    
     entity.relations = [             
