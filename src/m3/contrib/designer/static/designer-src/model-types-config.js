@@ -611,7 +611,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             parent: 'textField',
             properties: {
                 id: {
-                    defaultValue: 'New trigger field',
+                    defaultValue: 'trigger_field',
                     isInitProperty: true,
                     isQuickEditable: true
                 },

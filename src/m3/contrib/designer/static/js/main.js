@@ -317,35 +317,27 @@ function createTreeView(rootNodeName){
             url: '/project-files'
         })
         ,tbar: new Ext.Toolbar({
-            items: [{
-                iconCls: 'icon-script-add',
-                tooltip:'Создать файл',
-                handler: function(item, e){toolBarFuncWraper(newTarget)}
-            },{
-                iconCls: 'icon-script-edit',
-                tooltip:'Переименовать файл',
-                handler: function(item, e){toolBarFuncWraper(renameTarget)}
-            },{
-                iconCls: 'icon-script-delete',
-                tooltip:'Удалить файл',
-                handler: function(item, e){toolBarFuncWraper(deleteTarget)}
-            },{
-                tooltip: 'Редактировать файл',
-                iconCls: 'icon-script-lightning',
-                handler: function(item, e){toolBarFuncWraper(editFile)}
-            },{
-                xtype: 'tbseparator'
-            },{
-                iconCls: 'icon-arrow-refresh'
-                ,tooltip:'Обновить структуру проекта'
-                ,handler: function(){
-                    var cmp = Ext.getCmp('project-view');
-                    var loader = cmp.getLoader();
-                    var rootNode = cmp.getRootNode();
-                    loader.load(rootNode);
-                    rootNode.expand();
-                }
-            },{
+            items: [
+//            {
+//                iconCls: 'icon-script-add',
+//                tooltip:'Создать файл',
+//                handler: function(item, e){toolBarFuncWraper(newTarget)}
+//            },{
+//                iconCls: 'icon-script-edit',
+//                tooltip:'Переименовать файл',
+//                handler: function(item, e){toolBarFuncWraper(renameTarget)}
+//            },{
+//                iconCls: 'icon-script-delete',
+//                tooltip:'Удалить файл',
+//                handler: function(item, e){toolBarFuncWraper(deleteTarget)}
+//            },{
+//                tooltip: 'Редактировать файл',
+//                iconCls: 'icon-script-lightning',
+//                handler: function(item, e){toolBarFuncWraper(editFile)}
+//            },{
+//                xtype: 'tbseparator'
+//            },
+            {
                 iconCls: 'icon-tree-expand'
                 ,tooltip:'Развернуть узлы'
                 ,handler: function(){
@@ -358,6 +350,16 @@ function createTreeView(rootNodeName){
                 ,handler: function(){
                     var selectedNode = M3Designer.Utils.getProjectViewTreeSelectedNode();
                     selectedNode.collapse(true);
+                }
+            },{
+                iconCls: 'icon-arrow-refresh'
+                ,tooltip:'Обновить структуру проекта'
+                ,handler: function(){
+                    var cmp = Ext.getCmp('project-view');
+                    var loader = cmp.getLoader();
+                    var rootNode = cmp.getRootNode();
+                    loader.load(rootNode);
+                    rootNode.expand();
                 }
             }]
         })
