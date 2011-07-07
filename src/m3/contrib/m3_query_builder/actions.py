@@ -194,8 +194,16 @@ class ShowQueryTextAction(actions.Action):
 
         entity = build_entity(context.objects)
         sql = entity.get_raw_sql()
+
+        try:
+            import sqlparse
+        except ImportError:
+            pass
+        else:
+            sql = sqlparse.format(sql, reindent=True, keyword_case='upper')
+            print sql
                 
-        return actions.JsonResult(json.dumps({'sql':sql}))
+        return actions.JsonResult(json.dumps({'sql': sql}))
     
 
 class SaveQueryAction(actions.Action):

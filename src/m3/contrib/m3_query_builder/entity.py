@@ -392,16 +392,19 @@ class BaseEntity(object):
         self.app2map = self._create_app2models_map()
         
     def _create_app2models_map(self):
-        """ Возвращает словарь из полных имен моделей и физических имен таблиц """
+        """
+        Возвращает словарь из полных имен моделей и физических имен таблиц
+        Возможно стоит убрать?
+        """
         result = {}
         for entity in self.entities:
-            full_name = entity.name
-            model = cache.get_model(*full_name.split('.'))
-            table_name = model._meta.db_table
-            table = self.metadata.tables[table_name]
+#            full_name = entity.name
+#            model = cache.get_model(*full_name.split('.'))
+#            table_name = model._meta.db_table
+#            table = self.metadata.tables[table_name]
 
-            result[full_name] = table
-        
+            result[entity.name] = entity.table
+
         return result
 
     def _get_field_real_name(self, model_full_name, column_name):
@@ -507,25 +510,39 @@ class BaseEntity(object):
 
     def _create_where_expression(self, where):
         """ Преобразует выражение Where в логическое условие алхимии """
-        if where.is_empty():
+        # Пустые условия пропускаем
+        if where is None or where.is_empty():
             return
-        
+
+        # Если условие составное, то обрабатываем его рекурсивно
         left, right = where.left, where.right
         if isinstance(where.left, Where):
             left = self._create_where_expression(left)
-            
         if isinstance(where.right, Where):
             right = self._create_where_expression(right)
-           
+
+        # Если отсутствует одна из частей условия, то возвращаем существующую
+        if left is None and right is not None:
+            return right
+        elif left is not None and right is None:
+            return left
+
+        # Если часть условия не является готовым выражением алхимии,
+        # то преобразуем его в поле или параметр запроса
         if not isinstance(left, _BinaryExpression):
-            if left.startswith('$'):
+            if isinstance(left, Field):
+                left = left.get_alchemy_field()
+            elif isinstance(left, basestring) and left.startswith('$'):
                 left = bindparam(left, required=True)
             else:
+                # Это нужно только если схема задается строкой
                 dotcom = left.rfind('.')
                 left = self._get_column(left[:dotcom], left[dotcom+1:])
 
         if right is not None and not isinstance(right, _BinaryExpression):
-            if right.startswith('$'):
+            if isinstance(right, Field):
+                right = right.get_alchemy_field()
+            elif isinstance(right, basestring) and  right.startswith('$'):
                 right = bindparam(right, required=True)
             else:
                 dotcom = right.rfind('.')
@@ -545,8 +562,8 @@ class BaseEntity(object):
     
     def get_data(self, params=None):
         """ Возвращает данные, полученные в результатет выполнения запроса """
-        query = self.create_query(params)
-        cursor = query.execute()
+        query = self.create_query()
+        cursor = query.execute(params)
         data = cursor.fetchall()
         return data    
 
