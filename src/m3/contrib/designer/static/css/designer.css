@@ -1,5 +1,12 @@
 ﻿.icon-function{ background-image:url(../images/icon-function.png) !important; }
-.icon-class { background-image:url(../images/icon_c.gif) !important; }
+.icon-class { background-image:url(../images/icon-class.gif) !important; }
+.icon-module{background-image:url(../images/icon-module.png) !important; }
+
+.icon-instance{background-image:url(../images/icon-instance.png) !important; }
+.icon-instance-local{background-image:url(../images/icon-instance-local.png) !important; }
+.icon-instance-imported{background-image:url(../images/icon-instance-imported.png) !important; }
+.icon-instance-builtin{background-image:url(../images/icon-instance-builtin.png) !important; }
+.icon-instance-global{background-image:url(../images/icon-instance-global.png) !important; }
 
 /*Standart*/
 .designer-displayfield {background-image:url(../images/display-field.png) !important;}

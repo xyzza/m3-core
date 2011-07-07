@@ -102,10 +102,9 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
     showSeparator:false,
 
     maxHeight:300,
-
     initComponent:function() {
 
-        var items = [], i =0, item, text;
+        var items = [], i =0, item, text, icon;
         var clickFn = this.onItemClick.createDelegate(this);
 
         for (;i<this.proposals.length;i++) {
@@ -113,6 +112,10 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
             text = item.text + ' (' + item.scope;
             if (item.type && item.type != '') {
                 text += ',' + item.type + ')';
+                icon = 'icon-'+item.type;
+                if (item.type === 'instance'){
+                    icon = 'icon-'+item.type+'-'+item.scope;
+                }
             }
             else {
                 text += ')';
@@ -121,6 +124,7 @@ M3Designer.code.CompletionMenu = Ext.extend(Ext.menu.Menu, {
             items.push({
                 text: text,
                 data: item,
+                iconCls: icon,
                 listeners: {
                     click : clickFn
                 }
