@@ -4,7 +4,6 @@ import datetime
 from django.db import models, connection, transaction, IntegrityError, router, connections
 from django.db.models.query import QuerySet
 from django.db.models.deletion import Collector
-from django.utils.translation import ugettext as _
 
 from m3.core.exceptions import RelatedError
 
@@ -197,7 +196,7 @@ class BaseObjectModelWVersion(BaseObjectModel):
     
     objects = ForUpdateManager()
     
-    version = models.IntegerField(_(u'Версия записи'),null=False, blank=False, default=0)
+    version = models.IntegerField(u'Версия записи',null=False, blank=False, default=0)
     
     def do_lock(self):
         if self.id:
@@ -234,7 +233,7 @@ class ObjectState(BaseEnumerate):
     VALID = 0
     CLOSED = 1
     DRAFT = 2
-    values = {VALID: _(u'Действует'), CLOSED: _(u'Закрыта'), DRAFT: _(u'Черновик')}
+    values = {VALID: u'Действует', CLOSED: u'Закрыта', DRAFT: u'Черновик'}
     
 class ObjectManager(models.Manager):
     '''
@@ -248,7 +247,7 @@ class ObjectManager(models.Manager):
         return [ObjectState.VALID]
     
     def __init__(self, date = None, state = None):
-        super(StateObjectManager, self).__init__()
+        super(ObjectManager, self).__init__()
         self.query_on_date = date
         if state:
             if isinstance(state, type([])):
@@ -261,18 +260,18 @@ class ObjectManager(models.Manager):
     def get_query_set(self):
         # если указывали дату, то отфильтруем на дату, иначе только по состоянию
         if self.query_on_date:
-            return super(StateObjectManager, self).get_query_set().filter(begin__lte = self.query_on_date, end__gt = self.query_on_date, state__in = self.query_state)
+            return super(ObjectManager, self).get_query_set().filter(begin__lte = self.query_on_date, end__gt = self.query_on_date, state__in = self.query_state)
         else:
-            return super(StateObjectManager, self).get_query_set().filter(state__in = self.query_state)
+            return super(ObjectManager, self).get_query_set().filter(state__in = self.query_state)
 
 class BaseObjectModelWState(BaseObjectModel):
     '''
     Базовый класс для всех моделей состоянием и периодом действия
     '''
     
-    state = models.SmallIntegerField(_(u'Состояние'), choices = ObjectState.get_choices(), default = ObjectState.DRAFT)
-    begin = models.DateTimeField(_(u'Начало действия'), null = True, blank = True, db_index = True, default = datetime.date.min)
-    end = models.DateTimeField(_(u'Окончание действия'), null = True, blank = True, db_index = True, default = datetime.date.max)
+    state = models.SmallIntegerField(u'Состояние', choices = ObjectState.get_choices(), default = ObjectState.DRAFT)
+    begin = models.DateTimeField(u'Начало действия', null = True, blank = True, db_index = True, default = datetime.date.min)
+    end = models.DateTimeField(u'Окончание действия', null = True, blank = True, db_index = True, default = datetime.date.max)
     
     @classmethod
     def get_objects_on_date(cls, date = None):
