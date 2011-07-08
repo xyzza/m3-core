@@ -201,7 +201,7 @@ class Entity(Noname):
     
     def get_alchemy_field(self, field_name, field_alias=''):
         column = self.aliased_table.columns[field_name]
-        if self.alias:
+        if field_alias:
             column = column.label(field_alias)
 
         return column
@@ -212,7 +212,7 @@ class Entity(Noname):
             raise EntityNotFound(entity_name=self.name)
 
         fields = []
-        for f in entity.select:
+        for f in entity().select:
             if f.field_name == Field.ALL_FIELDS:
                 flist = f.entity.get_fields()
                 fields.extend(flist)
@@ -352,35 +352,7 @@ class BaseEntity(object):
     В дальнейшем будем употреблять "сущность"
     ps: view в контексте бд
     '''
-    
-    # Имя сущности
-    name = ''
-    
-    # Список объектов (модели, сущности, имена таблиц), используемых во текущей
-    # сущности.    
-    entities = []
-    
-    # Типизированный список связей, над вышеупомянутами объектами
-    relations = TypedList(type=Relation)
-    
-    # Список полей, по которым нужно проводить группировку
-    group_by = None
-    
-    # Объект условий
-    where = None
-    
-    # Словарь с алиасами для полей в select'e запроса
-    select = TypedList(type=Field)
-    
-    # Выводить повторяющиеся записи?
-    distinct = None
-    
-    # Количество показываемых записей
-    limit = 0
 
-    # Смещение от начала выборки
-    offset = 0
-    
     # Карта для перевода операций конструктора запросов в алхимию
     OPERATION_MAP = {
         Where.EQ: lambda x, y: x == y,
@@ -397,25 +369,36 @@ class BaseEntity(object):
     }
     
     def __init__(self):
+        # Имя сущности
+        self.name = ''
+
+        # Список объектов (модели, сущности, имена таблиц), используемых во текущей
+        # сущности.
+        self.entities = []
+
+        # Типизированный список связей, над вышеупомянутами объектами
+        self.relations = TypedList(type=Relation)
+
+        # Список полей, по которым нужно проводить группировку
+        self.group_by = None
+
+        # Объект условий
+        self.where = None
+
+        # Словарь с алиасами для полей в select'e запроса
+        self.select = TypedList(type=Field)
+
+        # Выводить повторяющиеся записи?
+        self.distinct = None
+
+        # Количество показываемых записей
+        self.limit = 0
+
+        # Смещение от начала выборки
+        self.offset = 0
+
         self.metadata = WRAPPER.metadata
         self.session = WRAPPER.session
-        self.app2map = self._create_app2models_map()
-        
-    def _create_app2models_map(self):
-        """
-        Возвращает словарь из полных имен моделей и физических имен таблиц
-        Возможно стоит убрать?
-        """
-        result = {}
-        for entity in self.entities:
-#            full_name = entity.name
-#            model = cache.get_model(*full_name.split('.'))
-#            table_name = model._meta.db_table
-#            table = self.metadata.tables[table_name]
-
-            result[entity.name] = entity.table
-
-        return result
 
     def _get_field_real_name(self, model_full_name, column_name):
         """ 
@@ -430,28 +413,13 @@ class BaseEntity(object):
         field = model._meta.get_field(column_name)
         return field.get_attname()
     
-    def _get_table_by_model(self, model_name):
-        """ Возвращает таблицу алхимии по имени модели Django """
-        table = self.app2map.get(model_name)
-        if table is None:
-            raise DBTableNotFound(model_name=model_name)
-        return table
-    
-    def _get_column(self, model_name, field_name):
-        """ Возвращает колонку алхимии по имени модели и имени поля """
-        table = self._get_table_by_model(model_name)
-        real_name = self._get_field_real_name(model_name, field_name)
-        column = table.columns.get(real_name)
-        if column is None:
-            raise DBColumnNotFound(model_name, field_name)
-        return column
-    
     def create_query(self):
         """ Возвращает готовый запрос алхимии по параметрам Entity """       
         
         # Подготовка колонок для выбора SELECT
         if not len(self.select):
             raise Exception(u'Нет данных для SELECT')
+        
         select_columns = []
         for field in self.select:
             assert isinstance(field, Field)
@@ -505,8 +473,8 @@ class BaseEntity(object):
         # Группировка GROUP BY
         if self.group_by and self.group_by.group_fields:
             for field in self.group_by.group_fields:
-                a = field.get_alchemy_field()
-                query = query.group_by(a)
+                col = field.get_alchemy_field()
+                query = query.group_by(col)
 
         # LIMIT и OFFSET
         if self.limit > 0:
@@ -516,11 +484,10 @@ class BaseEntity(object):
 
         return query
 
-    @classmethod
-    def get_select_fields(cls):
+    def get_select_fields(self):
         """ Возвращает список всех полей entity.Field из SELECT """
         fields = []
-        for field in cls.select:
+        for field in self.select:
             assert isinstance(field, Field), '"field" must be "Field" type'
             field_name = field.field_name
             
@@ -562,18 +529,15 @@ class BaseEntity(object):
             elif isinstance(left, basestring) and left.startswith('$'):
                 left = bindparam(left, required=True)
             else:
-                # Это нужно только если схема задается строкой
-                dotcom = left.rfind('.')
-                left = self._get_column(left[:dotcom], left[dotcom+1:])
+                raise TypeError('Left WHERE argument must be string parameter or Field instance')
 
-        if right is not None and not isinstance(right, _BinaryExpression):
+        if not isinstance(right, _BinaryExpression):
             if isinstance(right, Field):
                 right = right.get_alchemy_field()
-            elif isinstance(right, basestring) and  right.startswith('$'):
+            elif isinstance(right, basestring):
                 right = bindparam(right, required=True)
             else:
-                dotcom = right.rfind('.')
-                right = self._get_column(right[:dotcom], right[dotcom+1:])
+                raise TypeError('Right WHERE argument must be string parameter or Field instance')
         
         func = self.OPERATION_MAP.get(where.operator)
         if not func:

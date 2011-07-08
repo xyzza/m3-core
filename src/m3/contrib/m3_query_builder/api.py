@@ -27,6 +27,7 @@ def get_entities():
     entities = EntityCache.get_entities()
     res = []
     for entity in entities:
+        entity_ins = entity()
         
         assert issubclass(entity, BaseEntity)
         
@@ -34,7 +35,7 @@ def get_entities():
         node = ExtTreeNode(client_id=entity.__name__, 
                            auto_check=True, 
                            icon_cls=Icons.PLUGIN)        
-        node.set_items(schemes=entity.name)
+        node.set_items(schemes=entity_ins.name)
 
         res.append(node)
         
@@ -48,17 +49,18 @@ def get_entity_items(entities):
     res = []
     for entity_name in entities:
         entity = EntityCache.get_entity(entity_name)
+        entity_ins = entity()
         if entity:
-            fields = entity.get_select_fields()
+            fields = entity_ins.get_select_fields()
             
             # Через словарики - это выявило одну проблему:
             # TODO: Немного неудобно работать с ExtTreeNode, т.к. нужно
             # учить json.dumps работать с этим объектом
             root_node = {
-                    'id': entity.__name__, 
+                    'id': entity.__name__,
                     'leaf': False,
                     'iconCls': Icons.PLUGIN,
-                    'verbose_field': entity.name,                           
+                    'verbose_field': entity_ins.name,
                     'expanded': True}
     
             for field in fields:
