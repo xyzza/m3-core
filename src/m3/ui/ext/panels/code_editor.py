@@ -26,6 +26,7 @@ class ExtCodeEditor(ExtPanel):
         super(ExtCodeEditor, self).render_params()
         self._put_config_value('sourceCode', self.source_code)
         self._put_config_value('readOnly', self.read_only)
+        self._put_config_value('parser', self.parser)
 
     def render(self):
         self.render_base_config()

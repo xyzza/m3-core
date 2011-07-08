@@ -6,7 +6,7 @@ import uuid
 from django.core.exceptions import ValidationError
 
 from m3.ui import actions
-from m3.ui.actions import ACD
+from m3.ui.actions import ACD, PreJsonResult, OperationResult
 from m3.helpers import logger
 from m3.ui.actions.dicts.simple import BaseDictionaryModelActions
 from m3.ui.ext.controls.buttons import ExtButton
@@ -201,9 +201,10 @@ class ShowQueryTextAction(actions.Action):
             pass
         else:
             sql = sqlparse.format(sql, reindent=True, keyword_case='upper')
-            print sql
-                
-        return actions.JsonResult(json.dumps({'sql': sql}))
+
+        win = ui.SqlWindow()
+        win.set_source(sql)
+        return OperationResult(code=win.get_script())
     
 
 class SaveQueryAction(actions.Action):

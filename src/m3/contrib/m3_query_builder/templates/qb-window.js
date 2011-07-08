@@ -498,9 +498,10 @@ function showQueryText(){
 		,params: {
 			'objects': Ext.encode( buildParams() )
 		}
-		,success: function(){
+		,success: function(response){
 			loadMask.hide();
 			console.log('sql');
+            smart_eval(response.responseText);
 		}
 		,failure: function(){
         	loadMask.hide();
