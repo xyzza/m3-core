@@ -102,6 +102,7 @@ def build_entity(objs, separator='-'):
         entity_name, field_name = group_field['id'].split(separator)
         field = Field(entity=Entity(entity_name),
                       field_name=field_name,)
+        group_fields.append(field)
         
     aggr_fields = []
     for group_field in objs['group']['group_aggr_fields']:

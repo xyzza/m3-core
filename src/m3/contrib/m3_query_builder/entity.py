@@ -6,6 +6,7 @@ Created on 26.05.2011
 '''
 from sqlalchemy.sql.expression import join, select, _BinaryExpression
 from sqlalchemy import bindparam
+from sqlalchemy import func
 
 from m3.helpers.datastructures import TypedList
 from m3.db.alchemy_wrapper import SQLAlchemyWrapper
@@ -94,9 +95,9 @@ class Table(object):
         self.alias = alias
         self.verbose_name = verbose_name
 
-
-class X(object):
-    __ent_cache = {}
+#TODO: Придумать название и сделать абстрактным через ABCMeta
+class Noname(object):
+    __instance_cache = {}
 
     def __init__(self, name, alias=None, verbose_name=None):
         assert isinstance(name, basestring)
@@ -104,13 +105,13 @@ class X(object):
         self.alias = alias
         self.verbose_name = verbose_name
 
-        c = self.__ent_cache.get(self.name)
+        c = self.__instance_cache.get(self.name)
         if c:
             self.__dict__ = c.__dict__
         else:
             self.table = self._get_alchemy_table()
             self.aliased_table = self.table.alias(self.alias)
-            self.__ent_cache[self.name] = self
+            self.__instance_cache[self.name] = self
     
     def _get_alchemy_table(self):
         raise NotImplementedError
@@ -119,7 +120,7 @@ class X(object):
         return self.aliased_table
 
 
-class Model(X):
+class Model(Noname):
     '''
     Для обозначения моделей в схемах
     '''
@@ -177,7 +178,7 @@ class Model(X):
         return fields
         
 
-class Entity(X):
+class Entity(Noname):
     '''
     Для обозначения сущности в схемах.
     Опа! А почему у нас две энтити?
@@ -246,20 +247,25 @@ class Aggregate(object):
     '''
     Набор классов для агригирования
     '''
-    class Max(object):
+    class BaseAggregate(object):
         def __init__(self, field):
             assert isinstance(field, Field), '"field" must be "Field" type'
             self.field = field
+
+        def get_alchemy_func(self, column):
+            raise NotImplementedError
+
+    class Max(BaseAggregate):
+        def get_alchemy_func(self, column):
+            return func.max(column)
             
-    class Min(object):
-        def __init__(self, field):
-            assert isinstance(field, Field), '"field" must be "Field" type'
-            self.field = field
+    class Min(BaseAggregate):
+        def get_alchemy_func(self, column):
+            return func.min(column)
             
-    class Count(object):
-        def __init__(self, field):
-            assert isinstance(field, Field), '"field" must be "Field" type'
-            self.field = field
+    class Count(BaseAggregate):
+        def get_alchemy_func(self, column):
+            return func.count(column)
 
 class Where(object):
     '''
@@ -339,6 +345,7 @@ class Grouping(object):
                 Grouping.COUNT: Aggregate.Count,                
                 }
 
+#TODO: Тоже негодное название!
 class BaseEntity(object):
     '''
     Базовый класс для сущностей/схемы/прокси/view - кому как удобно
@@ -369,7 +376,10 @@ class BaseEntity(object):
     distinct = None
     
     # Количество показываемых записей
-    limit = None
+    limit = 0
+
+    # Смещение от начала выборки
+    offset = 0
     
     # Карта для перевода операций конструктора запросов в алхимию
     OPERATION_MAP = {
@@ -451,8 +461,17 @@ class BaseEntity(object):
                 table = field.entity.get_subquery()
                 select_columns.append(table)
             else:
-                # Отдельное поле
+                # Отдельное поле.
                 column = field.get_alchemy_field()
+
+                # На наго может быть наложена агрегатная функция.
+                if self.group_by and self.group_by.aggregate_fields:
+                    aggregate_fields = self.group_by.aggregate_fields
+                    for af in aggregate_fields:
+                        if af.field.field_name == field.field_name:
+                            column = af.get_alchemy_func(column)
+                            break
+
                 select_columns.append(column)
 
         # Подготовка объединений JOIN. Важна последовательность!
@@ -482,10 +501,18 @@ class BaseEntity(object):
         whereclause = self._create_where_expression(self.where)
 
         query = select(columns=select_columns, whereclause=whereclause, from_obj=join_sequence)
-        
-        # Прочее
+
+        # Группировка GROUP BY
+        if self.group_by and self.group_by.group_fields:
+            for field in self.group_by.group_fields:
+                a = field.get_alchemy_field()
+                query = query.group_by(a)
+
+        # LIMIT и OFFSET
         if self.limit > 0:
             query = query.limit(self.limit)
+        if self.offset > 0:
+            query = query.offset(self.offset)
 
         return query
 
@@ -559,7 +586,7 @@ class BaseEntity(object):
     def get_raw_sql(self):
         """ Возвращает текст SQL запроса для Entity """
         return str(self.create_query())
-    
+
     def get_data(self, params=None):
         """ Возвращает данные, полученные в результатет выполнения запроса """
         query = self.create_query()
@@ -567,6 +594,6 @@ class BaseEntity(object):
         data = cursor.fetchall()
         return data    
 
-#TODO: Сортировать последовательность join'ов
-#TODO: Что-то делать с атрибутом entities 
-#TODO: Поддержка вложенных Entity
+#TODO: Не нравится мне иерархия классов :(
+#TODO: Если параметры заданы прямо в BaseEntity, то их надо как-то заполнять...
+#TODO: Проблема с IN, он преобразуется в ARRAY, но PostgreSQL почему-то не понимает его
