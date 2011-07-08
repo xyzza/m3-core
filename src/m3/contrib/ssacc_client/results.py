@@ -1,11 +1,15 @@
 #coding:utf-8
-from xml.dom.minidom import Element
+
 from django.http import HttpResponse
 
-from xml.dom import minidom
 from m3.contrib.ssacc_client.exceptions import SSACCException
 from m3.contrib.ssacc_client.result_params import (MetaParameter,
     LicenseMetaObject, ProfileRatesParam)
+
+from pyexpat import ExpatError
+
+from xml.dom import minidom
+from xml.dom.minidom import Element
 
 __author__ = 'Excinsky'
 
@@ -80,8 +84,13 @@ class BaseResult(object):
 
         @param xml_string: XML строка
         @type xml_string: str
+        @raise SSACCException 
         """
-        document = minidom.parseString(xml_string)
+        try:
+            document = minidom.parseString(xml_string)
+        except ExpatError:
+            raise SSACCException(u'Ошибка преобразования из xml, формат не '
+                u'поддерживается SSACC')
         result_nodes = document.getElementsByTagName('result')
         if not len(result_nodes):
             raise SSACCException(u'Ошибка преобразования из xml, формат не '
