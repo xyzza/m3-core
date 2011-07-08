@@ -106,7 +106,10 @@ class BaseResult(object):
         @param xml_string: ХМЛ строка
         @type xml_string: str
         """
-        result_nodes = BaseResult._get_nodes_from_xml(xml_string)
+        try:
+            result_nodes = BaseResult._get_nodes_from_xml(xml_string)
+        except SSACCException:
+            return False
         result_node = result_nodes.pop()
         result_status_attribute = result_node.getAttribute('status')
 
@@ -125,7 +128,10 @@ class BaseResult(object):
             форматов SSACC
         @return OperationResult or ErrorResult
         """
-        result_nodes = BaseResult._get_nodes_from_xml(xml_string)
+        try:
+            result_nodes = BaseResult._get_nodes_from_xml(xml_string)
+        except SSACCException, e:
+            return ErrorResult(e.message, None)
         result_node = result_nodes[0]
 
         if result_type == OperationResult:
