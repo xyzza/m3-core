@@ -144,6 +144,19 @@
     "parent": "container"
 },
 
+// Панель редактирования кода
+{
+    "class": {
+        "codeEditor": "ExtCodeEditor"
+    },
+    "config": {
+        "sourceCode": "source_code",
+        "readOnly": "read_only",
+        "parser": "parser"
+    },
+    "parent": "panel"
+},
+
 // Форма
 {
     "class": {
@@ -283,7 +296,6 @@
         ,"filter":"filter"
         ,"menuDisabled":"menu_disabled"
         ,"width": "width"
-        ,"hidden":"hidden"
     }    
 },
 

@@ -17,6 +17,9 @@ class ExtCodeEditor(ExtPanel):
         # Признак: только чтение
         self.read_only = False
 
+        # Определяет как редактор будет разбирать исходный код
+        self.parser = ''
+
         self.init_component(*args, **kwargs)
 
     def render_params(self):

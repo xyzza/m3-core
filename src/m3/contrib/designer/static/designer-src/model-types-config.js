@@ -1443,6 +1443,27 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 category: 'M3'
             },
             treeIconCls: 'icon-application-form'
+        },
+        codeEditor: {
+            parent: 'panel',
+            properties: {
+                sourceCode: {
+                    defaultValue: ''
+                },
+                readOnly: {
+                    defaultValue: false
+                },
+                parser: {
+                    propertyType: 'enum',
+                    defaultValue: 'python',
+                    isQuickEditable: true,
+                    isInitProperty: true
+                }
+            },
+            toolboxData: {
+                category: 'M3',
+                text: 'Code editor'
+            }
         }
     }
 });

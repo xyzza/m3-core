@@ -334,6 +334,11 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
                 });
             }
             return columns;
+        },
+        codeEditor: function (model, cfg) {
+            return Ext.apply(cfg, {
+                xtype: 'uxCodeEditor'
+            });
         }
     };
 
