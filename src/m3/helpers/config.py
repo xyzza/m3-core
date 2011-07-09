@@ -29,6 +29,13 @@ class ProjectConfig:
         Устанавливает параметры проекта по умолчанию
         '''
         self.defauls = defaults
+        
+    def items(self, section):
+        '''
+        Возвращает список кортежей (key, value) из указанной секции.
+        В случае, если такой секции нет, то возвращается пустой список.
+        '''
+        return self.parser.items(section) if self.parser.has_section(section) else []
     
     def get(self, section, option):
         '''
