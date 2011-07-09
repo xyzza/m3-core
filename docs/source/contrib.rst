@@ -7,11 +7,8 @@ contrib
    :maxdepth: 2
    
    contrib/m3_replica.rst
-
-.. toctree::
-   :maxdepth: 2
-
    contrib/m3_logview.rst
+   contrib/m3_autologin.rst
    
 kladr
 -----
