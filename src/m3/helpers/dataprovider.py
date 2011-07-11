@@ -59,12 +59,12 @@ class BaseRecord(object):
 
 
 class GetRecordsParams(object):
-    begin = None
-    end = None
-    filter = {}
-    sorting = {}
-
     def __init__(self, *args, **kwargs):
+        self.begin = None
+        self.end = None
+        self.filter = {}
+        self.sorting = {}
+        
         for k, v in kwargs.items():
             assert k in dir(self) and not callable(getattr(self, k)), \
                 'Instance attribute "%s" should be defined in class "%s"!' \
@@ -221,14 +221,13 @@ class BaseRecordModelProvider(BaseRecordProvider):
         # TODO: пока сортировка сделана только по одному полю
         sort_fields = []
         if len(params.sorting.keys()) == 1:
-            sort_field = sorting.keys()[0]
-            sort_dir = sorting.values()[0]
+            sort_field = params.sorting.keys()[0]
+            sort_dir = params.sorting.values()[0]
             if sort_dir == 'DESC':
                 sort_fields.append('-' + sort_field)
             else:
                 sort_fields.append(sort_field)
             data = data.order_by(*sort_fields)
-        
         # перед непосредственным запросом может кто-то захочет что-то поменять
         data = self.before_query_data(data)
         

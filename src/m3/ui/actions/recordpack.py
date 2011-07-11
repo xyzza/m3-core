@@ -296,7 +296,7 @@ class BaseRecordPack(ActionPack):
                         user_sort = conf['attr']
                 elif isinstance(conf, str):
                     user_sort = conf
-            sorting[user_sorts] = direction
+            sorting[user_sort] = direction
         return sorting
     
     def rows_request(self, request, context):
