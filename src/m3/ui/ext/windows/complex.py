@@ -155,12 +155,18 @@ class ExtDictionaryWindow(BaseExtWindow):
             # Включаем обратно refresh, ибо он нужен.
             for component in self._components_refresh_tree:
                 exclude_list.append(component)
+            # И поиск тоже включаем
+            if self.search_text_tree:
+                exclude_list.append(self.search_text_tree)
             self.tree.make_read_only(self.read_only, exclude_list, *args, **kwargs)
             
         if self.grid:
             # Включаем обратно refresh, ибо он нужен.
             for component in self._components_refresh_grid:
                 exclude_list.append(component)
+            # И поиск тоже включаем
+            if self.search_text_grid:
+                exclude_list.append(self.search_text_grid)
             self.grid.make_read_only(self.read_only, exclude_list, *args, **kwargs)
             
 
