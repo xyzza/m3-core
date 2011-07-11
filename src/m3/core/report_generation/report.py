@@ -335,13 +335,13 @@ class Section(object):
         с левого края листа, ниже последней выведенной секции.
         '''
         document = self.report_object.document
+        #Лист с результатом - второй по счету
         dest_sheet = document.getSheets().getByIndex(1)
         section_width = abs(self.left_cell_addr.Column - self.right_cell_addr.Column)+1
         section_height = abs(self.left_cell_addr.Row - self.right_cell_addr.Row)+1
         x, y = self.report_object.get_section_render_position(vertical)
         self.report_object.update_previous_render_info(vertical, (x,y), section_width, section_height)
         
-        #Лист с результатом - второй по счету
         dest_cell = dest_sheet.getCellByPosition(x,y)
         if document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             src_sheet = document.getSheets().getByName(TEMPORARY_SHEET_NAME)
@@ -688,9 +688,10 @@ class SpreadsheetReport(object):
             filter_property.Name = "FilterName"
             filter_property.Value = filter
             properties.append(filter_property)
+        self.set_draw_page_size()     
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
         if self.document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
-            self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)
+            self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)           
         save_document_as(self.document, result_path, tuple(properties))
         # Удаление временного файла
         self.clean_temporary_file()        
@@ -769,5 +770,21 @@ class SpreadsheetReport(object):
         '''
         self.document.close(True)
         if os.path.exists(self.temporary_file_path):
-            os.remove(self.temporary_file_path)      
+            os.remove(self.temporary_file_path)     
+            
+    def set_draw_page_size(self):
+        '''
+        Выставляет странице с результатом такой же размер, как в шаблоне
+        ''' 
+        page_styles= self.document.StyleFamilies.getByName("PageStyles")
+        # Листу шаблона соответствует третий стиль
+        src_page = page_styles.getByIndex(2)
+        # Стиль по умолчанию
+        dest_page = page_styles.getByName("Default")
+        # Выставляется ориентация листа
+        dest_page.IsLandscape = src_page.IsLandscape
+        dest_page.Width = src_page.Width
+        dest_page.Height = src_page.Height
+        
+        
              
