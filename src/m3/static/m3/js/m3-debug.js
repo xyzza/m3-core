@@ -7963,14 +7963,16 @@ function showHelpWindow(url){
 
 Ext.ns('Ext.ux.form');
 
-Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
+Ext.ux.form.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
     delimeter:',',
 
     initComponent:function() {
 
         this.checkedItems = [];
-        
+
+        this.hideTriggerDictEdit = true;
+
         this.editable = false;
 
         if (!this.tpl) {
@@ -7983,15 +7985,13 @@ Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
             })
 
         }
-        Ext.ux.form.MultiComboBox.superclass.initComponent.apply(this);
+        Ext.ux.form.MultiSelectField.superclass.initComponent.apply(this);
     },
 
     setValue:function(v) {
         if (!v) {
             return;
         }
-
-        v = this.normalizeStringValues(v);
 
         var values = v.split(this.delimeter);
 
@@ -8015,9 +8015,27 @@ Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
 			value.push(record.get(this.valueField));
 		}, this);
 
-		return value.join(this.delimiter);
+		return value.join(',');
 
 	},
+
+    initValue:function() {
+        if (this.store && this.value) {
+            var values = Ext.util.JSON.decode(this.value);
+            
+            this.store.each(function (r) {
+			    Ext.each(values, function (value) {
+			        if (r.get(this.valueField) == value) {
+			            this.checkedItems.push(r);
+			            return false;
+			        }
+			    }, this);					
+		    }, this);
+        }
+
+        Ext.ux.form.MultiSelectField.superclass.initValue.call(this);
+
+    },
 
     getText : function () {
 		var value = [];
@@ -8039,22 +8057,6 @@ Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
         return 'x-grid3-check-col';
     },
 
-    normalizeStringValues : function (s) {
-	    if (!Ext.isEmpty(s, false)) {
-	        var values = [],
-	            re = /^\[{1}|\]{1}$/g;
-
-            s =  s.toString().replace(re, "");
-
-	        Ext.each(s.split(this.delimiter), function (item) {
-	            values.push(item.trim());
-	        });
-	        s = values.join(this.delimiter);
-	    }
-
-	    return s;
-	},
-
     onSelect : function (record, index) {
         if (this.fireEvent("beforeselect", this, record, index) !== false) {
 			if (this.checkedItems.indexOf(record) === -1) {
@@ -8074,11 +8076,58 @@ Ext.ux.form.MultiComboBox = Ext.extend(Ext.form.ComboBox, {
         if (this.view) {
             this.view.refreshNode(this.store.indexOf(record));
         }
-    }
+    },
+
+    onSelectInDictionary: function(){
+        assert( this.actionSelectUrl, 'actionSelectUrl is undefined' );
+
+		if(this.fireEvent('beforerequest', this)) {
+			Ext.Ajax.request({
+				url: this.actionSelectUrl
+				,method: 'POST'
+				,params: this.actionContextJson
+				,success: function(response, opts){
+				    var win = smart_eval(response.responseText);
+				    if (win){
+                        win.initMultiSelect(this.checkedItems);
+				        win.on('closed_ok',function(records){
+							if (this.fireEvent('afterselect', records)) {
+								this.addRecordsToStore( records);
+							}
+				        }, this);
+				    };
+				}
+				,failure: function(response, opts){
+					uiAjaxFailMessage.apply(this, arguments);
+				},
+                scope:this
+			});
+		}
+	},
+
+    clearValue:function() {
+        Ext.ux.form.MultiSelectField.superclass.clearValue.call(this);
+    },
+
+    addRecordsToStore: function(records){
+    	var i = 0, newRecords = [], record;
+
+        for (i; i< records.length;i++) {
+            record = new Ext.data.Record();
+            record.data['id'] = records[i].data.id;
+            record.data[this.displayField] = records[i].data[this.displayField];
+            newRecords.push( record );
+        }
+
+        this.getStore().loadData({total:newRecords.length, rows:newRecords});
+        this.checkedItems = newRecords;
+
+        this.setValue(this.getValue());
+	}
 
 });
 
-Ext.reg('m3-multicombo', Ext.ux.form.MultiComboBox );
+Ext.reg('m3-multiselect', Ext.ux.form.MultiSelectField );
 
 /**
  * Объектный грид, включает в себя тулбар с кнопками добавить, редактировать и удалить

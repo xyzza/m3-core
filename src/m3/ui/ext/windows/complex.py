@@ -15,6 +15,8 @@ from m3.ui.ext.containers import (ExtContextMenu,
                                 ExtToolBar, 
                                 ExtTree,
                                 ExtGrid)
+
+from m3.ui.ext.containers.grids import ExtGridCheckBoxSelModel
         
 #===============================================================================
 # TODO: Необходимо отрефакторить данный класс под внутриклассовый рендеринг
@@ -28,6 +30,9 @@ class ExtDictionaryWindow(BaseExtWindow):
     
     # Режим выбора
     SELECT_MODE = 1
+
+    # Режим множественного выбора
+    MULTI_SELECT_MODE = 2
     
     def __init__(self, *args, **kwargs):
         super(ExtDictionaryWindow, self).__init__(*args, **kwargs)
@@ -112,27 +117,15 @@ class ExtDictionaryWindow(BaseExtWindow):
     
     @mode.setter
     def mode(self, value):
-        assert value in (ExtDictionaryWindow.LIST_MODE, ExtDictionaryWindow.SELECT_MODE), 'Mode only 1 (select mode) or 0 (list mode)'
+        assert value in (ExtDictionaryWindow.LIST_MODE, ExtDictionaryWindow.SELECT_MODE,ExtDictionaryWindow.MULTI_SELECT_MODE), \
+            'Mode value should be 0(list), 1(select) or 2(multi select)'
 
         if value == ExtDictionaryWindow.SELECT_MODE:
-            
-            # панель с историей выбора пока отключена
-            button_panel = ExtPanel(title='История выбора',
-                                region='south',min_height=100, collapsible=True, split=True)
-            list_view = ExtListView() 
-            button_panel.items.append(list_view)
-#            self.items.append(button_panel)
-
-            self._panel_list_view = button_panel
-            self.list_view = list_view
-        
             select_btn = ExtButton(name = 'select_btn',text = u'Выбрать', disabled=True)
             self.buttons.insert(0, select_btn)
-            
             self.select_button = select_btn
             
         elif value == ExtDictionaryWindow.LIST_MODE:
-            
             if self._panel_list_view:
                 self.items.remove(self._panel_list_view)
                 self.list_view = None
@@ -140,6 +133,22 @@ class ExtDictionaryWindow(BaseExtWindow):
             if self.select_button:
                 self.buttons.remove(self.select_button)
                 self.select_button = None
+
+        if value == ExtDictionaryWindow.MULTI_SELECT_MODE:
+            select_btn = ExtButton(name = 'select_btn',text = u'Выбрать', disabled=True)
+            self.buttons.insert(0, select_btn)
+            self.select_button = select_btn
+
+        # панель с историей выбора пока отключена
+        if value == ExtDictionaryWindow.SELECT_MODE or value == ExtDictionaryWindow.MULTI_SELECT_MODE:
+            button_panel = ExtPanel(title='История выбора',
+                                region='south',min_height=100, collapsible=True, split=True)
+            list_view = ExtListView()
+            button_panel.items.append(list_view)
+#            self.items.append(button_panel)
+            self._panel_list_view = button_panel
+            self.list_view = list_view
+
 
         self._mode = value
         
@@ -328,8 +337,13 @@ class ExtDictionaryWindow(BaseExtWindow):
     
     @column_name_on_select.setter
     def column_name_on_select(self, value):
+        handler = 'selectValue'
+
+        if self.mode == ExtDictionaryWindow.MULTI_SELECT_MODE:
+            handler = 'multiSelectValues'
+
         if value:
-            self._set_handler([self.select_button,],'selectValue')
+            self._set_handler([self.select_button,],handler)
         else:
             self._clear_handler([self.select_button,])
         self._text_on_select = value
@@ -375,6 +389,9 @@ class ExtDictionaryWindow(BaseExtWindow):
             
             grid.top_bar.add_fill()
             grid.top_bar.items.append(search_grid)
+
+            if self.mode == ExtDictionaryWindow.MULTI_SELECT_MODE:
+                self.grid.sm = ExtGridCheckBoxSelModel()
             
     def init_tree_components(self):
         '''

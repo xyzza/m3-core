@@ -198,44 +198,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         
     @pack.setter
     def pack(self, ppack):
-        '''
-           Настраивает поле выбора под указанный экшенпак ppack. Причем в качестве аргумента может быть
-        как сам класс пака так и если имя. Это связано с тем, что не во всех формах можно импортировать
-        паки и может произойти кроссимпорт.
-           Поиск пака производится по всем экшенконтроллерам в системе. Используется первый найденный, т.к.
-        при правильном дизайне один и тот же пак не должен быть в нескольких контроллерах одновременно. 
-        @param ppack: Имя класса пака или класс пака.
-        '''
-        assert isinstance(ppack, basestring) or hasattr(ppack, '__bases__'), 'Argument %s must be a basestring or class' % ppack
-        ppack = ControllerCache.find_pack(ppack)
-        assert ppack, 'Pack %s not found in ControllerCache' % ppack
-        self.__pack = ppack
-        
-        # hasattr используется вместо isinstance, иначе будет перекрестный импорт.
-        # Для линейного справочника и иерархического спр., если задана списочная модель, значит выбирать будут из неё.
-        if hasattr(ppack, 'model') or (hasattr(ppack, 'tree_model') and ppack.list_model):
-            # url формы редактирования элемента
-            self.edit_url = ppack.get_edit_url()
-            # url автокомплита и данных
-            self.autocomplete_url = ppack.get_rows_url()
-        
-        # Для иерархических справочников без списочной модели
-        elif hasattr(ppack, 'tree_model') and ppack.tree_model:
-            self.edit_url = ppack.get_edit_node_url()
-            self.autocomplete_url = ppack.get_nodes_like_rows_url()
-        
-        else:
-            # для иных случаев (например паки без моделей) попробуем найти соответствующие методы
-            if hasattr(ppack, 'get_rows_url') or hasattr(ppack, 'get_edit_url'):  
-                if hasattr(ppack, 'get_rows_url'):
-                    self.autocomplete_url = ppack.get_rows_url()
-                if hasattr(ppack, 'get_edit_url'):
-                    self.edit_url = ppack.get_edit_url()
-            else:
-                raise Exception('Pack %s must be a dictionary pack instance.' % ppack)
-        
-        # url формы выбора
-        self.url = ppack.get_select_url()
+        self._set_urls_from_pack(ppack)
         
     @property
     def total(self):
@@ -258,7 +221,46 @@ class ExtDictSelectField(BaseExtTriggerField):
         
     def t_render_triggers(self):
         return '[%s]' % ','.join(['{%s}' % item.render() for item in self._triggers])
-    
+
+    def _set_urls_from_pack(self,ppack):
+        '''
+           Настраивает поле выбора под указанный экшенпак ppack. Причем в качестве аргумента может быть
+        как сам класс пака так и если имя. Это связано с тем, что не во всех формах можно импортировать
+        паки и может произойти кроссимпорт.
+           Поиск пака производится по всем экшенконтроллерам в системе. Используется первый найденный, т.к.
+        при правильном дизайне один и тот же пак не должен быть в нескольких контроллерах одновременно.
+        @param ppack: Имя класса пака или класс пака.
+        '''
+        assert isinstance(ppack, basestring) or hasattr(ppack, '__bases__'), 'Argument %s must be a basestring or class' % ppack
+        ppack = ControllerCache.find_pack(ppack)
+        assert ppack, 'Pack %s not found in ControllerCache' % ppack
+        self._pack = ppack
+
+        # hasattr используется вместо isinstance, иначе будет перекрестный импорт.
+        # Для линейного справочника и иерархического спр., если задана списочная модель, значит выбирать будут из неё.
+        if hasattr(ppack, 'model') or (hasattr(ppack, 'tree_model') and ppack.list_model):
+            # url формы редактирования элемента
+            self.edit_url = ppack.get_edit_url()
+            # url автокомплита и данных
+            self.autocomplete_url = ppack.get_rows_url()
+
+        # Для иерархических справочников без списочной модели
+        elif hasattr(ppack, 'tree_model') and ppack.tree_model:
+            self.edit_url = ppack.get_edit_node_url()
+            self.autocomplete_url = ppack.get_nodes_like_rows_url()
+
+        else:
+            # для иных случаев (например паки без моделей) попробуем найти соответствующие методы
+            if hasattr(ppack, 'get_rows_url') or hasattr(ppack, 'get_edit_url'):
+                if hasattr(ppack, 'get_rows_url'):
+                    self.autocomplete_url = ppack.get_rows_url()
+                if hasattr(ppack, 'get_edit_url'):
+                    self.edit_url = ppack.get_edit_url()
+            else:
+                raise Exception('Pack %s must be a dictionary pack instance.' % ppack)
+
+        # url формы выбора
+        self.url = ppack.get_select_url()
     
     def render_params(self):
         action_context = None
@@ -465,9 +467,9 @@ class ExtImageUploadField(ExtFileUploadField):
         return '%s/%s' % (settings.MEDIA_URL, name)
 
 #===============================================================================
-class ExtMultiComboBox(ExtComboBox):
+class ExtMultiSelectField(ExtDictSelectField):
     '''
-    Комбобокс со множественным выбором
+    Множественный выбор из справочника.
     '''
     def __init__(self, *args, **kwargs):
         self.delimeter = ','
@@ -475,7 +477,7 @@ class ExtMultiComboBox(ExtComboBox):
         self._value = ''
         self._init_flag = True
         
-        super(ExtMultiComboBox, self).__init__(*args, **kwargs)
+        super(ExtMultiSelectField, self).__init__(*args, **kwargs)
 
     @property
     def value(self):
@@ -490,20 +492,31 @@ class ExtMultiComboBox(ExtComboBox):
         if isinstance(value, (list, tuple)):
             self._value = json.dumps(value)
         else:
-            raise TypeError(u'MultiComboBox value must be list or tuple of values')
+            raise TypeError(u'ExtMultiSelectField value must be list or tuple of values')
+
+    @property
+    def pack(self):
+        return self.__pack
+
+    @pack.setter
+    def pack(self, ppack):
+        self._set_urls_from_pack(ppack)
+
+        if hasattr(self._pack, 'get_multi_select_url'):
+            self.url = self._pack.get_multi_select_url()
+        else:
+            raise Exception('Pack %s hasn\'t multiselect url defined')
 
     def render(self):
-        try:
-            self.render_base_config()
-
-        except Exception as msg:
-            raise Exception(msg)
+        self.render_base_config()
+        self.render_params()
 
         base_config = self._get_config_str()
-        return 'new Ext.ux.form.MultiComboBox({%s})' % base_config
+        params = self._get_params_str()
+        return 'new Ext.ux.form.MultiSelectField({%s}, {%s})' % (base_config, params)
 
     def render_base_config(self):
         self.pre_render()
 
-        super(ExtMultiComboBox, self).render_base_config()
+        super(ExtMultiSelectField, self).render_base_config()
         self._put_config_value('delimeter', self.delimeter)

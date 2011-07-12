@@ -95,16 +95,18 @@ class DictSelectWindowAction(DictListWindowAction):
     Действие, возвращающее окно с формой выбора из справочника
     '''
     url = '/select-window$'
-    
+
+    mode = ExtDictionaryWindow.SELECT_MODE
+
     def run(self, request, context):
         base = self.parent
-        win = self.create_window(request, context, mode=1)
+        win = self.create_window(request, context, self.mode)
         win.orig_request = request
         win.orig_context = context
         win.modal = True
         self.create_columns(win.grid, self.parent.list_columns)
         self.configure_list(win)
-        
+
         list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
         win.list_view.set_store(list_store)
         
@@ -121,6 +123,14 @@ class DictSelectWindowAction(DictListWindowAction):
         self.configure_window(win, request, context)
         
         return ExtUIScriptResult(self.parent.get_select_window(win))
+
+
+class DictMultiSelectWindowAction(DictSelectWindowAction) :
+    '''
+    '''
+    url = '/multiselect-window$'
+
+    mode = ExtDictionaryWindow.MULTI_SELECT_MODE
 
 class DictEditWindowAction(Action):
     '''
@@ -318,10 +328,11 @@ class BaseDictionaryActions(ActionPack):
         self.row_action           = ListGetRowAction()
         self.save_action          = DictSaveAction()
         self.delete_action        = ListDeleteRowAction()
+        self.multi_select_window_action = DictMultiSelectWindowAction()
         # Но привязать их все равно нужно
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
-                        self.delete_action]
+                        self.delete_action, self.multi_select_window_action]
     
     #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================    
     def get_list_url(self):
@@ -337,7 +348,13 @@ class BaseDictionaryActions(ActionPack):
         Используется для присвоения адресов в прикладном приложении.
         '''
         return self.select_window_action.get_absolute_url()
-    
+
+    def get_multi_select_url(self):
+        '''
+        Возвращает адрес формы списка элементов для множественного выбора
+        '''
+        return self.multi_select_window_action.get_absolute_url()
+
     def get_edit_url(self):
         '''
         Возвращает адрес формы редактирования элемента справочника.

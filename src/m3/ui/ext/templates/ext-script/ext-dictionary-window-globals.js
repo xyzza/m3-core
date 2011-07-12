@@ -491,7 +491,63 @@ var ajax = Ext.Ajax;
 {%endif%}
 
 {% if component.mode %}
-	/**
+
+    {% if component.grid %}
+    Ext.apply(win, {
+
+        initMultiSelect:function(selectedItems) {
+            var grid = Ext.getCmp('{{ component.grid.client_id}}');
+            this.checkedItems = this.extractSelectedData(selectedItems);
+            this.grid = grid;
+
+            grid.getStore().on('load', this.onGridStoreLoad, this);
+            grid.getSelectionModel().on('rowselect', this.onCheckBoxSelect, this);
+            grid.getSelectionModel().on('rowdeselect', this.onCheckBoxDeselect, this);
+        },
+
+        onGridStoreLoad:function(store, records, options) {
+            var i = 0, j = 0, recordsToSelect = [];
+
+            for (;i< records.length;i++) {
+
+                    if (this.checkedItems[records[i].data.id]) {
+                        recordsToSelect.push(records[i]);
+                    }
+                }
+                this.grid.getSelectionModel().selectRecords(recordsToSelect);
+        },
+
+        onCheckBoxSelect:function(selModel, rowIndex, record) {
+            if (!this.checkedItems[record.data.id] ) {
+                this.checkedItems[record.data.id] = record.copy();
+            }
+        },
+
+        onCheckBoxDeselect:function(selModel, rowIndex, record) {
+            if (this.checkedItems[record.data.id]) {
+                this.checkedItems[record.data.id] = undefined;
+            }
+        },
+
+        extractSelectedData:function(selectedItems) {
+            var i = 0, result = {};
+
+            for(; i < selectedItems.length; i++) {
+                result[selectedItems[i].data.id] = selectedItems[i].copy();
+            }
+
+            return result;
+
+        }
+    });
+    {% else %}
+    //Тут тоже самое для дерева
+
+    {% endif%}
+
+
+
+    /**
 	 * Выбор значения в справочнике по форме ExtDictionary
 	 */
 	function selectValue(){
@@ -518,7 +574,18 @@ var ajax = Ext.Ajax;
 		var win = Ext.getCmp('{{ component.client_id}}');
 		win.fireEvent('closed_ok', id, displayText);
 		win.close();
-	}
+	};
+
+    function multiSelectValues() {
+        var grid, records, win;
+        {% if component.grid %}
+        grid = Ext.getCmp('{{ component.grid.client_id}}');
+        records = grid.getSelectionModel().getSelections();
+        {% endif %}
+        win = Ext.getCmp('{{ component.client_id}}');
+		win.fireEvent('closed_ok', records);
+		win.close();
+    };
 {%endif%}
 
 {% block content %}{% endblock %}
