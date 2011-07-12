@@ -469,14 +469,20 @@ class ExtImageUploadField(ExtFileUploadField):
 #===============================================================================
 class ExtMultiSelectField(ExtDictSelectField):
     '''
-    Множественный выбор из справочника.
+    Множественный выбор из справочника. Может использоваться также как стандартный ExtDictSelectField,
+    При использовании следует обратить внимание, что биндиться к полям формы этот компонент не будет, тк в качестве
+    value принимается список чего-либо, откуда на клиенте будут извлекаться объекты по value_field и display_field.
+    Не рекомендуются передавать в value список моделей, тк все что передано будет преобразовано в json строку для
+    отдачи на клиент, а от полной сериализации моделей хорошего мало. Лушче отдавать список словарей.
+
+    Кроме того можно использовать как локальный комбокс с галочками, для этого достаточно задать Store методом
+    set_store и в value, если нужно, передать список со значениями value_field.
+
     '''
     def __init__(self, *args, **kwargs):
         self.delimeter = ','
-
         self._value = ''
         self._init_flag = True
-        
         super(ExtMultiSelectField, self).__init__(*args, **kwargs)
 
     @property
@@ -513,7 +519,7 @@ class ExtMultiSelectField(ExtDictSelectField):
 
         base_config = self._get_config_str()
         params = self._get_params_str()
-        return 'new Ext.ux.form.MultiSelectField({%s}, {%s})' % (base_config, params)
+        return 'new Ext.m3.MultiSelectField({%s}, {%s})' % (base_config, params)
 
     def render_base_config(self):
         self.pre_render()

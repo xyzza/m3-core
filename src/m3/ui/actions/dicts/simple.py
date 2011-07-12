@@ -110,9 +110,12 @@ class DictSelectWindowAction(DictListWindowAction):
         self.configure_list(win)
 
         # быть может кто-то умный уже настроил себе стор
-        if not win.list_view.get_store:
-            list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
-            win.list_view.set_store(list_store)
+
+        #ZIgi 12/07/2011 21:34: Илья, wtf?
+
+#        if not win.list_view.get_store:
+#            list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
+#            win.list_view.set_store(list_store)
         
         # M prefer 12.12.10 >
         # win.column_name_on_select = "name"
