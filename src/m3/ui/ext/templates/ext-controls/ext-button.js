@@ -1,4 +1,4 @@
-{%if component.menu %}
+{%if component.menu and component.handler %}
 new Ext.SplitButton({
 {%else%}
 new Ext.Button({

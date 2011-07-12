@@ -55,10 +55,12 @@ class DictListWindowAction(Action):
         base = self.parent
         
         # Устанавливаем источники данных
-        grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True, remote_sort=True)
-        grid_store.total_property = 'total'
-        grid_store.root = 'rows'
-        win.grid.set_store(grid_store)
+        # быть может кто-то умный уже настроил себе стор
+        if not win.grid.get_store:
+             grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True, remote_sort=True)
+             grid_store.total_property = 'total'
+             grid_store.root = 'rows'
+             win.grid.set_store(grid_store)
         
         if not base.list_readonly:
             # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося
@@ -107,8 +109,10 @@ class DictSelectWindowAction(DictListWindowAction):
         self.create_columns(win.grid, self.parent.list_columns)
         self.configure_list(win)
 
-        list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
-        win.list_view.set_store(list_store)
+        # быть может кто-то умный уже настроил себе стор
+        if not win.list_view.get_store:
+            list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
+            win.list_view.set_store(list_store)
         
         # M prefer 12.12.10 >
         # win.column_name_on_select = "name"

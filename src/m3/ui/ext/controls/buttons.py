@@ -95,7 +95,7 @@ class ExtButton(BaseExtControl):
             self._put_config_value('margins', self.margins)
 
     def render(self):
-        self._ext_name = 'Ext.SplitButton' if self.menu else 'Ext.Button'
+        self._ext_name = 'Ext.SplitButton' if self.menu and self.handler else 'Ext.Button'
         return super(ExtButton, self).render()
     
     def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):

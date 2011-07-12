@@ -263,6 +263,49 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
     Грид с возможностью множественной группировки колонок.
     Обработка группировки происходит на сервере (см. m3.helpers.datagrouping)
     '''
+    class GridExportMenu(menus.ExtContextMenu):
+        '''
+        Внутренний класс для удобной работы с контекстным меню грида
+        '''
+        def __init__(self, *args, **kwargs):
+            super(ExtMultiGroupinGrid.GridExportMenu, self).__init__(*args, **kwargs)
+            self.xls = menus.ExtContextMenuItem(text = u'XLS (Excel2003 до 65000 строк)', 
+                                handler='function(){exportData("xls");}')
+            self.csv = menus.ExtContextMenuItem(text = u'CSV (разделитель ";")', 
+                                handler='function(){exportData("csv");}')
+            
+            self.items.extend([
+                self.xls,
+                self.csv,
+            ])
+                      
+            self.init_component()
+            
+    class LiveGridTopBar(containers.ExtToolBar):
+        '''
+        Внутренний класс для удобной работы топбаром грида
+        '''
+        def __init__(self, *args, **kwargs):
+            super(ExtMultiGroupinGrid.LiveGridTopBar, self).__init__(*args, **kwargs)
+            self._ext_name = "Ext.ux.grid.livegrid.Toolbar"
+            self.button_new = controls.ExtButton(text = u'Добавить', 
+                                    icon_cls = 'add_item', handler='topBarNew')
+            self.button_edit = controls.ExtButton(text = u'Изменить', 
+                                    icon_cls = 'edit_item', handler='topBarEdit')
+            self.button_delete = controls.ExtButton(text = u'Удалить', 
+                                    icon_cls = 'delete_item', handler='topBarDelete')
+            self.button_export = controls.ExtButton(text = u'Экспорт', 
+                                    icon_cls = 'icon-table-go', menu=ExtMultiGroupinGrid.GridExportMenu())
+            
+            self.items.extend([
+                self.button_new,
+                self.button_edit,
+                self.button_delete,
+                self.button_export,
+            ])
+
+            self.init_component()
+            
     # Поле в котором будет содержаться значение ключа группировки
     # должно отличаться от ключевого поля Store, т.к. должно содержать совсем другие данные 
     data_id_field = 'id'
@@ -276,6 +319,21 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         self.template = 'ext-grids/ext-multigrouping-grid.js'
         # Для данных
         self.action_data = None
+        
+        self.action_new = None # Экшен для новой записи
+        self.action_edit = None # Экшен для  изменения
+        self.action_delete = None # Экшен для удаления
+        self.action_export = None # Экшен для экспорта
+        
+        # Поля для id записи
+        self.row_id_name = 'row_id'
+        
+        # Обработчик двойного клика
+        self.dblclick_handler = 'onEditRecord'
+        
+        # Топ бар для грида
+        self._top_bar = ExtMultiGroupinGrid.LiveGridTopBar() 
+        
         # Признак того, маскировать ли грид при загрузки
         self.load_mask = True
         # Стор для загрузки данных
@@ -295,13 +353,31 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
     def render_params(self):
         super(ExtMultiGroupinGrid, self).render_params()
         data_url = self.action_data.absolute_url() if self.action_data else None
+        new_url = self.action_new.absolute_url() if self.action_new else None
+        if not self.action_new:
+            self._top_bar.items.remove(self._top_bar.button_new)
+        edit_url = self.action_edit.absolute_url() if self.action_edit else None
+        if not self.action_edit:
+            self._top_bar.items.remove(self._top_bar.button_edit)
+        else:
+            self.handler_dblclick = self.dblclick_handler
+        delete_url = self.action_delete.absolute_url() if self.action_delete else None
+        if not self.action_delete:
+            self._top_bar.items.remove(self._top_bar.button_delete)
+        export_url = self.action_export.absolute_url() if self.action_export else None
         context_json = self.action_context.json if self.action_context else None
         
         self._put_params_value('actions', {'dataUrl': data_url,
-                                            'contextJson': context_json})
+                                           'newUrl': new_url,
+                                           'editUrl': edit_url,
+                                           'deleteUrl': delete_url,
+                                           'exportUrl': export_url,
+                                           'contextJson': context_json})
         self._put_params_value('dataIdField', self.data_id_field)
         self._put_params_value('dataDisplayField', self.data_display_field)
         self._put_params_value('groupedColumns', lambda : '[%s]' % ','.join(["'%s'" % (col) for col in self.grouped]))
+        self._put_params_value('toolbar', self._top_bar.t_render_items)
+        self._put_params_value('rowIdName', self.row_id_name)
         
     def t_render_base_config(self):
         return self._get_config_str()
