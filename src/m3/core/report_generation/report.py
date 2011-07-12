@@ -10,6 +10,8 @@ import tempfile
 from django.conf import settings
 from django.utils import importlib
 
+from m3.helpers import logger
+
 
 #FIXME: грязный хак для WIN и OSX
 can_use_uno = False
@@ -612,7 +614,11 @@ class DocumentReport(object):
         '''
         self.document.close(True)
         if os.path.exists(self.temporary_file_path):
-            os.remove(self.temporary_file_path)
+            try:
+                os.remove(self.temporary_file_path)
+            except OSError as e:
+                logger.exception("Не удалось удалить временный файл %s: %s " %(self.temporary_file_path, e.message))                
+                
             
             
 class SpreadsheetReport(object): 
@@ -770,7 +776,11 @@ class SpreadsheetReport(object):
         '''
         self.document.close(True)
         if os.path.exists(self.temporary_file_path):
-            os.remove(self.temporary_file_path)     
+            try:
+                os.remove(self.temporary_file_path)
+            except OSError as e:
+                logger.exception("Не удалось удалить временный файл %s: %s " %(self.temporary_file_path, e.message))                
+         
             
     def set_draw_page_size(self):
         '''
