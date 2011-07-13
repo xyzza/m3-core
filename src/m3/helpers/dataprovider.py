@@ -64,6 +64,8 @@ class GetRecordsParams(object):
         self.end = None
         self.filter = {}
         self.sorting = {}
+        self.request = None
+        self.context = None
         
         for k, v in kwargs.items():
             assert k in dir(self) and not callable(getattr(self, k)), \

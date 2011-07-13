@@ -11,6 +11,17 @@ from m3.ui.actions.results import OperationResult, ExtUIScriptResult, PreJsonRes
 from m3.ui.actions.utils import extract_int
 from m3.helpers.dataprovider import GetRecordsParams, BaseRecordProvider, BaseRecord
 
+def make_action(url, method, shortname = '', acd = None):
+    """
+    Надоело создавать Action - пусть сами создаются
+    """
+    act = Action()
+    act.url = url
+    act.run = method
+    if acd:
+        act.context_declaration = acd
+    return act
+
 class BaseRecordPack(ActionPack):
     """
     Экшенпак для работы с провайдерами записей
@@ -38,12 +49,15 @@ class BaseRecordPack(ActionPack):
     #    'date': {'attr': 'person__birthday', 'oper': 'icontains'}
     context_attr_map = {}
     
+    # Заголовок окна редактирования по-умолчанию
+    title = None
+    
     def __init__(self, *args, **kwargs):
         super(BaseRecordPack, self).__init__(*args, **kwargs)
-        self.action_edit = RecordEditWindowAction()
-        self.action_delete = RecordDeleteAction()
-        self.action_rows = RecordRowsAction()
-        self.action_save = RecordSaveAction()
+        self.action_edit = make_action('edit', self.edit_window_request, acd=self._get_edit_action_context_declaration) 
+        self.action_delete = make_action('delete', self.delete_request, acd=self._get_delete_action_context_declaration)
+        self.action_rows = make_action('rows', self.rows_request, acd=self._get_rows_action_context_declaration)
+        self.action_save = make_action('save', self.save_request, acd=self._get_save_action_context_declaration)
 
         self.actions.extend([
             self.action_edit, self.action_delete, self.action_rows, 
@@ -155,10 +169,14 @@ class BaseRecordPack(ActionPack):
         """
         if is_new:
             assert self.new_window, 'new_window должен быть задан'
-            return self.new_window(create_new=is_new)
+            win = self.new_window(create_new=is_new)
         else:
             assert self.edit_window, 'edit_window должен быть задан'
-            return self.edit_window(create_new=is_new)
+            win = self.edit_window(create_new=is_new)
+            
+        if not win.title:
+            win.title = self.title
+        return win
     
     def update_context(self, request, context, window):
         """
@@ -201,15 +219,21 @@ class BaseRecordPack(ActionPack):
             grid.store.total_property = 'total'
             grid.store.root = 'rows'
         
-        grid.url_new = self.action_edit.get_absolute_url()
-        grid.url_edit = self.action_edit.get_absolute_url()
-        grid.url_delete = self.action_delete.get_absolute_url()
-        grid.url_data = self.action_rows.get_absolute_url()
+#        grid.url_new = self.action_edit.get_absolute_url()
+#        grid.url_edit = self.action_edit.get_absolute_url()
+#        grid.url_delete = self.action_delete.get_absolute_url()
+#        grid.url_data = self.action_rows.get_absolute_url()
+#        grid.url_export = self.action_edit.get_absolute_url()
+        
+        grid.action_new = self.action_edit
+        grid.action_edit = self.action_edit
+        grid.action_delete = self.action_delete
+        grid.action_data = self.action_rows
+        grid.action_export = self.action_edit
         
         grid.row_id_name = self.context_id
     
     #====================== Обработка запросов =======================
-        
     def edit_window_request(self, request, context):
         """
         Запрос на создание формы редактирования/нового элемента
@@ -303,7 +327,7 @@ class BaseRecordPack(ActionPack):
         """
         Запрос на получение списка записей
         """
-        params = GetRecordsParams()
+        params = GetRecordsParams(request=request, context=context)
         if self.context_master_id:
             master_id = getattr(context, self.context_master_id)
             params.filter[self.master_id] = master_id
@@ -324,57 +348,14 @@ class BaseRecordPack(ActionPack):
         self.delete_rows(request, context, rows_id)
         return OperationResult()
 
-
-class RecordEditWindowAction(Action):
-    """
-    Экшен отдающий форму редактирования записи
-    """
-    url = '/edit'
-
-    def context_declaration(self):
-        return self.parent._get_edit_action_context_declaration()
-
-    def run(self, request, context):
-        return self.parent.edit_window_request(request, context)
-
-class RecordSaveAction(Action):
-    """
-    Экшен отвечает за сохранение записей в гриде
-    """
-    url = '/save'
-
-    def context_declaration(self):
-        return self.parent._get_save_action_context_declaration()
-
-    def run(self, request, context):
-        return self.parent.save_request(request, context)
-
-class RecordRowsAction(Action):
-    """
-    Экшен отвечает за отдачу данных в грид
-    """
-    url = '/rows'
-
-    def context_declaration(self):
-        return self.parent._get_rows_action_context_declaration()
-
-    def run(self, request, context):
-        return self.parent.rows_request(request, context)
-
-class RecordDeleteAction(Action):
-    """
-    Экшен удаляющий записи из грида
-    """
-    url = '/delete'
-
-    def context_declaration(self):
-        return self.parent._get_delete_action_context_declaration()
-
-    def run(self, request, context):
-        return self.parent.delete_rows_request(request, context)
-
     
 class BaseRecordListPack(BaseRecordPack):
+    """
+    Набор действий для работы с окном списка записей
+    """
+    # Заголовок окна списка записей по-умолчанию
+    title_plural = None
+    
     # Форма, которая будет вызываться при показе списка
     list_window = None
     # Форма, которая будет вызываться при выборе из списка
@@ -382,8 +363,8 @@ class BaseRecordListPack(BaseRecordPack):
     
     def __init__(self, *args, **kwargs):
         super(BaseRecordListPack, self).__init__(*args, **kwargs)
-        self.action_list = RecordListWindowAction()
-        self.action_select = RecordSelectWindowAction()
+        self.action_list = make_action('list', self.list_window_request, acd=self._get_list_action_context_declaration)
+        self.action_select = make_action('select', self.select_window_request, acd=self._get_select_action_context_declaration)
         self.actions.extend([self.action_list, self.action_select])
 
     #====================== Описание контекста действий =======================
@@ -423,10 +404,14 @@ class BaseRecordListPack(BaseRecordPack):
     def get_list_window(self, request, context, is_select):
         if is_select:
             assert self.select_window, 'Attribute "select_window" must be defined!'
-            return self.select_window(mode=0)
+            win = self.select_window(mode=0)
         else:
             assert self.list_window, 'Attribute "list_window" must be defined!'
-            return self.list_window(mode=1)
+            win = self.list_window(mode=1)
+        
+        if not win.title:
+            win.title = self.title_plural
+        return win
     
     #====================== Обработка запросов =======================
     
@@ -447,27 +432,3 @@ class BaseRecordListPack(BaseRecordPack):
         self.bind_to_grid(request, context, win.grid)
         
         return ExtUIScriptResult(win)
-
-class RecordListWindowAction(Action):
-    """
-    Экшен отдающий форму списка записей
-    """
-    url = '/list'
-
-    def context_declaration(self):
-        return self.parent._get_list_action_context_declaration()
-
-    def run(self, request, context):
-        return self.parent.list_window_request(request, context)
-    
-class RecordSelectWindowAction(Action):
-    """
-    Экшен отдающий форму выбора записей
-    """
-    url = '/select'
-
-    def context_declaration(self):
-        return self.parent._get_select_action_context_declaration()
-
-    def run(self, request, context):
-        return self.parent.select_window_request(request, context)
