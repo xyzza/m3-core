@@ -352,19 +352,21 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
 
     def render_params(self):
         super(ExtMultiGroupinGrid, self).render_params()
-        data_url = self.action_data.absolute_url() if self.action_data else None
-        new_url = self.action_new.absolute_url() if self.action_new else None
+        data_url = self.action_data.get_absolute_url() if self.action_data else None
+        new_url = self.action_new.get_absolute_url() if self.action_new else None
         if not self.action_new:
             self._top_bar.items.remove(self._top_bar.button_new)
-        edit_url = self.action_edit.absolute_url() if self.action_edit else None
+        edit_url = self.action_edit.get_absolute_url() if self.action_edit else None
         if not self.action_edit:
             self._top_bar.items.remove(self._top_bar.button_edit)
         else:
             self.handler_dblclick = self.dblclick_handler
-        delete_url = self.action_delete.absolute_url() if self.action_delete else None
+        delete_url = self.action_delete.get_absolute_url() if self.action_delete else None
         if not self.action_delete:
             self._top_bar.items.remove(self._top_bar.button_delete)
-        export_url = self.action_export.absolute_url() if self.action_export else None
+        export_url = self.action_export.get_absolute_url() if self.action_export else None
+        if not self.action_export:
+            self._top_bar.items.remove(self._top_bar.button_export)
         context_json = self.action_context.json if self.action_context else None
         
         self._put_params_value('actions', {'dataUrl': data_url,

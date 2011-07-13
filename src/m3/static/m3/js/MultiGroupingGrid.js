@@ -1062,13 +1062,13 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 						// для режима выделения строк
 						if (sm instanceof Ext.grid.RowSelectionModel) {
 							if (sm.singleSelect) {
-								baseConf[scope.rowIdName] = sm.getSelected().id;
+								baseConf[scope.rowIdName] = sm.getSelected().json.id;
 							} else {
 								// для множественного выделения
 								var sels = sm.getSelections();
 								var ids = [];
 								for(var i = 0, len = sels.length; i < len; i++){
-									ids.push(sels[i].id);
+									ids.push(sels[i].json.id);
 								}
 								baseConf[scope.rowIdName] = ids.join();
 							}

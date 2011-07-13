@@ -11,13 +11,13 @@ from m3.ui.actions.results import OperationResult, ExtUIScriptResult, PreJsonRes
 from m3.ui.actions.utils import extract_int
 from m3.helpers.dataprovider import GetRecordsParams, BaseRecordProvider, BaseRecord
 
-def make_action(url, method, shortname = '', acd = None):
+def make_action(url, run_method, shortname = '', acd = None):
     """
     Надоело создавать Action - пусть сами создаются
     """
     act = Action()
     act.url = url
-    act.run = method
+    act.run = run_method
     if acd:
         act.context_declaration = acd
     return act
@@ -54,10 +54,10 @@ class BaseRecordPack(ActionPack):
     
     def __init__(self, *args, **kwargs):
         super(BaseRecordPack, self).__init__(*args, **kwargs)
-        self.action_edit = make_action('edit', self.edit_window_request, acd=self._get_edit_action_context_declaration) 
-        self.action_delete = make_action('delete', self.delete_request, acd=self._get_delete_action_context_declaration)
-        self.action_rows = make_action('rows', self.rows_request, acd=self._get_rows_action_context_declaration)
-        self.action_save = make_action('save', self.save_request, acd=self._get_save_action_context_declaration)
+        self.action_edit = make_action('/edit', self.edit_window_request, acd=self._get_edit_action_context_declaration) 
+        self.action_delete = make_action('/delete', self.delete_rows_request, acd=self._get_delete_action_context_declaration)
+        self.action_rows = make_action('/rows', self.rows_request, acd=self._get_rows_action_context_declaration)
+        self.action_save = make_action('/save', self.save_request, acd=self._get_save_action_context_declaration)
 
         self.actions.extend([
             self.action_edit, self.action_delete, self.action_rows, 
@@ -209,7 +209,7 @@ class BaseRecordPack(ActionPack):
         """
         Присоединение списка к гриду
         """
-        if not grid.get_store:
+        if not grid.get_store():
             grid_store = ExtJsonStore(url=self.action_rows.get_absolute_url(), auto_load=True, remote_sort=True)
             grid_store.total_property = 'total'
             grid_store.root = 'rows'
@@ -219,17 +219,10 @@ class BaseRecordPack(ActionPack):
             grid.store.total_property = 'total'
             grid.store.root = 'rows'
         
-#        grid.url_new = self.action_edit.get_absolute_url()
-#        grid.url_edit = self.action_edit.get_absolute_url()
-#        grid.url_delete = self.action_delete.get_absolute_url()
-#        grid.url_data = self.action_rows.get_absolute_url()
-#        grid.url_export = self.action_edit.get_absolute_url()
-        
         grid.action_new = self.action_edit
         grid.action_edit = self.action_edit
         grid.action_delete = self.action_delete
         grid.action_data = self.action_rows
-        grid.action_export = self.action_edit
         
         grid.row_id_name = self.context_id
     
@@ -262,7 +255,7 @@ class BaseRecordPack(ActionPack):
             all_fields = win.form._get_all_fields(win)
             for field in all_fields:
                 data_object[field.name] = None
-            self.bind_window_to_record(request, context, win, data_object)
+            self.bind_window_to_record(request, context, win, data_object, is_new)
             
             return PreJsonResult({'success': True, 'data': data_object})
 
@@ -363,8 +356,8 @@ class BaseRecordListPack(BaseRecordPack):
     
     def __init__(self, *args, **kwargs):
         super(BaseRecordListPack, self).__init__(*args, **kwargs)
-        self.action_list = make_action('list', self.list_window_request, acd=self._get_list_action_context_declaration)
-        self.action_select = make_action('select', self.select_window_request, acd=self._get_select_action_context_declaration)
+        self.action_list = make_action('/list', self.list_window_request, acd=self._get_list_action_context_declaration)
+        self.action_select = make_action('/select', self.select_window_request, acd=self._get_select_action_context_declaration)
         self.actions.extend([self.action_list, self.action_select])
 
     #====================== Описание контекста действий =======================
