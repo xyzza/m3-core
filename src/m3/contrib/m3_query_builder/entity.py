@@ -4,17 +4,18 @@ Created on 26.05.2011
 
 @author: prefer
 '''
+from abc import ABCMeta, abstractmethod
 from sqlalchemy.sql.expression import join, select, _BinaryExpression
 from sqlalchemy import bindparam
 from sqlalchemy import func
 
 from m3.helpers.datastructures import TypedList
 from m3.db.alchemy_wrapper import SQLAlchemyWrapper
+from m3.contrib.m3_query_builder import EntityCache
 
 from django.conf import settings
 from django.db.models.loading import cache
 from django.db.models.fields import AutoField
-from m3.contrib.m3_query_builder import EntityCache
 
 #========================== КОНСТАНТЫ ============================
 WRAPPER = SQLAlchemyWrapper(settings.DATABASES)
@@ -95,8 +96,9 @@ class Table(object):
         self.alias = alias
         self.verbose_name = verbose_name
 
-#TODO: Придумать название и сделать абстрактным через ABCMeta
-class Noname(object):
+
+class BaseAlchemyObject(object):
+    __metaclass__ = ABCMeta
     __instance_cache = {}
 
     def __init__(self, name, alias=None, verbose_name=None):
@@ -112,15 +114,24 @@ class Noname(object):
             self.table = self._get_alchemy_table()
             self.aliased_table = self.table.alias(self.alias)
             self.__instance_cache[self.name] = self
-    
+
+    @abstractmethod
     def _get_alchemy_table(self):
-        raise NotImplementedError
-            
+        """ Возвращает таблицу в формате SqlAlchemy """
+
+    @abstractmethod
+    def get_alchemy_field(self, field_name, field_alias=''):
+        """ Возвращает поле таблицы в формате SqlAlchemy """
+
+    @abstractmethod
+    def get_fields(self):
+        """ Возвращает колонки в формате Entity """
+
     def get_subquery(self):
         return self.aliased_table
 
 
-class Model(Noname):
+class Model(BaseAlchemyObject):
     '''
     Для обозначения моделей в схемах
     '''
@@ -136,7 +147,6 @@ class Model(Noname):
         return model
     
     def _get_alchemy_table(self):
-        """ Возвращает таблицу в формате SqlAlchemy """
         model = self._get_django_model()
         table_name = model._meta.db_table
         table = WRAPPER.metadata.tables.get(table_name)
@@ -178,7 +188,7 @@ class Model(Noname):
         return fields
         
 
-class Entity(Noname):
+class Entity(BaseAlchemyObject):
     '''
     Для обозначения сущности в схемах.
     Опа! А почему у нас две энтити?
@@ -345,7 +355,7 @@ class Grouping(object):
                 Grouping.COUNT: Aggregate.Count,                
                 }
 
-#TODO: Тоже негодное название!
+
 class BaseEntity(object):
     '''
     Базовый класс для сущностей/схемы/прокси/view - кому как удобно
@@ -558,6 +568,6 @@ class BaseEntity(object):
         data = cursor.fetchall()
         return data    
 
-#TODO: Не нравится мне иерархия классов :(
-#TODO: Если параметры заданы прямо в BaseEntity, то их надо как-то заполнять...
 #TODO: Проблема с IN, он преобразуется в ARRAY, но PostgreSQL почему-то не понимает его
+#TODO: В get_data() надо использовать params чтобы определить,
+#      использовать в == или IN в Where, в зависимости от типа аргумента
