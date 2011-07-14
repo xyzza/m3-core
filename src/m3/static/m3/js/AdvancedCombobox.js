@@ -474,3 +474,5 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
         this.validate();
 	}
 });
+
+Ext.reg('m3-select', Ext.m3.AdvancedComboBox);
