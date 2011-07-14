@@ -85,3 +85,4 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 
 });
 
+Ext.reg('m3-date', Ext.m3.AdvancedDataField );

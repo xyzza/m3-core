@@ -7345,6 +7345,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
         this.validate();
 	}
 });
+
+Ext.reg('m3-select', Ext.m3.AdvancedComboBox);
 /**
  * Компонент поля даты. 
  * Добавлена кнопа установки текущий даты
@@ -7432,7 +7434,7 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 
 });
 
-
+Ext.reg('m3-date', Ext.m3.AdvancedDataField );
 /**
  * @class Ext.m3.CodeEditor
  * @extends Ext.Panel
