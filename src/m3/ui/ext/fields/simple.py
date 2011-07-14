@@ -360,7 +360,7 @@ class ExtCheckBox(BaseExtField):
         # Обрабатываем исключения.
         access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
         # Выключаем\включаем компоненты.
-        self.disabled = access_off
+        self.read_only = access_off
         
 #===============================================================================        
 class ExtComboBox(BaseExtTriggerField):
