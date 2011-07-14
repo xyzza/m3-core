@@ -9692,6 +9692,24 @@ Ext.override(Ext.form.Action.Submit, {
 });
 
 /**
+ * Метод  вызывается и при клике и при событии change - сюда добавлена обработка
+ * атрибута readOnly, тк в стандартном поведении браузеры обрабаытвают этот атрибут только
+ * у текстоввых полей
+ */
+Ext.override(Ext.form.Checkbox, {
+                onClick : function(e){
+                    if (this.readOnly) {
+                        e.stopEvent();
+                        return false;
+                    }
+
+                    if(this.el.dom.checked != this.checked){
+                        this.setValue(this.el.dom.checked);
+                    };
+                }
+});
+
+/**
  * Раньше нельзя было перейти на конкретную страницу в движках webkit. Т.к.
  * Событие PagingBlur наступает раньше pagingChange, и обновлялась текущая 
  * страница, т.к. PagingBlur обновляет индекс.
