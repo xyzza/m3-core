@@ -195,13 +195,6 @@ class ShowQueryTextAction(actions.Action):
         entity = build_entity(context.objects)
         sql = entity.get_raw_sql()
 
-        try:
-            import sqlparse
-        except ImportError:
-            pass
-        else:
-            sql = sqlparse.format(sql, reindent=True, keyword_case='upper')
-
         win = ui.SqlWindow()
         win.set_source(sql)
         return OperationResult(code=win.get_script())

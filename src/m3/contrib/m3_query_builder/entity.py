@@ -5,7 +5,7 @@ Created on 26.05.2011
 @author: prefer
 '''
 from abc import ABCMeta, abstractmethod
-from sqlalchemy.sql.expression import join, select, _BinaryExpression
+from sqlalchemy.sql.expression import join, select, ColumnElement
 from sqlalchemy import bindparam
 from sqlalchemy import func
 
@@ -16,6 +16,12 @@ from m3.contrib.m3_query_builder import EntityCache
 from django.conf import settings
 from django.db.models.loading import cache
 from django.db.models.fields import AutoField
+
+sqlparse = None
+try:
+    import sqlparse
+except ImportError:
+    pass
 
 #========================== КОНСТАНТЫ ============================
 WRAPPER = SQLAlchemyWrapper(settings.DATABASES)
@@ -320,6 +326,7 @@ class Where(object):
         return Where(self, Where.NOT)
     
     def is_empty(self):
+        """ Возвращает истину, если условие пустое """
         return self.left is None and self.right is None
         
     @staticmethod
@@ -423,7 +430,7 @@ class BaseEntity(object):
         field = model._meta.get_field(column_name)
         return field.get_attname()
     
-    def create_query(self):
+    def create_query(self, params=None):
         """ Возвращает готовый запрос алхимии по параметрам Entity """       
         
         # Подготовка колонок для выбора SELECT
@@ -476,7 +483,7 @@ class BaseEntity(object):
         join_sequence = None if join_sequence is None else [join_sequence]
                 
         # Условия WHERE
-        whereclause = self._create_where_expression(self.where)
+        whereclause = self._create_where_expression(self.where, params)
 
         query = select(columns=select_columns, whereclause=whereclause, from_obj=join_sequence)
 
@@ -512,7 +519,14 @@ class BaseEntity(object):
         
         return fields
 
-    def _create_where_expression(self, where):
+    def _get_func_by_operator(self, operator):
+        """ Возвращает функцию соответствующую логической операции """
+        func = self.OPERATION_MAP.get(operator)
+        if not func:
+            raise NotImplementedError(u'Логическая операция "%s" не реализована в WHERE' % operator)
+        return func
+
+    def _create_where_expression(self, where, params):
         """ Преобразует выражение Where в логическое условие алхимии """
         # Пустые условия пропускаем
         if where is None or where.is_empty():
@@ -521,9 +535,9 @@ class BaseEntity(object):
         # Если условие составное, то обрабатываем его рекурсивно
         left, right = where.left, where.right
         if isinstance(where.left, Where):
-            left = self._create_where_expression(left)
+            left = self._create_where_expression(left, params)
         if isinstance(where.right, Where):
-            right = self._create_where_expression(right)
+            right = self._create_where_expression(right, params)
 
         # Если отсутствует одна из частей условия, то возвращаем существующую
         if left is None and right is not None:
@@ -531,43 +545,68 @@ class BaseEntity(object):
         elif left is not None and right is None:
             return left
 
+        func = self._get_func_by_operator(where.operator)
+
         # Если часть условия не является готовым выражением алхимии,
         # то преобразуем его в поле или параметр запроса
-        if not isinstance(left, _BinaryExpression):
+        first_param = None
+        if not isinstance(left, ColumnElement):
             if isinstance(left, Field):
                 left = left.get_alchemy_field()
             elif isinstance(left, basestring) and left.startswith('$'):
                 left = bindparam(left, required=True)
+                first_param = left
             else:
                 raise TypeError('Left WHERE argument must be string parameter or Field instance')
 
-        if not isinstance(right, _BinaryExpression):
+        if not isinstance(right, ColumnElement):
             if isinstance(right, Field):
                 right = right.get_alchemy_field()
             elif isinstance(right, basestring):
                 right = bindparam(right, required=True)
+                first_param = right
             else:
                 raise TypeError('Right WHERE argument must be string parameter or Field instance')
-        
-        func = self.OPERATION_MAP.get(where.operator)
-        if not func:
-            raise NotImplementedError(u'Логическая операция "%s" не реализована в WHERE' % where.operator)
-        
-        # Отвадивает тут! Потому что нужны параметры!
+
+        # TODO: Закомментированный фрагмент не работает, т.к. во вложенные сущности нельзя передать параметры
+#        if first_param is not None:
+#            assert isinstance(first_param, _BindParamClause)
+#            param_name = first_param.key
+#            # Если значение параметра известно, то в зависимости от того,
+#            # является ли перечисляемым, заменяем EQUAL на IN и наоборот
+#            if params and params.has_key(param_name):
+#                value = params[left]
+#                if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
+#                    func = self._get_func_by_operator(Where.IN)
+#                elif not isinstance(value, (list, tuple)) and where.operator==Where.IN:
+#                    func = self._get_func_by_operator(Where.EQ)
+
         exp = func(left, right)
         return exp
     
     def get_raw_sql(self):
         """ Возвращает текст SQL запроса для Entity """
-        return str(self.create_query())
+        sql = str(self.create_query())
+        if sqlparse:
+            sql = sqlparse.format(sql, reindent=True, keyword_case='upper')
+        return sql
 
     def get_data(self, params=None):
         """ Возвращает данные, полученные в результатет выполнения запроса """
-        query = self.create_query()
+        query = self.create_query(params)
+
+        #TODO: Проблема с IN, он преобразуется в ARRAY, но PostgreSQL почему-то не понимает его
+        # ХАК!
+        if isinstance(params, dict):
+            for k, v in params.items():
+                if isinstance(v, (list, tuple)):
+                    v = "','".join(v)
+                    v = "'" + v + "'"
+                    params[k] = v
+
         cursor = query.execute(params)
         data = cursor.fetchall()
         return data    
 
-#TODO: Проблема с IN, он преобразуется в ARRAY, но PostgreSQL почему-то не понимает его
-#TODO: В get_data() надо использовать params чтобы определить,
-#      использовать в == или IN в Where, в зависимости от типа аргумента
+
+#TODO: В get_data() надо использовать params чтобы определить, использовать в == или IN в Where, в зависимости от типа аргумента
