@@ -258,3 +258,8 @@ def save_report(id, name, query_id, grid_data):
                 
         report_params.save()
     
+def get_report(id):
+    '''
+    Возвращает прикрепленный отчет по id
+    '''
+    return Report.objects.get(id=id)

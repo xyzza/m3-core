@@ -162,7 +162,6 @@ class ExtNumberField(BaseExtField):
 
         # Выделение всего содержимого при попадании в фокус
         self.select_on_focus = None
-
         
         self.init_component(*args, **kwargs)
         

@@ -15,11 +15,14 @@ import ui
 from models import Query, Report, TypeField, ReportParams
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
-    get_pack, get_report_params
+    get_pack, get_report_params, get_report
 from m3.ui.ext.fields.simple import ExtStringField, ExtNumberField, ExtDateField,\
     ExtCheckBox
 from m3.ui.ext.fields.complex import ExtDictSelectField
 from m3.ui.actions.context import ActionContext
+from django.http import QueryDict
+from m3.ui.ext.containers.containers import ExtContainer
+from m3.helpers.icons import Icons
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -415,7 +418,14 @@ class GetReportFormAction(actions.Action):
         name, params = get_report_params(context.id)
         
         win.title = name
-        for param in params:
+        win.hdn_report_id.value = context.id
+        win.height = 90        
+        win.frm_form.layout_config={'align':'stretch'}
+        
+        for i, param in enumerate(params):
+            
+            
+            
             if param['type'] == TypeField.STRING_FIELD:
                 field = ExtStringField()
             elif param['type'] == TypeField.NUMBER_FIELD:
@@ -425,19 +435,39 @@ class GetReportFormAction(actions.Action):
             elif param['type'] == TypeField.BOOLEAN_FIELD:
                 field = ExtCheckBox()
             elif param['type'] == TypeField.DICTIONARY_FIELD:
+                # Здесь нужно проверять pack на возможность множественного 
+                # выбора и если такой возможен, делать множественный выбор
+                
                 field = ExtDictSelectField()
                 field.pack = param['value']
+                
+ 
             elif param['type'] == TypeField.NUMBER_FIELD:
                 field = ExtNumberField()                
             else:
                 raise Exception('type "%s" is not define in class TypeField' % param['type'])
             
+            field.client_id = '-%d' % i
             field.anchor = '100%'
             field.label = param['verbose_name']
             field.name = param['name']
             
-            win.height += 35
-            win.frm_form.items.append(field)
+            cont_outer = ExtContainer(layout='hbox')
+            cont_inner = ExtContainer(layout='form', flex=1)
+            
+            cont_outer.items.append(cont_inner)
+            cont_inner.items.append(field)
+            
+
+
+            if param['type'] in (TypeField.STRING_FIELD, TypeField.NUMBER_FIELD,
+                                 TypeField.DATE_FIELD, TypeField.NUMBER_FIELD):
+                cont_outer.items.append(ExtButton(handler='function(){ addValue("%s")}' % field.client_id, 
+                                                  icon_cls=Icons.ADD,
+                                                  client_id='btn-'+field.client_id))
+            
+            win.height += 30
+            win.frm_form.items.append(cont_outer)
         
         return actions.ExtUIScriptResult(win)
        
@@ -448,9 +478,25 @@ class GenerateReportAction(actions.Action):
     url = '/generate-report'
     shortname = 'm3-report-builder-generate-report'
 
+    def context_declaration(self):
+        return [ACD(name='report_id', type=int, required=True, 
+                    verbose_name=u'Идентификатор отчета'),]
+        
     def run(self, request, context):
 
+        report = get_report(context.report_id)
+
         import pprint
-        pprint.pprint(request.POST)
+        
+        
+        query_dict = request.POST.copy()
+        pprint.pprint(query_dict)
+        #query_dict.pop()
+
+        
+
+        entity = build_entity( json.loads( report.query.query_json ))
+        entity.get_data(request.POST)
+
                
         return actions.JsonResult(json.dumps({'success': True}))
