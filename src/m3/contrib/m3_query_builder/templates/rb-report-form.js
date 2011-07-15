@@ -100,13 +100,12 @@ function addValue(id){
 
 	var divEl = Ext.get('div' + id);
 	var newChildEl = divEl.createChild({
-		tag: 'span',
-	    cls: '{display:inline}',
+		tag: 'span'	    
 	});
 	
 	var linkEl = newChildEl.createChild({		
     	tag: 'a',
-    	href: '#',
+    	href: '#',    	
     	html: String.format('{0} [x], ', value)	    
 	});
  	
@@ -114,31 +113,64 @@ function addValue(id){
  	linkEl.on('click', function(){	
  		fieldsModel.deleteValue(divEl.id, value);
  		this.remove();
+ 		
+ 		// Уменьшать размеры компонентов
+ 		decreaseCmp(component, divEl);
  	}, newChildEl);
-	
-	if (divEl.getHeight() > fieldsModel.getFieldContainer(divEl.id)['height']) {
-		
-		var k;		
-		if (!fieldsModel.getFieldContainer(divEl.id)['height']) {
 
-			k = divEl.getHeight()/fieldsModel.HEIGHT_LINE;	
-		} else {
-			k =  divEl.getHeight()/fieldsModel.getFieldContainer(divEl.id)['height'];
-		}
-		
-		component.ownerCt.ownerCt.setHeight( component.ownerCt.ownerCt.getHeight() + k*fieldsModel.HEIGHT_LINE );
-		component.ownerCt.setHeight( component.ownerCt.getHeight() + k*fieldsModel.HEIGHT_LINE );	
-		win.setHeight(win.getHeight() + k*fieldsModel.HEIGHT_LINE);	
-		
-		fieldsModel.getFieldContainer(divEl.id)['height'] = divEl.getHeight();		
-	}
+	increaseCmp(component, divEl);
 	
 	fieldsModel.addValue(divEl.id, value);
 	
 	component.setValue('');
 	component.focus();
+}
+
+/**
+ * Увеличение размеров компонента
+ */
+function increaseCmp(cmp, el){
+	var id = el.id;
 	
-	console.log(fieldsModel.getValues());
+	if (el.getHeight() > fieldsModel.getFieldContainer(id)['height']) {
+		
+		var k;		
+		if (!fieldsModel.getFieldContainer(id)['height']) {
+
+			k = el.getHeight()/fieldsModel.HEIGHT_LINE;	
+		} else {
+			k =  el.getHeight()/fieldsModel.getFieldContainer(id)['height'];
+		}
+		
+		cmp.ownerCt.ownerCt.setHeight( cmp.ownerCt.ownerCt.getHeight() + k*fieldsModel.HEIGHT_LINE );
+		cmp.ownerCt.setHeight( cmp.ownerCt.getHeight() + k*fieldsModel.HEIGHT_LINE );	
+		win.setHeight(win.getHeight() + k*fieldsModel.HEIGHT_LINE);	
+		
+		fieldsModel.getFieldContainer(id)['height'] = el.getHeight();		
+	}
+}
+
+/**
+ * Уменьшение размеров компонента, при удалении дочерних элементов
+ */
+function decreaseCmp(cmp, el){
+	var id = el.id;
+	
+	if (el.getHeight() < fieldsModel.getFieldContainer(id)['height']) {
+		
+		var k;		
+		if (!el.getHeight()) {
+			k = fieldsModel.getFieldContainer(id)['height']/fieldsModel.HEIGHT_LINE;	
+		} else {
+			k =  fieldsModel.getFieldContainer(id)['height']/el.getHeight();
+		}
+		
+		cmp.ownerCt.ownerCt.setHeight( cmp.ownerCt.ownerCt.getHeight() - k*fieldsModel.HEIGHT_LINE );
+		cmp.ownerCt.setHeight( cmp.ownerCt.getHeight() - k*fieldsModel.HEIGHT_LINE );	
+		win.setHeight(win.getHeight() - k*fieldsModel.HEIGHT_LINE);	
+		
+		fieldsModel.getFieldContainer(id)['height'] = el.getHeight();		
+	}
 }
 
 // Добавление в каждый field, за исключением некоторых, контейнерный элемент
@@ -157,16 +189,18 @@ win.on('beforeshow', function(window){
 
 			var newChildEl;
 			if (item.isXType(Ext.m3.AdvancedDataField)){
-				newChildEl = el.parent().createChild(spec);
-				
-				console.log(newChildEl);
+				newChildEl = el.parent().createChild(spec);								
 			} else {
 				newChildEl = el.createChild(spec);
 			}
 
-			fieldsModel.setFieldContainer(newChildEl.id);
-		
-			
+			// Добавление значения по нажатию ENTER
+			item.on('keydown', function(cmp, e){				
+				if (e.keyCode == e.ENTER) {
+					addValue(cmp.id);
+				}
+			});			
+			fieldsModel.setFieldContainer(newChildEl.id);	
 		}
 	});
 });

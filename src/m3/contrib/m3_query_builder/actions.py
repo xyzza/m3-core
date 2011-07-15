@@ -451,6 +451,7 @@ class GetReportFormAction(actions.Action):
             field.anchor = '100%'
             field.label = param['verbose_name']
             field.name = param['name']
+            field.enable_key_events = True
             
             cont_outer = ExtContainer(layout='hbox')
             cont_inner = ExtContainer(layout='form', flex=1)
