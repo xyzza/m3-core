@@ -91,17 +91,21 @@ class TreeSaveNodeAction(Action):
 
 class TreeDeleteNodeAction(Action):
     '''
-    Получает узел из запроса и откправляет его на удаление
+    Получает узел из запроса и отправляет его на удаление
     '''
     url = '/delete_node$'
     def context_declaration(self):
-        return [ACD(name='id', default=0, type=int, required=True, verbose_name=u'id группы справочника')]    
+        base = self.parent
+        id_name = base.contextTreeIdName 
+        return [ACD(name=id_name, default=0, type=int, required=True, verbose_name=u'id группы справочника')]    
     
     def run(self, request, context):
+        base = self.parent
+        id = getattr(context, base.contextTreeIdName)
         try:
-            obj = self.parent.get_node(context.id)
+            obj = self.parent.get_node(id)
         except self.parent._group_nofound_exception:
-            return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
+            return OperationResult.by_message(MSG_DOESNOTEXISTS % id)
             
         return self.parent.delete_node(obj)
 
