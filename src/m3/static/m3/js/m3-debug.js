@@ -7976,15 +7976,18 @@ Ext.ns('Ext.m3');
  */
 Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
+    /**
+     * @cfg {String} delimeter Разделитель для отображение текста в поле
+     */
+
     delimeter:',',
 
     initComponent:function() {
-
         this.checkedItems = [];
-
         this.hideTriggerDictEdit = true;
-
         this.editable = false;
+
+        this._isClearHidden = true;
 
         if (!this.tpl) {
              this.tpl = '<tpl for="."><div class="x-combo-list-item x-multi-combo-item">' +
@@ -8013,6 +8016,8 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         if (this.el) {
             this.el.removeClass(this.emptyClass);
         }
+
+        this.toggleClearButton();
     },
 
     getValue : function () {
@@ -8020,7 +8025,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 		Ext.each(this.checkedItems, function (record) {
 			value.push(record.get(this.valueField));
 		}, this);
-		return value.join(',');
+		return Ext.util.JSON.encode(value);
 	},
 
     initValue:function() {
@@ -8087,18 +8092,22 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         return this.checkedItems;    
     },
 
-    onSelect : function (record, index) {
-        if (this.fireEvent("beforeselect", this, record, index) !== false) {
-			if (this.checkedItems.indexOf(record) === -1) {
+    onSelect : function (record, checkedIndex) {
+        var index;
+
+        index = this.findCheckedRecord(record);
+        
+        if (this.fireEvent("beforeselect", this, record, checkedIndex) !== false) {
+			if (index === -1) {
 			    this.checkedItems.push(record);
 			} else {
-			    this.checkedItems.remove(record);
+			    this.checkedItems.remove( this.checkedItems[index]);
 			}
 
             this.refreshItem(record);
 
 			this.setValue(this.getValue());
-            this.fireEvent("select", this, record, index);
+            this.fireEvent("select", this, this.checkedItems);
         }
 	},
 
@@ -8109,8 +8118,6 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
     },
 
     onSelectInDictionary: function(){
-        assert( this.actionSelectUrl, 'actionSelectUrl is undefined' );
-
 		if(this.fireEvent('beforerequest', this)) {
 			Ext.Ajax.request({
 				url: this.actionSelectUrl
@@ -8121,14 +8128,13 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 				    if (win){
                         win.initMultiSelect(this.checkedItems);
 				        win.on('closed_ok',function(records){
-							if (this.fireEvent('afterselect', records)) {
-								this.addRecordsToStore( records);
-							}
+                            this.addRecordsToStore( records);
+                            this.fireEvent('select', this, this.checkedItems)
 				        }, this);
 				    };
 				}
 				,failure: function(response, opts){
-					uiAjaxFailMessage.apply(this, arguments);
+					window.uiAjaxFailMessage.apply(this, arguments);
 				},
                 scope:this
 			});
@@ -8136,7 +8142,9 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 	},
 
     clearValue:function() {
-        Ext.ux.form.MultiSelectField.superclass.clearValue.call(this);
+        this.checkedItems = [];
+        this.hideClearBtn();
+        this.setValue(this.getValue());
     },
 
     addRecordsToStore: function(records){
@@ -8149,10 +8157,49 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
             newRecords.push( record );
         }
 
-        this.getStore().loadData({total:newRecords.length, rows:newRecords});
         this.checkedItems = newRecords;
-
         this.setValue(this.getValue());
+	},
+
+    findCheckedRecord:function(record) {
+        var i = 0, index = -1;
+
+        for (; i < this.checkedItems.length;i++) {
+            if (this.checkedItems[i].data[this.valueField]
+                    === record.data[this.valueField]) {
+                index = i;
+                break;
+            }
+        }
+
+        return index;
+    },
+
+    toggleClearButton:function() {
+        if (this.hideClearTrigger) {
+            return;
+        }
+
+        if (this._isClearHidden) {
+            this.showClearBtn();
+        }
+        else {
+            this.hideClearBtn();
+        }
+    },
+
+    showClearBtn: function(){
+		if (!this.hideTriggerClear) {
+			this.el.parent().setOverflow('hidden');
+			this.getTrigger(0).show();
+            this._isClearHidden = false;
+		}
+	},
+
+	hideClearBtn: function(){
+		this.el.parent().setOverflow('auto');
+		this.getTrigger(0).hide();
+        this._isClearHidden = true;
 	}
 
 });
