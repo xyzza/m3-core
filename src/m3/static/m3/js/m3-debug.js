@@ -7705,10 +7705,21 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 				
         var scope = this;
 		var mask = new Ext.LoadMask(this.body, {msg:'Сохранение...'});
+		var params = Ext.applyIf(baseParams || {}, this.actionContextJson || {});
+		
+		// вытащим из формы все поля и исключим их из наших параметров, иначе они будут повторяться в submite
+		var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext.getDom(form.el.dom)).elements;
+		Ext.each(fElements, function(element){
+        	name = element.name;
+        	if (!element.disabled && name) {
+        		delete params[name];
+        	}
+        });
+		
 		var submit = {
             url: this.formUrl
            ,submitEmptyText: false
-           ,params: Ext.applyIf(baseParams || {}, this.actionContextJson || {})
+           ,params: params
            ,success: function(form, action){
               scope.fireEvent('closed_ok', action.response.responseText);
               scope.close(true);

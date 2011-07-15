@@ -91,9 +91,10 @@ class ExtForm(BaseExtPanel):
                 # Файлы нужно забирать из request.FILES
                 field.memory_file = request.FILES.get(
                                         ExtFileUploadField.PREFIX + field.name)
-      
-            value = request.POST.get(name)
-            field.value = value
+            # возьмем только то, что есть в запросе
+            if name in request.POST:
+                value = request.POST.get(name)
+                field.value = value
     
     #TODO необходимо добавить проверку на возникновение exception'ов
     def from_object(self, object, exclusion = []):
@@ -226,7 +227,7 @@ class ExtForm(BaseExtPanel):
                       assignment. Check the definition of the form.'
             # заполним атрибуты только те, которые не в списке исключаемых
             if not field.name in exclusion:
-
+                
                 names = field.name.split('.')                
                 new_val = get_value(object, names)
                 if new_val != None:
@@ -433,7 +434,7 @@ class ExtForm(BaseExtPanel):
             # заполним атрибуты только те, которые не в списке исключаемых
             if not field.name in exclusion:
 
-                names = field.name.split('.')                
+                names = field.name.split('.')
                 set_field(self.object, names, convert_value(field), field)
      
     @property
@@ -445,7 +446,7 @@ class ExtForm(BaseExtPanel):
         if not self.focused_field:
             childs = self._get_all_fields(self)
             for child in childs:
-                if isinstance(child, BaseExtField) and not isinstance(child, ExtHiddenField):
+                if isinstance(child, BaseExtField) and not isinstance(child, ExtHiddenField) and not child.hidden:
                     self.focused_field = child
                     break
 
