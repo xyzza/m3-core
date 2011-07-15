@@ -159,6 +159,9 @@ class ExtNumberField(BaseExtField):
         
         # Если превышено минимальное возможное значение, то будет отображаться этот текст
         self.min_text = None
+        
+        # Разрешает перехват нажатий клавиш
+        self.enable_key_events = False
 
         # Выделение всего содержимого при попадании в фокус
         self.select_on_focus = None
@@ -178,6 +181,7 @@ class ExtNumberField(BaseExtField):
         self._put_config_value('maxText', self.max_text)
         self._put_config_value('minText', self.min_text)        
         self._put_config_value('selectOnFocus', self.select_on_focus)
+        self._put_config_value('enableKeyEvents', self.enable_key_events)
         
     def render(self):
         try:
