@@ -18,5 +18,21 @@ class BaseMutexBackend(object):
         '''
         raise NotImplementedError(_(u'Данный метод должен быть переопределен в классах-потомках'))
     
-    def release_mutex(self, mutex)
+    def release_mutex(self, mutex_id, owner):
+        '''
+        Метод освобождения семафора
+        '''
+        raise NotImplementedError(_(u'Данный метод должен быть переопределен в классах-потомках'))
     
+    def request_mutex(self, mutex_id):
+        '''
+        Метод проверки состояния семафора
+        '''
+        raise NotImplementedError(_(u'Данный метод должен быть переопределен в классах-потомках'))
+    
+    
+class ModelMutexBackend(BaseMutexBackend):
+    pass
+
+class SessionMutexBackend(BaseMutexBackend):
+    pass 
