@@ -10,10 +10,13 @@ from django.conf import settings
 from django.contrib.auth import login, logout, get_backends
 from django.contrib.auth.models import User
 
+from m3.contrib.m3_audit import AuditManager
+
 
 from m3.helpers import logger
 
 from api import get_autologin_config
+
 
 URL_REDIRECT_ON_ERROR = '/'
 
@@ -48,5 +51,10 @@ def autologin_view(request, login_option):
     
     logout(request)
     login(request, user)
+    
+    # пишем запись в аудит входа
+    AuditManager().write('auth', user=user)
+    AuditManager().write('auto-login', user=user, type='no-password', request=request)
+    
     
     return HttpResponseRedirect(url)
