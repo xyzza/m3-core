@@ -297,7 +297,6 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
         var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
                        this.getBottomToolbar()]
         for (var i=0; i<toolbars.length; i++){
-        	debugger;
             if (toolbars[i]&&!this.readOnly){
                 toolbars[i].setDisabled(disabled);
             }
