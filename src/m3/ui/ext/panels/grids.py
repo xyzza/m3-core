@@ -338,9 +338,16 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         
         # Признак того, маскировать ли грид при загрузки
         self.load_mask = True
+        
         # Стор для загрузки данных
         self.store = misc.store.ExtMultiGroupingStore(auto_load=True, root='rows', id_property='index')
+        
+        # Начальный перечень сгруппированных колонок
         self.grouped = []
+        
+        # Признак редактирования на клиенте - особенным образом обрабатываются данные при редактировании
+        self.local_edit = False
+        
         self.init_component()
 
     def render(self):
@@ -382,6 +389,7 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         self._put_params_value('groupedColumns', lambda : '[%s]' % ','.join(["'%s'" % (col) for col in self.grouped]))
         self._put_params_value('toolbar', self._top_bar.t_render_items)
         self._put_params_value('rowIdName', self.row_id_name)
+        self._put_params_value('localEdit',self.local_edit)
         
     def t_render_base_config(self):
         return self._get_config_str()

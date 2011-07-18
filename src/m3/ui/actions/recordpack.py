@@ -9,6 +9,7 @@ from m3.ui.actions import Action, ActionPack, ACD
 from m3.ui.actions.context import ActionContext
 from m3.ui.actions.results import OperationResult, ExtUIScriptResult, PreJsonResult
 from m3.ui.actions.utils import extract_int
+from m3.ui.ext.panels.grids import ExtMultiGroupinGrid
 from m3.helpers.dataprovider import GetRecordsParams, BaseRecordProvider, BaseRecord
 
 def make_action(url, run_method, shortname = '', acd = None):
@@ -51,9 +52,15 @@ class BaseRecordPack(ActionPack):
     
     # Заголовок окна редактирования по-умолчанию
     title = None
-    
+
+    # Признак редактирования на клиенте
+    # Если редактирование локальное, то запросы сохранения и удаления не пишут в базу, а лишь обрабатывают записи
+    # результатом сохранения в этом случае будет JSON созданной/редактированной записи
+    local_edit = True
+        
     def __init__(self, *args, **kwargs):
         super(BaseRecordPack, self).__init__(*args, **kwargs)
+    
         self.action_edit = make_action('/edit', self.edit_window_request, acd=self._get_edit_action_context_declaration) 
         self.action_delete = make_action('/delete', self.delete_rows_request, acd=self._get_delete_action_context_declaration)
         self.action_rows = make_action('/rows', self.rows_request, acd=self._get_rows_action_context_declaration)
@@ -141,6 +148,12 @@ class BaseRecordPack(ActionPack):
         """
         assert isinstance(record, BaseRecord), 'record должен быть классом от BaseRecord'
         return record.validate()
+
+    def validate_delete_rows(self, request, context, ids):
+        """
+        Проверка препятствий для удаления записей по id
+        """
+        return False
     
     def delete_rows(self, request, context, ids):
         """
@@ -225,6 +238,9 @@ class BaseRecordPack(ActionPack):
         grid.action_data = self.action_rows
         
         grid.row_id_name = self.context_id
+        
+        if isinstance(grid, ExtMultiGroupinGrid):
+            grid.local_edit = self.local_edit
     
     #====================== Обработка запросов =======================
     def edit_window_request(self, request, context):
@@ -239,6 +255,9 @@ class BaseRecordPack(ActionPack):
         obj = self.get_row(request, context, is_new, row_id)
         win = self.get_edit_window(request, context, obj, is_new)
         self.bind_record_to_window(request, context, obj, win, is_new)
+        if self.local_edit:
+            # если редактирование в браузере
+            self.bind_request_to_window(request, context, win)
         
         is_get_data = context.isGetData
         if not is_get_data: 
@@ -275,8 +294,15 @@ class BaseRecordPack(ActionPack):
         result = self.validate_row(request, context, obj, is_new)
         if result:
             return result
-        self.save_row(request, context, obj, is_new)
-        return OperationResult()
+        
+        if self.local_edit:
+            # если редактирование на клиенте
+            # то выдадим JSON записи
+            return PreJsonResult({'success': True, 'data': obj})
+        else:
+            # если серверное редактирование
+            self.save_row(request, context, obj, is_new)
+            return OperationResult()
     
     def extract_filter_context(self, request, context):
         """
@@ -338,7 +364,12 @@ class BaseRecordPack(ActionPack):
         Запрос на удаление записей
         """
         rows_id = getattr(context, self.context_id)
-        self.delete_rows(request, context, rows_id)
+        result = self.validate_delete_rows(request, context, rows_id)
+        if result:
+            return result
+        if not self.local_edit:
+            # удаляем только для серверного редактирования
+            self.delete_rows(request, context, rows_id)
         return OperationResult()
 
     

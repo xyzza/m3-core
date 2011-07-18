@@ -797,6 +797,9 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		
 		this.rowIdName = params.rowIdName;
 		
+		// признак серверного редактирования
+		this.localEdit = params.localEdit;
+		
 		// обработчики
 		if (params.actions) {
 			baseConfig.actionNewUrl = params.actions.newUrl;
@@ -946,7 +949,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			success: function(res, opt){
 				if (scope.fireEvent('afternewrequest', scope, res, opt)) {
 				    try { 
-				        var child_win = scope.childWindowOpenHandler(res, opt);
+				        var child_win = scope.onNewRecordWindowOpenHandler(res, opt);
 				    } finally { 
     				    mask.hide();
     				    scope.disableToolbars(false);
@@ -984,16 +987,21 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			var baseConf = {};
 			var sm = this.getSelectionModel();
 			// для режима выделения строк
+			var record;
 			if (sm instanceof Ext.grid.RowSelectionModel) {
 				if (sm.singleSelect) {
-					baseConf[this.rowIdName] = sm.getSelected().json.id;
+					record = sm.getSelected();
+					baseConf[this.rowIdName] = record.json.id;
 				} else {
 					// для множественного выделения
 					var sels = sm.getSelections();
 					var ids = [];
+					var records = [];
 					for(var i = 0, len = sels.length; i < len; i++){
+						records.push(sels[i]);
 						ids.push(sels[i].json.id);
 					}
+					record = records;
 					baseConf[this.rowIdName] = ids.join();
 				}
 			}
@@ -1003,11 +1011,20 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 				
 				var cell = sm.getSelectedCell();
 				if (cell) {
-					var record = this.getStore().getAt(cell[0]); // получаем строку данных
+					record = this.getStore().getAt(cell[0]); // получаем строку данных
 					baseConf[this.rowIdName] = record.id;
 					baseConf[this.columnParamName] = this.getColumnModel().getDataIndex(cell[1]); // получаем имя колонки
 				}
 			}
+			// если локальное редактирование
+	        if (this.localEdit){
+	        	// то нужно добавить в параметры текущую строку грида
+	        	if (Ext.isArray(record)){
+	        		// пока х.з. что делать
+	        	} else {
+	        		baseConf = Ext.applyIf(baseConf, record.json);
+	        	}
+	        }
 			
 			var mask = new Ext.LoadMask(this.body);
 			var req = {
@@ -1016,7 +1033,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 				success: function(res, opt){
 					if (scope.fireEvent('aftereditrequest', scope, res, opt)) {
 					    try { 
-						    var child_win = scope.childWindowOpenHandler(res, opt);
+						    var child_win = scope.onEditRecordWindowOpenHandler(res, opt);
 						} finally { 
     						mask.hide();
     						scope.disableToolbars(false);
@@ -1059,17 +1076,22 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		            if (btn == 'yes') {
 						var baseConf = {};
 						var sm = scope.getSelectionModel();
+						var record;
 						// для режима выделения строк
 						if (sm instanceof Ext.grid.RowSelectionModel) {
 							if (sm.singleSelect) {
-								baseConf[scope.rowIdName] = sm.getSelected().json.id;
+								record = sm.getSelected();
+								baseConf[scope.rowIdName] = record.json.id;
 							} else {
 								// для множественного выделения
 								var sels = sm.getSelections();
 								var ids = [];
+								var records = [];
 								for(var i = 0, len = sels.length; i < len; i++){
+									records.push(sels[i]);
 									ids.push(sels[i].json.id);
 								}
+								record = records;
 								baseConf[scope.rowIdName] = ids.join();
 							}
 						}
@@ -1084,6 +1106,16 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 								baseConf[scope.columnParamName] = scope.getColumnModel().getDataIndex(cell[1]);
 							}
 						}
+						
+						// если локальное редактирование
+				        if (scope.localEdit){
+				        	// то нужно добавить в параметры текущую строку грида
+				        	if (Ext.isArray(record)){
+				        		// пока х.з. что делать
+				        	} else {
+				        		baseConf = Ext.applyIf(baseConf, record.json);
+				        	}
+				        }
 						
 						var mask = new Ext.LoadMask(scope.body);
 						var req = {
@@ -1124,13 +1156,58 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 	 * @param {Object} response Ответ
 	 * @param {Object} opts Доп. параметры
 	 */
-	,childWindowOpenHandler: function (response, opts){
-		
+	,onNewRecordWindowOpenHandler: function (response, opts){
 	    var window = smart_eval(response.responseText);
 	    if(window){
 			var scope = this;
-	        window.on('closed_ok', function(){
-				return scope.refreshStore()
+	        window.on('closed_ok', function(data){
+	        	// если локальное редактирование
+	        	if (scope.localEdit){
+	        		// то на самом деле нам пришла строка грида
+	        		var obj = Ext.util.JSON.decode(data);
+	        		var record = new Ext.data.Record(obj.data);
+	        		record.json = obj.data;
+	        		var store = scope.getStore();
+	        		// и надо ее добавить в стор
+	        		store.insert(0, record);
+	        	} else {
+					return scope.refreshStore();
+				}
+			});
+	    }
+	}
+	,onEditRecordWindowOpenHandler: function (response, opts){
+	    var window = smart_eval(response.responseText);
+	    if(window){
+			var scope = this;
+	        window.on('closed_ok', function(data){
+	        	// если локальное редактирование
+	        	if (scope.localEdit){
+	        		// то на самом деле нам пришла строка грида
+	        		var obj = Ext.util.JSON.decode(data);
+	        		var record = new Ext.data.Record(obj.data);
+	        		record.json = obj.data;
+	        		var store = scope.getStore();
+	        		// и надо ее заменить в сторе
+	        		var sm = scope.getSelectionModel();
+	        		if (sm.hasSelection()) {
+						var baseConf = {};
+						// только для режима выделения строк
+						if (sm instanceof Ext.grid.RowSelectionModel) {
+							if (sm.singleSelect) {
+								var rec = sm.getSelected();
+								var index = store.indexOf(rec);
+								store.remove(rec);
+								if (index < 0) {
+									index = 0;
+								}
+								store.insert(index, record);
+							}
+						}
+	        		}
+	        	} else {
+					return scope.refreshStore();
+				}
 			});
 	    }
 	}
@@ -1140,8 +1217,28 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 	 * @param {Object} opts Доп. параметры
 	 */
 	,deleteOkHandler: function (response, opts){
-		smart_eval(response.responseText);
-		this.refreshStore();
+		// если локальное редактирование
+		if (this.localEdit){
+			var store = this.getStore();
+			// и надо ее заменить в сторе
+			var sm = this.getSelectionModel();
+			if (sm.hasSelection()) {
+				// только для режима выделения строк
+				if (sm instanceof Ext.grid.RowSelectionModel) {
+					if (sm.singleSelect) {
+						var rec = sm.getSelected();
+						var index = store.indexOf(rec);
+						store.remove(rec);
+						if (index < 0) {
+							index = 0;
+						}
+					}
+				}
+			}
+		} else {
+			smart_eval(response.responseText);
+			this.refreshStore();
+		}
 	}
 	,refreshStore: function (){
 		this.view.reset(true);
