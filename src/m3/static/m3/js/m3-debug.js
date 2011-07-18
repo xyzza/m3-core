@@ -7709,6 +7709,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		
 		// вытащим из формы все поля и исключим их из наших параметров, иначе они будут повторяться в submite
 		var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext.getDom(form.el.dom)).elements;
+		var name;
 		Ext.each(fElements, function(element){
         	name = element.name;
         	if (!element.disabled && name) {
