@@ -490,7 +490,38 @@ var ajax = Ext.Ajax;
 	}
 {%endif%}
 
-{% if component.mode %}
+{% if component.mode == 1 %}
+/**
+ * Выбор значения в справочнике по форме ExtDictionary
+ */
+function selectValue(){
+    var id, displayText;
+    {%if component.grid %}
+        var grid = Ext.getCmp('{{ component.grid.client_id}}');
+        if (!isGridSelected(grid, 'Выбор элемента', 'Выберите элемент из списка') ) {
+            return;
+        }
+
+        id = grid.getSelectionModel().getSelected().id;
+        displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}");
+    {% else %}
+        var tree = Ext.getCmp('{{ component.tree.client_id}}');
+        if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
+            return;
+        }
+
+        id = tree.getSelectionModel().getSelectedNode().id;
+        displayText = tree.getSelectionModel().getSelectedNode().attributes.{{ component.column_name_on_select }};
+    {% endif %}
+    assert(id!=undefined, 'Справочник не определил id объекта. Поле выбора не будет работать');
+    assert(displayText!=undefined, 'Справочник не определил displayText объекта. Возможно он не приходит с ajax ответом, в JsonStore нет соответствующего поля, в гриде нет соотв. колонки или неправильно указан column_name_on_select!');
+    var win = Ext.getCmp('{{ component.client_id}}');
+    win.fireEvent('closed_ok', id, displayText);
+    win.close();
+};
+{% endif %}
+
+{% if component.mode == 2%}
 
     {% if component.grid %}
     Ext.apply(win, {
@@ -505,11 +536,17 @@ var ajax = Ext.Ajax;
             grid.getSelectionModel().on('rowdeselect', this.onCheckBoxDeselect, this);
         },
 
+        extractSelectedData:function(selectedItems) {
+            var i = 0, result = {};
+            for(; i < selectedItems.length; i++) {
+                result[selectedItems[i].data.id] = selectedItems[i].copy();
+            }
+            return result;
+        },
+
         onGridStoreLoad:function(store, records, options) {
             var i = 0, j = 0, recordsToSelect = [];
-
             for (;i< records.length;i++) {
-
                     if (this.checkedItems[records[i].data.id]) {
                         recordsToSelect.push(records[i]);
                     }
@@ -527,65 +564,80 @@ var ajax = Ext.Ajax;
             if (this.checkedItems[record.data.id]) {
                 this.checkedItems[record.data.id] = undefined;
             }
+        }
+    });
+    {% else %}
+    Ext.apply(win, {
+
+        initMultiSelect:function(selectedItems) {
+            this.tree = Ext.getCmp('{{ component.tree.client_id}}');
+            this.displayField = '{{ component.column_name_on_select }}';
+            this.checkedItems = this.extractSelectedData(selectedItems);
+
+            this.tree.on('beforeappend', this.setupCheckboxes, this);
+            this.tree.on('checkchange', this.onCheckChange, this);
         },
 
         extractSelectedData:function(selectedItems) {
             var i = 0, result = {};
-
             for(; i < selectedItems.length; i++) {
-                result[selectedItems[i].data.id] = selectedItems[i].copy();
+                result[selectedItems[i].data.id] = {
+                    display:selectedItems[i].data[this.displayField],
+                    value:selectedItems[i].data.id
+                };
             }
-
             return result;
+        },
 
+        setupCheckboxes:function(tree,parent,node) {
+            if (this.checkedItems[node.id] != undefined) {
+                node.attributes.checked = true;
+            }
+            else {
+                node.attributes.checked = false;
+            }
+        },
+
+        onCheckChange:function(node, checked) {
+            if (checked) {
+                if (this.checkedItems[node.id] === undefined) {
+                    this.checkedItems[node.id] = {
+                        display:node.attributes[this.displayField],
+                        value:node.id
+                    };
+                }
+            }
+            else {
+                if (this.checkedItems[node.id] != undefined) {
+                    this.checkedItems[node.id] = undefined;
+                }
+            }
         }
     });
-    {% else %}
-    //Тут тоже самое для дерева
-
-    {% endif%}
-
-
-
-    /**
-	 * Выбор значения в справочнике по форме ExtDictionary
-	 */
-	function selectValue(){
-		var id, displayText;
-		{%if component.grid %}
-			var grid = Ext.getCmp('{{ component.grid.client_id}}');
-			if (!isGridSelected(grid, 'Выбор элемента', 'Выберите элемент из списка') ) {
-				return;
-			}
-			
-			id = grid.getSelectionModel().getSelected().id;
-			displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}");			
-		{% else %}
-			var tree = Ext.getCmp('{{ component.tree.client_id}}');
-			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
-				return;
-			}
-			
-			id = tree.getSelectionModel().getSelectedNode().id;
-			displayText = tree.getSelectionModel().getSelectedNode().attributes.{{ component.column_name_on_select }};
-		{% endif %}
-		assert(id!=undefined, 'Справочник не определил id объекта. Поле выбора не будет работать');
-		assert(displayText!=undefined, 'Справочник не определил displayText объекта. Возможно он не приходит с ajax ответом, в JsonStore нет соответствующего поля, в гриде нет соотв. колонки или неправильно указан column_name_on_select!');
-		var win = Ext.getCmp('{{ component.client_id}}');
-		win.fireEvent('closed_ok', id, displayText);
-		win.close();
-	};
+    {% endif %}
 
     function multiSelectValues() {
-        var grid, records, win;
+        var records = [], win;
+        win = Ext.getCmp('{{ component.client_id}}');
         {% if component.grid %}
-        grid = Ext.getCmp('{{ component.grid.client_id}}');
+        var grid = Ext.getCmp('{{ component.grid.client_id}}');
         records = grid.getSelectionModel().getSelections();
+        {% else %}
+        var newRecord, v;
+        for (v in win.checkedItems) {
+            if (win.checkedItems[v] != undefined) {
+                newRecord = new Ext.data.Record();
+                newRecord.data['id'] = win.checkedItems[v].value;
+                newRecord.data[win.displayField] = win.checkedItems[v].display;
+                records.push( newRecord );
+            }
+        }
         {% endif %}
         win = Ext.getCmp('{{ component.client_id}}');
 		win.fireEvent('closed_ok', records);
 		win.close();
     };
+
 {%endif%}
 
 {% block content %}{% endblock %}

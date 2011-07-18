@@ -351,9 +351,11 @@ class SelectWindowAction(ListWindowAction):
     Экшен создает и настраивает окно справочника в режиме выбора
     '''
     url = '/get_select_window$'
+    mode = ExtDictionaryWindow.SELECT_MODE
+
     def run(self, request, context):
         # Создаем окно выбора
-        win = self.create_window(request, context, 1)
+        win = self.create_window(request, context, self.mode)
         win.orig_request = request
         win.orig_context = context
         win.modal = True
@@ -381,6 +383,10 @@ class SelectWindowAction(ListWindowAction):
             win.make_read_only()
                     
         return ExtUIScriptResult(win)
+
+class MultiSelectWindowAction(SelectWindowAction):
+    url = '/get_multis_select_window$'
+    mode = ExtDictionaryWindow.MULTI_SELECT_MODE
 
 class BaseTreeDictionaryActions(ActionPack):
     '''
@@ -437,7 +443,8 @@ class BaseTreeDictionaryActions(ActionPack):
         # Окна самого справочника
         self.list_window_action   = ListWindowAction()
         self.select_window_action = SelectWindowAction()
-        self.actions.extend([self.list_window_action, self.select_window_action])
+        self.multi_select_window_action = MultiSelectWindowAction()
+        self.actions.extend([self.list_window_action, self.select_window_action, self.multi_select_window_action])
         
         # Адреса экшенов списка
         self.new_grid_window_action  = ListNewRowWindowAction()
@@ -486,7 +493,10 @@ class BaseTreeDictionaryActions(ActionPack):
     def get_select_url(self):
         ''' Возвращает адрес формы списка элементов справочника. '''
         return self.select_window_action.get_absolute_url()
-    
+
+    def get_multi_select_url(self):
+        return self.multi_select_window_action.get_absolute_url()
+
     def get_list_url(self):
         ''' Возвращает адрес формы списка элементов справочника. '''
         return self.list_window_action.get_absolute_url()
