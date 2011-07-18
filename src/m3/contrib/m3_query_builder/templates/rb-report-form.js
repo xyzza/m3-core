@@ -9,7 +9,7 @@ var fieldsModel = new function(){
 		HEIGHT_LINE: 14, // Высота смещения по вертикали
 		
 		/**
-		 * 
+		 * Возвращает объект поля
 		 */
 		getFieldContainer: function(contID){			
 			return containers[contID];
@@ -17,7 +17,7 @@ var fieldsModel = new function(){
 		
 		
 		/**
-		 * 
+		 * Устанавливает объект поля
 		 */
 		setFieldContainer: function(contID){
 			containers[contID] = {
@@ -25,34 +25,40 @@ var fieldsModel = new function(){
 				// Значения вида [value1, value2]				
 				values: [],
 				
+				name: null,
+				
 				// Высота контейнера, где находятся отображаемые значения
 				height: 0
 			}
 		},
 		
 		/**
-		 * 
+		 * Получает значения всех объектов
 		 */
 		getValues: function(){
-			var mass = [];
+			var d = {};
 			for (var field in containers){
-				console.log(field);
-				var d = {};
-				d[field] = containers[field]['values'];
-				mass.push(d);
+				d[containers[field].name ] = containers[field]['values'];				
 			}
-			return mass;
+			return d;
 		},
 		
 		/**
-		 * 
+		 * Устанавливает значение по id контейнера
 		 */
 		addValue: function(contID, value){
 			containers[contID]['values'].push( value );
 		},
 		
 		/**
-		 * 
+		 * Устанавливает имя у компонента по id контейнера
+		 */
+		addName: function(contID, name){
+			containers[contID]['name'] = name;
+		},
+		
+		/**
+		 * Уджаляет значение по id контейнера
 		 */
 		deleteValue: function(contID, value){
 			var mass = containers[contID]['values'];
@@ -61,17 +67,22 @@ var fieldsModel = new function(){
 	}
 }
 
+/**
+ * Сабмит данных на сервер
+ */
 function submitForm(){
 	
 	var url = '{{ component.submit_data_url }}';
 	assert(url, 'Url for child window is not define');
+
+	var values = Ext.applyIf( fieldsModel.getValues(), form.getForm().getValues() );		
 	
 	var loadMask = new Ext.LoadMask(win.body);
     loadMask.show();
 	
-	form.getForm().submit({
-		clientValidation: true
-		,url: url
+	Ext.Ajax.request({		
+		url: url
+		,params: {'params': Ext.encode(values) }
 		,success: function(form, action) {
 			loadMask.hide();
 		}
@@ -82,6 +93,9 @@ function submitForm(){
 	});
 }
 
+/**
+ * 
+ */
 function addValue(id){
 	var component = Ext.getCmp(id);
 	
@@ -120,7 +134,7 @@ function addValue(id){
 
 	increaseCmp(component, divEl);
 	
-	fieldsModel.addValue(divEl.id, value);
+	fieldsModel.addValue(divEl.id, value);	
 	
 	component.setValue('');
 	component.focus();
@@ -200,7 +214,8 @@ win.on('beforeshow', function(window){
 					addValue(cmp.id);
 				}
 			});			
-			fieldsModel.setFieldContainer(newChildEl.id);	
+			fieldsModel.setFieldContainer(newChildEl.id);
+			fieldsModel.addName(newChildEl.id, item.getName());	
 		}
 	});
 });

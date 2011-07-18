@@ -6,23 +6,23 @@ import uuid
 from django.core.exceptions import ValidationError
 
 from m3.ui import actions
-from m3.ui.actions import ACD, PreJsonResult, OperationResult
+from m3.ui.actions import ACD, OperationResult
 from m3.helpers import logger
 from m3.ui.actions.dicts.simple import BaseDictionaryModelActions
 from m3.ui.ext.controls.buttons import ExtButton
+from m3.ui.ext.fields.complex import ExtDictSelectField
+from m3.ui.ext.containers.containers import ExtContainer
+from m3.helpers.icons import Icons
+from m3.ui.ext.fields.simple import ExtStringField, ExtNumberField, ExtDateField,\
+    ExtCheckBox
+
 
 import ui
 from models import Query, Report, TypeField, ReportParams
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
     get_pack, get_report_params, get_report
-from m3.ui.ext.fields.simple import ExtStringField, ExtNumberField, ExtDateField,\
-    ExtCheckBox
-from m3.ui.ext.fields.complex import ExtDictSelectField
-from m3.ui.actions.context import ActionContext
-from django.http import QueryDict
-from m3.ui.ext.containers.containers import ExtContainer
-from m3.helpers.icons import Icons
+
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -480,24 +480,18 @@ class GenerateReportAction(actions.Action):
     shortname = 'm3-report-builder-generate-report'
 
     def context_declaration(self):
-        return [ACD(name='report_id', type=int, required=True, 
-                    verbose_name=u'Идентификатор отчета'),]
+        return [ACD(name='params', type=object, required=True, 
+                    verbose_name=u'Параметры отчета'),]
         
     def run(self, request, context):
 
-        report = get_report(context.report_id)
+        report = get_report(context.params['report_id'])
 
         import pprint
-        
-        
-        query_dict = request.POST.copy()
-        pprint.pprint(query_dict)
-        #query_dict.pop()
-
-        
+        pprint.pprint(context.params)
 
         entity = build_entity( json.loads( report.query.query_json ))
-        entity.get_data(request.POST)
+        entity.get_data(context.params)
 
                
         return actions.JsonResult(json.dumps({'success': True}))
