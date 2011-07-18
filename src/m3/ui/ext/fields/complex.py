@@ -483,7 +483,9 @@ class ExtMultiSelectField(ExtDictSelectField):
         self.delimeter = ','
         self._value = ''
         self._init_flag = True
+
         super(ExtMultiSelectField, self).__init__(*args, **kwargs)
+        self.hidden_name = self.client_id
 
     @property
     def value(self):

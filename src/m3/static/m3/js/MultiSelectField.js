@@ -22,8 +22,6 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         this.hideTriggerDictEdit = true;
         this.editable = false;
 
-        this._isClearHidden = true;
-
         if (!this.tpl) {
              this.tpl = '<tpl for="."><div class="x-combo-list-item x-multi-combo-item">' +
             '<img src="' + Ext.BLANK_IMAGE_URL + '" class="{[this.getImgClass(values)]}" />' +
@@ -40,9 +38,16 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
     setValue:function(v) {
         if (!v) {
+            this.hideClearBtn();
             return;
         }
 
+        if (v === '[]'){
+            this.hideClearBtn();
+        }
+        else {
+            this.showClearBtn();
+        }
         this.value = this.getValue();
         this.setRawValue(this.getText());
         if (this.hiddenField) {
@@ -51,8 +56,6 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         if (this.el) {
             this.el.removeClass(this.emptyClass);
         }
-
-        this.toggleClearButton();
     },
 
     getValue : function () {
@@ -158,7 +161,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 				url: this.actionSelectUrl
 				,method: 'POST'
 				,params: this.actionContextJson
-				,success: function(response, opts){
+				,success: function(response){
 				    var win = smart_eval(response.responseText);
 				    if (win){
                         win.initMultiSelect(this.checkedItems);
@@ -166,7 +169,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
                             this.addRecordsToStore( records);
                             this.fireEvent('select', this, this.checkedItems)
 				        }, this);
-				    };
+				    }
 				}
 				,failure: function(response, opts){
 					window.uiAjaxFailMessage.apply(this, arguments);
@@ -178,7 +181,6 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
     clearValue:function() {
         this.checkedItems = [];
-        this.hideClearBtn();
         this.setValue(this.getValue());
     },
 
@@ -210,31 +212,16 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         return index;
     },
 
-    toggleClearButton:function() {
-        if (this.hideClearTrigger) {
-            return;
-        }
-
-        if (this._isClearHidden) {
-            this.showClearBtn();
-        }
-        else {
-            this.hideClearBtn();
-        }
-    },
-
     showClearBtn: function(){
 		if (!this.hideTriggerClear) {
 			this.el.parent().setOverflow('hidden');
 			this.getTrigger(0).show();
-            this._isClearHidden = false;
 		}
 	},
 
 	hideClearBtn: function(){
 		this.el.parent().setOverflow('auto');
 		this.getTrigger(0).hide();
-        this._isClearHidden = true;
 	}
 
 });
