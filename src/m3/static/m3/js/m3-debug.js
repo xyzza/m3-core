@@ -7923,6 +7923,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		this.actionDeleteUrl = params.actions.deleteUrl;
 		this.actionDataUrl = params.actions.dataUrl;
 		this.actionContextJson = params.actions.contextJson;
+		this.readOnly = params.readOnly;
 		
 		Ext.m3.ObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
@@ -8202,7 +8203,8 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
         var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
                        this.getBottomToolbar()]
         for (var i=0; i<toolbars.length; i++){
-            if (toolbars[i]){
+        	debugger;
+            if (toolbars[i]&&!this.readOnly){
                 toolbars[i].setDisabled(disabled);
             }
         }

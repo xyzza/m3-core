@@ -92,6 +92,9 @@ class ExtObjectGrid(containers.ExtGrid):
         # Адрес для данных
         self.url_data = None
         
+        # Флаг о состоянии грида. True означает что грид предназначен только для чтения.
+        self.read_only = False
+        
         #=======================================================================
         # Источник данных для грида
         #=======================================================================
@@ -137,10 +140,8 @@ class ExtObjectGrid(containers.ExtGrid):
         # Описание в базовом классе ExtUiComponent.
         # Обрабатываем исключения.
         access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+        self.read_only = access_off
         # Выключаем\включаем компоненты.
-        self.top_bar.button_new.make_read_only(access_off, exclude_list, *args, **kwargs)
-        self.top_bar.button_edit.make_read_only(access_off, exclude_list, *args, **kwargs)
-        self.top_bar.button_delete.make_read_only(access_off, exclude_list, *args, **kwargs)
         self.context_menu_grid.menuitem_new.make_read_only(access_off, exclude_list, *args, **kwargs)
         self.context_menu_grid.menuitem_edit.make_read_only(access_off, exclude_list, *args, **kwargs)
         self.context_menu_grid.menuitem_delete.make_read_only(access_off, exclude_list, *args, **kwargs)
@@ -249,6 +250,7 @@ class ExtObjectGrid(containers.ExtGrid):
         self._put_params_value('rowIdName', self.row_id_name)
         self._put_params_value('columnParamName', self.column_param_name)
         self._put_params_value('allowPaging', self.allow_paging)
+        self._put_params_value('readOnly', self.read_only)
         
     def t_render_base_config(self):
         return self._get_config_str()
