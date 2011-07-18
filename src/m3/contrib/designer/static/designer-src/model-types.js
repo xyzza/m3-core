@@ -16,7 +16,6 @@ M3Designer.model.ModelTypeLibrary = Ext.apply({}, {
         mode: ['local', 'remote'],
         triggerAction: ['query', 'all'],
         parentDockType: ['tbar', 'bbar', 'fbar', '(none)'],
-        //addressField
         level: ['place', 'street', 'house', 'flat'],
         viewMode: ['one','two', 'three'],
         buttonAlign: ['left', 'center', 'right'],
@@ -99,11 +98,17 @@ M3Designer.model.ModelTypeLibrary = Ext.apply({}, {
         var chain = this._buildInheritanceChain(type);
         var i, j = 0;
         var cfg = {};
-        for (i = 0; i < chain.length; i++) {
+        var overrides = [];
+        
+        for (i = chain.length; i >= 0; i--) {
             var currentType = chain[i];
             for (j in currentType) {
-                if (currentType.hasOwnProperty(j) && currentType[j].isInitProperty) {
+                if (currentType.hasOwnProperty(j) && currentType[j].isInitProperty
+                        && overrides.indexOf(j) == -1   ) {
                     cfg[j] = currentType[j].defaultValue;
+                }
+                if (currentType.hasOwnProperty(j)) {
+                    overrides.push(j);
                 }
             }
         }

@@ -409,6 +409,17 @@
     "parent":"triggerField"
 },
 
+// Компонент множественного выбора
+{
+    "class": {
+        "multiSelect": "ExtMultiSelectField"
+    },
+    "config": {
+
+    },
+    "parent":"dictSelect"
+},
+
 // Компонент загрузки файлов
 {
     "class": {

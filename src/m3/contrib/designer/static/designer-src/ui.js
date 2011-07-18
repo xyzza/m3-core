@@ -20,7 +20,8 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
     var mapObject = {
         button: function (model, cfg) {
             return Ext.apply(cfg, {
-                xtype: 'button'
+                xtype: 'button',
+                handler:undefined
             });
         },
         label: function (model, cfg) {
@@ -130,6 +131,11 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
             });
         },
         dictSelect: function (model, cfg) {
+            return Ext.apply(cfg, {
+                xtype: 'designer-dict-select'
+            });
+        },
+        multiSelect:function(model, cfg) {
             return Ext.apply(cfg, {
                 xtype: 'designer-dict-select'
             });

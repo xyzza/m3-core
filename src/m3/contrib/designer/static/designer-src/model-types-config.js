@@ -1216,6 +1216,36 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 category: 'M3'
             }
         },
+        multiSelect: {
+            parent:'dictSelect',
+            properties:{
+                id: {
+                    defaultValue: 'msf_multiselectfield',
+                    isInitProperty: true
+                },
+                triggerAction: {
+                    defaultValue: 'all',
+                    isInitProperty: false,
+                    propertyType: 'enum'
+                },
+                mode: {
+                    defaultValue: 'local',
+                    propertyType: 'enum',
+                    isInitProperty: false,
+                    isNotEditable:true
+                },
+                editable : {
+                    isInitProperty:false,
+                    isNotEditable:true,
+                    defaultValue:false
+                }
+            },
+            treeIconCls: 'designer-icon-combo',
+            toolboxData: {
+                text: 'Multi select field',
+                category: 'M3'
+            }
+        },
         objectGrid: {
             parent: 'grid',
             isContainer: true,
