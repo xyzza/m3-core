@@ -56,7 +56,7 @@ class BaseRecordPack(ActionPack):
     # Признак редактирования на клиенте
     # Если редактирование локальное, то запросы сохранения и удаления не пишут в базу, а лишь обрабатывают записи
     # результатом сохранения в этом случае будет JSON созданной/редактированной записи
-    local_edit = True
+    local_edit = False
         
     def __init__(self, *args, **kwargs):
         super(BaseRecordPack, self).__init__(*args, **kwargs)
