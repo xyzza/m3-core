@@ -91,8 +91,9 @@ class Relation(object):
         
         self.field_second = field_second        
         self.outer_second = outer_second
-        
 
+
+#TODO: Не используется нигде?
 class Table(object):
     '''
     Для обозначения таблиц в схемах
@@ -328,6 +329,24 @@ class Where(object):
     def is_empty(self):
         """ Возвращает истину, если условие пустое """
         return self.left is None and self.right is None
+
+    def get_parameters(self):
+        """ Возвращает список с именами параметров участвующих в условии """
+        if self.is_empty():
+            return []
+
+        all_params = []
+
+        def process_part(part):
+            if isinstance(part, basestring) and part.startswith('$'):
+                all_params.append(part)
+            elif isinstance(part, Where):
+                all_params.extend( part.get_parameters() )
+
+        process_part(self.left)
+        process_part(self.right)
+            
+        return all_params
         
     @staticmethod
     def get_simple_conditions():
@@ -606,7 +625,39 @@ class BaseEntity(object):
 
         cursor = query.execute(params)
         data = cursor.fetchall()
-        return data    
+        return data
+
+    def get_query_parameters(self):
+        """ Возвращает список параметров в запросе и всех вложенных в него подзапросах """
+        all_params = []
+
+        def append_with_check(params):
+            for p in params:
+                if p in all_params:
+                    raise Exception(u'Параметр с именем %s уже есть' % p)
+                all_params.append(p)
+
+        # Получаем параметры из вложенных BaseEntity
+        for ent in self.entities:
+            if isinstance(ent, Entity):
+                ent_class = EntityCache.get_entity(ent.name)
+                ent_ins = ent_class()
+                query_params = ent_ins.get_query_parameters()
+                append_with_check(query_params)
+
+        # Получаем параметры из WHERE
+        if isinstance(self.where, Where):
+            where_params = self.where.get_parameters()
+            append_with_check(where_params)
+
+        # Получаем из LIMIT и OFFSET
+        if self.limit and isinstance(self.limit, basestring):
+            append_with_check([self.limit])
+
+        if self.offset and isinstance(self.offset, basestring):
+            append_with_check([self.offset])
+
+        return all_params
 
 
 #TODO: В get_data() надо использовать params чтобы определить, использовать в == или IN в Where, в зависимости от типа аргумента

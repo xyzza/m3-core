@@ -195,8 +195,16 @@ def get_query_params(query_id):
         # оператор IN или нет                        
         res.append({'name': condition['parameter'], 
                     'multiple_choice': condition['condition'] == Where.IN})
+
+    # Получаем параметры вложенных сущностей
+    inner_list = []
+    for ent_dict in query_json['entities']:
+        ent = EntityCache.get_entity(ent_dict['id'])
+        ent_params = ent().get_query_parameters()
+        params = [{'name': x} for x in ent_params]
+        inner_list.extend( params )
         
-    return res
+    return res + inner_list
 
 def get_report_params(report_id):
     '''
