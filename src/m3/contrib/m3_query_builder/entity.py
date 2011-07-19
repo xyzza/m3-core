@@ -423,7 +423,8 @@ class Param(object):
         к имени параметра добавляется имя класса
         """
         assert isinstance(ent, BaseEntity)
-        self.name = '%s.%s' % (ent.__class__.__name__, self.name)
+        if self.name.find('.') == -1:
+            self.name = '%s.%s' % (ent.__class__.__name__, self.name)
 
     @staticmethod
     def get_type_choices():
@@ -621,6 +622,8 @@ class BaseEntity(object):
             return right
         elif left is not None and right is None:
             return left
+        elif left is None and right is None:
+            return
 
         func = self._get_func_by_operator(where.operator)
 
@@ -647,7 +650,7 @@ class BaseEntity(object):
             else:
                 raise TypeError('Right WHERE argument must be Param instance or Field instance')
 
-        if first_param and params:
+        if first_param and isinstance(params, dict):
             value = params.get(first_param.name)
 
             # Если параметры заданы, но нужного не оказалось, то убираем условие нафиг!
@@ -655,9 +658,11 @@ class BaseEntity(object):
                 return
 
             # Если значение параметра известно и оно является
-            #  перечисляемым, то заменяем EQUAL на IN
+            #  перечисляемым, то заменяем EQUAL или NOT EQUAL на IN
             if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
                     func = lambda x, y: x.in_([y])
+            if isinstance(value, (list, tuple)) and where.operator==Where.NE:
+                    func = lambda x, y: ~x.in_([y])
 
         exp = func(left, right)
         return exp
@@ -671,6 +676,8 @@ class BaseEntity(object):
 
     def get_data(self, params=None):
         """ Возвращает данные, полученные в результатет выполнения запроса """
+        params = params or {}
+
         #TODO: Потокоопасный метод! Надо использовать пул, живущий только во время формирования.
         BaseAlchemyObject.clear_instances()
 
@@ -684,14 +691,14 @@ class BaseEntity(object):
                     new_value = None
                     if len(v) > 0:
                         if isinstance(v[0], basestring):
-                            new_value = "','".join(v)
+                            new_value = "'" + "','".join(v) + "'"
                         elif isinstance(v[0], (int, float)):
-                            new_value = "','".join([str(x) for x in v])
+                            new_value = ",".join([str(x) for x in v])
 
                     if new_value:
-                        params[k] = "'" + new_value + "'"
+                        params[k] = new_value
 
-
+        #WRAPPER.engine.echo = True
         cursor = query.execute(params)
         data = cursor.fetchall()
         return data
@@ -723,3 +730,5 @@ class BaseEntity(object):
             all_params.append(self.offset)
 
         return all_params
+
+# Нужно состояние, которое определяет режим работы
