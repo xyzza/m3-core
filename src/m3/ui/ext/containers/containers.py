@@ -327,7 +327,6 @@ class ExtRadioGroup(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtRadioGroup, self).__init__(*args, **kwargs)
         self._ext_name = 'Ext.form.RadioGroup'
-        self.template = 'ext-containers/ext-radio-group.js' # TODO: отрефакторить под внутриклассовый рендеринг
 
         # количество колонок в контейнере
         self.columns = None
@@ -347,6 +346,15 @@ class ExtRadioGroup(BaseExtContainer):
             self._put_config_value('columns', self.columns)
         if self.label:
             self._put_config_value('label', self.label)
+
+    def render(self):
+        try:
+            self.render_base_config()
+        except Exception as msg:
+            raise Exception(msg)
+        
+        base_config = self._get_config_str()
+        return 'new %s({%s})' % (self._ext_name, base_config)
 
 #===============================================================================
 class ExtStatusBar(ExtToolBar):

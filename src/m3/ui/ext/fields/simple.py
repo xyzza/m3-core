@@ -285,7 +285,6 @@ class ExtRadio(BaseExtField):
     def __init__(self, *args, **kwargs):
         super(ExtRadio, self).__init__(*args, **kwargs)
         self._ext_name = 'Ext.form.Radio'
-        self.template = 'ext-fields/ext-radio.js' # TODO: отрефакторить под внутриклассовый рендеринг
 
         # Признак того, что значение выбрано
         self.checked = False
@@ -299,6 +298,15 @@ class ExtRadio(BaseExtField):
             self._put_config_value('checked', True)
         if self.box_label:
             self._put_config_value('boxLabel', self.box_label)
+
+    def render(self):
+        try:
+            self.render_base_config()
+        except Exception as msg:
+            raise Exception(msg)
+        
+        base_config = self._get_config_str()
+        return 'new %s({%s})' % (self._ext_name, base_config)
 
 #===============================================================================        
 class ExtComboBox(BaseExtTriggerField):
