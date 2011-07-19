@@ -319,18 +319,20 @@ class Where(object):
         """ Возвращает истину, если условие пустое """
         return self.left is None and self.right is None
 
-    def get_parameters(self):
+    def get_parameters(self, ent_ins):
         """ Возвращает список с именами параметров участвующих в условии """
+        assert isinstance(ent_ins, BaseEntity)
         if self.is_empty():
             return []
 
         all_params = []
 
         def process_part(part):
-            if isinstance(part, basestring) and part.startswith('$'):
+            if isinstance(part, Param):
+                part.bind_to_entity(ent_ins)
                 all_params.append(part)
             elif isinstance(part, Where):
-                all_params.extend( part.get_parameters() )
+                all_params.extend( part.get_parameters(ent_ins) )
 
         process_part(self.left)
         process_part(self.right)
@@ -389,6 +391,13 @@ class Param(object):
         # должен быть привязан
         self.param_value = param_value
         
+    def bind_to_entity(self, ent):
+        """
+        Чтобы имена параметров не пересекались, во время формирования запроса
+        к имени параметра добавляется имя класса
+        """
+        assert isinstance(ent, BaseEntity)
+        self.name = '%s.%s' % (ent.__class__.__name__, self.name)
 
 
 class BaseEntity(object):
@@ -522,9 +531,9 @@ class BaseEntity(object):
                 query = query.group_by(col)
 
         # LIMIT и OFFSET
-        if self.limit > 0:
+        if isinstance(self.limit, int):
             query = query.limit(self.limit)
-        if self.offset > 0:
+        if isinstance(self.offset, int):
             query = query.offset(self.offset)
 
         return query
@@ -581,8 +590,9 @@ class BaseEntity(object):
         if not isinstance(left, ColumnElement):
             if isinstance(left, Field):
                 left = left.get_alchemy_field()
-            elif isinstance(left, basestring) and left.startswith('$'):
-                left = bindparam(left, required=True)
+            elif isinstance(left, Param):
+                left.bind_to_entity(self)
+                left = bindparam(left.name, required=True)
                 first_param = left
             else:
                 raise TypeError('Left WHERE argument must be string parameter or Field instance')
@@ -591,6 +601,7 @@ class BaseEntity(object):
             if isinstance(right, Field):
                 right = right.get_alchemy_field()
             elif isinstance(right, Param):
+                right.bind_to_entity(self)
                 right = bindparam(right.name, required=True)
                 first_param = right
             else:
@@ -637,14 +648,8 @@ class BaseEntity(object):
         return data
 
     def get_query_parameters(self):
-        """ Возвращает список параметров в запросе и всех вложенных в него подзапросах """
+        """ Возвращает список экземпляров Param в запросе и всех вложенных в него подзапросах """
         all_params = []
-
-        def append_with_check(params):
-            for p in params:
-                if p in all_params:
-                    raise Exception(u'Параметр с именем %s уже есть' % p)
-                all_params.append(p)
 
         # Получаем параметры из вложенных BaseEntity
         for ent in self.entities:
@@ -652,21 +657,25 @@ class BaseEntity(object):
                 ent_class = EntityCache.get_entity(ent.name)
                 ent_ins = ent_class()
                 query_params = ent_ins.get_query_parameters()
-                append_with_check(query_params)
+                all_params.extend(query_params)
 
         # Получаем параметры из WHERE
         if isinstance(self.where, Where):
-            where_params = self.where.get_parameters()
-            append_with_check(where_params)
+            where_params = self.where.get_parameters(self)
+            all_params.extend(where_params)
 
         # Получаем из LIMIT и OFFSET
-        if self.limit and isinstance(self.limit, basestring):
-            append_with_check([self.limit])
+        if isinstance(self.limit, Param):
+            self.limit.bind_to_entity(self)
+            all_params.append(self.limit)
 
-        if self.offset and isinstance(self.offset, basestring):
-            append_with_check([self.offset])
+        if isinstance(self.offset, Param):
+            self.offset.bind_to_entity(self)
+            all_params.append(self.offset)
 
         return all_params
 
 
 #TODO: В get_data() надо использовать params чтобы определить, использовать в == или IN в Where, в зависимости от типа аргумента
+#TODO: Параметры нужно сделать классами
+#TODO: Добавить пробрасывание параметров при вызове get_data
