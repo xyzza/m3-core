@@ -423,9 +423,7 @@ class GetReportFormAction(actions.Action):
         win.frm_form.layout_config={'align':'stretch'}
         
         for i, param in enumerate(params):
-            
-            
-            
+
             if param['type'] == TypeField.STRING_FIELD:
                 field = ExtStringField()
             elif param['type'] == TypeField.NUMBER_FIELD:

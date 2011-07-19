@@ -51,11 +51,18 @@ var fieldsModel = new function(){
 		},
 		
 		/**
-		 * Устанавливает имя у компонента по id контейнера
+		 * Проверяет, есть ли значение в контейре
 		 */
-		addName: function(contID, name){
-			containers[contID]['name'] = name;
+		hasValue: function(contID, value){
+			var mass = containers[contID]['values'];
+			for (var i=0; i<mass.length; i++){
+				if (mass[i] == value){
+					return true;
+				}
+			}
+			return false;
 		},
+		
 		
 		/**
 		 * Уджаляет значение по id контейнера
@@ -63,6 +70,14 @@ var fieldsModel = new function(){
 		deleteValue: function(contID, value){
 			var mass = containers[contID]['values'];
 			mass.splice(mass.indexOf(value), 1);
+		},
+		
+		
+		/**
+		 * Устанавливает имя у компонента по id контейнера
+		 */
+		addName: function(contID, name){
+			containers[contID]['name'] = name;
 		}
 	}
 }
@@ -94,7 +109,7 @@ function submitForm(){
 }
 
 /**
- * 
+ * Хендлер добавления значения
  */
 function addValue(id){
 	var component = Ext.getCmp(id);
@@ -110,6 +125,11 @@ function addValue(id){
 								);
 	} else {
 		value = component.getValue();
+	}
+
+	// Если значение уже выбрано	
+	if (fieldsModel.hasValue('div' + id, value) ){		 					
+		return;
 	}
 
 	var divEl = Ext.get('div' + id);
@@ -213,7 +233,8 @@ win.on('beforeshow', function(window){
 				if (e.keyCode == e.ENTER) {
 					addValue(cmp.id);
 				}
-			});			
+			});
+
 			fieldsModel.setFieldContainer(newChildEl.id);
 			fieldsModel.addName(newChildEl.id, item.getName());	
 		}

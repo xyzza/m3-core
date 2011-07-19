@@ -193,8 +193,7 @@ def get_query_params(query_id):
         
         # Множественный выбор или нет, то есть используется ли 
         # оператор IN или нет                        
-        res.append({'name': condition['parameter'], 
-                    'multiple_choice': condition['condition'] == Where.IN})
+        res.append({'name': condition['parameter']})
 
     # Получаем параметры вложенных сущностей
     inner_list = []

@@ -93,17 +93,6 @@ class Relation(object):
         self.outer_second = outer_second
 
 
-#TODO: Не используется нигде?
-class Table(object):
-    '''
-    Для обозначения таблиц в схемах
-    '''        
-    def __init__(self, name, alias=None, verbose_name=None):
-        self.name = name
-        self.alias = alias
-        self.verbose_name = verbose_name
-
-
 class BaseAlchemyObject(object):
     __metaclass__ = ABCMeta
     __instance_cache = {}
@@ -380,6 +369,26 @@ class Grouping(object):
                 Grouping.MAX: Aggregate.Max,
                 Grouping.COUNT: Aggregate.Count,                
                 }
+
+class Param(object):
+    '''
+    Параметр в условии Where
+    '''
+    def __init__(self, name, verbose_name, param_type, param_type_value):
+        # Название параметра: Имя класса + '.' + Имя параметра
+        self.name = name
+        
+        # Человеческое название параметра
+        self.verbose_name = verbose_name
+        
+        # Тип параметра
+        self.param_type = param_type
+        
+        # Значение типа, например если тип - выбор из справочника, значением
+        # Будет являться название пака, к которому выбор из справочника
+        # должен быть привязан
+        self.param_type_value = param_type_value
+        
 
 
 class BaseEntity(object):
