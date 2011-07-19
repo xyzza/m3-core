@@ -374,7 +374,7 @@ class Param(object):
     '''
     Параметр в условии Where
     '''
-    def __init__(self, name, verbose_name, param_type, param_type_value):
+    def __init__(self, name, verbose_name, type, param_value=None):
         # Название параметра: Имя класса + '.' + Имя параметра
         self.name = name
         
@@ -382,12 +382,12 @@ class Param(object):
         self.verbose_name = verbose_name
         
         # Тип параметра
-        self.param_type = param_type
+        self.type = type
         
         # Значение типа, например если тип - выбор из справочника, значением
         # Будет являться название пака, к которому выбор из справочника
         # должен быть привязан
-        self.param_type_value = param_type_value
+        self.param_value = param_value
         
 
 
@@ -590,11 +590,11 @@ class BaseEntity(object):
         if not isinstance(right, ColumnElement):
             if isinstance(right, Field):
                 right = right.get_alchemy_field()
-            elif isinstance(right, basestring):
-                right = bindparam(right, required=True)
+            elif isinstance(right, Param):
+                right = bindparam(right.name, required=True)
                 first_param = right
             else:
-                raise TypeError('Right WHERE argument must be string parameter or Field instance')
+                raise TypeError('Right WHERE argument must be Param instance or Field instance')
 
         # TODO: Закомментированный фрагмент не работает, т.к. во вложенные сущности нельзя передать параметры
 #        if first_param is not None:
