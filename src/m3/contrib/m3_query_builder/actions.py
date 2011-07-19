@@ -458,8 +458,6 @@ class GetReportFormAction(actions.Action):
             
             cont_outer.items.append(cont_inner)
             cont_inner.items.append(field)
-            
-
 
             if param['type'] in (Param.STRING, Param.NUMBER, Param.DATE):
                 cont_outer.items.append(ExtButton(handler='function(){ addValue("%s")}' % field.client_id, 

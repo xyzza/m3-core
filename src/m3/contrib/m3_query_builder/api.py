@@ -146,7 +146,7 @@ def build_entity(objs, separator='-'):
                       field_name=field_name)
                 
         entity.where &= Where(left=field, op=condition['condition'], 
-                  right=condition['parameter'])                
+                  right=Param(name=condition['parameter'], type=1, verbose_name='123'))                
       
       
     entity.distinct = objs['distinct']
@@ -191,12 +191,8 @@ def get_query_params(query_id):
     query = Query.objects.get(id=query_id)
     query_json = json.loads(query.query_json)
     
-    res = []
-    for condition in query_json['cond_fields']:        
-        
-        # Множественный выбор или нет, то есть используется ли 
-        # оператор IN или нет                        
-        res.append({'name': condition['parameter']})
+    res = [{'name': '%s.%s' % (condition['entityName'], 
+                               condition['parameter'])} for condition in query_json['cond_fields']]    
 
     # Получаем параметры вложенных сущностей
     inner_list = []

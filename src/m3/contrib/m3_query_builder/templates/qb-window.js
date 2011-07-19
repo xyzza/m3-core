@@ -459,7 +459,7 @@ function openConditionWindow(node){
 				    'parameter':parameter,
 				    'expression': String.format('{0} {1} {2}', fieldName, condition, parameter)
 				   },
-				   String.format('{0}-{1}', entityName, fieldID) 				    
+				   String.format('{0}.{1}', entityName, fieldID) 				    
 				);
 				grdConditionsFields.getStore().add(newRecord);
 				
