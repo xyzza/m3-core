@@ -647,12 +647,16 @@ class BaseEntity(object):
             else:
                 raise TypeError('Right WHERE argument must be Param instance or Field instance')
 
-        if first_param:
-            # Если значение параметра известно, то в зависимости от того,
-            # является ли перечисляемым, заменяем EQUAL на IN и наоборот
-            if params and params.has_key(first_param.name):
-                value = params[first_param.name]
-                if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
+        if first_param and params:
+            value = params.get(first_param.name)
+
+            # Если параметры заданы, но нужного не оказалось, то убираем условие нафиг!
+            if value is None:
+                return
+
+            # Если значение параметра известно и оно является
+            #  перечисляемым, то заменяем EQUAL на IN
+            if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
                     func = lambda x, y: x.in_([y])
 
         exp = func(left, right)
@@ -677,9 +681,16 @@ class BaseEntity(object):
         if isinstance(params, dict):
             for k, v in params.items():
                 if isinstance(v, (list, tuple)):
-                    v = "','".join(v)
-                    v = "'" + v + "'"
-                    params[k] = v
+                    new_value = None
+                    if len(v) > 0:
+                        if isinstance(v[0], basestring):
+                            new_value = "','".join(v)
+                        elif isinstance(v[0], (int, float)):
+                            new_value = "','".join([str(x) for x in v])
+
+                    if new_value:
+                        params[k] = "'" + new_value + "'"
+
 
         cursor = query.execute(params)
         data = cursor.fetchall()
@@ -712,7 +723,3 @@ class BaseEntity(object):
             all_params.append(self.offset)
 
         return all_params
-
-
-#TODO: В get_data() надо использовать params чтобы определить, использовать в == или IN в Where, в зависимости от типа аргумента
-#TODO: Добавить пробрасывание параметров при вызове get_data
