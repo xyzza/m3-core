@@ -14,10 +14,13 @@ from m3.contrib.m3_query_builder import EntityCache
 from m3.helpers.icons import Icons
 from m3.ui.actions import ControllerCache
 
-from entity import BaseEntity, Field, Entity, Relation, Grouping, Where
-from models import Query, Report, ReportParams
 from m3.ui.actions.packs import BaseDictionaryActions
 from m3.ui.actions.tree_packs import BaseTreeDictionaryActions
+
+
+from entity import BaseEntity, Field, Entity, Relation, Grouping, Where, Param
+from models import Query, Report, ReportParams
+
 
 def get_entities():
     '''
@@ -200,7 +203,11 @@ def get_query_params(query_id):
     for ent_dict in query_json['entities']:
         ent = EntityCache.get_entity(ent_dict['id'])
         ent_params = ent().get_query_parameters()
-        params = [{'name': x} for x in ent_params]
+        params = [{'name': x.name, 
+                   'verbose_name': x.verbose_name, 
+                   'type_id': x.type,
+                   'type': Param.VALUES.get(x.type),                   
+                   'value_type': x.type_value} for x in ent_params]
         inner_list.extend( params )
         
     return res + inner_list

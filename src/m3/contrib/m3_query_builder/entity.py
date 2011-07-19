@@ -282,14 +282,14 @@ class Where(object):
     OR = 'or'
     NOT = 'not'
     
-    EQ = '='
-    NE = '!='
+    EQ = '= (IN)'
+    NE = '!= (NOT IN)'
     LT = '<'
     LE = '<='
     GT = '>'
     GE = '>='
     
-    IN = 'Вхождение'
+    # IN = 'Вхождение' -- используется пользовательский выбор
     
     # TODO: Пока не используется оператор between
     BETWEEN = 'between'
@@ -348,7 +348,7 @@ class Where(object):
                 'le': Where.LE,
                 'gt': Where.GT,
                 'ge': Where.GE,
-                'in': Where.IN,
+                #'in': Where.IN, -- используется пользовательский выбор
                 }
 
 class Grouping(object):
@@ -376,7 +376,24 @@ class Param(object):
     '''
     Параметр в условии Where
     '''
-    def __init__(self, name, verbose_name, type, param_value=None):
+    
+    STRING = 1
+    NUMBER = 2    
+    DICTIONARY =3
+    DATE = 4
+    BOOLEAN = 5
+    
+    VALUES = {
+        STRING: u'Текст',
+        NUMBER: u'Число',
+        DICTIONARY: u'Выбор из справочника',
+        DATE: u'Дата',
+        BOOLEAN: u'Флаг',
+    }
+    
+    def __init__(self, name, verbose_name, type, type_value=None):
+        assert type in Param.VALUES, 'type must be value in Param.VALUES'
+        
         # Название параметра: Имя класса + '.' + Имя параметра
         self.name = name
         
@@ -389,7 +406,7 @@ class Param(object):
         # Значение типа, например если тип - выбор из справочника, значением
         # Будет являться название пака, к которому выбор из справочника
         # должен быть привязан
-        self.param_value = param_value
+        self.type_value = type_value
         
     def bind_to_entity(self, ent):
         """
@@ -398,6 +415,10 @@ class Param(object):
         """
         assert isinstance(ent, BaseEntity)
         self.name = '%s.%s' % (ent.__class__.__name__, self.name)
+
+    @staticmethod
+    def get_type_choices():
+        return [ (k, v) for k, v in Param.VALUES.items()]
 
 
 class BaseEntity(object):
@@ -418,7 +439,7 @@ class BaseEntity(object):
         Where.AND: lambda x, y: x & y,
         Where.OR: lambda x, y: x | y,
         Where.NOT: lambda x, y: ~x,
-        Where.IN: lambda x, y: x.in_([y]),
+        #Where.IN: lambda x, y: x.in_([y]), -- используется пользовательский выбор
         Where.BETWEEN: lambda x, y: x.between(y[0], y[1]),
     }
     

@@ -28,7 +28,7 @@ function submitForm(){
 			'name': range[i].get('name'),
 			'verbose_name': range[i].get('verbose_name'),
 			'type': range[i].get('type_id'),
-			'type_value': range[i].get('value_type_id'),
+			'type_value': range[i].get('value_type'),
 		});
 	}
 
@@ -57,7 +57,14 @@ function getParams(queryID){
 			var records = Ext.decode(response.responseText);
 			var data = [];
 			for (var i=0; i<records.length; i++){
-				data.push([records[i].name, records[i].name]);
+				data.push([records[i].name, 
+						   records[i].name,
+						   records[i].verbose_name,
+						   records[i].type_id,
+						   records[i].type,
+						   records[i].value_type,
+						   records[i].value_type_id,	
+						]);
 			}
 
 			grdParams.getStore().loadData(data)						
@@ -109,15 +116,14 @@ function editParamWindow(node){
             	'name': record.get('name'),
             	'verboseName': record.get('verbose_name') || record.get('name'),
             	'type': record.get('type_id'),
-            	'value': record.get('value_type_id')
+            	'value': record.get('value_type')
             });
             childWin.on('selectData', function(obj){
 				
 				record.set('verbose_name', obj['verboseName']);
 				record.set('type', obj['typeName']);
 				record.set('type_id', obj['typeID']);
-				record.set('value_type', obj['valueName']);
-				record.set('value_type_id', obj['valueID']);
+				record.set('value_type', obj['value']);				
          		record.commit();				
             });		            
 		}

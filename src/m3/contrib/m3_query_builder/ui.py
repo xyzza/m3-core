@@ -903,7 +903,7 @@ class ReportBuilderWindow(ExtEditWindow):
         self.min_height = 300
         self.height = 350
         self.min_width = 400
-        self.width = 400
+        self.width = 500
         self.template_globals = 'rb-edit-window.js'
         
         tb_buttons = ExtToolBar()
@@ -938,8 +938,8 @@ class ReportBuilderWindow(ExtEditWindow):
         
         clmn_name = ExtGridColumn()
         clmn_name.header = u'Идентификатор'
-        clmn_name.menu_disabled = True
         clmn_name.data_index = 'name'
+        clmn_name.menu_disabled = True
         
         clmn_verbose_name = ExtGridColumn()
         clmn_verbose_name.header = u'Название'
@@ -956,12 +956,6 @@ class ReportBuilderWindow(ExtEditWindow):
         clmn_type.header = u'Тип'
         clmn_type.data_index = 'type'
         clmn_type.menu_disabled = True
-        
-        clmn_value_type_id = ExtGridColumn()
-        clmn_value_type_id.header = 'clmn_value_type_id'
-        clmn_value_type_id.menu_disabled = True
-        clmn_value_type_id.data_index = 'value_type_id'
-        clmn_value_type_id.hidden = True
         
         clmn_value_type = ExtGridColumn()
         clmn_value_type.header = u'Значение параметра'
@@ -1003,7 +997,7 @@ class ReportBuilderWindow(ExtEditWindow):
         
         tb_buttons.items.extend([btn_button_1, btn_button_2])
         tb_form.items.extend([btn_button_3])
-        grd_params.columns.extend([clmn_name, clmn_verbose_name, clmn_type_id, clmn_type, clmn_value_type_id, clmn_value_type])
+        grd_params.columns.extend([clmn_name, clmn_verbose_name, clmn_type_id, clmn_type, clmn_value_type])
         frm_form.items.extend([hdn_id, str_name, dsf_query])
         self.items.extend([grd_params, frm_form])
         
@@ -1018,14 +1012,13 @@ class ReportBuilderWindow(ExtEditWindow):
         self.clmn_verbose_name = clmn_verbose_name
         self.clmn_type_id = clmn_type_id
         self.clmn_type = clmn_type
-        self.clmn_value_type_id = clmn_value_type_id
         self.clmn_value_type = clmn_value_type
         self.frm_form = frm_form
         self.hdn_id = hdn_id
         self.str_name = str_name
         self.dsf_query = dsf_query
 
-                                                        
+                                                                                
 class ReportParamsWindow(ExtWindow):
 
     def __init__(self, types, default_type_value, params, *args, **kwargs):

@@ -73,8 +73,7 @@ function selectType(){
 		
 		'typeID': comboType.getValue(),
 		'typeName': comboType.lastSelectionText, 
-		'valueID': comboValueType.getValue(),
-		'valueName':  comboValueType.lastSelectionText
+		'value': comboValueType.getValue(),		
 	});
 	win.close();
 }

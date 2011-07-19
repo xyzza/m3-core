@@ -18,10 +18,12 @@ from m3.ui.ext.fields.simple import ExtStringField, ExtNumberField, ExtDateField
 
 
 import ui
-from models import Query, Report, TypeField, ReportParams
+from models import Query, Report, ReportParams
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
     get_pack, get_report_params, get_report
+        
+from entity import Param
 
 
 
@@ -291,7 +293,7 @@ class ReportBuilderWindowAction(actions.Action):
             for param in ReportParams.objects.filter(report=id):
 
                 value, value_name = None, None                
-                if param.type == TypeField.DICTIONARY_FIELD:
+                if param.type == Param.DICTIONARY:
                     value = param.value                    
                     pack = get_pack(value)
                     
@@ -305,7 +307,7 @@ class ReportBuilderWindowAction(actions.Action):
                              param.name,
                              param.verbose_name, 
                              param.type,
-                             TypeField.VALUES[int(param.type)],
+                             Param.VALUES[int(param.type)],
                              value or '',
                              value_name or ''
                              ])
@@ -371,11 +373,11 @@ class ReportEditParamsWindowAction(actions.Action):
                   'get_packs_url': GetPacksProjectAction.absolute_url(),
                   }
                                 
-        win = ui.ReportParamsWindow(types=TypeField.get_type_choices(), 
-                                    default_type_value=TypeField.STRING_FIELD,
+        win = ui.ReportParamsWindow(types=Param.get_type_choices(), 
+                                    default_type_value=Param.STRING,
                                     params=params)
                 
-        win.dict_value = TypeField.DICTIONARY_FIELD
+        win.dict_value = Param.DICTIONARY
                
         return actions.ExtUIScriptResult(win)
     
@@ -393,7 +395,7 @@ class GetPacksProjectAction(actions.Action):
 
     def run(self, request, context):
         data = None
-        if context.type == TypeField.DICTIONARY_FIELD:           
+        if context.type == Param.DICTIONARY:   
             data = get_packs()
                
         return actions.JsonResult(json.dumps({'success': True, 'data': data}))
@@ -424,15 +426,15 @@ class GetReportFormAction(actions.Action):
         
         for i, param in enumerate(params):
 
-            if param['type'] == TypeField.STRING_FIELD:
+            if param['type'] == Param.STRING:
                 field = ExtStringField()
-            elif param['type'] == TypeField.NUMBER_FIELD:
+            elif param['type'] == Param.NUMBER:
                 field = ExtNumberField()
-            elif param['type'] == TypeField.DATE_FIELD:
+            elif param['type'] == Param.DATE:
                 field = ExtDateField()
-            elif param['type'] == TypeField.BOOLEAN_FIELD:
+            elif param['type'] == Param.BOOLEAN:
                 field = ExtCheckBox()
-            elif param['type'] == TypeField.DICTIONARY_FIELD:
+            elif param['type'] == Param.DICTIONARY:
                 # Здесь нужно проверять pack на возможность множественного 
                 # выбора и если такой возможен, делать множественный выбор
                 
@@ -440,7 +442,7 @@ class GetReportFormAction(actions.Action):
                 field.pack = param['value']
                 
  
-            elif param['type'] == TypeField.NUMBER_FIELD:
+            elif param['type'] == Param.NUMBER:
                 field = ExtNumberField()                
             else:
                 raise Exception('type "%s" is not define in class TypeField' % param['type'])
@@ -459,8 +461,7 @@ class GetReportFormAction(actions.Action):
             
 
 
-            if param['type'] in (TypeField.STRING_FIELD, TypeField.NUMBER_FIELD,
-                                 TypeField.DATE_FIELD, TypeField.NUMBER_FIELD):
+            if param['type'] in (Param.STRING, Param.NUMBER, Param.DATE):
                 cont_outer.items.append(ExtButton(handler='function(){ addValue("%s")}' % field.client_id, 
                                                   icon_cls=Icons.ADD,
                                                   client_id='btn-'+field.client_id))
