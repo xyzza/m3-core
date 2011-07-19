@@ -11,6 +11,7 @@ from m3.ui.actions.results import OperationResult, ExtUIScriptResult, PreJsonRes
 from m3.ui.actions.utils import extract_int
 from m3.ui.ext.panels.grids import ExtMultiGroupinGrid
 from m3.helpers.dataprovider import GetRecordsParams, BaseRecordProvider, BaseRecord
+from m3.ui.ext.misc.store import ExtJsonStore
 
 def make_action(url, run_method, shortname = '', acd = None):
     """
@@ -19,6 +20,7 @@ def make_action(url, run_method, shortname = '', acd = None):
     act = Action()
     act.url = url
     act.run = run_method
+    act.shortname = shortname
     if acd:
         act.context_declaration = acd
     return act
@@ -52,7 +54,7 @@ class BaseRecordPack(ActionPack):
     
     # Заголовок окна редактирования по-умолчанию
     title = None
-
+    
     # Признак редактирования на клиенте
     # Если редактирование локальное, то запросы сохранения и удаления не пишут в базу, а лишь обрабатывают записи
     # результатом сохранения в этом случае будет JSON созданной/редактированной записи
@@ -60,14 +62,16 @@ class BaseRecordPack(ActionPack):
         
     def __init__(self, *args, **kwargs):
         super(BaseRecordPack, self).__init__(*args, **kwargs)
-    
+
         self.action_edit = make_action('/edit', self.edit_window_request, acd=self._get_edit_action_context_declaration) 
         self.action_delete = make_action('/delete', self.delete_rows_request, acd=self._get_delete_action_context_declaration)
         self.action_rows = make_action('/rows', self.rows_request, acd=self._get_rows_action_context_declaration)
         self.action_save = make_action('/save', self.save_request, acd=self._get_save_action_context_declaration)
 
         self.actions.extend([
-            self.action_edit, self.action_delete, self.action_rows, 
+            self.action_edit, 
+            self.action_delete, 
+            self.action_rows, 
             self.action_save
         ])
 
@@ -148,7 +152,7 @@ class BaseRecordPack(ActionPack):
         """
         assert isinstance(record, BaseRecord), 'record должен быть классом от BaseRecord'
         return record.validate()
-
+    
     def validate_delete_rows(self, request, context, ids):
         """
         Проверка препятствий для удаления записей по id
@@ -238,7 +242,7 @@ class BaseRecordPack(ActionPack):
         grid.action_data = self.action_rows
         
         grid.row_id_name = self.context_id
-        
+    
         if isinstance(grid, ExtMultiGroupinGrid):
             grid.local_edit = self.local_edit
     
@@ -302,7 +306,7 @@ class BaseRecordPack(ActionPack):
         else:
             # если серверное редактирование
             self.save_row(request, context, obj, is_new)
-            return OperationResult()
+        return OperationResult()
     
     def extract_filter_context(self, request, context):
         """

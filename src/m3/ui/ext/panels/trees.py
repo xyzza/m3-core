@@ -125,7 +125,7 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
         
         # тонкая настройка self.store
         if not self.url and self.action_data:
-            self.url = self.action_data.absolute_url()
+            self.url = self.action_data.get_absolute_url()
         
         
         self.render_base_config()
@@ -136,10 +136,10 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
     def render_params(self):
         super(ExtObjectTree, self).render_params()
         
-        new_url = self.action_new.absolute_url() if self.action_new else None
-        edit_url = self.action_edit.absolute_url() if self.action_edit else None
-        delete_url = self.action_delete.absolute_url() if self.action_delete else None
-        data_url = self.action_data.absolute_url() if self.action_data else None
+        new_url = self.action_new.get_absolute_url() if self.action_new else None
+        edit_url = self.action_edit.get_absolute_url() if self.action_edit else None
+        delete_url = self.action_delete.get_absolute_url() if self.action_delete else None
+        data_url = self.action_data.get_absolute_url() if self.action_data else None
         context_json = self.action_context.json if self.action_context else None
         
         self._put_params_value('actions', {'newUrl': new_url,
