@@ -194,7 +194,7 @@ class ExtDictSelectField(BaseExtTriggerField):
     
     @property
     def pack(self):
-        return self.__pack
+        return self._pack
         
     @pack.setter
     def pack(self, ppack):
