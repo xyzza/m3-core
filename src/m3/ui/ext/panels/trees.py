@@ -8,7 +8,7 @@ Created on 25.06.2010
 '''
 
 from m3.ui.ext import containers, controls, menus, render_component
-
+from m3.helpers.urls import get_url
 
 class ExtObjectTree(containers.ExtAdvancedTreeGrid):
     '''
@@ -125,7 +125,7 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
         
         # тонкая настройка self.store
         if not self.url and self.action_data:
-            self.url = self.action_data.get_absolute_url()
+            self.url = get_url(self.action_data)
         
         
         self.render_base_config()
@@ -136,10 +136,10 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
     def render_params(self):
         super(ExtObjectTree, self).render_params()
         
-        new_url = self.action_new.get_absolute_url() if self.action_new else None
-        edit_url = self.action_edit.get_absolute_url() if self.action_edit else None
-        delete_url = self.action_delete.get_absolute_url() if self.action_delete else None
-        data_url = self.action_data.get_absolute_url() if self.action_data else None
+        new_url = get_url(self.action_new) if self.action_new else None
+        edit_url = get_url(self.action_edit) if self.action_edit else None
+        delete_url = get_url(self.action_delete) if self.action_delete else None
+        data_url = get_url(self.action_data) if self.action_data else None
         context_json = self.action_context.json if self.action_context else None
         
         self._put_params_value('actions', {'newUrl': new_url,

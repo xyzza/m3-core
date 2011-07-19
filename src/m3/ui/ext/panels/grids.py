@@ -8,6 +8,7 @@ Created on 26.05.2010
 '''
 
 from m3.ui.ext import containers, controls, menus, misc, render_component
+from m3.helpers.urls import get_url
 
 class ExtObjectGrid(containers.ExtGrid):
     '''
@@ -133,6 +134,9 @@ class ExtObjectGrid(containers.ExtGrid):
         # Обработчик двойного клика
         self.dblclick_handler = 'onEditRecord'
         
+        # Признак редактирования на клиенте - особенным образом обрабатываются данные при редактировании
+        self.local_edit = False
+        
         self.init_component()
 
 
@@ -207,7 +211,7 @@ class ExtObjectGrid(containers.ExtGrid):
         
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
-            self.store.url = self.action_data.absolute_url()
+            self.store.url = get_url(self.action_data)
             
         if self.url_data:
             self.store.url = self.url_data
@@ -230,16 +234,13 @@ class ExtObjectGrid(containers.ExtGrid):
         
         # Получение адресов для грида. Текстовые адреса более приоритетны чем экшены!
         if not self.url_new and self.action_new:
-            self.url_new = self.action_new.absolute_url()
-             
+            self.url_new = get_url(self.action_new)
         if not self.url_edit and self.action_edit:
-            self.url_edit = self.action_edit.absolute_url()
-            
+            self.url_edit = get_url(self.action_edit)
         if not self.url_delete and self.action_delete:
-            self.url_delete = self.action_delete.absolute_url()
-            
+            self.url_delete = get_url(self.action_delete)
         if not self.url_data and self.action_data:
-            self.url_data = self.action_data.absolute_url()
+            self.url_data = get_url(self.action_data)
 
         context_json = self.action_context.json if self.action_context else None
         
@@ -253,6 +254,7 @@ class ExtObjectGrid(containers.ExtGrid):
         self._put_params_value('columnParamName', self.column_param_name)
         self._put_params_value('allowPaging', self.allow_paging)
         self._put_params_value('readOnly', self.read_only)
+        self._put_params_value('localEdit',self.local_edit)
         
     def t_render_base_config(self):
         return self._get_config_str()
@@ -355,7 +357,7 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
     def render(self):
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
-            self.store.url = self.action_data.absolute_url()
+            self.store.url = get_url(self.action_data)
             
         self.render_base_config()
         self.render_params()
@@ -363,19 +365,19 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
 
     def render_params(self):
         super(ExtMultiGroupinGrid, self).render_params()
-        data_url = self.action_data.get_absolute_url() if self.action_data else None
-        new_url = self.action_new.get_absolute_url() if self.action_new else None
+        data_url = get_url(self.action_data) if self.action_data else None
+        new_url = get_url(self.action_new) if self.action_new else None
         if not self.action_new:
             self._top_bar.items.remove(self._top_bar.button_new)
-        edit_url = self.action_edit.get_absolute_url() if self.action_edit else None
+        edit_url = get_url(self.action_edit) if self.action_edit else None
         if not self.action_edit:
             self._top_bar.items.remove(self._top_bar.button_edit)
         else:
             self.handler_dblclick = self.dblclick_handler
-        delete_url = self.action_delete.get_absolute_url() if self.action_delete else None
+        delete_url = get_url(self.action_delete) if self.action_delete else None
         if not self.action_delete:
             self._top_bar.items.remove(self._top_bar.button_delete)
-        export_url = self.action_export.get_absolute_url() if self.action_export else None
+        export_url = get_url(self.action_export) if self.action_export else None
         if not self.action_export:
             self._top_bar.items.remove(self._top_bar.button_export)
         context_json = self.action_context.json if self.action_context else None

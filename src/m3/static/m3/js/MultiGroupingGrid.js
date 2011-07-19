@@ -797,7 +797,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		
 		this.rowIdName = params.rowIdName;
 		
-		// признак серверного редактирования
+		// признак клиентского редактирования
 		this.localEdit = params.localEdit;
 		
 		// обработчики

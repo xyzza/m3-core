@@ -7,6 +7,7 @@ Created on 20.05.2010
 '''
 
 import collections
+import inspect
 
 from django.conf import settings
 from django.utils import importlib
@@ -68,11 +69,24 @@ def get_action(action_name):
     return action_data[0] if action_data else None
 
 
-def get_url(action_name):
+def get_url(action):
     '''
     Возвращает абсолютный путь до 
     '''
-    action_data = ActionsNameCache().get(action_name, None)
+    names = []
+    if isinstance(action, actions.Action):
+        names.append("%s.%s.%s" % (action.__class__.__module__, action.__class__.__name__, action.url))
+        names.append("%s.%s" % (action.__class__.__module__, action.__class__.__name__))
+    elif inspect.isclass(action) and issubclass(action, actions.Action):
+        names.append("%s.%s" % (action.__module__, action.__name__))
+    elif isinstance(action, str):
+        names.append(action)
+    
+    action_data = None
+    for name in names:
+        action_data = ActionsNameCache().get(name, None)
+        if action_data:
+            break
     return action_data[1] if action_data else ''
 
 get_acton_url = get_url
@@ -182,7 +196,14 @@ def inner_name_cache_handler(for_actions=True):
             packs.extend(pack.subpacks)
         if for_actions and hasattr(pack, 'actions'):
             for action in pack.actions:
-
+                
+                # если имеем дело с экземпляром экшена, то формируем запись 
+                # в кеше относительно имени класса экшена и заданного URL
+                if isinstance(action, actions.Action):
+                    url = action.get_absolute_url()
+                    key = "%s.%s.%s" % (action.__class__.__module__, action.__class__.__name__, action.url)
+                    result[key] = (action.__class__, url, action)
+                
                 # неважно что нам передали, нам нужен экземпляр класса
                 cleaned_action = get_instance(action)
 
@@ -193,6 +214,9 @@ def inner_name_cache_handler(for_actions=True):
                 shortname = get_shortname(cleaned_action)
                 if shortname:
                     result[shortname] = (cleaned_action.__class__, url, cleaned_action)
+                    
+                 
+                    
         else:
             cleaned_pack = get_instance(pack)
             key = cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__

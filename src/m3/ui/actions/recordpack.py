@@ -9,9 +9,9 @@ from m3.ui.actions import Action, ActionPack, ACD
 from m3.ui.actions.context import ActionContext
 from m3.ui.actions.results import OperationResult, ExtUIScriptResult, PreJsonResult
 from m3.ui.actions.utils import extract_int
-from m3.ui.ext.panels.grids import ExtMultiGroupinGrid
+from m3.ui.ext.panels.grids import ExtMultiGroupinGrid, ExtObjectGrid
 from m3.helpers.dataprovider import GetRecordsParams, BaseRecordProvider, BaseRecord
-from m3.ui.ext.misc.store import ExtJsonStore
+from m3.helpers.urls import get_url
 
 def make_action(url, run_method, shortname = '', acd = None):
     """
@@ -170,13 +170,13 @@ class BaseRecordPack(ActionPack):
         '''
         Возвращает адрес формы редактирования элемента справочника.
         '''
-        return self.action_edit.get_absolute_url()
+        return get_url(self.action_edit)
     
     def get_rows_url(self):
         '''
         Возвращает адрес по которому запрашиваются элементы грида
         '''
-        return self.action_rows.get_absolute_url()
+        return get_url(self.action_rows)
     
     #====================== Работа с окнами =======================
     
@@ -227,12 +227,12 @@ class BaseRecordPack(ActionPack):
         Присоединение списка к гриду
         """
         if not grid.get_store():
-            grid_store = ExtJsonStore(url=self.action_rows.get_absolute_url(), auto_load=True, remote_sort=True)
+            grid_store = ExtJsonStore(url=get_url(self.action_rows), auto_load=True, remote_sort=True)
             grid_store.total_property = 'total'
             grid_store.root = 'rows'
             grid.set_store(grid_store)
         else:
-            grid.store.url = self.action_rows.get_absolute_url()
+            grid.store.url = get_url(self.action_rows)
             grid.store.total_property = 'total'
             grid.store.root = 'rows'
         
@@ -243,7 +243,7 @@ class BaseRecordPack(ActionPack):
         
         grid.row_id_name = self.context_id
     
-        if isinstance(grid, ExtMultiGroupinGrid):
+        if isinstance(grid, (ExtMultiGroupinGrid, ExtObjectGrid)):
             grid.local_edit = self.local_edit
     
     #====================== Обработка запросов =======================
@@ -265,8 +265,8 @@ class BaseRecordPack(ActionPack):
         
         is_get_data = context.isGetData
         if not is_get_data: 
-            win.form.url = self.action_save.get_absolute_url()
-            win.data_url = self.action_edit.get_absolute_url()
+            win.form.url = get_url(self.action_save)
+            win.data_url = get_url(self.action_edit)
             self.update_context(request, context, win)
             
             return ExtUIScriptResult(win)
@@ -419,14 +419,14 @@ class BaseRecordListPack(BaseRecordPack):
         Возвращает адрес формы списка элементов справочника. 
         Используется для присвоения адресов в прикладном приложении.
         '''
-        return self.action_list.get_absolute_url()
+        return get_url(self.action_list)
     
     def get_select_url(self):
         '''
         Возвращает адрес формы списка элементов справочника. 
         Используется для присвоения адресов в прикладном приложении.
         '''
-        return self.action_select.get_absolute_url()
+        return get_url(self.action_select)
     
     #====================== Работа с окнами =======================
     def get_list_window(self, request, context, is_select):

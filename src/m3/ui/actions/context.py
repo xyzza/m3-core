@@ -169,6 +169,9 @@ class ActionContext(object):
             # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка 
             # IOError: request data read error
             logger.warning(str(err))
+        except ValueError as err:
+            # если ошибка преобразования, то пусть проставится значение по-умолчанию
+            pass
 
         # переносим обязательные параметры, которые не встретились в запросе
         for rule in rules if rules else []:
