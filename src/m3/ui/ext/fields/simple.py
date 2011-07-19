@@ -275,7 +275,31 @@ class ExtCheckBox(BaseExtField):
         access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
         # Выключаем\включаем компоненты.
         self.read_only = access_off
-        
+
+#===============================================================================
+class ExtRadio(BaseExtField):
+    '''
+    Радио-поле
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super(ExtRadio, self).__init__(*args, **kwargs)
+        self._ext_name = 'Ext.form.Radio'
+        self.template = 'ext-fields/ext-radio.js' # TODO: отрефакторить под внутриклассовый рендеринг
+
+        # Признак того, что значение выбрано
+        self.checked = False
+        # Текст рядом с полем выбора значения 
+        self.box_label = None
+        self.init_component(*args, **kwargs)
+
+    def render_base_config(self):
+        super(ExtRadio, self).render_base_config()
+        if self.checked:
+            self._put_config_value('checked', True)
+        if self.box_label:
+            self._put_config_value('boxLabel', self.box_label)
+
 #===============================================================================        
 class ExtComboBox(BaseExtTriggerField):
     '''

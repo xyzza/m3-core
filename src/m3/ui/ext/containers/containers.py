@@ -317,6 +317,38 @@ class ExtButtonGroup(BaseExtContainer):
     def buttons(self):
         return self._items
 
+
+#===============================================================================
+class ExtRadioGroup(BaseExtContainer):
+    '''
+    Компонент-контейнер для радио-полей
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super(ExtRadioGroup, self).__init__(*args, **kwargs)
+        self._ext_name = 'Ext.form.RadioGroup'
+        self.template = 'ext-containers/ext-radio-group.js' # TODO: отрефакторить под внутриклассовый рендеринг
+
+        # количество колонок в контейнере
+        self.columns = None
+        self.label = None
+
+        self.init_component(*args, **kwargs)
+
+    @property
+    def items(self):
+        return self._items
+
+    def render_base_config(self):
+        super(ExtRadioGroup, self).render_base_config()
+        if self.items:
+            self._put_config_value('items', self.t_render_items)
+        if self.columns:
+            self._put_config_value('columns', self.columns)
+        if self.label:
+            self._put_config_value('label', self.label)
+
+#===============================================================================
 class ExtStatusBar(ExtToolBar):
     '''
     Рассширенный тулбар с иконкой, текстом статуса и другими причиндалами.
