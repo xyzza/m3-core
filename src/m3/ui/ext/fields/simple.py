@@ -293,12 +293,15 @@ class ExtRadio(BaseExtField):
         self.init_component(*args, **kwargs)
 
     def render_base_config(self):
+        value = self.value
+        self.value = None
         super(ExtRadio, self).render_base_config()
         if self.checked:
             self._put_config_value('checked', True)
         if self.box_label:
             self._put_config_value('boxLabel', self.box_label)
-
+        self._put_config_value('inputValue', value) 
+        
     def render(self):
         try:
             self.render_base_config()
