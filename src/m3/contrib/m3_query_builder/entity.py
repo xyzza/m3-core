@@ -95,24 +95,28 @@ class Relation(object):
 
 class BaseAlchemyObject(object):
     __metaclass__ = ABCMeta
-    __instance_cache = {}
+    _instance_cache = {}
 
     def __init__(self, name, alias=None, verbose_name=None):
         assert isinstance(name, basestring)
         self.name = name
         self.alias = alias
         self.verbose_name = verbose_name
+        self._aliased_table = None
 
-        c = self.__instance_cache.get(self.name)
+        c = self._instance_cache.get(self.name)
         if c:
             self.__dict__ = c.__dict__
         else:
-            self.table = self._get_alchemy_table()
-            self.aliased_table = self.table.alias(self.alias)
-            self.__instance_cache[self.name] = self
+            self._instance_cache[self.name] = self
+
+    @classmethod
+    def clear_instances(cls):
+        for v in cls._instance_cache.values():
+            v._aliased_table = None
 
     @abstractmethod
-    def _get_alchemy_table(self):
+    def _get_alchemy_table(self, params=None):
         """ Возвращает таблицу в формате SqlAlchemy """
 
     @abstractmethod
@@ -123,8 +127,15 @@ class BaseAlchemyObject(object):
     def get_fields(self):
         """ Возвращает колонки в формате Entity """
 
-    def get_subquery(self):
-        return self.aliased_table
+    def get_subquery(self, params=None):
+        """
+        Возвращает подзапрос с алиасом. Параметры params передаются
+        чтобы модифицировать запрос в зависимости от данных
+        """
+        if self._aliased_table is None:
+            table = self._get_alchemy_table(params)
+            self._aliased_table = table.alias(self.alias)
+        return self._aliased_table
 
 
 class Model(BaseAlchemyObject):
@@ -142,7 +153,7 @@ class Model(BaseAlchemyObject):
             raise DjangoModelNotFound(model_name=self.name)
         return model
     
-    def _get_alchemy_table(self):
+    def _get_alchemy_table(self, params=None):
         model = self._get_django_model()
         table_name = model._meta.db_table
         table = WRAPPER.metadata.tables.get(table_name)
@@ -155,7 +166,7 @@ class Model(BaseAlchemyObject):
         
         field = model._meta.get_field(field_name)
         field_real_name = field.get_attname()
-        column = self.aliased_table.columns.get(field_real_name)
+        column = self.get_subquery().columns.get(field_real_name)
         if column is None:
             raise DBColumnNotFound(field_name, field_real_name)
 
@@ -192,13 +203,13 @@ class Entity(BaseAlchemyObject):
     def __init__(self, name, alias=None, verbose_name=None):
         super(Entity, self).__init__(name, alias, verbose_name)
 
-    def _get_alchemy_table(self):
+    def _get_alchemy_table(self, params=None):
         entity = EntityCache.get_entity(self.name)
         if entity is None:
             raise EntityNotFound(self.name)
 
         e = entity()
-        query = e.create_query()
+        query = e.create_query(params)
         
         if self.alias:
             query = query.label(self.alias)
@@ -206,7 +217,7 @@ class Entity(BaseAlchemyObject):
         return query
     
     def get_alchemy_field(self, field_name, field_alias=''):
-        column = self.aliased_table.columns[field_name]
+        column = self.get_subquery().columns[field_name]
         if field_alias:
             column = column.label(field_alias)
 
@@ -288,8 +299,6 @@ class Where(object):
     LE = '<='
     GT = '>'
     GE = '>='
-    
-    # IN = 'Вхождение' -- используется пользовательский выбор
     
     # TODO: Пока не используется оператор between
     BETWEEN = 'between'
@@ -392,7 +401,7 @@ class Param(object):
     }
     
     def __init__(self, name, verbose_name, type, type_value=None):
-        assert type in Param.VALUES, 'type must be value in Param.VALUES'
+        assert type in Param.VALUES.keys(), 'type must be value in Param.VALUES'
         
         # Название параметра: Имя класса + '.' + Имя параметра
         self.name = name
@@ -439,7 +448,6 @@ class BaseEntity(object):
         Where.AND: lambda x, y: x & y,
         Where.OR: lambda x, y: x | y,
         Where.NOT: lambda x, y: ~x,
-        #Where.IN: lambda x, y: x.in_([y]), -- используется пользовательский выбор
         Where.BETWEEN: lambda x, y: x.between(y[0], y[1]),
     }
     
@@ -489,19 +497,19 @@ class BaseEntity(object):
         return field.get_attname()
     
     def create_query(self, params=None):
-        """ Возвращает готовый запрос алхимии по параметрам Entity """       
+        """ Возвращает готовый запрос алхимии по параметрам Entity """
         
         # Подготовка колонок для выбора SELECT
         if not len(self.select):
             raise Exception(u'Нет данных для SELECT')
-        
+
         select_columns = []
         for field in self.select:
             assert isinstance(field, Field)
 
             if field.field_name == Field.ALL_FIELDS:
                 # Все поля
-                table = field.entity.get_subquery()
+                table = field.entity.get_subquery(params)
                 select_columns.append(table)
             else:
                 # Отдельное поле.
@@ -551,11 +559,22 @@ class BaseEntity(object):
                 col = field.get_alchemy_field()
                 query = query.group_by(col)
 
-        # LIMIT и OFFSET
-        if isinstance(self.limit, int):
-            query = query.limit(self.limit)
-        if isinstance(self.offset, int):
-            query = query.offset(self.offset)
+        #TODO: Не работают с параметрами!
+#        # LIMIT
+#        if isinstance(self.limit, int) and self.limit > 0:
+#            query = query.limit(self.limit)
+#        elif isinstance(self.limit, Param):
+#            self.limit.bind_to_entity(self)
+#            p = bindparam(self.limit.name, required=True)
+#            query = query.limit(p)
+#
+#        # OFFSET
+#        if isinstance(self.offset, int) and self.offset > 0:
+#            query = query.offset(self.offset)
+#        elif isinstance(self.offset, Param):
+#            self.offset.bind_to_entity(self)
+#            p = bindparam(self.offset.name, required=True)
+#            query = query.offset(p)
 
         return query
 
@@ -613,8 +632,8 @@ class BaseEntity(object):
                 left = left.get_alchemy_field()
             elif isinstance(left, Param):
                 left.bind_to_entity(self)
-                left = bindparam(left.name, required=True)
                 first_param = left
+                left = bindparam(left.name, required=True)
             else:
                 raise TypeError('Left WHERE argument must be string parameter or Field instance')
 
@@ -623,23 +642,18 @@ class BaseEntity(object):
                 right = right.get_alchemy_field()
             elif isinstance(right, Param):
                 right.bind_to_entity(self)
-                right = bindparam(right.name, required=True)
                 first_param = right
+                right = bindparam(right.name, required=True)
             else:
                 raise TypeError('Right WHERE argument must be Param instance or Field instance')
 
-        # TODO: Закомментированный фрагмент не работает, т.к. во вложенные сущности нельзя передать параметры
-#        if first_param is not None:
-#            assert isinstance(first_param, _BindParamClause)
-#            param_name = first_param.key
-#            # Если значение параметра известно, то в зависимости от того,
-#            # является ли перечисляемым, заменяем EQUAL на IN и наоборот
-#            if params and params.has_key(param_name):
-#                value = params[left]
-#                if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
-#                    func = self._get_func_by_operator(Where.IN)
-#                elif not isinstance(value, (list, tuple)) and where.operator==Where.IN:
-#                    func = self._get_func_by_operator(Where.EQ)
+        if first_param:
+            # Если значение параметра известно, то в зависимости от того,
+            # является ли перечисляемым, заменяем EQUAL на IN и наоборот
+            if params and params.has_key(first_param.name):
+                value = params[first_param.name]
+                if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
+                    func = lambda x, y: x.in_([y])
 
         exp = func(left, right)
         return exp
@@ -653,6 +667,9 @@ class BaseEntity(object):
 
     def get_data(self, params=None):
         """ Возвращает данные, полученные в результатет выполнения запроса """
+        #TODO: Потокоопасный метод! Надо использовать пул, живущий только во время формирования.
+        BaseAlchemyObject.clear_instances()
+
         query = self.create_query(params)
 
         #TODO: Проблема с IN, он преобразуется в ARRAY, но PostgreSQL почему-то не понимает его
@@ -698,5 +715,4 @@ class BaseEntity(object):
 
 
 #TODO: В get_data() надо использовать params чтобы определить, использовать в == или IN в Where, в зависимости от типа аргумента
-#TODO: Параметры нужно сделать классами
 #TODO: Добавить пробрасывание параметров при вызове get_data
