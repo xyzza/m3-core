@@ -10,6 +10,7 @@ from m3.ui.actions.context import ActionContext
 from m3.ui.actions.results import OperationResult, ExtUIScriptResult, PreJsonResult
 from m3.ui.actions.utils import extract_int
 from m3.ui.ext.panels.grids import ExtMultiGroupinGrid, ExtObjectGrid
+from m3.ui.ext.misc.store import ExtJsonStore
 from m3.helpers.dataprovider import GetRecordsParams, BaseRecordProvider, BaseRecord
 from m3.helpers.urls import get_url
 
@@ -338,6 +339,7 @@ class BaseRecordPack(ActionPack):
         user_sort = request.REQUEST.get('sort')
         if user_sort:
             if user_sort in self.context_attr_map:
+                conf = self.context_attr_map[user_sort]
                 if isinstance(conf, (dict)):
                     if 'attr' in conf:
                         user_sort = conf['attr']

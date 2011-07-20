@@ -75,8 +75,8 @@ def get_url(action):
     '''
     names = []
     if isinstance(action, actions.Action):
-        names.append("%s.%s.%s" % (action.__class__.__module__, action.__class__.__name__, action.url))
-        names.append("%s.%s" % (action.__class__.__module__, action.__class__.__name__))
+        # гениальных ход! - с чем пришли, то и ищем :)
+        names.append(action.get_absolute_url())
     elif inspect.isclass(action) and issubclass(action, actions.Action):
         names.append("%s.%s" % (action.__module__, action.__name__))
     elif isinstance(action, str):
@@ -197,11 +197,10 @@ def inner_name_cache_handler(for_actions=True):
         if for_actions and hasattr(pack, 'actions'):
             for action in pack.actions:
                 
-                # если имеем дело с экземпляром экшена, то формируем запись 
-                # в кеше относительно имени класса экшена и заданного URL
+                # если имеем дело с экземпляром экшена, то ключем будет его полный url 
                 if isinstance(action, actions.Action):
                     url = action.get_absolute_url()
-                    key = "%s.%s.%s" % (action.__class__.__module__, action.__class__.__name__, action.url)
+                    key = url
                     result[key] = (action.__class__, url, action)
                 
                 # неважно что нам передали, нам нужен экземпляр класса
@@ -214,8 +213,6 @@ def inner_name_cache_handler(for_actions=True):
                 shortname = get_shortname(cleaned_action)
                 if shortname:
                     result[shortname] = (cleaned_action.__class__, url, cleaned_action)
-                    
-                 
                     
         else:
             cleaned_pack = get_instance(pack)

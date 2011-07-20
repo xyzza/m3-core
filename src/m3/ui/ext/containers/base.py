@@ -123,6 +123,21 @@ class BaseExtPanel(BaseExtContainer):
         
         # Будет ли граница
         self.border = True
+        
+        # Если контрол находится непосредственно на компоненте с layout=border
+        # то при задании этого свойства можно будет ресайзить (изменять размеры)
+        # панели  
+        self.split = False
+        
+        # Если контрол находится непосредственно на компоненте с layout=border
+        # то можно указывать различные типы, например "mini" 
+        self.collapse_mode = None
+        
+        # Возможность сворачивать
+        self.collapsible = False
+        
+        # True - компонент изначально свернут
+        self.collapsed = False
 
     def t_render_top_bar(self):
         #TODO: Использовать lambda функцию в render_base_config
@@ -151,6 +166,11 @@ class BaseExtPanel(BaseExtContainer):
                                       self.bottom_bar)
         self._put_config_value('fbar', self.t_render_footer_bar,
                                       self.footer_bar)
+        self._put_config_value('collapsible', self.collapsible)
+        self._put_config_value('split', self.split)
+        self._put_config_value('collapseMode', self.collapse_mode)        
+        self._put_config_value('collapsed', self.collapsed)        
+
         
     def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         #FIXME: нельзя использовать в качестве умолчательных параметров

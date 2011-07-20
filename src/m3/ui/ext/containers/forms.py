@@ -467,21 +467,6 @@ class ExtPanel(BaseExtPanel):
         
         # Показывать ли внутреннюю границу у элемента
         self.body_border = True
-
-        # Если контрол находится непосредственно на компоненте с layout=border
-        # то при задании этого свойства можно будет ресайзить (изменять размеры)
-        # панели  
-        self.split = False
-        
-        # Если контрол находится непосредственно на компоненте с layout=border
-        # то можно указывать различные типы, например "mini" 
-        self.collapse_mode = None
-        
-        # Возможность сворачивать
-        self.collapsible = False
-        
-        # True - компонент изначально свернут
-        self.collapsed = False
         
         # Базовый CSS класс, по умолчанию 'x-panel'
         self.base_cls = ''
@@ -498,13 +483,9 @@ class ExtPanel(BaseExtPanel):
     def render_base_config(self):
         super(BaseExtPanel, self).render_base_config()
         self._put_config_value('padding', self.padding)
-        self._put_config_value('collapsible', self.collapsible)
-        self._put_config_value('split', self.split)
         self._put_config_value('baseCls', self.base_cls)
         self._put_config_value('bodyCls', self.body_cls)     
         self._put_config_value('autoLoad', self.auto_load)
-        self._put_config_value('collapseMode', self.collapse_mode)        
-        self._put_config_value('collapsed', self.collapsed)        
         self._put_config_value('bodyBorder', self.body_border)
 
     
