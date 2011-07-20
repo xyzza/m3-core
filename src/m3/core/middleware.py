@@ -6,11 +6,55 @@ Created on 16.01.2011
 '''
 import datetime
 
+try:
+    from threading import local
+except ImportError:
+    from django.utils._threading_local import local
+    
+_thread_locals = local()
+
 from django.conf import settings
 from django.contrib import auth
 
 from m3.helpers import logger
 
+class M3CommonMiddleware(object):
+    '''
+    Middleware общего назначения для проектов на M3.
+    
+    Данное middleware должно располагаться ниже
+    SessionMiddleware и AuthenticationMiddleware
+    '''
+    def process_request(self, request):
+        '''
+        Обработчик, срабатывающий перед выполнением запроса в прикладном 
+        приложении. Записываем в thread-locals информацию о 
+        текущей сессии и пользователе.
+        '''
+        user = auth.get_user(request)
+        
+        _thread_locals.m3_user_id = user.id if user else ''
+        _thread_locals.m3_user_login = user.username if user else ''
+        
+        _thread_locals.m3_session_key = request.session.session_key
+        
+    def _clear(self):
+        '''
+        Очищает информацию в thread-locals о текущей сессии и пользователе
+        '''
+        if hasattr(_thread_locals, 'm3_user'):
+            del _thread_locals.m3_user
+            
+        if hasattr(_thread_locals, 'm3_session_key'):
+            del _thread_locals.m3_session_key
+            
+    def process_response(self, request, response):
+        self.clear()
+        return response
+    
+    def process_exception(self, request, exception):
+        self.clear()
+        
 
 class M3SimpleProfileMiddleware(object):
     """
