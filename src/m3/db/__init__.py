@@ -1,20 +1,21 @@
 #coding:utf-8
 
 import datetime
-from django.db import models, connection, transaction, IntegrityError, router, connections
+
+from django.db import models, connection, transaction, router, connections
 from django.db.models.query import QuerySet
 from django.db.models.deletion import Collector
 
-from m3.core.exceptions import RelatedError
+from m3.core.json import json_encode
 
 def safe_delete(model):
-    '''
+    """
     Функция выполняющая "безопасное" удаление записи из БД.
     В случае, если удаление не удалось по причине нарушения целостности,
     то возвращается false. Иначе, true
     к тому же функция пересчитывает MPTT индексы дерева
     т.к. стандартный пересчет запускается при вызове model_instance.delete() 
-    '''
+    """
     models.signals.pre_delete.send(sender=model.__class__, instance=model)
     try:
         cursor = connection.cursor() #@UndefinedVariable
@@ -43,12 +44,12 @@ def safe_delete(model):
     return True
 
 def queryset_limiter(queryset, start=0, limit=0):
-    '''
+    """
     "Вырезает" из QuerySet'a записи начиная с позиции start до записи start+limit.
     Возвращает (rows, total, ), где
     rows -  QuerySet с вырезанными записями
     total - общее кол-во записей в queryset'e
-    '''
+    """
     
     assert (isinstance(queryset, QuerySet) or getattr(queryset, '__iter__')), \
     'queryset must be either instance of django.db.models.query.QuerySet or iterable' 
@@ -59,12 +60,12 @@ def queryset_limiter(queryset, start=0, limit=0):
         limit = 0
     total = queryset.count() if isinstance(queryset, QuerySet) else len(queryset)
     rows = queryset[start:start+limit]
-    return (rows, total,)
+    return rows, total
 
 class BaseEnumerate(object):
-    '''
+    """
     Базовый класс для создания перечислений.
-    '''
+    """
     # В словаре values описываются перечисляемые константы и их человеческое название
     # Например: {STATE1: u'Состояние 1', CLOSED: u'Закрыто'}
     values = {}
@@ -81,10 +82,10 @@ class BaseEnumerate(object):
 
     @classmethod
     def get_constant_value_by_name(cls, name):
-        '''
+        """
         Возвращает значение атрибута константы, которая используется в
         качестве ключа к словарю values
-        '''
+        """
         if not isinstance(name, basestring):
             raise TypeError("'name' must be a string")
 
@@ -99,17 +100,23 @@ class BaseObjectModel(models.Model):
     Базовая модель для объектов системы. 
     Сюда будут добавляться общие свойства и методы, которые могут быть перекрыты в дальнейшем
     """
+    @json_encode
     def display(self):
         """
         Отображение объекта по-умолчанию. Отличается от __unicode__ тем,
         что вызывается при json сериализации в m3.core.json.M3JSONEncoder
         """
         return unicode(self)
-    display.json_encode = True
 
     def __unicode__(self):
         """ Определяет текстовое представление объекта """
-        return u'{%s}' % self.pk
+        name = getattr(self, 'name', None) or getattr(self, 'fullname', None)
+        if name:
+            if callable(name):
+                name = name()
+            return u'{%s: %s}' % (self.pk, name)
+        else:
+            return u'{%s}' % self.pk
     
     @classmethod
     def get_verbose_name(cls):
@@ -190,13 +197,13 @@ class ConcurrentEditError(Exception):
     pass
 
 class BaseObjectModelWVersion(BaseObjectModel):
-    '''
+    """
     Базовый класс для версионных записей. Нужен для реализации оптимистичной обработки блокировки
-    '''
+    """
     
     objects = ForUpdateManager()
     
-    version = models.IntegerField(u'Версия записи',null=False, blank=False, default=0)
+    version = models.IntegerField(u'Версия записи', default=0)
     
     def do_lock(self):
         if self.id:
@@ -223,27 +230,27 @@ class BaseObjectModelWVersion(BaseObjectModel):
         abstract = True
 
 class ObjectState(BaseEnumerate):
-    '''
+    """
     Состояние объекта
     Используется для определения логики использования записи:
     - если запись "Действует", значит нет ограничений на ее использование
     - если запись "Закрыта", значит ее нельзя использовать в новых документах, но можно выводить в отчетах и уже существующих данных
     - если запись "Черновик", значит ее нельзя использовать в логике приложения и в отчетах. По сути, это означает что запись введена не полностью и не утверждена
-    '''
+    """
     VALID = 0
     CLOSED = 1
     DRAFT = 2
     values = {VALID: u'Действует', CLOSED: u'Закрыта', DRAFT: u'Черновик'}
     
 class ObjectManager(models.Manager):
-    '''
+    """
     Менеджер запросов к записям справочника
     Фильтрует записи по периоду действия и состоянию
-    '''
+    """
     def get_default_state(self):
-        '''
+        """
         Для прикладного переопределения состояний, выбираемых по-умолчанию
-        '''
+        """
         return [ObjectState.VALID]
     
     def __init__(self, date = None, state = None):
@@ -265,9 +272,9 @@ class ObjectManager(models.Manager):
             return super(ObjectManager, self).get_query_set().filter(state__in = self.query_state)
 
 class BaseObjectModelWState(BaseObjectModel):
-    '''
+    """
     Базовый класс для всех моделей состоянием и периодом действия
-    '''
+    """
     
     state = models.SmallIntegerField(u'Состояние', choices = ObjectState.get_choices(), default = ObjectState.DRAFT)
     begin = models.DateTimeField(u'Начало действия', null = True, blank = True, db_index = True, default = datetime.date.min)
@@ -275,10 +282,10 @@ class BaseObjectModelWState(BaseObjectModel):
     
     @classmethod
     def get_objects_on_date(cls, date = None):
-        '''
+        """
         Получает менеджер с параметрами.
         Можно писать так: Model.objects_on_date(datetime.today).filter....
-        '''
+        """
         return ObjectManager(date = date)
     
     objects_on_date = get_objects_on_date
@@ -287,8 +294,8 @@ class BaseObjectModelWState(BaseObjectModel):
         abstract = True
         
 #class BaseRecordModel(BaseObjectModelWVersion, BaseObjectModelWState):
-#    '''
+#    """
 #    Базовый класс записей справочников с состоянием и версионностью
-#    '''
+#    """
 #    class Meta:
 #        abstract = True
