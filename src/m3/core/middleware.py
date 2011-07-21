@@ -15,8 +15,108 @@ _thread_locals = local()
 
 from django.conf import settings
 from django.contrib import auth
+from django.utils.translation import ugettext as _
 
 from m3.helpers import logger
+
+
+#===============================================================================
+# M3 Common Middleware
+#===============================================================================
+
+class ThreadData(object):
+    '''
+    Класс-враппер для набора данных, которые храняться в 
+    thread-locals
+    '''
+    
+    DEFAULT_USER_ID = 0
+    DEFAULT_USER_LOGIN = 'console-user'
+    DEFAULT_USER_NAME = _(u'Пользователь системной консоли')
+    
+    ANONYMOUS_USER_ID = 0
+    ANONYMOUS_USER_LOGIN = 'anonymous-user'
+    ANONYMOUS_USER_NAME = _(u'Анонимный пользователь')
+    
+    DEFAULT_SESSION_KEY = ''
+    
+    
+    def __init__(self):
+        '''
+        '''
+        self.clear()
+    
+    def clear(self):
+        '''
+        Приводит данные объекта в начальное состояние
+        '''
+        # user data
+        self.user_id = None # идентификатор пользователя
+        self.user_login = '' # Логин пользователя
+        self.user_name = '' # ФИО пользователя
+        self._user_is_authenticated = False
+        
+        # session data
+        self.session_key = '' # идентификатор пользовательской сессии
+    
+    def apply_defaults(self):
+        '''
+        Метод применяет дефолтные значения атрибутов
+        '''
+        self._apply_user_defaults()
+        self._apply_session_defaults()
+        
+        
+    def _apply_user_defaults(self):
+        '''
+        '''
+        self.user_id = self.user_id or ThreadData.DEFAULT_USER_ID
+        self.user_login = self.user_id or ThreadData.DEFAULT_USER_LOGIN
+        self.user_name = self.user_id or ThreadData.DEFAULT_USER_NAME
+        
+    def _apply_session_defaults(self):
+        '''
+        '''
+        self.session_key = self.user_id or ThreadData.DEFAULT_SESSION_KEY
+        
+    def _apply_anonymous_user(self):
+        '''
+        Проставляет значения, специфичные для анонимного пользователя системы
+        '''
+        self.user_id = ThreadData.ANONYMOUS_USER_ID
+        self.user_login = ThreadData.ANONYMOUS_USER_LOGIN
+        self.user_name = ThreadData.ANONYMOUS_USER_NAME
+        self._user_is_authenticated = False
+        
+    def read(self, request=None):
+        '''
+        Читает данные из объекта request
+        '''
+        self.clear()
+        
+        if request:
+            # читаем данные пользователя
+            user = auth.get_user(request)
+            if user:
+                self.user_is_authenticated = user.is_authenticated()
+                if user.is_authenticated():
+                    self.user_id = user.id
+                    self.user_login = user.username
+                    self.user_name = ('%s %s' % (user.first_name, 
+                                                 user.last_name)).strip()
+                else:
+                    self._apply_anonymous_user()
+            else:
+                self._apply_user_defaults()
+            
+            # читаем данные сессии
+            if hasattr(request, 'session') and request.session:
+                self.session_key = request.session.session_key
+            else:
+                self._apply_session_defaults()
+            
+        return self
+            
 
 class M3CommonMiddleware(object):
     '''
@@ -31,29 +131,24 @@ class M3CommonMiddleware(object):
         приложении. Записываем в thread-locals информацию о 
         текущей сессии и пользователе.
         '''
-        user = auth.get_user(request)
+        _thread_locals.m3_data = ThreadData().read(request)
         
-        _thread_locals.m3_user_id = user.id if user else ''
-        _thread_locals.m3_user_login = user.username if user else ''
-        
-        _thread_locals.m3_session_key = request.session.session_key
         
     def _clear(self):
         '''
         Очищает информацию в thread-locals о текущей сессии и пользователе
         '''
-        if hasattr(_thread_locals, 'm3_user'):
-            del _thread_locals.m3_user
-            
-        if hasattr(_thread_locals, 'm3_session_key'):
-            del _thread_locals.m3_session_key
+        if hasattr(_thread_locals, 'm3_data'):
+            del _thread_locals.m3_data
+        
             
     def process_response(self, request, response):
-        self.clear()
+        self._clear()
         return response
     
+    
     def process_exception(self, request, exception):
-        self.clear()
+        self._clear()
         
 
 class M3SimpleProfileMiddleware(object):
