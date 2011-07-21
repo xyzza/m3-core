@@ -698,7 +698,7 @@ class BaseEntity(object):
                     if new_value:
                         params[k] = new_value
 
-        #WRAPPER.engine.echo = True
+        WRAPPER.engine.echo = True
         cursor = query.execute(params)
         data = cursor.fetchall()
         return data

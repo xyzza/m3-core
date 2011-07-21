@@ -354,7 +354,9 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         
         self.init_component()
 
-    def render(self):
+    def render(self):                
+        assert self.action_data, 'Action data is not defined'
+        
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
             self.store.url = get_url(self.action_data)

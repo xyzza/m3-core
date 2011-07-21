@@ -26,7 +26,6 @@ from api import get_entities, get_entity_items, build_entity, get_conditions, \
 from entity import Param
 
 
-
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
     '''
     Экшенпак работы с конструктором запросов
@@ -254,7 +253,8 @@ class ReportBuilderActionsPack(BaseDictionaryModelActions):
                              ReportEditParamsWindowAction(),
                              GetPacksProjectAction(),
                              GetReportFormAction(),
-                             GenerateReportAction()])
+                             GenerateReportAction(),
+                             ReportDataAction()])
         
     def get_list_window(self, win):
         win.template_globals = 'rb-report-list.js'
@@ -484,11 +484,57 @@ class GenerateReportAction(actions.Action):
 
         report = get_report(context.params['report_id'])
 
+        entity = build_entity( json.loads( report.query.query_json ))
+        #data = entity.get_data(context.params)
+        
+        #print data
+        win = ui.ReportData(params={'data_action': ReportDataAction})        
+        win.title = report.name
+        
+        #win.grid.action_context = context
+        
+        for field in entity.get_select_fields():
+            win.grid.add_column(data_index=field.field_name, 
+                                header=field.verbose_name or field.field_name)                
+            
+        return actions.ExtUIScriptResult(win)
+    
+    
+class ReportDataAction(actions.Action):
+    '''
+    Отдает данные для отчета
+    '''
+    
+    url = '/report-data'
+    
+    shortname = 'm3-report-builder-report-data'
+    
+    def context_declaration(self):
+        return [ACD(name='params', type=object, required=True, 
+                    verbose_name=u'Параметры отчета'),]
+        
+    def run(self, request, context):
+        # TODO: Получение данных, по факту должно вызываться в GenerateReportAction
+        # и сохроняться в кеш
+        
+        report = get_report(context.params['report_id'])
+
         import pprint
         pprint.pprint(context.params)
 
         entity = build_entity( json.loads( report.query.query_json ))
-        entity.get_data(context.params)
-
-               
-        return actions.JsonResult(json.dumps({'success': True}))
+        data = entity.get_data(context.params)
+        
+        # Проход по данным из алхимии и формирование данных для грида 
+        res = []
+        fields = entity.get_select_fields()
+        for item in data:
+            d = {}
+            for i, record in enumerate(item):    
+                d[fields[i].field_name] = record 
+            res.append(d)
+        
+        pprint.pprint(res)
+         
+        return actions.PreJsonResult({'rows': res})
+        return actions.JsonResult(json.dumps({'rows': json.dumps(res)}))

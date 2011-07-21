@@ -548,12 +548,18 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	},
 	onBeforeLoad: function (st, opts) {
 		this.grid.view.showLoadMask(true);
-		var expanding = this.expanding;
-		var exp_par = Ext.util.JSON.encode(this.expandedItems);
-		var group_par = Ext.util.JSON.encode(this.groupedColumns);
-		opts.params.expanding = expanding;
-		opts.params.exp = exp_par;
-		opts.params.grouped = group_par;
+		
+		// Преобразование в json объектов		
+		for (var p in st.baseParams) {			
+			if (st.baseParams[p] instanceof Object){
+				st.baseParams[p] = Ext.encode(st.baseParams[p]);
+			}					
+		}
+		
+		opts.params.exp = Ext.encode(this.expandedItems);
+		opts.params.grouped = Ext.encode(this.groupedColumns);
+		opts.params.expanding = this.expanding;
+
 	},
 	/**
 	 * Поиск набора раскрытых элементов по ключевым значениям
@@ -807,6 +813,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			baseConfig.actionDeleteUrl = params.actions.deleteUrl;
 			baseConfig.actionDataUrl = params.actions.dataUrl;
 			baseConfig.actionContextJson = params.actions.contextJson;
+
 			baseConfig.exportUrl = params.actions.exportUrl;
 		}
 		var config = Ext.applyIf({

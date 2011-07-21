@@ -98,8 +98,11 @@ function submitForm(){
 	Ext.Ajax.request({		
 		url: url
 		,params: {'params': Ext.encode(values) }
-		,success: function(form, action) {
+		,success: function(response) {
 			loadMask.hide();
+			
+			// Получение окна
+			smart_eval(response.responseText);
 		}
 		,failure: function(){
         	loadMask.hide();

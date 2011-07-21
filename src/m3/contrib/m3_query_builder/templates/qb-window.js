@@ -459,7 +459,7 @@ function openConditionWindow(node){
 				    'parameter':parameter,
 				    'expression': String.format('{0} {1} {2}', fieldName, condition, parameter)
 				   },
-				   String.format('{0}.{1}', entityName, fieldID) 				    
+				   String.format('{0}-{1}', entityName, fieldID) 				    
 				);
 				grdConditionsFields.getStore().add(newRecord);
 				
@@ -618,7 +618,3 @@ function buildParams(){
 		entityModel.add(mass);
 	};
 })()
-
-
-// TODO: Сделать модель, которая будет определять добавление и удаление
-// полей сущности в деревья на вкладках "Поля", "Группировка", "Условия"
