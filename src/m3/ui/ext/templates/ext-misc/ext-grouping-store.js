@@ -17,6 +17,15 @@
 		{% if component.remote_group %},remoteGroup: true {% endif %}
 		{% if component.group_field %},groupField: '{{component.group_field}}' {% endif %}
 		{% if component.sort_info %},sortInfo: {field:'{{component.sort_info|safe}}'} {% endif %}
+		{% if component.t_render_listeners %}
+		{# Прописываются имеющиеся обработчики #}
+		,listeners:{
+			{% for k, v in component.t_render_listeners.items %}
+				'{{k}}': {{v|safe}}
+				{% if not forloop.last %},{% endif %}
+			{% endfor%}
+		}
+		{% endif %}
     });
     return result;
 })()

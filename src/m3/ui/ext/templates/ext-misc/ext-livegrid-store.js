@@ -21,4 +21,13 @@ new Ext.ux.grid.livegrid.Store({
 		{% if component.total_property %} ,totalProperty: '{{ component.total_property }}' {% endif %}
 		,fields: [{{ component.t_render_fields|safe }}]
 	})
+	{% if component.t_render_listeners %}
+	{# Прописываются имеющиеся обработчики #}
+	,listeners:{
+		{% for k, v in component.t_render_listeners.items %}
+			'{{k}}': {{v|safe}}
+			{% if not forloop.last %},{% endif %}
+		{% endfor%}
+	}
+	{% endif %}
 })

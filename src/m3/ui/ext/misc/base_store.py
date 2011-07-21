@@ -37,3 +37,12 @@ class BaseExtStore(ExtUIComponent):
         return self._base_params
 
     base_params = property(_get_base_params, _set_base_params)
+    
+    @property
+    def handler_beforeload(self):
+        return self._listeners.get('beforeload')
+    
+    @handler_beforeload.setter
+    def handler_beforeload(self, function):
+        self._listeners['beforeload'] = function 
+    

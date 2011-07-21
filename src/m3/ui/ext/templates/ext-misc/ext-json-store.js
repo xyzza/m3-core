@@ -14,4 +14,13 @@ new Ext.data.JsonStore({
 	{% if component.writer %} ,writer: {{ component.writer.render }} {% endif %}
 	{% if component.remote_sort %} ,remoteSort: true {% endif %}
 	{% if not component.auto_save %} ,autoSave: false {% endif %}
+	{% if component.t_render_listeners %}
+	{# Прописываются имеющиеся обработчики #}
+	,listeners:{
+		{% for k, v in component.t_render_listeners.items %}
+			'{{k}}': {{v|safe}}
+			{% if not forloop.last %},{% endif %}
+		{% endfor%}
+	}
+	{% endif %}
 })
