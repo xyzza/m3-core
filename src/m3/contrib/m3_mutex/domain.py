@@ -24,10 +24,11 @@ class MutexOwner(object):
     '''
     def __init__(self, name = '', login = '', host = ''):
         
+        self.session_id = '' # идентификатор сессии, в рамках которой
         self.name = '' # наименование (например, ФИО) владельца
         self.user_id = '' # уникальный идентификатор владельца
         self.host = '' # тачка, с которой был выставлен семафор
-        self.session_id = '' # идентификатор сессии, в рамках которой
+        
         # был установлен семафор
         
 class SystemOwner(MutexOwner):

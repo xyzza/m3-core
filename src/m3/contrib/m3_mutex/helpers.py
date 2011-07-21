@@ -39,17 +39,19 @@ def get_default_owner():
     если информация о текущей сессии в thread-locals отсутствует, то
     считается, что работа с системой производится из shell-консоли и 
     параметры владельца заполняются на основании констант
-    CONSOLE_SESSION_KEY, CONSOLE_USER_ID и CONSILE_USER_NAME.
+    CONSOLE_SESSION_KEY, CONSOLE_USER_ID и CONSOLE_USER_NAME.
     '''
     owner = MutexOwner()
     
-    if (hasattr(_thread_locals, 'm3_user') and
-        _thread_locals.m3_user and
-        hasattr(_thread_locals, 'm3_session_key') and
-        _thread_locals.m3_session_key):
+    if (hasattr(_thread_locals, 'm3_data') and
+        _thread_locals.m3_data):
         
-        owner.user_id = _thread_locals.user.username
-        owner.user_name = '%s %s' % (_thread_locals.user.first_name, _thread_locals.user.last_name)
+        owner.session_id = _thread_locals.m3_data.session_key
+        owner.user_id = _thread_locals.m3_data.user_id
+        owner.name = _thread_locals.m3_data.user_name
+    #    owner.l
+    
+    #else:
         
         
     
@@ -62,4 +64,4 @@ def get_session_info():
     В случае если работа с системой происходит из 
     shell-консоли, то возвращается кортеж CONSOLE_SESSION_KEY.
     '''
-    return (CONSOLE_SESSION_KEY, CONSOLE_USER_ID, CONSOLE)
+    return (CONSOLE_SESSION_KEY, CONSOLE_USER_ID,)
