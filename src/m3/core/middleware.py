@@ -34,12 +34,11 @@ class ThreadData(object):
     DEFAULT_USER_LOGIN = 'console-user'
     DEFAULT_USER_NAME = _(u'Пользователь системной консоли')
     
+    DEFAULT_SESSION_KEY = 'console-session'
+    
     ANONYMOUS_USER_ID = 0
     ANONYMOUS_USER_LOGIN = 'anonymous-user'
     ANONYMOUS_USER_NAME = _(u'Анонимный пользователь')
-    
-    DEFAULT_SESSION_KEY = ''
-    
     
     def __init__(self):
         '''
@@ -116,7 +115,7 @@ class ThreadData(object):
                 self._apply_session_defaults()
             
         return self
-            
+
 
 class M3CommonMiddleware(object):
     '''
