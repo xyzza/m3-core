@@ -796,11 +796,19 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			,rowcontextmenu: funcRowContMenu
 		}, baseConfig.listeners || {});
 
-		var mgView = new Ext.ux.grid.livegrid.GridView({
-		        nearLimit : 100 // количество соседних загружаемых элементов при буферизации
-		        ,loadMask  : { msg :  'Загрузка, подождите...' }
-		    });
-		    
+		// настройка представления
+		var viewConfig = {
+			nearLimit: params.nearLimit // количество соседних загружаемых элементов при буферизации
+			,bufferSize: params.bufferSize //объем буфера для запоминания (размер страницы)
+		    ,loadMask: { msg :  'Загрузка, подождите...' }
+		};
+		
+		if (baseConfig.viewConfig){
+			viewConfig = Ext.applyIf(viewConfig, baseConfig.viewConfig);
+		}
+		
+		var mgView = new Ext.ux.grid.livegrid.GridView(viewConfig);
+		   
 		// элементы тулбара
 		var tools = params.toolbar;
 		

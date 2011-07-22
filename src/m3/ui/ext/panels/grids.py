@@ -358,6 +358,13 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         # Признак отображения информации о записях
         self.display_info = True
         
+        # Объем буфера записей - должен быть больше чем число соседних элементов + число видимых строк 
+        self.buffer_size = 200
+        
+        # Число соседних элементов сверху и снизу от видимой области для предотвращения запросов.
+        # Обычно 1/4 или 1/2 от объема буфера
+        self.near_limit = 100
+        
         self.init_component()
 
     def render(self):                
@@ -404,6 +411,8 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         self._put_params_value('localEdit',self.local_edit)
         self._put_params_value('groupable',self.groupable)
         self._put_params_value('displayInfo',self.display_info)
+        self._put_params_value('bufferSize',self.buffer_size)
+        self._put_params_value('nearLimit',self.near_limit)
         
     def t_render_base_config(self):
         return self._get_config_str()
