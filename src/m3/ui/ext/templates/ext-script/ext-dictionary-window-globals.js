@@ -617,11 +617,15 @@ function selectValue(){
     {% endif %}
 
     function multiSelectValues() {
-        var records = [], win;
+        var records = [], win, v;
         win = Ext.getCmp('{{ component.client_id}}');
         {% if component.grid %}
         var grid = Ext.getCmp('{{ component.grid.client_id}}');
-        records = grid.getSelectionModel().getSelections();
+        for (v in win.checkedItems) {
+            if (win.checkedItems.hasOwnProperty(v) && win.checkedItems[v] !== undefined) {
+                records.push(win.checkedItems[v]);
+            }
+        };
         {% else %}
         var newRecord, v;
         for (v in win.checkedItems) {
