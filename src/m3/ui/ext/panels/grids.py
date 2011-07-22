@@ -352,6 +352,12 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         # Признак редактирования на клиенте - особенным образом обрабатываются данные при редактировании
         self.local_edit = False
         
+        # Признак возможности группировки (показывает панель)
+        self.groupable = True
+        
+        # Признак отображения информации о записях
+        self.display_info = True
+        
         self.init_component()
 
     def render(self):                
@@ -396,6 +402,8 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         self._put_params_value('toolbar', self._top_bar.t_render_items)
         self._put_params_value('rowIdName', self.row_id_name)
         self._put_params_value('localEdit',self.local_edit)
+        self._put_params_value('groupable',self.groupable)
+        self._put_params_value('displayInfo',self.display_info)
         
     def t_render_base_config(self):
         return self._get_config_str()

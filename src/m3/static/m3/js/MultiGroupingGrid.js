@@ -769,13 +769,16 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			funcRowContMenu = Ext.emptyFn;
 		}
 		
+		var plugins = [];
 		// плугин для группировки колонок
-		var group_param = {
-			groupedColumns: params.groupedColumns,
-			dataIdField: params.dataIdField,
-			dataDisplayField: params.dataDisplayField
-		};
-		var plugins = [new Ext.ux.grid.MultiGrouping(group_param)];
+		if (params.groupable){
+			var group_param = {
+				groupedColumns: params.groupedColumns,
+				dataIdField: params.dataIdField,
+				dataDisplayField: params.dataDisplayField
+			};
+			plugins.push(new Ext.ux.grid.MultiGrouping(group_param));
+		}
 		
 		plugins = plugins.concat(params.plugins || []);
 		var bundedColumns = params.bundedColumns;
@@ -822,10 +825,11 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			,plugins: plugins
 			,view: mgView
 			,tbar: new Ext.ux.grid.livegrid.Toolbar({
-    	        displayInfo: true,
+    	        displayInfo: params.displayInfo,
     	        view: mgView,
     	        items: tools,
     	        displayMsg: 'Показано {0}-{1} из {2}',
+    	        emptyMsg: 'Нет данных',
     	        refreshText: "Обновить"
 	       	})
 		}, baseConfig);
