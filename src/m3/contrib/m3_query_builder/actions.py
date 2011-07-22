@@ -4,6 +4,7 @@ import json
 import uuid
 
 from django.core.exceptions import ValidationError
+from django.core.cache import cache
 
 from m3.ui import actions
 from m3.ui.actions import ACD, OperationResult
@@ -21,7 +22,7 @@ import ui
 from models import Query, Report, ReportParams
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
-    get_pack, get_report_params, get_report
+    get_pack, get_report_params, get_report, get_report_data
         
 from entity import Param
 
@@ -192,9 +193,6 @@ class ShowQueryTextAction(actions.Action):
         return [ACD(name='objects', type=object, required=True)]
 
     def run(self, request, context):           
-
-        import pprint
-        pprint.pprint(context.objects)
 
         entity = build_entity(context.objects)
         sql = entity.get_raw_sql()
@@ -478,28 +476,29 @@ class GenerateReportAction(actions.Action):
 
     def context_declaration(self):
         return [ACD(name='params', type=object, required=True, 
-                    verbose_name=u'Параметры отчета'),]
+                    verbose_name=u'Параметры отчета'),
+                ACD(name='id', type=int, required=True, 
+                    verbose_name=u'Идентификатор отчета')]
         
     def run(self, request, context):
 
-        report = get_report(context.params['report_id'])
+        report = get_report(context.id)
 
         entity = build_entity( json.loads( report.query.query_json ))
-        #data = entity.get_data(context.params)
-        
-        #print data
+
         win = ui.ReportData(params={'data_action': ReportDataAction})        
         win.title = report.name
-        
-        #win.grid.action_context = context
-        
+
         for field in entity.get_select_fields():
             win.grid.add_column(data_index=field.field_name, 
                                 header=field.verbose_name or field.field_name)                
+        
+        # Кеширование данных
+        cache.set(win.client_id, get_report_data(report, context.params))
             
         return actions.ExtUIScriptResult(win)
-    
-    
+
+
 class ReportDataAction(actions.Action):
     '''
     Отдает данные для отчета
@@ -510,31 +509,16 @@ class ReportDataAction(actions.Action):
     shortname = 'm3-report-builder-report-data'
     
     def context_declaration(self):
-        return [ACD(name='params', type=object, required=True, 
-                    verbose_name=u'Параметры отчета'),]
+        return [ACD(name='m3_window_id', type=str, required=True, 
+                    verbose_name=u'Идентификатор формы'),
+                ACD(name='limit', type=int, required=True, 
+                    verbose_name=u'Количество записей'),
+                ACD(name='start', type=int, required=True, 
+                    verbose_name=u'Индекс записи'),]
         
     def run(self, request, context):
-        # TODO: Получение данных, по факту должно вызываться в GenerateReportAction
-        # и сохроняться в кеш
-        
-        report = get_report(context.params['report_id'])
-
-        import pprint
-        pprint.pprint(context.params)
-
-        entity = build_entity( json.loads( report.query.query_json ))
-        data = entity.get_data(context.params)
-        
-        # Проход по данным из алхимии и формирование данных для грида 
-        res = []
-        fields = entity.get_select_fields()
-        for item in data:
-            d = {}
-            for i, record in enumerate(item):    
-                d[fields[i].field_name] = record 
-            res.append(d)
-        
-        pprint.pprint(res)
-         
-        return actions.PreJsonResult({'rows': res})
-        return actions.JsonResult(json.dumps({'rows': json.dumps(res)}))
+        # Ответ из кеша
+        data = cache.get(context.m3_window_id)
+        return actions.PreJsonResult({'rows': data[:25], 
+                                      #'total': len(data)
+                                      })

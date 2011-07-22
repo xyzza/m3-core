@@ -97,7 +97,7 @@ function submitForm(){
 	
 	Ext.Ajax.request({		
 		url: url
-		,params: {'params': Ext.encode(values) }
+		,params: Ext.applyIf({'params': Ext.encode(values) }, win.actionContextJson)
 		,success: function(response) {
 			loadMask.hide();
 			

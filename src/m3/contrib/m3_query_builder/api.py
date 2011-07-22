@@ -273,3 +273,21 @@ def get_report(id):
     Возвращает прикрепленный отчет по id
     '''
     return Report.objects.get(id=id)
+
+def get_report_data(report, params):
+    '''
+    '''
+    entity = build_entity( json.loads( report.query.query_json ))
+    data = entity.get_data(params)
+    
+    # Проход по данным из алхимии и формирование данных для грида 
+    res = []
+    fields = entity.get_select_fields()
+    for i, item in enumerate(data):
+        d = {}
+        for j, record in enumerate(item):    
+            d[fields[j].field_name] = record 
+        d['index'] = i
+        res.append(d)
+
+    return res
