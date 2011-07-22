@@ -1980,8 +1980,6 @@ Ext.extend(Ext.ux.grid.livegrid.JsonReader, Ext.data.JsonReader, {
             var v = this.getVersion(o);
             intercept.version = (v === undefined || v === "") ? null : v;
         }
-        // kirov
-        intercept.totalRow = o.totalRow;
 
         return intercept;
     }
@@ -3129,9 +3127,6 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
     // private
     loadRecords : function(o, options, success)
     {
-    	//kirov
-    	this.totalRow = o.totalRow;
-    	
         this.checkVersionChange(o, options, success);
 
         // we have to stay in sync with rows that may have been skipped while

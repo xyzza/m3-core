@@ -899,7 +899,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
         	}
         }
     	// соберем расположение колонок
-        columns = [];
+        var columns = [];
         Ext.each(this.colModel.config,function(column,index){
             columns.push({
                 data_index:column.dataIndex,
@@ -909,7 +909,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
             })
         });
         // передадим параметры колонок, заголовка и общего размера
-        params = {
+        var params = {
             columns: Ext.encode(columns),
             title: this.title || this.id,
             totalLength: this.view.ds.totalLength
@@ -1663,3 +1663,28 @@ Ext.extend(Ext.ux.grid.MultiGroupingSummary, Ext.util.Observable, {
     }
 });
 Ext.reg('multigroupingsummary', Ext.ux.grid.MultiGroupingSummary);
+
+Ext.m3.LiveStore = function(config) {
+    Ext.m3.LiveStore.superclass.constructor.call(this, config);
+};
+
+Ext.extend(Ext.m3.LiveStore, Ext.ux.grid.livegrid.Store, {
+	loadRecords : function(o, options, success){
+		// сохраним итоговую строку для дальнейшей обработки
+    	this.totalRow = o.totalRow;
+		return Ext.m3.LiveStore.superclass.loadRecords.call(this, o, options, success);
+	}
+});
+
+Ext.m3.LiveStoreReader = function(meta, recordType){
+    Ext.m3.LiveStoreReader.superclass.constructor.call(this, meta, recordType);
+};
+
+Ext.extend(Ext.m3.LiveStoreReader, Ext.ux.grid.livegrid.JsonReader, {
+	readRecords : function(o) {
+		var intercept = Ext.m3.LiveStoreReader.superclass.readRecords.call(this, o);
+		// сохраним итоговую строку для дальнейшей обработки
+		intercept.totalRow = o.totalRow;
+		return intercept;
+	}
+});

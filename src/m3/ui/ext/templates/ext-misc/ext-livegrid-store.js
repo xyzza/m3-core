@@ -1,4 +1,4 @@
-new Ext.ux.grid.livegrid.Store({
+new Ext.m3.LiveStore({
 	url: '{{ component.url }}'
 	,storeId: '{{ component.client_id }}'
 	,baseParams: Ext.applyIf({
@@ -14,7 +14,7 @@ new Ext.ux.grid.livegrid.Store({
 	{% if component.writer %} ,writer: {{ component.writer.render }} {% endif %}
 	{% if component.remote_sort %} ,remoteSort: true {% endif %}
 	,bufferSize: {{ component.bufferSize }}
-	, reader: new Ext.ux.grid.livegrid.JsonReader({
+	, reader: new Ext.m3.LiveStoreReader({
 		id: '{{ component.id_property }}'
 		,versionProperty: '{{ component.version_property }}'
 		{% if component.root %} ,root: '{{ component.root }}' {% endif %}
