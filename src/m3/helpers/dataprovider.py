@@ -212,7 +212,7 @@ class BaseRecordModelProvider(BaseRecordProvider):
 
         return record
 
-    def before_query_data(self, query):
+    def before_query_data(self, query, params):
         return query
 
     def get_records(self, params):
@@ -231,7 +231,7 @@ class BaseRecordModelProvider(BaseRecordProvider):
                 sort_fields.append(sort_field)
             data = data.order_by(*sort_fields)
         # перед непосредственным запросом может кто-то захочет что-то поменять
-        data = self.before_query_data(data)
+        data = self.before_query_data(data, params)
         
         if params.end:
             db_records = data.all()[params.begin:params.end]

@@ -115,7 +115,7 @@ function(){
 			
 		})
 	{%endif%}
-	
+	{% block code_extenders %}{% endblock %}
 	return tree;
 }()
 
