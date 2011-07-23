@@ -85,6 +85,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'm3.core.middleware.M3CommonMiddleware',
 )
 
 ROOT_URLCONF = 'tests.urls'
@@ -100,17 +101,19 @@ SSACC_SERVER = 'http://localhost:8000'
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.auth',
+    'south',
     'm3.contrib.m3_storage',
     'm3.contrib.m3_mutex',
     'm3.contrib.ssacc_client',
     # Test applications here
     'tests.tests_core',
+    'tests.contrib.m3_mutex_tests',
     'tests.data.caching_tests',
     'tests.data.mie_tests',
     'tests.ui.ext_tests',
     'tests.helpers.urls_tests',
     'tests.contrib.m3_audit_tests',
-    'tests.contrib.m3_mutex_tests',
 #    'tests.contrib.palo_olap',
     'tests.core.registry_tests',
     'tests.db.ddl_tests',

@@ -9,7 +9,7 @@ from m3.ui import actions
 
 class CoreActionPack(actions.ActionPack):
     '''
-    Основной action-pack для всех тестовых запросов
+    
     '''
     url = '/core'
     shortname = 'core-pack'
