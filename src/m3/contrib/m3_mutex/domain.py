@@ -13,21 +13,21 @@ class MutexID(object):
     '''
     Инкапсуляция над идентификатором экземпляра семафора
     '''
-    def __init__(self, group, cls, id):
+    def __init__(self, group='', mode='', id=''):
         self.group = group
-        self.cls = cls
+        self.mode = mode
         self.id = id
 
 class MutexOwner(object):
     '''
     Инкапсуляция над владельцем семафора
     '''
-    def __init__(self, name = '', login = '', host = ''):
-        
-        self.session_id = '' # идентификатор сессии, в рамках которой
-        self.name = '' # наименование (например, ФИО) владельца
-        self.user_id = '' # уникальный идентификатор владельца
-        self.host = '' # тачка, с которой был выставлен семафор
+    def __init__(self, session_id='', user_id=0, name='', login='', host=''):
+        self.session_id = session_id # идентификатор сессии, в рамках которой
+        self.name = name # наименование (например, ФИО) владельца
+        self.user_id = user_id # уникальный идентификатор владельца
+        self.login = login # логин пользователя
+        self.host = host # тачка, с которой был выставлен семафор
         
         # был установлен семафор
         
@@ -36,17 +36,31 @@ class SystemOwner(MutexOwner):
     Владелец, представленный в виде системного процесса
     '''    
     def __init__(self):
-        super(SystemOwner, self).__init__(name='system', login='', host='server')
+        super(SystemOwner, self).__init__(session_id='system',
+                                          name='system', 
+                                          login='',
+                                          user_id=0, 
+                                          host='server',)
         
+
+class MutexState:
+    '''
+    Класс-перечисление возможных состояний семафора
+    '''
+    FREE = 1              # семафор свободен
+    CAPTURED_BY_ME = 2    # семафор захвачен нами 
+    CAPTURED_BY_OTHER = 3 # семафор захвачен другим
+    
         
 class Mutex(object):
     '''
     Класс семафора
     '''
-    def __init__(self, id, owner):
+    def __init__(self, id=MutexID(), owner=MutexOwner(), auto_release=None):
         self.id = id
         self.owner = owner
-        self.captured_since = datetime.datetime.min() 
+        self.auto_release = None
+        self.captured_since = datetime.datetime.min 
         
     def check_owner(self, owner):
         '''
@@ -54,9 +68,9 @@ class Mutex(object):
         с владельцем семафора
         '''
         return owner.session == self.session
-        
+    
 
-class AutoReleaseCondition(object):
+class MutexAutoReleaseRule(object):
     '''
     Базовый класс, устанавливающий правила автоматического освобождения (снятия)
     семафора.
@@ -76,18 +90,29 @@ class AutoReleaseCondition(object):
     def dump(self):
         '''
         Возвращает кортеж из двух элементов для сохранения алгоритма
-        автоматического освобождения семафоров в текстовом виде
+        автоматического освобождения семафоров в текстовом виде.
+        
+        Данный метод, будучи переопределенным в дочерних классах, должен вернуть
+        кортеж из двух эелементов ('код правила', 'упакованные параметры срабатывания правила')
         '''
         raise NotImplementedError(_(u'Данный метод должен быть переопределен в классах-потомках'))
     
     def restore(self, config):
         '''
         Читает информацию о конфигурации условий автаматического освобождения
-        семафором из текстовой строки.
+        семафоров из текстовой строки.
         '''
         raise NotImplementedError(_(u'Данный метод должен быть переопределен в классах-потомках'))
     
-class TimeoutAutoRelease(object):
+    @staticmethod
+    def get_rule_class(str='timeout'):
+        
+        if str == 'timeout':
+            return TimeoutAutoRelease
+        
+        return None
+    
+class TimeoutAutoRelease(MutexAutoReleaseRule):
     '''
     Освобождение семафора на основании превышения времени ожидания.
     
@@ -96,19 +121,20 @@ class TimeoutAutoRelease(object):
     
     DEFAULT_TIMEOUT = 300
     
-    def __init__(self, timeout=TimeoutAutoRelease.DEFAULT_TIMEOUT):
+    def __init__(self, timeout=DEFAULT_TIMEOUT):
         
-        self._timeout = timeout
+        self.timeout = timeout
     
     def check(self, mutex):
         '''
         Метод проверки на возможность получения 
         '''
         delta = datetime.datetime.now() - mutex.captured_since
-        return delta.seconds > self._timeout if self.timeout else TimeoutAutoRelease.DEFAULT_TIMEOUT
+        return delta.seconds > self.timeout if self.timeout else TimeoutAutoRelease.DEFAULT_TIMEOUT
     
     def dump(self):
         ''' 
+        Возвращает информацию
         '''
         return ('timeout', str(self.timeout if self.timeout else TimeoutAutoRelease.DEFAULT_TIMEOUT),)
     

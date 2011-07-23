@@ -36,6 +36,8 @@ class ThreadData(object):
     
     DEFAULT_SESSION_KEY = 'console-session'
     
+    DEFAULT_CLIENT_HOST = 'server'
+    
     ANONYMOUS_USER_ID = 0
     ANONYMOUS_USER_LOGIN = 'anonymous-user'
     ANONYMOUS_USER_NAME = _(u'Анонимный пользователь')
@@ -57,6 +59,9 @@ class ThreadData(object):
         
         # session data
         self.session_key = '' # идентификатор пользовательской сессии
+        
+        # client host data
+        self.client_host = ''
     
     def apply_defaults(self):
         '''
@@ -64,6 +69,7 @@ class ThreadData(object):
         '''
         self._apply_user_defaults()
         self._apply_session_defaults()
+        self._apply_client_host_defaults()
         
         
     def _apply_user_defaults(self):
@@ -77,6 +83,11 @@ class ThreadData(object):
         '''
         '''
         self.session_key = self.user_id or ThreadData.DEFAULT_SESSION_KEY
+        
+    def _apply_client_host_defaults(self):
+        '''
+        '''
+        self.client_host = self.client_host or ThreadData.DEFAULT_CLIENT_HOST
         
     def _apply_anonymous_user(self):
         '''
@@ -113,8 +124,31 @@ class ThreadData(object):
                 self.session_key = request.session.session_key
             else:
                 self._apply_session_defaults()
+                
+            if hasattr(request, 'META') and request.META:
+                self.client_host = request.META.get('HTTP_X_FORWARDED_FOR', '')
+            else:
+                self._apply_client_host_defaults()
             
         return self
+    
+    def dump(self):
+        '''
+        Выводит состояние объекта в строку для получения отладочной информации
+        '''
+        str = '''session_key: %s
+user_id: %s
+user_login: %s
+user_name: %s
+client_host: %s''' % (self.session_key,
+                          self.user_id,
+                          self.user_login,
+                          self.user_name,
+                          self.client_host)
+        return str
+
+def get_thread_data():
+    return _thread_locals.m3_data if hasattr(_thread_locals, 'm3_data') else None
 
 
 class M3CommonMiddleware(object):
@@ -130,7 +164,10 @@ class M3CommonMiddleware(object):
         приложении. Записываем в thread-locals информацию о 
         текущей сессии и пользователе.
         '''
-        _thread_locals.m3_data = ThreadData().read(request)
+        _thread_locals.m3_data = ThreadData()
+        _thread_locals.m3_data.read(request)
+        
+        _thread_locals.foo = 'foo'
         
         
     def _clear(self):
