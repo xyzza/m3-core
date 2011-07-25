@@ -158,7 +158,13 @@ class ValidationFailed(Exception):
         
     def has_errors(self):
         return self.error_messages
-    
+
+    def __unicode__(self):
+        return self.messages_as_string()
+
+    def __str__(self):
+        return unicode(self).encode("utf-8")
+
     def messages_as_string(self, line_preffix = '  - ', line_delimiter='\n'):
         '''
         Преобразует self.error_messages в одну строку для отдачи в html
@@ -170,6 +176,6 @@ class ValidationFailed(Exception):
         if result:
             result = result[0:len(result)-len(line_delimiter)]
         return result
-    
+
     def messages_to_html(self):
         return self.messages_as_string(line_preffix = '&nbsp;&nbsp;-&nbsp;', line_delimiter='<br>')
