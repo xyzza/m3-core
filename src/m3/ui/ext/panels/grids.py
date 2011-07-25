@@ -165,6 +165,14 @@ class ExtObjectGrid(containers.ExtGrid):
     @handler_beforenew.setter
     def handler_beforenew(self, function):
         self._listeners['beforenewrequest'] = function    
+            
+    @property
+    def handler_beforeedit(self):
+        return self._listeners.get('beforeeditrequest')
+
+    @handler_beforeedit.setter
+    def handler_beforeedit(self, function):
+        self._listeners['beforeeditrequest'] = function
         
     def render(self):
         '''
@@ -419,3 +427,19 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
     
     def t_render_params(self):
         return self._get_params_str()
+    
+    @property
+    def handler_beforenew(self):
+        return self._listeners.get('beforenewrequest')
+    
+    @handler_beforenew.setter
+    def handler_beforenew(self, function):
+        self._listeners['beforenewrequest'] = function    
+
+    @property
+    def handler_beforeedit(self):
+        return self._listeners.get('beforeeditrequest')
+
+    @handler_beforeedit.setter
+    def handler_beforeedit(self, function):
+        self._listeners['beforeeditrequest'] = function
