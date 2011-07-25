@@ -1223,6 +1223,7 @@ class ReportData(ExtWindow):
         self.layout = 'fit'
         self.height = 500
         self.width = 600
+        self.maximizable = True
         
         tb_buttons = ExtToolBar()
         tb_buttons.layout = 'toolbar'

@@ -519,6 +519,7 @@ class ReportDataAction(actions.Action):
     def run(self, request, context):
         # Ответ из кеша
         data = cache.get(context.m3_window_id)
-        return actions.PreJsonResult({'rows': data[:25], 
-                                      #'total': len(data)
+        return actions.PreJsonResult({'rows': data[context.start:
+                                                   context.start + context.limit], 
+                                      'total': len(data)
                                       })
