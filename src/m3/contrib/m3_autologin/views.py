@@ -6,12 +6,14 @@ Created on 08.07.2011
 '''
 
 import uuid
+import datetime 
 
 from django.http import (HttpResponse, 
                          HttpResponseRedirect, 
                          HttpResponseForbidden,
                          HttpResponseNotFound,)
-from django.conf import settings
+
+
 from django.contrib.auth import login, logout, get_backends
 from django.contrib.auth.models import User, get_hexdigest
 
@@ -136,6 +138,12 @@ def remote_login_view(request):
     except User.DoesNotExist:
         return HttpResponseRedirect(URL_REDIRECT_ON_ERROR)
     
+    # чистим тикеты
+    # 1. удаляем текущий тикет
+    ticket.delete()
+    # 2. удаляем тикеты, которым больше 1 часа
+    RemoteAuthTicket.objects.filter(created__lte=datetime.datetime.now() - datetime.timedelta(hours=1)).delete()
+     
     # всё ок, выполняем вход в систему
     auth_backends = get_backends()
     if auth_backends:
@@ -148,8 +156,8 @@ def remote_login_view(request):
     # пишем запись в аудит входа
     AuditManager().write('auth', user=user)
     AuditManager().write('auto-login', user=user, type='remote-auth', request=request)
-        
     
     
-    
-    
+    # тут пока жесткий URL, необходимо бы сделать так, чтобы редиректить на
+    # URL, задаваемый извне
+    return HttpResponseRedirect('/')
