@@ -148,7 +148,16 @@ client_host: %s''' % (self.session_key,
         return str
 
 def get_thread_data():
-    return _thread_locals.m3_data if hasattr(_thread_locals, 'm3_data') else None
+    '''
+    Метод возвращает объект типа ThreadData, который описывает
+    текущие thread-local параметры обработки запроса. 
+    '''
+    if not hasattr(_thread_locals, 'm3_data'):
+        default_data = ThreadData()
+        default_data.apply_defaults()
+        return default_data  
+    
+    return _thread_locals.m3_data
 
 
 class M3CommonMiddleware(object):
