@@ -1,10 +1,14 @@
 #coding:utf-8
-from django.conf import settings
 
 import urllib2
+import urllib
+import urlparse
+
+from django.conf import settings
+
 from m3.contrib.ssacc_client.exceptions import SSACCException
-from m3.contrib.ssacc_client.results import (BaseResult, ErrorResult,
-    ProfileRatesResult)
+from m3.contrib.ssacc_client.results import BaseResult, ErrorResult, \
+     ProfileRatesResult, OperationResult, AvailabilityResult
 
 __author__ = 'Excinsky'
 
@@ -19,7 +23,8 @@ try:
 except AttributeError:
     SSACC_SERVER = 'http://localhost'
 
-def try_to_connect_to_ssacc_url_and_get_request_result(connect_url):
+
+def ssacc_send_request(url, params=None):
     """
     Подключается к SSACC серваку, и получает ответ, либо выбрасывает ошибку.
 
@@ -27,12 +32,23 @@ def try_to_connect_to_ssacc_url_and_get_request_result(connect_url):
     @raise SSACCException
     @return: str
     """
+    encode_utf8 = lambda x: dict((k, v.encode("utf-8") if isinstance(v, unicode)
+                                  else v) for k, v in x.items())
+    if params:
+        request = urllib2.Request(url, urllib.urlencode(encode_utf8(params)))
+    else:
+        request = url
+
+    sock = None
     try:
-        request = urllib2.urlopen(SSACC_SERVER + connect_url)
-        result_xml = request.read()
-    except urllib2.HTTPError, e:
-        raise SSACCException(u'Не удалось соединиться с SSACC сервером.')
-    return result_xml
+        sock = urllib2.urlopen(request)
+        return sock.read()
+    except (ValueError, urllib2.URLError, urllib2.HTTPError):
+        raise SSACCException(u"Не удалось соединиться с SSACC сервером.")
+    finally:
+        if sock is not None:
+            sock.close()
+
 
 def check_if_result_is_ok_and_return_parsed_result(result_xml,
         additional_result_type):
@@ -56,6 +72,15 @@ def check_if_result_is_ok_and_return_parsed_result(result_xml,
     result = BaseResult.parse_xml_to_result(result_xml, result_type)
     return result
 
+
+def _send_post_request(url, params=None, result_class=OperationResult):
+    # Отправка POST-запрса на сервер и получение ответа в виде враппера:
+    response = ssacc_send_request(
+        urlparse.urljoin(SSACC_SERVER, url), params)
+    return check_if_result_is_ok_and_return_parsed_result(
+        response, result_class)
+
+
 def server_ssacc_ping():
     """
     Обращение к системе за пустым запросом.
@@ -63,25 +88,19 @@ def server_ssacc_ping():
     @raise: SSACCException.
     @return: OperationResult or ErrorResult
     """
-    ping_url = '/ssacc/ping'
-    result_xml = try_to_connect_to_ssacc_url_and_get_request_result(ping_url)
+    return _send_post_request('/ssacc/ping')
 
-    result = check_if_result_is_ok_and_return_parsed_result(result_xml,
-        ProfileRatesResult)
-    return result
 
 def server_ssacc_profile_rates(account_id):
     """
     Обращение к системе за тарифным планом аккаунта.
 
-    @return: OperationResult or ErrorResult
+    @return: ProfileRatesResult or ErrorResult
     """
-    profile_url = '/ssacc/profile/rates'
-    result_xml = try_to_connect_to_ssacc_url_and_get_request_result(profile_url)
+    return _send_post_request(
+        '/ssacc/profile/rates',
+        result_class=ProfileRatesResult)
 
-    result = check_if_result_is_ok_and_return_parsed_result(result_xml,
-        ProfileRatesResult)
-    return result
 
 def server_ssacc_availability(account_id):
     """
@@ -89,10 +108,30 @@ def server_ssacc_availability(account_id):
 
     @return: AvailabilityResult or ErrorResult
     """
-    profile_url = '/ssacc/profile/availability'
-    result_xml = try_to_connect_to_ssacc_url_and_get_request_result(profile_url)
+    return _send_post_request(
+        '/ssacc/profile/availability',
+        result_class=AvailabilityResult)
 
-    result = check_if_result_is_ok_and_return_parsed_result(result_xml,
-        ProfileRatesResult)
-    return result
-  
+
+def server_ssacc_operator_new(account_id, login, raw_password):
+    """Сообщает серверу о создании нового оператора.
+    """
+    return _send_post_request(
+        "/ssacc/operator/new",
+        dict(account_id=account_id, login=login, raw_password=raw_password))
+
+
+def server_ssacc_operator_edit(account_id, login, raw_password):
+    """Сообщает серверу об изменении существующенго оператора.
+    """
+    return _send_post_request(
+        "/ssacc/operator/edit",
+        dict(account_id=account_id, login=login, raw_password=raw_password))
+
+
+def server_ssacc_operator_delete(account_id):
+    """Сообщает серверу об удалении оператора.
+    """
+    return _send_post_request(
+        "/ssacc/operator/delete",
+        dict(account_id=account_id))
