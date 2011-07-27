@@ -27,6 +27,7 @@ from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.fields.complex import ExtDictSelectField
 from m3.helpers import get_img_size, logger
 from m3.helpers.datastructures import TypedList
+from m3.ui.actions.interfaces import ISelectablePack
 
 
 #===============================================================================
@@ -140,19 +141,21 @@ class ExtForm(BaseExtPanel):
                 # нужно удалить проверку на 'bind_pack'
                 bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
                 if bind_pack:
-                    # Нельзя импортировать, будет циклический импорт
-                    #assert isinstance(item.bind_pack, BaseDictionaryActions)
-                    row = bind_pack.get_row(value)
-                    # Может случиться что в источнике данных bind_pack 
-                    # не окажется записи с ключом id
-                    # Потому что источник имеет заведомо неизвестное происхождение
-                    if row != None:
-                        default_text = getattr(row, item.display_field)
-                        # getattr может возвращать метод, например verbose_name
-                        if callable(default_text):
-                            item.default_text = default_text()
-                        else:
-                            item.default_text = default_text
+                    assert isinstance(bind_pack, ISelectablePack), 'Pack %s must provide ISelectablePack interface' % bind_pack
+                    item.default_text = bind_pack.get_display_text(value, item.display_field)
+#                    # Нельзя импортировать, будет циклический импорт
+#                    #assert isinstance(item.bind_pack, BaseDictionaryActions)
+#                    row = bind_pack.get_row(value)
+#                    # Может случиться что в источнике данных bind_pack 
+#                    # не окажется записи с ключом id
+#                    # Потому что источник имеет заведомо неизвестное происхождение
+#                    if row != None:
+#                        default_text = getattr(row, item.display_field)
+#                        # getattr может возвращать метод, например verbose_name
+#                        if callable(default_text):
+#                            item.default_text = default_text()
+#                        else:
+#                            item.default_text = default_text
                 item.value = value
             elif isinstance(item, ExtComboBox) and hasattr(item, 'bind_rule_reverse'):
                 # Комбобокс как правило передает id выбранного значения. 

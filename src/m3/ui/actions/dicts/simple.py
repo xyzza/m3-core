@@ -18,7 +18,7 @@ from m3.db import BaseObjectModel, safe_delete
 from m3.core.exceptions import RelatedError
 
 from m3.contrib.m3_audit import AuditManager
-
+from m3.ui.actions.interfaces import IMultiSelectablePack
 
 class DictListWindowAction(Action):
     '''
@@ -278,7 +278,7 @@ class ListDeleteRowAction(Action):
                 AuditManager().write('dict-changes', user=request.user, model_object=obj, type='delete')
         return result
 
-class BaseDictionaryActions(ActionPack):
+class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
     '''
     Пакет с действиями, специфичными для работы со справочниками
     '''
@@ -341,6 +341,7 @@ class BaseDictionaryActions(ActionPack):
         '''
         return self.list_window_action.get_absolute_url()
     
+    #ISelectablePack
     def get_select_url(self):
         '''
         Возвращает адрес формы списка элементов справочника. 
@@ -348,12 +349,14 @@ class BaseDictionaryActions(ActionPack):
         '''
         return self.select_window_action.get_absolute_url()
 
+    #IMultiSelectablePack
     def get_multi_select_url(self):
         '''
         Возвращает адрес формы списка элементов для множественного выбора
         '''
         return self.multi_select_window_action.get_absolute_url()
 
+    #ISelectablePack
     def get_edit_url(self):
         '''
         Возвращает адрес формы редактирования элемента справочника.
@@ -365,6 +368,13 @@ class BaseDictionaryActions(ActionPack):
         Возвращает адрес по которому запрашиваются элементы грида
         '''
         return self.rows_action.get_absolute_url()
+
+    #ISelectablePack
+    def get_autocomplete_url(self):
+        '''
+        Возвращает адрес по которому запрашиваются элементы подходящие введенному в поле тексту
+        '''
+        return self.get_rows_url()
     
     #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ ДАННЫЕ =====================
     def get_rows(self, request, context, offset, limit, filter, user_sort=''):
@@ -408,6 +418,12 @@ class BaseDictionaryActions(ActionPack):
         параметре object находится именно та запись справочника, которую необходимо удалить.
         '''
         raise NotImplementedError()
+
+    #ISelectablePack
+    def get_display_text(self, key, attr_name = None):
+        """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
+        raise NotImplementedError()
+
     
     #====================== РАБОТА С ОКНАМИ ===============================
     def get_list_window(self, win):
@@ -545,6 +561,19 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
                                   if field.attname in ('code', 'name')])
         return filter_fields            
                 
+    #ISelectablePack
+    def get_display_text(self, key, attr_name = None):
+        """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
+        row = self.get_row(key)
+        if row != None:
+            name = attr_name if attr_name else self.column_name_on_select
+            text = getattr(row, name)
+            # getattr может возвращать метод, например verbose_name
+            if callable(text):
+                return text()
+            else:
+                return text
+        return None
             
 class BaseEnumerateDictionary(BaseDictionaryActions):
     '''
@@ -578,3 +607,9 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
         assert id in self.enumerate_class.keys(), 'Enumarate key "%s" is not defined in %s' % (id, self.enumerate_class)
         return id
     
+    #ISelectablePack
+    def get_display_text(self, key, attr_name = None):
+        """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
+        row_id = self.get_row(key)
+        text = self.enumerate_class.values[row_id]
+        return text

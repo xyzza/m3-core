@@ -18,6 +18,7 @@ from m3.ui.ext.misc import ExtJsonStore
 from m3.ui.ext.fields.base import BaseExtTriggerField
 from m3.ui.ext.base import BaseExtComponent, ExtUIComponent
 from m3.ui.actions import ControllerCache
+from m3.ui.actions.interfaces import ISelectablePack, IMultiSelectablePack
 from m3.helpers.datastructures import TypedList
 
 #===============================================================================
@@ -234,34 +235,42 @@ class ExtDictSelectField(BaseExtTriggerField):
         assert isinstance(ppack, basestring) or hasattr(ppack, '__bases__'), 'Argument %s must be a basestring or class' % ppack
         ppack = ControllerCache.find_pack(ppack)
         assert ppack, 'Pack %s not found in ControllerCache' % ppack
+        assert isinstance(ppack, ISelectablePack), 'Pack %s must provide ISelectablePack interface' % ppack
         self._pack = ppack
 
-        # hasattr используется вместо isinstance, иначе будет перекрестный импорт.
-        # Для линейного справочника и иерархического спр., если задана списочная модель, значит выбирать будут из неё.
-        if hasattr(ppack, 'model') or (hasattr(ppack, 'tree_model') and ppack.list_model):
-            # url формы редактирования элемента
-            self.edit_url = ppack.get_edit_url()
-            # url автокомплита и данных
-            self.autocomplete_url = ppack.get_rows_url()
-
-        # Для иерархических справочников без списочной модели
-        elif hasattr(ppack, 'tree_model') and ppack.tree_model:
-            self.edit_url = ppack.get_edit_node_url()
-            self.autocomplete_url = ppack.get_nodes_like_rows_url()
-
-        else:
-            # для иных случаев (например паки без моделей) попробуем найти соответствующие методы
-            if hasattr(ppack, 'get_rows_url') or hasattr(ppack, 'get_edit_url'):
-                if hasattr(ppack, 'get_rows_url'):
-                    self.autocomplete_url = ppack.get_rows_url()
-                if hasattr(ppack, 'get_edit_url'):
-                    self.edit_url = ppack.get_edit_url()
-            else:
-                raise Exception('Pack %s must be a dictionary pack instance.' % ppack)
-
+        # старый спосом подключения Pack теперь не действует - всё должно быть в рамках интерфейса ISelectablePack
+        
+        # url формы редактирования элемента
+        self.edit_url = ppack.get_edit_url()
+        # url автокомплита и данных
+        self.autocomplete_url = ppack.get_autocomplete_url()
         # url формы выбора
         self.url = ppack.get_select_url()
     
+#        # hasattr используется вместо isinstance, иначе будет перекрестный импорт.
+#        # Для линейного справочника и иерархического спр., если задана списочная модель, значит выбирать будут из неё.
+#        if hasattr(ppack, 'model') or (hasattr(ppack, 'tree_model') and ppack.list_model):
+#            # url формы редактирования элемента
+#            self.edit_url = ppack.get_edit_url()
+#            # url автокомплита и данных
+#            self.autocomplete_url = ppack.get_rows_url()
+#
+#        # Для иерархических справочников без списочной модели
+#        elif hasattr(ppack, 'tree_model') and ppack.tree_model:
+#            self.edit_url = ppack.get_edit_node_url()
+#            self.autocomplete_url = ppack.get_nodes_like_rows_url()
+#
+#        else:
+#            # для иных случаев (например паки без моделей) попробуем найти соответствующие методы
+#            if hasattr(ppack, 'get_rows_url') or hasattr(ppack, 'get_edit_url'):
+#                if hasattr(ppack, 'get_rows_url'):
+#                    self.autocomplete_url = ppack.get_rows_url()
+#                if hasattr(ppack, 'get_edit_url'):
+#                    self.edit_url = ppack.get_edit_url()
+#            else:
+#                raise Exception('Pack %s must be a dictionary pack instance.' % ppack)
+
+        
     def render_params(self):
         action_context = None
         if self.action_context:
@@ -508,12 +517,13 @@ class ExtMultiSelectField(ExtDictSelectField):
 
     @pack.setter
     def pack(self, ppack):
+        assert isinstance(ppack, IMultiSelectablePack), 'Pack %s must provide IMultiSelectablePack interface' % ppack
         self._set_urls_from_pack(ppack)
-
-        if hasattr(self._pack, 'get_multi_select_url'):
-            self.url = self._pack.get_multi_select_url()
-        else:
-            raise Exception('Pack %s hasn\'t multiselect url defined')
+        self.url = self._pack.get_multi_select_url()
+#        if hasattr(self._pack, 'get_multi_select_url'):
+#            self.url = self._pack.get_multi_select_url()
+#        else:
+#            raise Exception('Pack %s hasn\'t multiselect url defined')
 
     def render(self):
         self.render_base_config()

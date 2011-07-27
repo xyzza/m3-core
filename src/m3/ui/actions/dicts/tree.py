@@ -20,7 +20,7 @@ from m3.ui.ext.containers import ExtPagingBar
 from m3.db import BaseObjectModel, safe_delete
 from m3.core.exceptions import RelatedError
 from m3.ui.actions.results import ActionResult
-
+from m3.ui.actions.interfaces import IMultiSelectablePack
 
 class TreeGetNodesAction(Action):
     '''
@@ -388,7 +388,7 @@ class MultiSelectWindowAction(SelectWindowAction):
     url = '/get_multis_select_window$'
     mode = ExtDictionaryWindow.MULTI_SELECT_MODE
 
-class BaseTreeDictionaryActions(ActionPack):
+class BaseTreeDictionaryActions(ActionPack, IMultiSelectablePack):
     '''
     Пакет с действиями, специфичными для работы с иерархическими справочниками
     '''
@@ -490,10 +490,12 @@ class BaseTreeDictionaryActions(ActionPack):
     
     #================ ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА ===============
     
+    #ISelectablePack
     def get_select_url(self):
         ''' Возвращает адрес формы списка элементов справочника. '''
         return self.select_window_action.get_absolute_url()
 
+    #IMultiSelectablePack
     def get_multi_select_url(self):
         return self.multi_select_window_action.get_absolute_url()
 
@@ -501,6 +503,7 @@ class BaseTreeDictionaryActions(ActionPack):
         ''' Возвращает адрес формы списка элементов справочника. '''
         return self.list_window_action.get_absolute_url()
     
+    #ISelectablePack
     def get_edit_url(self):
         ''' Возвращает адрес формы редактирования элемента справочника. '''
         return self.edit_grid_window_action.get_absolute_url()
@@ -520,6 +523,11 @@ class BaseTreeDictionaryActions(ActionPack):
     def get_nodes_like_rows_url(self):
         ''' Возвращает адрес по которому запрашиваются группы дерева как список '''
         return self.nodes_like_rows_action.get_absolute_url()
+        
+    #ISelectablePack
+    def get_autocomplete_url(self):
+        """ Получить адрес для запроса элементов подходящих введенному в поле тексту """
+        return self.get_nodes_like_rows_url()
     
     #=================== ИЗМЕНЕНИЕ ДАННЫХ =======================
     
@@ -536,6 +544,11 @@ class BaseTreeDictionaryActions(ActionPack):
         raise NotImplementedError()
     
     def delete_row(self, obj):
+        raise NotImplementedError()
+    
+    #ISelectablePack
+    def get_display_text(self, key, attr_name = None):
+        """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         raise NotImplementedError()
     
     #============ ДЛЯ ИЗМЕНЕНИЯ ОКОН ВЫБОРА НА ХОДУ ==============
@@ -855,6 +868,45 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             row.parent_id = dest_id
             row.save()
         return OperationResult()
+    
+    #ISelectablePack
+    def get_edit_url(self):
+        """ Получить адрес для запроса диалога редактирования выбранного элемента """
+        # тут возможны варианты, когда pack используется без грида
+        # в этом случае нужно возвращать ссылку на редактирование элемента дерева
+        # именно по этой причине была сделана эта обертка над методом get_edit_url
+        if self.list_model:
+            return super(BaseTreeDictionaryModelActions, self).get_edit_url()
+        elif self.tree_model:
+            return self.get_edit_node_url()
+        return None
+        
+    #ISelectablePack
+    def get_display_text(self, key, attr_name = None):
+        """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
+        # тут возможны варианты, когда pack используется без грида
+        # в этом случае нужно работать с элементом дерева
+        if self.list_model:
+            row = self.get_row(key)
+            if row != None:
+                name = attr_name if attr_name else self.column_name_on_select
+                text = getattr(row, name)
+                # getattr может возвращать метод, например verbose_name
+                if callable(text):
+                    return text()
+                else:
+                    return text
+        elif self.tree_model:
+            row = self.get_node(key)
+            if row != None:
+                name = attr_name if attr_name else self.column_name_on_select
+                text = getattr(row, name)
+                # getattr может возвращать метод, например verbose_name
+                if callable(text):
+                    return text()
+                else:
+                    return text
+        return None
     
 #=#===============================================================================
 # Сигналы, который посылаются в процессе работы подсистемы древовидных справочника
