@@ -116,18 +116,18 @@ class BaseAlchemyObject(object):
             v._aliased_table = None
 
     @abstractmethod
-    def _get_alchemy_table(self, params=None):
+    def _get_alchemy_table(self, params):
         """ Возвращает таблицу в формате SqlAlchemy """
 
     @abstractmethod
-    def get_alchemy_field(self, field_name, field_alias=''):
+    def get_alchemy_field(self, field_name, params, field_alias=''):
         """ Возвращает поле таблицы в формате SqlAlchemy """
 
     @abstractmethod
     def get_fields(self):
         """ Возвращает колонки в формате Entity """
 
-    def get_subquery(self, params=None):
+    def get_subquery(self, params):
         """
         Возвращает подзапрос с алиасом. Параметры params передаются
         чтобы модифицировать запрос в зависимости от данных
@@ -153,7 +153,7 @@ class Model(BaseAlchemyObject):
             raise DjangoModelNotFound(model_name=self.name)
         return model
     
-    def _get_alchemy_table(self, params=None):
+    def _get_alchemy_table(self, params):
         model = self._get_django_model()
         table_name = model._meta.db_table
         table = WRAPPER.metadata.tables.get(table_name)
@@ -161,12 +161,12 @@ class Model(BaseAlchemyObject):
             raise DBTableNotFound(model_name=table_name)
         return table
     
-    def get_alchemy_field(self, field_name, field_alias=''):
+    def get_alchemy_field(self, field_name, params, field_alias=''):
         model = self._get_django_model()
         
         field = model._meta.get_field(field_name)
         field_real_name = field.get_attname()
-        column = self.get_subquery().columns.get(field_real_name)
+        column = self.get_subquery(params=params).columns.get(field_real_name)
         if column is None:
             raise DBColumnNotFound(field_name, field_real_name)
 
@@ -203,21 +203,21 @@ class Entity(BaseAlchemyObject):
     def __init__(self, name, alias=None, verbose_name=None):
         super(Entity, self).__init__(name, alias, verbose_name)
 
-    def _get_alchemy_table(self, params=None):
+    def _get_alchemy_table(self, params):
         entity = EntityCache.get_entity(self.name)
         if entity is None:
             raise EntityNotFound(self.name)
 
         e = entity()
-        query = e.create_query(params)
+        query = e.create_query(params=params)
         
         if self.alias:
             query = query.label(self.alias)
         
         return query
     
-    def get_alchemy_field(self, field_name, field_alias=''):
-        column = self.get_subquery().columns[field_name]
+    def get_alchemy_field(self, field_name, params, field_alias=''):
+        column = self.get_subquery(params).columns[field_name]
         if field_alias:
             column = column.label(field_alias)
 
@@ -254,9 +254,12 @@ class Field(object):
         self.alias = alias
         self.verbose_name = verbose_name
     
-    def get_alchemy_field(self):
-        """ Возвращает поле в формате SqlAlchemy """
-        field = self.entity.get_alchemy_field(self.field_name, self.alias)
+    def get_alchemy_field(self, params):
+        """
+        Возвращает поле в формате SqlAlchemy.
+        Пробрасывает вызов той сущности, с которой само работает.
+        """
+        field = self.entity.get_alchemy_field(field_name=self.field_name, params=params, field_alias=self.alias)
         return field
 
 
@@ -497,13 +500,25 @@ class BaseEntity(object):
         field = model._meta.get_field(column_name)
         return field.get_attname()
     
-    def create_query(self, params=None):
+    def create_query(self, params=None, first_head=False):
         """ Возвращает готовый запрос алхимии по параметрам Entity """
         
         # Подготовка колонок для выбора SELECT
         if not len(self.select):
             raise Exception(u'Нет данных для SELECT')
 
+        select_columns = self._create_columns(params)
+        join_sequence = self._create_join(params)
+        whereclause = self._create_where_expression(self.where, params, first_head)
+
+        query = select(columns=select_columns, whereclause=whereclause, from_obj=join_sequence)
+
+        query = self._create_grouping(query)
+        query = self._create_limit_offset(query, params, first_head)
+
+        return query
+
+    def _create_columns(self, params):
         select_columns = []
         for field in self.select:
             assert isinstance(field, Field)
@@ -514,7 +529,7 @@ class BaseEntity(object):
                 select_columns.append(table)
             else:
                 # Отдельное поле.
-                column = field.get_alchemy_field()
+                column = field.get_alchemy_field(params)
 
                 # На наго может быть наложена агрегатная функция.
                 if self.group_by and self.group_by.aggregate_fields:
@@ -525,59 +540,97 @@ class BaseEntity(object):
                             break
 
                 select_columns.append(column)
+        return select_columns
 
-        # Подготовка объединений JOIN. Важна последовательность!
+    def _create_join(self, params):
+        """
+        Подготовка объединений JOIN. Важна последовательность!
+        """
         join_sequence = None
         last_column = None
         for rel in self.relations:
-            assert isinstance(rel, Relation)           
+            assert isinstance(rel, Relation)
 
-            left_column = rel.field_first.get_alchemy_field()
-            right_column = rel.field_second.get_alchemy_field()
-            
+            left_column = rel.field_first.get_alchemy_field(params)
+            right_column = rel.field_second.get_alchemy_field(params)
+
             if join_sequence is None:
                 last_column = right_column
-                
+
                 onclause = (left_column == right_column) # _BinaryExpression
                 join_sequence = join(left_column.table, right_column.table, onclause)
 
             else:
                 assert left_column.table == last_column.table
-                
+
                 onclause = (last_column == right_column) # _BinaryExpression
                 join_sequence = join_sequence.join(right_column.table, onclause)
-        
+
         join_sequence = None if join_sequence is None else [join_sequence]
-                
-        # Условия WHERE
-        whereclause = self._create_where_expression(self.where, params)
+        return join_sequence
 
-        query = select(columns=select_columns, whereclause=whereclause, from_obj=join_sequence)
-
-        # Группировка GROUP BY
+    def _create_grouping(self, query):
+        """
+        Группировка GROUP BY
+        """
         if self.group_by and self.group_by.group_fields:
             for field in self.group_by.group_fields:
                 col = field.get_alchemy_field()
                 query = query.group_by(col)
+        return query
 
-        #TODO: Не работают с параметрами!
-#        # LIMIT
-#        if isinstance(self.limit, int) and self.limit > 0:
-#            query = query.limit(self.limit)
-#        elif isinstance(self.limit, Param):
-#            self.limit.bind_to_entity(self)
-#            p = bindparam(self.limit.name, required=True)
-#            query = query.limit(p)
-#
-#        # OFFSET
-#        if isinstance(self.offset, int) and self.offset > 0:
-#            query = query.offset(self.offset)
-#        elif isinstance(self.offset, Param):
-#            self.offset.bind_to_entity(self)
-#            p = bindparam(self.offset.name, required=True)
-#            query = query.offset(p)
+    def _create_limit_offset(self, query, params, first_head):
+        """
+        Добавляет в запрос алхимии срез по LIMIT и OFFSET. Из-за того, что эти операторы не
+        поддердивают работу с параметрами, приходится подставлять их напрямую в запрос, если
+        текущий проход является генеративным.
+        """
+        limit_value = 0
+        offset_value = 0
+
+        if params and isinstance(params, dict):
+            class_name = self.__class__.__name__ + '.'
+            if first_head:
+                limit_value = self._get_param(params, 'limit', 0)
+                offset_value = self._get_param(params, 'offset', 0)
+            else:
+                limit_value = self._get_param(params, class_name + 'limit', 0)
+                offset_value = self._get_param(params, class_name + 'offset', 0)
+
+        # Пробуем получить предустановленные значения
+        if not limit_value and isinstance(self.limit, int) and self.limit > 0:
+            limit_value = self.limit
+
+        if not offset_value and isinstance(self.offset, int) and self.offset > 0:
+            offset_value = self.offset
+
+        # Установка значений
+        if limit_value > 0:
+            query = query.limit(limit_value)
+
+        if offset_value > 0:
+            query = query.offset(offset_value)
 
         return query
+
+    def _is_param_empty(self, value):
+        """
+        Из-за особой хитрости передаваемых параметров это делается не очевидно.
+        Возвращает истину, если значение параметра пустое.
+        """
+        if value is None:
+            return True
+        if isinstance(value, (tuple, list)) and not len(value):
+            return True
+        return False
+
+    def _get_param(self, params, key, default=None, single=True):
+        value = params.get(key)
+        if not self._is_param_empty(value):
+            if single and isinstance(value, (list, tuple)):
+                return value[0]
+            return value
+        return default
 
     def get_select_fields(self):
         """ Возвращает список всех полей entity.Field из SELECT """
@@ -604,7 +657,7 @@ class BaseEntity(object):
             raise NotImplementedError(u'Логическая операция "%s" не реализована в WHERE' % operator)
         return func
 
-    def _create_where_expression(self, where, params):
+    def _create_where_expression(self, where, params, level):
         """ Преобразует выражение Where в логическое условие алхимии """
         # Пустые условия пропускаем
         if where is None or where.is_empty():
@@ -613,9 +666,9 @@ class BaseEntity(object):
         # Если условие составное, то обрабатываем его рекурсивно
         left, right = where.left, where.right
         if isinstance(where.left, Where):
-            left = self._create_where_expression(left, params)
+            left = self._create_where_expression(left, params, level)
         if isinstance(where.right, Where):
-            right = self._create_where_expression(right, params)
+            right = self._create_where_expression(right, params, level)
 
         # Если отсутствует одна из частей условия, то возвращаем существующую
         if left is None and right is not None:
@@ -632,7 +685,7 @@ class BaseEntity(object):
         first_param = None
         if not isinstance(left, ColumnElement):
             if isinstance(left, Field):
-                left = left.get_alchemy_field()
+                left = left.get_alchemy_field(params)
             elif isinstance(left, Param):
                 left.bind_to_entity(self)
                 first_param = left
@@ -642,7 +695,7 @@ class BaseEntity(object):
 
         if not isinstance(right, ColumnElement):
             if isinstance(right, Field):
-                right = right.get_alchemy_field()
+                right = right.get_alchemy_field(params)
             elif isinstance(right, Param):
                 right.bind_to_entity(self)
                 first_param = right
@@ -654,7 +707,7 @@ class BaseEntity(object):
             value = params.get(first_param.name)
 
             # Если параметры заданы, но нужного не оказалось, то убираем условие нафиг!
-            if value is None:
+            if self._is_param_empty(value):
                 return
 
             # Если значение параметра известно и оно является
@@ -681,7 +734,7 @@ class BaseEntity(object):
         #TODO: Потокоопасный метод! Надо использовать пул, живущий только во время формирования.
         BaseAlchemyObject.clear_instances()
 
-        query = self.create_query(params)
+        query = self.create_query(params=params, first_head=True)
 
         #TODO: Проблема с IN, он преобразуется в ARRAY, но PostgreSQL почему-то не понимает его
         # ХАК!

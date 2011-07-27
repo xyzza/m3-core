@@ -56,3 +56,28 @@ class AutoLoginAudit(BaseAuditModel):
         db_table = 'm3_autologin_audit'
         
 AuditManager().register('auto-login', AutoLoginAudit)
+
+
+#===============================================================================
+# Модель для хранения тикетов при удаленной авторизации
+#===============================================================================
+class RemoteAuthTicket(models.Model):
+    '''
+    Модель хранения тикета для удаленного входа пользователя
+    '''
+    # имя пользователя, для которого выдан тикет
+    user_login = models.CharField(max_length=100)
+    
+    # идентификатор тикета (уникальное значение, которое гоняется
+    # между данной системой и системой, в которой реализуется удаленная 
+    # авторизация) 
+    ticket_key = models.CharField(max_length=20)
+    
+    # содержимое тикета. здесь
+    ticket_hash = models.CharField(max_length=100)
+    
+    # дата и время выдачи тикета
+    created = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'm3_autologin_tickets'

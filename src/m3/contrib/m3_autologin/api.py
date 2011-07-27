@@ -8,6 +8,7 @@ Created on 08.07.2011
 from django.conf import settings
 
 AUTOLOGIN_SETTINGS_NAME = 'M3_AUTOLOGIN_CONF'
+AUTOLOGIN_ALLOW_REMOTE_AUTH = 'M3_AUTOLOGIN_ALLOW_REMOTE_AUTH'
 
 def read_autologin_config(conf, autologin_section_name='auto-login', default_url = '/'):
     '''
@@ -40,3 +41,13 @@ def get_autologin_config():
     Возвращает настройку автовхода в систему.
     '''
     return getattr(settings, AUTOLOGIN_SETTINGS_NAME, {})
+
+
+def allow_remote_auth():
+    '''
+    Функция, возвращающая True в случае, если в системе разрешен
+    удаленный метод аутентификации пользователей.
+    
+    По умолчанию такое поведение является запрещенным.
+    '''
+    return getattr(settings, AUTOLOGIN_ALLOW_REMOTE_AUTH, False)
