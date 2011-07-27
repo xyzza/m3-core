@@ -698,11 +698,13 @@ class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
     def __init__(self, *args, **kwargs):
         super(ExtGridCheckBoxSelModel, self).__init__(*args, **kwargs)
         self.single_select = False
+        self.check_only = False
         self.init_component(*args, **kwargs)
 
     def render(self):
-        single_sel = 'singleSelect: true' if self.single_select else ''
-        return 'new Ext.grid.CheckboxSelectionModel({ %s })' % single_sel
+        self._put_config_value('singleSelect', self.single_select)
+        self._put_config_value('checkOnly', self.check_only)
+        return 'new Ext.grid.CheckboxSelectionModel({ %s })' %self._get_config_str()
 
 #===============================================================================
 class ExtGridRowSelModel(BaseExtGridSelModel):
