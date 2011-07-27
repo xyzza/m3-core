@@ -46,3 +46,12 @@ def generate_id():
     избежать пересечения id-шников
     '''
     return str(uuid4())[0:8]
+
+
+def date2str(date):
+    '''
+    datetime.strftime глючит с годом < 1900
+    типа обходной маневр
+    '''
+    #FIXME добавить разбор шаблона (вторым параметром)
+    return "%02d.%02d.%04d" %(date.day, date.month, date.year)
