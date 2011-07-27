@@ -657,7 +657,7 @@ class BaseEntity(object):
             raise NotImplementedError(u'Логическая операция "%s" не реализована в WHERE' % operator)
         return func
 
-    def _create_where_expression(self, where, params, level):
+    def _create_where_expression(self, where, params, first_head):
         """ Преобразует выражение Where в логическое условие алхимии """
         # Пустые условия пропускаем
         if where is None or where.is_empty():
@@ -666,9 +666,9 @@ class BaseEntity(object):
         # Если условие составное, то обрабатываем его рекурсивно
         left, right = where.left, where.right
         if isinstance(where.left, Where):
-            left = self._create_where_expression(left, params, level)
+            left = self._create_where_expression(left, params, first_head)
         if isinstance(where.right, Where):
-            right = self._create_where_expression(right, params, level)
+            right = self._create_where_expression(right, params, first_head)
 
         # Если отсутствует одна из частей условия, то возвращаем существующую
         if left is None and right is not None:
@@ -680,31 +680,36 @@ class BaseEntity(object):
 
         func = self._get_func_by_operator(where.operator)
 
-        # Если часть условия не является готовым выражением алхимии,
-        # то преобразуем его в поле или параметр запроса
-        first_param = None
-        if not isinstance(left, ColumnElement):
-            if isinstance(left, Field):
-                left = left.get_alchemy_field(params)
-            elif isinstance(left, Param):
-                left.bind_to_entity(self)
-                first_param = left
-                left = bindparam(left.name, required=True)
-            else:
-                raise TypeError('Left WHERE argument must be string parameter or Field instance')
+        # Выясняем, кто у нас параметр, а кто поле
+        def give_me_some_class(class_, iterable):
+            has_one  = False
+            for x in iterable:
+                if not isinstance(left, ColumnElement):
+                    has_one = True
+                    if isinstance(x, class_):
+                        return x
+            if has_one:
+                raise TypeError('WHERE argument must be string a Param or a Field instance')
 
-        if not isinstance(right, ColumnElement):
-            if isinstance(right, Field):
-                right = right.get_alchemy_field(params)
-            elif isinstance(right, Param):
-                right.bind_to_entity(self)
-                first_param = right
-                right = bindparam(right.name, required=True)
-            else:
-                raise TypeError('Right WHERE argument must be Param instance or Field instance')
+        part_param = give_me_some_class(Param, [left, right])
+        part_field = give_me_some_class(Field, [left, right])
 
-        if first_param and isinstance(params, dict):
-            value = params.get(first_param.name)
+        # Текущий узел WHERE не содержит ни поля ни параметра,
+        # значит он объединяет 2 логических условия. Разбор параметров не требется.
+        if part_param is None and part_field is None:
+            return func(left, right)
+
+        left = part_field.get_alchemy_field(params)
+
+        if first_head:
+            part_param.name = part_field.entity.name + '.' + part_param.name
+        else:
+            part_param.bind_to_entity(self)
+
+        right = bindparam(part_param.name, required=True)
+
+        if part_param and isinstance(params, dict):
+            value = params.get(part_param.name)
 
             # Если параметры заданы, но нужного не оказалось, то убираем условие нафиг!
             if self._is_param_empty(value):
@@ -713,12 +718,52 @@ class BaseEntity(object):
             # Если значение параметра известно и оно является
             #  перечисляемым, то заменяем EQUAL или NOT EQUAL на IN
             if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
-                    func = lambda x, y: x.in_([y])
+                func = lambda x, y: x.in_([y])
             if isinstance(value, (list, tuple)) and where.operator==Where.NE:
-                    func = lambda x, y: ~x.in_([y])
+                func = lambda x, y: ~x.in_([y])
 
         exp = func(left, right)
         return exp
+
+#        # Если часть условия не является готовым выражением алхимии,
+#        # то преобразуем его в поле или параметр запроса
+#        first_param = None
+#        if not isinstance(left, ColumnElement):
+#            if isinstance(left, Field):
+#                left = left.get_alchemy_field(params)
+#            elif isinstance(left, Param):
+#                left.bind_to_entity(self)
+#                first_param = left
+#                left = bindparam(left.name, required=True)
+#            else:
+#                raise TypeError('Left WHERE argument must be string parameter or Field instance')
+#
+#        if not isinstance(right, ColumnElement):
+#            if isinstance(right, Field):
+#                right = right.get_alchemy_field(params)
+#            elif isinstance(right, Param):
+#                right.bind_to_entity(self)
+#                first_param = right
+#                right = bindparam(right.name, required=True)
+#            else:
+#                raise TypeError('Right WHERE argument must be Param instance or Field instance')
+#
+#        if first_param and isinstance(params, dict):
+#            value = params.get(first_param.name)
+#
+#            # Если параметры заданы, но нужного не оказалось, то убираем условие нафиг!
+#            if self._is_param_empty(value):
+#                return
+#
+#            # Если значение параметра известно и оно является
+#            #  перечисляемым, то заменяем EQUAL или NOT EQUAL на IN
+#            if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
+#                    func = lambda x, y: x.in_([y])
+#            if isinstance(value, (list, tuple)) and where.operator==Where.NE:
+#                    func = lambda x, y: ~x.in_([y])
+#
+#        exp = func(left, right)
+#        return exp
     
     def get_raw_sql(self):
         """ Возвращает текст SQL запроса для Entity """
@@ -784,4 +829,4 @@ class BaseEntity(object):
 
         return all_params
 
-# Нужно состояние, которое определяет режим работы
+#TODO: Прогнать через code coverage и найти мертвые места
