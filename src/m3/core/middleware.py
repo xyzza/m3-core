@@ -15,7 +15,7 @@ _thread_locals = local()
 
 from django.conf import settings
 from django.contrib import auth
-from django.utils.translation import ugettext as _
+#from django.utils.translation import ugettext as _
 
 from m3.helpers import logger
 
@@ -32,7 +32,7 @@ class ThreadData(object):
     
     DEFAULT_USER_ID = 0
     DEFAULT_USER_LOGIN = 'console-user'
-    DEFAULT_USER_NAME = _(u'Пользователь системной консоли')
+    DEFAULT_USER_NAME = u'Пользователь системной консоли'
     
     DEFAULT_SESSION_KEY = 'console-session'
     
@@ -40,7 +40,7 @@ class ThreadData(object):
     
     ANONYMOUS_USER_ID = 0
     ANONYMOUS_USER_LOGIN = 'anonymous-user'
-    ANONYMOUS_USER_NAME = _(u'Анонимный пользователь')
+    ANONYMOUS_USER_NAME = u'Анонимный пользователь'
     
     def __init__(self):
         '''
@@ -158,7 +158,6 @@ def get_thread_data():
         return default_data  
     
     return _thread_locals.m3_data
-
 
 class M3CommonMiddleware(object):
     '''
