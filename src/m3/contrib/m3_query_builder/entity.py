@@ -7,7 +7,7 @@ Created on 26.05.2011
 from abc import ABCMeta, abstractmethod
 from sqlalchemy.sql.expression import join, select, ColumnElement
 from sqlalchemy import bindparam
-from sqlalchemy import func
+from sqlalchemy import func as func_generator
 
 from m3.helpers.datastructures import TypedList
 from m3.db.alchemy_wrapper import SQLAlchemyWrapper
@@ -277,15 +277,15 @@ class Aggregate(object):
 
     class Max(BaseAggregate):
         def get_alchemy_func(self, column):
-            return func.max(column)
+            return func_generator.max(column)
             
     class Min(BaseAggregate):
         def get_alchemy_func(self, column):
-            return func.min(column)
+            return func_generator.min(column)
             
     class Count(BaseAggregate):
         def get_alchemy_func(self, column):
-            return func.count(column)
+            return func_generator.count(column)
 
 class Where(object):
     '''
@@ -295,7 +295,8 @@ class Where(object):
     AND = 'and'
     OR = 'or'
     NOT = 'not'
-    
+
+    # Внимание! Тут нет условия IN потому, что в случае передачи списка алхимия его поймет
     EQ = '= (IN)'
     NE = '!= (NOT IN)'
     LT = '<'
@@ -715,55 +716,12 @@ class BaseEntity(object):
             if self._is_param_empty(value):
                 return
 
-            # Если значение параметра известно и оно является
-            #  перечисляемым, то заменяем EQUAL или NOT EQUAL на IN
-            if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
-                func = lambda x, y: x.in_([y])
-            if isinstance(value, (list, tuple)) and where.operator==Where.NE:
-                func = lambda x, y: ~x.in_([y])
+            # Хитрая замена IN (ARRAY[]) на ANY(ARRAY[])
+            if isinstance(value, (list, tuple)):
+                right = func_generator.any(right)
 
         exp = func(left, right)
         return exp
-
-#        # Если часть условия не является готовым выражением алхимии,
-#        # то преобразуем его в поле или параметр запроса
-#        first_param = None
-#        if not isinstance(left, ColumnElement):
-#            if isinstance(left, Field):
-#                left = left.get_alchemy_field(params)
-#            elif isinstance(left, Param):
-#                left.bind_to_entity(self)
-#                first_param = left
-#                left = bindparam(left.name, required=True)
-#            else:
-#                raise TypeError('Left WHERE argument must be string parameter or Field instance')
-#
-#        if not isinstance(right, ColumnElement):
-#            if isinstance(right, Field):
-#                right = right.get_alchemy_field(params)
-#            elif isinstance(right, Param):
-#                right.bind_to_entity(self)
-#                first_param = right
-#                right = bindparam(right.name, required=True)
-#            else:
-#                raise TypeError('Right WHERE argument must be Param instance or Field instance')
-#
-#        if first_param and isinstance(params, dict):
-#            value = params.get(first_param.name)
-#
-#            # Если параметры заданы, но нужного не оказалось, то убираем условие нафиг!
-#            if self._is_param_empty(value):
-#                return
-#
-#            # Если значение параметра известно и оно является
-#            #  перечисляемым, то заменяем EQUAL или NOT EQUAL на IN
-#            if isinstance(value, (list, tuple)) and where.operator==Where.EQ:
-#                    func = lambda x, y: x.in_([y])
-#            if isinstance(value, (list, tuple)) and where.operator==Where.NE:
-#                    func = lambda x, y: ~x.in_([y])
-#
-#        exp = func(left, right)
-#        return exp
     
     def get_raw_sql(self):
         """ Возвращает текст SQL запроса для Entity """
@@ -780,21 +738,6 @@ class BaseEntity(object):
         BaseAlchemyObject.clear_instances()
 
         query = self.create_query(params=params, first_head=True)
-
-        #TODO: Проблема с IN, он преобразуется в ARRAY, но PostgreSQL почему-то не понимает его
-        # ХАК!
-        if isinstance(params, dict):
-            for k, v in params.items():
-                if isinstance(v, (list, tuple)):
-                    new_value = None
-                    if len(v) > 0:
-                        if isinstance(v[0], basestring):
-                            new_value = "'" + "','".join(v) + "'"
-                        elif isinstance(v[0], (int, float)):
-                            new_value = ",".join([str(x) for x in v])
-
-                    if new_value:
-                        params[k] = new_value
 
         WRAPPER.engine.echo = True
         cursor = query.execute(params)
