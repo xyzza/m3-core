@@ -5,6 +5,7 @@
 
 import re
 from uuid import uuid4
+from django.utils import datetime_safe
 
 def is_valid_email(value):
     if (value is None):
@@ -48,10 +49,12 @@ def generate_id():
     return str(uuid4())[0:8]
 
 
-def date2str(date):
+def date2str(date, template='%d.%m.%Y'):
     '''
     datetime.strftime глючит с годом < 1900
-    типа обходной маневр
+    типа обходной маневр (взято из django)
+    WARNING from django:
+    # This library does not support strftime's "%s" or "%y" format strings.
+    # Allowed if there's an even number of "%"s because they are escaped.
     '''
-    #FIXME добавить разбор шаблона (вторым параметром)
-    return "%02d.%02d.%04d" %(date.day, date.month, date.year)
+    return datetime_safe.new_datetime(date).strftime(template)
