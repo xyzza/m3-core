@@ -111,6 +111,7 @@ INSTALLED_APPS = (
     'tests.contrib.m3_mutex_tests',
     'tests.data.caching_tests',
     'tests.data.mie_tests',
+    'tests.data.repo_tests',
     'tests.ui.ext_tests',
     'tests.helpers.urls_tests',
     'tests.contrib.m3_audit_tests',
