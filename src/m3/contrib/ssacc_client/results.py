@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 from m3.contrib.ssacc_client.exceptions import SSACCException
 from m3.contrib.ssacc_client.result_params import (MetaParameter,
-    LicenseMetaObject, ProfileRatesParam)
+    LicenseMetaObject, ProfileRatesParam, LicenseMetaResultObjectTypeEnum)
 
 from pyexpat import ExpatError
 
@@ -66,13 +66,13 @@ class BaseResult(object):
         """
         return self._get_xml_response().createElement(name)
 
-    def return_response(self):
+    def return_response(self, status='ok'):
         """
         Возвращает ответ в виде HttpResponse с XML внутри.
 
         @return HttpResponse
         """
-        self._get_result_node().setAttribute('status', 'ok')
+        self._get_result_node().setAttribute('status', status)
         return HttpResponse(content=self._get_xml_content(),
             mimetype='text/xml')
 
@@ -128,19 +128,16 @@ class BaseResult(object):
             форматов SSACC
         @return OperationResult or ErrorResult
         """
-        try:
-            result_nodes = BaseResult._get_nodes_from_xml(xml_string)
-        except SSACCException, e:
-            return ErrorResult(e.message, None)
-        result_node = result_nodes[0]
 
-        if result_type == OperationResult:
+        def operation_result():
             return OperationResult()
-        elif result_type == ErrorResult:
+
+        def error_result(result_node):
             message = result_node.getAttribute('message')
             code = result_node.getAttribute('error_code')
             return ErrorResult(message, code)
-        elif result_type == ProfileRatesResult:
+
+        def profile_rates_result(result_node):
             # TODO(Excinsky): Не совсем эффективно, так как идет сначала
             # распарсивание, а потом снова запарсивание.
             params_list = []
@@ -153,13 +150,48 @@ class BaseResult(object):
 
             return ProfileRatesResult(*params_list)
 
-        elif result_type == AvailabilityResult:
+        def availability_result(result_node):
             availability = result_node.getElementsByTagName(
                 'availability').pop()
             status = availability.getAttribute('status')
             message = availability.getAttribute('message')
-
             return AvailabilityResult(status, message)
+
+        def license_meta_result(result_node):
+            object_list = []
+            for obj in result_node.getElementsByTagName('object'):
+                obj_code = obj.getAttribute('code')
+                obj_name = obj.getAttribute('name')
+                obj_type = obj.getAttribute('type')
+                if obj_type == 'int':
+                    obj_type = LicenseMetaResultObjectTypeEnum.INT
+                elif obj_type == 'bool':
+                    obj_type = LicenseMetaResultObjectTypeEnum.BOOL
+                else:
+                    return ErrorResult(u'Неверный тип лицензируемого параметра',
+                        'wrong_licensing_param')
+
+                object_list.append(LicenseMetaObject(obj_code,
+                    obj_name, obj_type))
+
+            return LicenseMetaResult(*object_list)
+
+        try:
+            result_nodes = BaseResult._get_nodes_from_xml(xml_string)
+        except SSACCException, e:
+            return ErrorResult(e.message, None)
+        result_node = result_nodes[0]
+
+        if result_type == OperationResult:
+            return operation_result()
+        elif result_type == ErrorResult:
+            return error_result(result_node)
+        elif result_type == ProfileRatesResult:
+            return profile_rates_result(result_node)
+        elif result_type == AvailabilityResult:
+            return availability_result(result_node)
+        elif result_type == LicenseMetaResult:
+            return license_meta_result(result_node)
 
         raise SSACCException(u'Неверный тип результата')
 
@@ -176,11 +208,10 @@ class ErrorResult(BaseResult):
         self._is_result_status_ok = False
 
     def return_response(self):
-        self._get_result_node().setAttribute('status', 'error')
         self._get_result_node().setAttribute('error_code', self._error_code)
         self._get_result_node().setAttribute('message', self._message)
 
-        return super(ErrorResult, self).return_response()
+        return super(ErrorResult, self).return_response(status='error')
 
 
 class OperationResult(BaseResult):
@@ -280,9 +311,23 @@ class LicenseMetaResult(BaseResult):
                 self._get_result_node().appendChild(node)
 
     def _prepare_node_from_object(self, node, obj):
+        """
+        Дополняет вершину XML-графа атрибутами из объекта лицензирования
+
+        @param node: Вершина графа
+        @param obj: Объект лицензирования
+        """
         node.setAttribute('code', obj.get_code())
         node.setAttribute('name', obj.get_name())
         node.setAttribute('type', obj.get_type_as_string())
+
+    def get_object_list(self):
+        """
+        Возвращает список объектов лицензирования, из которых был построен.
+
+        @return list of LicenseMetaObject
+        """
+        return self._object_list
 
 
 class OperatorResult(BaseResult):
