@@ -144,10 +144,12 @@ class BaseContextedResult(ActionResult):
         if isinstance(context, ActionContext):
             # в случае если задан реальный результат выполнения операции, то его и регистрируем
             self.context = context
+        elif context is None:
+            # Пустой контекст
+            self.context = ActionContext()
         else:
-            # иначе пытаемся построить ActionContext на основе переданного объекта context
-            self.context = ActionContext(context)
-    
+            raise TypeError('context must be a ActionContext instance')
+
 
 class ExtUIComponentResult(BaseContextedResult):
     '''

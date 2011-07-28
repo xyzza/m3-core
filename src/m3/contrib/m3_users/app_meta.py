@@ -1,9 +1,9 @@
 #coding:utf-8
-'''
+"""
 Created on 10.06.2010
 
 @author: akvarats
-'''
+"""
 
 from django.conf import urls
 
@@ -12,7 +12,7 @@ from m3.helpers.users import authenticated_user_required
 
 from roles import RolesActions, Roles_DictPack
 from users import UsersActions
-from metaroles import metarole_manager, UserMetarole, Metaroles_DictPack
+from metaroles import UserMetarole, Metaroles_DictPack
 
 # Константы:
 GENERIC_USER = 'generic-user'
@@ -20,7 +20,7 @@ ADMIN = 'admin'
 SUPER_ADMIN = 'super-admin'
 
 # контроллер
-users_controller = ActionController(url='/m3-users')
+users_controller = ActionController(url='/m3-users', name=u'Пользователи М3')
 
 
 def register_actions():
@@ -33,9 +33,9 @@ def register_actions():
     ])
 
 def register_urlpatterns():
-    '''
+    """
     Регистрация конфигурации урлов для приложения m3.contrib.users
-    '''
+    """
     return urls.defaults.patterns('',
         (r'^m3-users', 'm3.contrib.m3_users.app_meta.users_view'),
     )
@@ -44,12 +44,12 @@ def register_urlpatterns():
 # Регистрация метаролей для приложения
 #===============================================================================        
 def register_metaroles(manager):
-    '''
+    """
     Функция возвращает список метаролей, которые регистрируются
     по умолчанию на уровне Платформы М3.
     
     @param manager: объект, отвечающий за управление метаролями.
-    '''
+    """
     
     # метароль обычного пользователя системы
     manager.GENERIC_USER_METAROLE = UserMetarole(GENERIC_USER, u'Обобщенный пользователь')
@@ -69,4 +69,4 @@ def register_metaroles(manager):
 #===============================================================================
 @authenticated_user_required
 def users_view(request):
-    return users_controller.process_request(request) 
+    return users_controller.process_request(request)

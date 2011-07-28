@@ -82,11 +82,12 @@ class ActionContext(object):
             self.type = type
             self.allow_empty = allow_empty
 
-    def __init__(self, obj=None):
+    def __init__(self, **kwargs):
         '''
-        В зависимости от типа obj выполняем построение объекта контекста действия
+        Параметры kwargs для быстрой инициализации
         '''
-        pass
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     def convert_value(self, raw_value, arg_type):
         ''' Возвращает значение *raw_value* преобразованное в заданный тип *arg_type* '''
