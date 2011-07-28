@@ -886,26 +886,19 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         # тут возможны варианты, когда pack используется без грида
         # в этом случае нужно работать с элементом дерева
+        row = None
         if self.list_model:
             row = self.get_row(key)
-            if row != None:
-                name = attr_name if attr_name else self.column_name_on_select
-                text = getattr(row, name)
-                # getattr может возвращать метод, например verbose_name
-                if callable(text):
-                    return text()
-                else:
-                    return text
         elif self.tree_model:
             row = self.get_node(key)
-            if row != None:
-                name = attr_name if attr_name else self.column_name_on_select
-                text = getattr(row, name)
-                # getattr может возвращать метод, например verbose_name
-                if callable(text):
-                    return text()
-                else:
-                    return text
+        if row != None:
+            name = attr_name if attr_name else self.column_name_on_select
+            text = getattr(row, name)
+            # getattr может возвращать метод, например verbose_name
+            if callable(text):
+                return text()
+            else:
+                return text
         return None
     
 #=#===============================================================================

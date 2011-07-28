@@ -592,6 +592,6 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
     def get_display_text(self, key, attr_name = None):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         row_id = self.get_row(key)
-        text = self.enumerate_class.values[row_id]
+        text = self.enumerate_class.values.get(row_id,'')
         return text
     
