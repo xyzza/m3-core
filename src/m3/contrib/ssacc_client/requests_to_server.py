@@ -113,25 +113,29 @@ def server_ssacc_availability(account_id):
         result_class=AvailabilityResult)
 
 
-def server_ssacc_operator_new(account_id, login, raw_password):
+def server_ssacc_operator_new(account_id, login, username, enc_password):
     """Сообщает серверу о создании нового оператора.
     """
     return _send_post_request(
         "/ssacc/operator/new",
-        dict(account_id=account_id, login=login, raw_password=raw_password))
+        dict(account_id=account_id, login=login,
+             username=username, enc_password=enc_password))
 
 
-def server_ssacc_operator_edit(account_id, login, raw_password):
+def server_ssacc_operator_edit(account_id, old_login, old_enc_password,
+                               new_login, new_username, new_enc_password):
     """Сообщает серверу об изменении существующенго оператора.
     """
     return _send_post_request(
         "/ssacc/operator/edit",
-        dict(account_id=account_id, login=login, raw_password=raw_password))
+        dict(account_id=account_id, old_login=old_login,
+             old_enc_password=old_enc_password, new_login=new_login,
+             new_username=new_username, new_enc_password=new_enc_password))
 
 
-def server_ssacc_operator_delete(account_id):
+def server_ssacc_operator_delete(account_id, login, enc_password):
     """Сообщает серверу об удалении оператора.
     """
     return _send_post_request(
         "/ssacc/operator/delete",
-        dict(account_id=account_id))
+        dict(account_id=account_id, login=login, enc_password=enc_password))
