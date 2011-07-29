@@ -412,7 +412,15 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
     #ISelectablePack
     def get_display_text(self, key, attr_name = None):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
-        raise NotImplementedError()
+        row = self.get_row(key)
+        if row is not None:
+            name = attr_name if attr_name else self.column_name_on_select
+            text = getattr(row, name)
+            # getattr может возвращать метод, например verbose_name
+            if callable(text):
+                return text()
+            else:
+                return text
     
     #====================== РАБОТА С ОКНАМИ ===============================
     def get_list_window(self, win):
@@ -426,6 +434,7 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
     def get_edit_window(self, win):
         ''' Возвращает настроенное окно редактирования элемента справочника '''
         return win
+
 
 class BaseDictionaryModelActions(BaseDictionaryActions):
     '''
@@ -541,20 +550,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
             filter_fields.extend([field.attname for field in self.model._meta.local_fields \
                                   if field.attname in ('code', 'name')])
         return filter_fields
-    
-    #ISelectablePack
-    def get_display_text(self, key, attr_name = None):
-        """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
-        row = self.get_row(key)
-        if row != None:
-            name = attr_name if attr_name else self.column_name_on_select
-            text = getattr(row, name)
-            # getattr может возвращать метод, например verbose_name
-            if callable(text):
-                return text()
-            else:
-                return text
-        return None
+
             
 class BaseEnumerateDictionary(BaseDictionaryActions):
     '''
