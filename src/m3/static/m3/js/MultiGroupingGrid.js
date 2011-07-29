@@ -964,7 +964,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		
 		var req = {
 			url: this.actionNewUrl,
-			params: this.actionContextJson || {},
+			params: this.getMainContext(),
 			success: function(res, opt){
 				if (scope.fireEvent('afternewrequest', scope, res, opt)) {
 				    try { 
@@ -1003,52 +1003,11 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		assert(this.rowIdName, 'rowIdName is not define');
 		
 	    if (this.getSelectionModel().hasSelection()) {
-			var baseConf = {};
-			var sm = this.getSelectionModel();
-			// для режима выделения строк
-			var record;
-			if (sm instanceof Ext.grid.RowSelectionModel) {
-				if (sm.singleSelect) {
-					record = sm.getSelected();
-					baseConf[this.rowIdName] = record.json.id;
-				} else {
-					// для множественного выделения
-					var sels = sm.getSelections();
-					var ids = [];
-					var records = [];
-					for(var i = 0, len = sels.length; i < len; i++){
-						records.push(sels[i]);
-						ids.push(sels[i].json.id);
-					}
-					record = records;
-					baseConf[this.rowIdName] = ids.join();
-				}
-			}
-			// для режима выделения ячейки
-			else if (sm instanceof Ext.grid.CellSelectionModel) {
-				assert(this.columnParamName, 'columnParamName is not define');
-				
-				var cell = sm.getSelectedCell();
-				if (cell) {
-					record = this.getStore().getAt(cell[0]); // получаем строку данных
-					baseConf[this.rowIdName] = record.id;
-					baseConf[this.columnParamName] = this.getColumnModel().getDataIndex(cell[1]); // получаем имя колонки
-				}
-			}
-			// если локальное редактирование
-	        if (this.localEdit){
-	        	// то нужно добавить в параметры текущую строку грида
-	        	if (Ext.isArray(record)){
-	        		// пока х.з. что делать
-	        	} else {
-	        		baseConf = Ext.applyIf(baseConf, record.json);
-	        	}
-	        }
-			
+			var baseConf = this.getSelectionContext(this.localEdit);
 			var mask = new Ext.LoadMask(this.body);
 			var req = {
 				url: this.actionEditUrl,
-				params: Ext.applyIf(baseConf, this.actionContextJson || {}),
+				params: baseConf,
 				success: function(res, opt){
 					if (scope.fireEvent('aftereditrequest', scope, res, opt)) {
 					    try { 
@@ -1093,53 +1052,11 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		        buttons: Ext.Msg.YESNO,
 		        fn:function(btn, text, opt){ 
 		            if (btn == 'yes') {
-						var baseConf = {};
-						var sm = scope.getSelectionModel();
-						var record;
-						// для режима выделения строк
-						if (sm instanceof Ext.grid.RowSelectionModel) {
-							if (sm.singleSelect) {
-								record = sm.getSelected();
-								baseConf[scope.rowIdName] = record.json.id;
-							} else {
-								// для множественного выделения
-								var sels = sm.getSelections();
-								var ids = [];
-								var records = [];
-								for(var i = 0, len = sels.length; i < len; i++){
-									records.push(sels[i]);
-									ids.push(sels[i].json.id);
-								}
-								record = records;
-								baseConf[scope.rowIdName] = ids.join();
-							}
-						}
-						// для режима выделения ячейки
-						else if (sm instanceof Ext.grid.CellSelectionModel) {
-							assert(scope.columnParamName, 'columnParamName is not define');
-							
-							var cell = sm.getSelectedCell();
-							if (cell) {
-								var record = scope.getStore().getAt(cell[0]);
-								baseConf[scope.rowIdName] = record.id;
-								baseConf[scope.columnParamName] = scope.getColumnModel().getDataIndex(cell[1]);
-							}
-						}
-						
-						// если локальное редактирование
-				        if (scope.localEdit){
-				        	// то нужно добавить в параметры текущую строку грида
-				        	if (Ext.isArray(record)){
-				        		// пока х.з. что делать
-				        	} else {
-				        		baseConf = Ext.applyIf(baseConf, record.json);
-				        	}
-				        }
-						
+						var baseConf = scope.getSelectionContext(scope.localEdit);
 						var mask = new Ext.LoadMask(scope.body);
 						var req = {
 		                   url: scope.actionDeleteUrl,
-		                   params: Ext.applyIf(baseConf, scope.actionContextJson || {}),
+		                   params: baseConf,
 		                   success: function(res, opt){
 		                	   if (scope.fireEvent('afterdeleterequest', scope, res, opt)) {
 		                	       try { 
@@ -1270,6 +1187,62 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
                 toolbars[i].setDisabled(disabled);
             }
         }
+    }
+    /**
+     * Получение основного контекста грида
+     * Используется при ajax запросах
+     */
+    ,getMainContext: function(){
+    	return this.actionContextJson || {};
+    }
+    /**
+     * Получение контекста выделения строк/ячеек
+     * Используется при ajax запросах
+     * @param {bool} withRow Признак добавление в контекст текущей выбранной записи
+     */
+    ,getSelectionContext: function(withRow){
+    	var baseConf = this.getMainContext();
+		var sm = this.getSelectionModel();
+		var record;
+		// для режима выделения строк
+		if (sm instanceof Ext.grid.RowSelectionModel) {
+			if (sm.singleSelect) {
+				record = sm.getSelected();
+				baseConf[this.rowIdName] = record.json.id;
+			} else {
+				// для множественного выделения
+				var sels = sm.getSelections();
+				var ids = [];
+				record = [];
+				for(var i = 0, len = sels.length; i < len; i++){
+					record.push(sels[i]);
+					ids.push(sels[i].json.id);
+				}
+				baseConf[this.rowIdName] = ids.join();
+			}
+		}
+		// для режима выделения ячейки
+		else if (sm instanceof Ext.grid.CellSelectionModel) {
+			assert(this.columnParamName, 'columnParamName is not define');
+			
+			var cell = sm.getSelectedCell();
+			if (cell) {
+				record = this.getStore().getAt(cell[0]);
+				baseConf[this.rowIdName] = record.json.id;
+				baseConf[this.columnParamName] = this.getColumnModel().getDataIndex(cell[1]);
+			}
+		}
+		// если просят выделенную строку
+        if (withRow){
+        	// то нужно добавить в параметры текущую строку грида
+        	if (Ext.isArray(record)){
+        		// пока х.з. что делать - возьмем первую
+        		baseConf = Ext.applyIf(baseConf, record[0].json);
+        	} else {
+        		baseConf = Ext.applyIf(baseConf, record.json);
+        	}
+        }
+		return baseConf;
     }
 });
 
