@@ -694,7 +694,7 @@ class SpreadsheetReport(object):
             filter_property.Name = "FilterName"
             filter_property.Value = filter
             properties.append(filter_property)
-        self.set_draw_page_size()     
+        self.set_result_sheet_style()     
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
         if self.document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)           
@@ -782,19 +782,13 @@ class SpreadsheetReport(object):
                 logger.exception("Не удалось удалить временный файл %s: %s " %(self.temporary_file_path, e.message))                
          
             
-    def set_draw_page_size(self):
+    def set_result_sheet_style(self):
         '''
-        Выставляет странице с результатом такой же размер, как в шаблоне
+        Выставляет странице с результатом такой же стиль, как в шаблоне
         ''' 
-        page_styles= self.document.StyleFamilies.getByName("PageStyles")
-        # Листу шаблона соответствует третий стиль
-        src_page = page_styles.getByIndex(2)
-        # Стиль по умолчанию
-        dest_page = page_styles.getByName("Default")
-        # Выставляется ориентация листа
-        dest_page.IsLandscape = src_page.IsLandscape
-        dest_page.Width = src_page.Width
-        dest_page.Height = src_page.Height
+        dest_sheet = self.document.getSheets().getByIndex(1)
+        src_sheet = self.document.getSheets().getByName(TEMPORARY_SHEET_NAME)
+        dest_sheet.PageStyle = src_sheet.PageStyle
         
         
              
