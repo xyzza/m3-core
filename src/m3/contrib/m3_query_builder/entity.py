@@ -287,6 +287,25 @@ class Aggregate(object):
         def get_alchemy_func(self, column):
             return func_generator.count(column)
 
+class SortOrder(object):
+    '''
+    Для сортировки
+    '''
+    
+    ASC = u'По возврастанию'
+    DESC = u'По убыванию'
+    
+    VALUES = [ASC, DESC]
+    
+    def __init__(self, field, order=None):
+        order = order or SortOrder.ASC
+        
+        assert isinstance(field, Field)
+        assert order in (SortOrder.ASC, SortOrder.DESC)
+        
+        self.field = field
+        self.order = order
+
 class Where(object):
     '''
     Для условий
@@ -297,8 +316,8 @@ class Where(object):
     NOT = 'not'
 
     # Внимание! Тут нет условия IN потому, что в случае передачи списка алхимия его поймет
-    EQ = '= (IN)'
-    NE = '!= (NOT IN)'
+    EQ = u'= (Вхождение)'
+    NE = u'!= (Не вхождение)'
     LT = '<'
     LE = '<='
     GT = '>'
@@ -405,7 +424,8 @@ class Param(object):
     }
     
     def __init__(self, name, verbose_name, type, type_value=None):
-        assert type in Param.VALUES.keys(), 'type must be value in Param.VALUES'
+        if type:
+            assert type in Param.VALUES.keys(), 'type must be value in Param.VALUES'
         
         # Название параметра: Имя класса + '.' + Имя параметра
         self.name = name
@@ -472,6 +492,9 @@ class BaseEntity(object):
 
         # Объект условий
         self.where = None
+        
+        # Список объектов SortOrder
+        self.order_by = TypedList(type=SortOrder)
 
         # Словарь с алиасами для полей в select'e запроса
         self.select = TypedList(type=Field)

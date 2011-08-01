@@ -18,7 +18,8 @@ from m3.ui.actions.packs import BaseDictionaryActions
 from m3.ui.actions.tree_packs import BaseTreeDictionaryActions
 
 
-from entity import BaseEntity, Field, Entity, Relation, Grouping, Where, Param
+from entity import BaseEntity, Field, Entity, Relation, Grouping, Where, Param, \
+    SortOrder
 from models import Query, Report, ReportParams
 
 
@@ -81,6 +82,35 @@ def get_entity_items(entities):
             
     return res
 
+#==============================================================================
+# Вспомогательные функции для получения различной информации о запросе
+def get_group_fields(objs, separator='-'):
+    '''
+    Возвращает поля группировок
+    '''
+    for group_field in objs['group']['group_fields']:
+        entity_name, field_name = group_field['id'].split(separator)
+        yield entity_name, field_name 
+
+def get_limit(objs):
+    '''
+    Возвращает лимит для запроса
+    '''
+    return objs['limit']
+
+def get_sorted_fields(objs, separator='-'):
+    '''
+    Возвращает поля, по которым требуется сортировка
+    '''
+    ordered_item = []
+    for select_field in objs['selected_fields']:
+        
+        _, field_name = select_field['id'].split(separator)
+
+        if select_field['sorting']:
+            ordered_item.append(field_name)
+            
+    return ordered_item
 
 def build_entity(objs, separator='-'):    
     '''
@@ -103,8 +133,7 @@ def build_entity(objs, separator='-'):
     
     # Список группировки
     group_fields = []
-    for group_field in objs['group']['group_fields']:
-        entity_name, field_name = group_field['id'].split(separator)
+    for entity_name, field_name in get_group_fields(objs, separator):        
         field = Field(entity=Entity(entity_name),
                       field_name=field_name,)
         group_fields.append(field)
@@ -125,7 +154,7 @@ def build_entity(objs, separator='-'):
     entity.group_by = Grouping(group_fields=group_fields, 
                                aggregate_fields=aggr_fields)
     
-    # Список полей выборки
+    # Список полей выборки и сортировка
     for select_field in objs['selected_fields']:
         
         entity_name, field_name = select_field['id'].split(separator)
@@ -135,8 +164,11 @@ def build_entity(objs, separator='-'):
                       alias=select_field.get('alias'))
         
         entity.select.append(field)
+        
+        if select_field['sorting']:
+            entity.order_by.append(SortOrder(field, select_field['sorting']))
             
-    # Список условий    
+    # Список условий
     entity.where = Where()
     for condition in objs['cond_fields']:
         
@@ -146,13 +178,15 @@ def build_entity(objs, separator='-'):
                       field_name=field_name)
                 
         entity.where &= Where(left=field, op=condition['condition'], 
-                  right=Param(name=condition['parameter'], type=1, verbose_name='123'))                
+                  right=Param(name=condition['parameter'], type=None, verbose_name=None))                
       
       
-    entity.distinct = objs['distinct']
+    entity.distinct = objs['distinct']        
     
-    if objs['limit']:
-        entity.limit = objs['limit']
+    # Лимит:
+    limit = get_limit(objs)
+    if limit:
+        entity.limit = limit
     
     return entity
 
@@ -191,8 +225,8 @@ def get_query_params(query_id):
     query = Query.objects.get(id=query_id)
     query_json = json.loads(query.query_json)
     
-    res = [{'name': '%s.%s' % (condition['entityName'], 
-                               condition['parameter'])} for condition in query_json['cond_fields']]    
+    res = [{'name': '%s' % condition['id'].replace('-','.'),
+            'condition': condition['condition']} for condition in query_json['cond_fields']]
 
     # Получаем параметры вложенных сущностей
     inner_list = []
@@ -216,7 +250,7 @@ def get_report_params(report_id):
     name = Report.objects.get(id=report_id).name
     
     params = ReportParams.objects.filter(report=report_id).\
-        values('name', 'verbose_name', 'type', 'value')
+        values('name', 'verbose_name', 'type', 'value', 'condition')
 
     return name, params
 
@@ -262,6 +296,7 @@ def save_report(id, name, query_id, grid_data):
         report_params.verbose_name = item['verbose_name']
         report_params.name = item['name']
         report_params.type = item['type']
+        report_params.condition = item['condition']
         
         if item.get('type_value'):
             report_params.value = item['type_value']
@@ -276,6 +311,7 @@ def get_report(id):
 
 def get_report_data(report, params):
     '''
+    Данные для грида
     '''
     entity = build_entity( json.loads( report.query.query_json ))
     data = entity.get_data(params)

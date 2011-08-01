@@ -57,5 +57,8 @@ class ReportParams(models.Model):
     # Значение параметра
     value = models.CharField(max_length=300)
     
+    # Условие для работы параметра
+    condition = models.CharField(max_length=30)
+    
     class Meta():
         db_table = 'm3_report_builder_params'

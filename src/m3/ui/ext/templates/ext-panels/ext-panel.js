@@ -12,6 +12,8 @@ new Ext.Panel({
 	{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
 	{% if component.split %} ,split: true {% endif %} 
 	{% if component.collapsible %} ,collapsible: true {% endif %} 
+	{% if component.collapse_mode %} ,collapseMode: '{{ component.collapse_mode }}' {% endif %}
+	
 	{% if component.padding %} ,padding: '{{ component.padding }}' {% endif %}
 	{% if component.anchor %}, anchor: '{{component.anchor}}' {% endif %}
     {% if component.dd_group %}, ddGroup: '{{component.dd_group}}' {% endif %}

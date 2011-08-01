@@ -23,10 +23,17 @@
     	{% endif %}
 		, fileUpload: {% if component.file_upload %} true {% else %} false {% endif %}
     	{% if component.top_bar %} ,tbar: {{ component.t_render_top_bar|safe }} {% endif %}
+        
         {% if component.collapsible %} ,collapsible: true {% endif %}
+        {% if component.collapsed %} ,collapsed: true {% endif %}
+        {% if component.collapse_mode %} ,collapseMode: '{{ component.collapse_mode }}' {% endif %}
+        
+        {% if component.split %} ,split: true {% endif %}
+        
     	{% if component.buttom_bar %} ,bbar: {{ component.t_render_buttom_bar|safe }} {% endif %}
     	{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
-     	,baseCls: 'x-plain'
+     	{% if component.base_cls %} ,baseCls: '{{ component.base_cls }}' {% else %} ,baseCls:'x-plain' {% endif %}
+        
         ,items: {{ component.t_render_items|safe }}
     });
     {% if component.focused_field %}

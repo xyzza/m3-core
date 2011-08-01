@@ -52,9 +52,6 @@ class ExtForm(BaseExtPanel):
         # Будут ли загружаться файлы
         self.file_upload = False
 
-        # Возможность сворачивать панель
-        self.collapsible = False
-        
         # @deprecated: См 467. Необязательно использовать непосредственно атрибут экземпляра 
         self.object = None
         

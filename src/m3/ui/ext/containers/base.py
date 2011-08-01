@@ -12,6 +12,16 @@ class BaseExtContainer(ExtUIComponent):
     '''
     Базовый класс для контейнерных компонентов
     '''
+    AUTO = 'auto'
+    FIT = 'fit'
+    FORM = 'form'
+    BORDER = 'border'    
+    VBOX = 'vbox'
+    HBOX = 'hbox'
+    ABSOLUTE = 'absolute'
+    ACCORDITION = 'accordition'
+    
+    
     def __init__(self, *args, **kwargs):
         super(BaseExtContainer, self).__init__(*args, **kwargs)
         
@@ -26,6 +36,21 @@ class BaseExtContainer(ExtUIComponent):
         
         # Атрибуты специфичные для form layout
         self.label_width = self.label_align = self.label_pad = None
+        
+        # Если контрол находится непосредственно на компоненте с layout=border
+        # то при задании этого свойства можно будет ресайзить (изменять размеры)
+        # панели  
+        self.split = False
+        
+        # Если контрол находится непосредственно на компоненте с layout=border
+        # то можно указывать различные типы, например "mini" 
+        self.collapse_mode = None
+        
+        # Возможность сворачивать
+        self.collapsible = False
+        
+        # True - компонент изначально свернут
+        self.collapsed = False
         
     def t_render_items(self):
         ''' 
@@ -72,10 +97,16 @@ class BaseExtContainer(ExtUIComponent):
                                       self.layout)
         self._put_config_value('layout', self.layout)
         
-        self._put_config_value('labelWidth', self.label_width)
-        self._put_config_value('labelAlign', self.label_align)
-        self._put_config_value('labelPad', self.label_pad)
-    
+        if self.region == BaseExtContainer.BORDER:
+            self._put_config_value('split', self.split)
+            self._put_config_value('collapseMode', self.collapse_mode)
+            self._put_config_value('collapsible', self.collapsible)
+            self._put_config_value('collapsed', self.collapsed)
+     
+        if self.layout == BaseExtContainer.FORM:
+            self._put_config_value('labelWidth', self.label_width)
+            self._put_config_value('labelAlign', self.label_align)
+            self._put_config_value('labelPad', self.label_pad)
         
     def nested_components(self):
         '''
@@ -123,21 +154,6 @@ class BaseExtPanel(BaseExtContainer):
         
         # Будет ли граница
         self.border = True
-        
-        # Если контрол находится непосредственно на компоненте с layout=border
-        # то при задании этого свойства можно будет ресайзить (изменять размеры)
-        # панели  
-        self.split = False
-        
-        # Если контрол находится непосредственно на компоненте с layout=border
-        # то можно указывать различные типы, например "mini" 
-        self.collapse_mode = None
-        
-        # Возможность сворачивать
-        self.collapsible = False
-        
-        # True - компонент изначально свернут
-        self.collapsed = False
 
     def t_render_top_bar(self):
         #TODO: Использовать lambda функцию в render_base_config

@@ -15,16 +15,18 @@ from m3.ui.ext.fields.complex import ExtDictSelectField
 from m3.ui.ext.containers.containers import ExtContainer
 from m3.helpers.icons import Icons
 from m3.ui.ext.fields.simple import ExtStringField, ExtNumberField, ExtDateField,\
-    ExtCheckBox
+    ExtCheckBox, ExtDisplayField
 
 
 import ui
 from models import Query, Report, ReportParams
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
-    get_pack, get_report_params, get_report, get_report_data
+    get_pack, get_report_params, get_report, get_report_data, get_group_fields, \
+    get_limit
         
-from entity import Param
+from entity import Param, SortOrder
+from m3.contrib.m3_query_builder.api import get_sorted_fields
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -71,6 +73,7 @@ class QueryBuilderWindowAction(actions.Action):
         window = ui.QueryBuilderWindow(params=params)
         window.set_aggr_functions( get_aggr_functions())
         
+        window.set_data_to_store_combo_sort([(value, value) for value in SortOrder.VALUES])
         
         if hasattr(context, 'id') and getattr(context, 'id'):
             query = self.parent.model.objects.get(id=context.id)
@@ -301,13 +304,16 @@ class ReportBuilderWindowAction(actions.Action):
                     value_name = pack.verbose_name or pack.__class__.__name__
 
                        
+                print param.condition
+                       
                 data.append([param.id,
                              param.name,
                              param.verbose_name, 
                              param.type,
                              Param.VALUES[int(param.type)],
-                             value or '',
-                             value_name or ''
+                             #value or '',
+                             value_name or '',
+                             param.condition
                              ])
 
             window.astore_params.data = data
@@ -354,8 +360,8 @@ class ReportQuerySaveAction(actions.Action):
                         'message': u'Не удалось сохранить запрос'}))
             
         return actions.JsonResult(json.dumps({'success':True}))
-    
-    
+
+
 class ReportEditParamsWindowAction(actions.Action):
     '''
     Запрос на получение окна редактрирования параметров
@@ -412,6 +418,8 @@ class GetReportFormAction(actions.Action):
 
     def run(self, request, context):
 
+        conditions = []
+
         win = ui.ReportForm()
         win.submit_data_url = GenerateReportAction.absolute_url()
         
@@ -419,7 +427,7 @@ class GetReportFormAction(actions.Action):
         
         win.title = name
         win.hdn_report_id.value = context.id
-        win.height = 90        
+        #win.height = 90        
         win.frm_form.layout_config={'align':'stretch'}
         
         for i, param in enumerate(params):
@@ -462,8 +470,46 @@ class GetReportFormAction(actions.Action):
                                                   icon_cls=Icons.ADD,
                                                   client_id='btn-'+field.client_id))
             
-            win.height += 30
+            #win.height += 30
             win.frm_form.items.append(cont_outer)
+            
+            import pprint
+            pprint.pprint( param )
+        
+            # Добавляются условия:
+            conditions.append('%s %s' % (param['verbose_name'] ,param['condition']))
+            
+        
+        info_data_fields = []
+        
+        report = get_report(context.id)            
+        
+        json_query = json.loads( report.query.query_json )
+        
+        # Информация о distinct:
+        limit = get_limit(json_query)
+        if limit > 0:
+            info_data_fields.append(  ExtDisplayField(label=u'<b>Первые</b>', value=limit) )
+            
+        # Информация о group by:
+        gr_fields = get_group_fields(json_query)
+        fields = [field_name for entity_name, field_name in gr_fields]
+        if fields:
+            info_data_fields.append( 
+                ExtDisplayField(label=u'<b>Группировка</b>', value='<br/>'.join(fields)) )        
+        
+        # Информация о сортировке:
+        sorted_fields = get_sorted_fields(json_query)
+        if sorted_fields:
+            info_data_fields.append(        
+                ExtDisplayField(label=u'<b>Сортировка</b>', value='<br/>'.join(sorted_fields)) )        
+        
+        # Информация о where:
+        if conditions: 
+            info_data_fields.append( 
+                ExtDisplayField(label=u'<b>Условия</b>', value='<br/>'.join(conditions)) )
+        
+        win.frm_info.items.extend(info_data_fields)
         
         return actions.ExtUIScriptResult(win)
        
@@ -473,6 +519,8 @@ class GenerateReportAction(actions.Action):
     '''
     url = '/generate-report'
     shortname = 'm3-report-builder-generate-report'
+
+    TIMEOUT = 30 * 60 # 30 минут
 
     def context_declaration(self):
         return [ACD(name='params', type=object, required=True, 
@@ -494,7 +542,8 @@ class GenerateReportAction(actions.Action):
                                 header=field.verbose_name or field.field_name)                
         
         # Кеширование данных
-        cache.set(win.client_id, get_report_data(report, context.params))
+        cache.set(win.client_id, get_report_data(report, context.params),
+                    GenerateReportAction.TIMEOUT)
             
         return actions.ExtUIScriptResult(win)
 
@@ -519,6 +568,7 @@ class ReportDataAction(actions.Action):
     def run(self, request, context):
         # Ответ из кеша
         data = cache.get(context.m3_window_id)
+                        
         return actions.PreJsonResult({'rows': data[context.start:
                                                    context.start + context.limit], 
                                       'total': len(data)

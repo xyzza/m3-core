@@ -29,6 +29,7 @@ function submitForm(){
 			'verbose_name': range[i].get('verbose_name'),
 			'type': range[i].get('type_id'),
 			'type_value': range[i].get('value_type'),
+			'condition': range[i].get('condition'),
 		});
 	}
 
@@ -55,6 +56,9 @@ function getParams(queryID){
 			loadMask.hide();
 			
 			var records = Ext.decode(response.responseText);
+			
+			console.log(records);
+			
 			var data = [];
 			for (var i=0; i<records.length; i++){
 				data.push([records[i].name, 
@@ -63,7 +67,8 @@ function getParams(queryID){
 						   records[i].type_id,
 						   records[i].type,
 						   records[i].value_type,
-						   records[i].value_type_id,	
+						   //records[i].value_type_id,
+						   records[i].condition	
 						]);
 			}
 
