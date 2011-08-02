@@ -549,7 +549,7 @@ class BaseEntity(object):
 
         query = select(columns=select_columns, whereclause=whereclause, from_obj=join_sequence)
 
-        query = self._create_grouping(query)
+        query = self._create_grouping(query, params)
         query = self._create_sorting(query, params)
         query = self._create_limit_offset(query, params, first_head)
 
@@ -606,13 +606,13 @@ class BaseEntity(object):
         join_sequence = None if join_sequence is None else [join_sequence]
         return join_sequence
 
-    def _create_grouping(self, query):
+    def _create_grouping(self, query, params):
         """
         Добавляет в запрос алхимии конструкцию GROUP BY
         """
         if self.group_by and self.group_by.group_fields:
             for field in self.group_by.group_fields:
-                col = field.get_alchemy_field()
+                col = field.get_alchemy_field(params)
                 query = query.group_by(col)
         return query
 
@@ -785,6 +785,7 @@ class BaseEntity(object):
         #TODO: Потокоопасный метод! Надо использовать пул, живущий только во время формирования.
         BaseAlchemyObject.clear_instances()
 
+        #params['EntityTree.created'] = datetime.date(2000,1,1)
         query = self.create_query(params=params, first_head=True)
 
         WRAPPER.engine.echo = True
