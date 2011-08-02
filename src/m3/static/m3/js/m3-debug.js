@@ -8520,7 +8520,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return this.actionContextJson || {};
+    	return Ext.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек
@@ -8769,7 +8769,7 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return this.actionContextJson || {};
+    	return Ext.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек
@@ -8985,7 +8985,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return this.getLoader().baseParams || {};
+    	return Ext.applyIf({}, this.getLoader().baseParams);
     }
     /**
      * Получение контекста выделения строк/ячеек
