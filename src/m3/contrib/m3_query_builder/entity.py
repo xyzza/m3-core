@@ -306,6 +306,18 @@ class SortOrder(object):
         self.field = field
         self.order = order
 
+    def get_alchemy_field(self, params):
+        """
+        Возвращает поле в формате SqlAlchemy, с окончанием, указывающим направление сортировки
+        """
+        column = self.field.get_alchemy_field(params)
+        if self.order ==  self.ASC:
+            column = column.asc()
+        elif self.order == self.DESC:
+            column = column.desc()
+
+        return column
+
 class Where(object):
     '''
     Для условий
@@ -538,6 +550,7 @@ class BaseEntity(object):
         query = select(columns=select_columns, whereclause=whereclause, from_obj=join_sequence)
 
         query = self._create_grouping(query)
+        query = self._create_sorting(query, params)
         query = self._create_limit_offset(query, params, first_head)
 
         return query
@@ -595,13 +608,25 @@ class BaseEntity(object):
 
     def _create_grouping(self, query):
         """
-        Группировка GROUP BY
+        Добавляет в запрос алхимии конструкцию GROUP BY
         """
         if self.group_by and self.group_by.group_fields:
             for field in self.group_by.group_fields:
                 col = field.get_alchemy_field()
                 query = query.group_by(col)
         return query
+
+    def _create_sorting(self, query, params):
+        """
+        Добавляет в запрос алхимии конструкцию ORDER BY
+        """
+        sorted_fields = []
+        for sort_order in self.order_by:
+            field = sort_order.get_alchemy_field(params)
+            sorted_fields.append(field)
+
+        return query.order_by(*sorted_fields)
+
 
     def _create_limit_offset(self, query, params, first_head):
         """
