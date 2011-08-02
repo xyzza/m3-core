@@ -306,18 +306,6 @@ class SortOrder(object):
         self.field = field
         self.order = order
 
-    def get_alchemy_field(self, params):
-        """
-        Возвращает поле в формате SqlAlchemy, с окончанием, указывающим направление сортировки
-        """
-        column = self.field.get_alchemy_field(params)
-        if self.order ==  self.ASC:
-            column = column.asc()
-        elif self.order == self.DESC:
-            column = column.desc()
-
-        return column
-
 class Where(object):
     '''
     Для условий
@@ -555,6 +543,20 @@ class BaseEntity(object):
 
         return query
 
+    #TODO: Не нравятся мне эти аргументы...
+    def _prepare_aggregate_for_field(self, field, column):
+        """
+        Если обёрнуто аггрегирующую в функцию, то метод возвращает эту функцию,
+        иначе возвращает не измененное поле
+        """
+        if self.group_by and self.group_by.aggregate_fields:
+            aggregate_fields = self.group_by.aggregate_fields
+            for af in aggregate_fields:
+                if af.field.field_name == field.field_name:
+                    column = af.get_alchemy_func(column)
+                    break
+        return column
+
     def _create_columns(self, params):
         select_columns = []
         for field in self.select:
@@ -569,12 +571,7 @@ class BaseEntity(object):
                 column = field.get_alchemy_field(params)
 
                 # На наго может быть наложена агрегатная функция.
-                if self.group_by and self.group_by.aggregate_fields:
-                    aggregate_fields = self.group_by.aggregate_fields
-                    for af in aggregate_fields:
-                        if af.field.field_name == field.field_name:
-                            column = af.get_alchemy_func(column)
-                            break
+                column = self._prepare_aggregate_for_field(field, column)
 
                 select_columns.append(column)
         return select_columns
@@ -622,8 +619,17 @@ class BaseEntity(object):
         """
         sorted_fields = []
         for sort_order in self.order_by:
-            field = sort_order.get_alchemy_field(params)
-            sorted_fields.append(field)
+            field, order = sort_order.field, sort_order.order
+            column = field.get_alchemy_field(params)
+            column = self._prepare_aggregate_for_field(field, column)
+
+            # Добавляем сортировочные функции
+            if order == SortOrder.ASC:
+                column = column.asc()
+            elif order == SortOrder.DESC:
+                column = column.desc()
+
+            sorted_fields.append(column)
 
         return query.order_by(*sorted_fields)
 
