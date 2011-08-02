@@ -70,7 +70,10 @@ class BaseExtField(ExtUIComponent):
         self.plugins = []
 
     def t_render_label_style(self):
-        return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
+        if isinstance(self.label_style, dict):        
+            return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
+        else:
+            return self.label_style
 
     def t_render_regex(self):
         return '/%s/' % self.regex
