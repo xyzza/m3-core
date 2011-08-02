@@ -592,7 +592,12 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
         ''' Возвращает данные для грида справочника '''
         assert self.enumerate_class != None, 'Attribute enumerate_class is not defined.'
         data = []
-        for k, v in self.enumerate_class.values.items():
+        # сортировка по ключам
+        keys = self.enumerate_class.values.keys()
+        keys.sort()
+
+        for k in keys:
+            v = self.enumerate_class.values.get(k)
             if filter and v.upper().find(filter.upper())<0:
                 continue
             else:
