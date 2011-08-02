@@ -961,7 +961,6 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		var mask = new Ext.LoadMask(this.body);
-		
 		var req = {
 			url: this.actionNewUrl,
 			params: this.getMainContext(),
@@ -1193,7 +1192,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return this.actionContextJson || {};
+    	return Ext.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек

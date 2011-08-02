@@ -217,14 +217,15 @@ class BaseObjectModelWVersion(BaseObjectModel):
                 return False
         else:
             return True
-        
-    def save_with_lock(self):
-        if self.do_lock():
-            if self.id:
-                self.version += 1
-            self.save()
-        else:
-            raise ConcurrentEditError("Record already has been changed")
+
+    def save(self, *a, **k):
+        """
+        При каждом сохранении номер версии увеличивается.
+        Это нужно чтобы проверять, была ли модифицирована запись после последнего получения
+        """
+        if self.id:
+            self.version += 1
+        super(BaseObjectModelWVersion, self).save()
             
     class Meta:
         abstract = True
