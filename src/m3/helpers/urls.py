@@ -199,15 +199,15 @@ def inner_name_cache_handler(for_actions=True):
                 
                 # если имеем дело с экземпляром экшена, то ключем будет его полный url 
                 if isinstance(action, actions.Action):
-                    url = action.get_absolute_url()
+                    cleaned_action = action
+                    url = cleaned_action.get_absolute_url()
                     key = url
-                    result[key] = (action.__class__, url, action)
-                
-                # неважно что нам передали, нам нужен экземпляр класса
-                cleaned_action = get_instance(action)
+                else:
+                    # неважно что нам передали, нам нужен экземпляр класса
+                    cleaned_action = get_instance(action)
+                    key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
+                    url = cleaned_action.__class__.absolute_url()
 
-                key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
-                url = cleaned_action.__class__.absolute_url()
                 result[key] = (cleaned_action.__class__, url, cleaned_action)
 
                 shortname = get_shortname(cleaned_action)
