@@ -10,7 +10,7 @@ Created on 25.06.2010
 from m3.ui.ext import containers, controls, menus, render_component
 from m3.helpers.urls import get_url
 
-class ExtObjectTree(containers.ExtAdvancedTreeGrid):
+class ExtObjectTree(containers.ExtTree):
     '''
     Панель с деревом для управления списком объектов.
     '''
@@ -27,8 +27,7 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
             self.menuitem_new_child = menus.ExtContextMenuItem(text = u'Новый дочерний', icon_cls = 'add_item', handler='contextMenuNewChild')
             self.menuitem_edit = menus.ExtContextMenuItem(text = u'Изменить', icon_cls = 'edit_item', handler='contextMenuEdit')
             self.menuitem_delete = menus.ExtContextMenuItem(text = u'Удалить', icon_cls = 'delete_item', handler='contextMenuDelete')
-            self.menuitem_separator = menus.ExtContextMenuSeparator()            
-                        
+            self.menuitem_separator = menus.ExtContextMenuSeparator()
             self.init_component()
     
     class TreeTopBar(containers.ExtToolBar):
@@ -44,6 +43,10 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
             self.button_edit = controls.ExtButton(text = u'Изменить', icon_cls = 'edit_item', handler='topBarEdit')
             self.button_delete = controls.ExtButton(text = u'Удалить', icon_cls = 'delete_item', handler='topBarDelete')
             self.button_refresh = controls.ExtButton(text = u'Обновить', icon_cls = 'refresh-icon-16', handler='topBarRefresh')
+            menu = menus.ExtContextMenu()
+            menu.items.append(self.button_new)
+            menu.items.append(self.button_new_child)
+            self.add_menu = containers.containers.ExtToolbarMenu(icon_cls="add_item", menu=menu, text = u'Добавить')
             self.init_component()
             
     #===========================================================================
@@ -66,16 +69,20 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
         #=======================================================================
         #self.store = misc.ExtJsonStore(auto_load=True, root='rows', id_property='id')
         self.load_mask = True
-        self.row_id_name = 'row_id'
+        self.row_id_name = 'id'
+        self.parent_id_name = 'parent_id'
         self.allow_paging = False
 
         #=======================================================================
-        # Контекстное меню и бары грида
+        # Контекстное меню и бары дерева
         #=======================================================================
         self.context_menu_row = ExtObjectTree.TreeContextMenu()
         self.context_menu_tree = ExtObjectTree.TreeContextMenu()
         self.top_bar = ExtObjectTree.TreeTopBar()
-        #self.paging_bar = containers.ExtPagingBar()
+        self.top_bar.items.append(self.top_bar.add_menu)
+        self.top_bar.items.append(self.top_bar.button_edit)
+        self.top_bar.items.append(self.top_bar.button_delete)
+        self.top_bar.items.append(self.top_bar.button_refresh)
         
         self.dblclick_handler = 'onEditRecord'
         
@@ -108,20 +115,17 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
         #=======================================================================
         # Настройка top bar
         #=======================================================================
-        if self.action_new:
-            menu = menus.ExtContextMenu()
-            menu.items.append(self.top_bar.button_new)
-            menu.items.append(self.top_bar.button_new_child)
-            self.top_bar.add_menu(icon_cls="add_item", menu=menu, text = u'Добавить')
+        if not self.action_new:
+            self.top_bar.items.remove(self.top_bar.add_menu)
         
-        if self.action_edit:
-            self.top_bar.items.append(self.top_bar.button_edit)
+        if not self.action_edit:
+            self.top_bar.items.remove(self.top_bar.button_edit)
         
-        if self.action_delete:
-            self.top_bar.items.append(self.top_bar.button_delete)
+        if not self.action_delete:
+            self.top_bar.items.remove(self.top_bar.button_delete)
         
-        if self.action_data:
-            self.top_bar.items.append(self.top_bar.button_refresh)
+        if not self.action_data:
+            self.top_bar.items.remove(self.top_bar.button_refresh)
         
         # тонкая настройка self.store
         if not self.url and self.action_data:
@@ -149,7 +153,7 @@ class ExtObjectTree(containers.ExtAdvancedTreeGrid):
                                             'contextJson': context_json})
         
         self._put_params_value('rowIdName', self.row_id_name)
-        self._put_params_value('allowPaging', self.use_bbar)
+        self._put_params_value('parentIdName', self.parent_id_name)
         
     
     def t_render_base_config(self):

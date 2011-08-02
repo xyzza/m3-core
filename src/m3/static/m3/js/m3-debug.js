@@ -8825,12 +8825,8 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
  * Объектное дерево, включает в себя тулбар с кнопками добавить (в корень и дочерний элемент), редактировать и удалить
  * @param {Object} config
  */
-Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
+Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 	constructor: function(baseConfig, params){
-//		console.log(baseConfig);
-//		console.log(params);
-		
-		assert(params.allowPaging !== undefined,'allowPaging is undefined');
 		assert(params.rowIdName !== undefined,'rowIdName is undefined');
 		assert(params.actions !== undefined,'actions is undefined');
 		
@@ -8841,21 +8837,55 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 		this.actionDeleteUrl = params.actions.deleteUrl;
 		this.actionDataUrl = params.actions.dataUrl;
 		this.actionContextJson = params.actions.contextJson;
-		
+		this.parentIdName = params.parentIdName; 
+		if (params.customLoad) {
+			var ajax = Ext.Ajax;
+			this.on('expandnode',function (node){
+				var nodeList = new Array();
+				if (node.hasChildNodes()){
+					for (var i=0; i < node.childNodes.length; i++){
+						if(!node.childNodes[i].isLoaded()) {
+							nodeList.push(node.childNodes[i].id);
+						}	
+					}
+				}
+				if (nodeList.length > 0) {
+					ajax.request({
+						url: params.actions.dataUrl
+						,params: {'list_nodes': nodeList.join(',')}
+						,success: function(response, opts){
+							var res = Ext.util.JSON.decode(response.responseText);
+							if (res) {
+								for (var i=0; i < res.length; i++){
+									var curr_node = node.childNodes[i];
+									for (var j=0; j < res[i].children.length; j++){
+										var newNode = new Ext.tree.AsyncTreeNode(res[i].children[j]);
+										curr_node.appendChild(newNode);
+										curr_node.loaded = true;
+									}
+								}
+							} 
+						}
+						,failure: function(response, opts){
+						   Ext.Msg.alert('','failed');
+						}
+					});
+				}
+			});
+		}
 		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
 	}
 	,initComponent: function(){
-		Ext.m3.AdvancedTreeGrid.superclass.initComponent.call(this);
-		var store = this.getStore();
-		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});	
-    	}
+		Ext.m3.ObjectTree.superclass.initComponent.call(this);
+	}
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
 		var scope = this;
 	    Ext.Ajax.request({
 	       url: this.actionNewUrl
-	       ,params: this.actionContextJson || {}
+	       ,method: 'POST'
+	       ,params: this.getMainContext()
 	       ,success: function(res, opt){
 		   		return scope.childWindowOpenHandler(res, opt);
 		    }
@@ -8865,7 +8895,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 	,onNewRecordChild: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
-		if (!this.getSelectionModel().getSelected()) {
+		if (!this.getSelectionModel().getSelectedNode()) {
 			Ext.Msg.show({
 			   title: 'Новый',
 			   msg: 'Элемент не выбран',
@@ -8874,12 +8904,14 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 			});
 			return;
 		}
-		var baseConf = {};
-		baseConf[this.rowIdName] = this.getSelectionModel().getSelected().get('_parent');
+		var baseConf = this.getSelectionContext();
+		baseConf[this.parentIdName] = baseConf[this.rowIdName];
+		delete baseConf[this.rowIdName];
 		var scope = this;
 	    Ext.Ajax.request({
 	       url: this.actionNewUrl
-	       ,params: Ext.applyIf(baseConf, this.actionContextJson || {})
+	       ,method: "POST"
+	       ,params: baseConf
 	       ,success: function(res, opt){
 		   		return scope.childWindowOpenHandler(res, opt);
 		    }
@@ -8890,18 +8922,17 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 		assert(this.actionEditUrl, 'actionEditUrl is not define');
 		assert(this.rowIdName, 'rowIdName is not define');
 		
-	    if (this.getSelectionModel().hasSelection()) {
-			var baseConf = {};
-			baseConf[this.rowIdName] = this.getSelectionModel().getSelected().id;
-			
+	    if (this.getSelectionModel().getSelectedNode()) {
+			var baseConf = this.getSelectionContext();
 			var scope = this;
 		    Ext.Ajax.request({
-		       url: this.actionEditUrl,
-		       params: Ext.applyIf(baseConf, this.actionContextJson || {}),
-		       success: function(res, opt){
+		       url: this.actionEditUrl
+		       ,method: 'POST'
+		       ,params: baseConf
+		       ,success: function(res, opt){
 			   		return scope.childWindowOpenHandler(res, opt);
-			   },
-		       failure: Ext.emptyFn
+			   }
+		       ,failure: Ext.emptyFn
 		    });
     	}
 	}
@@ -8917,13 +8948,11 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 	        buttons: Ext.Msg.YESNO,
 	        fn:function(btn,text,opt){ 
 	            if (btn == 'yes') {
-	                if (scope.getSelectionModel().hasSelection()) {
-						var baseConf = {};
-						baseConf[scope.rowIdName] = scope.getSelectionModel().getSelected().id;
-			
+	                if (scope.getSelectionModel().getSelectedNode()) {
+						var baseConf = scope.getSelectionContext();
 		                Ext.Ajax.request({
 		                   url: scope.actionDeleteUrl,
-		                   params: Ext.applyIf(baseConf, scope.actionContextJson || {}),
+		                   params: baseConf,
 		                   success: function(res, opt){
 						   	    return scope.deleteOkHandler(res, opt);
 						   },
@@ -8949,17 +8978,27 @@ Ext.m3.ObjectTree = Ext.extend(Ext.m3.AdvancedTreeGrid, {
 		this.refreshStore();
 	}
 	,refreshStore: function (){
-		if (this.allowPaging) {
-			var pagingBar = this.getBottomToolbar(); 
-			if(pagingBar &&  pagingBar instanceof Ext.PagingToolbar){
-			    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
-		        pagingBar.changePage(active_page);
-			}
-		} else {
-			this.getStore().load(); 	
-		}
-
+		this.getLoader().load(this.getRootNode());
 	}
+	/**
+     * Получение основного контекста дерева
+     * Используется при ajax запросах
+     */
+    ,getMainContext: function(){
+    	return this.getLoader().baseParams || {};
+    }
+    /**
+     * Получение контекста выделения строк/ячеек
+     * Используется при ajax запросах
+     * @param {bool} withRow Признак добавление в контекст текущей выбранной записи
+     */
+    ,getSelectionContext: function(withRow){
+    	var baseConf = this.getMainContext();
+    	if (this.getSelectionModel().getSelectedNode()) {
+			baseConf[this.rowIdName] = this.getSelectionModel().getSelectedNode().id;
+		}
+		return baseConf;
+    }
 });
 
 

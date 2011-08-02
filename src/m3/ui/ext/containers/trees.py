@@ -99,6 +99,11 @@ class ExtTree(BaseExtPanel):
     def t_render_nodes(self):
         return ','.join([node.render() for node in self.nodes])
     
+    def t_render_root(self):
+        return '''new Ext.tree.AsyncTreeNode({id: '-1', expanded: true, allowDrag: false %s %s})''' \
+            % ((',text:"%s"' % self.root_text) if self.root_text else ''\
+               , (',children:[%s]' % self.t_render_children()) if self.nodes else '')
+    
     def t_render_columns(self):
         return self.t_render_items()
     
@@ -241,7 +246,31 @@ class ExtTree(BaseExtPanel):
     @handler_beforedrop.setter
     def handler_beforedrop(self, function):
         self._listeners['beforenodedrop'] = function    
-    #------------------------------------------------------------------------
+    
+    #----------------------------------------------------------------------------
+
+    def render_base_config(self):
+        super(ExtTree, self).render_base_config()
+        self._put_config_value('useArrows', True)
+        self._put_config_value('autoScroll', False)
+        self._put_config_value('animate', True)
+        self._put_config_value('containerScroll', True)
+        if self.drag_drop and not self.read_only:
+            self._put_config_value('enableDD', True)
+            self._put_config_value('dropConfig', {'allowContainerDrop': self.allow_container_drop,
+                                                  'allowParentInsert': self.allow_parent_insert
+                                                  })
+        else:
+            self._put_config_value('enableDrop', self.enable_drop)
+            self._put_config_value('enableDrag', self.enable_drag)
+        
+        self._put_config_value('columns', self.t_render_columns)
+        self._put_config_value('loader', self.t_render_tree_loader)
+        self._put_config_value('root', self.t_render_root)            
+        
+    def render_params(self):
+        super(ExtTree, self).render_params()
+        self._put_params_value('customLoad', self.custom_load)
     
 #===============================================================================    
 class ExtTreeNode(ExtUIComponent):
