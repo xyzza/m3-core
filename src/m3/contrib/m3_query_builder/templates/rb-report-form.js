@@ -1,5 +1,7 @@
 var form = Ext.getCmp('{{ component.frm_form.client_id }}');
 
+var multipleChoice = Ext.decode('{{ component.multiple_choice|safe }}');
+
 var fieldsModel = new function(){
 	
 	var containers = {};
@@ -38,7 +40,7 @@ var fieldsModel = new function(){
 		getValues: function(){
 			var d = {};
 			for (var field in containers){
-				d[containers[field].name ] = containers[field]['values'];				
+				d[containers[field].name] = containers[field]['values'];				
 			}
 			return d;
 		},
@@ -46,8 +48,14 @@ var fieldsModel = new function(){
 		/**
 		 * Устанавливает значение по id контейнера
 		 */
-		addValue: function(contID, value){
-			containers[contID]['values'].push( value );
+		addValue: function(contID, value){			
+			
+			if (containers[contID]['multipleChoice']) {
+				containers[contID]['values'].push( value );
+			} else {
+				containers[contID]['values'] = value;
+			}
+			
 		},
 		
 		/**
@@ -55,6 +63,12 @@ var fieldsModel = new function(){
 		 */
 		hasValue: function(contID, value){
 			var mass = containers[contID]['values'];
+
+			// Если множественный выбор запрещен, то возможно одно значениие
+			if (!containers[contID]['multipleChoice'] && !(mass instanceof Array) && mass) {
+				return true;
+			}
+			
 			for (var i=0; i<mass.length; i++){
 				if (mass[i] == value){
 					return true;
@@ -65,19 +79,24 @@ var fieldsModel = new function(){
 		
 		
 		/**
-		 * Уджаляет значение по id контейнера
+		 * Удаляет значение по id контейнера
 		 */
 		deleteValue: function(contID, value){
 			var mass = containers[contID]['values'];
-			mass.splice(mass.indexOf(value), 1);
+			if (containers[contID]['multipleChoice']) {
+				mass.splice(mass.indexOf(value), 1);
+			} else {
+				containers[contID]['values'] = '';
+			}
 		},
 		
 		
 		/**
 		 * Устанавливает имя у компонента по id контейнера
 		 */
-		addName: function(contID, name){
+		addName: function(contID, name, multipleChoice){
 			containers[contID]['name'] = name;
+			containers[contID]['multipleChoice'] = multipleChoice;
 		}
 	}
 }
@@ -124,7 +143,7 @@ function addValue(id){
 	var value;
 	if (component.isXType(Ext.m3.AdvancedDataField)){
 		var d = component.getValue();
-		value = String.format('{0}.{1}.{2}', d.getDate(), d.getMonth(), d.getFullYear()
+		value = String.format('{0}.{1}.{2}', d.getDate(), d.getMonth() + 1, d.getFullYear()
 								);
 	} else {
 		value = component.getValue();
@@ -239,7 +258,7 @@ win.on('beforeshow', function(window){
 			});
 
 			fieldsModel.setFieldContainer(newChildEl.id);
-			fieldsModel.addName(newChildEl.id, item.getName());	
+			fieldsModel.addName(newChildEl.id, item.getName(), multipleChoice[item.id]);	
 		}
 	});
 });

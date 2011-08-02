@@ -25,8 +25,9 @@ from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_pack, get_report_params, get_report, get_report_data, get_group_fields, \
     get_limit
         
-from entity import Param, SortOrder
+from entity import Param, SortOrder, Where
 from m3.contrib.m3_query_builder.api import get_sorted_fields
+
 
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
@@ -430,6 +431,8 @@ class GetReportFormAction(actions.Action):
         #win.height = 90        
         win.frm_form.layout_config={'align':'stretch'}
         
+        multiple_choice = {}
+        
         for i, param in enumerate(params):
 
             if param['type'] == Param.STRING:
@@ -446,8 +449,7 @@ class GetReportFormAction(actions.Action):
                 
                 field = ExtDictSelectField()
                 field.pack = param['value']
-                
- 
+                 
             elif param['type'] == Param.NUMBER:
                 field = ExtNumberField()                
             else:
@@ -466,19 +468,21 @@ class GetReportFormAction(actions.Action):
             cont_inner.items.append(field)
 
             if param['type'] in (Param.STRING, Param.NUMBER, Param.DATE):
-                cont_outer.items.append(ExtButton(handler='function(){ addValue("%s")}' % field.client_id, 
+                cont_outer.items.append(ExtButton(handler='function(){ addValue("%s");}' % field.client_id, 
                                                   icon_cls=Icons.ADD,
-                                                  client_id='btn-'+field.client_id))
+                                                  client_id='btn-'+field.client_id,
+                                                  tooltip_text=u'Условие: %s' % param['condition']))
             
             #win.height += 30
             win.frm_form.items.append(cont_outer)
-            
-            import pprint
-            pprint.pprint( param )
+        
+            multiple_choice[field.client_id] = not (param['condition'] in (Where.LT, Where.LE, Where.GT, Where.GE)) 
+        
         
             # Добавляются условия:
             conditions.append('%s %s' % (param['verbose_name'] ,param['condition']))
             
+        win.multiple_choice = json.dumps(multiple_choice)
         
         info_data_fields = []
         

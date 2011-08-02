@@ -6,6 +6,7 @@ Created on 06.06.2011
 @author: prefer
 '''
 import json
+import datetime
 
 from django.db import transaction
 
@@ -314,6 +315,20 @@ def get_report_data(report, params):
     Данные для грида
     '''
     entity = build_entity( json.loads( report.query.query_json ))
+    
+    # Преобразование строковых дат в Объект datetime pythona
+    # Нужно для корректной работы алхимии
+    params_from_bd =  ReportParams.objects.filter(report=report, type=Param.DATE)
+    for param_bd in params_from_bd:        
+        k, v = param_bd.name, params[ param_bd.name ]
+        if isinstance(v, list):            
+            v = map(lambda x: datetime.datetime.strptime(x, '%d.%m.%Y'), v)            
+        
+        params[k] = v
+    
+    import pprint 
+    pprint.pprint(params)
+    
     data = entity.get_data(params)
     
     # Проход по данным из алхимии и формирование данных для грида 
