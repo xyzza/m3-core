@@ -107,7 +107,7 @@ def get_sorted_fields(objs, separator='-'):
         
         _, field_name = select_field['id'].split(separator)
 
-        if select_field['sorting']:
+        if select_field.get('sorting'):
             ordered_item.append(field_name)
             
     return ordered_item
@@ -165,7 +165,7 @@ def build_entity(objs, separator='-'):
         
         entity.select.append(field)
         
-        if select_field['sorting']:
+        if select_field.get('sorting'):
             entity.order_by.append(SortOrder(field, select_field['sorting']))
             
     # Список условий

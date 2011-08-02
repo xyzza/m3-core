@@ -496,7 +496,7 @@ class BaseEntity(object):
         # Список объектов SortOrder
         self.order_by = TypedList(type=SortOrder)
 
-        # Словарь с алиасами для полей в select'e запроса
+        # Список объектов Field
         self.select = TypedList(type=Field)
 
         # Выводить повторяющиеся записи?
