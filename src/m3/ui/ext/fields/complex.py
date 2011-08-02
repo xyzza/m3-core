@@ -517,7 +517,9 @@ class ExtMultiSelectField(ExtDictSelectField):
 
     @pack.setter
     def pack(self, ppack):
-        assert isinstance(ppack, IMultiSelectablePack), 'Pack %s must provide IMultiSelectablePack interface' % ppack
+        assert isinstance(ppack, basestring) or hasattr(ppack, '__bases__'), 'Argument %s must be a basestring or class' % ppack
+        ppack_class = ControllerCache.find_pack(ppack)
+        assert isinstance(ppack_class, IMultiSelectablePack), 'Pack %s must provide IMultiSelectablePack interface' % ppack
         self._set_urls_from_pack(ppack)
         self.url = self._pack.get_multi_select_url()
 #        if hasattr(self._pack, 'get_multi_select_url'):

@@ -57,10 +57,10 @@ class DictListWindowAction(Action):
         # Устанавливаем источники данных
         # быть может кто-то умный уже настроил себе стор
         if not win.grid.get_store():
-             grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True, remote_sort=True)
-             grid_store.total_property = 'total'
-             grid_store.root = 'rows'
-             win.grid.set_store(grid_store)
+            grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True, remote_sort=True)
+            grid_store.total_property = 'total'
+            grid_store.root = 'rows'
+            win.grid.set_store(grid_store)
         
         if not base.list_readonly:
             # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося
@@ -588,7 +588,7 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
     list_columns = [('code', 'Код', 15),
                     ('name', 'Наименование')]
     
-    def get_rows(self, offset, limit, filter, user_sort=''):
+    def get_rows(self, request, context, offset, limit, filter, user_sort=''):
         ''' Возвращает данные для грида справочника '''
         assert self.enumerate_class != None, 'Attribute enumerate_class is not defined.'
         data = []
