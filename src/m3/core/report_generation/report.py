@@ -192,6 +192,9 @@ class OOParser(object):
             if not section.is_valid():
                 raise OOParserException, u"Неверно задана секция %s. \
                 Определена одна из двух ячеек" %section.name  
+        #Находим разрывы страниц в секции
+        for section in all_sections.values():
+            self.find_page_breaks(section, document)    
         #Флаг 8 отвечает за удаление аннотаций.
         document.clearContents(8)          
         return all_sections  
@@ -222,7 +225,30 @@ class OOParser(object):
         elif isinstance(value, (int, float, decimal.Decimal, long)):
             return str(value).replace('.', ',')        
         else:
-            return repr(value)           
+            return repr(value)    
+        
+    def find_page_breaks(self, section, sheet):
+        '''
+        Находит все разрывы страниц в секции 
+        '''           
+        left_x = section.left_cell_addr.Column
+        left_y = section.left_cell_addr.Row
+        right_x = section.right_cell_addr.Column
+        right_y = section.right_cell_addr.Row 
+        columns = sheet.Columns
+        rows = sheet.Rows
+        #Просматриваем также столбец правее секции. Это нужно для того, чтобы  
+        #включить в список и разрывы, заданные на правой границе секции. 
+        for x in range (left_x, right_x+2):
+            column = columns.getByIndex(x)
+            if column.IsStartOfNewPage:
+                section.column_page_breaks.append(x-left_x)
+        #Просматриваем также строку ниже секции. Это нужно для того, чтобы  
+        #включить в список и разрывы, заданные на нижней границе секции. 
+        for y in range (left_y, right_y+2):
+            row = rows.getByIndex(y)
+            if row.IsStartOfNewPage:
+                section.row_page_breaks.append(y-left_y)        
 
 
 class Section(object):
@@ -244,6 +270,10 @@ class Section(object):
         self.report_object = report_object
         #Список вставленных в секцию изображений
         self.images = []
+        #Список разрывов страницы по строке
+        self.row_page_breaks = []
+        #Список разрывов страницы по столбцу
+        self.column_page_breaks = []
         
     def add_new_cell(self, cell):
         '''
@@ -363,6 +393,8 @@ class Section(object):
         #Задаем размеры строк и столбцов
         self.set_columns_width(x, src_sheet, dest_sheet)
         self.set_rows_height(y, src_sheet, dest_sheet)
+        #Вставка разрывов строк и столбцов
+        self.insert_page_breaks(dest_sheet, x, y)
         #Вставка изображений в секцию
         self.flush_images(dest_sheet, section_range)  
         #Если не все теги изображений в шаблоне были заменены, стираем оставшиеся
@@ -425,7 +457,21 @@ class Section(object):
                 image.create_graphic_shape()
                 image.set_image_location(image.position[0]+image_tag.Position.X, image.position[1]+image_tag.Position.Y)
                 image.set_image_size(image.width, image.height)
-                image.insert_into_document(dest_sheet)                   
+                image.insert_into_document(dest_sheet)    
+                
+    def insert_page_breaks(self, sheet, section_render_x, section_render_y):
+        '''
+        Вставляет в секцию разрывы строк и столбцов
+        '''
+        columns = sheet.Columns
+        rows = sheet.Rows
+        for column_index in self.column_page_breaks:
+            column = columns.getByIndex(section_render_x + column_index)
+            column.IsStartOfNewPage = True
+        for row_index in self.row_page_breaks:
+            row = rows.getByIndex(section_render_y + row_index)
+            row.IsStartOfNewPage = True    
+                                   
                         
                     
 class OOImage(object):
