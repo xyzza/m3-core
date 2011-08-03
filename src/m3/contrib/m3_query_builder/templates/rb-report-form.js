@@ -150,7 +150,13 @@ function addValue(id){
 	}
 
 	// Если значение уже выбрано	
-	if (fieldsModel.hasValue('div' + id, value) ){		 					
+	if (fieldsModel.hasValue('div' + id, value) ){
+		if (!multipleChoice[id]){
+			// Нужно заменить элемент
+			fieldsModel.deleteValue('div' + id);
+			Ext.get('div' + id).child('span').remove()
+			addValue(id);
+		}	 					
 		return;
 	}
 
@@ -255,6 +261,9 @@ win.on('beforeshow', function(window){
 				if (e.keyCode == e.ENTER) {
 					addValue(cmp.id);
 				}
+			});
+			item.on('blur', function(cmp){
+				addValue(cmp.id);
 			});
 
 			fieldsModel.setFieldContainer(newChildEl.id);

@@ -440,7 +440,7 @@ class GetReportFormAction(actions.Action):
             elif param['type'] == Param.NUMBER:
                 field = ExtNumberField()
             elif param['type'] == Param.DATE:
-                field = ExtDateField()
+                field = ExtDateField(hide_today_btn=True)
             elif param['type'] == Param.BOOLEAN:
                 field = ExtCheckBox()
             elif param['type'] == Param.DICTIONARY:
