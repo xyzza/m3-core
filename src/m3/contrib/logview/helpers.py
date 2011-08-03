@@ -105,7 +105,7 @@ def log_file_parse(log_file):
     if file_name == INFO:
         info_lines = []
         for line in log_file.xreadlines():
-            if line[0] == '[' and VERSION in line:
+            if line[0] == '[': #and VERSION in line:
                 info_lines.append(
                 {'date': line[1:FULL_DATE_LENGHT],
                 'message':' '.join(line.split()[POSITION_AFTER_DATE_TIME:])})

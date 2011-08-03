@@ -7,6 +7,8 @@ Created on 06.04.2011
 
 import os, sqlite3
 
+from m3.helpers import logger
+
 def create_sqlite_from_sql(sql_text_path, db_ready_path):
     '''
     Запускает команды из SQL-файла
@@ -34,7 +36,8 @@ def create_sqlite_from_sql(sql_text_path, db_ready_path):
     for query in query_queue:
         try:
             cursor.execute(query)
-        except:
+        except Exception, err:
+            logger.exception(err.message)
             raise Exception(u"Не удалось выполнить запрос %s" % query)
     cursor.close()
     connection.commit()
