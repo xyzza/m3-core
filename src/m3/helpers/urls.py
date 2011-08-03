@@ -196,30 +196,36 @@ def inner_name_cache_handler(for_actions=True):
             packs.extend(pack.subpacks)
         if for_actions and hasattr(pack, 'actions'):
             for action in pack.actions:
-                
+                keys = []
+                cache_object = None
                 # если имеем дело с экземпляром экшена, то ключем будет его полный url 
                 if isinstance(action, actions.Action):
                     cleaned_action = action
                     url = cleaned_action.get_absolute_url()
-                    key = url
-                    # регистрируем для url
-                    result[key] = (cleaned_action.__class__, url, cleaned_action)
-                    # также регистрируем для класса
-                    key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
-                    result[key] = (cleaned_action.__class__, url, cleaned_action)
+                    long_class_name = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
+                    # регистрируем для url и для класса
+                    cache_object = (cleaned_action.__class__, url, cleaned_action)
+                    keys.extend([url, long_class_name])
                 else:
                     # неважно что нам передали, нам нужен экземпляр класса
                     cleaned_action = get_instance(action)
-                    key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
+                    #TODO: здесь url может быть не правильный, т.к. мы сами создали экземпляр и у него нет ни Pack, ни Controller.
+                    #TODO: поэтому берем его через absolute_url, т.к. он ищет экземпляр экшена во всех контроллерах
+                    #TODO: а это работает только для единичных экземпляров 
                     url = cleaned_action.__class__.absolute_url()
+                    long_class_name = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
                     # регистрируем для класса
-                    result[key] = (cleaned_action.__class__, url, cleaned_action)
+                    cache_object = (cleaned_action.__class__, url, cleaned_action)
+                    keys.append(long_class_name)
 
                 # регистрируем для shortname
                 shortname = get_shortname(cleaned_action)
                 if shortname:
-                    result[shortname] = (cleaned_action.__class__, url, cleaned_action)
-                    
+                    keys.append(shortname)
+                
+                # регистрируем
+                for key in keys:
+                    result[key] = cache_object
         else:
             cleaned_pack = get_instance(pack)
             key = cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__
