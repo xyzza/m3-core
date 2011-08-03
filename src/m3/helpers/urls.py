@@ -202,6 +202,9 @@ def inner_name_cache_handler(for_actions=True):
                     cleaned_action = action
                     url = cleaned_action.get_absolute_url()
                     key = url
+                    result[key] = (cleaned_action.__class__, url, cleaned_action)
+                    # также регистрируем для класса
+                    key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
                 else:
                     # неважно что нам передали, нам нужен экземпляр класса
                     cleaned_action = get_instance(action)
