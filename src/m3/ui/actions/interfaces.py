@@ -36,4 +36,11 @@ class IMultiSelectablePack(ISelectablePack):
     @abstractmethod
     def get_multi_select_url(self):
         """ Получить адрес для запроса диалога множественного выбора элемента """
-    
+
+    @abstractmethod
+    def get_display_dict(self, key, value_field='id', display_field='name'):
+        """
+        Получить список словарей, необходимый для представления выбранных 
+        значений ExtMultiSelectField
+        Пример результата: [{'id':0,'name':u''},]
+        """

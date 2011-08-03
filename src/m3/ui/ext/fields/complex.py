@@ -506,6 +506,9 @@ class ExtMultiSelectField(ExtDictSelectField):
             self._init_flag = False
             return
 
+        if isinstance(value, basestring):
+            value = json.loads(value)
+
         if isinstance(value, (list, tuple)):
             self._value = json.dumps(value)
         else:
@@ -513,7 +516,7 @@ class ExtMultiSelectField(ExtDictSelectField):
 
     @property
     def pack(self):
-        return self.__pack
+        return self._pack
 
     @pack.setter
     def pack(self, ppack):

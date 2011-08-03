@@ -424,7 +424,14 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         raise NotImplementedError()
 
-    
+    #IMultiSelectablePack
+    def get_display_dict(self, key, value_field='id', display_field='name'):
+        """
+        Получить список словарей, необходимый для представления выбранных 
+        значений ExtMultiSelectField
+        """
+        raise NotImplementedError()
+
     #====================== РАБОТА С ОКНАМИ ===============================
     def get_list_window(self, win):
         ''' Возвращает настроенное окно типа "Список" справочника '''        
@@ -574,7 +581,27 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
             else:
                 return text
         return None
-            
+
+    #IMultiSelectablePack
+    def get_display_dict(self, key, value_field='id', display_field='name'):
+        """
+        Получить список словарей, необходимый для представления выбранных 
+        значений ExtMultiSelectField
+        """
+        items = []
+        row = self.get_row(key)
+        if row != None:
+            keys = key if isinstance(key, (list, tuple,)) else [key, ]
+            for key in keys:
+                value = getattr(row, display_field, None)
+                if value:
+                    items.append({
+                        value_field: key,
+                        display_field: value,
+                    })
+        return items
+
+
 class BaseEnumerateDictionary(BaseDictionaryActions):
     '''
     Базовый экшен пак для построения справочников основанных на перечислениях, т.е.
@@ -618,3 +645,19 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
         row_id = self.get_row(key)
         text = self.enumerate_class.values.get(row_id,'')
         return text
+
+    #IMultiSelectablePack
+    def get_display_dict(self, key, value_field='id', display_field='name'):
+        """
+        Получение представления по переданным ключам
+        """
+        items = []
+        keys = key if isinstance(key, (list, tuple,)) else [key, ]
+        for key in keys:
+            value = self.enumerate_class.values.get(key, None)
+            if value:
+                items.append({
+                    value_field: key,
+                    display_field: value,
+                })
+        return items

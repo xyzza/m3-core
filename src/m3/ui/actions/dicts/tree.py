@@ -550,7 +550,15 @@ class BaseTreeDictionaryActions(ActionPack, IMultiSelectablePack):
     def get_display_text(self, key, attr_name = None):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         raise NotImplementedError()
-    
+
+    #IMultiSelectablePack
+    def get_display_dict(self, key, value_field='id', display_field='name'):
+        """
+        Получить список словарей, необходимый для представления выбранных 
+        значений ExtMultiSelectField
+        """
+        raise NotImplementedError()
+
     #============ ДЛЯ ИЗМЕНЕНИЯ ОКОН ВЫБОРА НА ХОДУ ==============
     
     def get_select_window(self, win):
@@ -880,7 +888,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         elif self.tree_model:
             return self.get_edit_node_url()
         return None
-        
+
     #ISelectablePack
     def get_display_text(self, key, attr_name = None):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
@@ -900,7 +908,30 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             else:
                 return text
         return None
-    
+
+    #IMultiSelectablePack
+    def get_display_dict(self, key, value_field='id', display_field='name'):
+        """
+        Получить список словарей, необходимый для представления выбранных 
+        значений ExtMultiSelectField
+        """
+        items = []
+        row = None
+        if self.list_model:
+            row = self.get_row(key)
+        elif self.tree_model:
+            row = self.get_node(key)
+        if row != None:
+            keys = key if isinstance(key, (list, tuple,)) else [key, ]
+            for key in keys:
+                value = getattr(row, display_field, None)
+                if value:
+                    items.append({
+                        value_field: key,
+                        display_field: value,
+                    })
+        return items
+
 #=#===============================================================================
 # Сигналы, который посылаются в процессе работы подсистемы древовидных справочника
 #===============================================================================

@@ -24,10 +24,10 @@ from m3.ui.ext.fields import (ExtNumberField,
 
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
-from m3.ui.ext.fields.complex import ExtDictSelectField
+from m3.ui.ext.fields.complex import ExtDictSelectField, ExtMultiSelectField
 from m3.helpers import get_img_size, logger
 from m3.helpers.datastructures import TypedList
-from m3.ui.actions.interfaces import ISelectablePack
+from m3.ui.actions.interfaces import ISelectablePack, IMultiSelectablePack
 
 
 #===============================================================================
@@ -132,6 +132,12 @@ class ExtForm(BaseExtPanel):
                     
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
+            elif isinstance(item, ExtMultiSelectField):
+                # У поля выбора может быть сзязанный с ним пак
+                bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
+                if bind_pack:
+                    assert isinstance(bind_pack, IMultiSelectablePack), 'Pack %s must provide IMultiSelectablePack interface' % bind_pack
+                    item.value = bind_pack.get_display_dict(value, value_field=item.value_field, display_field=item.display_field)
             elif isinstance(item, ExtDictSelectField):
                 # У поля выбора может быть сзязанный с ним пак
                 # TODO после окончательного удаления метода configure_by_dictpack в ExtDictSelectField
@@ -457,7 +463,7 @@ class ExtPanel(BaseExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)
-
+        
         # Отступ от внешних границ
         self.padding = None
         
@@ -476,7 +482,7 @@ class ExtPanel(BaseExtPanel):
         
         # Автозагрузка контента
         self.auto_load = None
-
+        
         self.auto_scroll = True
         
         self.init_component(*args, **kwargs)
@@ -502,7 +508,7 @@ class ExtPanel(BaseExtPanel):
         self.render_params() # Пусто
         base_config = self._get_config_str()
         return 'new Ext.Panel({%s})' % base_config
-
+    
     @property
     def items(self):
         return self._items
@@ -514,7 +520,7 @@ class ExtTitlePanel(ExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTitlePanel, self).__init__(*args, **kwargs)
-        self.template = "ext-panels/ext-title-panel.js" #TODO: Отрефакторить под внутриклассовый рендеринг
+        self.template = "ext-panels/ext-title-panel.js" #TODO: Отрефакторить под внутриклассовый рендеринг 
         self.__title_items = TypedList(type=ExtUIComponent, on_after_addition=
             self._on_title_after_addition, on_before_deletion=
             self._on_title_before_deletion, on_after_deletion=
@@ -529,7 +535,7 @@ class ExtTitlePanel(ExtPanel):
     def _on_title_after_addition(self, component):
         # Событие вызываемое после добавления элемента в заголовок
         self.items.append(component)
-        self._update_header_state()
+        self._update_header_state() 
 
     def _on_title_before_deletion(self, component):
         # Событие вызываемое перед удалением элемента из заголовка
