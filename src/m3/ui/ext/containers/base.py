@@ -182,7 +182,6 @@ class BaseExtPanel(BaseExtContainer):
                                       self.bottom_bar)
         self._put_config_value('fbar', self.t_render_footer_bar,
                                       self.footer_bar)
-        self._put_config_value('collapsible', self.collapsible)
         self._put_config_value('split', self.split)
         self._put_config_value('collapseMode', self.collapse_mode)        
         self._put_config_value('collapsed', self.collapsed)        

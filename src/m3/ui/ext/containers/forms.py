@@ -23,7 +23,7 @@ from m3.ui.ext.fields import (ExtNumberField,
                               ExtFileUploadField,ExtImageUploadField)
 
 from base import BaseExtPanel
-from m3.ui.ext.base import ExtUIComponent
+from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from m3.ui.ext.fields.complex import ExtDictSelectField
 from m3.helpers import get_img_size, logger
 from m3.helpers.datastructures import TypedList
@@ -457,8 +457,7 @@ class ExtPanel(BaseExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtPanel, self).__init__(*args, **kwargs)
-        self.template = 'ext-panels/ext-panel.js' #TODO: Отрефакторить под внутриклассовый рендеринг
-        
+
         # Отступ от внешних границ
         self.padding = None
         
@@ -477,18 +476,33 @@ class ExtPanel(BaseExtPanel):
         
         # Автозагрузка контента
         self.auto_load = None
+
+        self.auto_scroll = True
         
         self.init_component(*args, **kwargs)
     
     def render_base_config(self):
-        super(BaseExtPanel, self).render_base_config()
+        """
+        Точная имитация рендера из покойного шаблона
+        """
+        super(ExtPanel, self).render_base_config()
         self._put_config_value('padding', self.padding)
-        self._put_config_value('baseCls', self.base_cls)
-        self._put_config_value('bodyCls', self.body_cls)     
+        self._put_config_value('collapsible', self.collapsible, self.collapsible)
+        self._put_config_value('bodyBorder', self.body_border, not self.body_border)
+        self._put_config_value('baseCls', self.base_cls, self.base_cls)
+        self._put_config_value('bodyCfg', {'cls': self.body_cls}, self.body_cls)
         self._put_config_value('autoLoad', self.auto_load)
-        self._put_config_value('bodyBorder', self.body_border)
+        self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
+        if self._items:
+            self._put_config_value('items', self.t_render_items)
 
-    
+    def render(self):
+        self.pre_render() # Тут рендерится контекст
+        self.render_base_config() # Тут конфиги
+        self.render_params() # Пусто
+        base_config = self._get_config_str()
+        return 'new Ext.Panel({%s})' % base_config
+
     @property
     def items(self):
         return self._items
@@ -500,7 +514,7 @@ class ExtTitlePanel(ExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTitlePanel, self).__init__(*args, **kwargs)
-        self.template = "ext-panels/ext-title-panel.js" #TODO: Отрефакторить под внутриклассовый рендеринг 
+        self.template = "ext-panels/ext-title-panel.js" #TODO: Отрефакторить под внутриклассовый рендеринг
         self.__title_items = TypedList(type=ExtUIComponent, on_after_addition=
             self._on_title_after_addition, on_before_deletion=
             self._on_title_before_deletion, on_after_deletion=
@@ -515,7 +529,7 @@ class ExtTitlePanel(ExtPanel):
     def _on_title_after_addition(self, component):
         # Событие вызываемое после добавления элемента в заголовок
         self.items.append(component)
-        self._update_header_state() 
+        self._update_header_state()
 
     def _on_title_before_deletion(self, component):
         # Событие вызываемое перед удалением элемента из заголовка
@@ -537,6 +551,14 @@ class ExtTitlePanel(ExtPanel):
     @property
     def title_items(self):
         return self.__title_items
+
+    def render(self):
+        #WARNING!
+        # Не удалось перевести этот компонент на полность питонячий рендер
+        # Потому что в ЭПК шаблон этого компонента переопределяется
+        # И дабы не ломать все их формы, приходится оставлять старый рендер
+        # Посылаю им лучи ненависти и поноса!
+        return BaseExtComponent.render(self)
 
 
 #===============================================================================
@@ -582,13 +604,18 @@ class ExtFieldSet(ExtPanel):
     '''
     Объеденяет внутренние элементы и создает рамку для остальных контролов
     '''
-    
-    checkboxToggle = False # TODO: Зачем нужны эти свойства?
-    collapsible = False # TODO: Зачем нужны эти свойства?
-    
     def __init__(self, *args, **kwargs):
         super(ExtFieldSet, self).__init__(*args, **kwargs)
-        self.template = 'ext-panels/ext-fieldset.js' #TODO: Отрефакторить под внутриклассовый рендеринг
         self.checkboxToggle = False
-        self.collapsed = False
         self.init_component(*args, **kwargs)
+
+    def render_base_config(self):
+        super(ExtFieldSet, self).render_base_config()
+        self._put_config_value('checkboxToggle', self.checkboxToggle)
+
+    def render(self):
+        self.pre_render() # Тут рендерится контекст
+        self.render_base_config() # Тут конфиги
+        self.render_params() # Пусто
+        base_config = self._get_config_str()
+        return 'new Ext.form.FieldSet({%s})' % base_config
