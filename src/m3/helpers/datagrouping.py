@@ -100,8 +100,64 @@ class GroupingRecordProvider(object):
     def get_data(self, *args, **kwargs):
         return self.data_source
 
+    def getattr(self, obj, attr):
+        """
+        Получить атрибут объекта или элемент словаря
+        """
+        if isinstance(obj, dict):
+            return obj[attr]
+        else:
+            return getattr(obj, attr)
+        
+    def setattr(self, obj, attr, value):
+        """
+        Установить атрибут объекта или элемент словаря
+        """
+        if isinstance(obj, dict):
+            obj[attr] = value
+        else:
+            setattr(obj, attr, value)
+    
+    def calc(self, obj):
+        """
+        Вычислить остальные атрибуты объекта или словаря
+        """
+        if isinstance(obj, dict):
+            pass
+        else:
+            if hasattr(obj, 'call') and callable(obj.calc):
+                obj.calc()
+    
+    def load(self, destination, source):
+        """
+        Загрузка объекта destination из атрибутов объекта source
+        """
+        EXCLUDED = ('index', 'lindex', 'indent', 'is_leaf', 'expanded', 'count')
+        if isinstance(destination, dict):
+            for attr in destination:
+                if not attr in EXCLUDED:
+                    if isinstance(source, dict):
+                        if attr in source:
+                            destination[attr] = source[attr]
+                    else:
+                        if hasattr(source, attr):
+                            destination[attr] = getattr(source, attr)
+        else:
+            if hasattr(destination, 'load') and callable(destination.load):
+                destination.load(source)
+                
     def create_record(self, *args, **kwargs):
-        return self.proxy_class(*args, **kwargs)
+        if isinstance(self.proxy_class, dict):
+            rec = self.proxy_class.copy()
+            rec['index'] = 0
+            rec['lindex'] = 0
+            rec['indent'] = 0
+            rec['is_leaf'] = False
+            rec['expanded'] = False
+            rec['count'] = 0
+            return rec
+        else:
+            return self.proxy_class(*args, **kwargs)
 
     def reader(self, grouped, offset, level_index, level_keys, begin, end, aggregates, sorting):
         pass
@@ -158,7 +214,7 @@ class GroupingRecordProvider(object):
                 list = self.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if level['id'] != -1 else [], begin, end, aggregates, sorting)
                 # если выдали раскрытый элемент, то установим у него признак раскрытости
                 if end == exp['index']:
-                    list[-1].expanded = True
+                    self.setattr(list[-1], 'expanded', True)
                 res.extend(list)
                 # переходим к след. развернутому элементу
                 i = i + 1
@@ -172,7 +228,7 @@ class GroupingRecordProvider(object):
                 # выдадим известный диапазон, а остальное продолжим искать
                 list = self.reader(grouped, offset + len(res) - begin, level_index, keys + [level['id']] if level['id'] != -1 else [], begin, exp['index'], aggregates, sorting)
                 # если выдали раскрытый элемент, то установим у него признак раскрытости
-                list[-1].expanded = True
+                self.setattr(list[-1], 'expanded', True)
                 res.extend(list)
                 begin = exp['index'] + 1
                 continue
@@ -240,9 +296,9 @@ class GroupingRecordProvider(object):
         '''
         Форматирование колонки группировки
         '''
-        indent_str = "   " * item.indent
-        value = item.id
-        return "%s %s: %s (%s)" % (indent_str, grouped_col_name, value, item.count)
+        indent_str = "   " * self.getattr(item, 'indent')
+        value = self.getattr(item, 'id')
+        return "%s %s: %s (%s)" % (indent_str, grouped_col_name, value, self.getattr(item, 'count'))
 
     EXPORT_XLS = 'xls'
     EXPORT_CSV = 'csv'
@@ -299,16 +355,16 @@ class GroupingRecordProvider(object):
             for idx, k in enumerate(columns_cash):
                 # значит это группировочная колонка
                 if k == "grouping":
-                    if item.is_leaf:
+                    if self.getattr(item, 'is_leaf'):
                         v = ""
                     else:
-                        col = grouped[item.indent]
+                        col = grouped[self.getattr(item, 'indent')]
                         col_name = columns_title[col]
                         v = self.get_export_group_text(item, col_name)
-                    ws.write(item.index + 2, idx, v, data_style)
+                    ws.write(self.getattr(item, 'index') + 2, idx, v, data_style)
                 else:
-                    v = getattr(item, k)
-                    ws.write(item.index + 2, idx, v, data_style)
+                    v = self.getattr(item, k)
+                    ws.write(self.getattr(item, 'index') + 2, idx, v, data_style)
         # вывод итогов
         if not isinstance(total, (int, long)):
             total_row = total[1]
@@ -316,7 +372,7 @@ class GroupingRecordProvider(object):
                 if k == "grouping":
                     v = ""
                 else:
-                    v = getattr(total_row, k)
+                    v = self.getattr(total_row, k)
                 ws.write(total[0] + 2, idx, v, header_style)
 
         base_name = str(uuid.uuid4())[0:16] + '.xls'
@@ -360,15 +416,15 @@ class GroupingRecordProvider(object):
             for idx, k in enumerate(columns_cash):
                 # значит это группировочная колонка
                 if k == "grouping":
-                    if item.is_leaf:
+                    if self.getattr(item, 'is_leaf'):
                         v = ""
                     else:
-                        col = grouped[item.indent]
+                        col = grouped[self.getattr(item, 'indent')]
                         col_name = columns_title[col]
                         v = self.get_export_group_text(item, col_name)
                     row.append(v if v else '')
                 else:
-                    v = getattr(item, k)
+                    v = self.getattr(item, k)
                     row.append(v if v else '')
             ws.writerow(row)
         # вывод итогов
@@ -379,7 +435,7 @@ class GroupingRecordProvider(object):
                 if k == "grouping":
                     v = ""
                 else:
-                    v = getattr(total_row, k)
+                    v = self.getattr(total_row, k)
                 row.append(v if v else '')
             ws.writerow(row)
 
@@ -712,6 +768,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
     '''
     Провайдер для массива
     '''
+        
     def reader(self, grouped, offset, level_index, level_keys, begin, end, aggregates, sorting):
         return self.__read_data(grouped, offset, level_index, level_keys, begin, end, aggregates, sorting)
 
@@ -735,7 +792,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                 # будем считать агрегаты
                 for agg in aggregates.keys():
                     agg_type = aggregates[agg]
-                    agg_value = getattr(rec, agg)
+                    agg_value = self.getattr(rec, agg)
                     if agg_type == 'sum':
                         aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                     elif agg_type == 'count':
@@ -748,17 +805,17 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                         aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                 count += 1
             item = self.create_record()
-            item.id = None
-            item.indent = None
-            item.lindex = None
-            item.count = count
+            self.setattr(item, 'id', None)
+            self.setattr(item, 'indent', None)
+            self.setattr(item, 'lindex', None)
+            self.setattr(item, 'count', count)
             for agg in aggregates.keys():
                 # для средних - посчитаем среднее
                 if aggregates[agg] == 'avg':
-                    setattr(item, agg, aggr_rec[agg] / item.count)
+                    self.setattr(item, agg, aggr_rec[agg] / self.getattr(item, 'count'))
                 else:
-                    setattr(item, agg, aggr_rec[agg])
-            item.calc()
+                    self.setattr(item, agg, aggr_rec[agg])
+            self.calc(item)
             return item
 
         # проведем сортировку собранного уровня
@@ -784,19 +841,19 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                 field = grouped[level_index]
 
             for rec in raw_data:
-                finded = True
+                found = True
                 for lev in range(0, level_index):
                     lev_field = grouped[lev]
                     key = level_keys[lev]
-                    key_value = getattr(rec, lev_field)
+                    key_value = self.getattr(rec, lev_field)
                     # подходит ли запись под группировку
                     if key != key_value:
-                        finded = False
+                        found = False
                         break
                 # если успешно проверили все поля, то значит это наша запись
-                if finded:
+                if found:
                     if field:
-                        group_value = getattr(rec, field)
+                        group_value = self.getattr(rec, field)
                         if not group_value in level.keys():
                             level[group_value] = 1
                             aggr_rec = {}
@@ -808,7 +865,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                         # будем считать агрегаты
                         for agg in aggregates.keys():
                             agg_type = aggregates[agg]
-                            agg_value = getattr(rec, agg)
+                            agg_value = self.getattr(rec, agg)
                             if agg_type == 'sum':
                                 aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                             elif agg_type == 'count':
@@ -820,35 +877,35 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             elif agg_type == 'avg':
                                 aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                     else:
-                        level[rec.id] = rec
+                        level[self.getattr(rec, 'id')] = rec
                         prepared.append(rec)
             # теперь выведем запрошенные элементы уровня
             # придется обработать все записи уровня, т.к. требуется еще отсортировать их и лишь потом ограничить количество
             for i in prepared:
                 if field:
                     item = self.create_record()
-                    setattr(item, field, i)
-                    item.id = i
-                    item.indent = level_index
-                    item.count = level[i]
+                    self.setattr(item, field, i)
+                    self.setattr(item, 'id', i)
+                    self.setattr(item, 'indent', level_index)
+                    self.setattr(item, 'count', level[i])
                     for agg in aggregates.keys():
                         # для средних - посчитаем среднее
                         if aggregates[agg] == 'avg':
-                            setattr(item, agg, aggregate_values[i][agg] / item.count)
+                            self.setattr(item, agg, aggregate_values[i][agg] / self.getattr(item, 'count'))
                         else:
-                            setattr(item, agg, aggregate_values[i][agg])
+                            self.setattr(item, agg, aggregate_values[i][agg])
                     # проставим значения ключей уровня
                     for lev in range(0, level_index):
                         lev_field = grouped[lev]
                         key = level_keys[lev]
-                        setattr(item, lev_field, key)
-                    item.calc()
+                        self.setattr(item, lev_field, key)
+                    self.calc(item)
                 else:
                     item = self.create_record()
-                    item.is_leaf = True
-                    item.indent = level_index
-                    item.load(i)
-                    item.calc()
+                    self.setattr(item, 'is_leaf', True)
+                    self.setattr(item, 'indent', level_index)
+                    self.load(item, i)
+                    self.calc(item)
                 pre_res.append(item)
 
         else:
@@ -856,21 +913,21 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
             index = 0
             for i in raw_data:
                 item = self.create_record()
-                item.indent = 0
-                item.is_leaf = True
-                item.load(i)
-                item.calc()
+                self.setattr(item, 'indent', 0)
+                self.setattr(item, 'is_leaf', True)
+                self.load(item, i)
+                self.calc(item)
                 pre_res.append(item)
 
         # а вот теперь сортируем и граничиваем
         if len(sorting.keys()) == 1:
-            sorted_data = sorted(pre_res, key=lambda k: getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
+            sorted_data = sorted(pre_res, key=lambda k: self.getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
         else:
             sorted_data = pre_res
         index = 0
         for item in sorted_data[begin:end + 1]:
-            item.index = offset + index + begin
-            item.lindex = index + begin
+            self.setattr(item, 'index', offset + index + begin)
+            self.setattr(item, 'lindex', index + begin)
             res.append(item)
             index = index + 1
 
@@ -900,7 +957,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                 # переберем элементы и сформируем уровень
                 field = grouped[level_index]
                 for rec in self.get_data():
-                    group_value = getattr(rec, field)
+                    group_value = self.getattr(rec, field)
                     if not group_value in level:
                         level.append(group_value)
                 total_of_level = len(level)
@@ -917,14 +974,14 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                     for lev in range(0, level_index):
                         lev_field = grouped[lev]
                         key = level_keys[lev]
-                        key_value = getattr(rec, lev_field)
+                        key_value = self.getattr(rec, lev_field)
                         # подходит ли запись под группировку
                         if key != key_value:
                             break
                         # если успешно проверили все поля, то значит это наша запись
                         elif lev == level_index - 1:
                             if field:
-                                group_value = getattr(rec, field)
+                                group_value = self.getattr(rec, field)
                                 if not group_value in level:
                                     level.append(group_value)
                             else:
@@ -966,14 +1023,14 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                 for lev in range(0, level_index):
                     lev_field = grouped[lev]
                     key = level_keys[lev]
-                    key_value = getattr(rec, lev_field)
+                    key_value = self.getattr(rec, lev_field)
                     # подходит ли запись под группировку
                     if key != key_value:
                         finded = False
                         break
                 # если успешно проверили все поля, то значит это наша запись
                 if finded:
-                    group_value = getattr(rec, field)
+                    group_value = self.getattr(rec, field)
                     if not group_value in level.keys():
                         level[group_value] = 1
                         aggr_rec = {}
@@ -985,7 +1042,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                     # будем считать агрегаты
                     for agg in aggregates.keys():
                         agg_type = aggregates[agg]
-                        agg_value = getattr(rec, agg)
+                        agg_value = self.getattr(rec, agg)
                         if agg_type == 'sum':
                             aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                         elif agg_type == 'count':
@@ -1000,30 +1057,30 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
             # придется обработать все записи уровня, т.к. требуется еще отсортировать их и лишь потом ограничить количество
             for i in prepared:
                 item = self.create_record()
-                setattr(item, field, i)
-                item.id = i
-                item.indent = level_index
-                item.count = level[i]
+                self.setattr(item, field, i)
+                self.setattr(item, 'id', i)
+                self.setattr(item, 'indent', level_index)
+                self.setattr(item, 'count', level[i])
                 for agg in aggregates.keys():
                     # для средних - посчитаем среднее
                     if aggregates[agg] == 'avg':
-                        setattr(item, agg, aggregate_values[i][agg] / item.count)
+                        self.setattr(item, agg, aggregate_values[i][agg] / self.getattr(item, 'count'))
                     else:
-                        setattr(item, agg, aggregate_values[i][agg])
+                        self.setattr(item, agg, aggregate_values[i][agg])
                 # проставим значения ключей уровня
                 for lev in range(0, level_index):
                     lev_field = grouped[lev]
                     key = level_keys[lev]
-                    setattr(item, lev_field, key)
-                item.calc()
+                    self.setattr(item, lev_field, key)
+                self.calc(item)
                 pre_res.append(item)
 
             # а вот теперь сортируем и граничиваем
             if len(sorting.keys()) == 1:
-                sorted_data = sorted(pre_res, key=lambda k: getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
+                sorted_data = sorted(pre_res, key=lambda k: self.getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
             else:
                 sorted_data = pre_res
 
             for item in sorted_data:
-                res.append(item.id)
+                res.append(self.getattr(item, 'id'))
         return res
