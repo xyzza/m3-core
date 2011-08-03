@@ -162,7 +162,8 @@ def build_entity(objs, separator='-'):
 
         field = Field(entity=Entity(entity_name),
                       field_name=field_name, 
-                      alias=select_field.get('alias'))
+                      alias=select_field.get('alias'),
+                      verbose_name=select_field.get('fieldName'))
         
         entity.select.append(field)
         
@@ -227,6 +228,7 @@ def get_query_params(query_id):
     query_json = json.loads(query.query_json)
     
     res = [{'name': '%s' % condition['id'].replace('-','.'),
+            'verbose_name': condition['fieldName'] ,
             'condition': condition['condition']} for condition in query_json['cond_fields']]
 
     # Получаем параметры вложенных сущностей

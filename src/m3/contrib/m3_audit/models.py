@@ -22,18 +22,28 @@ class BaseAuditModel(models.Model):
     # данные пользователя. специально не делается ForeignKey.
     # чтобы не быть завязанными на ссылочную целостность
     # * логин пользователя в системе (на момент записи значения
-    username = models.CharField(max_length=50, null=True, blank=True, db_index=True, default=u'')
+    username = models.CharField(max_length=50, null=True, blank=True, 
+                                db_index=True, default=u'', 
+                                verbose_name=u'Логин пользователя')
+    
     # * идентификатор пользователя
-    userid = models.PositiveIntegerField(default=0, db_index=True)
+    userid = models.PositiveIntegerField(default=0, db_index=True,
+                                    verbose_name=u'Идентификатор пользователя')
+
     # * ФИО пользователя на момент записи значения (для ускоренного отображения 
     #   значений
-    user_fio = models.CharField(max_length=70, null=True, blank=True, db_index=True, default=u'')
+    user_fio = models.CharField(max_length=70, null=True, blank=True, 
+                                db_index=True, default=u'',
+                                verbose_name=u'ФИО пользователя')
+    
     # * дополнительные сведения о пользователе (например, сотрудником какого 
     #   учреждения он являлся на момент записи
-    user_info = models.CharField(max_length=200, null=True, blank=True, default=u'')
+    user_info = models.CharField(max_length=200, null=True, blank=True, default=u'',
+                                verbose_name=u'Дполнительные сведения о пользователе')
     
     # серверный таймстамп на запись аудита
-    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    created = models.DateTimeField(auto_now_add=True, db_index=True, 
+                                verbose_name=u'Дата создания')
     
     class Meta:
         abstract = True

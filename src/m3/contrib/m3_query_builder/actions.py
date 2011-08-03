@@ -433,7 +433,7 @@ class GetReportFormAction(actions.Action):
         
         multiple_choice = {}
         
-        for i, param in enumerate(params):
+        for param in params:
 
             if param['type'] == Param.STRING:
                 field = ExtStringField()
@@ -454,8 +454,7 @@ class GetReportFormAction(actions.Action):
                 field = ExtNumberField()                
             else:
                 raise Exception('type "%s" is not define in class TypeField' % param['type'])
-            
-            field.client_id = '-%d' % i
+                        
             field.anchor = '100%'
             field.label = param['verbose_name']
             field.name = param['name']
@@ -475,10 +474,9 @@ class GetReportFormAction(actions.Action):
             
             #win.height += 30
             win.frm_form.items.append(cont_outer)
-        
+
             multiple_choice[field.client_id] = not (param['condition'] in (Where.LT, Where.LE, Where.GT, Where.GE)) 
-        
-        
+
             # Добавляются условия:
             conditions.append('%s %s' % (param['verbose_name'] ,param['condition']))
             
@@ -542,6 +540,7 @@ class GenerateReportAction(actions.Action):
         win.title = report.name
 
         for field in entity.get_select_fields():
+            print field.verbose_name
             win.grid.add_column(data_index=field.field_name, 
                                 header=field.verbose_name or field.field_name)                
         
