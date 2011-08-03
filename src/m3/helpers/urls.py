@@ -202,17 +202,20 @@ def inner_name_cache_handler(for_actions=True):
                     cleaned_action = action
                     url = cleaned_action.get_absolute_url()
                     key = url
+                    # регистрируем для url
                     result[key] = (cleaned_action.__class__, url, cleaned_action)
                     # также регистрируем для класса
                     key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
+                    result[key] = (cleaned_action.__class__, url, cleaned_action)
                 else:
                     # неважно что нам передали, нам нужен экземпляр класса
                     cleaned_action = get_instance(action)
                     key = cleaned_action.__class__.__module__ + '.' + cleaned_action.__class__.__name__
                     url = cleaned_action.__class__.absolute_url()
+                    # регистрируем для класса
+                    result[key] = (cleaned_action.__class__, url, cleaned_action)
 
-                result[key] = (cleaned_action.__class__, url, cleaned_action)
-
+                # регистрируем для shortname
                 shortname = get_shortname(cleaned_action)
                 if shortname:
                     result[shortname] = (cleaned_action.__class__, url, cleaned_action)
