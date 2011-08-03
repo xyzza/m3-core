@@ -4126,7 +4126,7 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     var selModel = params.selModel;
     var gridColumns = params.colModel || [];
     if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
-      gridColumns.unshift(selModel);
+      gridColumns.columns.unshift(selModel);
     }
     
     // Навешивание обработчиков на контекстное меню если нужно 
