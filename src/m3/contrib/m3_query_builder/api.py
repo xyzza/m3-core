@@ -303,9 +303,9 @@ def save_report(id, name, query_id, grid_data):
         
         if item.get('type_value'):
             report_params.value = item['type_value']
-                
+
         report_params.save()
-    
+
 def get_report(id):
     '''
     Возвращает прикрепленный отчет по id
@@ -327,10 +327,7 @@ def get_report_data(report, params):
             v = map(lambda x: datetime.datetime.strptime(x, '%d.%m.%Y'), v)            
         
         params[k] = v
-    
-    import pprint 
-    pprint.pprint(params)
-    
+
     data = entity.get_data(params)
     
     # Проход по данным из алхимии и формирование данных для грида 

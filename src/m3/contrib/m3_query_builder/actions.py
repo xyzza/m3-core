@@ -27,6 +27,7 @@ from api import get_entities, get_entity_items, build_entity, get_conditions, \
         
 from entity import Param, SortOrder, Where
 from m3.contrib.m3_query_builder.api import get_sorted_fields
+from m3.helpers.datagrouping import GroupingRecordDataProvider, RecordProxy
 
 
 
@@ -539,10 +540,13 @@ class GenerateReportAction(actions.Action):
         win = ui.ReportData(params={'data_action': ReportDataAction})        
         win.title = report.name
 
-        for field in entity.get_select_fields():
-            print field.verbose_name
+        for field in entity.get_select_fields():            
             win.grid.add_column(data_index=field.field_name, 
-                                header=field.verbose_name or field.field_name)                
+                                header=field.verbose_name or field.field_name,
+                                # Группировка
+                                extra={'groupable': True},
+                                #Сортировка
+                                sortable = True)                
         
         # Кеширование данных
         cache.set(win.client_id, get_report_data(report, context.params),
@@ -566,13 +570,45 @@ class ReportDataAction(actions.Action):
                 ACD(name='limit', type=int, required=True, 
                     verbose_name=u'Количество записей'),
                 ACD(name='start', type=int, required=True, 
-                    verbose_name=u'Индекс записи'),]
+                    verbose_name=u'Индекс записи'),
+                
+                # Группировка
+                ACD(name='exp', type=object, required=True, 
+                    verbose_name=u'Развернутые строки'),
+                ACD(name='grouped', type=object, required=True, 
+                    verbose_name=u'Сгруппированные столбцы'),
+                
+                # Сортировка
+                ACD(name='sort', type=str, required=False, 
+                    verbose_name=u'Сортируемый столбец'),
+                ACD(name='dir', type=str, required=False, 
+                    verbose_name=u'Направление сортировки'),]
         
     def run(self, request, context):
         # Ответ из кеша
         data = cache.get(context.m3_window_id)
+
+        sorting = {}
+        if hasattr(context, 'sort') and context.sort:
+            sorting[context.sort] = context.dir
+        
+        report = get_report(context.id)
+        entity = build_entity( json.loads( report.query.query_json ))    
+
+        # Генерируется словарь, коючем является название поля со значением
+        # None по умолчанию
+        proxy = dict((field.field_name, None) 
+                          for field in entity.get_select_fields())
+
+        
+        prov = GroupingRecordDataProvider(proxy = proxy, data=data)               
+
+        list, total = prov.get_elements(context.start, 
+                                        context.start + context.limit,
+                                        context.grouped, 
+                                        context.exp, 
+                                        sorting)
                         
-        return actions.PreJsonResult({'rows': data[context.start:
-                                                   context.start + context.limit], 
-                                      'total': len(data)
+        return actions.PreJsonResult({'rows': list, 
+                                      'total': total
                                       })
