@@ -10,7 +10,7 @@ import tempfile
 from django.conf import settings
 from django.utils import importlib
 
-from m3.helpers import logger
+from m3.helpers import logger, date2str
 
 
 #FIXME: грязный хак для WIN и OSX
@@ -198,24 +198,13 @@ class OOParser(object):
         #Флаг 8 отвечает за удаление аннотаций.
         document.clearContents(8)          
         return all_sections  
-    
-    def strftime_less_1900(self, dt):
-        """ 
-        Превращает дату dt в строку формата <%d.%m.%Y>, 
-        т.к. штатный питонячий strftime не понимает даты меньше 1900 года
-        (Украдено из старого генератора отчетов)
-        """
-        day = str(dt.day).zfill(2)
-        month = str(dt.month).zfill(2)
-        year = str(dt.year).zfill(4)
-        return '%s.%s.%s' % (day, month, year)
 
     def convert_value(self, value):
         '''
         Преобразовывает значение в тип, подходящий для отображения в openoffice
         ''' 
         if isinstance(value, datetime.datetime):
-            return "%s %s" % (self.strftime_less_1900(value), value.time().strftime(self.TIME_FORMAT))
+            return "%s %s" % (date2str(value), value.time().strftime(self.TIME_FORMAT))
         elif isinstance(value, datetime.date):
             return str(self.strftime_less_1900(value))
         elif isinstance(value, datetime.time):
