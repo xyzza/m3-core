@@ -984,8 +984,14 @@ Ext.Desktop = function(app){
 
     layout();
 
+    // Если в прикладном приложении при создании Ext.app.App передать в словаре
+    // параметр primaryEvent, то срабатывание именно этого эвента запустит
+    // действие, назначенное на ярлык на рабочем столе.
+    // Пример: если передать primaryEvent: 'dblclick', то ярлыки будут
+    // открываться только по даблклику.
+    var primaryEvent = app.primaryEvent || 'click';
     if(shortcuts){
-        shortcuts.on('click', function(e, t){
+        shortcuts.on(primaryEvent, function(e, t){
             var t = e.getTarget('td', shortcuts);
 			if(t){
                 e.stopEvent();
