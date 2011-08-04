@@ -1202,12 +1202,13 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
     ,getSelectionContext: function(withRow){
     	var baseConf = this.getMainContext();
 		var sm = this.getSelectionModel();
+		var idField = this.getStore().idProperty;
 		var record;
 		// для режима выделения строк
 		if (sm instanceof Ext.grid.RowSelectionModel) {
 			if (sm.singleSelect) {
 				record = sm.getSelected();
-				baseConf[this.rowIdName] = record.json.id;
+				baseConf[this.rowIdName] = record.json[idField];
 			} else {
 				// для множественного выделения
 				var sels = sm.getSelections();
@@ -1215,7 +1216,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 				record = [];
 				for(var i = 0, len = sels.length; i < len; i++){
 					record.push(sels[i]);
-					ids.push(sels[i].json.id);
+					ids.push(sels[i].json[idField]);
 				}
 				baseConf[this.rowIdName] = ids.join();
 			}
@@ -1227,7 +1228,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 			var cell = sm.getSelectedCell();
 			if (cell) {
 				record = this.getStore().getAt(cell[0]);
-				baseConf[this.rowIdName] = record.json.id;
+				baseConf[this.rowIdName] = record.json[idField];
 				baseConf[this.columnParamName] = this.getColumnModel().getDataIndex(cell[1]);
 			}
 		}
