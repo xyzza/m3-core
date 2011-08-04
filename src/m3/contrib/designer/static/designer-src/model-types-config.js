@@ -1207,8 +1207,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 },
                 autocompleteUrlShortName: {
                     defaultValue: ''
-                }
-
+                },
+				pack: {
+					defaultValue: ''
+				}
             },
             treeIconCls: 'designer-icon-combo',
             toolboxData: {

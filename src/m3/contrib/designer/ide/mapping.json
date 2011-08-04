@@ -404,7 +404,8 @@
         ,"urlShortName": {
             "type":"shortname"
             ,"value":"url"
-        }
+        },
+		"pack": "pack"
     },
     "parent":"triggerField"
 },
