@@ -213,8 +213,7 @@ class LicenseMetaResultObjectTypeEnum(BaseEnumerate):
     @enum
     Тип объекта лицензирования
     """
-    INT = 1
-    BOOL = 2
+    INT, DATE, BOOL = range(1, 4)
 
     values = {INT: 'int', BOOL: 'bool'}
 
