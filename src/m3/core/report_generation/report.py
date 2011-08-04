@@ -72,9 +72,7 @@ VARIABLE_REGEX  = '#[:alpha:]+((_)*[:digit:]*[:alpha:]*)*#'
 
 TEMPORARY_SHEET_NAME = 'template_zw'
 
-OPENOFFICE_SERVER_PORT = getattr(settings, "OPENOFFICE_SERVER_PORT", None)
-if not OPENOFFICE_SERVER_PORT:
-    OPENOFFICE_SERVER_PORT = 8010
+OPENOFFICE_SERVER_PORT = getattr(settings, "OPENOFFICE_SERVER_PORT", 8010)
 
 
 class ReportGeneratorException(Exception):
@@ -104,11 +102,10 @@ class OORunner(object):
         resolver = localContext.ServiceManager.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", localContext)
     
         # Пытаемся соединиться с сервером
-        for i in range(OORunner.CONNECTION_RETRY_COUNT):
-            try:
-                OORunner.CONTEXT = resolver.resolve("uno:socket,host=localhost,port=%d;urp;StarOffice.ComponentContext" % OORunner.PORT)
-            except NoConnectException:
-                raise ReportGeneratorException, "Не удалось соединиться с сервером openoffice на порту %d" % OORunner.PORT    
+        try:
+            OORunner.CONTEXT = resolver.resolve("uno:socket,host=localhost,port=%d;urp;StarOffice.ComponentContext" % OORunner.PORT)
+        except NoConnectException:
+            raise ReportGeneratorException, "Не удалось соединиться с сервером openoffice на порту %d" % OORunner.PORT    
         
         desktop = OORunner.CONTEXT.ServiceManager.createInstanceWithContext("com.sun.star.frame.Desktop", OORunner.CONTEXT)
         if not desktop:
@@ -180,9 +177,8 @@ class OOParser(object):
                     if all_sections.has_key(section_name[1:]):
                         all_sections[section_name[1:]].add_new_cell(position)
                     else:
-                        new_section = Section()
-                        new_section.name = section_name[1:]
-                        new_section.report_object = report_object
+                        new_section = Section(name=section_name[1:], 
+                                              report_object=report_object)
                         new_section.add_new_cell(position)
                         all_sections[section_name[1:]] = new_section    
                 else:
@@ -209,6 +205,7 @@ class OOParser(object):
         month = str(dt.month).zfill(2)
         year = str(dt.year).zfill(4)
         return '%s.%s.%s' % (day, month, year)
+    
 
     def convert_value(self, value):
         '''
@@ -258,8 +255,7 @@ class Section(object):
     Секции существуют только в контексте объекта отчета SpreadSheetReport.
     '''
     
-    def __init__(self, name=None, left_cell_addr=None, right_cell_addr=None, 
-                 report_object=None):
+    def __init__(self, name, report_object, left_cell_addr=None, right_cell_addr=None):
         #Название секции
         self.name = name
         #Верхняя левая ячейка - объект com.sun.star.table.CellAddress
@@ -387,7 +383,7 @@ class Section(object):
             if not isinstance(key, basestring):
                 raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым: %s" % key
             value = parser.convert_value(value)
-            parser.find_and_replace(section_range, u'#'+key+u'#', value)      
+            parser.find_and_replace(section_range, u'#%s#' %key, value)      
         #Если не все переменные в шаблоне были заменены, стираем оставшиеся
         parser.find_and_replace(section_range, VARIABLE_REGEX, '')
         #Задаем размеры строк и столбцов
@@ -470,8 +466,7 @@ class Section(object):
             column.IsStartOfNewPage = True
         for row_index in self.row_page_breaks:
             row = rows.getByIndex(section_render_y + row_index)
-            row.IsStartOfNewPage = True    
-                                   
+            row.IsStartOfNewPage = True                        
                         
                     
 class OOImage(object):
@@ -540,67 +535,7 @@ class OOImage(object):
         нужно передавать лист         
         '''       
         document.getDrawPage().add(self.image) 
-        
-                                 
-def create_document(desktop, path):
-    '''
-    Создает объект документа рабочей области из файла path.
-    '''
-    if path:
-        #В windows, несмотря на режим запуска OO с опцией headless, новые 
-        # документы открываются в обычном режиме. Это свойство делает документ
-        # скрытым 
-        prop = PropertyValue()
-        prop.Name = "Hidden"
-        prop.Value = True
-        file_url = path_to_file_url(path)
-        return desktop.loadComponentFromURL(file_url, "_blank", 0, (prop,))
-    else:
-        return desktop.getCurrentComponent()   
-             
-def save_document_as(document, path, properties):
-    '''
-    Сохраняет документ по указанному пути со свойствами property. property - 
-    объект com.sun.star.beans.PropertyValue
-    '''           
-    file_url = path_to_file_url(path)
-    document.storeToURL(file_url, properties)        
-
-def path_to_file_url(path):
-    '''
-    Преобразует путь в url, понятный для uno.
-    '''
-    abs_path = os.path.abspath(path)
-    file_url = uno.systemPathToFileUrl(abs_path)
-    return file_url 
-
-def get_temporary_file_path(temporary_file_name):
-    '''
-    Возвращает путь к временному файлу
-    '''
-    temporary_path = getattr(settings, "REPORT_TEMPORARY_FILE_PATH", None)
-    if not temporary_path:
-        temporary_path = tempfile.gettempdir()
-    return os.path.join(temporary_path, temporary_file_name)
-
-def copy_document(desktop, src_file_path, dest_file_path, filter=None):
-    '''
-    Создает копию файла и возвращает объект документа созданного файла.
-    '''
-    properties = []
-    if filter:
-        filter_property = PropertyValue()
-        filter_property.Name = "FilterName"
-        filter_property.Value = filter
-        properties.append(filter_property)    
-    source_document = create_document(desktop, src_file_path)
-    try:
-        save_document_as(source_document, dest_file_path, tuple(properties))
-    finally:
-        source_document.close(True)
-    document = create_document(desktop, dest_file_path)
-    return document 
-    
+     
 
 class DocumentReport(object):
     '''
@@ -702,18 +637,34 @@ class SpreadsheetReport(object):
         #Номера рядов, высота которых уже была задана
         self.defined_height_rows = []
         
-        self.desktop = OORunner.get_desktop()         
+        self.desktop = OORunner.get_desktop()    
+             
         self.document = self.get_template_document(template_name)
+        
+        #Ячейка, с которой начинается неделимый блок 
+        self.solid_block_begin = None
+        
         # Первый лист шаблона, в котором должны быть заданы секции
-        template_sheet = self.document.getSheets().getByIndex(0)
+        self.template_sheet = self.document.getSheets().getByIndex(0)
+        
+        #Размер области печати
+        self.print_area_height = self.calculate_print_area_height()
+        
         #Вставляем новый лист с таким же названием, как лист шаблона, на вторую
         # позицию
-        template_sheet_name = template_sheet.getName()
-        template_sheet.setName(TEMPORARY_SHEET_NAME)
+        template_sheet_name = self.template_sheet.getName()
+        self.template_sheet.setName(TEMPORARY_SHEET_NAME)
         self.document.getSheets().insertNewByName(template_sheet_name, 1)
+        
+        #Лист шаблона с результатом
+        self.dest_sheet = self.document.getSheets().getByIndex(1)
+        
         #Находим все секции в шаблоне
         parser = OOParser()
-        self.sections = parser.create_sections(template_sheet, self)
+        self.sections = parser.create_sections(self.template_sheet, self)
+        
+        #Устанавливаем стиль
+        self.set_result_sheet_style()
 
     def get_section(self, section_name):
         '''
@@ -739,8 +690,7 @@ class SpreadsheetReport(object):
             filter_property = PropertyValue()
             filter_property.Name = "FilterName"
             filter_property.Value = filter
-            properties.append(filter_property)
-        self.set_result_sheet_style()     
+            properties.append(filter_property)     
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
         if self.document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)           
@@ -826,8 +776,7 @@ class SpreadsheetReport(object):
                 os.remove(self.temporary_file_path)
             except OSError as e:
                 logger.exception("Не удалось удалить временный файл %s: %s " %(self.temporary_file_path, e.message))                
-         
-            
+                 
     def set_result_sheet_style(self):
         '''
         Выставляет странице с результатом такой же стиль, как в шаблоне
@@ -835,6 +784,126 @@ class SpreadsheetReport(object):
         dest_sheet = self.document.getSheets().getByIndex(1)
         src_sheet = self.document.getSheets().getByName(TEMPORARY_SHEET_NAME)
         dest_sheet.PageStyle = src_sheet.PageStyle
+    
+    def begin_solid_block(self):    
+        '''
+        Запоминает позицию начала неделимого блока
+        '''
+        position = self.previous_position[1]+self.previous_height 
+        self.solid_block_begin = self.dest_sheet.Rows.getByIndex(position)
+
+    def end_solid_block(self):
+        '''
+        Закрытие неделимого блока
+        '''          
+        if self.solid_block_begin:
+            block_end = self.previous_position[1]+self.previous_height
+            block_end_row = self.dest_sheet.Rows.getByIndex(block_end)
+            block_height = block_end_row.Position.Y - self.solid_block_begin.Position.Y   
+            all_prev_breaks = filter(lambda page_break: page_break.Position < block_end, self.dest_sheet.RowPageBreaks)
+            
+            #Находим ближайший к неделимому блоку разрыв страницы
+            if not all_prev_breaks:
+                prev_break = 0
+            elif all_prev_breaks[-1:][0].ManualBreak:
+                prev_break = all_prev_breaks[-1:][0].Position
+            elif len(all_prev_breaks) >= 2:
+                prev_break = all_prev_breaks[-2:-1][0].Position
+            else:
+                prev_break = 0
+                                            
+            prev_break_position = self.dest_sheet.Rows.getByIndex(prev_break).Position.Y
+            #Высота всех строк, которые уже были выведены после последнего разрыва
+            prefix_rows_height = self.solid_block_begin.Position.Y - prev_break_position
+            if prefix_rows_height > self.print_area_height:
+                prefix_rows_height = prefix_rows_height % self.print_area_height 
+                   
+            #Если блок не помещается на странице, ставим разрыв в начале блока
+            if (self.print_area_height-prefix_rows_height) <= (block_height):
+                 self.solid_block_begin.IsStartOfNewPage = True
+        else:
+            raise ReportGeneratorException, u"Невозможно закрыть неделимый блок до того, как он был открыт"
+                       
+        
+    def calculate_print_area_height(self):
+        '''
+        Рассчитывает высоту доступной для печати области страницы.  
+        '''
+        page_styles = self.document.StyleFamilies.getByName("PageStyles")
+        style_name  = self.template_sheet.PageStyle
+        page_style = page_styles.getByName(style_name)
+        
+        #Вычитаем из общей высоты высоту полей и колонтитулов
+        total_height = page_style.Height
+        footer = page_style.FooterHeight + page_style.FooterBodyDistance if page_style.FooterIsOn else 0
+        header = page_style.HeaderHeight + page_style.HeaderBodyDistance if page_style.HeaderIsOn else 0     
+        top_margin = page_style.TopMargin
+        bottom_margin = page_style.BottomMargin    
+        height = total_height - (footer + header + top_margin + bottom_margin)
+        
+        #При расчете высоты страницы учитываем масштаб печати (задается в процентах)
+        page_scale = page_style.PageScale
+        height = (height * 100) / page_scale 
+
+        return height  
         
         
+def create_document(desktop, path):
+    '''
+    Создает объект документа рабочей области из файла path.
+    '''
+    if path:
+        #В windows, несмотря на режим запуска OO с опцией headless, новые 
+        # документы открываются в обычном режиме. Это свойство делает документ
+        # скрытым 
+        prop = PropertyValue()
+        prop.Name = "Hidden"
+        prop.Value = True
+        file_url = path_to_file_url(path)
+        return desktop.loadComponentFromURL(file_url, "_blank", 0, (prop,))
+    else:
+        return desktop.getCurrentComponent()   
+             
+def save_document_as(document, path, properties):
+    '''
+    Сохраняет документ по указанному пути со свойствами property. property - 
+    объект com.sun.star.beans.PropertyValue
+    '''           
+    file_url = path_to_file_url(path)
+    document.storeToURL(file_url, properties)        
+
+def path_to_file_url(path):
+    '''
+    Преобразует путь в url, понятный для uno.
+    '''
+    abs_path = os.path.abspath(path)
+    file_url = uno.systemPathToFileUrl(abs_path)
+    return file_url 
+
+def get_temporary_file_path(temporary_file_name):
+    '''
+    Возвращает путь к временному файлу
+    '''
+    temporary_path = getattr(settings, "REPORT_TEMPORARY_FILE_PATH", None)
+    if not temporary_path:
+        temporary_path = tempfile.gettempdir()
+    return os.path.join(temporary_path, temporary_file_name)
+
+def copy_document(desktop, src_file_path, dest_file_path, filter=None):
+    '''
+    Создает копию файла и возвращает объект документа созданного файла.
+    '''
+    properties = []
+    if filter:
+        filter_property = PropertyValue()
+        filter_property.Name = "FilterName"
+        filter_property.Value = filter
+        properties.append(filter_property)    
+    source_document = create_document(desktop, src_file_path)
+    try:
+        save_document_as(source_document, dest_file_path, tuple(properties))
+    finally:
+        source_document.close(True)
+    document = create_document(desktop, dest_file_path)
+    return document         
              
