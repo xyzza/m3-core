@@ -52,19 +52,23 @@ function selectLinks(){
 	
 	var firstChkLink = Ext.getCmp('{{ component.chk_link_first.client_id }}');
 	var secondChkLink = Ext.getCmp('{{ component.chk_link_second.client_id }}');
-	
+
 	var resObj = {
-		'firstEntity': {
-			'fieldName': firstNode.attributes['verbose_field']
-			,'entityName': firstNode.attributes['entity_name']
-			,'outer': firstChkLink.checked
-		},
-		'secondEntity': {
-			'fieldName': secondNode.attributes['verbose_field']
-			,'entityName': secondNode.attributes['entity_name']
-			,'outer': secondChkLink.checked
-		},
-	}
+		'outerFirst': firstChkLink.checked
+		,'outerSecond': secondChkLink.checked
+		,'relation': String.format('{0}-{1}|{2}-{3}',
+			firstNode.attributes['entity_name'],
+			firstNode.attributes['id_field'],
+			secondNode.attributes['entity_name'],
+			secondNode.attributes['id_field']		
+		)
+		,'value': String.format('{0}.{1} = {2}.{3}',
+			firstNode.parentNode.attributes['verbose_field'],
+			firstNode.attributes['verbose_field'],
+			secondNode.parentNode.attributes['verbose_field'],
+			secondNode.attributes['verbose_field']
+		)
+}
 
 	win.fireEvent('selectLinks', resObj);
 	win.close();

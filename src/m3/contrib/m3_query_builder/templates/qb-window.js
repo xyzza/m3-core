@@ -281,35 +281,14 @@ function selectConnection(){
             // Подпись на нажатие "Выбор" и обработка результатов запроса
             childWin.on('selectLinks', function(resObj){
 
-				var LinkRecord = Ext.data.Record.create([
-				    {name: 'entityFirst', mapping: 'entityFirst'},
-				    {name: 'entityFirstField', mapping: 'entityFirstField'},
-				    {name: 'outerFirst', mapping: 'outerFirst'},
-				    {name: 'entitySecond', mapping: 'entitySecond'},
-				    {name: 'entitySecondField', mapping: 'entitySecondField'},
-				    {name: 'outerSecond', mapping: 'outerSecond'},
-				    {name: 'value', mapping: 'value'}
-				]);
-				
-				
-				var newLinkRecord = new LinkRecord(
-				    {
-				    	entityFirst: resObj['firstEntity']['entityName'],
-				    	entityFirstField: resObj['firstEntity']['fieldName'],
-				    	outerFirst: resObj['firstEntity']['outer'],
-				    	entitySecond: resObj['secondEntity']['entityName'],
-				    	entitySecondField: resObj['secondEntity']['fieldName'],
-				    	outerSecond: resObj['secondEntity']['outer'],
-				    	value: String.format('{0}.{1} = {2}.{3}', 				    	
-				    		resObj['firstEntity']['entityName'],
-				    		resObj['firstEntity']['fieldName'],
-				    		resObj['secondEntity']['entityName'],
-				    		resObj['secondEntity']['fieldName']				    					    	
-				    	)				    	
-				    }
-				);
-		
-	        	grdLinks.getStore().add(newLinkRecord);
+				var record = new Ext.data.Record();
+				record.id = resObj['relation'];
+				record.data['outerFirst'] = resObj['outerFirst'];
+				record.data['outerSecond'] = resObj['outerSecond'];
+				record.data['outerFirst'] = resObj['outerSecond'];
+				record.data['value'] = resObj['value'];
+
+	        	grdLinks.getStore().add(record);
             });
         }
         ,failure: function(){
@@ -431,37 +410,26 @@ function openConditionWindow(node){
         ,params: win.actionContextJson || {}
         ,success: function(response){
             loadMask.hide();
-            var childWin = smart_eval(response.responseText);
+            var childWin = smart_eval(response.responseText);            
             childWin.fireEvent('loadData', {
-            	'field': node.attributes['verbose_field']
+            	'verboseName': node.attributes['verbose_field'],
+            	'paramName': node.attributes['id_field']
             });
             childWin.on('selectData', function(obj){
 
-         		var Record = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
-				    {name: 'fieldName', mapping: 'fieldName'},
-				    {name: 'entityName', mapping: 'entityName'},
-				    {name: 'condition', mapping: 'condition'},
-				    {name: 'parameter', mapping: 'parameter'},
-				    {name: 'expression', mapping: 'expression'},
-				]);
-			
-				var fieldName = node.attributes['verbose_field'];
-				var entityName = node.attributes['entity_name'];
-				var fieldID = node.attributes['id_field'];
+				var verboseFieldName = node.attributes['verbose_field'],
+					entityName = node.attributes['entity_name'],
+					fieldID = node.attributes['id_field'];
 				
-				var condition = obj['condition'];
-				var parameter = obj['parameter'];
-				
-				var newRecord = new Record(
-				    {'fieldName': fieldName,
-				    'entityName': entityName,
-				    'condition':condition,
-				    'parameter':parameter,
-				    'expression': String.format('{0} {1} {2}', fieldName, condition, parameter)
-				   },
-				   String.format('{0}-{1}', entityName, fieldID) 				    
-				);
-				grdConditionsFields.getStore().add(newRecord);
+				var record = new Ext.data.Record();
+				record.id = String.format('{0}-{1}', entityName, fieldID) 
+				record.data['verboseName'] = verboseFieldName;
+				record.data['condition'] = obj['condition'];
+				record.data['parameter'] = obj['parameter'];
+				record.data['expression'] = String.format('{0} {1} ${2}', 
+										verboseFieldName, obj['condition'], obj['parameter']);
+
+				grdConditionsFields.getStore().add(record);
 				
             });		            
 		}
@@ -499,8 +467,7 @@ function showQueryText(){
 			'objects': Ext.encode( buildParams() )
 		}
 		,success: function(response){
-			loadMask.hide();
-			console.log('sql');
+			loadMask.hide();			
             smart_eval(response.responseText);
 		}
 		,failure: function(){

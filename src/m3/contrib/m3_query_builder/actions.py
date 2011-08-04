@@ -17,19 +17,16 @@ from m3.helpers.icons import Icons
 from m3.ui.ext.fields.simple import ExtStringField, ExtNumberField, ExtDateField,\
     ExtCheckBox, ExtDisplayField
 
+from m3.helpers.datagrouping import GroupingRecordDataProvider
 
 import ui
 from models import Query, Report, ReportParams
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
     get_pack, get_report_params, get_report, get_report_data, get_group_fields, \
-    get_limit
+    get_limit, get_sorted_fields
         
-from entity import Param, SortOrder, Where
-from m3.contrib.m3_query_builder.api import get_sorted_fields
-from m3.helpers.datagrouping import GroupingRecordDataProvider, RecordProxy
-
-
+from entity import Param, SortOrder, Where, EntityException
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
     '''
@@ -93,16 +90,11 @@ class QueryBuilderWindowAction(actions.Action):
                                                               x['entityName']], 
                                                    query_json['entities']),
                                     
-                             links=map(lambda x: [ str(uuid.uuid4())[:8],# ID
-                                                  x['entityFirst'],
-                                                  x['entityFirstField'],  
+                             links=map(lambda x: [x['id'],                                                    
                                                   x['outerFirst'],
-                                                  
-                                                  x['entitySecond'],                                                    
-                                                  x['entitySecondField'],                                                                                                   
-                                                  x['outerSecond'],
-                                                  
-                                                  x['value'],], query_json['relations']),
+                                                  x['value'],
+                                                  x['outerSecond'],                                                  
+                                                  ], query_json['relations']),
 
                              
                              distinct=query_json['distinct'],
@@ -127,7 +119,7 @@ class QueryBuilderWindowAction(actions.Action):
                              
                              conditions=map(lambda x: [ 
                                                   x['id'],
-                                                  x['fieldName'],
+                                                  x['verboseName'],
                                                   x['condition'],
                                                   x['parameter'],
                                                   x['expression']
@@ -200,7 +192,10 @@ class ShowQueryTextAction(actions.Action):
     def run(self, request, context):           
 
         entity = build_entity(context.objects)
-        sql = entity.get_raw_sql()
+        try:
+            sql = entity.get_raw_sql()
+        except EntityException as ins:
+            return OperationResult(success=False, message=ins.message)
 
         win = ui.SqlWindow()
         win.set_source(sql)

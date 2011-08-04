@@ -66,7 +66,7 @@ class DBColumnNotFound(EntityException):
         self.field_name = field_name
         
     def __str__(self):
-        raise Exception(u'В модели %s не найдена колонка %s' % (self.model_name, self.field_name))
+        return u'В модели %s не найдена колонка %s' % (self.model_name, self.field_name)
         
 
 #=========================== КЛАССЫ ==============================
@@ -529,7 +529,7 @@ class BaseEntity(object):
         
         # Подготовка колонок для выбора SELECT
         if not len(self.select):
-            raise Exception(u'Нет данных для SELECT')
+            raise EntityException(u'Нет данных для SELECT')
 
         select_columns = self._create_columns(params)
         join_sequence = self._create_join(params)

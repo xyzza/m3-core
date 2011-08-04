@@ -5,8 +5,8 @@ var condition = Ext.getCmp('{{ component.cmb_simple_cond.client_id }}');
 
 
 win.on('loadData', function(obj){
-	condField.setValue(obj['field']);
-	condParam.setValue(obj['field']);
+	condField.setValue(obj['verboseName']);
+	condParam.setValue(obj['paramName']);
 });
 
 function selectCondition(){

@@ -199,44 +199,22 @@ class QueryBuilderWindow(ExtWindow):
         
         dstore_links = ExtDataStore()
         
-        clmn_entity_first = ExtGridColumn()
-        clmn_entity_first.header = 'column'
-        clmn_entity_first.menu_disabled = True
-        clmn_entity_first.data_index = 'entityFirst'
-        clmn_entity_first.hidden = True
-        
-        clmn_entity_first_field = ExtGridColumn()
-        clmn_entity_first_field.header = u'Поле 1'
-        clmn_entity_first_field.data_index = 'entityFirstField'
-        clmn_entity_first_field.menu_disabled = True
-        
         clmn_entity_first_type = ExtGridColumn()
         clmn_entity_first_type.menu_disabled = True
-        clmn_entity_first_type.header = u'Вн.'
-        clmn_entity_first_type.width = 30
+        clmn_entity_first_type.header = u'Левое внешнее соединение'
+        clmn_entity_first_type.width = 20
         clmn_entity_first_type.data_index = 'outerFirst'
         
-        clmn_entity_second = ExtGridColumn()
-        clmn_entity_second.header = 'column'
-        clmn_entity_second.menu_disabled = True
-        clmn_entity_second.data_index = 'entitySecond'
-        clmn_entity_second.hidden = True
-        
-        clmn_entity_second_field = ExtGridColumn()
-        clmn_entity_second_field.header = u'Поле 2'
-        clmn_entity_second_field.data_index = 'entitySecondField'
-        clmn_entity_second_field.menu_disabled = True
+        clmn_descr = ExtGridColumn()
+        clmn_descr.header = u'Наименование связи'
+        clmn_descr.data_index = 'value'
+        clmn_descr.menu_disabled = True
         
         clmn_entity_second_type = ExtGridColumn()
         clmn_entity_second_type.menu_disabled = True
-        clmn_entity_second_type.header = u'Вн.'
-        clmn_entity_second_type.width = 30
+        clmn_entity_second_type.header = u'Правое внешнее соединение'
+        clmn_entity_second_type.width = 20
         clmn_entity_second_type.data_index = 'outerSecond'
-        
-        clmn_descr = ExtGridColumn()
-        clmn_descr.header = u'Тип связи'
-        clmn_descr.data_index = 'value'
-        clmn_descr.menu_disabled = True
         
         tree_entities = ExtTree()
         tree_entities.title = u'Дерево сущностей'
@@ -269,7 +247,7 @@ class QueryBuilderWindow(ExtWindow):
         tb_selected_entities.items.extend([btn_add_entity, btn_delete_entity])
         grd_selected_entities.columns.extend([entity_name])
         tb_link_entities.items.extend([btn_select_link, btn_delete_link])
-        grd_links.columns.extend([clmn_entity_first, clmn_entity_first_field, clmn_entity_first_type, clmn_entity_second, clmn_entity_second_field, clmn_entity_second_type, clmn_descr])
+        grd_links.columns.extend([clmn_entity_first_type, clmn_descr, clmn_entity_second_type])
         cnt_entities.items.extend([grd_selected_entities, grd_links])
         tb_entities.items.extend([btn_button_5])
         tree_entities.columns.extend([clmn_entities])
@@ -287,13 +265,9 @@ class QueryBuilderWindow(ExtWindow):
         self.btn_select_link = btn_select_link
         self.btn_delete_link = btn_delete_link
         self.dstore_links = dstore_links
-        self.clmn_entity_first = clmn_entity_first
-        self.clmn_entity_first_field = clmn_entity_first_field
         self.clmn_entity_first_type = clmn_entity_first_type
-        self.clmn_entity_second = clmn_entity_second
-        self.clmn_entity_second_field = clmn_entity_second_field
-        self.clmn_entity_second_type = clmn_entity_second_type
         self.clmn_descr = clmn_descr
+        self.clmn_entity_second_type = clmn_entity_second_type
         self.tree_entities = tree_entities
         self.tb_entities = tb_entities
         self.btn_button_5 = btn_button_5
@@ -301,7 +275,7 @@ class QueryBuilderWindow(ExtWindow):
         
         return cont
 
-                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                
     def init_fields(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
@@ -579,7 +553,7 @@ class QueryBuilderWindow(ExtWindow):
         clmn_cond_field = ExtGridColumn()
         clmn_cond_field.header = u'Поле'
         clmn_cond_field.menu_disabled = True
-        clmn_cond_field.data_index = 'fieldName'
+        clmn_cond_field.data_index = 'verboseName'
         clmn_cond_field.hidden = True
         
         clmn_cond_condition = ExtGridColumn()
@@ -621,7 +595,7 @@ class QueryBuilderWindow(ExtWindow):
         
         return cont
 
-        
+                
     def set_aggr_functions(self, aggr_functions):
         '''
         Устанавливает возможные функции агригирования
@@ -768,8 +742,8 @@ class ConditionWindow(ExtWindow):
         '''AUTOGENERATED'''
         self.layout = 'auto'
         self.title = u'Добавление условия'
-        self.min_height = 250
-        self.height = 250
+        self.min_height = 150
+        self.height = 150
         self.min_width = 500
         self.width = 500
         self.template_globals = 'qb-add-condition-window.js'
@@ -788,14 +762,6 @@ class ConditionWindow(ExtWindow):
         cnt_simple_cond = ExtContainer()
         cnt_simple_cond.layout = 'hbox'
         cnt_simple_cond.style = {'padding': '5px'}
-        
-        cnt_simple_chk = ExtContainer()
-        cnt_simple_chk.layout = 'form'
-        cnt_simple_chk.label_align = 'top'
-        cnt_simple_chk.style = {'padding': '5px'}
-        
-        chk_simple = ExtCheckBox()
-        chk_simple.checked = True
         
         cnt_item = ExtContainer()
         cnt_item.flex = 1
@@ -817,10 +783,10 @@ class ConditionWindow(ExtWindow):
         cmb_simple_cond = ExtComboBox()
         cmb_simple_cond.display_field = 'name'
         cmb_simple_cond.label = u'Условие'
-        cmb_simple_cond.anchor = '100%'
         cmb_simple_cond.value_field = 'id'
         cmb_simple_cond.mode = 'local'
         cmb_simple_cond.trigger_action = 'all'
+        cmb_simple_cond.anchor = '100%'
         
         astore_conditions = ExtDataStore()
         astore_conditions.store_id = 'newArrayStore'
@@ -834,51 +800,23 @@ class ConditionWindow(ExtWindow):
         str_param = ExtStringField()
         str_param.label = u'Параметр'
         str_param.anchor = '100%'
-        
-        cnt_complex_cond = ExtContainer()
-        cnt_complex_cond.layout = 'hbox'
-        cnt_complex_cond.style = {'padding': '5px'}
-        
-        cnt_complex = ExtContainer()
-        cnt_complex.layout = 'form'
-        cnt_complex.label_align = 'top'
-        cnt_complex.style = {'padding': '5px'}
-        
-        chk_complex = ExtCheckBox()
-        chk_complex.disabled = True
-        
-        cnt_complex_tarea = ExtContainer()
-        cnt_complex_tarea.flex = 1
-        cnt_complex_tarea.layout = 'form'
-        cnt_complex_tarea.label_align = 'top'
-        cnt_complex_tarea.style = {'padding': '5px'}
-        
-        tarea_complex_cond = ExtTextArea()
-        tarea_complex_cond.flex = 1
-        tarea_complex_cond.label = u'Составное условие'
-        tarea_complex_cond.disabled = True
-        tarea_complex_cond.anchor = '100%'
+        str_param.disabled = False
+        str_param.read_only = True
         
         self.footer_bar = tb_buttons
         cmb_simple_cond.store = astore_conditions
         
         tb_buttons.items.extend([btn_select, btn_cancel])
-        cnt_simple_chk.items.extend([chk_simple])
         cnt_item.items.extend([str_item])
         cnt_simple_cmb.items.extend([cmb_simple_cond])
         cnt_param.items.extend([str_param])
-        cnt_simple_cond.items.extend([cnt_simple_chk, cnt_item, cnt_simple_cmb, cnt_param])
-        cnt_complex.items.extend([chk_complex])
-        cnt_complex_tarea.items.extend([tarea_complex_cond])
-        cnt_complex_cond.items.extend([cnt_complex, cnt_complex_tarea])
-        self.items.extend([cnt_simple_cond, cnt_complex_cond])
+        cnt_simple_cond.items.extend([cnt_item, cnt_simple_cmb, cnt_param])
+        self.items.extend([cnt_simple_cond])
         
         self.tb_buttons = tb_buttons
         self.btn_select = btn_select
         self.btn_cancel = btn_cancel
         self.cnt_simple_cond = cnt_simple_cond
-        self.cnt_simple_chk = cnt_simple_chk
-        self.chk_simple = chk_simple
         self.cnt_item = cnt_item
         self.str_item = str_item
         self.cnt_simple_cmb = cnt_simple_cmb
@@ -886,12 +824,8 @@ class ConditionWindow(ExtWindow):
         self.astore_conditions = astore_conditions
         self.cnt_param = cnt_param
         self.str_param = str_param
-        self.cnt_complex_cond = cnt_complex_cond
-        self.cnt_complex = cnt_complex
-        self.chk_complex = chk_complex
-        self.cnt_complex_tarea = cnt_complex_tarea
-        self.tarea_complex_cond = tarea_complex_cond
 
+                                                
     def set_conditions(self, conditions):
         '''
         Устанавливает возможные простые условия
@@ -954,9 +888,10 @@ class ReportBuilderWindow(ExtEditWindow):
         astore_params.id_index = 0
         
         clmn_name = ExtGridColumn()
+        clmn_name.menu_disabled = True
         clmn_name.header = u'Идентификатор'
         clmn_name.data_index = 'name'
-        clmn_name.menu_disabled = True
+        clmn_name.hidden = True
         
         clmn_verbose_name = ExtGridColumn()
         clmn_verbose_name.header = u'Название'
@@ -970,6 +905,7 @@ class ReportBuilderWindow(ExtEditWindow):
         clmn_type_id.hidden = True
         
         clmn_type = ExtGridColumn()
+        clmn_type.width = 40
         clmn_type.header = u'Тип'
         clmn_type.data_index = 'type'
         clmn_type.menu_disabled = True
@@ -980,9 +916,10 @@ class ReportBuilderWindow(ExtEditWindow):
         clmn_value_type.menu_disabled = True
         
         clmn_condition = ExtGridColumn()
+        clmn_condition.width = 50
         clmn_condition.header = u'Условие'
-        clmn_condition.menu_disabled = True
         clmn_condition.data_index = 'condition'
+        clmn_condition.menu_disabled = True
         
         frm_form = ExtForm()
         frm_form.layout = 'form'
@@ -1041,7 +978,7 @@ class ReportBuilderWindow(ExtEditWindow):
         self.str_name = str_name
         self.dsf_query = dsf_query
 
-                                                                                                
+                                                                                                                                        
 class ReportParamsWindow(ExtWindow):
 
     def __init__(self, types, default_type_value, params, *args, **kwargs):
@@ -1155,7 +1092,9 @@ class ReportForm(ExtWindow):
         self.layout = 'border'
         self.height = 300
         self.width = 620
+        self.maximizable = True
         self.template_globals = 'rb-report-form.js'
+        self.minimizable = True
         
         tb_buttons = ExtToolBar()
         tb_buttons.layout = 'toolbar'
@@ -1203,7 +1142,7 @@ class ReportForm(ExtWindow):
         self.hdn_report_id = hdn_report_id
         self.frm_info = frm_info
 
-                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                
 class SqlWindow(ExtWindow):
 
     def __init__(self, *args, **kwargs):
@@ -1262,6 +1201,8 @@ class ReportData(ExtWindow):
         self.height = 500
         self.width = 600
         self.maximizable = True
+        self.maximized = True
+        self.minimizable = True
         
         tb_buttons = ExtToolBar()
         tb_buttons.layout = 'toolbar'

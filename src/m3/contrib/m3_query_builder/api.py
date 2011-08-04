@@ -123,14 +123,20 @@ def build_entity(objs, separator='-'):
         
     entity.entities = map(lambda x: Entity(x['id']), objs['entities'])
     
-    # Список связей    
-    entity.relations = [             
-        Relation(
-            Field(Entity(rel['entityFirst']), rel['entityFirstField']),     
-            Field(Entity(rel['entitySecond']), rel['entitySecondField']),
+    # Список связей
+    for rel in objs['relations']:  
+        left_entity, right_entity = rel['id'].split('|') # | - разделитель для сущностей внетри связи
+        left_entity_name, left_field_name = left_entity.split(separator)
+        right_entity_name, right_field_name = right_entity.split(separator) 
+                  
+        relation = Relation(
+            Field(Entity(left_entity_name), left_field_name),     
+            Field(Entity(right_entity_name), right_field_name),
             outer_first=rel['outerFirst'],            
             outer_second=rel['outerSecond'],
-        ) for rel in objs['relations']]
+        )
+        
+        entity.relations.append(relation)
     
     # Список группировки
     group_fields = []
@@ -228,7 +234,7 @@ def get_query_params(query_id):
     query_json = json.loads(query.query_json)
     
     res = [{'name': '%s' % condition['id'].replace('-','.'),
-            'verbose_name': condition['fieldName'] ,
+            'verbose_name': condition['verboseName'] ,
             'condition': condition['condition']} for condition in query_json['cond_fields']]
 
     # Получаем параметры вложенных сущностей

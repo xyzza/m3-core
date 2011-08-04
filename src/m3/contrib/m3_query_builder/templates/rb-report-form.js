@@ -104,8 +104,8 @@ var fieldsModel = new function(){
 /**
  * Сабмит данных на сервер
  */
-function submitForm(){
-	
+function submitForm(btn){
+
 	var url = '{{ component.submit_data_url }}';
 	assert(url, 'Url for child window is not define');
 
@@ -113,18 +113,20 @@ function submitForm(){
 	
 	var loadMask = new Ext.LoadMask(win.body);
     loadMask.show();
-	
+	btn.getEl().mask();
 	Ext.Ajax.request({		
 		url: url
 		,params: Ext.applyIf({'params': Ext.encode(values) }, win.actionContextJson)
 		,success: function(response) {
 			loadMask.hide();
+			btn.getEl().unmask();
 			
 			// Получение окна
 			smart_eval(response.responseText);
 		}
 		,failure: function(){
         	loadMask.hide();
+        	btn.getEl().unmask();
             uiAjaxFailMessage.apply(this, arguments);
         }
 	});
