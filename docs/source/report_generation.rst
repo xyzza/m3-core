@@ -155,7 +155,7 @@ OpenOffice должен быть запущен в качестве сервер
 +++++++++++++++
 
 .. autoclass:: SpreadsheetReport
-   :members: get_section, get_section_render_position, set_section_render_position, show
+   :members: get_section, get_section_render_position, set_section_render_position, show, begin_solid_block, end_solid_block
 
 .. autoclass:: Section
    :members: flush, create_image
@@ -232,6 +232,32 @@ OpenOffice должен быть запущен в качестве сервер
 	.. image:: images/report_generation/page_breaks.png
 
 	В данном примере шаблон содержит разрыв по нижней границе строки с номером 11. В результате в отчет будет вставлен разрыв страницы в конце каждой секции "Информация".
+
+12. Поддержка неделимых областей шаблона.
+	Неделимая область шаблона - это такая часть шаблона, в которой не должно быть разрывов страницы по строке.
+
+	Неделимая области шаблона задается своими началом и концом.
+
+	Для задания начала неделимой области существует метод *begin_solid_block* объекта отчета *SpreadsheetReport*. Для задания окончания неделимой области существует метод *end_solid_block* объекта отчета *SpreadsheetReport*.
+	
+	В случае, если размер неделимого блока больше размера страницы, генератор отчетов не сможет предотвратить наличие разрывов, и часть неделимого блока будет пренесена на следующую страницу.
+
+	Неделимые блоки не могут быть вложены друг в друга.
+
+	Определение неделимой области может выглядеть так:
+::
+
+	report = SpreadsheetReport(temp_path)
+	header = report.get_section(u'Шапка')
+        body = report.get_section(u'Тело')
+	header.flush()
+        
+        report.begin_solid_block()
+        for data in data_list:
+            body.flush(data)
+        report.end_solid_block()
+
+Все секции, выведенные в цикле, входят в неделимый блок. Генератор отчетов будет следить за тем, чтобы в нем не было разрывов по строке.
 
 Примеры использования
 +++++++++++++++++++++
