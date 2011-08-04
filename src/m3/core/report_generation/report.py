@@ -72,8 +72,6 @@ VARIABLE_REGEX  = '#[:alpha:]+((_)*[:digit:]*[:alpha:]*)*#'
 
 TEMPORARY_SHEET_NAME = 'template_zw'
 
-OPENOFFICE_SERVER_PORT = getattr(settings, "OPENOFFICE_SERVER_PORT", 8010)
-
 
 class ReportGeneratorException(Exception):
     pass
@@ -85,8 +83,11 @@ class OORunner(object):
     '''
     Cоединяется с сервером OpenOffice
     '''
+    #Хост, на котором будет запущен сервер
+    HOST = getattr(settings, "OPENOFFICE_SERVER_HOST", 'localhost')
+    
     # Порт, на котором будет запущен сервер
-    PORT = OPENOFFICE_SERVER_PORT
+    PORT = getattr(settings, "OPENOFFICE_SERVER_PORT", 8010)
     
     CONTEXT = None
     
@@ -103,7 +104,7 @@ class OORunner(object):
     
         # Пытаемся соединиться с сервером
         try:
-            OORunner.CONTEXT = resolver.resolve("uno:socket,host=localhost,port=%d;urp;StarOffice.ComponentContext" % OORunner.PORT)
+            OORunner.CONTEXT = resolver.resolve("uno:socket,host=%s,port=%d;urp;StarOffice.ComponentContext" % (OORunner.HOST, OORunner.PORT))
         except NoConnectException:
             raise ReportGeneratorException, "Не удалось соединиться с сервером openoffice на порту %d" % OORunner.PORT    
         

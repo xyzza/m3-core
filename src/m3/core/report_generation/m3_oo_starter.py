@@ -9,7 +9,7 @@ import time
 from com.sun.star.connection import NoConnectException
 from optparse import OptionParser
 
-def start_server(port=8010):
+def start_server(host, port):
     '''
     Запускает OpenOffice
     ''' 
@@ -23,7 +23,7 @@ def start_server(port=8010):
         print "Не удалось запустить сервер на порту %d: %s. \
         Возможно, не установлен OpenOffice или не прописан путь в переменной окружения PATH" % (port, e.message)    
         
-def stop_server(port=8010):
+def stop_server(host, port):
     '''
     Закрывает рабочую область OpenOffice
     '''     
@@ -46,16 +46,18 @@ if __name__ == '__main__':
     
     parser = OptionParser()
     parser.add_option("-c", "--command", dest="command", help=u"Команда start для запуска, stop для остановки и restart для перезапуска сервера OpenOffice", type="string")
-    parser.add_option("-p", "--port", dest="port", help=u"Порт сервера OpenOffice", type="int", default=8010)  
+    parser.add_option("--host", dest="host", help=u"Хост сервера OpenOffice", type="string", default='localhost')  
+    parser.add_option("--port", dest="port", help=u"Порт сервера OpenOffice", type="int", default=8010)
     (options, args) = parser.parse_args(sys.argv[1:])                    
     command = options.command
+    host = options.host
     port = options.port
     if command == 'start':
-        start_server(port)
+        start_server(host, port)
     elif command == 'stop':
-        stop_server(port)
+        stop_server(host, port)
     elif command == 'restart':
-        stop_server(port)
-        start_server(port)
+        stop_server(host, port)
+        start_server(host, port)
     else:
         raise ValueError, params_error_message %command
