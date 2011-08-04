@@ -28,7 +28,8 @@ def ssacc_send_request(url, params=None):
     """
     Подключается к SSACC серваку, и получает ответ, либо выбрасывает ошибку.
 
-    @param connect_url: добавочный урл на сервере.
+    @param url: добавочный урл на сервере.
+    @param params: параметры запроса.
     @raise SSACCException
     @return: str
     """

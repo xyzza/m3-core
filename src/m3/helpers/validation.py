@@ -150,12 +150,13 @@ class ValidationFailed(Exception):
     '''
     Исключение для ситуаций валидации пользовательских данных
     '''
-    def __init__(self):
-        self.error_messages = [] # список ошибок валидации
+    def __init__(self, *args):
+        Exception.__init__(self, *args)
+        self.error_messages = [unicode(arg) for arg in args] # список ошибок валидации
         
     def add_error_message(self, message):
         self.error_messages.append(message)
-        
+
     def has_errors(self):
         return self.error_messages
 
