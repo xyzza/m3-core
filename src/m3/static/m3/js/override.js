@@ -230,21 +230,22 @@ Ext.override(Ext.form.Action.Submit, {
             if (o.submitEmptyText === false) {
                 var fields = this.form.items,
                     emptyFields = [];
-                fields.each(function(f) {					
+                fields.each(function(f) {
+                    assert(f.el === undefined, "Возможно у вас непроинициализировались некоторые поля для отправки. Обратите внимание на TabPanel'и.");
                     if (f.el.getValue() == f.emptyText) {
                         emptyFields.push(f);
                         f.el.dom.value = "";
-                    };
+                    }
 					// Добавилось
                     // вот тут сделаем добавку
                     if (f instanceof Ext.form.CompositeField) {
-                        f.items.each(function(cf) {					
+                        f.items.each(function(cf) {
                             if (cf.el.getValue() == cf.emptyText) {
                                 emptyFields.push(cf);
                                 cf.el.dom.value = "";
-                            };
+                            }
                         });
-                    };
+                    }
 					// <--
                 });
             }
@@ -276,16 +277,16 @@ Ext.override(Ext.form.Action.Submit, {
  * у текстоввых полей
  */
 Ext.override(Ext.form.Checkbox, {
-                onClick : function(e){
-                    if (this.readOnly) {
-                        e.stopEvent();
-                        return false;
-                    }
+    onClick : function(e){
+        if (this.readOnly) {
+            e.stopEvent();
+            return false;
+        }
 
-                    if(this.el.dom.checked != this.checked){
-                        this.setValue(this.el.dom.checked);
-                    };
-                }
+        if(this.el.dom.checked != this.checked){
+            this.setValue(this.el.dom.checked);
+        }
+    }
 });
 
 /**
