@@ -310,6 +310,24 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
             url: this.dataUrl
             ,params: Ext.applyIf({isGetData: true}, this.actionContextJson || {})
             ,success: function(form, action){
+                // Сложным контролам, данные которых хранятся в Store, недостаточно присвоить value.
+                // Для них передаются готовые записи Store целиком.
+                var complex_data = action.result.complex_data;
+                for (var fieldName in complex_data){
+                    var field = form.findField(fieldName);
+
+                    // Создаем запись и добавляем в стор
+                    var record = new Ext.data.Record();
+                    var id = complex_data[fieldName].id;
+                    record['id'] = id;
+                    record[field.displayField] = complex_data[fieldName].value;
+                    field.getStore().loadData({total:1, rows:[record]});
+
+                    // Устанавливаем новое значение
+                    field.setValue(id);
+                    field.collapse();
+                }
+                
             	mask.hide();
                 this.disableToolbars(false);
                 this.fireEvent('dataloaded', action);
