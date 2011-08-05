@@ -877,7 +877,6 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             elif agg_type == 'avg':
                                 aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                     else:
-                        level[self.getattr(rec, 'id')] = rec
                         prepared.append(rec)
             # теперь выведем запрошенные элементы уровня
             # придется обработать все записи уровня, т.к. требуется еще отсортировать их и лишь потом ограничить количество
