@@ -231,7 +231,7 @@ Ext.override(Ext.form.Action.Submit, {
                 var fields = this.form.items,
                     emptyFields = [];
                 fields.each(function(f) {
-                    assert(f.el === undefined, "Возможно у вас непроинициализировались некоторые поля для отправки. Обратите внимание на TabPanel'и.");
+                    assert(f.el, "Возможно у вас непроинициализировались некоторые поля для отправки. Обратите внимание на TabPanel'и.");
                     if (f.el.getValue() == f.emptyText) {
                         emptyFields.push(f);
                         f.el.dom.value = "";
