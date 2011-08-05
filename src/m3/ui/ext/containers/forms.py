@@ -51,9 +51,6 @@ class ExtForm(BaseExtPanel):
         
         # Будут ли загружаться файлы
         self.file_upload = False
-
-        # @deprecated: См 467. Необязательно использовать непосредственно атрибут экземпляра 
-        self.object = None
         
         # поле, которое будет под фокусом ввода после рендеринга формы
         self.focused_field = None               
@@ -427,7 +424,6 @@ class ExtForm(BaseExtPanel):
             return val
         
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
-        self.object = object # FIXME: Необязательно использовать атрибут экземпляра       
         all_fields = self._get_all_fields(self)
         for field in all_fields:
             if not field.name:
@@ -441,7 +437,7 @@ class ExtForm(BaseExtPanel):
             if not field.name in exclusion:
 
                 names = field.name.split('.')
-                set_field(self.object, names, convert_value(field), field)
+                set_field(object, names, convert_value(field), field)
      
     @property
     def items(self):       
