@@ -228,11 +228,17 @@ def inner_name_cache_handler(for_actions=True):
                     result[key] = cache_object
         else:
             cleaned_pack = get_instance(pack)
-            key = cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__
             url = cleaned_pack.__class__.absolute_url()
-            result[key] = (cleaned_pack.__class__, url, cleaned_pack)
+            cache_object = (cleaned_pack.__class__, url, cleaned_pack)
+            # регистрируем как полный класс с модулем, так и просто имя класса
+            keys = [cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__,
+                    cleaned_pack.__class__.__name__]
+            # регистрируем shortname
             shortname = get_shortname(cleaned_pack)
             if shortname:
-                result[shortname] = (cleaned_pack.__class__, url, cleaned_pack)
+                keys.append(shortname)        
+            # регистрируем
+            for key in keys:
+                result[key] = cache_object
 
     return result
