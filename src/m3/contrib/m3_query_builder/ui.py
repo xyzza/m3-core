@@ -447,7 +447,7 @@ class QueryBuilderWindow(ExtWindow):
         
         grd_gruop_aggr_fields = ExtGrid()
         grd_gruop_aggr_fields.layout = 'auto'
-        grd_gruop_aggr_fields.title = u'Суммируемые поля'
+        grd_gruop_aggr_fields.title = u'Агрегируемые поля'
         grd_gruop_aggr_fields.region = 'center'
         grd_gruop_aggr_fields.header = True
         
@@ -467,7 +467,7 @@ class QueryBuilderWindow(ExtWindow):
         astore_group_aggr = ExtDataStore()
         
         clmn_aggr_name = ExtGridColumn()
-        clmn_aggr_name.header = u'Суммируемое поле'
+        clmn_aggr_name.header = u'Агрегируемое поле'
         clmn_aggr_name.data_index = 'fieldName'
         clmn_aggr_name.menu_disabled = True
         
@@ -508,7 +508,7 @@ class QueryBuilderWindow(ExtWindow):
         
         return cont
 
-                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                
     def init_conditions(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'

@@ -102,16 +102,8 @@ def get_limit(objs):
 def get_sorted_fields(objs, separator='-'):
     '''
     Возвращает поля, по которым требуется сортировка
-    '''
-    ordered_item = []
-    for select_field in objs['selected_fields']:
-        
-        _, field_name = select_field['id'].split(separator)
-
-        if select_field.get('sorting'):
-            ordered_item.append(field_name)
-            
-    return ordered_item
+    '''    
+    return [field['fieldName']for field in objs['selected_fields'] if field.get('sorting')]
 
 def build_entity(objs, separator='-'):    
     '''

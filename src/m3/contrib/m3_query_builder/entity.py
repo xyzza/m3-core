@@ -24,7 +24,11 @@ except ImportError:
     pass
 
 #========================== КОНСТАНТЫ ============================
-WRAPPER = SQLAlchemyWrapper(settings.DATABASES)
+# автодокументация в сфинксе почему то не видит SQLAlchemyWrapper
+try:
+    WRAPPER = SQLAlchemyWrapper(settings.DATABASES)
+except:
+    pass
 
 #========================== ИСКЛЮЧЕНИЯ ===========================
 class EntityException(Exception):
