@@ -36,7 +36,7 @@ class ExtPivotGrid(BaseExtPanel):
         self.init_component(*args,**kwargs)
 
     def t_render_store(self):
-        return self.__store.render([col.data_index for col in self.columns])
+        return self.__store.render(self.columns)
 
     def t_render_columns(self):
         return self.t_render_items()
@@ -470,7 +470,7 @@ class ExtGrid(BaseExtPanel):
 
             self.render_base_config()
             self.render_params()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
 
 
@@ -641,7 +641,7 @@ class ExtGridColumn(BaseExtGridColumn):
     def render(self):
         try:
             self.render_base_config()            
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         
         config = self._get_config_str()        
@@ -863,7 +863,7 @@ class ExtGridGroupingView(BaseExtComponent):
             self.pre_render()
             self.render_base_config()
             self.render_params()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         params = self._get_params_str()
         return 'new Ext.grid.GroupingView({%s})' % (params)

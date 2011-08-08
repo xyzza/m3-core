@@ -42,8 +42,8 @@ class ExtContainer(BaseExtContainer):
             self.render_params()
         except UnicodeDecodeError:
             raise Exception('Some attribute is not unicode')
-        except Exception as msg:
-            raise Exception(msg)
+#        except Exception as msg:
+#            raise Exception(msg)
 
         base_config = self._get_config_str()
         params = self._get_params_str()

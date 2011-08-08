@@ -54,7 +54,7 @@ class ExtStringField(BaseExtField):
     def render(self):
         try:
             self.render_base_config()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         
         base_config = self._get_config_str()
@@ -119,7 +119,7 @@ class ExtDateField(BaseExtField):
         try:
             self.render_base_config()
             self.render_params()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         
         base_config = self._get_config_str()
@@ -185,7 +185,7 @@ class ExtNumberField(BaseExtField):
     def render(self):
         try:
             self.render_base_config()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         
         base_config = self._get_config_str()
@@ -237,7 +237,7 @@ class ExtTextArea(BaseExtField):
     def render(self):
         try:
             self.render_base_config()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         
         base_config = self._get_config_str()
@@ -305,7 +305,7 @@ class ExtRadio(BaseExtField):
     def render(self):
         try:
             self.render_base_config()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         
         base_config = self._get_config_str()
@@ -325,7 +325,7 @@ class ExtComboBox(BaseExtTriggerField):
         try:
             self.render_base_config()
             
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
        
         base_config = self._get_config_str()
@@ -369,7 +369,7 @@ class ExtHTMLEditor(BaseExtField):
     def render(self):
         try:
             self.render_base_config()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         
         base_config = self._get_config_str()
@@ -395,7 +395,7 @@ class ExtDisplayField(BaseExtField):
     def render(self):
         try:
             self.render_base_config()
-        except Exception as msg:
+        except UnicodeDecodeError as msg:
             raise Exception(msg)
         
         base_config = self._get_config_str()

@@ -42,18 +42,22 @@ class ExtDataStore(BaseExtStore):
         
     def render(self, columns):
         self.__columns = columns
+        print columns
         #self.__columns.insert(0, 'id') # Для того, чтобы submit работал корректно
         return super(ExtDataStore, self).render()
     
     def t_render_fields(self):
         '''Прописывается в шаблоне и заполняется при рендеринге'''        
         res = ['{name: %s, mapping: %d}' % (self.id_property, 1)] # ID
-        for i, col in enumerate(self.__columns):
-            d = {'name': col.data_index, 'mapping': i+1} # 1-ое поле - ID
-            if hasattr(col, 'format'): # ExtDateField
-                d['type'] = 'date'
-                d['dateFormat'] = col.format
-            res.append(json.dumps(d))                
+        for i, col in enumerate(self.__columns):            
+            if isinstance(col, basestring):
+                res.append('{name: "%s", mapping: %d}' % (col, i+1))
+            else:            
+                d = {'name': col.data_index, 'mapping': i+1} # 1-ое поле - ID
+                if hasattr(col, 'format'): # ExtDateField
+                    d['type'] = 'date'
+                    d['dateFormat'] = col.format
+                res.append(json.dumps(d))                
         return ','.join(res) 
     
     def t_render_data(self):
@@ -121,12 +125,15 @@ class ExtJsonStore(BaseExtStore):
 
         res = ['{name: %s}' % self.id_property]
         for col in self.__columns:
-            d = {'name': col.data_index}
-            if hasattr(col, 'format'): # ExtDateField                
-                d['type'] = 'date'
-                d['dateFormat'] = col.format
+            if isinstance(col, basestring):
+                res.append('{name: "%s"}' % col)
+            else:
+                d = {'name': col.data_index}
+                if hasattr(col, 'format'): # ExtDateField                
+                    d['type'] = 'date'
+                    d['dateFormat'] = col.format
 
-            res.append(json.dumps(d))
+                res.append(json.dumps(d))
         return ','.join(res) 
     
     def _get_start(self):
