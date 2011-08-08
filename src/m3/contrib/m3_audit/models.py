@@ -39,7 +39,7 @@ class BaseAuditModel(models.Model):
     # * дополнительные сведения о пользователе (например, сотрудником какого 
     #   учреждения он являлся на момент записи
     user_info = models.CharField(max_length=200, null=True, blank=True, default=u'',
-                                verbose_name=u'Дполнительные сведения о пользователе')
+                                verbose_name=u'Дополнительные сведения о пользователе')
     
     # серверный таймстамп на запись аудита
     created = models.DateTimeField(auto_now_add=True, db_index=True, 

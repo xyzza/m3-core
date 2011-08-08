@@ -7,9 +7,12 @@
 отображать произвольный набор данных. Поддержка группировок, сортировок и условий,
 как на уровне конечного пользователя, так и на уровне создания запроса.
 
+При подключении не забудте заглянуть в раздел :ref:`settings-cache`
+
 Содержит в себе редактор запросов и редактор отчетов.
 
 .. image:: ../images/contrib/m3_query_builder/menu.png    
+
 
 Редактор запросов
 -----------------
@@ -30,7 +33,7 @@
 описаны в подразделе :ref:`add-entity-rules`.
 
 Выбираем сущность "*Аудит*" и "*Пользователи и его метароли*" и переносим их в выбранные
-сущности. Это и все операции переноса и добавление поддерживают Drag & Drop.
+сущности. Это и все операции переноса и добавления поддерживают Drag & Drop.
 
 После чего можно выбрать связь между сущностями щелкнув на кнопку "*Выбрать связь*".
 
@@ -39,6 +42,8 @@
 Флагом внешняя связь помечается сущность, если необходимо указать тип соединения 
 (``inner join`` - если флагов нет, ``left join`` - если имеется один флаг на любой сущности, 
 ``full join`` - если два).
+
+Для отображения полей в кириллице см. раздел: :ref:`rules-cirilic-name`
 
 Добавим название к запросу: "*Информация о действиях пользователя*".
 
@@ -105,7 +110,7 @@ $sudo pip install sqlparse
 .. image:: ../images/contrib/m3_query_builder/report-form.png
 
 Выбираем дату (если не выбрать, условие будет не подставляться в запрос, таким образом 
-будут выбранны все данные). Слева можем наблюдать в информации параметры сортировки,
+будут выбраны все данные). Слева можем наблюдать в информации параметры сортировки,
 группировки, условия и количество отображаемых данных в отчете. 
 Нажимем "*Сформировать*". 
 
@@ -124,7 +129,7 @@ $sudo pip install sqlparse
 ------------------------------
 
 Далее под понятием "*сущность*" будет подразумеваться некий объект, который
-может быть моделью в джанговском представлении, либо объект, который реализует 
+может быть моделью в django-представлении, либо объект, который реализует 
 определенный интерфейс ``BaseEntity``. 
 
 В приложении необходимо создать файл с названием ``schema.py``, в котором необходимо описать 
@@ -246,7 +251,9 @@ $sudo pip install sqlparse
   Название сущности
   
 * Атрибут ``entities``:
-  Список возможных сущностей, которые включают в себя данные из ``Data``, пример::    
+  Список возможных сущностей, которые включают в себя данные из ``Data``, которые
+  будут участвовать в запросе. Пример::    
+  
    self.entities = [
       Data.USER_ROLE,
       Data.ASSIGNED_ROLE,
@@ -254,25 +261,128 @@ $sudo pip install sqlparse
    ]
 
 * Атрибут ``relations``:
-  Список связей между сущностями
+  Список связей между сущностями ``entities``
   
-  Пример::    
+  Пример::
+  
     self.relations = [
         Relation( Field(Data.USER_ROLE, 'id'), Field(Data.ASSIGNED_ROLE, 'role') ),
         Relation( Field(Data.ASSIGNED_ROLE, 'user'), Field(Data.USER, 'id') ),
     ]
+  где ``Relation``:
+  
+  .. autoclass:: Relation
+  
+  и где ``Field``:
+  
+  .. autoclass:: Field
 
 * Атрибут ``group_by``:
   Список полей для сортировки
+  
+  Пример::
+  
+	  # Список полей для группировки
+	  group_fields = [Field(Data.USER_ROLE, 'username'),]
+	  # Список полей для агрегированных выражений: поддерживаются Count, Min, Max
+	  aggr_fields = [Aggregate.Count(Field(Data.USER_ROLE, 'id')),]
+	  self.group_by = Grouping(group_fields=group_fields, 
+	                               aggregate_fields=aggr_fields)
+	                               
+  ``Grouping``:
+  
+  .. autoclass:: Grouping
+  
+  ``Aggregate``:
+  
+  .. autoclass:: Aggregate
+  
+  ``Field``:
+  
+  .. autoclass:: Field
 
 * Атрибут ``order_by``:
-  Список полей для группировки
-
+  Список полей для сортировки
+  
+  Пример::
+  
+  	# Возможна по возрастанию (SortOrder.ASC) и по убыванию (SortOrder.DESC)
+	self.order_by = [SortOrder(Field(Data.USER, 'username'), SortOrder.ASC)]
+	
+  ``SortOrder``:
+	
+  .. autoclass:: SortOrder
+	
+	
 * Атрибут ``select``:
   Список результирующих полей, которые будут отображаться в готовом отчете
 
+
+  Пример::
+  
+	  self.select = [
+	    Field(Data.USER, Field.ALL_FIELDS),
+	    Field(Data.ASSIGNED_ROLE, 'id',  alias='assign_id'),
+	    Field(Data.USER_ROLE, 'metarole'),
+	  ]
+	  
+  ``Field.ALL_FIELDS``- Будут показаны все поля, имеющиеся в сущности.
+
 * Атрибут ``where``:
   Список условий
+    
+    
+  Пример::
+    
+    # Добавляет условие неравно на поле id сущности Data.ASSIGNED_ROLE
+    # где параметр должен называться "param1" и иметь числовой тип
+    # текстовое представление параметра "Идентификатор параметра" - нужно
+    # для представления в коррилице в редакторе запросов 
+    self.where = Where( Field(Data.ASSIGNED_ROLE, 'id'), Where.NE, 
+                    	    Param(name='param1', type=Param.NUMBER, 
+                    	        verbose_name=u'Идентификатор параметра')) 
+                    	        
+    # Добавляет к предыдущему условию уловие через AND (&).
+    # Условие "равно" накладывается на поле "username" сущности Data.USER,
+    # где параметр должен называться как "param2", иметь строковый тип
+    # Представление параметра в кириллице: "ФИО пользователя"
+    self.where &= Where( Field(Data.USER, 'username'), Where.EQ, 
+                             Param(name='param2', type=Param.STRING, 
+                                 verbose_name=u'ФИО пользователя'))
+                                 
+  Условия, подобно условиям в django, можно соединять через: 
+   * ``&`` (AND - логическое "И"); 
+   * ``|`` (OR - логическое "ИЛИ"); 
+   * ``~`` (NOT - не равно);
+  
+  Доступные логические конструкции внутри условия::
+   
+   # Условия при преобразовании в SQL использует конструкцию ANY(...)
+   # Параметров может быть множество и они передаются в списке
+   Where.EQ = u'= (Вхождение)'
+   Where.NE = u'!= (Не вхождение)'
+   
+   # Не зависит от количества параметров
+   Where.LT = '<'
+   Where.LE = '<='
+   Where.GT = '>'
+   Where.GE = '>='
+  
+  ``Where``:
+  
+  .. autoclass:: Where
+  
+  Предопределенные типы параметров (для подстановки в редактор отчетов)::
+  
+    STRING = 1 # Строковое представление
+    NUMBER = 2 # Числовое
+    DICTIONARY =3 # Выбор из справочника
+    DATE = 4 # Дата
+    BOOLEAN = 5 # Булево
+  
+  ``Param``:
+  
+  .. autoclass:: Param
 
 * Атрибут ``distinct``:
   ``True`` или ``False`` - Добавляет ключевое слово ``DISTINCT`` в запрос.
@@ -282,3 +392,88 @@ $sudo pip install sqlparse
 * Атрибут ``limit``:
   Добавляет количество отобранных записей. Пример::
     self.limit = 100 # Будут возвращены 100 записей
+    
+    
+Простейшая схема без наворотов с сортировками, группировками и прочим может быть 
+представлена следующим образом::
+
+	class EntityAudit(BaseEntity):
+	    '''
+	    Сущность для аудита
+	    
+	    Использует модель "m3_audit.AuthAuditModel" и предоставляет доступ ко
+	    всем имеющимся полям в модели
+	    '''
+	    def __init__(self):
+	        super(EntityAudit, self).__init__()
+	
+	        class Data(object):
+	            AUDIT = Model('m3_audit.AuthAuditModel')
+	
+	        self.name = u'Аудит'
+	
+	        self.entities = [Data.AUDIT,]
+	
+	        self.select = [Field(Data.AUDIT, Field.ALL_FIELDS),]
+	        
+.. _settings-cache:
+
+Настройки в ``settings`` проекта
+--------------------------------
+
+Результаты запроса предварительно кешируются при построении формы и при последующих
+перемещениях по таблице с результатами генерируется Ajax запрос за данными, которые лежат в кеше.
+Для этого необходимо подключить кеширование в django.
+
+Для разработчиков можно использовать вариант с `Local-memory caching <https://docs.djangoproject.com/en/dev/topics/cache/?from=olddocs#local-memory-caching>`_::
+
+	CACHES = {
+	    'default': {
+	        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+	        'LOCATION': 'unique-snowflake'
+	    }
+	}
+	
+При этом на продакшене лучше использовать `memcached <https://docs.djangoproject.com/en/dev/topics/cache/?from=olddocs#memcached>`_
+
+.. _rules-cirilic-name:
+
+Правила названия полей в кириллице
+-----------------------------------
+
+Для моделей django необходимо проставлять ``verbose_name`` в полях, например::
+
+	class BaseAuditModel(models.Model):
+	    '''
+	    Базовая модель, от которой наследуются все 
+	    модели хранения результатов аудита
+	    '''
+	    
+	    # данные пользователя. специально не делается ForeignKey.
+	    # чтобы не быть завязанными на ссылочную целостность
+	    # * логин пользователя в системе (на момент записи значения
+	    username = models.CharField(max_length=50, null=True, blank=True, 
+	                                db_index=True, default=u'', 
+	                                verbose_name=u'Логин пользователя')
+	    
+	    # * идентификатор пользователя
+	    userid = models.PositiveIntegerField(default=0, db_index=True,
+	                                    verbose_name=u'Идентификатор пользователя')
+	
+	    # * ФИО пользователя на момент записи значения (для ускоренного отображения 
+	    #   значений
+	    user_fio = models.CharField(max_length=70, null=True, blank=True, 
+	                                db_index=True, default=u'',
+	                                verbose_name=u'ФИО пользователя')
+	    
+	    # * дополнительные сведения о пользователе (например, сотрудником какого 
+	    #   учреждения он являлся на момент записи
+	    user_info = models.CharField(max_length=200, null=True, blank=True, default=u'',
+	                                verbose_name=u'Дополнительные сведения о пользователе')
+	    
+	    # серверный таймстамп на запись аудита
+	    created = models.DateTimeField(auto_now_add=True, db_index=True, 
+	                                verbose_name=u'Дата создания')
+	                                
+Для сущностей, наследников от ``BaseEntity`` необходимо, чтобы в списке ``self.select`` 
+у каждого поля ``Field`` имелось текстовое представление ``verbose_name``
