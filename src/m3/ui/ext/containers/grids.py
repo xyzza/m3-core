@@ -231,7 +231,7 @@ class ExtGrid(BaseExtPanel):
 
     def t_render_store(self):
         assert self.__store, 'Store is not define'
-        return self.__store.render([column.data_index for column in self.columns])
+        return self.__store.render(self.columns)
 
     def add_column(self, **kwargs):
         '''
@@ -682,6 +682,7 @@ class ExtGridDateColumn(BaseExtGridColumn):
             self.format = settings.DATE_FORMAT.replace('%', '')
         except:
             self.format = 'd.m.Y'
+
         self.init_component(*args, **kwargs)
 
 #==============================================================================

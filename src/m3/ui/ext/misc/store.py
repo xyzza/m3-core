@@ -4,12 +4,16 @@ Created on 3.3.2010
 
 @author: prefer
 '''
+import json
 from decimal import Decimal
 
 from m3.helpers import normalize
 
 from m3.ui.ext.base import BaseExtComponent
+from m3.ui.ext.containers.grids import ExtGridDateColumn # Связность пилять!!
+
 from base_store import BaseExtStore
+
 
 #===============================================================================
 class ExtDataStore(BaseExtStore):
@@ -26,6 +30,8 @@ class ExtDataStore(BaseExtStore):
         else:
             self.data = []
             
+        self.id_property = 'id'
+        
         self.template = 'ext-misc/ext-data-store.js' # TODO: Отрефакторить под внутриклассовый рендеринг
         
         # Для заполнения полей в шаблоне
@@ -37,12 +43,19 @@ class ExtDataStore(BaseExtStore):
         
     def render(self, columns):
         self.__columns = columns
-        self.__columns.insert(0, 'id') # Для того, чтобы submit работал корректно
+        #self.__columns.insert(0, 'id') # Для того, чтобы submit работал корректно
         return super(ExtDataStore, self).render()
     
     def t_render_fields(self):
-        '''Прописывается в шаблоне и заполняется при рендеринге'''
-        return ','.join(['{name: "%s", mapping: %d}' % (data_index, i) for i, data_index in enumerate(self.__columns)])
+        '''Прописывается в шаблоне и заполняется при рендеринге'''        
+        res = ['{name: %s, mapping: %d}' % (self.id_property, 1)] # ID
+        for i, col in enumerate(self.__columns):
+            d = {'name': col.data_index, 'mapping': i+1} # 1-ое поле - ID
+            if isinstance(col, ExtGridDateColumn):                
+                d['type'] = 'date'
+                d['dateFormat'] = col.format
+            res.append(json.dumps(d))                
+        return ','.join(res) 
     
     def t_render_data(self):
         '''Прописывается в шаблоне и заполняется при рендеринге'''
@@ -99,14 +112,23 @@ class ExtJsonStore(BaseExtStore):
         
     def render(self, columns):
         self.__columns = columns
-        self.__columns.insert(0, self.id_property)
+        #self.__columns.insert(0, self.id_property)
         return super(ExtJsonStore, self).render()
         
     def t_render_fields(self):
         '''
-            Прописывается в шаблоне и заполняется при рендеринге
+        Прописывается в шаблоне и заполняется при рендеринге
         '''
-        return ','.join(['{name: "%s"}' % data_index for data_index in self.__columns]) 
+
+        res = ['{name: %s}' % self.id_property]
+        for col in self.__columns:
+            d = {'name': col.data_index}
+            if isinstance(col, ExtGridDateColumn):                
+                d['type'] = 'date'
+                d['dateFormat'] = col.format
+
+            res.append(json.dumps(d))
+        return ','.join(res) 
     
     def _get_start(self):
         return self.__start
