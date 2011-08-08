@@ -162,7 +162,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return Ext.applyIf({}, this.getLoader().baseParams);
+    	return Ext.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек
