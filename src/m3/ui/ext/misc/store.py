@@ -10,7 +10,6 @@ from decimal import Decimal
 from m3.helpers import normalize
 
 from m3.ui.ext.base import BaseExtComponent
-from m3.ui.ext.containers.grids import ExtGridDateColumn # Связность пилять!!
 
 from base_store import BaseExtStore
 
@@ -51,7 +50,7 @@ class ExtDataStore(BaseExtStore):
         res = ['{name: %s, mapping: %d}' % (self.id_property, 1)] # ID
         for i, col in enumerate(self.__columns):
             d = {'name': col.data_index, 'mapping': i+1} # 1-ое поле - ID
-            if isinstance(col, ExtGridDateColumn):                
+            if hasattr(col, 'format'): # ExtDateField
                 d['type'] = 'date'
                 d['dateFormat'] = col.format
             res.append(json.dumps(d))                
@@ -123,7 +122,7 @@ class ExtJsonStore(BaseExtStore):
         res = ['{name: %s}' % self.id_property]
         for col in self.__columns:
             d = {'name': col.data_index}
-            if isinstance(col, ExtGridDateColumn):                
+            if hasattr(col, 'format'): # ExtDateField                
                 d['type'] = 'date'
                 d['dateFormat'] = col.format
 
