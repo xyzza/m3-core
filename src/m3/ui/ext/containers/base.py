@@ -103,10 +103,10 @@ class BaseExtContainer(ExtUIComponent):
             self._put_config_value('collapsible', self.collapsible)
             self._put_config_value('collapsed', self.collapsed)
      
-        if self.layout == BaseExtContainer.FORM:
-            self._put_config_value('labelWidth', self.label_width)
-            self._put_config_value('labelAlign', self.label_align)
-            self._put_config_value('labelPad', self.label_pad)
+        
+        self._put_config_value('labelWidth', self.label_width)
+        self._put_config_value('labelAlign', self.label_align)
+        self._put_config_value('labelPad', self.label_pad)
         
     def nested_components(self):
         '''
