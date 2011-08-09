@@ -148,7 +148,37 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
         var scope = this;
 		var mask = new Ext.LoadMask(this.body, {msg:'Сохранение...'});
 		var params = Ext.applyIf(baseParams || {}, this.actionContextJson || {});
-		
+
+        // На форме могут находиться компоненты, которые не являются полями, но их можно сабмитить
+        // Находим такие компоненты по наличию атрибутов name и localEdit
+        var getControls = function(items){
+            var result = new Array();
+            for (var i = 0; i < items.getCount(); i++){
+                var control = items.get(i);
+                if (control.name && control.localEdit){
+                    result.push(control);
+                } else if (control instanceof Ext.Container) {
+                    var cc = getControls(control.items);
+                    result = result.concat(cc);
+                }
+            }
+            return result;
+        }
+
+        // В params сабмита добавляются пары, где ключ - имя компонента,
+        // а значение - массив из записей стора этого компонента. Пример:
+        // "mainGrid": [{"id": 1, "name": "First"}, {"id": 2, "name": "Second"}]
+        var cControls = getControls(this.items);
+        for (var i = 0; i < cControls.length; i++){
+            var cControl = cControls[i];
+            var cStore = cControl.getStore();
+            var cStoreData = new Array();
+            for (var j = 0; i < cStore.data.items.length; i++){
+                cStoreData.push(cStore.data.items[0].data);
+            }
+            params[cControl.name] = Ext.util.JSON.encode(cStoreData);
+        }
+
 		// вытащим из формы все поля и исключим их из наших параметров, иначе они будут повторяться в submite
 		var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext.getDom(form.el.dom)).elements;
 		var name;

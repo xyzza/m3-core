@@ -20,6 +20,8 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		this.readOnly = params.readOnly;
 		// признак клиентского редактирования
 		this.localEdit = params.localEdit;
+        // имя для сабмита в режиме клиентского редактирования
+        this.name = params.name;
 		
 		Ext.m3.ObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
