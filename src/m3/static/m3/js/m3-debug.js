@@ -7731,8 +7731,8 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
             var cControl = cControls[i];
             var cStore = cControl.getStore();
             var cStoreData = new Array();
-            for (var j = 0; i < cStore.data.items.length; i++){
-                cStoreData.push(cStore.data.items[0].data);
+            for (var k = 0; k < cStore.data.items.length; k++){
+                cStoreData.push(cStore.data.items[k].data);
             }
             params[cControl.name] = Ext.util.JSON.encode(cStoreData);
         }
