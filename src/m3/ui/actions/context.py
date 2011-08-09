@@ -151,6 +151,7 @@ class ActionContext(object):
             for rule in rules:
                 params[rule.name] = [rule.type, False] # [тип параметра; признак того, что параметр включен в context]
 
+        key = value = ptype = None
         try:
             # переносим параметры в контекст из запроса
             for key in request.REQUEST:
@@ -160,7 +161,8 @@ class ActionContext(object):
                     continue
                 # 
                 if params.has_key(key):
-                    value = self.convert_value(value, params[key][0])
+                    ptype = params[key][0]
+                    value = self.convert_value(value, ptype)
                     # Флаг того, что параметр успешно расшифрован и добавлен в контекст
                     params[key][1] = True
                 setattr(self, key, value)
@@ -172,7 +174,8 @@ class ActionContext(object):
             logger.warning(str(err))
         except ValueError as err:
             # если ошибка преобразования, то пусть проставится значение по-умолчанию
-            pass
+            logger.exception(u'Ошибка при преобразовании значения из запроса %s="%s" к типу "%s"'
+                % (key, value, ptype))
 
         # переносим обязательные параметры, которые не встретились в запросе
         for rule in rules if rules else []:
