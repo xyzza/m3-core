@@ -155,6 +155,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		this.refreshStore();
 	}
 	,refreshStore: function (){
+		this.getLoader().baseParams = this.getMainContext();
 		this.getLoader().load(this.getRootNode());
 	}
 	/**
