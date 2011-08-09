@@ -47,7 +47,7 @@ class ExtDataStore(BaseExtStore):
     
     def t_render_fields(self):
         '''Прописывается в шаблоне и заполняется при рендеринге'''        
-        res = ['{name: "%s", mapping: %d}' % (self.id_property, 1)] # ID
+        res = ['{name: "%s", mapping: %d}' % (self.id_property, 0)] # ID
         for i, col in enumerate(self.__columns):
             if isinstance(col, basestring):
                 if col != self.id_property:
