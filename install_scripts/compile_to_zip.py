@@ -42,11 +42,14 @@ class FileList():
 
         # ----------------------------------------------------
         def get_files(path):
-            result=[]
+            result = []
             names = sorted(os.listdir(path))
             top = path
             for name in names:
                 file_path = os.path.normpath(os.path.join(top, name))
+                if file_path[-3:] == 'pyc' and os.path.exists(file_path[:-1]):
+                    #есть py, pyc на не нужен
+                    continue
                 if os.path.isdir(file_path):
                     child_files = get_files(os.path.join(top, name))
                     result.extend(child_files)
@@ -65,26 +68,26 @@ class FileList():
 def copy_file(filepath, src_basepath, dst_basepath):
     def normdir(dirname):
         return os.path.normpath(dirname) + '/'
-         
+
     basefrom = normdir(src_basepath.strip())
     baseto = normdir(dst_basepath.strip())
-    localpath,filename = os.path.split(filepath)
-    
+    localpath, filename = os.path.split(filepath)
+
     localpath = localpath[len(basefrom):]
     targetpath = os.path.join(baseto, localpath)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
-    shutil.copyfile(filepath, os.path.join(targetpath,filename))
+    shutil.copyfile(filepath, os.path.join(targetpath, filename))
 
 #===============================================================================
 #  Основная процедура построения
 #===============================================================================
 if __name__ == '__main__':
-    
+
     if len(sys.argv) != 4:
         print u'usage: compile_to.py path_to_project_src path_to_temp output_file'
         sys.exit()
-    
+
     config_temp_dir = sys.argv[2]
     config_result_file = sys.argv[3]
     config_project_dir = sys.argv[1]
@@ -98,7 +101,7 @@ if __name__ == '__main__':
     print 'output file:', config_result_file
     print '--------------------------'
 
-    try:    
+    try:
         # создаем врвменный каталог
         tempdir = os.path.normpath(os.path.join(config_temp_dir, str(uuid.uuid4())[0:8]))
         os.makedirs(tempdir)
@@ -119,9 +122,9 @@ if __name__ == '__main__':
         project_files = FileList()
         project_files.build(config_project_dir)
         for file in project_files.files.keys():
-            print 'add:', file[len(config_project_dir)+1:]
+            print 'add:', file[len(config_project_dir) + 1:]
             copy_file(file, config_project_dir, tempdir)
-        
+
         # компиляция
         print 'Compile python files...'
         compileall.compile_dir(tempdir)
@@ -133,14 +136,20 @@ if __name__ == '__main__':
 
         # делаем обработку файла 
         for file in distfiles.files.keys():
-            linuxed_filename = file.replace('\\','/')
+            linuxed_filename = file.replace('\\', '/')
             if file[-3:].lower() == '.py':
-                if not '/migrations/' in linuxed_filename and not '/vendor/' in linuxed_filename:
+                if (not '/migrations/' in linuxed_filename
+                    and not '/vendor/' in linuxed_filename
+                    and not '/management/' in linuxed_filename
+                    ):
                     continue
             if file[-4:].lower() == '.pyc':
-                if '/migrations/' in linuxed_filename or '/vendor/' in linuxed_filename:
+                if ('/migrations/' in linuxed_filename
+                    or '/vendor/' in linuxed_filename
+                    or '/management/' in linuxed_filename
+                    ):
                     continue
-            zip.write(file, file[len(tempdir)+1:])
+            zip.write(file, file[len(tempdir) + 1:])
         zip.close()
 
         # удаляем временную папку
@@ -150,5 +159,5 @@ if __name__ == '__main__':
         except:
             print 'cannot remove trash from temp directory'
     except Exception as exc:
-        print 'dist-builder aborted with message: ' 
+        print 'dist-builder aborted with message: '
         print exc.message
