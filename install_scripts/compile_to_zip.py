@@ -47,9 +47,6 @@ class FileList():
             top = path
             for name in names:
                 file_path = os.path.normpath(os.path.join(top, name))
-                if file_path[-3:] == 'pyc' and os.path.exists(file_path[:-1]):
-                    #есть py, pyc на не нужен
-                    continue
                 if os.path.isdir(file_path):
                     child_files = get_files(os.path.join(top, name))
                     result.extend(child_files)
@@ -115,6 +112,9 @@ def execute(config_temp_dir, config_result_file, config_project_dir):
         project_files = FileList()
         project_files.build(config_project_dir)
         for file in project_files.files.keys():
+            if file[-3:] == 'pyc' and os.path.exists(file[:-1]):
+                #есть py, pyc на не нужен
+                continue
             print 'add:', file[len(config_project_dir) + 1:]
             copy_file(file, config_project_dir, tempdir)
 
