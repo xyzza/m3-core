@@ -40,7 +40,7 @@ class UnicodeWriter:
     def writerows(self, rows):
         for row in rows:
             self.writerow(row)
-            
+
 class RecordProxy(object):
     '''
     Прокси объект записи отображающей группировку
@@ -57,8 +57,8 @@ class RecordProxy(object):
 
     def init_component(self, *args, **kwargs):
         '''
-        Заполняет атрибуты экземпляра значениями в kwargs, 
-        если они проинициализированы ранее 
+        Заполняет атрибуты экземпляра значениями в kwargs,
+        если они проинициализированы ранее
         '''
         for k, v in kwargs.items():
             assert k in dir(self) and not callable(getattr(self, k)), \
@@ -86,6 +86,7 @@ class GroupingRecordProvider(object):
     data_source = None
     count_totals = False
     aggregates = {}
+    xls_style = {}
 
     def __init__(self, proxy=None, data=None, totals=None, aggregates=None):
         if proxy:
@@ -186,7 +187,7 @@ class GroupingRecordProvider(object):
                 if exp['id'] in level['items']:
                     exp['index'] = level['items'].index(exp['id'])
                 else:
-                    # развернутый элемент отсутствует в уровне (видимо фильтр сработал, или что-то еще) - что делать?! 
+                    # развернутый элемент отсутствует в уровне (видимо фильтр сработал, или что-то еще) - что делать?!
                     level['expandedItems'].remove(exp)
 
             #теперь выстроим в порядке индексов
@@ -302,7 +303,7 @@ class GroupingRecordProvider(object):
 
     EXPORT_XLS = 'xls'
     EXPORT_CSV = 'csv'
-    
+
     def export_to_file (self, title, columns, total, grouped, expanded, sorting, export_type = EXPORT_XLS):
         if export_type == self.EXPORT_XLS:
             return self.export_to_xls(title, columns, total, grouped, expanded, sorting)
@@ -310,24 +311,25 @@ class GroupingRecordProvider(object):
             return self.export_to_csv(title, columns, total, grouped, expanded, sorting)
         else:
             return None
-    
+
     def export_to_xls (self, title, columns, total, grouped, expanded, sorting):
         '''
         выгрузка таблицы в xls-файл
         '''
         w = xlwt.Workbook()
         ws = w.add_sheet('grid')
-        title_style = xlwt.easyxf("font: bold on, height 400;")
 
-        header_style = xlwt.easyxf(
+        title_style = xlwt.easyxf(self.xls_style.get('title') or "font: bold on, height 400;")
+        header_style = xlwt.easyxf(self.xls_style.get('header') or
             "font: bold on, color-index white;"
             "borders: left thick, right thick, top thick, bottom thick;"
             "pattern: pattern solid, fore_colour gray80;"
         )
-
-        data_style = xlwt.easyxf(
+        data_style = xlwt.easyxf( self.xls_style.get('data') or
             "borders: left thin, right thin, top thin, bottom thin;"
         )
+
+
         col_count = 0
         total_width = 0
         for column in columns:
@@ -388,7 +390,7 @@ class GroupingRecordProvider(object):
         выгрузка таблицы в csv-файл
         '''
         base_name = str(uuid.uuid4())[0:16] + '.csv'
-        file_abs = os.path.join(settings.MEDIA_ROOT, base_name)        
+        file_abs = os.path.join(settings.MEDIA_ROOT, base_name)
         #ws = UnicodeWriter(open(file_abs, 'wb'), delimiter='|', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         ws = UnicodeWriter(open(file_abs, 'wb'), delimiter=';', encoding="cp1251")
         col_count = 0
@@ -548,7 +550,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                 else:
                     query = self.get_data()
 
-            #сортировка 
+            #сортировка
             sort_fields = []
             # TODO: пока сортировка сделана только по одному полю
             if len(sorting.keys()) == 1:
@@ -738,7 +740,7 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
                 else:
                     query = self.get_data().values(field).distinct()
 
-            #сортировка 
+            #сортировка
             sort_fields = []
             # TODO: пока сортировка сделана только по одному полю
             if len(sorting.keys()) == 1:
@@ -997,7 +999,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
             exp_count = exp_count + exp['count']
 
         #count_cache[cache_key] = total_of_level+exp_count
-        #print 'count_exp_data() = %s, total=%s, exp_count=%s' % (total_of_level+exp_count, total_of_level, exp_count) 
+        #print 'count_exp_data() = %s, total=%s, exp_count=%s' % (total_of_level+exp_count, total_of_level, exp_count)
         return total_of_level + exp_count
 
     def indexer(self, grouped, level_index, level_keys, expandedItems, aggregates, sorting):
