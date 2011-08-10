@@ -7909,7 +7909,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
                     var id = complex_data[fieldName].id;
                     record['id'] = id;
                     record[field.displayField] = complex_data[fieldName].value;
-                    field.getStore().loadData({total:1, rows:[record]});
+                    field.getStore().add([record]);
 
                     // Устанавливаем новое значение
                     field.setValue(id);
