@@ -53,6 +53,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
 	}
 	,initComponent: function(){
+		this.getLoader().baseParams = this.getMainContext();
 		Ext.m3.ObjectTree.superclass.initComponent.call(this);
 	}
 	,onNewRecord: function (){
