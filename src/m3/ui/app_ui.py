@@ -129,9 +129,9 @@ class DesktopLaunchGroup(BaseDesktopElement):
         ''' Рендерит имеющийся список объектов. Вызывается из шаблона.'''
         res = []
         for item in self.subitems:
-                rendered = item.render()
-                if rendered:
-                    res.append(rendered)
+            rendered = item.render()
+            if rendered:
+                res.append(rendered)
         return '{items: [%s]}' % ','.join(res)
     
     def __str__(self):
@@ -199,6 +199,16 @@ class DesktopShortcut(DesktopLauncher):
             if not kwargs.get('name'):
                 self.name = p.title
 
+class MenuSeparator(BaseDesktopElement):
+    """
+    Специальный разделитель для меню
+    """
+    def __init__(self, *args, **kwargs):
+        super(MenuSeparator, self).__init__(*args, **kwargs)
+        self._init_component(*args, **kwargs)
+        
+    def render(self):
+        return '"-"'
 
 class DesktopLoader(object):
     '''
