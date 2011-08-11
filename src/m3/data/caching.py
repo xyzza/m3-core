@@ -180,6 +180,18 @@ class RuntimeCache(object):
     def clear_stat(self):
         self.stat = CacheStat()
         
+    def lock(self):
+        '''
+        Устанавливает блокировку на работу с внутренними данными 
+        '''
+        self.write_lock.acquire()
+        
+    def unlock(self):
+        '''
+        Снимает блокировку на работу с внутренними данными
+        '''
+        self.write_lock.release()
+        
         
 class IntegralRuntimeCache(RuntimeCache):
     '''
