@@ -8041,6 +8041,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
      */
 
     delimeter:',',
+    multipleDisplayValue: null,
 
     initComponent:function() {
         this.checkedItems = [];
@@ -8136,8 +8137,11 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 		Ext.each(this.checkedItems, function (record) {
 			value.push(record.get(this.displayField));
 		}, this);
-
-		return value.join(this.delimeter + ' ');
+		if (value.length > 1 && this.multipleDisplayValue){
+			return this.multipleDisplayValue;
+		} else {
+			return value.join(this.delimeter + ' ');
+		}
 	},
 
     getCheckboxCls:function(record) {

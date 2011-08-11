@@ -490,6 +490,7 @@ class ExtMultiSelectField(ExtDictSelectField):
     '''
     def __init__(self, *args, **kwargs):
         self.delimeter = ','
+        self.multiple_display_value = None
         self._value = ''
         self._init_flag = True
 
@@ -542,4 +543,7 @@ class ExtMultiSelectField(ExtDictSelectField):
         self.pre_render()
 
         super(ExtMultiSelectField, self).render_base_config()
+        self._put_config_value('delimeter', self.delimeter)
+        if self.multiple_display_value:
+            self._put_config_value('multipleDisplayValue', self.multiple_display_value)
         self._put_config_value('delimeter', self.delimeter)
