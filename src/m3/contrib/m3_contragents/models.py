@@ -92,7 +92,7 @@ class Contragent(BaseObjectModel):
     f_dul_issue_by = models.CharField(max_length = 200, null = True, blank = True, verbose_name=u'Кем выдан документ, удостоверяющий личность')
 
     def name(self):
-        return self.u_short_name if self.contragent_type == ContragentTypeEnum.UL else \
+        return (self.u_short_name or self.u_full_name) if self.contragent_type == ContragentTypeEnum.UL else \
                ((self.f_fname or '') + ' ' + (self.f_iname or '') + ' ' + (self.f_oname or '')).strip()
                
     name.json_encode = True
