@@ -692,6 +692,18 @@
         "viewMode": "view_mode"
     },
     "parent":"container"
+},
+// Объектное дерево (которое с тулбаром и веселыми кнопочками)
+{
+    "class": {
+        "objectTree": "ExtObjectTree"
+    },
+    "config": {
+        "loadMask": "load_mask",
+        "rowIdName": "rowIdName",
+        "parentIdName": "parent_id_name",
+        "allowPaging": "allow_paging"
+    },
+    "parent": "treeGrid"
 }
-
 ]

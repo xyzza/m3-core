@@ -1496,6 +1496,36 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 category: 'M3',
                 text: 'Code editor'
             }
+        },
+        objectTree: {
+            parent: 'treeGrid',
+            properties: {
+                id: {
+                    defaultValue: 'obtg_treegrid',
+                    isInitProperty: true
+                },
+                load_mask: {
+                    defaultValue: true
+                },
+                rowIdName: {
+                    defaultValue: 'row_id',
+                    isQuickEditable: true
+                },
+                parent_id_name: {
+                    defaultValue: 'parent_id'
+                },
+                allow_paging: {
+                    defaultValue: false
+                }
+            },
+            childTypesRestrictions: {
+                allowed: ['treeNode', 'gridColumn', 'toolbar']
+            },
+            toolboxData: {
+                category: 'M3',
+                text: 'Object tree'
+            },
+            treeIconCls: 'designer-tree-panel'
         }
     }
 });
