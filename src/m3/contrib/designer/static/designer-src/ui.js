@@ -213,6 +213,37 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
             });
 
         },
+        objectTree: function(model, cfg) {
+            var tree_cfg = this.treeGrid(model, cfg);
+            var advcfg = {
+                tbar: {
+                    xtype: 'toolbar',
+                    items: [{
+                        xtype: 'button',
+                        text: 'Добавить',
+                        iconCls: 'add_item'
+                    }, {
+                        xtype: 'button',
+                        text: 'Изменить',
+                        iconCls: 'edit_item'
+                    }, {
+                        xtype: 'button',
+                        text: 'Удалить',
+                        iconCls: 'delete_item'
+                    }, {
+                        xtype: 'button',
+                        text: 'Обновить',
+                        iconCls: 'refresh-icon-16'
+                    }]
+                },
+                bbar: {
+                    xtype: 'paging'
+                }
+            };
+            if (!cfg.allowPaging)
+                delete advcfg["bbar"];
+            return Ext.apply(tree_cfg, advcfg);
+        },
         gridPanel: function (model, cfg) {
             var columns = this.findGridColumns(model);
             var store, i;

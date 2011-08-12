@@ -1498,23 +1498,24 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             }
         },
         objectTree: {
+            isContainer: true,
             parent: 'treeGrid',
             properties: {
                 id: {
                     defaultValue: 'obtg_treegrid',
                     isInitProperty: true
                 },
-                load_mask: {
+                loadMask: {
                     defaultValue: true
                 },
                 rowIdName: {
                     defaultValue: 'row_id',
                     isQuickEditable: true
                 },
-                parent_id_name: {
+                parentIdName: {
                     defaultValue: 'parent_id'
                 },
-                allow_paging: {
+                allowPaging: {
                     defaultValue: false
                 }
             },
