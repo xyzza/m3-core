@@ -206,7 +206,7 @@ class OOParser(object):
         if isinstance(value, datetime.datetime):
             return "%s %s" % (date2str(value), value.time().strftime(self.TIME_FORMAT))
         elif isinstance(value, datetime.date):
-            return str(self.strftime_less_1900(value))
+            return date2str(value)
         elif isinstance(value, datetime.time):
             return str(value.strftime(self.TIME_FORMAT))   
         elif isinstance(value, basestring):
