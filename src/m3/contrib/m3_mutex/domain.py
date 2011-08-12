@@ -60,7 +60,8 @@ class Mutex(object):
         self.id = id
         self.owner = owner
         self.auto_release = None
-        self.captured_since = datetime.datetime.min 
+        self.captured_since = datetime.datetime.min
+        self.status_data = None 
         
     def check_owner(self, owner):
         '''
