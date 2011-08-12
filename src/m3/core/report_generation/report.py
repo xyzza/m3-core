@@ -52,6 +52,7 @@ if can_use_uno:
     import uno
     from com.sun.star.beans import PropertyValue
     from com.sun.star.connection import NoConnectException
+    from com.sun.star.task import ErrorCodeIOException
 #else:
     #FIXME: убрал, чтобы хоть как-то работать!  raise Exception(u'Unable to find OpenOffice (LibreOffice) in PATH variable') 
 
@@ -860,7 +861,10 @@ def save_document_as(document, path, properties):
     объект com.sun.star.beans.PropertyValue
     '''           
     file_url = path_to_file_url(path)
-    document.storeToURL(file_url, properties)        
+    try:
+        document.storeToURL(file_url, properties)  
+    except ErrorCodeIOException:
+            raise ReportGeneratorException, "Не удалось сохранить файл %s. Проверьте, есть ли права на запись." %path        
 
 def path_to_file_url(path):
     '''
