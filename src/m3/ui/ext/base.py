@@ -519,6 +519,15 @@ class ExtUIComponent(BaseExtComponent):
                 
         # Использовать ли автоскрол 
         self.auto_scroll = False
+
+        # Метка поля
+        self.label = None
+
+        # Скрыть label
+        self.hide_label = False
+
+        # CSS стиль для label
+        self.label_style = {}
         
     def t_render_style(self):
         '''
@@ -549,6 +558,10 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('anchor', self.anchor)        
         self._put_config_value('cls', self.cls)
         self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
+        self._put_config_value('fieldLabel', self.label)
+        if  self.label_style:
+            self._put_config_value('labelStyle', self.t_render_label_style())
+        self._put_config_value('hideLabel', self.hide_label)
                         
     def pre_make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         '''

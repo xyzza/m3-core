@@ -15,20 +15,10 @@ class BaseExtField(ExtUIComponent):
     '''
     def __init__(self, *args, **kwargs):
         super(BaseExtField, self).__init__(*args, **kwargs)
-
-        # Метка поля
-        self.label = None
-
-        # Нужно выставлять пустое значение для того, чтобы обязательные поля, 
+        # Нужно выставлять пустое значение для того, чтобы обязательные поля,
         # те, которые allow_blank=False подсвечивались автоматически после 
         # рендеринга 
         self.value = ""
-
-        # CSS стиль для label
-        self.label_style = {}
-
-        # Скрыть label
-        self.hide_label = False
 
         # Признак нередактируемости поля
         self.read_only = False
@@ -116,11 +106,8 @@ class BaseExtField(ExtUIComponent):
             self.cls = grey_cls  if not self.cls else self.cls + grey_cls
 
         super(BaseExtField, self).render_base_config()
-        self._put_config_value('fieldLabel', self.label)
         self._put_config_value('value', self.value)
 
-        if  self.label_style:
-            self._put_config_value('labelStyle', self.t_render_label_style())
         self._put_config_value('readOnly', self.read_only, self.read_only)
         self._put_config_value('isEdit', self.is_edit)
         self._put_config_value('allowBlank', self.allow_blank, not self.allow_blank)
@@ -134,7 +121,6 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('regexText', self.regex_text)
         self._put_config_value('tabIndex', self.tab_index)
         self._put_config_value('invalidClass', self.invalid_class)
-        self._put_config_value('hideLabel', self.hide_label)
         self._put_config_value('invalidText', self.invalid_text)
         self._put_config_value('plugins', (lambda: '[%s]' % ','.join(self.plugins)), self.plugins)
 
