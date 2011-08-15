@@ -60,7 +60,6 @@ class EMailBackend(Backend):
                 msg = u'Почтовый сервер перегружен. Попробуйте позже.'
                 raise M3NotifyException(msg)
 
-
 class BackendFactory(object):
     '''Завод по изготовлению бэкендов им. Стаханова'''
     def create_backend(self, type):
@@ -69,6 +68,20 @@ class BackendFactory(object):
 
         if type == BackendTypeEnum.EMAIL:
             backend = EMailBackend()
+        elif  type == BackendTypeEnum.DUMMY:
+            backend = DummyBackend()
 
         return backend
+    
+class DummyBackend(Backend):
+    '''Бэкенд который ничего никуда не отправляет'''
+
+    def __init__(self):
+        self.messages = []
+
+    def add(self, template, context, recipients=(), **kwargs):
+        pass
+
+    def send(self):
+        pass
   
