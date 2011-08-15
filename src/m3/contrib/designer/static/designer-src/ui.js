@@ -49,6 +49,17 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
                 xtype: 'fieldset'
             });
         },
+        listView: function (model, cfg) {
+            debugger;
+            var columns = this.findGridColumns(model);
+            var store = this.findStore(model, columns);
+
+            return Ext.apply(cfg, {
+                store: store,
+                columns: columns,
+                xtype: 'listview'
+            });
+        },
         formPanel: function (model, cfg) {
             return Ext.apply(cfg, {
                 xtype: 'form'
@@ -246,31 +257,7 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
         },
         gridPanel: function (model, cfg) {
             var columns = this.findGridColumns(model);
-            var store, i;
-
-            //попробуем найти стор
-            for (i = 0; i < model.childNodes.length; i++) {
-                if (model.childNodes[i].attributes.type === 'arrayStore') {
-                    //Добавляем филды для array сторе для правильного рендеринга
-                    var fieldsIndexes = ['id'];
-                    for (var x = 0; x<columns.length; x++){
-                        fieldsIndexes.push(columns[x].dataIndex);
-                    };
-                    store = new Ext.data.ArrayStore(
-                        Ext.apply({
-                                fields: fieldsIndexes
-                                },
-                                model.childNodes[i].attributes.properties
-                        )
-                    );
-                }
-            }
-            //или создадим пустой
-            if (!store) {
-                store = new Ext.data.Store({
-                    autoDestroy: true
-                });
-            }
+            var store = this.findStore(model, columns);
 
             return Ext.apply(cfg, {
                 xtype: 'grid',
@@ -351,6 +338,13 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
                 xtype: 'paging'
             });
         },
+        codeEditor: function (model, cfg) {
+            return Ext.apply(cfg, {
+                xtype: 'uxCodeEditor'
+            });
+        },
+        
+        //================ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ================
         findGridColumns: function (model) {
             var columns = [];
             var i;
@@ -372,10 +366,34 @@ M3Designer.ui.ModelUIPresentaitionBuilder = (function () {
             }
             return columns;
         },
-        codeEditor: function (model, cfg) {
-            return Ext.apply(cfg, {
-                xtype: 'uxCodeEditor'
-            });
+        findStore: function(model, columns){
+            // Ищем Store во вложенных компонентах. Если нет нашли, то возвращаем заглушку.
+            var store, i;
+
+            //попробуем найти стор
+            for (i = 0; i < model.childNodes.length; i++) {
+                if (model.childNodes[i].attributes.type === 'arrayStore') {
+                    //Добавляем филды для array сторе для правильного рендеринга
+                    var fieldsIndexes = ['id'];
+                    for (var x = 0; x<columns.length; x++){
+                        fieldsIndexes.push(columns[x].dataIndex);
+                    };
+                    store = new Ext.data.ArrayStore(
+                        Ext.apply({
+                                fields: fieldsIndexes
+                                },
+                                model.childNodes[i].attributes.properties
+                        )
+                    );
+                }
+            }
+            //или создадим пустой
+            if (!store) {
+                store = new Ext.data.Store({
+                    autoDestroy: true
+                });
+            }
+            return store;
         }
     };
 

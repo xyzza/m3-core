@@ -705,5 +705,16 @@
         "allowPaging": "allow_paging"
     },
     "parent": "treeGrid"
+},
+// Список со строками и колонками
+{
+    "class": {
+        "listView": "ExtListView"
+    },
+    "config": {
+        "store": "store",
+        "columns":"columns"
+    },
+    "parent": "component"
 }
 ]

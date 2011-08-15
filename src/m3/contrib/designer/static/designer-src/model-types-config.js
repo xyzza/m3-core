@@ -250,6 +250,26 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
             },
             treeIconCls: 'designer-icon-fieldset'
         },
+        listView: {
+            parent: "component",
+            isContainer: true,
+            properties: {
+                id: {
+                    defaultValue: 'lv_listview',
+                    isInitProperty: true,
+                    isQuickEditable: true
+                }
+            },
+            childTypesRestrictions: {
+                allowed: ['arrayStore', 'jsonStore', 'gridColumn'],
+                single: ['arrayStore', 'jsonStore']
+            },
+            toolboxData: {
+                text: 'List view',
+                category: 'Standart'
+            },
+            treeIconCls: 'designer-grid-panel'
+        },
         tabPanel: {
             parent: 'panel',
             isContainer: true,
