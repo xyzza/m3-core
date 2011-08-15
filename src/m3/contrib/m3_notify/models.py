@@ -11,8 +11,9 @@ class BackendTypeEnum(BaseEnumerate):
     (Твиттер, эл. почта, и т.п.)
     '''
     EMAIL = 1
+    DUMMY = 2
 
-    values = {EMAIL: u'Электронная почта'}
+    values = {EMAIL: u'Электронная почта',DUMMY: u'Не отправлять',}
 
 
 class NotifyMessageParentTypeEnum(BaseEnumerate):

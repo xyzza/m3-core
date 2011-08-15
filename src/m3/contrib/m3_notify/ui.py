@@ -68,7 +68,7 @@ class EditNotifyMessageWindow(ExtEditWindow):
                                      value_field = 'id',
                                      anchor = '98%',
                                      trigger_action_all = True,
-                                     name = 'type',
+                                     name = 'default_backend',
                                      editable = False)
         self.type_field.set_store( ExtDataStore(data = BackendTypeEnum.get_choices()))
         self.type_field.value = str(BackendTypeEnum.EMAIL)
