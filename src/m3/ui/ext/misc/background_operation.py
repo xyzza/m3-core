@@ -6,7 +6,7 @@ from m3.ui.ext.misc.progress_bar import ExtProgressBar
 
 class BackgroundOperationBar(ExtProgressBar):
     '''
-    Прогресс бар с привязаной к нему серверной операцией.
+    Прогресс бар с привязаной к нему серверной фоновой операцией.
 
     self.foo_bar = BackgroundOperationBar(url = urls.get_action_url('some_async_action'), interval = 5000)
 

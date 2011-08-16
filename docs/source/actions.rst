@@ -9,7 +9,8 @@ actions
    actions_and_packs.rst
    actions_results.rst
    actions_context.rst
-
+   actions_async.rst
+       
 packs
 ---------
 
