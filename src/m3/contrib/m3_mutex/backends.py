@@ -94,15 +94,8 @@ class BaseMutexBackend(object):
         '''
         Метод проверки состояния семафора. 
         
-        Существует два основных состояния семафора:
-        1) семафор свободен;
-        2) семафор захвачен;
-        
-        У состояния "семафор захвачен" существует два подсостояния
-        2.1) семафор захвачен нами;
-        2.2) семафор захвачен другим владельцем.
-        
-        Метод возвращает значение перечисления domain.MutexState.
+        Возвращает значение перечисления кортеж из двух элементов.
+        Первым элементом указывается состояние семафора (mutex.) 
         '''
         mutex = self._read_mutex(mutex_id)
         
@@ -116,7 +109,7 @@ class BaseMutexBackend(object):
         if not owner:
             owner = get_default_owner()
         
-        return ((MutexState.CAPTURED_BY_ME, mutex.status_data) if compare_owners(mutex.owner, owner) else (MutexState.CAPTURED_BY_OTHER, mutex.status_data)) 
+        return (MutexState.CAPTURED_BY_ME if compare_owners(mutex.owner, owner) else MutexState.CAPTURED_BY_OTHER, mutex) 
         
     
     #===========================================================================
