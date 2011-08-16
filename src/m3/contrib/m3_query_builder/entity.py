@@ -71,8 +71,7 @@ class DBColumnNotFound(EntityException):
         
     def __str__(self):
         return u'В модели %s не найдена колонка %s' % (self.model_name, self.field_name)
-        
-
+    
 #=========================== КЛАССЫ ==============================
 class Relation(object):
     '''
@@ -265,6 +264,12 @@ class Field(object):
         """
         field = self.entity.get_alchemy_field(field_name=self.field_name, params=params, field_alias=self.alias)
         return field
+    
+    def get_full_field_name(self, separator='-'):
+        '''
+        Возвращает через разделитель наименование сущности и наименование поля
+        '''
+        return separator.join([self.entity.name, self.field_name])
 
 
 class Aggregate(object):
@@ -466,6 +471,18 @@ class BaseEntity(object):
     ps: view в контексте бд
     '''
 
+    # Использовать при выводе линеный список без полей
+    USE_LIST_RESULT = 0
+        
+    # Использовать при выводе объект, привязанный к полям
+    USE_DICT_RESULT = 1    
+
+    TYPE_RESULT = {
+        USE_LIST_RESULT: u'Выводить данные как линейный список',
+        USE_DICT_RESULT: u'Выводить данные как объект с полями'
+    }
+
+
     # Карта для перевода операций конструктора запросов в алхимию
     OPERATION_MAP = {
         Where.EQ: lambda x, y: x == y,
@@ -479,6 +496,19 @@ class BaseEntity(object):
         Where.NOT: lambda x, y: ~x,
         Where.BETWEEN: lambda x, y: x.between(y[0], y[1]),
     }
+    
+    class MultipleResultException(EntityException):
+        '''
+        Генерируется, когда указан флаг EntityBase.USE_DICT_RESULT и возвращено 
+        несколько записей
+        '''
+        pass
+    
+    class NotFoundResultException(EntityException):
+        '''
+        Генерируется, когда указан флаг EntityBase.USE_DICT_RESULT и записей не возвращено
+        '''
+        pass
     
     def __init__(self):
         # Имя сущности
@@ -514,6 +544,9 @@ class BaseEntity(object):
 
         self.metadata = WRAPPER.metadata
         self.session = WRAPPER.session
+        
+        # По-умолчанию данные будут представлены как список
+        self.result_type = BaseEntity.USE_LIST_RESULT
 
     def _get_field_real_name(self, model_full_name, column_name):
         """ 
@@ -801,6 +834,18 @@ class BaseEntity(object):
         WRAPPER.engine.echo = True
         cursor = query.execute(params)
         data = cursor.fetchall()
+        
+        if self.result_type == BaseEntity.USE_DICT_RESULT:
+            # Если указан флаг, использовать объект            
+            if len(data) == 0:
+                raise BaseEntity.NotFoundResultException(u'Нет данных для создания объекта')
+            elif len(data) > 1:
+                raise BaseEntity.MultipleResultException(u'Возвращено больше одной записи для создания объекта')                
+            else:
+                # Возьмем первую запись
+                data = dict(zip([field.get_full_field_name() for field in self.get_select_fields()] ,data[0]))
+                print data
+        
         return data
 
     def get_query_parameters(self):

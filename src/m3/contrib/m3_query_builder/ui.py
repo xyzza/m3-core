@@ -95,9 +95,10 @@ class QueryBuilderWindow(ExtWindow):
         btn_close.handler = 'winClose'
         
         cnt_name_and_id = ExtContainer()
-        cnt_name_and_id.layout = 'form'
+        cnt_name_and_id.label_width = 120
         cnt_name_and_id.region = 'north'
-        cnt_name_and_id.height = 35
+        cnt_name_and_id.height = 55
+        cnt_name_and_id.layout = 'form'
         cnt_name_and_id.style = {'padding': '5px'}
         
         hdn_id = ExtHiddenField()
@@ -108,6 +109,9 @@ class QueryBuilderWindow(ExtWindow):
         str_name.allow_blank = False
         str_name.max_length = 100
         str_name.anchor = '100%'
+        
+        chk_use_dict_result = ExtCheckBox()
+        chk_use_dict_result.label = u'Получать объект'
         
         cnt_tab_panel = ExtContainer()
         cnt_tab_panel.region = 'center'
@@ -121,7 +125,7 @@ class QueryBuilderWindow(ExtWindow):
         self.footer_bar = tb_main_tabpanel
         
         tb_main_tabpanel.items.extend([btn_query_text, tbfill_tab, btn_run_query, btn_save_query, btn_close])
-        cnt_name_and_id.items.extend([hdn_id, str_name])
+        cnt_name_and_id.items.extend([hdn_id, str_name, chk_use_dict_result])
         cnt_tab_panel.items.extend([tab_main])
         self.items.extend([cnt_name_and_id, cnt_tab_panel])
         
@@ -134,10 +138,11 @@ class QueryBuilderWindow(ExtWindow):
         self.cnt_name_and_id = cnt_name_and_id
         self.hdn_id = hdn_id
         self.str_name = str_name
+        self.chk_use_dict_result = chk_use_dict_result
         self.cnt_tab_panel = cnt_tab_panel
         self.tab_main = tab_main
 
-                                                                                        
+                                                                                                        
     def init_tables_and_connections(self, container_class=ExtPanel):
         cont = container_class()
         cont.layout = 'border'
@@ -606,7 +611,8 @@ class QueryBuilderWindow(ExtWindow):
     
     def configure_window(self, 
                          id, 
-                         name, 
+                         name,
+                         use_dict_result, 
                          
                          selected_entities,
                          links, 
@@ -623,6 +629,7 @@ class QueryBuilderWindow(ExtWindow):
         Конфигурирование окна, для редактирования запроса
         '''
         self.hdn_id.value = id
+        self.chk_use_dict_result.checked = use_dict_result
         self.str_name.value = name
                                             
         self.grd_selected_entities.store.data = selected_entities

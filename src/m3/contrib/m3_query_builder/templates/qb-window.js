@@ -1,6 +1,7 @@
 
 var hdnID = Ext.getCmp('{{ component.hdn_id.client_id }}');
 var edtQueryName = Ext.getCmp('{{ component.str_name.client_id }}');
+var useDictResult = Ext.getCmp('{{ component.chk_use_dict_result.client_id }}');
 
 var treeEntities = Ext.getCmp('{{ component.tree_entities.client_id }}');
 var grdSelectedEntities = Ext.getCmp('{{ component.grd_selected_entities.client_id }}');
@@ -502,6 +503,7 @@ function saveQuery(){
 			'objects': Ext.encode( buildParams() )
 			,'query_name': queryName 
 			,'id': hdnID.getValue()
+			,'use_dict_result': useDictResult.getValue()
 		}
 		,success: function(){
 			loadMask.hide();

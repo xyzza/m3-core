@@ -105,11 +105,17 @@ def get_sorted_fields(objs, separator='-'):
     '''    
     return [field['fieldName']for field in objs['selected_fields'] if field.get('sorting')]
 
-def build_entity(objs, separator='-'):    
+def build_entity(objs, name=None, result_type=None,  separator='-'):    
     '''
     Создает объект сущности по данным формы редактора запроса
     '''
     entity = BaseEntity()
+    entity.name = name 
+        
+    if result_type == None:
+        result_type = entity.USE_LIST_RESULT
+        
+    entity.result_type = result_type
     
     # Используемые сущности
         
@@ -203,7 +209,7 @@ def get_conditions():
     '''
     return Where.get_simple_conditions()
 
-def save_query(id, query_name, query_json):
+def save_query(id, query_name, use_dict_result, query_json):
     '''
     Сохранение запросов
     '''
@@ -211,8 +217,10 @@ def save_query(id, query_name, query_json):
         q = Query.objects.get(id=id)
         q.name = query_name
         q.query_json = query_json
+        q.use_dict_result = use_dict_result
     else:
-        q = Query(name=query_name, query_json=query_json)
+        q = Query(name=query_name, use_dict_result=use_dict_result, 
+                  query_json=query_json)
     
     q.full_clean()
     q.save()
@@ -314,7 +322,10 @@ def get_report_data(report, params):
     '''
     Данные для грида
     '''
-    entity = build_entity( json.loads( report.query.query_json ))
+    query = report.query
+    entity = build_entity(name=query.name, 
+                          result_type=query.use_dict_result,
+                          objs=json.loads( report.query.query_json ))
     
     # Преобразование строковых дат в Объект datetime pythona
     # Нужно для корректной работы алхимии
@@ -327,15 +338,21 @@ def get_report_data(report, params):
         params[k] = v
 
     data = entity.get_data(params)
-    
-    # Проход по данным из алхимии и формирование данных для грида 
+
     res = []
-    fields = entity.get_select_fields()
-    for i, item in enumerate(data):
-        d = {}
-        for j, record in enumerate(item):    
-            d[fields[j].field_name] = record 
-        d['index'] = i
-        res.append(d)
+        
+    if entity.result_type == bool(entity.USE_DICT_RESULT):
+        print entity.result_type
+        res.append( data )        
+    else:
+        # Проход по данным из алхимии и формирование данных для грида 
+        
+        fields = entity.get_select_fields()
+        for i, item in enumerate(data):
+            d = {}
+            for j, record in enumerate(item):    
+                d[fields[j].get_full_field_name()] = record 
+            d['index'] = i
+            res.append(d)
 
     return res

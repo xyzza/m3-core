@@ -82,9 +82,13 @@ class QueryBuilderWindowAction(actions.Action):
 
             query_json = json.loads(query_str)
 
+
+            print query.use_dict_result
+
             window.configure_window(
                              id=context.id,
                              name=name,
+                             use_dict_result = query.use_dict_result,
                              
                              selected_entities=map(lambda x: [x['id'], 
                                                               x['entityName']], 
@@ -210,9 +214,10 @@ class SaveQueryAction(actions.Action):
     shortname = 'm3-query-builder-save'
 
     def context_declaration(self):
-        return [ACD(name='objects', type=object, required=True),
-                ACD(name='query_name', type=str, required=True), 
-                ACD(name='id', type=str, required=False),]
+        return [ACD(name='objects', type=object, required=True, verbose_name=u'Тело запроса'),
+                ACD(name='query_name', type=str, required=True, verbose_name=u'Наименование запроса'), 
+                ACD(name='id', type=str, required=False, verbose_name=u'Идентификатор запроса'),
+                ACD(name='use_dict_result', type=bool, required=True, verbose_name=u'Тип вывода данных')]
 
     def run(self, request, context):           
         
@@ -220,7 +225,7 @@ class SaveQueryAction(actions.Action):
 
         id = getattr(context, 'id', None)        
         try:
-            save_query(id, context.query_name, query_json)
+            save_query(id, context.query_name, context.use_dict_result, query_json)
         except ValidationError:
             logger.exception()
             return actions.JsonResult(json.dumps({'success': False,
@@ -530,13 +535,15 @@ class GenerateReportAction(actions.Action):
 
         report = get_report(context.id)
 
-        entity = build_entity( json.loads( report.query.query_json ))
+        entity = build_entity(name=report.query.name,
+                              result_type=report.query.use_dict_result,
+                               objs=json.loads( report.query.query_json ))
 
         win = ui.ReportData(params={'data_action': ReportDataAction})        
         win.title = report.name
 
         for field in entity.get_select_fields():            
-            win.grid.add_column(data_index=field.field_name, 
+            win.grid.add_column(data_index= field.get_full_field_name(), 
                                 header=field.verbose_name or field.field_name,
                                 # Группировка
                                 extra={'groupable': True},
@@ -544,8 +551,10 @@ class GenerateReportAction(actions.Action):
                                 sortable = True)                
         
         # Кеширование данных
-        cache.set(win.client_id, get_report_data(report, context.params),
-                    GenerateReportAction.TIMEOUT)
+        data = get_report_data(report, context.params)
+        print data 
+        
+        cache.set(win.client_id, data, GenerateReportAction.TIMEOUT)
             
         return actions.ExtUIScriptResult(win)
 
@@ -588,11 +597,14 @@ class ReportDataAction(actions.Action):
             sorting[context.sort] = context.dir
         
         report = get_report(context.id)
-        entity = build_entity( json.loads( report.query.query_json ))    
+        query = report.query
+        entity = build_entity(name=query.name, 
+                              result_type=query.use_dict_result,
+                              objs=json.loads( report.query.query_json ))    
 
         # Генерируется словарь, коючем является название поля со значением
         # None по умолчанию
-        proxy = dict((field.field_name, None) 
+        proxy = dict((field.get_full_field_name(), None) 
                           for field in entity.get_select_fields())
 
         

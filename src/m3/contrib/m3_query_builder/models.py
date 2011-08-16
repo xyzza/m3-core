@@ -7,8 +7,7 @@ Created on 17.06.2011
 
 from django.db import models
 
-from entity import Param
-        
+from entity import Param, BaseEntity  
 
 class Query(models.Model):
     '''
@@ -18,7 +17,10 @@ class Query(models.Model):
     name = models.CharField(max_length=100, db_index=True)
     
     # Json представление запроса
-    query_json = models.TextField() 
+    query_json = models.TextField()
+    
+    # Тип выводимых данных
+    use_dict_result = models.BooleanField (choices=BaseEntity.TYPE_RESULT.items())
         
     class Meta():
         db_table = 'm3_query_builder'
@@ -52,7 +54,7 @@ class ReportParams(models.Model):
     verbose_name = models.CharField(max_length=100, db_index=True)
     
     # Тип параметра
-    type = models.SmallIntegerField(choices=Param.get_type_choices())
+    type = models.SmallIntegerField(choices=Param.VALUES.items())
     
     # Значение параметра
     value = models.CharField(max_length=300)

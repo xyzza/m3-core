@@ -23,7 +23,7 @@ class ExtComponentException(Exception):
     """
     Ошибка М3-шного экстового компонента.
     """
-
+    pass
 
 #===============================================================================
 class ExtUIScriptRenderer(object):
