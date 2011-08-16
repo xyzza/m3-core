@@ -53,8 +53,7 @@ class Request(object):
                 param.finalize()
                 
         return (datagen, headers)
-        
-       
+    
 class SingleObjectRequest(Request):
     '''
     Запрос на отправку одного объекта в транспорт
