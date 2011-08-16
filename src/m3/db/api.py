@@ -16,7 +16,7 @@ def get_object_by_id(model, object_id):
     '''
     result = None
     
-    if isinstance(object_id, int):
+    if isinstance(object_id, (int, str, unicode)):
         try:
             result = model.objects.get(pk=object_id)
         except model.DoesNotExist:
