@@ -20,7 +20,7 @@ class ExtProgressBar(ExtUIComponent):
         #Анимация (дефолт false)
         self.animate = None
 
-        self.init_component(*args, **kwargs)
+        self.init_component(*args,**kwargs)
 
     def render_base_config(self):
         super(ExtProgressBar,self).render_base_config()
