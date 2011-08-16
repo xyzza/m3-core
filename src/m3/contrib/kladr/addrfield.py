@@ -27,12 +27,12 @@ class ExtAddrComponent(BaseExtContainer):
     def __init__(self, *args, **kwargs):
         super(ExtAddrComponent, self).__init__(*args, **kwargs)
         # Названия полей к которым биндится КЛАДР
-        self.place_field_name = 'place'
-        self.street_field_name = 'street'
-        self.house_field_name = 'house'
-        self.flat_field_name = 'flat'
-        self.zipcode_field_name = 'zipcode'
-        self.addr_field_name = 'addr'
+        self._place_field_name = 'place'
+        self._street_field_name = 'street'
+        self._house_field_name = 'house'
+        self._flat_field_name = 'flat'
+        self._zipcode_field_name = 'zipcode'
+        self._addr_field_name = 'addr'
         
         # Названия меток
         self.place_label = u'Населенный пункт'
@@ -59,15 +59,14 @@ class ExtAddrComponent(BaseExtContainer):
         
         self.pack = kladr_controller.find_pack(KLADRPack)
         #self.action_getaddr = self.pack.get_addr_action
-        self.init_component(*args, **kwargs)
         self.layout = 'form'
         self.template = 'ext-fields/ext-addr-field.js'
-        self.addr = ExtHiddenField(name = self.addr_field_name, type = ExtHiddenField.STRING)
-        self.place = ExtHiddenField(name = self.place_field_name, type = ExtHiddenField.STRING)
-        self.street = ExtHiddenField(name = self.street_field_name, type = ExtHiddenField.STRING)
-        self.house = ExtHiddenField(name = self.house_field_name, type = ExtHiddenField.STRING)
-        self.flat = ExtHiddenField(name = self.flat_field_name, type = ExtHiddenField.STRING)
-        self.zipcode = ExtHiddenField(name = self.zipcode_field_name, type = ExtHiddenField.STRING)
+        self.addr = ExtHiddenField(name = self._addr_field_name, type = ExtHiddenField.STRING)
+        self.place = ExtHiddenField(name = self._place_field_name, type = ExtHiddenField.STRING)
+        self.street = ExtHiddenField(name = self._street_field_name, type = ExtHiddenField.STRING)
+        self.house = ExtHiddenField(name = self._house_field_name, type = ExtHiddenField.STRING)
+        self.flat = ExtHiddenField(name = self._flat_field_name, type = ExtHiddenField.STRING)
+        self.zipcode = ExtHiddenField(name = self._zipcode_field_name, type = ExtHiddenField.STRING)
         self._items.append(self.addr)
         self._items.append(self.place)
         self._items.append(self.street)
@@ -93,6 +92,8 @@ class ExtAddrComponent(BaseExtContainer):
                     self.height = 25
         if self.addr_visible:
             self.height += 36+7
+        
+        self.init_component(*args, **kwargs)
 
     def render_params(self):
         super(ExtAddrComponent, self).render_params()
@@ -167,6 +168,60 @@ class ExtAddrComponent(BaseExtContainer):
     @property
     def items(self):       
         return self._items
+    
+    @property
+    def place_field_name(self):       
+        return self._place_field_name
+    
+    @place_field_name.setter
+    def place_field_name(self, value):
+        self._place_field_name = value
+        self.place.name = value
+    
+    @property
+    def street_field_name(self):       
+        return self._street_field_name
+    
+    @street_field_name.setter
+    def street_field_name(self, value):
+        self._street_field_name = value
+        self.street.name = value
+    
+    @property
+    def house_field_name(self):       
+        return self._house_field_name
+    
+    @house_field_name.setter
+    def house_field_name(self, value):
+        self._house_field_name = value
+        self.house.name = value
+    
+    @property
+    def flat_field_name(self):       
+        return self._flat_field_name
+    
+    @flat_field_name.setter
+    def flat_field_name(self, value):
+        self._flat_field_name = value
+        self.flat.name = value
+    
+    @property
+    def zipcode_field_name(self):       
+        return self._zipcode_field_name
+    
+    @zipcode_field_name.setter
+    def zipcode_field_name(self, value):
+        self._zipcode_field_name = value
+        self.zipcode.name = value
+    
+    @property
+    def addr_field_name(self):       
+        return self._addr_field_name
+    
+    @addr_field_name.setter
+    def addr_field_name(self, value):
+        self._addr_field_name = value
+        self.addr.name = value
     
     @property
     def handler_change_place(self):
