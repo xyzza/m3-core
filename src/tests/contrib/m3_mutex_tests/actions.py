@@ -63,7 +63,7 @@ class CaptureMutexOkAction(MutexActionBase):
         m3_mutex.capture_mutex(mutex_id)
         
         # 2. проверяем состояние захваченного семафора
-        state = m3_mutex.request_mutex(mutex_id)
+        state, _ = m3_mutex.request_mutex(mutex_id)
         
         if state != m3_mutex.MutexState.CAPTURED_BY_ME:
             return actions.TextResult(u'После выполнения операции блокировки семафор должен находиться в состоянии "Заблокирован текущим владельцем".')
@@ -87,7 +87,7 @@ class CaptureMutexFailAction(MutexActionBase):
                                     id=context.mutex_id)
         
         # 0. проверяем, что семафор должен находиться в состоянии "Занят не нами"
-        state = m3_mutex.request_mutex(mutex_id)
+        state, _ = m3_mutex.request_mutex(mutex_id)
         if state != m3_mutex.MutexState.CAPTURED_BY_OTHER:
             return actions.TextResult(u'Первоначально, семафор должен находиться в состоянии "Занят другим владельцем".')
         
@@ -114,7 +114,7 @@ class RequestMutexAction(MutexActionBase):
                                     id=context.mutex_id)
         
         # 0. проверяем, что семафор должен находиться в состоянии "Занят не нами"
-        state = m3_mutex.request_mutex(mutex_id)
+        state, _ = m3_mutex.request_mutex(mutex_id)
         
         name_map = {m3_mutex.MutexState.FREE: 'FREE',
                     m3_mutex.MutexState.CAPTURED_BY_ME: 'CAPTURED_BY_ME',
