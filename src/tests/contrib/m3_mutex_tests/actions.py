@@ -141,9 +141,9 @@ class RequestStatusDataAction(MutexActionBase):
                                     id=context.mutex_id)
         
         # 0. проверяем, что семафор должен находиться в состоянии "Занят не нами"
-        _, status_data = m3_mutex.request_mutex(mutex_id)
+        _, mutex = m3_mutex.request_mutex(mutex_id)
         
-        return actions.TextResult(unicode(status_data))
+        return actions.TextResult(unicode(mutex.status_data))
     
     
 class ReleaseMutexOkAction(MutexActionBase):
