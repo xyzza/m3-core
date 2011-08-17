@@ -735,7 +735,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 	constructor: function(baseConfig, params){
 		// Добавление selection model если нужно
 		//var selModel = params.selModel;
-		var selModel = new Ext.ux.grid.livegrid.RowSelectionModel({singleSelect: true});
+		var selModel = params.selModel ? params.selModel : new Ext.ux.grid.livegrid.RowSelectionModel({singleSelect: true});
 		var gridColumns = params.colModel || [];
 		if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
 			gridColumns.columns.unshift(selModel);

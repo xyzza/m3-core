@@ -157,7 +157,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
                 var control = items.get(i);
                 if (control.name && control.localEdit){
                     result.push(control);
-                } else if (control instanceof Ext.Container) {
+                } else if (control instanceof Ext.Container && control.items != undefined) {
                     var cc = getControls(control.items);
                     result = result.concat(cc);
                 }
