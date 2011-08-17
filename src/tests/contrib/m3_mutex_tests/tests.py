@@ -45,6 +45,11 @@ class MutexTests(TestCase):
         admin.username = 'admin'
         admin.set_password('admin')
         admin.save()
+        
+        user = User()
+        user.username = 'user'
+        user.set_password('user')
+        user.save()
     
         
         
@@ -71,7 +76,7 @@ class MutexTests(TestCase):
         client1.login(username='admin', password='admin')
         
         client2 = Client()
-        client2.login(username='admin', password='admin')
+        client2.login(username='user', password='user')
         
         client3 = Client()
         
@@ -176,5 +181,31 @@ class MutexTests(TestCase):
         self.assertEqual(response.content, 'ok')
         
         # 9. освобождаем семафор клиентом 1
+        response = client1.post(urls.get_url('mutex.release-ok'), mutex_id_params)
+        self.assertEqual(response.content, 'ok')
+        
+    def test3_status_data(self):
+        '''
+        Тест на сохранение и чтение статусной информации
+        '''
+        status_data = u'1234567890'
+        
+        mutex_id_params = {'mutex_group': 'group2',
+                           'mutex_mode': 'mode2',
+                           'mutex_id': 'id2',
+                           'status_data': status_data,}
+        
+        client1 = Client()
+        client1.login(username='admin', password='admin')
+        
+        # 1. захватываем семафор клиентом 1
+        response = client1.post(urls.get_url('mutex.capture-ok'), mutex_id_params)
+        self.assertEqual(response.content, 'ok')
+        
+        # 2. проверяем владельца семафора клиентом 1
+        response = client1.post(urls.get_url('mutex.status-data'), mutex_id_params)
+        self.assertEqual(response.content, status_data)
+        
+        # 3. освобождаем семафор
         response = client1.post(urls.get_url('mutex.release-ok'), mutex_id_params)
         self.assertEqual(response.content, 'ok')

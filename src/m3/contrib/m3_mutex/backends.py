@@ -21,7 +21,7 @@ class BaseMutexBackend(object):
     Базовый класс (интерфейс) бекэнда для управления семафорами.
     '''
     
-    def capture_mutex(self, mutex_id, owner=None, auto_release=TimeoutAutoRelease()):
+    def capture_mutex(self, mutex_id, owner=None, auto_release=TimeoutAutoRelease(), status_data=None):
         '''
         Метод захвата семафора.
         
@@ -50,7 +50,7 @@ class BaseMutexBackend(object):
                     raise MutexBusy()
                 # семафор был ранее захвачен нами, обновляем информацию
                 # об его захвате
-                self._refresh_mutex(mutex_id)
+                self._refresh_mutex(mutex_id, status_data)
         else:
             create_mutex = True
             
@@ -60,6 +60,11 @@ class BaseMutexBackend(object):
             mutex.owner = owner
             mutex.captured_since = datetime.datetime.now()
             mutex.auto_release = auto_release
+            if status_data != None:
+                if hasattr(status_data, 'dump') and callable(status_data.dump):
+                    mutex.status_data = status_data.dump()
+                else:
+                    mutex.status_data = unicode(status_data) 
             
             self._add_mutex(mutex)
             
@@ -160,6 +165,7 @@ class ModelMutexBackend(BaseMutexBackend):
             mutex.owner.name = stored_mutex.owner_name
             
             mutex.captured_since = stored_mutex.captured_since
+            mutex.status_data = stored_mutex.status_data
             
             # восстановление правила автоосвобождения семафора
             auto_release_class = MutexAutoReleaseRule.get_rule_class(stored_mutex.auto_release_rule)
@@ -189,6 +195,7 @@ class ModelMutexBackend(BaseMutexBackend):
         mutex_model.owner_name = mutex.owner.name
         
         mutex_model.captured_since = mutex.captured_since 
+        mutex_model.status_data = mutex.status_data
         
         if mutex.auto_release:
             auto_release_tuple = mutex.auto_release.dump()

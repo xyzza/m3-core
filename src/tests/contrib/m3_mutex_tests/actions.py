@@ -20,6 +20,7 @@ class MutexActionPack(actions.ActionPack):
         self.actions.extend([CaptureMutexOkAction(),
                              CaptureMutexFailAction(),
                              RequestMutexAction(),
+                             RequestStatusDataAction(),
                              ReleaseMutexOkAction(),
                              ReleaseMutexFailAction(),
                              ShortCaptureMutexAction(),])
@@ -42,7 +43,8 @@ class MutexActionBase(actions.Action):
     def context_declaration(self):
         return [actions.ACD(name='mutex_group', type=str, required=True, default=''),
                 actions.ACD(name='mutex_mode', type=str, required=True, default=''),
-                actions.ACD(name='mutex_id', type=str, required=True)]
+                actions.ACD(name='mutex_id', type=str, required=True),
+                actions.ACD(name='status_data', type=str, required=True, default=''),]
 
 class CaptureMutexOkAction(MutexActionBase):
     '''
@@ -60,7 +62,7 @@ class CaptureMutexOkAction(MutexActionBase):
                                     id=context.mutex_id)
         
         # 1. захватываем семафор
-        m3_mutex.capture_mutex(mutex_id)
+        m3_mutex.capture_mutex(mutex_id, status_data=context.status_data)
         
         # 2. проверяем состояние захваченного семафора
         state, _ = m3_mutex.request_mutex(mutex_id)
@@ -121,6 +123,27 @@ class RequestMutexAction(MutexActionBase):
                     m3_mutex.MutexState.CAPTURED_BY_OTHER: 'CAPTURED_BY_OTHER',}
         
         return actions.TextResult(name_map[state])
+    
+
+class RequestStatusDataAction(MutexActionBase):
+    '''
+    Действие, которое запрашивает статусные данные семафора
+    '''
+    url = '/status-data'
+    shortname = 'mutex.status-data'
+    
+    
+    def run(self, request, context):
+        '''
+        '''
+        mutex_id = m3_mutex.MutexID(group=context.mutex_group, 
+                                    mode=context.mutex_mode,
+                                    id=context.mutex_id)
+        
+        # 0. проверяем, что семафор должен находиться в состоянии "Занят не нами"
+        _, mutex = m3_mutex.request_mutex(mutex_id)
+        
+        return actions.TextResult(unicode(mutex.status_data))
     
     
 class ReleaseMutexOkAction(MutexActionBase):

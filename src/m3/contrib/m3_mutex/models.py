@@ -32,5 +32,8 @@ class MutexModel(models.Model):
     # служебная информация
     captured_since = models.DateTimeField()
     
+    # статусная информация
+    status_data = models.TextField(null=True, blank=True)
+    
     class Meta:
         db_table = 'm3_mutex'
