@@ -140,6 +140,12 @@ class BaseAlchemyObject(object):
             self._aliased_table = table.alias(self.alias)
         return self._aliased_table
 
+#===============================================================================
+#
+# Описание конструкций, которые используются для декларативного описания
+# сущностей
+#
+#===============================================================================
 
 class Model(BaseAlchemyObject):
     '''
@@ -423,11 +429,13 @@ class Param(object):
     DICTIONARY =3
     DATE = 4
     BOOLEAN = 5
+    COMBO = 6
     
     VALUES = {
         STRING: u'Текст',
         NUMBER: u'Число',
         DICTIONARY: u'Выбор из справочника',
+        COMBO: u'Выбор из списка значений',
         DATE: u'Дата',
         BOOLEAN: u'Флаг',
     }
@@ -463,7 +471,12 @@ class Param(object):
     def get_type_choices():
         return [ (k, v) for k, v in Param.VALUES.items()]
 
-
+#===============================================================================
+#
+# Описание базовой сущности, от которой в проектах наследуются реальные, 
+# декларативно описываемые
+#
+#===============================================================================
 class BaseEntity(object):
     '''
     Базовый класс для сущностей/схемы/прокси/view - кому как удобно
@@ -843,8 +856,8 @@ class BaseEntity(object):
                 raise BaseEntity.MultipleResultException(u'Возвращено больше одной записи для создания объекта')                
             else:
                 # Возьмем первую запись
-                data = dict(zip([field.get_full_field_name() for field in self.get_select_fields()] ,data[0]))
-                print data
+                data = dict(zip([field.get_full_field_name() for \
+                                    field in self.get_select_fields()] ,data[0]))                
         
         return data
 
@@ -875,5 +888,23 @@ class BaseEntity(object):
             all_params.append(self.offset)
 
         return all_params
+
+#===============================================================================
+# Базовый класс, для описания статических данных
+class BaseData(object):
+    '''
+    Для описания произвольных данных
+    '''    
+    # Человеческое название данных для выбора
+    verbose_name = None
+    
+    @classmethod
+    def get_data(cls):
+        '''
+        Данные должны быть возвращены в виде:
+        [(id1, name1),(id2, name2),(id3, name3)]
+        То есть список кортежей, состоящих из двух элементов
+        '''
+        raise NotImplemented('Method get_data() must be implemented in subclass')
 
 #TODO: Прогнать через code coverage и найти мертвые места

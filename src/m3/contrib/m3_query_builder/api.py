@@ -340,9 +340,7 @@ def get_report_data(report, params):
     data = entity.get_data(params)
 
     res = []
-        
-    if entity.result_type == bool(entity.USE_DICT_RESULT):
-        print entity.result_type
+    if entity.result_type == bool(entity.USE_DICT_RESULT):        
         res.append( data )        
     else:
         # Проход по данным из алхимии и формирование данных для грида 
@@ -356,3 +354,18 @@ def get_report_data(report, params):
             res.append(d)
 
     return res
+
+def get_data_classes():
+    '''
+    Возвращает набор классов для произвольного описания данных
+    '''
+    data_classes = EntityCache.get_data_classes()
+    return [(cl.__name__, cl.verbose_name or cl.__name__) for cl in data_classes]
+
+def get_data_class(class_name):
+    '''
+    Возвращает класс для данных по имени класса
+    '''
+    cl = EntityCache.get_data_class(class_name)
+    assert cl, 'cl is not defined in EntityCache'
+    return cl

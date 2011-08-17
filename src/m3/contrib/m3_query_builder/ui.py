@@ -895,8 +895,8 @@ class ReportBuilderWindow(ExtEditWindow):
         astore_params.id_index = 0
         
         clmn_name = ExtGridColumn()
-        clmn_name.menu_disabled = True
         clmn_name.header = u'Идентификатор'
+        clmn_name.menu_disabled = True
         clmn_name.data_index = 'name'
         clmn_name.hidden = True
         
@@ -912,10 +912,16 @@ class ReportBuilderWindow(ExtEditWindow):
         clmn_type_id.hidden = True
         
         clmn_type = ExtGridColumn()
-        clmn_type.width = 40
-        clmn_type.header = u'Тип'
-        clmn_type.data_index = 'type'
         clmn_type.menu_disabled = True
+        clmn_type.header = u'Тип'
+        clmn_type.width = 40
+        clmn_type.data_index = 'type'
+        
+        clmn_value = ExtGridColumn()
+        clmn_value.menu_disabled = True
+        clmn_value.header = 'value_id'
+        clmn_value.data_index = 'value'
+        clmn_value.hidden = True
         
         clmn_value_type = ExtGridColumn()
         clmn_value_type.header = u'Значение параметра'
@@ -923,10 +929,10 @@ class ReportBuilderWindow(ExtEditWindow):
         clmn_value_type.menu_disabled = True
         
         clmn_condition = ExtGridColumn()
-        clmn_condition.width = 50
-        clmn_condition.header = u'Условие'
-        clmn_condition.data_index = 'condition'
         clmn_condition.menu_disabled = True
+        clmn_condition.header = u'Условие'
+        clmn_condition.width = 50
+        clmn_condition.data_index = 'condition'
         
         frm_form = ExtForm()
         frm_form.layout = 'form'
@@ -963,7 +969,7 @@ class ReportBuilderWindow(ExtEditWindow):
         
         tb_buttons.items.extend([btn_button_1, btn_button_2])
         tb_form.items.extend([btn_button_3])
-        grd_params.columns.extend([clmn_name, clmn_verbose_name, clmn_type_id, clmn_type, clmn_value_type, clmn_condition])
+        grd_params.columns.extend([clmn_name, clmn_verbose_name, clmn_type_id, clmn_type, clmn_value, clmn_value_type, clmn_condition])
         frm_form.items.extend([hdn_id, str_name, dsf_query])
         self.items.extend([grd_params, frm_form])
         
@@ -978,6 +984,7 @@ class ReportBuilderWindow(ExtEditWindow):
         self.clmn_verbose_name = clmn_verbose_name
         self.clmn_type_id = clmn_type_id
         self.clmn_type = clmn_type
+        self.clmn_value = clmn_value
         self.clmn_value_type = clmn_value_type
         self.clmn_condition = clmn_condition
         self.frm_form = frm_form
@@ -985,7 +992,7 @@ class ReportBuilderWindow(ExtEditWindow):
         self.str_name = str_name
         self.dsf_query = dsf_query
 
-                                                                                                                                        
+                                                                                                                                                                                
 class ReportParamsWindow(ExtWindow):
 
     def __init__(self, types, default_type_value, params, *args, **kwargs):

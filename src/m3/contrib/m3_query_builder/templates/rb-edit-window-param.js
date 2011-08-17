@@ -20,8 +20,7 @@ win.on('loadData', function(obj){
 		
 		win.setHeight( parseInt(preHeightWin) + 30); // 30 - ширина одного контрола
 		comboValueType.setVisible(true);
-		
-		
+
 		loadData(obj['type'], function(){			
 			// Выполняется после успешного выполнения Ajax запроса
 			comboValueType.setValue(obj['value']);	
@@ -39,6 +38,7 @@ function loadData(typeValue, func){
 		,success: function(response){								
 			var jsonData = Ext.decode(response.responseText);
 			if (jsonData['success']){
+				comboValueType.clearValue();
 				comboValueType.getStore().loadData(jsonData['data']);
 				
 				if (func instanceof Function){
@@ -51,13 +51,14 @@ function loadData(typeValue, func){
 }
 
 comboType.on('select', function(combo, record, index){	
-	var dictValue = '{{ component.dict_value }}';	
+	var dictValue = '{{ component.dict_value }}',
+		comboValue = '{{ component.combo_value }}';
 	
-	if (record.get('id') == dictValue){
+	if (record.get('id') == dictValue || record.get('id') == comboValue){
 		win.setHeight( parseInt(preHeightWin) + 30); // 30 - ширина одного контрола
 		comboValueType.setVisible(true);
-		
-		loadData(dictValue);
+				
+		loadData(record.get('id'));
 		
 	} else {
 		win.setHeight( parseInt(preHeightWin) );
@@ -73,7 +74,8 @@ function selectType(){
 		
 		'typeID': comboType.getValue(),
 		'typeName': comboType.lastSelectionText, 
-		'value': comboValueType.getValue(),		
+		'valueID': comboValueType.getValue(),
+		'valueName': comboValueType.lastSelectionText,			
 	});
 	win.close();
 }

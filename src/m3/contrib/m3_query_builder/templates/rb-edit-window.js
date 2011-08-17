@@ -28,7 +28,7 @@ function submitForm(){
 			'name': range[i].get('name'),
 			'verbose_name': range[i].get('verbose_name'),
 			'type': range[i].get('type_id'),
-			'type_value': range[i].get('value_type'),
+			'type_value': range[i].get('value'),
 			'condition': range[i].get('condition'),
 		});
 	}
@@ -65,7 +65,7 @@ function getParams(queryID){
 						   records[i].type_id,
 						   records[i].type,
 						   records[i].value_type,
-						   //records[i].value_type_id,
+						   records[i].value_type_id,
 						   records[i].condition	
 						]);
 			}
@@ -126,7 +126,8 @@ function editParamWindow(node){
 				record.set('verbose_name', obj['verboseName']);
 				record.set('type', obj['typeName']);
 				record.set('type_id', obj['typeID']);
-				record.set('value_type', obj['value']);				
+				record.set('value', obj['valueID']);	
+				record.set('value_type', obj['valueName']);				
          		record.commit();				
             });		            
 		}

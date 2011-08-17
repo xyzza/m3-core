@@ -15,7 +15,7 @@ from m3.ui.ext.fields.complex import ExtDictSelectField
 from m3.ui.ext.containers.containers import ExtContainer
 from m3.helpers.icons import Icons
 from m3.ui.ext.fields.simple import ExtStringField, ExtNumberField, ExtDateField,\
-    ExtCheckBox, ExtDisplayField
+    ExtCheckBox, ExtDisplayField, ExtComboBox
 
 from m3.helpers.datagrouping import GroupingRecordDataProvider
 
@@ -24,9 +24,10 @@ from models import Query, Report, ReportParams
 from api import get_entities, get_entity_items, build_entity, get_conditions, \
     get_aggr_functions, save_query, get_query_params, get_packs, save_report, \
     get_pack, get_report_params, get_report, get_report_data, get_group_fields, \
-    get_limit, get_sorted_fields
+    get_limit, get_sorted_fields, get_data_classes, get_data_class
         
 from entity import Param, SortOrder, Where, EntityException
+from m3.ui.ext.misc.store import ExtDataStore
 
 class QueryBuilderActionsPack(BaseDictionaryModelActions):
     '''
@@ -81,9 +82,6 @@ class QueryBuilderWindowAction(actions.Action):
             query_str = query.query_json
 
             query_json = json.loads(query_str)
-
-
-            print query.use_dict_result
 
             window.configure_window(
                              id=context.id,
@@ -295,25 +293,13 @@ class ReportBuilderWindowAction(actions.Action):
             data = []
             for param in ReportParams.objects.filter(report=id):
 
-                value, value_name = None, None                
-                if param.type == Param.DICTIONARY:
-                    value = param.value                    
-                    pack = get_pack(value)
-                    
-                    if pack.verbose_name:                        
-                        assert isinstance(pack.verbose_name, unicode), 'Pack "%s" verbose name must be unicode ' % pack.__class__.__name__
-                    
-                    value_name = pack.verbose_name or pack.__class__.__name__
-
-                       
-                print param.condition
-                       
+                value_name = self.get_values(param.type, param.value) 
                 data.append([param.id,
                              param.name,
                              param.verbose_name, 
                              param.type,
                              Param.VALUES[int(param.type)],
-                             #value or '',
+                             param.value or '',
                              value_name or '',
                              param.condition
                              ])
@@ -322,6 +308,23 @@ class ReportBuilderWindowAction(actions.Action):
         
         return actions.ExtUIScriptResult(data=window)
 
+    def get_values(self, atype, avalue):
+        '''
+        Возвращает значение и значение выбранного типа
+        '''
+        value_name = None             
+        if atype == Param.DICTIONARY:                    
+            pack = get_pack(avalue)
+            
+            if pack.verbose_name:                        
+                assert isinstance(pack.verbose_name, unicode), 'Pack "%s" verbose name must be unicode ' % pack.__class__.__name__
+            
+            value_name = pack.verbose_name or pack.__class__.__name__
+        elif atype == Param.COMBO:                 
+            cl = get_data_class(avalue)
+            value_name = cl.verbose_name or cl.__class__.__name__
+
+        return value_name
 
 class ReportQueryParamsAction(actions.Action):
     '''
@@ -384,6 +387,7 @@ class ReportEditParamsWindowAction(actions.Action):
                                     params=params)
                 
         win.dict_value = Param.DICTIONARY
+        win.combo_value = Param.COMBO
                
         return actions.ExtUIScriptResult(win)
     
@@ -403,6 +407,8 @@ class GetPacksProjectAction(actions.Action):
         data = None
         if context.type == Param.DICTIONARY:   
             data = get_packs()
+        if context.type == Param.COMBO:   
+            data = get_data_classes()
                
         return actions.JsonResult(json.dumps({'success': True, 'data': data}))
     
@@ -452,7 +458,13 @@ class GetReportFormAction(actions.Action):
                 field.pack = param['value']
                  
             elif param['type'] == Param.NUMBER:
-                field = ExtNumberField()                
+                field = ExtNumberField()
+            elif param['type'] == Param.COMBO:
+                field = ExtComboBox(display_field='text', 
+                                    value_field='id',
+                                    trigger_action=ExtComboBox.ALL)
+                data = get_data_class(param['value']).get_data()                
+                field.store = ExtDataStore(data)
             else:
                 raise Exception('type "%s" is not define in class TypeField' % param['type'])
                         
@@ -551,8 +563,7 @@ class GenerateReportAction(actions.Action):
                                 sortable = True)                
         
         # Кеширование данных
-        data = get_report_data(report, context.params)
-        print data 
+        data = get_report_data(report, context.params)        
         
         cache.set(win.client_id, data, GenerateReportAction.TIMEOUT)
             
