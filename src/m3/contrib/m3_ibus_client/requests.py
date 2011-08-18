@@ -10,7 +10,7 @@ Created on 15.08.2011
 import poster.encode
 
 from m3.db import BaseEnumerate
-from enums import InteractionMode
+from m3.misc.ibus import InteractionMode
 
 
 class Request(object):
