@@ -8445,7 +8445,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
     addRecordsToStore: function(records){
     	var i = 0, newRecords = [], record;
 
-        for (i; i< records.length;i++) {
+        for (; i< records.length;i++) {
             record = new Ext.data.Record();
             record.data['id'] = records[i].data.id;
             record.data[this.displayField] = records[i].data[this.displayField];
@@ -9157,26 +9157,59 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 			});
 		}
 		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
-	}
-	,initComponent: function(){
+	},
+
+	initComponent: function(){
 		this.getLoader().baseParams = this.getMainContext();
 		Ext.m3.ObjectTree.superclass.initComponent.call(this);
-	}
-	,onNewRecord: function (){
+
+        this.addEvents(
+			/**
+			 * Событие до запроса добавления записи - запрос отменится при возврате false
+			 * @param {ObjectTree} this - само дерево
+			 * @param {JSON} request - AJAX-запрос для отправки на сервер
+             * @param isChild - флаг того, что запрос идет на дочерний узел
+			 */
+			'beforenewrequest',
+
+            /**
+			 * Событие до запроса редактирования записи - запрос отменится при возврате false
+			 * @param {ObjectTree} this - само дерево
+			 * @param {JSON} request - AJAX-запрос для отправки на сервер
+			 */
+			'beforeeditrequest',
+
+            /**
+			 * Событие до запроса удаления записи - запрос отменится при возврате false
+			 * @param {ObjectTree} this - само дерево
+			 * @param {JSON} request - AJAX-запрос для отправки на сервер
+			 */
+			'beforedeleterequest'
+        );
+	},
+
+	onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
-		
-		var scope = this;
-	    Ext.Ajax.request({
-	       url: this.actionNewUrl
-	       ,method: 'POST'
-	       ,params: this.getMainContext()
-	       ,success: function(res, opt){
-		   		return scope.childWindowOpenHandler(res, opt);
-		    }
-	       ,failure: Ext.emptyFn
-    	});
-	}
-	,onNewRecordChild: function (){
+
+        var req = {
+            url: this.actionNewUrl,
+	        method: 'POST',
+	        params: this.getMainContext(),
+            scope: this,
+	        success: function(res, opt){
+		   		return this.childWindowOpenHandler(res, opt);
+		    },
+	        failure: function(){
+                uiAjaxFailMessage.apply(this, arguments);
+            }
+    	};
+
+        if (this.fireEvent('beforenewrequest', this, req, false)) {
+			Ext.Ajax.request(req);
+		}
+	},
+
+	onNewRecordChild: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
 		if (!this.getSelectionModel().getSelectedNode()) {
@@ -9192,62 +9225,89 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		baseConf[this.parentIdName] = baseConf[this.rowIdName];
 		delete baseConf[this.rowIdName];
 		var scope = this;
-	    Ext.Ajax.request({
-	       url: this.actionNewUrl
-	       ,method: "POST"
-	       ,params: baseConf
-	       ,success: function(res, opt){
-		   		return scope.childWindowOpenHandler(res, opt);
-		    }
-	       ,failure: Ext.emptyFn
-    	});
-	}
-	,onEditRecord: function (){
+
+        var req = {
+            url: this.actionNewUrl,
+            scope: this,
+	        method: "POST",
+	        params: baseConf,
+	        success: function(res, opt){
+		   		return this.childWindowOpenHandler(res, opt);
+		    },
+	        failure: function(){
+                uiAjaxFailMessage.apply(this, arguments);
+            }
+    	};
+
+        if (this.fireEvent('beforenewrequest', this, req, true)) {
+			Ext.Ajax.request(req);
+		}
+	},
+
+	onEditRecord: function (){
 		assert(this.actionEditUrl, 'actionEditUrl is not define');
 		assert(this.rowIdName, 'rowIdName is not define');
 		
 	    if (this.getSelectionModel().getSelectedNode()) {
 			var baseConf = this.getSelectionContext();
-			var scope = this;
-		    Ext.Ajax.request({
-		       url: this.actionEditUrl
-		       ,method: 'POST'
-		       ,params: baseConf
-		       ,success: function(res, opt){
-			   		return scope.childWindowOpenHandler(res, opt);
-			   }
-		       ,failure: Ext.emptyFn
-		    });
+
+            var req = {
+		        url: this.actionEditUrl,
+                scope: this,
+		        method: 'POST',
+		        params: baseConf,
+		        success: function(res, opt){
+			   		return this.childWindowOpenHandler(res, opt);
+			    },
+		        failure: function(){
+                    uiAjaxFailMessage.apply(this, arguments);
+                }
+		    };
+
+            if (this.fireEvent('beforeeditrequest', this, req)) {
+			    Ext.Ajax.request(req);
+		    }
     	}
-	}
-	,onDeleteRecord: function (){
+	},
+
+	onDeleteRecord: function (){
 		assert(this.actionDeleteUrl, 'actionDeleteUrl is not define');
 		assert(this.rowIdName, 'rowIdName is not define');
 		
-		var scope = this;
 	    Ext.Msg.show({
 	        title: 'Удаление записи',
+            scope: this,
 		    msg: 'Вы действительно хотите удалить выбранную запись?',
 		    icon: Ext.Msg.QUESTION,
 	        buttons: Ext.Msg.YESNO,
-	        fn:function(btn,text,opt){ 
-	            if (btn == 'yes') {
-	                if (scope.getSelectionModel().getSelectedNode()) {
-						var baseConf = scope.getSelectionContext();
-		                Ext.Ajax.request({
-		                   url: scope.actionDeleteUrl,
-		                   params: baseConf,
-		                   success: function(res, opt){
-						   	    return scope.deleteOkHandler(res, opt);
-						   },
-		                   failure: Ext.emptyFn
-		                });
-	                }
-	            }
+	        fn: function(btn, text, opt){
+	            if (btn != 'yes')
+                    return;
+
+                if (this.getSelectionModel().getSelectedNode()) {
+                    var baseConf = this.getSelectionContext();
+
+                    var req = {
+                        url: this.actionDeleteUrl,
+                        scope: this,
+                        params: baseConf,
+                        success: function(res, opt){
+                             return this.deleteOkHandler(res, opt);
+                        },
+                        failure: function(){
+                            uiAjaxFailMessage.apply(this, arguments);
+                        }
+                    };
+
+                    if (this.fireEvent('beforedeleterequest', this, req)) {
+                        Ext.Ajax.request(req);
+                    }
+                }
 	        }
 	    });
-	}
-	,childWindowOpenHandler: function (response, opts){
+	},
+
+	childWindowOpenHandler: function (response, opts){
 		
 	    var window = smart_eval(response.responseText);
 	    if(window){

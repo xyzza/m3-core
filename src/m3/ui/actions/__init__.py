@@ -490,20 +490,20 @@ class ActionController(object):
             # Все ПРЕ обработчики
             for pack in stack:
                 result = pack.pre_run(request, context)
-                if result != None:
+                if result is not None:
                     return result
             # Сам экшен
             result = action.pre_run(request, context)
-            if result != None:
+            if result is not None:
                 return result
             response = action.run(request, context)
             result = action.post_run(request, context, response)
-            if result != None:
+            if result is not None:
                 return result
             # Все ПОСТ обработчики с конца
             for pack in reversed(stack):
                 result = pack.post_run(request, context, response)
-                if result != None:
+                if result is not None:
                     return result
         except ApplicationLogicException as exc:
             return OperationResult(success = False, message = exc.exception_message)

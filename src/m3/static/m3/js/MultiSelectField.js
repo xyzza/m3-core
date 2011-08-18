@@ -191,7 +191,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
     addRecordsToStore: function(records){
     	var i = 0, newRecords = [], record;
 
-        for (i; i< records.length;i++) {
+        for (; i< records.length;i++) {
             record = new Ext.data.Record();
             record.data['id'] = records[i].data.id;
             record.data[this.displayField] = records[i].data[this.displayField];
