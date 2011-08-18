@@ -7884,6 +7884,19 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
                 });
                 return invalidNames
             }
+    /**
+	 * Сообщить пользователю об имеющихся некорректно заполненных полях.
+	 * Будет использоваться для переопределения способа уведомления в потомках.
+	 * @param {list} invalidNames
+	 */
+    ,showInvalidFields: function(invalidNames){
+        Ext.Msg.show({
+          title: 'Проверка формы',
+          msg: 'На форме имеются некорректно заполненные поля:' + invalidNames.toString() + '.',
+          buttons: Ext.Msg.OK,
+          icon: Ext.Msg.WARNING
+        });
+    } 
 	/**
 	 * Сабмит формы
 	 * @param {Object} btn
@@ -7895,14 +7908,9 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 
 		var form = Ext.getCmp(this.formId).getForm();
 		if (form){
-            invalidNames = this.getInvalidNames(form);
+            var invalidNames = this.getInvalidNames(form);
             if (invalidNames.length){
-                Ext.Msg.show({
-                    title: 'Проверка формы',
-                    msg: 'На форме имеются некорректно заполненные поля:' + invalidNames.toString() + '.',
-                    buttons: Ext.Msg.OK,
-                    icon: Ext.Msg.WARNING
-                });
+            	this.showInvalidFields(invalidNames);
 			    return;
             }
 		}
