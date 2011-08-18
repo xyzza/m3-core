@@ -1068,7 +1068,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 										if(t=='combo' || t=='datefield'){ //avoid refresh twice for combo select 
 										return;
 										}else{
-										this.applyFilter(field);
+											this.applyFilter(field);
 										}
 									}, this);
 							}
@@ -1076,12 +1076,17 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 								fc.on('specialkey',function(el,ev)
 									{
 										ev.stopPropagation();
-										if(ev.getKey() == ev.ENTER) 
+										if(ev.getKey() == ev.ENTER) {
+											this.focusedFilterName = el.filterName;
 											el.el.dom.blur();
+										}
 									}, this);
 							}
 							if (!fc.hasListener('select')) {
-								fc.on('select',function(field){this.applyFilter(field);}, this);
+								fc.on('select',function(field){
+									this.focusedFilterName = field.filterName;
+									this.applyFilter(field);
+								}, this);
 							}
 						} else {
 							fc.listeners = 
@@ -1095,14 +1100,18 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 										this.applyFilter(field);
 									}
 								},
-								// kirov - не обязательный походу обработчик
-								// specialkey: function(el,ev)
-								// {
-									// ev.stopPropagation();
-									// if(ev.getKey() == ev.ENTER) 
-										// el.el.dom.blur();
-								// },
+								specialkey: function(el,ev)
+								{
+									ev.stopPropagation();
+									if(ev.getKey() == ev.TAB) {
+										this.focusedFilterName = undefined;
+									}
+									if(ev.getKey() == ev.ENTER) {
+										this.focusedFilterName = el.filterName;
+									}
+								},
 								select: function(field){
+									this.focusedFilterName = field.filterName;
 									this.applyFilter(field);
 									},
 								scope: this	
@@ -1118,7 +1127,12 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 								ev.stopPropagation();
 								if(ev.getKey() == ev.ENTER) 
 								{
+									this.focusedFilterName = el.filterName;
 									this.applyFilters();
+								}
+								if(ev.getKey() == ev.TAB) 
+								{
+									this.focusedFilterName = undefined;
 								}
 							},
 							scope: this
@@ -1216,6 +1230,9 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		}
 		this.setFilters(this.filters);
 		this.highlightFilters(this.isFiltered());
+		if (this.focusedFilterName) {
+			this.getFilterField(this.focusedFilterName).focus();
+		}
 	},
 	
 	onRender: function()
