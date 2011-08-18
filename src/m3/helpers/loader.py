@@ -308,15 +308,16 @@ def fill_simple_dict(model, data):
     for value in values:
         obj = model()
         for attr, val in zip(attrs, value):
-            try:
-                if fields.has_key(attr):
-                    converted = _convert_value(fields[attr], val)
-                    setattr(obj, attr, converted)
-            except:
-                raise DictLoadException(model.__name__, u'Не удалось преобразовать значение: %s' % val)
+            if val != u'None':
+                try:
+                    if fields.has_key(attr):
+                        converted = _convert_value(fields[attr], val)
+                        setattr(obj, attr, converted)
+                except:
+                    raise DictLoadException(model.__name__, u'Не удалось преобразовать значение: %s' % val)
         try:
             obj.save()
-        except:
+        except Exception as exc:
             raise DictLoadException(model.__name__, u'Не удалось сохранить запись справочника: %s' % string.join(value))
 
 @transaction.commit_on_success
@@ -364,11 +365,12 @@ def fill_tree_dict(group_model, list_model, group_link, list_link, data):
     for k,v in dict_rows.items():
         obj = list_model()
         for i in range(len(dict_attrs)):
-            try:
-                val = _convert_value(dict_fields[str(dict_attrs[i])], v.attrs[i])
-            except:
-                raise DictLoadException(list_model.__name__, u'Не удалось преобразовать значение: %s' % v.attrs[i])
-            setattr(obj, str(dict_attrs[i]), val)
+            if v.attrs[i] != u'None':
+                try:
+                    val = _convert_value(dict_fields[str(dict_attrs[i])], v.attrs[i])
+                except:
+                    raise DictLoadException(list_model.__name__, u'Не удалось преобразовать значение: %s' % v.attrs[i])
+                setattr(obj, str(dict_attrs[i]), val)
 
         parent = None if v.parent_uid == -1 else tree_values[v.parent_uid][0]
         setattr(obj, list_link, parent)
@@ -406,10 +408,10 @@ def _convert_value(field, value):
     elif isinstance(field, models.CommaSeparatedIntegerField):
         pass
     elif isinstance(field, models.DateTimeField):
-        ts = time.strptime(value, '%d.%m.%Y %H.%M.%S')
+        ts = time.strptime(value, '%Y-%m-%d %H.%M.%S')
         converted_value = datetime.datetime(*(ts[0:6]))
     elif isinstance(field, models.DateField):
-        ts = time.strptime(value, '%d.%m.%Y')
+        ts = time.strptime(value, '%Y-%m-%d')
         converted_value = datetime.date(*(ts[0:3]))
     elif isinstance(field, models.DecimalField):
         converted_value = decimal.Decimal(value)
