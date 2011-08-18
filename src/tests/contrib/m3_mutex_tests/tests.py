@@ -209,3 +209,46 @@ class MutexTests(TestCase):
         # 3. освобождаем семафор
         response = client1.post(urls.get_url('mutex.release-ok'), mutex_id_params)
         self.assertEqual(response.content, 'ok')
+        
+    def test4_refresh_mutex(self):
+        '''
+        Тесты на корректное обновление мютекса
+        '''
+        status_data = u'1234567890'
+        new_status_data = u'0987654321'
+        
+        mutex_id_params = {'mutex_group': 'group2',
+                           'mutex_mode': 'mode2',
+                           'mutex_id': 'id2',
+                           'status_data': status_data,}
+        
+        client1 = Client()
+        client1.login(username='admin', password='admin')
+        
+        # 1. захватываем семафор клиентом 1
+        response = client1.post(urls.get_url('mutex.capture-ok'), mutex_id_params)
+        self.assertEqual(response.content, 'ok')
+        
+        time.sleep(1)
+        
+        # 2. должен сработать refresh
+        mutex_id_params['status_data'] = ''
+        response = client1.post(urls.get_url('mutex.capture-ok'), mutex_id_params)
+        self.assertEqual(response.content, 'ok')
+        
+        # 3. запрашиваем данные семафора (должны прийти старые данные)
+        response = client1.post(urls.get_url('mutex.status-data'), mutex_id_params)
+        self.assertEqual(response.content, status_data)
+        
+        # 4. отправляем новые статусные данные
+        mutex_id_params['status_data'] = new_status_data
+        response = client1.post(urls.get_url('mutex.capture-ok'), mutex_id_params)
+        self.assertEqual(response.content, 'ok')
+        
+        # 5. проверяем новые статусные данные
+        response = client1.post(urls.get_url('mutex.status-data'), mutex_id_params)
+        self.assertEqual(response.content, new_status_data)
+        
+        # 6. освобождаем семафор
+        response = client1.post(urls.get_url('mutex.release-ok'), mutex_id_params)
+        self.assertEqual(response.content, 'ok')

@@ -8,6 +8,7 @@ Created on 15.07.2011
 import datetime
 
 from django.utils.translation import ugettext as _
+from django.db.models import F
 
 from domain import (Mutex, MutexState, MutexID, MutexOwner, MutexAutoReleaseRule, 
                     TimeoutAutoRelease)
@@ -36,7 +37,15 @@ class BaseMutexBackend(object):
         
         if not owner:  
             owner = get_default_owner()
-            
+        
+        cleaned_status_data = ''
+        
+        if status_data != None:
+            if hasattr(status_data, 'dump') and callable(status_data.dump):
+                cleaned_status_data = status_data.dump()
+            else:
+                cleaned_status_data = unicode(status_data)
+         
         mutex = self._read_mutex(mutex_id)
         
         create_mutex = False # признак того, что необходимо создать новый семафор
@@ -50,7 +59,7 @@ class BaseMutexBackend(object):
                     raise MutexBusy()
                 # семафор был ранее захвачен нами, обновляем информацию
                 # об его захвате
-                self._refresh_mutex(mutex_id, status_data)
+                self._refresh_mutex(mutex_id, cleaned_status_data)
         else:
             create_mutex = True
             
@@ -60,11 +69,7 @@ class BaseMutexBackend(object):
             mutex.owner = owner
             mutex.captured_since = datetime.datetime.now()
             mutex.auto_release = auto_release
-            if status_data != None:
-                if hasattr(status_data, 'dump') and callable(status_data.dump):
-                    mutex.status_data = status_data.dump()
-                else:
-                    mutex.status_data = unicode(status_data) 
+            mutex.status_data = cleaned_status_data 
             
             self._add_mutex(mutex)
             
@@ -127,7 +132,7 @@ class BaseMutexBackend(object):
         '''
         raise NotImplementedError(_(u'Данный метод должен быть переопределен в классах-потомках'))
     
-    def _refresh_mutex(self, mutex_id):
+    def _refresh_mutex(self, mutex_id, status_data):
         '''
         '''
         raise NotImplementedError(_(u'Данный метод должен быть переопределен в классах-потомках'))
@@ -205,14 +210,15 @@ class ModelMutexBackend(BaseMutexBackend):
         mutex_model.save()
         
     
-    def _refresh_mutex(self, mutex_id):
+    def _refresh_mutex(self, mutex_id, status_data=''):
         '''
         Производит обновление информации об установке семафора. Выставляет
         текущую дату в качестве метки момента захвата семафора.
         '''
         MutexModel.objects.filter(mutex_group=mutex_id.group,
                                   mutex_mode=mutex_id.mode,
-                                  mutex_id=mutex_id.id).update(captured_since=datetime.datetime.now())
+                                  mutex_id=mutex_id.id).update(captured_since=datetime.datetime.now(),
+                                                               status_data=status_data or F('status_data'))
                                   
     def _remove_mutex(self, mutex_id):
         '''
