@@ -454,7 +454,7 @@ class GetReportFormAction(actions.Action):
                 # Здесь нужно проверять pack на возможность множественного 
                 # выбора и если такой возможен, делать множественный выбор
                 
-                field = ExtDictSelectField()
+                field = ExtDictSelectField(hide_edit_trigger=True)
                 field.pack = param['value']
                  
             elif param['type'] == Param.NUMBER:
@@ -479,7 +479,7 @@ class GetReportFormAction(actions.Action):
             cont_outer.items.append(cont_inner)
             cont_inner.items.append(field)
 
-            if param['type'] in (Param.STRING, Param.NUMBER, Param.DATE):
+            if param['type'] in (Param.STRING, Param.NUMBER, Param.DATE, Param.COMBO):
                 cont_outer.items.append(ExtButton(handler='function(){ addValue("%s");}' % field.client_id, 
                                                   icon_cls=Icons.ADD,
                                                   client_id='btn-'+field.client_id,
