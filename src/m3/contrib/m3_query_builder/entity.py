@@ -647,7 +647,7 @@ class BaseEntity(object):
             else:
                 assert left_column.table == last_column.table
 
-                onclause = (last_column == right_column) # _BinaryExpression
+                onclause = (left_column == right_column) # _BinaryExpression
                 join_sequence = join_sequence.join(right_column.table, onclause)
 
         join_sequence = None if join_sequence is None else [join_sequence]
