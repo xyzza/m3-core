@@ -607,9 +607,8 @@ class ExtFieldSet(ExtPanel):
     Объеденяет внутренние элементы и создает рамку для остальных контролов
     '''
     def __init__(self, *args, **kwargs):
-        super(ExtFieldSet, self).__init__(*args, **kwargs)
         self.checkboxToggle = False
-        self.init_component(*args, **kwargs)
+        super(ExtFieldSet, self).__init__(*args, **kwargs)
 
     def render_base_config(self):
         super(ExtFieldSet, self).render_base_config()
