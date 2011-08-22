@@ -62,7 +62,7 @@ class ExtTree(BaseExtPanel):
         
         # перечень плагинов
         self.plugins = []
-                
+        
         self.init_component(*args, **kwargs)
         
     def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
