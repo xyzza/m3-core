@@ -1230,6 +1230,15 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 },
 				pack: {
 					defaultValue: ''
+				},
+				handlerAfterSelect: {
+					defaultValue: ''
+				},
+				handlerBeforeRequest: {
+					defaultValue: ''
+				},
+				handlerChanged: {
+					defaultValue: ''
 				}
             },
             treeIconCls: 'designer-icon-combo',

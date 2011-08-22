@@ -405,7 +405,10 @@
             "type":"shortname"
             ,"value":"url"
         },
-		"pack": "pack"
+		"pack": "pack",
+		"handlerAfterSelect": "handler_afterselect",
+		"handlerBeforeRequest": "handler_beforerequest",
+		"handlerChanged": "handler_changed"
     },
     "parent":"triggerField"
 },
