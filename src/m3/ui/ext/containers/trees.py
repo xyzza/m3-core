@@ -59,6 +59,9 @@ class ExtTree(BaseExtPanel):
         
         # Разрешить только драгить (перемещать из дерево) 
         self.enable_drag = False
+        
+        # перечень плагинов
+        self.plugins = []
                 
         self.init_component(*args, **kwargs)
         
@@ -266,7 +269,8 @@ class ExtTree(BaseExtPanel):
         
         self._put_config_value('columns', self.t_render_columns)
         self._put_config_value('loader', self.t_render_tree_loader)
-        self._put_config_value('root', self.t_render_root)            
+        self._put_config_value('root', self.t_render_root)
+        self._put_config_value('plugins', lambda: '[%s]' % ','.join(self.plugins))
         
     def render_params(self):
         super(ExtTree, self).render_params()
