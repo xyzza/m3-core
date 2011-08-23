@@ -86,6 +86,11 @@ class ExtObjectTree(containers.ExtTree):
         
         self.dblclick_handler = 'onEditRecord'
         
+        # Признак "Сортировки папок"
+        # если true, то папки всегда будут выше простых элементов
+        # иначе, сортируются как элементы
+        self.folder_sort = True
+        
         self.init_component()
         
     def render(self):
@@ -154,7 +159,7 @@ class ExtObjectTree(containers.ExtTree):
         
         self._put_params_value('rowIdName', self.row_id_name)
         self._put_params_value('parentIdName', self.parent_id_name)
-        
+        self._put_params_value('folderSort', self.folder_sort)
     
     def t_render_base_config(self):
         return self._get_config_str()

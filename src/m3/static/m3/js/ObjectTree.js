@@ -14,7 +14,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		this.actionDeleteUrl = params.actions.deleteUrl;
 		this.actionDataUrl = params.actions.dataUrl;
 		this.actionContextJson = params.actions.contextJson;
-		this.parentIdName = params.parentIdName; 
+		this.parentIdName = params.parentIdName;
 		if (params.customLoad) {
 			var ajax = Ext.Ajax;
 			this.on('expandnode',function (node){
@@ -50,12 +50,22 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 				}
 			});
 		}
+		// Параметр "Сортировать папки"
+		// если true, то папки всегда будут выше простых элементов
+		// если false, то папки ведут себя также как элементы
+		baseConfig.folderSort = true;
+		baseConfig.enableSort = false;
+		if (params.folderSort != undefined) {
+			baseConfig.folderSort = params.folderSort; 
+		}
 		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
 	},
 
 	initComponent: function(){
 		this.getLoader().baseParams = this.getMainContext();
 		Ext.m3.ObjectTree.superclass.initComponent.call(this);
+		// Созадем свой сортировщик с переданными параметрами
+		var sorter = new Ext.ux.tree.TreeGridSorter(this, {folderSort: this.folderSort, property: this.columns[0].dataIndex || 'text'});
 
         this.addEvents(
 			/**
