@@ -218,6 +218,8 @@ def fetch_search_tree(model, filter, branch_id = None, parent_field_name = 'pare
         while getattr(node, parent_field_name):
             if branch_id and getattr(node, parent_field_name) == branch_node:
                 break
+            if node == getattr(node, parent_field_name):
+                break
             node = getattr(node, parent_field_name)
             path.append(node)
             processed_nodes.add(node)
