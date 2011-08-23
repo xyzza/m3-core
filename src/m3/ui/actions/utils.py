@@ -190,7 +190,7 @@ def safe_delete_record(model, id=None):
             return True
     return safe_delete(obj)
 
-def fetch_search_tree(model, filter, branch_id = None):
+def fetch_search_tree(model, filter, branch_id = None, parent_field_name = 'parent'):
     '''
     По заданному фильтру filter и модели model формирует развернутое дерево с результатами поиска.
     Если filter пустой, то получается полностью развернутое дерево.
@@ -199,9 +199,9 @@ def fetch_search_tree(model, filter, branch_id = None):
     # Сначала тупо получаем все узлы подходящие по фильтру
     if branch_id and hasattr(model,'get_descendants'):
         branch_node = model.objects.get(id = branch_id)
-        nodes = branch_node.get_descendants().select_related('parent')
+        nodes = branch_node.get_descendants().select_related(parent_field_name)
     else:
-        nodes = model.objects.all().select_related('parent')
+        nodes = model.objects.all().select_related(parent_field_name)
         
     if filter:
         nodes = nodes.filter(filter)
@@ -215,10 +215,10 @@ def fetch_search_tree(model, filter, branch_id = None):
             continue
 
         path = [node]
-        while node.parent:
-            if branch_id and node.parent == branch_node:
+        while getattr(node, parent_field_name):
+            if branch_id and getattr(node, parent_field_name) == branch_node:
                 break
-            node = node.parent
+            node = getattr(node, parent_field_name)
             path.append(node)
             processed_nodes.add(node)
         # Первый элемент пути всегда корень
@@ -261,7 +261,7 @@ def fetch_search_tree(model, filter, branch_id = None):
             if hasattr(sub_tree,'is_leaf_node'):
                 sub_tree.leaf = sub_tree.is_leaf_node()
             else:
-                child_nodes = model.objects.filter(parent=sub_tree.id)
+                child_nodes = model.objects.filter(Q(**{parent_field_name: sub_tree.id}))
                 if len(child_nodes) == 0:
                     sub_tree.leaf = True
         else:
