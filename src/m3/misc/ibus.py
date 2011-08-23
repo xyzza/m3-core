@@ -5,6 +5,8 @@ Created on 16.08.2011
 @author: akvarats
 '''
 
+from django.utils.translation import ugettext as _
+
 from m3.db import BaseEnumerate
 
 class ServerUrls(object):
