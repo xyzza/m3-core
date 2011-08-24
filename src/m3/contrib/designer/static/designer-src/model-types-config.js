@@ -1347,7 +1347,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 },
                 header: {
                     defaultValue: true
-                }
+                },
+				localEdit: {
+					defaultValue: false
+				}
             },
             childTypesRestrictions: {
                 allowed: ['gridColumn'],
