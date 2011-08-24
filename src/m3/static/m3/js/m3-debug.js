@@ -9168,10 +9168,16 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 	},
 
 	initComponent: function(){
-		this.getLoader().baseParams = this.getMainContext();
+		var loader = this.getLoader(); 
+		loader.baseParams = this.getMainContext();
+		
 		Ext.m3.ObjectTree.superclass.initComponent.call(this);
 		// Созадем свой сортировщик с переданными параметрами
-		var sorter = new Ext.ux.tree.TreeGridSorter(this, {folderSort: this.folderSort, property: this.columns[0].dataIndex || 'text'});
+		var sorter = new Ext.ux.tree.TreeGridSorter(this, {folderSort: this.folderSort, property: this.columns[0].dataIndex || 'text'});        
+        // Повесим отображение маски при загрузке дерева
+        loader.on('beforeload', this.onBeforeLoad, this);
+        loader.on('load', this.onLoad, this);
+        loader.on('loadexception', this.onLoadException, this);
 
         this.addEvents(
 			/**
@@ -9196,6 +9202,30 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 			 */
 			'beforedeleterequest'
         );
+	},
+	
+	showMask: function(visible) {
+		var loader = this.getLoader();
+		if (this.treeLoadingMask == undefined) {
+			this.treeLoadingMask = new Ext.LoadMask(this.el, {msg:"Загрузка..."});
+		}
+		if (visible) {
+			this.treeLoadingMask.show();
+		} else {
+			this.treeLoadingMask.hide();
+		}
+	},
+	
+	onBeforeLoad: function(treeloader, node, callback){
+		this.showMask(true);
+	},
+	
+	onLoad: function(treeloader, node, response){
+		this.showMask(false);
+	},
+	
+	onLoadException: function(treeloader, node, response){
+		this.showMask(false);
 	},
 
 	onNewRecord: function (){
