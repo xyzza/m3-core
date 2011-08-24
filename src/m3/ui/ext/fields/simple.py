@@ -334,13 +334,11 @@ class ExtComboBox(BaseExtTriggerField):
 
 #===============================================================================
 class ExtTimeField(BaseExtField):
-    '''
+    """
     Поле ввода времени
-    '''
-    
+    """
     def __init__(self, *args, **kwargs):
         super(ExtTimeField, self).__init__(*args, **kwargs)
-        self.template = 'ext-fields/ext-time-field.js' #TODO: Необходимо отрефакторить под внутриклассовый рендеринг
         
         # Формат отображения времени
         self.format = None
@@ -352,6 +350,18 @@ class ExtTimeField(BaseExtField):
         # т.к. форматы времени в python'e и javascript'e разные
         self.max_value = self.min_value = None         
         self.init_component(*args, **kwargs)
+
+    def render_base_config(self):
+        super(ExtTimeField, self).render_base_config()
+        self._put_config_value('format', self.format)
+        self._put_config_value('increment', self.increment)
+        self._put_config_value('max_value', self.max_value)
+        self._put_config_value('min_value', self.min_value)
+
+    def render(self):
+        self.render_base_config()
+        base_config = self._get_config_str()
+        return 'new Ext.form.TimeField({%s})' % base_config
 
 #===============================================================================        
 class ExtHTMLEditor(BaseExtField):
