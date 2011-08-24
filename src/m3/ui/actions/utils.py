@@ -190,18 +190,25 @@ def safe_delete_record(model, id=None):
             return True
     return safe_delete(obj)
 
-def fetch_search_tree(model, filter, branch_id = None, parent_field_name = 'parent'):
+def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_name = 'parent'):
     '''
     По заданному фильтру filter и модели model формирует развернутое дерево с результатами поиска.
     Если filter пустой, то получается полностью развернутое дерево.
     '''
     #branch_id - это элемент ограничивающий дерево, т.е. должны возвращаться только дочерние ему элементы
     # Сначала тупо получаем все узлы подходящие по фильтру
+    assert isinstance(model_or_query, (models.query.QuerySet, models.Manager)) or issubclass(model_or_query, models.Model)
+    if isinstance(model_or_query, (models.query.QuerySet, models.Manager)):
+        query = model_or_query
+        model = model_or_query.model
+    else:
+        query = model_or_query.objects
+        model = model_or_query
     if branch_id and hasattr(model,'get_descendants'):
-        branch_node = model.objects.get(id = branch_id)
+        branch_node = query.get(id = branch_id)
         nodes = branch_node.get_descendants().select_related(parent_field_name)
     else:
-        nodes = model.objects.all().select_related(parent_field_name)
+        nodes = query.all().select_related(parent_field_name)
         
     if filter:
         nodes = nodes.filter(filter)
@@ -263,7 +270,7 @@ def fetch_search_tree(model, filter, branch_id = None, parent_field_name = 'pare
             if hasattr(sub_tree,'is_leaf_node'):
                 sub_tree.leaf = sub_tree.is_leaf_node()
             else:
-                child_nodes = model.objects.filter(Q(**{parent_field_name: sub_tree.id}))
+                child_nodes = query.filter(Q(**{parent_field_name: sub_tree.id}))
                 if len(child_nodes) == 0:
                     sub_tree.leaf = True
         else:
