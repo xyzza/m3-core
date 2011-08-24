@@ -256,6 +256,7 @@
         ,"rowIdName":"row_id_name"
         ,"columnParamName":"column_param_name"
         ,"allowPaging":"allow_paging"
+		,"localEdit": "local_edit"
         
         ,"urlDataShortName": {
             "type":"shortname"
