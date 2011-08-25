@@ -9178,6 +9178,8 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
         loader.on('beforeload', this.onBeforeLoad, this);
         loader.on('load', this.onLoad, this);
         loader.on('loadexception', this.onLoadException, this);
+        // еще настроим loader, чтобы правильно передавал узел через параметр
+        loader.nodeParameter = this.rowIdName; 
 
         this.addEvents(
 			/**
