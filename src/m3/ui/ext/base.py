@@ -476,6 +476,7 @@ class BaseExtComponent(object):
 class ExtUIComponent(BaseExtComponent):
     '''
     Базовый класс для компонентов визуального интерфейса
+    Наиболее походит на BoxComponent в ExtJS
     '''
     
     def __init__(self, *args, **kwargs):
@@ -520,6 +521,9 @@ class ExtUIComponent(BaseExtComponent):
         # Использовать ли автоскрол 
         self.auto_scroll = False
 
+        # Включение автовысоты. Аналог height='auto'
+        self.auto_height = False
+
         # Метка поля
         self.label = None
 
@@ -558,6 +562,7 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('anchor', self.anchor)        
         self._put_config_value('cls', self.cls)
         self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
+        self._put_config_value('autoHeight', self.auto_height, self.auto_height)
         self._put_config_value('fieldLabel', self.label)
         if  self.label_style:
             self._put_config_value('labelStyle', self.t_render_label_style())
