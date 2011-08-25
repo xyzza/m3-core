@@ -36,6 +36,7 @@
         ,"minWidth": "min_width"
         
         ,"autoScroll": "auto_scroll"
+		,"autoHeight": "auto_height"
         
     },
     "parent": "Observable"

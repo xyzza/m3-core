@@ -71,7 +71,10 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 },
                 autoScroll: {
                     defaultValue: false
-                }
+                },
+				autoHeight: {
+				    defaultValue: false
+				}
             }
         },
         /*
