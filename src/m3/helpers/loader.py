@@ -313,7 +313,7 @@ def fill_simple_dict(model, data):
                     if fields.has_key(attr):
                         converted = _convert_value(fields[attr], val)
                         setattr(obj, attr, converted)
-                except:
+                except Exception as e:
                     raise DictLoadException(model.__name__, u'Не удалось преобразовать значение: %s' % val)
         try:
             obj.save()
@@ -408,10 +408,16 @@ def _convert_value(field, value):
     elif isinstance(field, models.CommaSeparatedIntegerField):
         pass
     elif isinstance(field, models.DateTimeField):
-        ts = time.strptime(value, '%Y-%m-%d %H.%M.%S')
+        if '-' in value:
+            ts = time.strptime(value, '%Y-%m-%d %H.%M.%S')
+        else:
+            ts = time.strptime(value, '%d.%m.%Y %H.%M.%S')
         converted_value = datetime.datetime(*(ts[0:6]))
     elif isinstance(field, models.DateField):
-        ts = time.strptime(value, '%Y-%m-%d')
+        if '-' in value:
+            ts = time.strptime(value, '%Y-%m-%d')
+        else:
+            ts = time.strptime(value, '%d.%m.%Y')
         converted_value = datetime.date(*(ts[0:3]))
     elif isinstance(field, models.DecimalField):
         converted_value = decimal.Decimal(value)
