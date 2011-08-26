@@ -78,10 +78,10 @@ class DeleteAccountUser(Action):
     shortname = 'delete_account_user'
 
     def context_declaration(self):
-        return [ActionContextDeclaration(name='id', required=True, type=int)]
+        return [ActionContextDeclaration(name='account_id', required=True, type=int)]
 
     def run(self, request, context):
-        SandboxUser.objects.get(pk = context.id).delete()
+        SandboxUser.objects.get(pk = context.account_id).delete()
         return OperationResult(success=True)
 
 

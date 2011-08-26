@@ -4,6 +4,7 @@ import inspect
 import os.path
 import sys
 from django.conf import settings
+from m3.contrib.m3_sandbox.models import SandboxAccount, SandboxUser
 from m3.ui.actions import ActionController, Action, ActionPack, ControllerCache
 from django.utils.importlib import import_module
 from django.conf import settings
@@ -63,7 +64,6 @@ class SandboxController(ActionController):
         return super(SandboxController, self)._invoke(request, action_to_invoke, stack)
 
 class SandboxKeeper(object):
-    _accounts_buffer = ['petya','vasya']
     _apps_loaded = False
     _sandbox_controllers = {}
     _action_overrides = {}
@@ -74,26 +74,25 @@ class SandboxKeeper(object):
 
     @classmethod
     def get_accounts(cls):
-        return cls._accounts_buffer
+        return map( lambda x: x.name,  list(SandboxAccount.objects.all()))
 
     @classmethod
     def get_account(cls, request):
-        if request.user.username in cls._accounts_buffer:
-            return request.user.username
-        else:
-            return None
-
+        sandbox_user = SandboxUser.objects.filter(user = request.user).select_related('account')
+        return sandbox_user[0].account.name if sandbox_user else None
+        
     @classmethod
     def get_override_to_action(cls, action, request):
         account = cls.get_account(request)
+
+        if not account:
+            return None
+
         action_path = action.__class__.__module__ + '.' + action.__class__.__name__
 
         if cls._action_overrides.has_key(account) \
             and cls._action_overrides[account].has_key(action_path):
             return cls._action_overrides[account][action_path]
-        
-        if not account:
-            return None
 
     @classmethod
     def get_sandbox_controllers(cls):
