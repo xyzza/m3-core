@@ -264,7 +264,8 @@ function uiFailureResponseOnFormSubmit(context){
 */
 function uiAjaxFailMessage (response, opt) {
 	
-	if (Ext.isEmpty(response)) {
+	// response.status === 0 -- "communication failure"
+	if (Ext.isEmpty(response) || response.status === 0) {
 		Ext.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
 		return;
 	}
