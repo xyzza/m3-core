@@ -27,7 +27,8 @@ class Communicator(object):
         
         transport_urls = helpers.get_transport_urls()
         for url in transport_urls:
-            req = urllib2.Request(urljoin(url, m3.misc.ibus.ServerUrls.PING))
+            print url, '#', urljoin(url, m3.misc.ibus.ServerUrls.PING), "#"
+            req = urllib2.Request(url=urljoin(url, m3.misc.ibus.ServerUrls.PING))
             result[url] = False # призумпция виновности транспорта
             
             res = urllib2.urlopen(req)
@@ -47,5 +48,5 @@ class Communicator(object):
         transport_urls = helpers.get_transport_urls()
         for url in transport_urls:
             # FIXME тут нужно, чтобы конкатенация урлов происходила корректно
-            req = urllib2.Request(urljoin(url, m3.misc.ibus.ServerUrls.SEND_MESSAGE), datagen, headers)
+            req = urllib2.Request(urljoin(url, m3.misc.ibus.ServerUrls.FORWARD_MESSAGE), datagen, headers)
             urllib2.urlopen(req)   

@@ -14,8 +14,10 @@ class ServerUrls(object):
     Перечисление урлов, которые используются при отсылке запросов с клиента в транспортный сервер.
     '''
     
-    SEND_MESSAGE = 'message/send'
+    FORWARD_MESSAGE = 'message/forward'
     PING = 'ping'
+    ECHO = 'echo'
+    
     
 
 class ClientUrls(object):
