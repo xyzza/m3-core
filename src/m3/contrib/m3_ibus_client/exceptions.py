@@ -11,7 +11,7 @@ class IBusException(Exception):
     '''
     pass
 
-class NoTransportsException(Exception):
+class IncompleteIBusSettings(Exception):
     '''
     Исключительная ситуация, которая выдается клиентом при отсутствии настройки
     на транспортные сервера.

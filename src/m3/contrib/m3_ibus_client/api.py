@@ -4,39 +4,40 @@ Created on 11.08.2011
 
 @author: akvarats
 '''
-#from enums import InteractionMode
-#from requests import SendObjectsRequest  
+from m3.misc.ibus import InteractionMode
 
-IBUS_SECTION_SETTINGS_NAME = 'ibus-client'
-IBUS_TRANSPORTS_SETTINGS_NAME = 'TRANSPORTS'
 
 from communicator import Communicator
-
-def read_transports_config(conf, ibus_client_section=IBUS_SECTION_SETTINGS_NAME):
-    '''
-    Считывает настройки списка транспортов, используемых для передачи данных
-    '''
-    return filter(lambda x: x, conf.get(ibus_client_section, IBUS_TRANSPORTS_SETTINGS_NAME).split(','))
+import requests
+import responses
 
 #===============================================================================
 # Методы проверки доступности транспортных серверов
 #===============================================================================
-def ping_transports():
-    '''
-    Пингует известные транспортные сервера и возвращает True в случае,
-    если все сервера доступны.
-    '''
-    return len(filter(lambda x: not x, get_ping_stat().values())) == 0
-    
-    
-def get_ping_stat():
+def pint_transports_details():
     '''
     Пингует известные транспортные сервера и возвращает словарь доступности серверов
     '''
     return Communicator().ping()
 
-#def send_objects(objects=[], mode=InteractionMode.ASYNC):
-#    '''
-#    Отправка синхронного запроса в транспортный сервер
-#    '''
-#    request = SendObjectsRequest(category)
+def ping_transports():
+    '''
+    Пингует известные транспортные сервера и возвращает True в случае,
+    если все сервера доступны.
+    '''
+    return len(filter(lambda x: not x, pint_transports_details().values())) == 0
+    
+
+
+def send_models_async(objects=[], category=''):
+    '''
+    Выполняет отсылку объектов получателям через транспортный сервер
+    
+    @param objects: список объектов, которые подлежат отправке по транспорту
+    @param mode: режим, в котором должна выполняться отсылка сообщения
+    @category: категория сообщения, предназначенная для определения получателей.
+    '''
+    request = requests.SimpleObjectRequest(category=category, objects=objects, mode=InteractionMode.ASYNC)    
+    Communicator().send_request(request)
+    
+    return responses.AsyncResponse()
