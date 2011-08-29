@@ -9,6 +9,7 @@ Created on 26.05.2010
 
 from m3.ui.ext import containers, controls, menus, misc, render_component
 from m3.helpers.urls import get_url
+from m3.ui.ext.base import ExtUIComponent
 
 class ExtObjectGrid(containers.ExtGrid):
     '''
@@ -442,3 +443,24 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
     @handler_beforeedit.setter
     def handler_beforeedit(self, function):
         self._listeners['beforeeditrequest'] = function
+
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+        # Описание в базовом классе ExtUiComponent.
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, 
+                                             *args, **kwargs)
+        # Выключаем\включаем компоненты.
+        super(ExtMultiGroupinGrid, self).make_read_only(access_off, exclude_list, 
+                                            *args, **kwargs)
+
+        if (self._top_bar and
+            hasattr(self._top_bar,'items') and
+            self._top_bar.items and
+            hasattr(self._top_bar.items,'__iter__')):
+            for item in self._top_bar.items:
+                if isinstance(item, ExtUIComponent):
+                    item.make_read_only(
+                        self.read_only, 
+                        exclude_list, 
+                        *args, **kwargs
+                    )
