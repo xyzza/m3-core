@@ -584,6 +584,9 @@ class ExtTabPanel(BaseExtPanel):
         # Если True, то применяется lazy рендеринг табов
         self.deferred_render = None
         
+        # Показывает панель вкладок без фонового изображения
+        self.plain = False
+        
         self._items = TypedList(type=ExtPanel)
         self.init_component(*args, **kwargs)
 
