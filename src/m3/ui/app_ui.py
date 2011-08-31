@@ -300,7 +300,7 @@ class DesktopLoader(object):
             '''
             Сортирует все контейнеры десктопа в зависимости от индекса (index)
             '''
-            desktop_list.sort(key = lambda item: item.index)
+            desktop_list.sort(key = lambda item: (item.index, item.name))
             for item in desktop_list:
                 if isinstance(item, DesktopLaunchGroup):
                     sort_desktop(item.subitems)
