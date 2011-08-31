@@ -587,6 +587,10 @@ class ExtTabPanel(BaseExtPanel):
         # Показывает панель вкладок без фонового изображения
         self.plain = False
         
+        # Если False, то TabPanel указывается фиксированная ширина,
+        # либо она подчиняется layout родителя
+        self.auto_width = True
+        
         self._items = TypedList(type=ExtPanel)
         self.init_component(*args, **kwargs)
 

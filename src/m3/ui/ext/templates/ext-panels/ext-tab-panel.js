@@ -5,7 +5,7 @@ new Ext.TabPanel({
 	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
     {% if component.deferred_render != None %},deferredRender: {{ component.deferred_render|lower }} {% endif %}
     ,activeTab: {% if component.active_tab %}{{ component.active_tab }}{% else %}0{% endif %}
-	,autoWidth: true
+	{% if component.auto_width %} ,autoWidth: true {% endif %}
     {% if component.enable_tab_scroll %}
     ,enableTabScroll: true
     {% else %}
