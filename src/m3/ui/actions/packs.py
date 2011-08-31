@@ -460,7 +460,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         '''
         Возвращает данные для грида справочника
         '''
-        sort_order = [user_sort] if user_sort else self.list_sort_order
+        sort_order = user_sort.split(',') if user_sort else self.list_sort_order
         filter_fields = self._default_filter()
         query = self.model.objects.all()
         query = utils.apply_sort_order(query, self.list_columns, sort_order)
@@ -474,7 +474,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         return result
     
     def get_rows(self, offset, limit, filter, user_sort=''):
-        sort_order = [user_sort] if user_sort else self.list_sort_order
+        sort_order = user_sort.split(',') if user_sort else self.list_sort_order
         filter_fields = self._default_filter()
         query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, filter_fields)
