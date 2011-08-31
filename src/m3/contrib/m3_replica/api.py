@@ -83,8 +83,28 @@ def get_ikey(external_key, object_type=None):
     
     return result
     
-    
-    
-    
-    
-    
+
+def get_replicated_object_history(obj):
+    """
+    Получает по объекту модели строку в журнале реплицированных объектов
+    """
+    imported_object = None
+    if obj.id:
+        try:
+            qname = '%s.%s#%s' % \
+                (
+                 obj.__class__.__module__, 
+                 obj.__class__.__name__, 
+                 str(obj.id),
+                 )
+            qname = qname.lower()
+        except:
+            qname = ''
+        if qname:
+            try:
+                imported_object = ImportedObject.objects.get(ifullkey__exact=qname)
+            except ImportedObject.DoesNotExist:
+                imported_object = None
+            except ImportedObject.MultipleObjectsReturned:
+                imported_object = None
+    return imported_object
