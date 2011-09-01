@@ -74,6 +74,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 },
 				autoHeight: {
 				    defaultValue: false
+				},
+				autoWidth: {
+				    defaultValue: false
 				}
             }
         },
@@ -285,6 +288,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                 activeTab: {
                     defaultValue: 0,
                     isInitProperty: true
+                },
+				autoWidth: {
+                    defaultValue: true
                 },
                 layout: {
                     defaultValue: undefined,

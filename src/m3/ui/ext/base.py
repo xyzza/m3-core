@@ -524,6 +524,9 @@ class ExtUIComponent(BaseExtComponent):
         # Включение автовысоты. Аналог height='auto'
         self.auto_height = False
 
+        # Включение автоширины. Аналог width='auto'
+        self.auto_width = False
+
         # Метка поля
         self.label = None
 
@@ -563,6 +566,7 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('cls', self.cls)
         self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
         self._put_config_value('autoHeight', self.auto_height, self.auto_height)
+        self._put_config_value('autoWidth', self.auto_width, self.auto_width)
         self._put_config_value('fieldLabel', self.label)
         if  self.label_style:
             self._put_config_value('labelStyle', self.t_render_label_style())
