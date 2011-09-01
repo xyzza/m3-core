@@ -12,6 +12,8 @@ from urlparse import urljoin
 import m3.misc.ibus
 import helpers
 
+import responses
+
 class Communicator(object):
     '''
     Класс, используемый для отправки сообщений (запросов)
@@ -27,7 +29,6 @@ class Communicator(object):
         
         transport_urls = helpers.get_transport_urls()
         for url in transport_urls:
-            print url, '#', urljoin(url, m3.misc.ibus.ServerUrls.PING), "#"
             req = urllib2.Request(url=urljoin(url, m3.misc.ibus.ServerUrls.PING))
             result[url] = False # призумпция виновности транспорта
             
@@ -49,4 +50,20 @@ class Communicator(object):
         for url in transport_urls:
             # FIXME тут нужно, чтобы конкатенация урлов происходила корректно
             req = urllib2.Request(urljoin(url, m3.misc.ibus.ServerUrls.FORWARD_MESSAGE), datagen, headers)
-            urllib2.urlopen(req)   
+            try:
+                res = urllib2.urlopen(req)
+                
+                response_body = res.read()
+                if response_body[0:11] != 'request_id:':
+                    return responses.TransportServiceError(error_message=u'Недопустимый протокол общения с транспортным сервером')
+                
+                return responses.AsyncResponse(message_id=response_body[11:].strip())
+            except urllib2.HTTPError as exc:
+                return responses.TransportServiceError(error_code = exc.code,
+                                                       error_message = exc.msg if hasattr(exc, 'msg') else '')
+                # тут в error_message стоит конструкция if-else потому, что 
+                # какбе в офдоке нет указания на то, что такой атрибут у
+                # объекта исключения есть. лучше перебздеть, чем обосраться.
+            except urllib2.URLError as exc:
+                return responses.TransportServerUnavailable(error_message=exc.reason)    
+            
