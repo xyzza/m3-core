@@ -15,9 +15,10 @@ class Response(object):
     '''
     __metaclass__ = abc.ABCMeta
     
-    def __init__(self):
-        self.code = 200
-        self.http_message = 'OK'
+    def __init__(self, code=0, http_message='OK', body=''):
+        self.code = code
+        self.http_message = http_message
+        self.body = body
     
     @abc.abstractmethod
     def content(self):
@@ -53,3 +54,21 @@ class AsyncResponse(Response):
         
     def content(self):
         return self.message_id
+    
+class TransportServiceError(Response):
+    '''
+    Ответ, который возвращается при ошибке транспортного сервера
+    '''
+    def __init__(self, error_code=500, error_message = ''):
+        super(TransportServiceError, self).__init__(code=error_code, http_message=error_message)
+        
+        
+    def content(self):
+        return self.error_message
+    
+class TransportServerUnavailable(Response):
+    '''
+    Ответ, который приходит при недоступности транспортного сервера
+    '''
+    def __init__(self, error_message=''):
+        super(TransportServiceError, self).__init__(http_message=error_message)

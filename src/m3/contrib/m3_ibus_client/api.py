@@ -37,7 +37,7 @@ def send_models_async(objects=[], category=''):
     @param mode: режим, в котором должна выполняться отсылка сообщения
     @category: категория сообщения, предназначенная для определения получателей.
     '''
-    request = requests.SimpleObjectRequest(category=category, objects=objects, mode=InteractionMode.ASYNC)    
-    Communicator().send_request(request)
+    request = requests.SimpleObjectRequest(category='@'+category if category else '', objects=objects, mode=InteractionMode.ASYNC)    
+    response = Communicator().send_request(request)
     
-    return responses.AsyncResponse()
+    return response
