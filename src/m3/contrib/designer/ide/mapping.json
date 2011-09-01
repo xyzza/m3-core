@@ -37,7 +37,7 @@
         
         ,"autoScroll": "auto_scroll"
 		,"autoHeight": "auto_height"
-        
+		,"autoWidth": "auto_width"
     },
     "parent": "Observable"
 },
