@@ -210,6 +210,11 @@ class MenuSeparator(BaseDesktopElement):
     def render(self):
         return '"-"'
 
+
+# Ключ сортировки элементов меню по умолчанию:
+SORTING = lambda x: x.index
+
+
 class DesktopLoader(object):
     '''
     Загрузчик значков и меню для веб-десктопа
@@ -250,7 +255,7 @@ class DesktopLoader(object):
             cls._lock.release()
         
     @classmethod
-    def populate(cls, user, desktop):
+    def populate(cls, user, desktop, sorting=SORTING):
         '''
         Метод, который выполняет всю работу по настройке десктопа во вьюшке
         '''
@@ -300,7 +305,8 @@ class DesktopLoader(object):
             '''
             Сортирует все контейнеры десктопа в зависимости от индекса (index)
             '''
-            desktop_list.sort(key = lambda item: (item.index, item.name))
+
+            desktop_list.sort(key=sorting)
             for item in desktop_list:
                 if isinstance(item, DesktopLaunchGroup):
                     sort_desktop(item.subitems)
