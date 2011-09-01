@@ -8569,11 +8569,13 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	 */
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
-		var mask = new Ext.LoadMask(this.body);
-		
+		var mask = new Ext.LoadMask(this.body),
+		    params = this.getMainContext();
+		params[this.rowIdName] = '';
+
 		var req = {
 			url: this.actionNewUrl,
-			params: this.getMainContext(),
+			params: params,
 			success: function(res, opt){
 				if (scope.fireEvent('afternewrequest', scope, res, opt)) {
 				    try { 
@@ -8644,7 +8646,14 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 				mask.show();
 				Ext.Ajax.request(req);
 			}
-    	}
+	    } else {
+		Ext.Msg.show({
+			title: 'Редактирование',
+			msg: 'Элемент не выбран',
+			buttons: Ext.Msg.OK,
+			icon: Ext.MessageBox.INFO
+		    });
+	    }
 	}
 	/**
 	 * Нажатие на кнопку "Удалить"
@@ -8694,7 +8703,14 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	                }
 	            }
 	        });
-	    }
+		} else {
+                    Ext.Msg.show({
+                            title: 'Удаление',
+                            msg: 'Элемент не выбран',
+                            buttons: Ext.Msg.OK,
+                            icon: Ext.MessageBox.INFO
+                        });
+                }
 	}
 	
 	/**
@@ -8933,9 +8949,12 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
+		var params = this.getMainContext();
+		params[this.rowIdName] = '';
+
 		var req = {
 			url: this.actionNewUrl,
-			params: this.getMainContext(),
+			params: params,
 			success: function(res, opt){
 				if (scope.fireEvent('afternewrequest', scope, res, opt)) {
 					return scope.childWindowOpenHandler(res, opt);
@@ -8974,7 +8993,14 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 				var scope = this;
 				Ext.Ajax.request(req);
 			}
-    	}
+	    } else {
+		Ext.Msg.show({
+			title: 'Редактирование',
+			msg: 'Элемент не выбран',
+			buttons: Ext.Msg.OK,
+			icon: Ext.MessageBox.INFO
+		    });
+	    }
 	}
 	/**
 	 * Нажатие на кнопку "Удалить"
@@ -9009,7 +9035,14 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 	                }
 	            }
 	        });
-	    }
+		} else {
+                    Ext.Msg.show({
+                            title: 'Удаление',
+                            msg: 'Элемент не выбран',
+                            buttons: Ext.Msg.OK,
+                            icon: Ext.MessageBox.INFO
+                        });
+                }
 	}
 	
 	/**
