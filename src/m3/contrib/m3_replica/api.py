@@ -71,7 +71,7 @@ def get_ikey(external_key, object_type=None):
     # системы. С другой стороны, мы гарантируем то, что в процессе импорта,
     # мы достанем из базы именно тот реплицированный объект, который засунули
     # туда ранее
-    query = query.distinct().values_list('ikey', 'model')[0:2]
+    query = query.distinct().order_by('-id').values_list('ikey', 'model')[0:1]
     
     result = None
     
