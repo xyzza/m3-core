@@ -153,7 +153,12 @@ class DesktopLauncher(BaseDesktopElement):
         self.index = 100
         self.context = {} # словарь контекста
         self._init_component(*args, **kwargs)
-        
+        self._set_default_handler()
+
+    def _set_default_handler(self):
+            self.handler = 'function(){return sendRequest("%s", AppDesktop.getDesktop(), %s);}' \
+            % (self.url, self.t_render_context())
+
     def t_is_subitems(self):
         ''' Для удобства понимания что рендерить. Используется в шаблонах.'''
         return False
@@ -165,8 +170,9 @@ class DesktopLauncher(BaseDesktopElement):
         '''Рендерит текущий объект. Вызывается из метода render_items класса DesktopLaunchGroup'''
         res = 'text:"%s"' % self.name.replace('"', "&quot;")
         res += ',iconCls:"%s"' % self.icon
-        res += ',handler: function(){return sendRequest("%s", AppDesktop.getDesktop(), %s);}' % (self.url, self.t_render_context())
+        res += ',handler: %s' %self.handler
         res += ',scope: this'
+        print res
         return '{%s}' % res
     
     def __str__(self):
@@ -198,6 +204,8 @@ class DesktopShortcut(DesktopLauncher):
             # Если не задано имя ярлыка, то название берем из справочника
             if not kwargs.get('name'):
                 self.name = p.title
+
+        self._set_default_handler()
 
 class MenuSeparator(BaseDesktopElement):
     """

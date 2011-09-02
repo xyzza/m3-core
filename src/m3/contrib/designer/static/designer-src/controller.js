@@ -253,7 +253,7 @@ M3Designer.controller.AppController = Ext.extend(Ext.util.Observable, {
      * Обработка перемещения компонентов
      * @param {Ext.data.Node} source нода что перемещается
      * @param {Ext.data.Node} target нода куда перемещается
-     * @params {string} point положение относительно target(above, below, append)
+     * @param {string} point положение относительно target(above, below, append)
      */
     moveModelComponent: function (source, target, point) {
         if (point === 'append') {
