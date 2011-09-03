@@ -1,12 +1,13 @@
 #coding:utf-8
-'''
+"""
 Created on 12.05.2011
 @author: Сафиуллин В. А.
-'''
+"""
+from django.db.models import ForeignKey
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.sqlsoup import SqlSoup
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import mapper
+from sqlalchemy.orm import mapper, relationship
 import sqlalchemy as sa
 
 from m3.helpers import logger
@@ -88,13 +89,14 @@ class SQLAlchemyWrapper(object):
             from django.db.models.loading import cache
         except ImportError:
             raise AlchemyWrapperError('Cross import from settings.py')
-        
+
+        meta_collection = {}
+
         db = ModelCollection()
         for model in cache.get_models():
             attr_name = model._meta.object_name
             table_name = model._meta.db_table
             try:
-                print table_name
                 table = self.soup._metadata.tables[table_name]
             except KeyError:
                 raise AlchemyWrapperError('Table %s was not reflected in SqlAlchemy metadata' % table_name)
@@ -103,9 +105,35 @@ class SQLAlchemyWrapper(object):
                 table = self.create_map_class(attr_name, table)
                 if not table:
                     continue
-            
+
+            meta_collection[attr_name] = model._meta
             db[attr_name] = table
-            
+
+        if create_mappers:
+            # Не все так просто для MAP-объектов. Для правильной работы
+            # им нужно иметь такие же свойства, как ассессоры в Django
+            for attr_name, mapped_table in db.items():
+                meta = meta_collection[attr_name]
+
+                # Нужно создать свойства для ForeignKey
+                for field in meta.fields:
+                    if isinstance(field, ForeignKey) and field.attname.endswith('_id'):
+                        property_name = field.attname[:-3]
+                        related_model_name = field.rel.to._meta.object_name # Мегахак!
+                        related_mapped_table = db[related_model_name]
+                        property_value = relationship(related_mapped_table)
+
+                        # Может встретиться такое западло, когда в БД колонка не является FK,
+                        # но в модели Django она каким-то магическим образом помечена как FK!
+                        # Это легко проверить, но в будущем возможно придется найти решение.
+                        alchemy_col = mapped_table.columns[field.attname]
+                        if not alchemy_col.foreign_keys:
+                           continue
+
+                        mapped_table.add_property(property_name, property_value)
+
+                #TODO: Нужно создать свойства для RelatedManager
+
         return db
             
     
