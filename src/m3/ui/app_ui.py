@@ -172,7 +172,6 @@ class DesktopLauncher(BaseDesktopElement):
         res += ',iconCls:"%s"' % self.icon
         res += ',handler: %s' %self.handler
         res += ',scope: this'
-        print res
         return '{%s}' % res
     
     def __str__(self):
