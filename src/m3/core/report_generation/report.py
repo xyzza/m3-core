@@ -71,6 +71,8 @@ IMAGE_TAG = '<img %s>'
 
 VARIABLE_REGEX  = '#[:alpha:]+((_)*[:digit:]*[:alpha:]*)*#'
 
+OPTIMAL_HEIGHT_ROW_REGEX = '<optimal height>'
+
 TEMPORARY_SHEET_NAME = 'template_zw'
 
 
@@ -399,7 +401,8 @@ class Section(object):
                 return
             else:
                 #Если у ряда выставлена автовысота, устанавливать высоту не нужно 
-                if src_sheet.getRows().getByIndex(src_row_index).OptimalHeight:
+                if (src_sheet.getRows().getByIndex(src_row_index).OptimalHeight or 
+                    self.report_object.optimal_height_rows.count(src_row_index)):
                     dest_sheet.getRows().getByIndex(dest_row_index).OptimalHeight = True
                 else:
                     dest_sheet.getRows().getByIndex(dest_row_index).Height = \
@@ -628,6 +631,8 @@ class SpreadsheetReport(object):
         #Номера рядов, высота которых уже была задана
         self.defined_height_rows = []
         
+        self.optimal_height_rows = []
+        
         self.desktop = OORunner.get_desktop()    
              
         self.document = self.get_template_document(template_name)
@@ -656,6 +661,10 @@ class SpreadsheetReport(object):
         
         #Устанавливаем стиль
         self.set_result_sheet_style()
+        
+        #Находим все ряды, в которых должна быть установлена оптимальная высота строки
+        optimal_height_cells = parser.find_regex_cells(self.template_sheet, OPTIMAL_HEIGHT_ROW_REGEX)
+        self.optimal_height_rows = [cell.CellAddress.Row for cell in optimal_height_cells]
 
     def get_section(self, section_name):
         '''
@@ -900,4 +909,3 @@ def copy_document(desktop, src_file_path, dest_file_path, filter=None):
         source_document.close(True)
     document = create_document(desktop, dest_file_path)
     return document         
-             
