@@ -407,10 +407,7 @@ class ExtForm(BaseExtPanel):
                         raise ValueError('Invalid attribute type bind_rule. \
                                 Must be a function or a dict.')
                 else:
-                    try:
-                        val = int(val)
-                    except Exception:
-                        pass
+                    val = try_to_int(val, default=val)
 
             elif isinstance(item, ExtDictSelectField):
                 val = try_to_int(val, val) if val else None
