@@ -15,7 +15,7 @@ from m3.core.exceptions import ApplicationLogicException
 from results import ActionResult, PreJsonResult, JsonResult, ExtGridDataQueryResult,\
                     HttpReadyResult, TextResult, ExtAdvancedTreeGridDataQueryResult,\
                     BaseContextedResult, ExtUIComponentResult, ExtUIScriptResult,\
-                    OperationResult
+                    OperationResult, ActionRedirectResult
 
 from context import ActionContext, ActionContextDeclaration
 
@@ -466,7 +466,7 @@ class ActionController(object):
         '''
         # проверим что права на выполнение есть
         if not action.has_permission(request.user, request):
-            return OperationResult(success = False, message = u'У вас нет прав на выполнение этого действия!')
+            return OperationResult.by_message(u'У вас нет прав на выполнение этого действия!')
         
         # Заполняем контект
         rules = action.context_declaration()
@@ -479,7 +479,7 @@ class ActionController(object):
         except ActionContext.RequiredFailed, e:
             # если контекст неправильный, то возвращаем 
             # фейльный результат операции
-            return OperationResult(success = False, message = u'Не удалось выполнить операцию. Не задан обязательный<br>параметр: ' + e.reason)
+            return OperationResult.by_message(u'Не удалось выполнить операцию. Не задан обязательный<br>параметр: ' + e.reason)
 
         # В request заносим информацию о паках и экшене, которые будут
         # выполнены в процессе обработки запроса
@@ -537,9 +537,18 @@ class ActionController(object):
             
             if isinstance(result, ActionResult):
                 return result.get_http_response()
+
+            # Если вернули редирект, то нужно повторно обработать запрос, уже с новым экшеном
+            elif isinstance(result, ActionRedirectResult):
+                new_path = self.get_action_url(result.action)
+                if not new_path:
+                    raise ActionNotFoundException(result.action)
+
+                request.path = new_path
+                return self.process_request(request)
+
             return result
 
-        #self.dump_urls()
         raise http.Http404()
     
     def build_context(self, request):
