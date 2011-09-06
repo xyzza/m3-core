@@ -207,41 +207,51 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 	},
 
 	onDeleteRecord: function (){
-		assert(this.actionDeleteUrl, 'actionDeleteUrl is not define');
-		assert(this.rowIdName, 'rowIdName is not define');
-		
-	    Ext.Msg.show({
-	        title: 'Удаление записи',
-            scope: this,
-		    msg: 'Вы действительно хотите удалить выбранную запись?',
-		    icon: Ext.Msg.QUESTION,
-	        buttons: Ext.Msg.YESNO,
-	        fn: function(btn, text, opt){
-	            if (btn != 'yes')
+        assert(this.actionDeleteUrl, 'actionDeleteUrl is not define');
+        assert(this.rowIdName, 'rowIdName is not define');
+        var node = this.getSelectionModel().getSelectedNode()
+        if (node) {
+        
+            Ext.Msg.show({
+               title: 'Удаление записи',
+               scope: this,
+               msg: 'Вы действительно хотите удалить выбранную запись?',
+               icon: Ext.Msg.QUESTION,
+               buttons: Ext.Msg.YESNO,
+               fn: function(btn, text, opt){
+                   if (btn != 'yes')
                     return;
-
-                if (this.getSelectionModel().getSelectedNode()) {
-                    var baseConf = this.getSelectionContext();
-
-                    var req = {
-                        url: this.actionDeleteUrl,
-                        scope: this,
-                        params: baseConf,
-                        success: function(res, opt){
-                             return this.deleteOkHandler(res, opt);
-                        },
-                        failure: function(){
-                            uiAjaxFailMessage.apply(this, arguments);
+    
+                    if (this.getSelectionModel().getSelectedNode()) {
+                        var baseConf = this.getSelectionContext();
+    
+                        var req = {
+                            url: this.actionDeleteUrl,
+                            scope: this,
+                            params: baseConf,
+                            success: function(res, opt){
+                                 return this.deleteOkHandler(res, opt);
+                            },
+                            failure: function(){
+                                uiAjaxFailMessage.apply(this, arguments);
+                            }
+                        };
+    
+                        if (this.fireEvent('beforedeleterequest', this, req)) {
+                            Ext.Ajax.request(req);
                         }
-                    };
-
-                    if (this.fireEvent('beforedeleterequest', this, req)) {
-                        Ext.Ajax.request(req);
                     }
                 }
-	        }
-	    });
-	},
+           });
+        } else {
+            Ext.Msg.show({
+                title: 'Удаление',
+                msg: 'Элемент не выбран',
+                buttons: Ext.Msg.OK,
+                icon: Ext.MessageBox.INFO
+            });
+        }
+    },
 
 	childWindowOpenHandler: function (response, opts){
 		

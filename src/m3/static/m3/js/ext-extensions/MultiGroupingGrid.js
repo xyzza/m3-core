@@ -1039,55 +1039,62 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
     	}
 	}
 	/**
-	 * Нажатие на кнопку "Удалить"
-	 */
-	,onDeleteRecord: function (){
-		assert(this.actionDeleteUrl, 'actionDeleteUrl is not define');
-		assert(this.rowIdName, 'rowIdName is not define');
-		
-		var scope = this;
-		if (scope.getSelectionModel().hasSelection()) {
-		    Ext.Msg.show({
-		        title: 'Удаление записи',
-			    msg: 'Вы действительно хотите удалить выбранную запись?',
-			    icon: Ext.Msg.QUESTION,
-		        buttons: Ext.Msg.YESNO,
-		        fn:function(btn, text, opt){ 
-		            if (btn == 'yes') {
-						var baseConf = scope.getSelectionContext(scope.localEdit);
-						var mask = new Ext.LoadMask(scope.body);
-						var req = {
-		                   url: scope.actionDeleteUrl,
-		                   params: baseConf,
-		                   success: function(res, opt){
-		                	   if (scope.fireEvent('afterdeleterequest', scope, res, opt)) {
-		                	       try { 
-		                		       var child_win =  scope.deleteOkHandler(res, opt);
-		                		   } finally { 
-    		                		   mask.hide();
-    		                		   scope.disableToolbars(false);
-    		                	   }
-		                		   return child_win;
-		                	   }
-		                	   mask.hide();
+     * Нажатие на кнопку "Удалить"
+     */
+    ,onDeleteRecord: function (){
+        assert(this.actionDeleteUrl, 'actionDeleteUrl is not define');
+        assert(this.rowIdName, 'rowIdName is not define');
+        
+        var scope = this;
+        if (scope.getSelectionModel().hasSelection()) {
+            Ext.Msg.show({
+                title: 'Удаление записи',
+                msg: 'Вы действительно хотите удалить выбранную запись?',
+                icon: Ext.Msg.QUESTION,
+                buttons: Ext.Msg.YESNO,
+                fn:function(btn, text, opt){ 
+                    if (btn == 'yes') {
+                        var baseConf = scope.getSelectionContext(scope.localEdit);
+                        var mask = new Ext.LoadMask(scope.body);
+                        var req = {
+                           url: scope.actionDeleteUrl,
+                           params: baseConf,
+                           success: function(res, opt){
+                               if (scope.fireEvent('afterdeleterequest', scope, res, opt)) {
+                                   try { 
+                                       var child_win =  scope.deleteOkHandler(res, opt);
+                                   } finally { 
+                                       mask.hide();
+                                       scope.disableToolbars(false);
+                                   }
+                                   return child_win;
+                               }
+                               mask.hide();
                                scope.disableToolbars(false);
-						   }
+                           }
                            ,failure: function(){ 
                                uiAjaxFailMessage.apply(this, arguments);
                                mask.hide();
                                scope.disableToolbars(false);
                            }
-		                };
-						if (scope.fireEvent('beforedeleterequest', scope, req)) {
-						    scope.disableToolbars(true);
-						    mask.show();
-							Ext.Ajax.request(req);
-						}
-	                }
-	            }
-	        });
-	    }
-	}
+                        };
+                        if (scope.fireEvent('beforedeleterequest', scope, req)) {
+                            scope.disableToolbars(true);
+                            mask.show();
+                            Ext.Ajax.request(req);
+                        }
+                    }
+                }
+            });
+        } else {
+            Ext.Msg.show({
+                title: 'Удаление',
+                msg: 'Элемент не выбран',
+                buttons: Ext.Msg.OK,
+                icon: Ext.MessageBox.INFO
+            });
+        }
+    }
 	
 	/**
 	 * Показ и подписка на сообщения в дочерних окнах
