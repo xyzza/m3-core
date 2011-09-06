@@ -162,6 +162,10 @@ def inner_name_cache_handler(for_actions=True):
 
     # TODO посмотреть как работает для врапнутых классов
     result = {}
+    
+    # fullpaths - словарь, который хранит соответствие объекта (контроллера,
+    # пака или экшена) и полного пути до него по шортнеймам
+    fullpaths = {}
 
     ControllerCache.populate()
     # что-то внутренность данного метода не вызывает
@@ -174,12 +178,21 @@ def inner_name_cache_handler(for_actions=True):
     # считываем паки верхнего уровня
     for controller in controllers:
         packs.extend(controller.top_level_packs)
+        
+        # добавляем полные пути в fullpaths
+        fullpaths[controller] = get_shortname(controller) 
+        for pack in controller.top_level_packs:
+            fullpaths[pack] = '%s.%s' % (fullpaths.get(controller, ''), get_shortname(pack))
 
     while len(packs) > 0:
         pack = packs.popleft()
         # субпаки - в очередь!
         if hasattr(pack, 'subpacks'):
             packs.extend(pack.subpacks)
+            
+            for subpack in pack.subpacks:
+                fullpaths[subpack] = '%s.%s' % (fullpaths.get(controller, ''), get_shortname(pack))
+            
         if for_actions and hasattr(pack, 'actions'):
             for action in pack.actions:
 
@@ -193,6 +206,8 @@ def inner_name_cache_handler(for_actions=True):
                 shortname = get_shortname(cleaned_action)
                 if shortname:
                     result[shortname] = (cleaned_action.__class__, url, cleaned_action)
+                    # добавляем также полный путь до экшена
+                    result["%s.%s" % (fullpaths.get(pack, ''), shortname)] = (cleaned_action.__class__, url, cleaned_action)
         else:
             cleaned_pack = get_instance(pack)
             key = cleaned_pack.__class__.__module__ + '.' + cleaned_pack.__class__.__name__
@@ -201,5 +216,9 @@ def inner_name_cache_handler(for_actions=True):
             shortname = get_shortname(cleaned_pack)
             if shortname:
                 result[shortname] = (cleaned_pack.__class__, url, cleaned_pack)
+                
+                # добавляем также полный путь до экшена
+                if fullpaths.has_key(pack):
+                    result[fullpaths[pack]] = (cleaned_pack.__class__, url, cleaned_pack)
 
     return result
