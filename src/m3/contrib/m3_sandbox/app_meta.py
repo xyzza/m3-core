@@ -2,6 +2,7 @@
 import os
 from django.conf.urls.defaults import url
 from django.core.urlresolvers import reverse
+from m3.contrib.designer.ide.views import designer
 from m3.contrib.m3_sandbox import SandboxKeeper
 from django.conf import urls as django_urls, settings
 from m3.ui.actions import ActionController
@@ -40,11 +41,36 @@ def register_urlpatterns():
         urls += django_urls.defaults.patterns('', ('^sandbox/' + k + '/',
                                               lambda request: v.process_request(request)))
 
+
     urls += django_urls.defaults.patterns('',
-        url('^m3-ide/', views.workspace, name = 'ide-workspace'),
+        url('^m3-ide/$', views.workspace, name = 'ide-workspace'),
         # статичный контент проекта
         (r'^ide-static/(?P<path>.*)$', 'django.views.static.serve',
             {'document_root': os.path.join( settings.M3_ROOT, 'contrib/designer/static' ) }),
+
+
+        # Файлы проекта
+        (r'^m3-ide/project-files$', 'm3.contrib.designer.ide.views.get_project_files'),
+
+        # Создание нового класса в файле
+        (r'^create-new-class$', 'm3.contrib.designer.ide.views.create_class'),
+
+        # Создание функции инициализации в классе
+        (r'^create-autogen-function$', 'm3.contrib.designer.ide.views.create_initialize'),
+
+        # Создание контейнерной функции
+        (r'^create-function$', 'm3.contrib.designer.ide.views.create_cont_func_view'),
+
+        # Возвращает по питоновскому кода, js код
+        (r'^designer/upload-code$', 'm3.contrib.designer.ide.views.upload_code'),
+        (r'^designer/data$','m3.contrib.designer.ide.views.designer_data'),
+        (r'designer/save$','m3.contrib.designer.ide.views.designer_save'),
+        (r'designer/preview$','m3.contrib.designer.ide.views.designer_preview'),
+        (r'designer/file-content$','m3.contrib.designer.ide.views.designer_file_content'),
+        (r'designer/file-content/save$','m3.contrib.designer.ide.views.designer_file_content_save'),
+        (r'designer/project-manipulation$','m3.contrib.designer.ide.views.designer_structure_manipulation'),
+        (r'designer/project-global-template$','m3.contrib.designer.ide.views.designer_global_template_content'),
+        (r'designer/codeassist$','m3.contrib.designer.ide.views.codeassist')
     )
 
     return urls
