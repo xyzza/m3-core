@@ -352,10 +352,13 @@ class ExtForm(BaseExtPanel):
         def try_to_int(value, default=None):
             ''' Пробует преобразовать value в целое число,
             иначе возвращает default '''
+            if not value:
+                return default
+            
             try:
                 return int(value)
-            except:
-                return default
+            except ValueError:
+                return value
 
         def convert_value(item):
             '''Берет значение item.value,
@@ -407,10 +410,10 @@ class ExtForm(BaseExtPanel):
                         raise ValueError('Invalid attribute type bind_rule. \
                                 Must be a function or a dict.')
                 else:
-                    val = try_to_int(val, default=val)
+                    val = try_to_int(val)
 
             elif isinstance(item, ExtDictSelectField):
-                val = try_to_int(val, val) if val else None
+                val = try_to_int(val)
 
             elif isinstance(item, ExtHiddenField):
                 if item.type == ExtHiddenField.INT:
