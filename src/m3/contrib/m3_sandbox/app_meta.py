@@ -1,6 +1,9 @@
 #coding: utf-8
+import os
+from django.conf.urls.defaults import url
+from django.core.urlresolvers import reverse
 from m3.contrib.m3_sandbox import SandboxKeeper
-from django.conf import urls as django_urls
+from django.conf import urls as django_urls, settings
 from m3.ui.actions import ActionController
 from m3.ui.app_ui import DesktopShortcut, DesktopLoader, DesktopLauncher
 from m3.contrib.m3_users.app_meta import ADMIN
@@ -37,17 +40,20 @@ def register_urlpatterns():
         urls += django_urls.defaults.patterns('', ('^sandbox/' + k + '/',
                                               lambda request: v.process_request(request)))
 
-    urls += django_urls.defaults.patterns('', ('^foo/', views.test))
-    
+    urls += django_urls.defaults.patterns('',
+        url('^m3-ide/', views.workspace, name = 'ide-workspace'),
+        # статичный контент проекта
+        (r'^ide-static/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': os.path.join( settings.M3_ROOT, 'contrib/designer/static' ) }),
+    )
 
     return urls
 
 def register_desktop_menu():
-    #TODO прикрутить что-то с метаролями - нужна некая метароль некоего разработчика
+    #TODO прикрутить что-то с метаролями - нужна некая метароль некоего разработчика и некая роль админа разработчиков
     admin_user = metaroles.get_metarole(ADMIN)
-    accounts_shortcut = DesktopShortcut(name = u'Учетные записи', icon='guests',
+    accounts_shortcut = DesktopShortcut(name = u'Разработчики', icon='devs',
                                         pack = actions.AccountsManagementPack )
     DesktopLoader.add(admin_user, DesktopLoader.DESKTOP, accounts_shortcut)
-
-    DesktopLoader.add(admin_user, DesktopLoader.DESKTOP, RedirectShortcut(name = u'GTFO', icon = 'face',
-                                                                          url = 'http://www.google.com'))
+    DesktopLoader.add(admin_user, DesktopLoader.DESKTOP, RedirectShortcut(name = u'Дизайнер', icon = 'engineer',
+                                                                          url = reverse('ide-workspace')))
