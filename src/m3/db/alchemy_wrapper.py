@@ -4,6 +4,7 @@ Created on 12.05.2011
 @author: Сафиуллин В. А.
 """
 from django.db.models import ForeignKey
+
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.sqlsoup import SqlSoup
 from sqlalchemy.ext.declarative import declarative_base
@@ -38,7 +39,14 @@ class SQLAlchemyWrapper(object):
     }
     
     ERROR_NO_PK = 'could not assemble any primary key columns for mapped table'
+
+    _instance = None
     
+    def __new__(cls, *more):
+        if not cls._instance:
+            cls._instance = super(SQLAlchemyWrapper, cls).__new__(cls, *more)
+        return cls._instance
+
     def __init__(self, db_config):
         # Создаем движок БД
         default_db = db_config['default']
@@ -99,7 +107,7 @@ class SQLAlchemyWrapper(object):
             try:
                 table = self.soup._metadata.tables[table_name]
             except KeyError:
-                raise AlchemyWrapperError('Table %s was not reflected in SqlAlchemy metadata' % table_name)
+                logger.warning('Table %s was not reflected in SqlAlchemy metadata' % table_name)
             
             if create_mappers:
                 table = self.create_map_class(attr_name, table)
