@@ -108,3 +108,28 @@ M3Designer.Utils = Ext.apply({},{
         return selectedNode;
     }
 });
+
+/**
+ * @class M3Designer.UrlMap
+ * Класс для конфигурирования url'ов, испльзуемых дизайнером
+ */
+M3Designer.UrlMap = Ext.apply({}, {
+    _urls : {},
+
+    add: function(name, url) {
+        this._urls[name] = url;
+    },
+
+    addUrls : function(cfg) {
+        Ext.apply(this._urls, cfg)
+    },
+
+    get:function(name) {
+        if (this._urls.hasOwnProperty(name)) {
+            return this._urls[name];
+        }
+        else {
+            throw 'Url for ' + name + ' is not defined';
+        }
+    }
+});

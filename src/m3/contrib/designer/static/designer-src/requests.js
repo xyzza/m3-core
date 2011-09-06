@@ -22,7 +22,7 @@ M3Designer.Requests = Ext.apply({}, {
      */
     fileSaveContent:function(codeEditor, path){
         Ext.Ajax.request({
-            url:'/designer/file-content/save',
+            url: M3Designer.UrlMap.get('save-file-content'),
             params: {
                 path: path,
                 content: codeEditor.codeMirrorEditor.getValue()
@@ -58,7 +58,7 @@ M3Designer.Requests = Ext.apply({}, {
         }
 
         Ext.Ajax.request({
-            url:'/designer/file-content',
+            url: M3Designer.UrlMap.get('get-file-content'),
             method: 'GET',
             params: {
                 path: path
@@ -101,7 +101,7 @@ M3Designer.Requests = Ext.apply({}, {
      */
     fileGetContent:function(fileAttr, node, tabPanel){
         Ext.Ajax.request({
-            url:'/designer/file-content',
+            url: M3Designer.UrlMap.get('get-file-content'),
             method: 'GET',
             params: {
                 path: fileAttr.path
@@ -139,7 +139,7 @@ M3Designer.Requests = Ext.apply({}, {
         var scope = this,
             crateNew = crateNew || false;
         Ext.Ajax.request({
-            url:'/designer/project-global-template',
+            url: M3Designer.UrlMap.get('get-template-global'),
             method: 'GET',
             params: {
                 path: path,
@@ -208,7 +208,7 @@ M3Designer.Requests = Ext.apply({}, {
      */
     generateInitialize:function(node){
         Ext.Ajax.request({
-            url:'create-autogen-function'
+            url: M3Designer.UrlMap.get('create-autogen-function')
             ,params:{
                 path: node.attributes['path'],
                 className: node.attributes['class_name']
@@ -248,7 +248,7 @@ M3Designer.Requests = Ext.apply({}, {
     manipulation:function(params, fn){
         var errorTypeExist = 'exist';
         Ext.Ajax.request({
-            url:'/designer/project-manipulation',
+            url: M3Designer.UrlMap.get('manipulation'),
             method: 'POST',
             params: params,
             success: function(response, opts){
@@ -276,7 +276,7 @@ M3Designer.Requests = Ext.apply({}, {
      */
     createFunction:function(funcName, funcType, node, win){
         Ext.Ajax.request({
-            url: '/create-function'
+            url: M3Designer.UrlMap.get('create-function')
             ,params:{
                 name: funcName,
                 path: node.attributes['path'],
@@ -317,7 +317,7 @@ M3Designer.Requests = Ext.apply({}, {
     createClass: function(node, text){
         var path = node.attributes['path'];
         Ext.Ajax.request({
-            url:'/create-new-class'
+            url: M3Designer.UrlMap.get('create-new-class')
             ,params: {
                 path: path
                 ,className: text

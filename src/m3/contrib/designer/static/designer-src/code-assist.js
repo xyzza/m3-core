@@ -6,7 +6,7 @@ Ext.namespace('M3Designer.code');
  */
 
 M3Designer.code.CodeAssistPlugin = Ext.extend(Object,{
-    codeAssistUrl:'designer/codeassist',
+    codeAssistUrl: M3Designer.UrlMap.get('code-assist'),
 
     constructor:function(cfg) {
         Ext.apply(this, cfg);

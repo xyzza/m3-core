@@ -314,7 +314,7 @@ function createTreeView(rootNodeName){
         ,border: false
         ,header: false
         ,loader: new Ext.tree.TreeLoader({
-            url: '/project-files'
+            url: M3Designer.UrlMap.get('project-files')
         })
         ,tbar: new Ext.Toolbar({
             items: [
@@ -674,13 +674,13 @@ function onClickNode(node) {
         id: id,
         treeNodeId: node.id, // нода в дереве "струкрура проекта"
         silent: true, // Признак обработки ивентов
-        dataUrl:'/designer/data',
-        saveUrl:'/designer/save',
+        dataUrl: M3Designer.UrlMap.get('data'),
+        saveUrl: M3Designer.UrlMap.get('save'),
         path:attr['path'],
         className:attr['class_name'],
         funcName:attr['func_name'],
-        previewUrl:'/designer/preview',
-        uploadCodeUrl: 'designer/upload-code'
+        previewUrl: M3Designer.UrlMap.get('preview'),
+        uploadCodeUrl: M3Designer.UrlMap.get('upload-code')
     });
     workspace.loadModel();
 
@@ -693,7 +693,8 @@ function onClickNode(node) {
             // Может быть сгенерировать эту функцию в этом классе?
             Ext.Msg.show({
                title:'Функция не определена'
-               ,msg: 'Функция автогенерация не определена в классе ' + attr['class_name'] + '. <br/> Сгенерировать данную функцию?'
+               ,msg: 'Функция автогенерация не определена в классе ' + attr['class_name'] + '. ' +
+                    '<br/> Сгенерировать данную функцию?'
                ,buttons: Ext.Msg.YESNO
                ,icon: Ext.MessageBox.QUESTION
                ,fn: function(btn, text){
