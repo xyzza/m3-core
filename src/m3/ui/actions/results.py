@@ -207,7 +207,7 @@ class OperationResult(ActionResult):
         Если сообщение не пустое, то операция считается проваленной и success=False,
         иначе операция считается успешной success=True.
         """
-        result = OperationResult(success = True)
+        result = OperationResult()
         if message:
             result.success = False
             result.message = message
@@ -217,9 +217,10 @@ class OperationResult(ActionResult):
         '''
         Возвращает объект HttpResponse, соответствующий данному результату выполнения операции
         '''
-        result = {}
-        result['message'] = self.message
-        result['success'] = True if self.success else False
+        result = {
+            'message': self.message,
+            'success': True if self.success else False
+        }
         result = json.JSONEncoder().encode(result)
         
         # Вставляем функцию прямо в JSON без кодирования
@@ -234,3 +235,12 @@ class OperationResult(ActionResult):
         repsonse = http.HttpResponse(result)
         repsonse = self.process_http_params(repsonse)
         return repsonse
+
+
+class ActionRedirectResult(object):
+    """
+    Перенаправляет обработку запроса на другой экшен.
+    Экшен предварительно находится с помощью метода ActionController.get_action_url()
+    """
+    def __init__(self, action):
+        self.action = action
