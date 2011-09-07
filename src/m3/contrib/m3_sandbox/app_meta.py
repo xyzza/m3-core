@@ -50,7 +50,7 @@ def register_urlpatterns():
 
 
         # Файлы проекта
-        (r'^m3-ide/project-files$', 'm3.contrib.designer.ide.views.get_project_files'),
+        (r'^m3-ide/project-files$', 'm3.contrib.m3_sandbox.views.get_project_files'),
 
         # Создание нового класса в файле
         (r'^create-new-class$', 'm3.contrib.designer.ide.views.create_class'),

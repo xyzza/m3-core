@@ -3,7 +3,6 @@
 import inspect
 import os.path
 import sys
-from django.conf import settings
 from m3.contrib.m3_sandbox.models import SandboxAccount, SandboxUser
 from m3.ui.actions import ActionController, Action, ActionPack, ControllerCache
 from django.utils.importlib import import_module
