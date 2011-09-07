@@ -8,6 +8,8 @@ import datetime
 import json
 from decimal import Decimal
 
+from django.utils.encoding import force_unicode
+
 from m3.helpers import logger
 
 
@@ -94,13 +96,13 @@ class ActionContext(object):
         value = None
         if arg_type == int:
             value = int(raw_value)
-            
+
         elif arg_type == float:
             value = float(raw_value)
-            
+
         elif arg_type == Decimal:
             value = Decimal(raw_value)
-            
+
         elif arg_type in [str, unicode]:
             value = unicode(raw_value)
 
@@ -125,7 +127,7 @@ class ActionContext(object):
 
         elif arg_type == bool:
             value = raw_value in ['true', 'True', 1, '1', 'on', True]
-        
+
         elif isinstance(arg_type, ActionContext.ValuesList):
             elements = raw_value.split(arg_type.separator)
             if not arg_type.allow_empty:
@@ -208,8 +210,8 @@ class ActionContext(object):
             elif isinstance(obj, datetime.time):
                 result = obj.strftime('%H:%M')
             else:
-                result = unicode(repr(obj))
-                
+                result = force_unicode(obj)
+
             return result
-        
+
         return json.dumps(self.__dict__, default=encoder_extender)
