@@ -153,13 +153,11 @@ def execute(config_temp_dir, config_result_file, config_project_dir):
             print 'cannot remove trash from temp directory'
     except Exception as exc:
         print 'dist-builder aborted with message: '
-        print exc.message
-    
+        print unicode(exc)
 
-
-if __name__ == '__main__':   
+if __name__ == '__main__':
     if len(sys.argv) != 4:
-        print u'usage: compile_to.py path_to_project_src path_to_temp output_file'
+        print u'usage: compile_to.py output_file path_to_temp path_to_project_src'
         sys.exit()
 
     execute(sys.argv[2], sys.argv[1], sys.argv[3])
