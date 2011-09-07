@@ -210,7 +210,8 @@ class Action(object):
         @deprecated: Дублирует absolute_url 
         '''
         #TODO: Переписать, т.к. этот код дублирует функции контроллера
-        assert isinstance(self.controller, ActionController)
+        assert isinstance(self.controller, ActionController), ( 
+            '%s is not actioncontroller in %s' % (self.controller, self))
         # Очищаем от мусора рег. выр.
         ignored_chars = ['^', '&', '$']
         for char in ignored_chars:
