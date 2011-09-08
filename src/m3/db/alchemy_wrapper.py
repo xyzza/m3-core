@@ -21,6 +21,17 @@ class AlchemyWrapperError(Exception):
 
 #=============================== КЛАССЫ ====================================
 
+class SingletonMeta(type):
+    def __init__(self, name, bases, dict):
+        super(SingletonMeta, self).__init__(name, bases, dict)
+        self.instance = None
+
+    def __call__(self, *args, **kw):
+        if self.instance is None:
+            self.instance = super(SingletonMeta, self).__call__(*args, **kw)
+        return self.instance
+
+
 class SQLAlchemyWrapper(object):
     """ 
     Класс обёртка, предназначенный для подключения БД SqlAlchemy
@@ -31,6 +42,8 @@ class SQLAlchemyWrapper(object):
         metadata - коллекция из таблиц и колонок БД
         session - сессия для запросов
     """
+    __metaclass__ = SingletonMeta
+
     # Карта соответствия между драйверами Django и SqlAlchemy
     DRIVER_MAP = {
         "django.db.backends.sqlite3": "sqlite",
@@ -40,12 +53,7 @@ class SQLAlchemyWrapper(object):
     
     ERROR_NO_PK = 'could not assemble any primary key columns for mapped table'
 
-    _instance = None
-    
-    def __new__(cls, *more):
-        if not cls._instance:
-            cls._instance = super(SQLAlchemyWrapper, cls).__new__(cls, *more)
-        return cls._instance
+    _models_map_cache = None
 
     def __init__(self, db_config):
         # Создаем движок БД
@@ -86,13 +94,59 @@ class SQLAlchemyWrapper(object):
                 logger.warning(msg)
                 return
             raise e
-    
-    def get_models_map(self, create_mappers=False):
+
+    def _check_installed_apps(self, model):
+        """
+        Проверяет, может ли модель с именем model_name быть подключена к проекту.
+        Это нужно потому, что в приложениях проекта могут быть импорты из contrib'ов,
+        которые не подключены в INSTALLED_APPS и их модели не существуют в БД.
+        Хотя это нарушает принцип IoC, но прециденты встречаются.
+        """
+        for app_name in settings.INSTALLED_APPS:
+            pure_module_name = model.__module__.replace('.models', '')
+            if pure_module_name.startswith(app_name):
+                return True
+
+        return False
+
+    def _create_accessor_property(self, db, mapped_table, property_name, field):
+        """
+        Создает свойство указывающее через JOIN на другую таблицу
+        """
+        # Получаем алхимическую таблицу и поле с которой будет связывание
+        related_model_name = field.rel.to._meta.object_name # Мегахак!
+        related_field_name = field.rel.field_name
+        related_mapped_table = db[related_model_name]
+
+        left_column = related_mapped_table.columns[related_field_name]
+        right_column = mapped_table.columns[field.attname]
+        primaryjoin = (left_column == right_column)
+
+        # Добавляем свойство
+        property_value = relationship(related_mapped_table, primaryjoin=primaryjoin)
+        mapped_table.add_property(property_name, property_value)
+
+    def _get_alchemy_table(self, model):
+        """
+        Возвращает алхимическую таблицу по модели Django
+        """
+        table_name = model._meta.db_table
+        try:
+            return self.soup._metadata.tables[table_name]
+        except KeyError:
+            logger.warning('Table %s was not reflected in SqlAlchemy metadata' % table_name)
+
+    def get_models_map(self, create_mappers=False, create_properties=True):
         """ 
         Возвращает объект для быстрого доступа к таблицам SqlAlchemy.
         Атрибуты объекта имеют имена соответствующих моделей Django, а
-        их значения - мататаблицы алхимии.
+        их значения - метатаблицы алхимии.
+            create_mappers - вместо таблиц алхимии создаются map-объекты
+            create_properties - в map-объектах создаются свойства по аналогии с ассессорами Django
         """
+        if self._models_map_cache:
+            return self._models_map_cache
+
         try:
             from django.db.models.loading import cache
         except ImportError:
@@ -100,49 +154,51 @@ class SQLAlchemyWrapper(object):
 
         meta_collection = {}
 
-        db = ModelCollection()
+        model_collection = ModelCollection()
         for model in cache.get_models():
-            attr_name = model._meta.object_name
-            table_name = model._meta.db_table
-            try:
-                table = self.soup._metadata.tables[table_name]
-            except KeyError:
-                logger.warning('Table %s was not reflected in SqlAlchemy metadata' % table_name)
+            table = self._get_alchemy_table(model)
             
-            if create_mappers:
-                table = self.create_map_class(attr_name, table)
-                if not table:
-                    continue
+            if table is not None:
+                attr_name = model._meta.object_name
 
-            meta_collection[attr_name] = model._meta
-            db[attr_name] = table
+                if create_mappers:
+                    table = self.create_map_class(attr_name, table)
+                    if table is None:
+                        continue
 
-        if create_mappers:
+                meta_collection[attr_name] = model._meta
+                if not model_collection.has_key(attr_name):
+                    model_collection[attr_name] = table
+                else:
+                    logger.warning('Model Collection already have model with name %s' % attr_name)
+
+        if create_mappers and create_properties:
             # Не все так просто для MAP-объектов. Для правильной работы
             # им нужно иметь такие же свойства, как ассессоры в Django
-            for attr_name, mapped_table in db.items():
+            for attr_name, mapped_table in model_collection.items():
                 meta = meta_collection[attr_name]
 
                 # Нужно создать свойства для ForeignKey
                 for field in meta.fields:
                     if isinstance(field, ForeignKey) and field.attname.endswith('_id'):
-                        property_name = field.attname[:-3]
-                        related_model_name = field.rel.to._meta.object_name # Мегахак!
-                        related_mapped_table = db[related_model_name]
-                        property_value = relationship(related_mapped_table)
 
                         # Может встретиться такое западло, когда в БД колонка не является FK,
                         # но в модели Django она каким-то магическим образом помечена как FK!
                         # Это легко проверить, но в будущем возможно придется найти решение.
                         alchemy_col = mapped_table.columns[field.attname]
                         if not alchemy_col.foreign_keys:
-                           continue
+                            logger.warning('Column %s is not foreign key but defined as it in Django' % alchemy_col)
+                            continue
 
-                        mapped_table.add_property(property_name, property_value)
+                        # Имя свойства такое же как FK, только без _id
+                        property_name = field.attname[:-3]
+
+                        self._create_accessor_property(model_collection, mapped_table, property_name, field)
 
                 #TODO: Нужно создать свойства для RelatedManager
 
-        return db
+        self._models_map_cache = model_collection
+        return model_collection
             
     
 class ModelCollection(dict):
@@ -150,10 +206,7 @@ class ModelCollection(dict):
     
     def __getattr__(self, name):
         """ Доступ к значениям словаря через точку """
-        try:
-            return self[name]
-        except KeyError:
-            return super(ModelCollection, self).__getattr__(name)
+        return self[name]
 
     def __setitem__(self, k, v):
         """ При добавлении пары в словарь также появляется одноименный атрибут """
