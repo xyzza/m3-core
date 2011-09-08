@@ -4,7 +4,7 @@
  */
 Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	constructor: function(baseConfig, params){
-		 
+		
 		var items = params.items || [];
 		
 		var place_store = new Ext.data.JsonStore({
@@ -114,7 +114,19 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					width: 40,
                     invalidClass: params.invalid_class
 				});
-				
+				if (params.use_corps) {
+					this.corps = new Ext.form.TextField({
+						name: params.corps_field_name,
+						allowBlank: params.corps_allow_blank,
+						readOnly: params.read_only,
+						cls: field_cls,
+						fieldLabel: params.corps_label,
+						value: params.corps_value,
+						emptyText: '',
+						width: 40,
+						invalidClass: params.invalid_class
+					});
+				}
 				if (params.level > 3) {
 					this.flat = new Ext.form.TextField({
 						name: params.flat_field_name,
@@ -152,7 +164,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	    		
 			if (params.level > 1) {
 				this.street.flex = 1;
-				this.street.fieldLabel = params.place_label;
+				this.street.fieldLabel = params.street_label;
 				row_items.push({
 						xtype: 'label'
 						,style: {padding:'3px'}
@@ -161,7 +173,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					, this.street
 				);
 				if (params.level > 2) {
-					this.house.fieldLabel = params.place_label;
+					this.house.fieldLabel = params.house_label;
 					row_items.push({
 							xtype: 'label'
 							,style: {padding:'3px'}
@@ -169,8 +181,18 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						}
 						, this.house
 					);
+					if (params.use_corps) {
+						this.corps.fieldLabel = params.corps_label;
+						row_items.push({
+								xtype: 'label'
+								,style: {padding:'3px'}
+								,text: params.corps_label+':'
+							}
+							, this.corps
+						);
+					}
 					if (params.level > 3) {
-						this.flat.fieldLabel = params.place_label;
+						this.flat.fieldLabel = params.flat_label;
 						row_items.push({
 								xtype: 'label'
 								,style: {padding:'3px'}
@@ -214,7 +236,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				this.street.flex = 1;
 				var row_items = [this.street];
 				if (params.level > 2) {
-					this.house.fieldLabel = params.street_label;
+					this.house.fieldLabel = params.house_label;
 					row_items.push({
 							xtype: 'label'
 							,style: {padding:'3px'}
@@ -222,8 +244,18 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						}
 						, this.house
 					);
+					if (params.use_corps) {
+						this.corps.fieldLabel = params.corps_label;
+						row_items.push({
+								xtype: 'label'
+								,style: {padding:'3px'}
+								,text: params.corps_label+':'
+							}
+							, this.corps
+						);
+					}
 					if (params.level > 3) {
-						this.flat.fieldLabel = params.street_label;
+						this.flat.fieldLabel = params.flat_label;
 						row_items.push({
 								xtype: 'label'
 								,style: {padding:'3px'}
@@ -272,6 +304,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 						, items: this.house
                         , style: {overflow: 'hidden'}
 					}];
+					if (params.use_corps) {
+						row_items.push({
+							xtype: 'container'
+							, layout: 'form'
+							, items: this.corps
+							, style: {overflow: 'hidden'}
+						});
+					}
 					if (params.level > 3) {
 						row_items.push({
 							xtype: 'container'
@@ -324,6 +364,9 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			this.mon(this.street, 'change', this.onChangeStreet, this);
 			if (this.level > 2) {
 				this.mon(this.house, 'change', this.onChangeHouse, this);
+				if (this.use_corps) {
+					this.mon(this.corps, 'change', this.onChangeCorps, this);
+				}
 				this.mon(this.zipcode, 'change', this.onChangeZipcode, this);
 				if (this.level > 3) {
 					this.mon(this.flat, 'change', this.onChangeFlat, this);
@@ -367,6 +410,13 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
              * @param {House} Номер дома
              */
 			'change_house',
+            /**
+             * @event change_corps
+             * При изменении скорпуса
+             * @param {AddrField} this
+             * @param {Corps} Номер корпуса
+             */
+            'change_corps',
 			/**
              * @event change_flat
              * При изменении квартиры
@@ -402,6 +452,10 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		if (this.house != undefined) {
 			house_num = this.house.getValue();
 		}
+		var corps_num;
+		if (this.corps != undefined) {
+			corps_num = this.corps.getValue();
+		}
 		var flat_num;
 		if (this.flat != undefined) {
 			flat_num = this.flat.getValue();
@@ -421,7 +475,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			street = street_data.data;
 		}
 		
-		var new_addr = this.generateTextAddr(place, street, house_num, flat_num, zipcode);
+		var new_addr = this.generateTextAddr(place, street, house_num, corps_num, flat_num, zipcode);
 		if (this.addr != undefined) {
 			this.addr.setValue(new_addr);
 		}
@@ -439,7 +493,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		});
 		*/
     }
-	, generateTextAddr: function(place, street, house, flat, zipcode) {
+	, generateTextAddr: function(place, street, house, corps, flat, zipcode) {
 		/* Формирование текстового представления полного адреса */
 		
 		var addr_text = '';
@@ -456,6 +510,10 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
         if (house != '' && house != undefined) {
             addr_text = addr_text+', '+'д. '+house;
         }
+        // обработаем и поставим дом с квартирой
+		if (corps != '' && corps != undefined) {
+			addr_text = addr_text+', '+'корп. '+corps;
+		}
         if (flat != '' && flat != undefined) {
             addr_text = addr_text+', '+'к. '+flat;
         }
@@ -501,6 +559,12 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	}
 	, onChangeHouse: function(){
 		this.fireEvent('change_house', this, this.house.getValue());
+		if (this.addr_visible) {
+			this.getNewAddr();
+		}
+	}
+	, onChangeCorps: function(){
+		this.fireEvent('change_corps', this, this.corps.getValue());
 		if (this.addr_visible) {
 			this.getNewAddr();
 		}
