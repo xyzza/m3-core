@@ -338,6 +338,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			items: items
 			, get_addr_url: params.get_addr_url
 			, level: params.level
+			, use_corps: params.use_corps
 			, addr_visible: params.addr_visible
 			, style: {overflow: 'hidden'}
 		}, baseConfig);
