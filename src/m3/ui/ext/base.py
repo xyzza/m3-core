@@ -237,7 +237,7 @@ class BaseExtComponent(object):
         '''
         conf_dict = {}
         res = None
-        if item == None or not condition:
+        if item is None or not condition:
             return
         elif callable(item):
             res = self.__check_unicode( item() )
@@ -272,7 +272,7 @@ class BaseExtComponent(object):
             raise ExtComponentException(u'Тип переданного параметра не '
                 u'поддерживается: "%s":"%s"' % (extjs_name, item))
         
-        if res:
+        if res is not None:
             conf_dict[extjs_name] = res
             if depth == 0:
                 src_list.append(conf_dict)
