@@ -5,10 +5,10 @@ from xml.dom.minidom import Element
 from django.test.client import RequestFactory
 from django.utils import unittest
 
-from m3.contrib.ssacc_client.exceptions import SSACCException
-from m3.contrib.ssacc_client.requests_to_server import server_ssacc_ping, server_ssacc_profile_rates
-from m3.contrib.ssacc_client.results import BaseResult, ProfileRatesResult, AvailabilityResult
-from m3.contrib.ssacc_client.views import (ssacc_ping, ssacc_profile_meta,
+from m3_ssacc_client.exceptions import SSACCException
+from m3_ssacc_client.requests_to_server import server_ssacc_ping, server_ssacc_profile_rates
+from m3_ssacc_client.results import BaseResult, ProfileRatesResult, AvailabilityResult
+from m3_ssacc_client.views import (ssacc_ping, ssacc_profile_meta,
     ssacc_operator_meta, ssacc_license_meta, ssacc_operator_exists, ssacc_profile_new, ssacc_profile_edit, ssacc_operator_edit, ssacc_operator_new, ssacc_operator_delete, ssacc_profile_delete)
 
 __author__ = 'daniil-ganiev'

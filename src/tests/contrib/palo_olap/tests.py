@@ -7,8 +7,9 @@ Created on 04.01.2011
 import random
 
 from django.test import TestCase
-from m3.contrib.palo_olap.server import PaloServer
-from m3.contrib.palo_olap.dimension import ELEMENT_TYPE_CONSOLIDATED, ELEMENT_TYPE_STRING, ELEMENT_TYPE_NUMERIC
+
+from palo_olap.server import PaloServer
+from palo_olap.dimension import ELEMENT_TYPE_CONSOLIDATED, ELEMENT_TYPE_STRING, ELEMENT_TYPE_NUMERIC
 
 DB_NAME = 'olap_test'
 YEAR_DIM = u'Года'
