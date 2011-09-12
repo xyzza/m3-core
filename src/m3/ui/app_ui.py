@@ -11,16 +11,17 @@ import threading
 import copy
 from uuid import uuid4
 
+from m3_users import GENERIC_USER, SUPER_ADMIN
+from m3_users.helpers import get_assigned_metaroles_query
+from m3_users.metaroles import UserMetarole, get_metarole
+
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.contrib.auth.models import User, AnonymousUser
 
 from m3.helpers.datastructures import TypedList
 from m3.helpers import logger
-from m3.contrib.m3_users import GENERIC_USER, SUPER_ADMIN
 
-from m3.contrib.m3_users.helpers import get_assigned_metaroles_query
-from m3.contrib.m3_users.metaroles import UserMetarole, get_metarole
 from m3.ui.actions.packs import BaseDictionaryActions
 from m3.ui.actions import ControllerCache, Action
 from m3.ui.actions.tree_packs import BaseTreeDictionaryActions
