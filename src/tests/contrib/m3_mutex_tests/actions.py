@@ -4,9 +4,9 @@ Created on 22.07.2011
 
 @author: akvarats
 '''
+import m3_mutex
 
 from m3.ui import actions
-from m3.contrib import m3_mutex
 from m3.core.middleware import get_thread_data
 
 class MutexActionPack(actions.ActionPack):

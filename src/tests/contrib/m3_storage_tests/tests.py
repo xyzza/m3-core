@@ -9,18 +9,18 @@ from django.test import TestCase
 from django.db import connections
 
 
-from m3.contrib.m3_storage.models import (StorageConfigurationModel,
+from m3_storage.models import (StorageConfigurationModel,
                                           StorageTableModel,
                                           TableFieldModel,
                                           TableRelationModel,
                                           FieldTypeEnum,
                                           RelationTypeEnum,)
 
-from m3.contrib.m3_storage.api import activate_configuration
+from m3_storage.api import activate_configuration
 
 class StorageTests(TestCase):
     '''
-    Тесты для подсистемы m3.contrib.m3_storage
+    Тесты для подсистемы m3_storage
     '''
     
     def test_configuration_1(self):

@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from m3.core.middleware import ThreadData
 from m3.helpers import urls
 
-from m3.contrib.m3_mutex.helpers import get_default_owner
+from m3_mutex.helpers import get_default_owner
 
 
 class InfrastractureTests(TestCase):

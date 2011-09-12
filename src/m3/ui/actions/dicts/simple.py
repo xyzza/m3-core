@@ -17,7 +17,7 @@ from m3.ui.actions.results import ActionResult
 from m3.db import BaseObjectModel, safe_delete
 from m3.core.exceptions import RelatedError
 
-from m3.contrib.m3_audit import AuditManager
+from m3_audit import AuditManager
 from m3.ui.actions.interfaces import IMultiSelectablePack
 
 class DictListWindowAction(Action):
@@ -257,7 +257,7 @@ class DictSaveAction(Action):
             # узкое место. после того, как мы переделаем работу экшенов,
             # имя параметра с идентификатором запси может уже называться не 
             # id
-            if 'm3.contrib.m3_audit' in settings.INSTALLED_APPS:
+            if 'm3_audit' in settings.INSTALLED_APPS:
                 AuditManager().write('dict-changes', user=request.user, model_object=obj, type='new' if not id else 'edit')
             context.id = obj.id
         return result
@@ -273,7 +273,7 @@ class ListDeleteRowAction(Action):
         result = self.parent.delete_row(objs)
         if (isinstance(result, OperationResult) and 
             result.success == True and 
-            'm3.contrib.m3_audit' in settings.INSTALLED_APPS):
+                'm3_audit' in settings.INSTALLED_APPS):
             for obj in objs:
                 AuditManager().write('dict-changes', user=request.user, model_object=obj, type='delete')
         return result

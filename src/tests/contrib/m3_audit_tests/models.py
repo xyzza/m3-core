@@ -5,7 +5,7 @@ Created on 22.12.2010
 @author: akvarats
 '''
 
-from m3.contrib.m3_audit import BaseAuditModel, AuditManager
+from m3_audit import BaseAuditModel, AuditManager
 
 
 class MyAuditModel(BaseAuditModel):
