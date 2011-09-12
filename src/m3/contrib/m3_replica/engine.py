@@ -147,6 +147,7 @@ class BaseDataExchange(object):
                 result = self.target.write(objects)
                 self.post_write(source_row, result or objects)
         finally:
+            self.post_process()
             self.source.close_session()
             self.target.close_session()
             self.objects_storage.drop()
@@ -190,6 +191,13 @@ class BaseDataExchange(object):
         будет приостановлена
         '''
         return None
+    
+    def post_process(self):
+        """
+        Метод пост-обработки данных, вызывается в самом конце обработки данных,
+        перед закрытием сессии источника данных
+        """
+        pass  
     
 #===============================================================================
 # Базовые классы для репликации 
@@ -314,7 +322,7 @@ class DjangoSQLDataSource(BaseDataSource):
     '''
     Описывает источник данных в виде 
     '''
-    def __init__(self, db_name, query):
+    def __init__(self, db_name, query, as_dict=False):
         '''
         Инициализирует состояние источника данных.
         
@@ -324,9 +332,11 @@ class DjangoSQLDataSource(BaseDataSource):
         
         self.db_name = db_name
         self.query = query
+        self.as_dict = as_dict
         
         self._cursor = None
         self._fetching = False
+        self._fields = []
         
     def open_session(self):
         '''
@@ -337,6 +347,7 @@ class DjangoSQLDataSource(BaseDataSource):
             self._cursor.close()
             
         self._cursor = connections[self.db_name].cursor()
+        self._fields = []
         
     def close_session(self):
         '''
@@ -355,11 +366,21 @@ class DjangoSQLDataSource(BaseDataSource):
         if not self._fetching:
             # выполняем запрос в базу данных
             self._cursor.execute(self.query)
-            
+            if self.as_dict:
+                self._fields = map(lambda x: x[0], self._cursor.description)
+            self._fetching = True
+
         for row in self._cursor:
-            yield row
-        
-        
+            if self.as_dict:
+                row_dict, i = {}, 0
+                for field in self._fields:
+                    row_dict[field] = row[i]
+                    i += 1
+                yield row_dict
+            else:
+                yield row
+
+
 #===============================================================================
 # Описание приемников данных 
 #===============================================================================
