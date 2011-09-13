@@ -26,7 +26,7 @@ def start(project_path, as_repos=False):
     has_error= False
         
     env_root = os.path.join(project_path, 'env')
-    envbuild_root = os.path.join(env_root, '.build')
+    envbuild_root = os.environ.get('ENV_BUILD_ROOT', os.path.join(env_root, '.build'))
     
     # достаем версию и зависимости основного продукта
     module = import_module('version')
