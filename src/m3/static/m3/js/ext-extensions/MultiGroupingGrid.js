@@ -353,15 +353,17 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 				var col = this.grid.colModel.getColumnAt(colInd);
 				if (this.grouppingColumn.id == col.id) {
 					var row = this.grid.store.getAt(rowInd);
-					// если это кнопки группировки, то переключим их
-					if (row._expanded) {
-						obj.removeClass('x-tree-elbow-minus');
-				        obj.addClass('x-tree-elbow-plus');
-				        this.collapseItem(rowInd);
-					} else {
-						obj.removeClass('x-tree-elbow-plus');
-				        obj.addClass('x-tree-elbow-minus');
-				        this.expandItem(rowInd);
+					if (!row.json.is_leaf) {
+						// если это кнопки группировки, то переключим их
+						if (row._expanded) {
+							obj.removeClass('x-tree-elbow-minus');
+					        obj.addClass('x-tree-elbow-plus');
+					        this.collapseItem(rowInd);
+						} else {
+							obj.removeClass('x-tree-elbow-plus');
+					        obj.addClass('x-tree-elbow-minus');
+					        this.expandItem(rowInd);
+						}
 					}
 				}
 			}
