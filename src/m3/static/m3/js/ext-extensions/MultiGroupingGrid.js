@@ -487,6 +487,9 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	 * Получение текста группировки
 	 */
 	getGroupText: function(record){
+        if (!record) {
+            return null
+        }
 		var res = '';
 		if (!record.json.is_leaf) {
 			var v = record.json[this.dataDisplayField];
