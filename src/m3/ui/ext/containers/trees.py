@@ -105,7 +105,7 @@ class ExtTree(BaseExtPanel):
     def t_render_root(self):
         return '''new Ext.tree.AsyncTreeNode({id: '-1', expanded: true, allowDrag: false %s %s})''' \
             % ((',text:"%s"' % self.root_text) if self.root_text else ''\
-               , (',children:[%s]' % self.t_render_children()) if self.nodes else '')
+               , (',children:[%s]' % self.nodes[0].render()) if self.nodes else '')
     
     def t_render_columns(self):
         return self.t_render_items()
