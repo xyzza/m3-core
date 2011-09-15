@@ -126,7 +126,7 @@ class GroupingRecordProvider(object):
         if isinstance(obj, dict):
             pass
         else:
-            if hasattr(obj, 'call') and callable(obj.calc):
+            if hasattr(obj, 'calc') and callable(obj.calc):
                 obj.calc()
     
     def load(self, destination, source):
