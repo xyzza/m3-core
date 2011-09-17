@@ -7159,17 +7159,35 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
                 t.dom.style.display = 'none';
                 this['hidden' + triggerIndex] = true;
             }
-            if (!this.disabled) { 
-                this.mon(t, 'click', this.allTriggers[index].handler, this, {preventDefault:true});
-                t.addClassOnOver('x-form-trigger-over');
-                t.addClassOnClick('x-form-trigger-click');
-            } else {
-                this.mun(t, 'click', this.allTriggers[index].handler, this, {preventDefault:true});
-            }
         }, this);
+
+        this.disableTriggers(this.disabled);
 		
         this.triggers = ts.elements;
     }
+
+    /**
+     * Устанавливает или снимает с кнопок обработчики,
+     * в зависимости от того, доступно ли поле.
+     */
+    ,disableTriggers: function(disabled){
+        var ts = this.trigger.select('.x-form-trigger', true);
+        ts.each(function(t, all, index){
+            var handler = this.allTriggers[index].handler;
+            if (!disabled) {
+                // Чтобы не добавлять событие несколько раз, нужно проверить есть ли оно уже
+                var events = Ext.elCache[t.id].events;
+                if (!events['click'] || events.click.length == 0){
+                    t.on('click', handler, this, {preventDefault:true});
+                    t.addClassOnOver('x-form-trigger-over');
+                    t.addClassOnClick('x-form-trigger-click');
+                }
+            } else {
+                t.un('click', handler, this, {preventDefault:true});
+            }
+        }, this);
+    }
+
 	/**
 	 * Инициализация первоначальной настройки триггеров 
 	 */
@@ -7426,7 +7444,15 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             this.setRawValue('');            
         }
         this.validate();
-	}
+	},
+
+    /**
+     * При изменении доступности поля, нужно также поменять доступность всех его кнопок
+     */
+    setDisabled: function(disabled){
+        this.disableTriggers(disabled);
+        Ext.m3.AdvancedComboBox.superclass.setDisabled.call(this, disabled);
+    }
 });
 
 Ext.reg('m3-select', Ext.m3.AdvancedComboBox);
