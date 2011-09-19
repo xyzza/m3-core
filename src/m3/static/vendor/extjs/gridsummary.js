@@ -322,7 +322,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
 		if (allowHScroll){
     		this.view.scroller.dom.style.overflow = 'auto';
     	} else {
-    		this.view.scroller.dom.style['overflow-y'] = 'hidden';
+    		this.view.scroller.dom.style.overflowX = "hidden";
     	}
         this.view.scroller[allowHScroll === undefined ? 'toggleClass' : allowHScroll ? 'removeClass' : 'addClass']('x-grid3-gridsummary-hide-hscroll');
     },
