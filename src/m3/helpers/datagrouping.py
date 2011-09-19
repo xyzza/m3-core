@@ -800,9 +800,9 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                     elif agg_type == 'count':
                         aggr_rec[agg] = 1 + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                     elif agg_type == 'min':
-                        aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] > agg_value else aggr_rec[agg]
+                        aggr_rec[agg] = agg_value if aggr_rec.get(agg, 0) > agg_value else aggr_rec.get(agg, 0)
                     elif agg_type == 'max':
-                        aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] < agg_value else aggr_rec[agg]
+                        aggr_rec[agg] = agg_value if aggr_rec.get(agg, 0) < agg_value else aggr_rec.get(agg, 0)
                     elif agg_type == 'avg':
                         aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                 count += 1
@@ -873,9 +873,9 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             elif agg_type == 'count':
                                 aggr_rec[agg] = 1 + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                             elif agg_type == 'min':
-                                aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] > agg_value else aggr_rec[agg]
+                                aggr_rec[agg] = agg_value if aggr_rec.get(agg, 0) > agg_value else aggr_rec.get(agg, 0)
                             elif agg_type == 'max':
-                                aggr_rec[agg] = agg_value if aggr_rec.has_key(agg) and aggr_rec[agg] < agg_value else aggr_rec[agg]
+                                aggr_rec[agg] = agg_value if aggr_rec.get(agg, 0) < agg_value else aggr_rec.get(agg, 0)
                             elif agg_type == 'avg':
                                 aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                     else:
