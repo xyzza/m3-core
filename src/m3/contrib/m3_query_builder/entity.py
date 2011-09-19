@@ -649,6 +649,7 @@ class BaseEntity(object):
 
                 onclause = (left_column == right_column) # _BinaryExpression
                 join_sequence = join_sequence.join(right_column.table, onclause)
+                last_column = right_column
 
         join_sequence = None if join_sequence is None else [join_sequence]
         return join_sequence
