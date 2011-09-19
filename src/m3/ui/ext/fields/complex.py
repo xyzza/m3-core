@@ -506,7 +506,10 @@ class ExtMultiSelectField(ExtDictSelectField):
         if self._init_flag:
             self._init_flag = False
             return
-
+        
+        if not value:
+            value = []
+        
         if isinstance(value, basestring):
             value = json.loads(value)
 
