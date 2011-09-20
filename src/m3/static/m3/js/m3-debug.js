@@ -8378,7 +8378,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
                 }
                 
                 record = new Ext.data.Record();
-                record.data['id'] = val[this.valueField];
+                record.data[this.valueField] = val[this.valueField];
                 record.data[this.displayField] = val[this.displayField];
 
                 this.checkedItems.push(record);
@@ -8474,7 +8474,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
         for (; i< records.length;i++) {
             record = new Ext.data.Record();
-            record.data['id'] = records[i].data.id;
+            record.data[this.valueField] = records[i].data[this.valueField];
             record.data[this.displayField] = records[i].data[this.displayField];
             newRecords.push( record );
         }
