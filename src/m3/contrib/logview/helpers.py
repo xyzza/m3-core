@@ -64,19 +64,26 @@ def log_files_list(start_date_str = None, end_date_str = None, to_email = None):
     log_files = []
     today = datetime.date.today()
     path_to_logs = settings.LOG_PATH
+
     for file_item in os.listdir(path_to_logs):
         full_path = os.path.join(path_to_logs, file_item)
-        creation_date = file_creation_time(full_path)
-        if file_creation_time(full_path).date() != today\
-            and start_date_str and end_date_str:
-            start_date = datetime.datetime.strptime(start_date_str,'%Y-%m-%d')
-            end_date = datetime.datetime.strptime(end_date_str,'%Y-%m-%d')
-            if creation_date >= start_date and creation_date <= end_date:
-                if os.path.isfile(os.path.join(path_to_logs, file_item)):
+        
+        if os.path.isfile(full_path):
+            creation_date = file_creation_time(full_path)
+
+            # если указан интервал дат, за которые надо смотреть логи
+            if start_date_str and end_date_str:
+                start_date = datetime.datetime.strptime(start_date_str,'%Y-%m-%d')
+                end_date = datetime.datetime.strptime(end_date_str,'%Y-%m-%d')
+
+                if start_date <= creation_date <= end_date:
                     log_files.append(file_item)
-        elif file_creation_time(full_path).date() == today:
-            if os.path.isfile(os.path.join(path_to_logs, file_item)):
+
+            # если интервал не указан -- берем лишь сегодняшние + последние актуальные (с расширением .log)
+            elif file_creation_time(full_path).date() == today\
+                    or file_item.rsplit('.', 1)[-1] == 'log':
                 log_files.append(file_item)
+                        
     log_files = [[log_files.index(file_item), file_item] for file_item in log_files if file_item]
     return log_files
 
