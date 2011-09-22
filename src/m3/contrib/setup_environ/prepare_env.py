@@ -148,7 +148,7 @@ def start(project_path, as_repos=False):
     
 def clone_repo(app_name, app_repo_root):
     
-    out, err = run_command(['hg', 'clone', REPO_LOCATION + app_name, app_repo_root])
+    out, err = run_command(['hg', 'clone', '--insecure', REPO_LOCATION + app_name, app_repo_root])
     if err:
         print '  ', u'Клонирование репозитория', REPO_LOCATION + app_name, u'завершено с ошибкой:', err
         
