@@ -71,8 +71,13 @@ def shift_date(period, date, step = 1):
         return date
 
 class OverlapError(Exception):
-    r"""Исключение возникающее при наложении интервалов друг на друга."""
-    pass
+    """
+    Исключение возникающее при наложении интервалов друг на друга.
+    """
+    def __init__(self, cls=None):
+        self.model_cls = cls
+#    def __str__(self):
+#        return self.exception_message
 
 class InvalidIntervalError(Exception):
     '''
@@ -411,7 +416,7 @@ class BaseIntervalInfoModel(models.Model):
             if self.pk:
                 q = q.exclude(pk = self.pk)
             if q.count() > 0:
-                raise OverlapError()
+                raise OverlapError( self.__class__ )
         
         # если объект уже хранится, то найдем записи для изменения
         old_prev_rec = None
