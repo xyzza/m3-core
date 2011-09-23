@@ -4,8 +4,8 @@ Created on 12.04.2011
 
 @author: akvarats
 '''
+import calendar
 from datetime import datetime
-from calendar import calendar
 
 class PeriodEnum:
     
