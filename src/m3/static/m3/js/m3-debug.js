@@ -9181,6 +9181,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		this.actionDataUrl = params.actions.dataUrl;
 		this.actionContextJson = params.actions.contextJson;
 		this.parentIdName = params.parentIdName;
+        this.incrementalUpdate = params.incrementalUpdate;
 		if (params.customLoad) {
 			var ajax = Ext.Ajax;
 			this.on('expandnode',function (node){
@@ -9299,7 +9300,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 	        params: this.getMainContext(),
             scope: this,
 	        success: function(res, opt){
-		   		return this.childWindowOpenHandler(res, opt);
+		   		return this.childWindowOpenHandler(res, opt, 'new');
 		    },
 	        failure: function(){
                 uiAjaxFailMessage.apply(this, arguments);
@@ -9334,7 +9335,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 	        method: "POST",
 	        params: baseConf,
 	        success: function(res, opt){
-		   		return this.childWindowOpenHandler(res, opt);
+		   		return this.childWindowOpenHandler(res, opt, 'newChild');
 		    },
 	        failure: function(){
                 uiAjaxFailMessage.apply(this, arguments);
@@ -9359,7 +9360,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		        method: 'POST',
 		        params: baseConf,
 		        success: function(res, opt){
-			   		return this.childWindowOpenHandler(res, opt);
+			   		return this.childWindowOpenHandler(res, opt, 'edit');
 			    },
 		        failure: function(){
                     uiAjaxFailMessage.apply(this, arguments);
@@ -9419,16 +9420,48 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
         }
     },
 
-	childWindowOpenHandler: function (response, opts){
-		
-	    var window = smart_eval(response.responseText);
-	    if(window){
-			var scope = this;
-	        window.on('closed_ok', function(){
-				return scope.refreshStore()
-			});
-	    }
-	}
+	childWindowOpenHandler: function (response, opts, operation){
+        
+        var window = smart_eval(response.responseText);
+        if(window){
+            var scope = this;
+            window.on('closed_ok', function(data){
+                if (scope.incrementalUpdate){
+                    // нам пришел узел дерева
+                    var obj = Ext.util.JSON.decode(data);
+                    switch (operation){
+                        case 'edit':
+                            var selectedNode = scope.getSelectionModel().getSelectedNode();
+                            var parentNode = selectedNode.parentNode
+                            parentNode.reload(function(){
+                                var newSelectNode = scope.getNodeById(obj.data.root.id);
+                                newSelectNode.select();
+                            })
+                        break;
+                        case 'new':
+                            var rootNode = scope.getRootNode()
+                            rootNode.reload(function(){
+                                var newSelectNode = scope.getNodeById(obj.data.root.id);
+                                newSelectNode.select();
+                                })
+                        break;
+                        case 'newChild':
+                            var parentNode = scope.getSelectionModel().getSelectedNode();
+                            parentNode.leaf = false
+                            parentNode.reload(function(){
+                                var newSelectNode = scope.getNodeById(obj.data.root.id)
+                                newSelectNode.select();
+                            })
+                        break;
+                    
+                    }                   
+                }
+                else {
+                    return scope.refreshStore()
+                }
+            });
+        }
+    }
 	,deleteOkHandler: function (response, opts){
 		smart_eval(response.responseText);
 		this.refreshStore();
