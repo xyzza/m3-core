@@ -483,6 +483,8 @@ class ExtPanel(BaseExtPanel):
         self.auto_load = None
         
         self.auto_scroll = True
+        # Позволять ли панели быть "плавающей" (см Ext.layout.BorderLayout.Region)
+        self.floatable = True
         
         self.init_component(*args, **kwargs)
     
@@ -500,7 +502,8 @@ class ExtPanel(BaseExtPanel):
         self._put_config_value('autoScroll', self.auto_scroll, self.auto_scroll)
         if self._items:
             self._put_config_value('items', self.t_render_items)
-
+        self._put_config_value('floatable', self.floatable, not self.floatable)
+        
     def render(self):
         self.pre_render() # Тут рендерится контекст
         self.render_base_config() # Тут конфиги
