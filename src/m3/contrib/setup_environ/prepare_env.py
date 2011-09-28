@@ -314,7 +314,7 @@ def is_protected_type(obj):
 if __name__ == '__main__':
     path_to_manage_py = os.path.abspath(__file__)        
     path_to_src = os.path.dirname( os.path.dirname( path_to_manage_py ) )      
-    start()
+    start(path_to_src)
 else:
     # здесь отрабатывается код, который происходит при импорте prepare_env
     # в manage.py
