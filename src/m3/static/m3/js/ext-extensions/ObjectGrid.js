@@ -71,7 +71,25 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 			 * @param res - результат запроса
 			 * @param opt - параметры запроса 
 			 */
-			'afterdeleterequest'
+			'afterdeleterequest',
+            /**
+             * Событие после успешного диалога добавления записи - встроенная обработка отменится при возврате false
+             * @param ObjectGrid this
+             * @param res - результат добавления (ответ сервера)
+             */
+            'rowadded',
+            /**
+             * Событие после успешного диалога редактирования записи - встроенная обработка отменится при возврате false
+             * @param ObjectGrid this
+             * @param res - результат редактирования  (ответ сервера)
+             */
+            'rowedited',
+            /**
+             * Событие после успешного диалога удаления записи - встроенная обработка отменится при возврате false
+             * @param ObjectGrid this
+             * @param res - результат удаления (ответ сервера)
+             */
+            'rowdeleted'
 			);
 		
 	}
@@ -234,18 +252,20 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	    if(window){
 			var scope = this;
 	        window.on('closed_ok', function(data){
-	        	// если локальное редактирование
-	        	if (scope.localEdit){
-	        		// то на самом деле нам пришла строка грида
-	        		var obj = Ext.util.JSON.decode(data);
-	        		var record = new Ext.data.Record(obj.data);
-	        		record.json = obj.data;
-	        		var store = scope.getStore();
-	        		// и надо ее добавить в стор
-	        		store.add(record);
-	        	} else {
-					return scope.refreshStore();
-				}
+                if (scope.fireEvent('rowadded', scope, data)) {
+                    // если локальное редактирование
+                    if (scope.localEdit){
+                        // то на самом деле нам пришла строка грида
+                        var obj = Ext.util.JSON.decode(data);
+                        var record = new Ext.data.Record(obj.data);
+                        record.json = obj.data;
+                        var store = scope.getStore();
+                        // и надо ее добавить в стор
+                        store.add(record);
+                    } else {
+                        return scope.refreshStore();
+                    }
+                }
 			});
 	    }
 	}
@@ -254,31 +274,33 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	    if(window){
 			var scope = this;
 	        window.on('closed_ok', function(data){
-	        	// если локальное редактирование
-	        	if (scope.localEdit){
-	        		// то на самом деле нам пришла строка грида
-	        		var obj = Ext.util.JSON.decode(data);
-	        		var record = new Ext.data.Record(obj.data);
-	        		record.json = obj.data;
-	        		var store = scope.getStore();
-	        		// и надо ее заменить в сторе
-	        		var sm = scope.getSelectionModel();
-	        		if (sm.hasSelection()) {
-						var baseConf = {};
-						// пока только для режима выделения строк
-						if (sm instanceof Ext.grid.RowSelectionModel) {
-							var rec = sm.getSelected();
-							var index = store.indexOf(rec);
-							store.remove(rec);
-							if (index < 0) {
-								index = 0;
-							}
-							store.insert(index, record);
-						}
-	        		}
-	        	} else {
-					return scope.refreshStore();
-				}
+                if (scope.fireEvent('rowedited', scope, data)) {
+                    // если локальное редактирование
+                    if (scope.localEdit){
+                        // то на самом деле нам пришла строка грида
+                        var obj = Ext.util.JSON.decode(data);
+                        var record = new Ext.data.Record(obj.data);
+                        record.json = obj.data;
+                        var store = scope.getStore();
+                        // и надо ее заменить в сторе
+                        var sm = scope.getSelectionModel();
+                        if (sm.hasSelection()) {
+                            var baseConf = {};
+                            // пока только для режима выделения строк
+                            if (sm instanceof Ext.grid.RowSelectionModel) {
+                                var rec = sm.getSelected();
+                                var index = store.indexOf(rec);
+                                store.remove(rec);
+                                if (index < 0) {
+                                    index = 0;
+                                }
+                                store.insert(index, record);
+                            }
+                        }
+                    } else {
+                        return scope.refreshStore();
+                    }
+                }
 			});
 	    }
 	}
@@ -288,22 +310,24 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	 * @param {Object} opts Доп. параметры
 	 */
 	,deleteOkHandler: function (response, opts){
-		// если локальное редактирование
-		if (this.localEdit){
-			var store = this.getStore();
-			// и надо ее заменить в сторе
-			var sm = this.getSelectionModel();
-			if (sm.hasSelection()) {
-				// только для режима выделения строк
-				if (sm instanceof Ext.grid.RowSelectionModel) {
-					var rec = sm.getSelected();
-					store.remove(rec);
-				}
-			}
-		} else {
-			smart_eval(response.responseText);
-			this.refreshStore();
-		}
+        if (this.fireEvent('rowdeleted', this, response)) {
+            // если локальное редактирование
+            if (this.localEdit){
+                var store = this.getStore();
+                // и надо ее заменить в сторе
+                var sm = this.getSelectionModel();
+                if (sm.hasSelection()) {
+                    // только для режима выделения строк
+                    if (sm instanceof Ext.grid.RowSelectionModel) {
+                        var rec = sm.getSelected();
+                        store.remove(rec);
+                    }
+                }
+            } else {
+                smart_eval(response.responseText);
+                this.refreshStore();
+            }
+        }
 	}
 	,refreshStore: function (){
 		if (this.allowPaging) {
