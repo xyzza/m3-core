@@ -455,10 +455,11 @@ class ExtDictionaryWindow(BaseExtWindow):
 
         # В режиме выбора даблклик работает на выбор
         if self.mode == self.SELECT_MODE:
-            if self.grid:
+            if self.grid or self.tree:
                 self.grid.handler_dblclick = 'selectValue'
-            if self.tree:
-                self.tree.handler_dblclick = 'selectValue'
+        if self.mode == self.MULTI_SELECT_MODE:
+            if self.grid or self.tree:
+                self.grid.handler_dblclick = 'multiSelectValues'
 
         return super(ExtDictionaryWindow, self).render()
 

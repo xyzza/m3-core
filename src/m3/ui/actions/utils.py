@@ -117,7 +117,7 @@ def apply_search_filter(query, filter, fields):
         query = query.filter(condition)
     return query
 
-def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id'):
+def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id', exclusion=[]):
     '''
     Функция извлекает объект из запроса по id, создает его экземпляр и биндит к форме
     @param request:     Запрос от клиента содержащий id объекта
@@ -140,10 +140,10 @@ def bind_object_from_request_to_form(request, obj_factory, form, request_id_name
     # Устанавливаем параметры формы
     win = form(create_new = create_new)
     # Биндим объект к форме
-    win.form.from_object(obj)
+    win.form.from_object(obj, exclusion)
     return win
 
-def bind_request_form_to_object(request, obj_factory, form, request_id_name = 'id'):
+def bind_request_form_to_object(request, obj_factory, form, request_id_name = 'id', exclusion=[]):
     '''
     Функция создает объект по id в запросе и заполняет его атрибуты из данных пришедшей формы
     @param request:     Запрос от клиента содержащий id объекта
@@ -151,14 +151,21 @@ def bind_request_form_to_object(request, obj_factory, form, request_id_name = 'i
     @param form:        Класс формы к которому привязывается объект
     @param request_id_name:   Имя параметра запроса соответствующего ID объекта
     '''
-    # Создаем форму для биндинга к ней
-    win = form()
-    win.form.bind_to_request(request)
-    
     # Получаем наш объект по id и биндим форму к нему
     id = extract_int(request, request_id_name)
     obj = obj_factory(id)
-    win.form.to_object(obj)
+    
+    # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
+    create_new = True
+    if isinstance(obj, dict) and obj.get('id') != None:
+        create_new = False
+    elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
+        create_new = False
+
+    # Создаем форму для биндинга к ней
+    win = form(create_new = create_new)
+    win.form.bind_to_request(request)
+    win.form.to_object(obj, exclusion)
     
     # Может возникнуть трудноуловимая ошибка, когда в request был id=0 и
     # он присвоился obj.id. В БД не должно быть pk=0
