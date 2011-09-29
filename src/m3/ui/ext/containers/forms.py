@@ -8,6 +8,7 @@ Created on 25.02.2010
 import datetime
 import decimal
 import os
+import json
 
 from PIL import Image # require PIL module 
 
@@ -358,9 +359,21 @@ class ExtForm(BaseExtPanel):
             иначе возвращает default '''
             if not value:
                 return default
-            
+
             try:
                 return int(value)
+            except ValueError:
+                return value
+
+        def try_to_list(value):
+            '''
+            Пробует преобразовать value в список
+            '''
+            if not value:
+                return []
+
+            try:
+                return json.loads(value)
             except ValueError:
                 return value
 
@@ -415,6 +428,9 @@ class ExtForm(BaseExtPanel):
                                 Must be a function or a dict.')
                 else:
                     val = try_to_int(val)
+
+            elif isinstance(item, ExtMultiSelectField):
+                val = try_to_list(val)
                     
             elif isinstance(item, ExtDictSelectField):
                 val = try_to_int(val)
@@ -425,7 +441,10 @@ class ExtForm(BaseExtPanel):
                 elif item.type == ExtHiddenField.STRING:
                     val = unicode(val)           
             return val
-        
+
+        # список m2m полей модели нужен, чтобы проверить возможность их сохранения
+        list_of_m2m = [x[0].name for x in object._meta.get_m2m_with_model()]
+
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
         all_fields = self._get_all_fields(self)
         for field in all_fields:
@@ -436,9 +455,15 @@ class ExtForm(BaseExtPanel):
             assert isinstance(field.name, str) and len(field.name) > 0, \
                   'The names of all fields must be set for a successful \
                       assignment. Check the definition of the form.'
+
             # заполним атрибуты только те, которые не в списке исключаемых
             if not field.name in exclusion:
-
+                # запрещаем пытаться сохранять many2many для объекта без pk
+                if object.pk is None and field.name in list_of_m2m:
+                    raise ValueError(' '.join(
+                        ["'%s' instance needs to have a primary" % object.__class__.__name__,
+                         "key value before a many-to-many relationship can be used."]))
+                
                 names = field.name.split('.')
                 set_field(object, names, convert_value(field), field)
      
