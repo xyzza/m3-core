@@ -443,7 +443,10 @@ class ExtForm(BaseExtPanel):
             return val
 
         # список m2m полей модели нужен, чтобы проверить возможность их сохранения
-        list_of_m2m = [x[0].name for x in object._meta.get_m2m_with_model()]
+        try:
+            list_of_m2m = [x[0].name for x in object._meta.get_m2m_with_model()]
+        except AttributeError:
+            list_of_m2m = []
 
         # Присваиваем атрибутам связываемого объекта соответствующие поля формы
         all_fields = self._get_all_fields(self)
@@ -459,10 +462,11 @@ class ExtForm(BaseExtPanel):
             # заполним атрибуты только те, которые не в списке исключаемых
             if not field.name in exclusion:
                 # запрещаем пытаться сохранять many2many для объекта без pk
-                if object.pk is None and field.name in list_of_m2m:
-                    raise ValueError(' '.join(
-                        ["'%s' instance needs to have a primary" % object.__class__.__name__,
-                         "key value before a many-to-many relationship can be used."]))
+                if hasattr(object, 'pk'):
+                    if object.pk is None and field.name in list_of_m2m:
+                        raise ValueError(' '.join(
+                            ["'%s' instance needs to have a primary" % object.__class__.__name__,
+                             "key value before a many-to-many relationship can be used."]))
                 
                 names = field.name.split('.')
                 set_field(object, names, convert_value(field), field)
