@@ -442,3 +442,14 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
     @handler_beforeedit.setter
     def handler_beforeedit(self, function):
         self._listeners['beforeeditrequest'] = function
+
+    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+        # Описание в базовом классе ExtUiComponent.
+        # Обрабатываем исключения.
+        access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
+        self.read_only = access_off
+        # Выключаем\включаем компоненты.
+        if hasattr(self._top_bar, 'items') and self._top_bar.items:
+            for item in self._top_bar.items:
+                if hasattr(item, 'make_read_only') and callable(item.make_read_only):
+                    item.make_read_only(access_off, exclude_list, *args, **kwargs)
