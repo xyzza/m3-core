@@ -85,9 +85,16 @@ class M3JSONEncoder(json.JSONEncoder):
             if (not attr.startswith('_') and attr not in manager_names and attr != 'tree'
                 and attr not in related_objs_attrs):
                 try:
-                    if hasattr(getattr(obj, attr), 'json_encode'):
-                        if getattr(obj, attr).json_encode:
-                            dict[attr] = getattr(obj, attr)()
+                    # если метод или свойство есть в классе, то проверим у него признак
+                    if hasattr(obj.__class__, attr) and hasattr(getattr(obj.__class__, attr), 'json_encode'):
+                        if getattr(obj.__class__, attr).json_encode:
+                            value = getattr(obj, attr)
+                            if callable(value):
+                                # если это метод, то вызовем его
+                                dict[attr] = value()
+                            else:
+                                # иначе это было свойство или какой-то атрибут
+                                dict[attr] = value
                 except Exception, exc:
                     # Вторая проблема с моделями в том, что dir кроме фактических полей возвращает ассессоры.
                     # При попытке обратиться к ним происходит запрос(!) и может возникнуть ошибка DoesNotExist
@@ -130,3 +137,9 @@ def json_encode(f):
     """ Декоратор, которым нужно отмечать сериализуемые в M3JSONEncoder методы """
     f.json_encode = True
     return f
+
+class property_json_encode(property):
+    """
+    Декоратор для свойств, которые нужно отмечать сериализуемые в M3JSONEncoder
+    """
+    json_encode = True
