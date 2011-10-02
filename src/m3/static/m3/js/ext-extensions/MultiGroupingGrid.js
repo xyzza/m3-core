@@ -824,7 +824,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
         
         // имя для сабмита в режиме клиентского редактирования
         this.name = params.name;
-		
+
 		// обработчики
 		if (params.actions) {
 			baseConfig.actionNewUrl = params.actions.newUrl;
@@ -1139,6 +1139,8 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
                         var store = scope.getStore();
                         // и надо ее добавить в стор
                         store.insert(0, record);
+                        var sm = scope.getSelectionModel();
+                        sm.selectRow(0);
                     } else {
                         return scope.refreshStore();
                     }
@@ -1173,6 +1175,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
                                         index = 0;
                                     }
                                     store.insert(index, record);
+                                    sm.selectRow(index);
                                 }
                             }
                         }
