@@ -262,6 +262,8 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
                         var store = scope.getStore();
                         // и надо ее добавить в стор
                         store.add(record);
+                        var sm = scope.getSelectionModel();
+                        sm.selectRecords([record]);
                     } else {
                         return scope.refreshStore();
                     }
@@ -295,6 +297,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
                                     index = 0;
                                 }
                                 store.insert(index, record);
+                                sm.selectRow(index);
                             }
                         }
                     } else {
