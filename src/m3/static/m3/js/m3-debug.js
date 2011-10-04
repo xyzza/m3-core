@@ -9461,14 +9461,14 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
                             var selectedNode = scope.getSelectionModel().getSelectedNode();
                             var parentNode = selectedNode.parentNode
                             parentNode.reload(function(){
-                                var newSelectNode = scope.getNodeById(obj.data.root.id);
+                                var newSelectNode = scope.getNodeById(obj.data.id);
                                 newSelectNode.select();
                             })
                         break;
                         case 'new':
                             var rootNode = scope.getRootNode()
                             rootNode.reload(function(){
-                                var newSelectNode = scope.getNodeById(obj.data.root.id);
+                                var newSelectNode = scope.getNodeById(obj.data.id);
                                 newSelectNode.select();
                              })
                         break;
@@ -9476,7 +9476,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
                             var parentNode = scope.getSelectionModel().getSelectedNode();
                             parentNode.leaf = false
                             parentNode.reload(function(){
-                                var newSelectNode = scope.getNodeById(obj.data.root.id)
+                                var newSelectNode = scope.getNodeById(obj.data.id)
                                 newSelectNode.select();
                             })
                         break;
