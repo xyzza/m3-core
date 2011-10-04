@@ -85,9 +85,11 @@ class M3JSONEncoder(json.JSONEncoder):
             if (not attr.startswith('_') and attr not in manager_names and attr != 'tree'
                 and attr not in related_objs_attrs):
                 try:
-                    # если метод или свойство есть в классе, то проверим у него признак
-                    if hasattr(obj.__class__, attr) and hasattr(getattr(obj.__class__, attr), 'json_encode'):
-                        if getattr(obj.__class__, attr).json_encode:
+                    # если метод или свойство есть в классе, то проверим у него признак 
+                    class_attr_value = getattr(obj.__class__, attr, None)
+                    if not class_attr_value is None:
+                        json_encode = getattr(class_attr_value, 'json_encode', False)
+                        if json_encode:
                             value = getattr(obj, attr)
                             if callable(value):
                                 # если это метод, то вызовем его
