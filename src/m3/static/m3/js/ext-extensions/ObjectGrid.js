@@ -428,6 +428,12 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 		this.actionDeleteUrl = params.actions.deleteUrl;
 		this.actionDataUrl = params.actions.dataUrl;
 		this.actionContextJson = params.actions.contextJson;
+
+        // признак клиентского редактирования
+      	this.localEdit = params.localEdit;
+
+        // имя для сабмита в режиме клиентского редактирования
+        this.name = params.name;
 		
 		Ext.m3.EditorObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
