@@ -192,6 +192,7 @@
         ,"cm":"cm"
         ,"enableDragDrop":"drag_drop"
         ,"ddGroup":"drag_drop_group"
+        ,"editor": "editor"
     }
     ,"parent": "panel"
 },

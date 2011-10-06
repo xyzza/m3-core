@@ -907,6 +907,9 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: 'auto',
                     isInitProperty: true,
                     isQuickEditable: false
+                },
+                editor: {
+                    defaultValue: false
                 }
             },
             childTypesRestrictions: {
