@@ -114,7 +114,7 @@ class ExtContextMenuItem(ExtUIComponent):
         if self.hidden:
             res.append('hidden: true')
         if self.item_id:
-            res.append('itemId: ' + self.item_id)
+            res.append('itemId: "%s"' %self.item_id)
         if self.menu:
             res.append('menu: ' + self.menu.render())
         if self.handler:
