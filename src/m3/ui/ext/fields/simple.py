@@ -225,6 +225,9 @@ class ExtTextArea(BaseExtField):
         # Фильтр допустимых символов по регекспу
         self.mask_re = None
         self.init_component(*args, **kwargs)
+        
+        # DOM-атрибуты
+        self.auto_create = {"tag": "textarea", "autocomplete": "off"}
     
     def t_render_mask_re(self):
         return '/%s/' % self.mask_re
