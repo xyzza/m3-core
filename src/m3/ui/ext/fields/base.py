@@ -59,6 +59,9 @@ class BaseExtField(ExtUIComponent):
         # Плагины к полям ввода
         self.plugins = []
 
+        # Дополнительные DOM-атрибуты
+        self.auto_create = {"tag": "input", "type": "text", "size": "20", "autocomplete": "off"}
+
     def t_render_label_style(self):
         if isinstance(self.label_style, dict):        
             return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
@@ -99,8 +102,6 @@ class BaseExtField(ExtUIComponent):
         self._listeners['change'] = function
 
     def render_base_config(self):
-        auto_create = {"tag": "input", "type": "text", "size": "20", "autocomplete": "off"}
-
         if self.read_only:
             grey_cls = 'm3-grey-field'
             self.cls = grey_cls  if not self.cls else self.cls + grey_cls
@@ -126,8 +127,8 @@ class BaseExtField(ExtUIComponent):
 
         # дополнительно вешаем DOM-атрибуты через Ext.Field.autoCreate
         if self.max_length:
-            auto_create.update({"maxlength": self.max_length})
-            self._put_config_value('autoCreate', auto_create)
+            self.auto_create.update({"maxlength": self.max_length})
+            self._put_config_value('autoCreate', self.auto_create)
 
 class BaseExtTriggerField(BaseExtField):
     '''
