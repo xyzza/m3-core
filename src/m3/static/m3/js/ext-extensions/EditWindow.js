@@ -77,6 +77,14 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			 *   @param {Object} submit - sumbit-запрос для отправки на сервер
 			*/
 			'beforesubmit'
+            /*
+             * Генерируется после сабмита формы, позволяет перекрыть, например, закрытие формы
+             * Параметры:
+             *   this - Сам компонент
+             *   @param {Object} form - то что проходит в success обработчик сабмита
+             *   @param {Object} action - то что проходит в success обработчик сабмита
+             */
+            ,'aftersubmit'
 			/**
 			 * Генерируется, если произошел запрос на закрытие окна
 			 * (через win.close()) при несохраненных изменениях, а пользователь
@@ -196,26 +204,29 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
         		delete params[name];
         	}
         });
-		
-		var submit = {
-            url: this.formUrl
-           ,submitEmptyText: false
-           ,params: params
-           ,success: function(form, action){
-              scope.fireEvent('closed_ok', action.response.responseText);
-              scope.close(true);
-              try { 
-                  smart_eval(action.response.responseText);
-              } finally { 
-                  mask.hide();
-                  scope.disableToolbars(false);
-              }
-           }
-           ,failure: function (form, action){
-              uiAjaxFailMessage.apply(scope, arguments);
-              mask.hide();
-              scope.disableToolbars(false);
-           }
+
+        var submit = {
+            url: this.formUrl,
+            submitEmptyText: false,
+            params: params,
+            scope: this,
+            success: function(form, action) {
+                try {
+                    if (this.fireEvent('aftersubmit', this, form, action)) {
+                        this.fireEvent('closed_ok', action.response.responseText);
+                        this.close(true);
+                        smart_eval(action.response.responseText);
+                    }
+                } finally {
+                    mask.hide();
+                    this.disableToolbars(false);
+                }
+            },
+            failure: function(form, action) {
+                uiAjaxFailMessage.apply(this, arguments);
+                mask.hide();
+                this.disableToolbars(false);
+            }
         };
         
         if (scope.fireEvent('beforesubmit', submit)) {
