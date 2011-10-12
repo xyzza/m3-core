@@ -1,4 +1,4 @@
-#coding:utf-8
+#encoding:utf-8
 
 import os
 import sys
@@ -6,9 +6,9 @@ import datetime
 import decimal
 from uuid import uuid4
 import tempfile
+import re
 
 from django.conf import settings
-from django.utils import importlib
 
 from m3.helpers import logger, date2str
 
@@ -55,15 +55,9 @@ if can_use_uno:
     from com.sun.star.task import ErrorCodeIOException
 #else:
     #FIXME: убрал, чтобы хоть как-то работать!  raise Exception(u'Unable to find OpenOffice (LibreOffice) in PATH variable') 
-
-
-def __get_template_path():
-    ''' Ищем корневую папку проекта '''
-    mod = importlib.import_module(settings.SETTINGS_MODULE)
-    settings_abs_path = os.path.dirname(mod.__file__)
-    return settings_abs_path
     
-DEFAULT_REPORT_TEMPLATE_PATH = __get_template_path()
+# FIXME:
+DEFAULT_REPORT_TEMPLATE_PATH = os.path.abspath(settings.PROJECT_ROOT) 
 
 IMAGE_REGEX = '<img .*>'
 
@@ -104,7 +98,7 @@ class OORunner(object):
         '''        
         localContext = uno.getComponentContext()
         resolver = localContext.ServiceManager.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", localContext)
-    
+
         # Пытаемся соединиться с сервером
         try:
             OORunner.CONTEXT = resolver.resolve("uno:socket,host=%s,port=%d;urp;StarOffice.ComponentContext" % (OORunner.HOST, OORunner.PORT))
@@ -145,16 +139,18 @@ class OOParser(object):
         document.replaceAll(replace_descriptor)
     
     def find_regex_cells(self, document, regex):
-        '''
+        u'''
         Находит все строки, соответствующие регулярному выражению(задается строкой,
         по правилам опенофиса). 
         Возвращает список ячеек таблицы, в которых было найдено совпадение.
         '''
-        result = []
+        
         search_descriptor = document.createSearchDescriptor()
         search_descriptor.SearchRegularExpression = True
         search_descriptor.SearchString = regex
         found = document.findFirst(search_descriptor)
+        
+        result = []
         while found:
             result.append(found)
             found.String = ''
@@ -249,21 +245,68 @@ class Section(object):
     '''
     
     def __init__(self, name, report_object, left_cell_addr=None, right_cell_addr=None):
+        
         #Название секции
         self.name = name
+        
         #Верхняя левая ячейка - объект com.sun.star.table.CellAddress
         self.left_cell_addr = left_cell_addr
+        
         #Нижняя правая ячейка - объект com.sun.star.table.CellAddress
         self.right_cell_addr = right_cell_addr
+        
         #Объект отчета, в контексте которого будет выводиться секция
         self.report_object = report_object
+        
         #Список вставленных в секцию изображений
         self.images = []
+        
         #Список разрывов страницы по строке
         self.row_page_breaks = []
+        
         #Список разрывов страницы по столбцу
         self.column_page_breaks = []
+    
+    def get_range(self):
+        u"""
+        Возвращает рабочую область секции
+        """
+        return self.report_object.template_sheet.getCellRangeByPosition(
+                                                self.left_cell_addr.Column, 
+                                                self.left_cell_addr.Row, 
+                                                self.right_cell_addr.Column, 
+                                                self.right_cell_addr.Row)
+    
+    def find(self, regexp):
+        u"""
+        Осуществляет поиск по регулярному выражению внутри секции
+        Возвращает объект интерфейса XIndexAccess, который можно перебрать, например:
         
+        items = Section(...).find(regexp)
+        for i in xrange(items.Count):
+            print items.getByIndex(i)
+        
+        """
+        section_range = self.get_range()        
+        search_descriptor = section_range.createSearchDescriptor()
+        search_descriptor.SearchRegularExpression = True
+        search_descriptor.SearchString = regexp
+        return section_range.findAll(search_descriptor)
+    
+    def get_all_parameters(self):
+        u"""
+        Возвращает список параметров, которые используются внутри секции        
+        """
+        index_object = self.find(VARIABLE_REGEX)        
+        if not index_object is None:
+            # Производится поиск по всем выражениям по условию '#\w+#' - так определяются параметры
+            res = []
+            for i in xrange(index_object.Count):
+                res.extend( re.findall('#\w+#', index_object.getByIndex(i).getString() ) )                
+            return res            
+        else:
+            return []
+    
     def add_new_cell(self, cell):
         '''
         Добавляет новую ячейку. Если одна из ячеек не определена, добавляет 
@@ -331,7 +374,7 @@ class Section(object):
         '''        
         return self.left_cell_addr and self.right_cell_addr
         
-    def copy (self, src_sheet, dest_cell):
+    def copy(self, src_sheet, dest_cell):
         '''
         Копирует секцию в документе из листа src_sheet начиная с ячейки cell
         Ячейку можно получить из листа так: cell = sheet.getCellByPosition(2,5) 
@@ -371,12 +414,14 @@ class Section(object):
             лист-шаблон отсутствует. Возможно, отчет уже был отображен."    
         self.copy(src_sheet, dest_cell)
         section_range = dest_sheet.getCellRangeByPosition(x,y,x+section_width-1,y+section_height-1)
+        
         parser = OOParser()
         for key, value in params.items():
             if not isinstance(key, basestring):
                 raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым: %s" % key
             value = parser.convert_value(value)
             parser.find_and_replace(section_range, u'#%s#' %key, value)      
+        
         #Если не все переменные в шаблоне были заменены, стираем оставшиеся
         parser.find_and_replace(section_range, VARIABLE_REGEX, '')
         #Задаем размеры строк и столбцов
@@ -603,7 +648,7 @@ class SpreadsheetReport(object):
     открывается файл шаблона, заданный в переменной template_name и из шаблона 
     извлекается информация о заданных секциях. 
     '''       
-    def __init__(self, template_name):
+    def __init__(self, template_name, use_temp_file=True):
         
         #Задаем начальное состояние конечного автомата, описывающего порядок
         #размещения секций.
@@ -634,8 +679,11 @@ class SpreadsheetReport(object):
         self.optimal_height_rows = []
         
         self.desktop = OORunner.get_desktop()    
-             
-        self.document = self.get_template_document(template_name)
+            
+        if use_temp_file:
+            self.document = self.get_template_document(template_name)
+        else:
+            self.document = create_document(self.desktop, template_name)
         
         #Ячейка, с которой начинается неделимый блок 
         self.solid_block_begin = None
@@ -699,7 +747,7 @@ class SpreadsheetReport(object):
         self.clean_temporary_file()        
         
     def find_section_position(self, vertical):
-        '''
+        u'''
         Возвращает координаты позиции в листе, с которой должна выводиться секция. 
         '''
         # Определяем новые координаты на основе текущего состояния автомата
@@ -820,7 +868,7 @@ class SpreadsheetReport(object):
                    
             #Если блок не помещается на странице, ставим разрыв в начале блока
             if (self.print_area_height-prefix_rows_height) <= (block_height):
-                 self.solid_block_begin.IsStartOfNewPage = True
+                self.solid_block_begin.IsStartOfNewPage = True
         else:
             raise ReportGeneratorException, u"Невозможно закрыть неделимый блок до того, как он был открыт"
                        
