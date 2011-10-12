@@ -9702,7 +9702,12 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
              * @param {Ext.ux.form.FileUploadField} this
              * @param {String} value The file value returned by the underlying file input field
              */
-            'fileselected'
+            'fileselected',
+            
+            /**
+             * Отрабатывает, когда изменилось значение
+             */
+            'change'
         );
     }
 
@@ -9811,6 +9816,8 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
                  var v = this.fileInput.dom.value;
                  this.setValue(v);
                  this.fireEvent('fileselected', this, v);
+                 this.fireEvent('change', this, v);
+                 
 
                  if (v) {
                     // Очищаем ссылку на файл
@@ -9924,6 +9931,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
     ,clickClearField: function(){
         this.reset();
         this.setValue('');
+        this.fireEvent('change', this, '');
         var width = this.el.getWidth() + this.buttonClear.getWidth();
         if (this.getHelperBtn()){
             width += (this.getHelperBtn().isVisible() ? this.getHelperBtn().getWidth() : 0);
