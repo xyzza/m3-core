@@ -145,9 +145,13 @@ class ExtPivotGrid(BaseExtPanel):
 
 #===============================================================================
 class ExtGrid(BaseExtPanel):
-    '''
+    """
     Таблица (Grid)
-    '''
+    Внимание! Грид реализует двуличное поведение в зависимости от атрибута editor.
+    Порождающая его функция createGridPanel может вернуть экземпляр
+    Ext.m3.GridPanel (False) или Ext.m3.EditorGridPanel (True), поэтому некоторые
+    атрибуты могут действовать в одном, но не действовать в другом гриде.
+    """
     
     # TODO: Реализовать человеческий MVC грид
     
@@ -161,7 +165,9 @@ class ExtGrid(BaseExtPanel):
         
         # Объект маскирования, который будет отображаться при загрузке
         self.load_mask = False
-        
+
+        # Сколько раз нужно щелкнуть для редактирования ячейки. Только для EditorGridPanel
+        self.clicks_to_edit = 2
         
         self.drag_drop = False
         self.drag_drop_group = None
@@ -438,6 +444,8 @@ class ExtGrid(BaseExtPanel):
         self._put_config_value('columnLines', self.column_lines, self.column_lines)
         if self.label:
             self._put_config_value('fieldLabel', self.label)
+        if self.editor:
+            self._put_config_value('clicksToEdit', self.clicks_to_edit, self.clicks_to_edit != 2)
 
     def render_params(self):
         super(ExtGrid, self).render_params()
