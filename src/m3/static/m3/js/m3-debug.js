@@ -7241,7 +7241,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			if (this.isExpanded()) {
 				this.collapse();
 			} else {
-				this.getStore().load();
 				this.onFocus({});
 				this.doQuery(this.allQuery, true);
 			}
