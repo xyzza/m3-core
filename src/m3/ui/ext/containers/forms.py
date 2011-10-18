@@ -621,11 +621,14 @@ class ExtFieldSet(ExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         self.checkboxToggle = False
+        # имя чекбокса, используется в случае checkboxToggle = True
+        self.checkboxName = ''
         super(ExtFieldSet, self).__init__(*args, **kwargs)
 
     def render_base_config(self):
         super(ExtFieldSet, self).render_base_config()
         self._put_config_value('checkboxToggle', self.checkboxToggle)
+        self._put_config_value('checkboxName', self.checkboxName)
 
     def render(self):
         self.pre_render() # Тут рендерится контекст
