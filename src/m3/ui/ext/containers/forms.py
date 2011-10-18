@@ -603,6 +603,11 @@ class ExtTabPanel(BaseExtPanel):
     '''
     Класс, отвечающий за работу TabPanel
     '''
+    
+    # Возможности размещения табов
+    TOP = 'top'
+    BOTTOM = 'bottom'
+    
     def __init__(self, *args, **kwargs):
         super(ExtTabPanel, self).__init__(*args, **kwargs)
         self.template = 'ext-panels/ext-tab-panel.js' #TODO: Отрефакторить под внутриклассовый рендеринг
@@ -626,7 +631,12 @@ class ExtTabPanel(BaseExtPanel):
         # либо она подчиняется layout родителя
         self.auto_width = True
         
-        self._items = TypedList(type=ExtPanel)
+        # Табы
+        self._items = TypedList(type=(ExtPanel, ExtTabPanel))
+        
+        # Позиция отображения табов: возможные варианты TOP и BOTTOM
+        self.tab_postion = self.TOP
+        
         self.init_component(*args, **kwargs)
 
     def add_tab(self, **kwargs):
