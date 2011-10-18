@@ -635,7 +635,7 @@ class ExtTabPanel(BaseExtPanel):
         self._items = TypedList(type=(ExtPanel, ExtTabPanel))
         
         # Позиция отображения табов: возможные варианты TOP и BOTTOM
-        self.tab_postion = self.TOP
+        self.tab_position = self.TOP
         
         self.init_component(*args, **kwargs)
 
