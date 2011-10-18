@@ -620,15 +620,15 @@ class ExtFieldSet(ExtPanel):
     Объеденяет внутренние элементы и создает рамку для остальных контролов
     '''
     def __init__(self, *args, **kwargs):
-        self.checkboxToggle = False
+        self.checkbox_toggle = False
         # имя чекбокса, используется в случае checkboxToggle = True
-        self.checkboxName = ''
+        self.checkbox_name = None
         super(ExtFieldSet, self).__init__(*args, **kwargs)
 
     def render_base_config(self):
         super(ExtFieldSet, self).render_base_config()
-        self._put_config_value('checkboxToggle', self.checkboxToggle)
-        self._put_config_value('checkboxName', self.checkboxName)
+        self._put_config_value('checkboxToggle', self.checkbox_toggle)
+        self._put_config_value('checkboxName', self.checkbox_name)
 
     def render(self):
         self.pre_render() # Тут рендерится контекст
@@ -636,3 +636,17 @@ class ExtFieldSet(ExtPanel):
         self.render_params() # Пусто
         base_config = self._get_config_str()
         return 'new Ext.form.FieldSet({%s})' % base_config
+
+    @property
+    def checkboxToggle(self):
+        """
+        deprecated
+        """
+        return self.checkbox_toggle
+
+    @checkboxToggle.setter
+    def checkboxToggle(self, value):
+        """
+        deprecated
+        """
+        self.checkbox_toggle = value
