@@ -41651,95 +41651,42 @@ Ext.form.DisplayField = Ext.extend(Ext.form.Field,  {
 Ext.reg('displayfield', Ext.form.DisplayField);
 
 Ext.form.ComboBox = Ext.extend(Ext.form.TriggerField, {
-    
-    
-    
-    
-    
-
-    
-    defaultAutoCreate : {tag: "input", type: "text", size: "24", autocomplete: "off"},
-    
-    
-    
-    
-    
-    
-    
+	defaultAutoCreate : {tag: "input", type: "text", size: "24", autocomplete: "off"},
     listClass : '',
-    
     selectedClass : 'x-combo-selected',
-    
     listEmptyText: '',
-    
     triggerClass : 'x-form-arrow-trigger',
-    
     shadow : 'sides',
-    
     listAlign : 'tl-bl?',
-    
     maxHeight : 300,
-    
     minHeight : 90,
-    
     triggerAction : 'query',
-    
     minChars : 4,
-    
     autoSelect : true,
-    
     typeAhead : false,
-    
     queryDelay : 500,
-    
     pageSize : 0,
-    
     selectOnFocus : false,
-    
     queryParam : 'query',
-    
     loadingText : 'Loading...',
-    
     resizable : false,
-    
     handleHeight : 8,
-    
     allQuery: '',
-    
     mode: 'remote',
-    
     minListWidth : 70,
-    
     forceSelection : false,
-    
     typeAheadDelay : 250,
-    
-
-    
     lazyInit : true,
-
-    
     clearFilterOnReset : true,
-
-    
     submitValue: undefined,
-
-    
-
     
     initComponent : function(){
         Ext.form.ComboBox.superclass.initComponent.call(this);
-        this.addEvents(
-            
-            'expand',
-            
-            'collapse',
-
-            
-            'beforeselect',
-            
-            'select',
-            
+        this.addEvents(            
+            'expand',            
+            'collapse',            
+            'beforeselect',            
+            'select',            
             'beforequery'
         );
         if(this.transform){
