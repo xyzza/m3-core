@@ -7134,10 +7134,10 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		this.baseTriggers[2].handler = this.onTriggerDictSelectClick;
 		this.baseTriggers[3].handler = this.onTriggerDictEditClick;
 		
-		this.baseTriggers[0].hide = this.hideTriggerClear;
-		this.baseTriggers[1].hide = this.hideTriggerDropDown;
-		this.baseTriggers[2].hide = this.hideTriggerDictSelect;
-		this.baseTriggers[3].hide = this.hideTriggerDictEdit;
+		this.baseTriggers[0].hide = this.hideTriggerClear || this.readOnly || this.disabled;
+		this.baseTriggers[1].hide = this.hideTriggerDropDown || this.readOnly || this.disabled;
+		this.baseTriggers[2].hide = this.hideTriggerDictSelect || this.readOnly || this.disabled;
+		this.baseTriggers[3].hide = this.hideTriggerDictEdit || this.readOnly || this.disabled;
 		
 		if (!this.getValue()) {
 			this.baseTriggers[0].hide = true;
