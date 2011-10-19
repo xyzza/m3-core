@@ -7089,6 +7089,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			this.addRecordToStore(this.defaultValue, this.defaultText);
 		}
 
+        this.validator = this.validateField;
+
 		// Инициализация базовой настройки триггеров
 		this.initBaseTrigger();
 		
@@ -7438,12 +7440,20 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		if(this.wrap){
             this.wrap.removeClass(this.wrapFocusClass);
         }
-        // Очистка значения, если в автоподборе ничего не выбрано
-        if (!this.getValue() && this.lastQuery) {
-            this.setRawValue('');            
+        // Очистка значения, если введено пустое значение
+        if (!this.getRawValue()) {
+            this.clearValue();
         }
         this.validate();
 	},
+
+    /**
+     * Проверка поля на корректность
+     */
+    validateField: function(value){
+        // поле неверно, если в него ввели текст, который не совпадает с выбранным текстом
+        return (this.getRawValue() == this.getText());
+    },
 
     /**
      * При изменении доступности поля, нужно также поменять доступность всех его кнопок
