@@ -987,9 +987,15 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		var mask = new Ext.LoadMask(this.body);
+        var baseConf = this.getMainContext();
+
+        // Если контекст замусорен и уже содержит чей-то id, то вместо создания элемента
+        // может открыться редактирование, поэтому удаляем его от греха подальше.
+        delete baseConf[this.rowIdName];
+        
 		var req = {
 			url: this.actionNewUrl,
-			params: this.getMainContext(),
+			params: baseConf,
 			success: function(res, opt){
 				if (scope.fireEvent('afternewrequest', scope, res, opt)) {
 				    try { 
@@ -1059,7 +1065,14 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 				mask.show();
 				Ext.Ajax.request(req);
 			}
-    	}
+    	} else {
+            Ext.Msg.show({
+                title: 'Редактирование',
+                msg: 'Элемент не выбран',
+                buttons: Ext.Msg.OK,
+                icon: Ext.MessageBox.INFO
+            });
+        }
 	}
 	/**
      * Нажатие на кнопку "Удалить"
