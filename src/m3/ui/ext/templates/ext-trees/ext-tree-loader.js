@@ -7,4 +7,13 @@ new Ext.tree.TreeLoader({
     		{% endfor %}
 	},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 	{% if component.url %},dataUrl: '{{ component.url|safe }}'{% endif %}
+	{% if component.t_render_listeners %}
+    {# Прописываются имеющиеся обработчики #}
+    ,listeners:{
+        {% for k, v in component.t_render_listeners.items %}
+            '{{k}}': {{v|safe}}
+            {% if not forloop.last %},{% endif %}
+        {% endfor%}
+    }
+    {% endif %}
 })
