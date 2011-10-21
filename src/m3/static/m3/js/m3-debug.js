@@ -7361,7 +7361,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             // иначе добавим
             store.add(record);
             // сделаем ее выбранной
-            this.setValue(key);
+            this.onSelect(record, index);
         } else {
             this.clearValue();
         }
