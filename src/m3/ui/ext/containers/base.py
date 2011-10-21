@@ -4,6 +4,7 @@ Created on 25.02.2010
 
 @author: prefer <telepenin@bars-open.ru>
 '''
+from m3.ui.actions.context import ActionContext
 
 from m3.ui.ext.base import ExtUIComponent
 from m3.helpers.datastructures import TypedList
@@ -88,7 +89,10 @@ class BaseExtContainer(ExtUIComponent):
         # выставляем action_context у дочерних элементов
         for item in self._items:
             if item:
-                item.action_context = self.action_context
+                # объединим личный и общий контексты. личный важнее!
+                # поэтому его накатим его первым
+                # если у объекта небыло контекста, то будет!
+                item.action_context = ActionContext().combine(getattr(item,'action_context',None)).combine(getattr(self,'action_context',None))
     
     def render_base_config(self):
         super(BaseExtContainer, self).render_base_config()
