@@ -215,3 +215,18 @@ class ActionContext(object):
             return result
 
         return json.dumps(self.__dict__, default=encoder_extender)
+
+    def combine(self, context):
+        """
+        Объединение контекстов друг с другом
+        Дополнение собственного контекста! Существующие значания не заменяются!
+        Выдается новый контекст!!!
+        Пример: ac = ActionContext(a=1, b=2).combine(ActionContext(c=3,a=2))
+                ac.json()
+                {"a": 1, "c": 3, "b": 2}
+        """
+        result = ActionContext()
+        if context:
+            result.__dict__.update(context.__dict__)
+        result.__dict__.update(self.__dict__)
+        return result

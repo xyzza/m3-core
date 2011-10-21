@@ -201,14 +201,15 @@ class BaseExtWindow(ExtUIComponent):
         children.extend(self.buttons)
         children.append(self.top_bar)
         children.append(self.footer_bar)
-        for child in children:
-            if child:
-                child.action_context = self.action_context
-                if child.action_context:
-                    child.action_context.m3_window_id = self.client_id
-                else:
-                    child.action_context = ActionContext()
-                    child.action_context.m3_window_id = self.client_id
+        # выставление контекста всем элементам окна
+        for item in children:
+            if item:
+                # объединим личный и общий контексты. личный важнее!
+                # поэтому его накатим его первым
+                # если у объекта небыло контекста, то будет!
+                item.action_context = ActionContext().combine(getattr(item,'action_context',None)).combine(getattr(self,'action_context',None))
+                # укажем кто у него окно-папа
+                item.action_context.m3_window_id = self.client_id
 
     def render_globals(self):
         if self.template_globals:
