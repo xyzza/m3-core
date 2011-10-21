@@ -7408,6 +7408,46 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		this.fireEvent('change', this, id, oldValue);
 		this.fireEvent('changed', this);
 	}
+    /**
+     * Установка значения как готовой записи
+     * @param {Ext.data.Record} record Запись-значение
+     */
+    ,setRecord: function(record){
+        if (record){
+            var store = this.getStore();
+            // узнаем ключ новой записи
+            var key = record.data[this.valueField];
+            // найдем похожую запись
+            var index = store.find(this.valueField, key);
+            // если нашли, то заменим запись
+            if (index >= 0) {
+                store.removeAt(index);
+            }
+            // иначе добавим
+            store.add(record);
+            // сделаем ее выбранной
+            this.setValue(key);
+        } else {
+            this.clearValue();
+        }
+    }
+    /**
+     * Получение значения как записи из store
+     * @return {Ext.data.Record} Запись-значение
+     */
+    ,getRecord: function(){
+        var store = this.getStore();
+        // узнаем ключ записи
+        var key = this.getValue();
+        // найдем запись
+        var index = store.find(this.valueField, key);
+        // если нашли, то вернем
+        if (index >= 0) {
+            return store.getAt(index);
+        }
+        // иначе вернем пусто
+        return null;
+    }
 	/**
 	 * Обработчик вызываемый по нажатию на кнопку редактирования записи
 	 */
