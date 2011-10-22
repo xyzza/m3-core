@@ -412,3 +412,20 @@ class ExtDisplayField(BaseExtField):
         
         base_config = self._get_config_str()
         return 'new Ext.form.DisplayField({%s})' % base_config
+
+
+class ExtDateTimeField(ExtDateField):
+
+    def __init__(self, *args, **kwargs):
+        super(ExtDateTimeField, self).__init__(*args, **kwargs)
+
+    def render(self):
+        try:
+            self.render_base_config()
+            self.render_params()
+        except UnicodeDecodeError as msg:
+            raise Exception(msg)
+
+        base_config = self._get_config_str()
+        params = self._get_params_str()
+        return 'new Ext.ux.form.DateTimeField({%s},{%s})' % (base_config, params)
