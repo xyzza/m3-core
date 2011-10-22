@@ -31,6 +31,8 @@ from m3.ui.actions.interfaces import ISelectablePack, IMultiSelectablePack
 
 
 #===============================================================================
+from m3.ui.ext.fields.simple import ExtDateTimeField
+
 class ExtForm(BaseExtPanel):
     '''
     Форма, умеющая биндиться и делать сабмит по урлу
@@ -115,6 +117,15 @@ class ExtForm(BaseExtPanel):
                     item.value = unicode(value)
                 else:
                     item.value = u''
+
+            elif isinstance(item, ExtDateTimeField):
+                if isinstance(value, datetime.datetime):
+                    item.value = '%02d.%02d.%04d %02d:%02d:%02d' % (value.day,value.month,value.year,value.hour,value.minute,value.second)
+                elif isinstance(value, datetime.date):
+                    item.value = '%02d.%02d.%04d 00:00:00' % (value.day,value.month,value.year)
+                else:
+                    item.value = value
+
             elif isinstance(item, ExtDateField):
                 #item.value = value.strftime('%d.%m.%Y') \
                 # для дат, до 1900 года метод выше не работает
@@ -126,7 +137,7 @@ class ExtForm(BaseExtPanel):
                 # для дат, до 1900 года метод выше не работает
                 item.value = '%02d:%02d' % (value.hour,value.minute) \
                     if not is_secret_token(value) else unicode(value)
-                    
+
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
             elif isinstance(item, ExtMultiSelectField):
@@ -384,7 +395,12 @@ class ExtForm(BaseExtPanel):
                 else:
                     val = None
             elif isinstance(item, ExtStringField):
-                val = unicode(val) if val is not None else None  
+                val = unicode(val) if val is not None else None
+            elif isinstance(item, ExtDateTimeField):
+                if val and val.strip():
+                    val = datetime.datetime.strptime(val, '%d.%m.%Y %H:%M:%S')
+                else:
+                    val = None
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
                 if val and val.strip():
