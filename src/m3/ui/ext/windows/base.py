@@ -196,8 +196,8 @@ class BaseExtWindow(ExtUIComponent):
         super(BaseExtWindow, self).pre_render()
         if hasattr(self.action_context,'m3_window_id'):
             self.parent_window_id = self.action_context.m3_window_id
-            # надо удалить этот признак из контекста, чтобы не переходил дальше
-            del self.action_context.m3_window_id
+            # теперь m3_window_id должно быть единое для всех дочерних контролов
+            self.action_context.m3_window_id = self.client_id
 
         children = []
         children.extend(self.items)
