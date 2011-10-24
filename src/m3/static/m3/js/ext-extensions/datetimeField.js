@@ -647,7 +647,6 @@ Ext.namespace('Ext.ux');
     });
 
     Ext.reg('datetimefield', F.DateTimeField);
-
 })();
 
 // <kirov
@@ -666,3 +665,128 @@ if(Ext.ux.BaseTimePicker){
     Ext.ux.BaseTimePicker.prototype.secsLabel = 'Секунды';
 }
 // kirov>
+
+// <kirov
+(function () {
+
+    var F = Ext.ux.form;
+
+    var STRICT = Ext.isIE7 && Ext.isStrict;
+
+    var Menu = Ext.extend(Ext.menu.Menu, {
+
+        enableScrolling : false,
+
+        hideOnClick: false,
+
+        plain: true,
+
+        showSeparator: false,
+
+        constructor: function (picker, config) {
+            config = config || {};
+
+            if (config.picker) {
+                delete config.picker;
+            }
+
+            this.picker = Ext.create(picker);
+
+            Menu.superclass.constructor.call(this, Ext.applyIf({
+                items: this.picker
+            }, config));
+
+            this.addEvents('timeselect');
+
+            this.picker.on('select', this.onTimeSelect, this);
+        },
+
+        getPicker: function () {
+            return this.picker;
+        },
+
+        onTimeSelect: function (picker, value) {
+            this.hide();
+            this.fireEvent('timeselect', this, picker, value);
+        },
+
+        destroy: function () {
+            this.purgeListeners();
+
+            this.picker = null;
+
+            Menu.superclass.destroy.call(this);
+        }
+
+    });
+
+    //kirov
+    F.AdvTimeField = Ext.extend(Ext.m3.AdvancedDataField, {
+
+        timeFormat: 'H:i:s',
+
+        defaultAutoCreate : {
+            tag: 'input',
+            type: 'text',
+            size: '22',
+            autocomplete: 'off'
+        },
+
+        initComponent: function () {
+            F.AdvTimeField.superclass.initComponent.call(this);
+
+            this.dateFormat = this.dateFormat || this.format;
+
+            var picker = this._createPicker();
+
+            //this.format = this.dateFormat + ' ' + this.timeFormat;
+            this.format = this.timeFormat;
+
+            this.menu = new Menu(picker, {
+                hideOnClick: false
+            });
+            this.menu.on('timeselect', this.onTimeSelect, this);
+        },
+
+        _createPicker: function () {
+            var config = this.initialConfig.picker || {};
+
+            Ext.apply(config, {
+                ctCls: 'x-menu-date-item',
+                internalRender: STRICT || !Ext.isIE
+            });
+
+            Ext.applyIf(config, {
+                timeFormat: this.timeFormat
+            });
+
+            return Ext.create(config, 'basetimepicker');
+        },
+
+        onTriggerClick: function () {
+            F.AdvTimeField.superclass.onTriggerClick.apply(this, arguments);
+
+            this.menu.picker.setValue(this.getValue() || new Date());
+        },
+
+        onTimeSelect: function (menu, picker, value) {
+            this._updateTimeValue(picker, value);
+        },
+
+        _updateTimeValue: function (picker) {
+            var v = this.getValue() || new Date();
+            v.setHours(picker.hourSlider.getValue());
+            v.setMinutes(picker.minSlider.getValue());
+            v.setSeconds(picker.secSlider.getValue());
+            this.setValue(v);
+        },
+
+        setValue: function (value) {
+            F.AdvTimeField.superclass.setValue.call(this, value);
+        }
+
+    });
+
+    Ext.reg('advtimefield', F.AdvTimeField);
+})();
+//kirov >
