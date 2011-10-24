@@ -31,7 +31,7 @@ from m3.ui.actions.interfaces import ISelectablePack, IMultiSelectablePack
 
 
 #===============================================================================
-from m3.ui.ext.fields.simple import ExtDateTimeField
+from m3.ui.ext.fields.simple import ExtDateTimeField, ExtAdvTimeField
 
 class ExtForm(BaseExtPanel):
     '''
@@ -117,6 +117,10 @@ class ExtForm(BaseExtPanel):
                     item.value = unicode(value)
                 else:
                     item.value = u''
+
+            elif isinstance(item, ExtAdvTimeField):
+                item.value = '%02d:%02d:%02d' % (value.hour,value.minute, value.second)\
+                    if not is_secret_token(value) else unicode(value)
 
             elif isinstance(item, ExtDateTimeField):
                 if isinstance(value, datetime.datetime):
@@ -396,6 +400,12 @@ class ExtForm(BaseExtPanel):
                     val = None
             elif isinstance(item, ExtStringField):
                 val = unicode(val) if val is not None else None
+            elif isinstance(item, ExtAdvTimeField):
+                if val and val.strip():
+                    d = datetime.datetime.strptime(val, "%H:%M:%S")
+                    val = d.time()
+                else:
+                    val = None
             elif isinstance(item, ExtDateTimeField):
                 if val and val.strip():
                     val = datetime.datetime.strptime(val, '%d.%m.%Y %H:%M:%S')
