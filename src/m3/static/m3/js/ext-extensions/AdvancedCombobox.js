@@ -21,6 +21,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		
 		this.defaultValue = null;
 		this.defaultText = null;
+        this.defaultRecord = null;
 		
 		// кнопка очистки
 		this.hideTriggerClear = params.hideClearTrigger || false;
@@ -70,6 +71,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 
 		this.defaultValue = params.defaultValue;
 		this.defaultText = params.defaultText;
+        this.defaultRecord = Ext.decode(params.recordValue);
+
 		this.baseTriggers = [
 			{
 				iconCls: 'x-form-clear-trigger',
@@ -131,9 +134,14 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		}
 
 		// Значения по-умолчанию
-		if (this.defaultValue && this.defaultText) {
-			this.addRecordToStore(this.defaultValue, this.defaultText);
-		}
+        if (this.defaultRecord){
+            var record = new Ext.data.Record(this.defaultRecord);
+            this.setRecord(record);
+        } else {
+            if (this.defaultValue && this.defaultText) {
+                this.addRecordToStore(this.defaultValue, this.defaultText);
+            }
+        }
 
         this.validator = this.validateField;
 
@@ -337,8 +345,10 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	,onSelect: function(record, index){
 		if (this.fireEvent('afterselect', this, record.data[this.valueField], record.data[this.displayField] )) {
 			Ext.m3.AdvancedComboBox.superclass.onSelect.call(this, record, index);
-			this.showClearBtn();
-			this.showEditBtn();
+            if (this.rendered) {
+			    this.showClearBtn();
+			    this.showEditBtn();
+            }
 			this.fireEvent('change', this, record.data[this.valueField || this.displayField]);
 			this.fireEvent('changed', this);
 		}

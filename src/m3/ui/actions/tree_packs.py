@@ -588,6 +588,11 @@ class BaseTreeDictionaryActions(ActionPack, ISelectablePack):
     def get_display_text(self, key, attr_name = None):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         raise NotImplementedError()
+
+    #ISelectablePack
+    def get_record(self, key):
+        """ Получить записи по ключу key """
+        raise NotImplementedError()
     
     #============ ДЛЯ ИЗМЕНЕНИЯ ОКОН ВЫБОРА НА ХОДУ ==============
     
@@ -901,11 +906,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         # тут возможны варианты, когда pack используется без грида
         # в этом случае нужно работать с элементом дерева
-        row = None
-        if self.list_model:
-            row = self.get_row(key)
-        elif self.tree_model:
-            row = self.get_node(key)
+        row = self.get_record(key)
         if row != None:
             name = attr_name if attr_name else self.column_name_on_select
             text = getattr(row, name)
@@ -915,6 +916,15 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             else:
                 return text
         return None
+
+    #ISelectablePack
+    def get_record(self, key):
+        row = None
+        if self.list_model:
+            row = self.get_row(key)
+        elif self.tree_model:
+            row = self.get_node(key)
+        return row
     
 #=#===============================================================================
 # Сигналы, который посылаются в процессе работы подсистемы древовидных справочника

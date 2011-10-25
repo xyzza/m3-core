@@ -192,6 +192,9 @@ class BaseExtTriggerField(BaseExtField):
         # Текст, отображаемый при загрузке данных
         self.loading_text = u'Загрузка...'
 
+        # иные имена полей (кроме id и display_field), которые будут попадать в store
+        self.fields = []
+
     def set_store(self, store):
         self.mode = 'local' if isinstance(store, ExtDataStore) else 'remote'
         self.__store = store
@@ -203,7 +206,11 @@ class BaseExtTriggerField(BaseExtField):
 
     def t_render_store(self):
         assert self.__store, 'Store is not define'
-        return self.__store.render([self.display_field, ])
+        # отрисуем стор с полями
+        if self.display_field in self.fields:
+            return self.__store.render(self.fields)
+        else:
+            return self.__store.render([self.display_field]+self.fields)
 
     @property
     def trigger_action_all(self):
@@ -280,4 +287,3 @@ class BaseExtTriggerField(BaseExtField):
         self._put_config_value('valueNotFoundText', self.not_found_text)
         self._put_config_value('loadingText', self.loading_text)
         self._put_config_value('store', self.t_render_store, self.get_store())
-
