@@ -29,10 +29,6 @@ class ISelectablePack(object):
     def get_display_text(self, key, attr_name = None):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
 
-    @abstractmethod
-    def get_record(self, key):
-        """ Получить запись по ключу key """
-        
 class IMultiSelectablePack(ISelectablePack):
     """
     Интерфейс pack-классов для множественного выбора значений из полей ExtMultiSelectField 
