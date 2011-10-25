@@ -67,6 +67,9 @@ class ExtDictSelectField(BaseExtTriggerField):
         # Из-за ошибки убраны свойства по умолчанию
         self.total = 'total'
         self.root = 'rows'
+
+        # значение, которое будет передано в store
+        self.__record_value = {}
         
         self._triggers = TypedList(ExtDictSelectField.ExtTrigger)
         
@@ -152,7 +155,15 @@ class ExtDictSelectField(BaseExtTriggerField):
             self.editable = True
             self.get_store().url = value
         self.__autocomplete_url = value
-        
+
+    @property
+    def record_value(self):
+        return self.__record_value
+
+    @record_value.setter
+    def record_value(self, val):
+        self.__record_value = val
+
     @property
     def value(self):
         return self.__value
@@ -160,7 +171,7 @@ class ExtDictSelectField(BaseExtTriggerField):
     @value.setter
     def value(self, val):
         self.__value = val
-        
+
     def configure_by_dictpack(self, pack, controller=None):
         '''
         Метод настройки поля выбора из справочника на основе 
@@ -185,13 +196,23 @@ class ExtDictSelectField(BaseExtTriggerField):
         Причем они могут быть методами, например обернутыми json_encode. 
         Это позволяет избежать двойного присваивания в коде.
         """
-        assert isinstance(obj, models.Model), '%s must be a Django model instance.' % obj
+        #assert isinstance(obj, models.Model), '%s must be a Django model instance.' % obj
         
         value = getattr(obj, self.value_field)
         self.value = value() if callable(value) else value 
         
         value = getattr(obj, self.display_field)
         self.default_text = value() if callable(value) else value
+
+        # также запомним объект как значение
+        # будем брать только те атрибуты, которые есть в fields
+        attr_set = set(self.fields)
+        attr_set.add(self.value_field)
+        attr_set.add(self.display_field)
+        self.__record_value = {}
+        for attr in attr_set:
+            value = getattr(obj, attr, None)
+            self.__record_value[attr] = value() if callable(value) else value
     
     @property
     def pack(self):
@@ -290,6 +311,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         
         self._put_params_value('defaultValue', self.value)
         self._put_params_value('customTriggers', self.t_render_triggers, self._triggers )
+        self._put_params_value('recordValue', json.dumps(self.record_value), self.record_value)
         
     
     def render(self):

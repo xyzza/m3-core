@@ -551,6 +551,11 @@ class BaseTreeDictionaryActions(ActionPack, IMultiSelectablePack):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         raise NotImplementedError()
 
+    #ISelectablePack
+    def get_record(self, key):
+        """ Получить значение записи по ключу key """
+        raise NotImplementedError()
+
     #IMultiSelectablePack
     def get_display_dict(self, key, value_field='id', display_field='name'):
         """
@@ -894,11 +899,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         # тут возможны варианты, когда pack используется без грида
         # в этом случае нужно работать с элементом дерева
-        row = None
-        if self.list_model:
-            row = self.get_row(key)
-        elif self.tree_model:
-            row = self.get_node(key)
+        row = self.get_record(key)
         if row != None:
             name = attr_name if attr_name else self.column_name_on_select
             text = getattr(row, name)
@@ -908,6 +909,16 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             else:
                 return text
         return None
+
+    #ISelectablePack
+    def get_record(self, key):
+        """ Получить запись по ключу key """
+        row = None
+        if self.list_model:
+            row = self.get_row(key)
+        elif self.tree_model:
+            row = self.get_node(key)
+        return row
 
     #IMultiSelectablePack
     def get_display_dict(self, key, value_field='id', display_field='name'):
