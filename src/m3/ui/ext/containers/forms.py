@@ -158,7 +158,10 @@ class ExtForm(BaseExtPanel):
                 bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
                 if bind_pack:
                     assert isinstance(bind_pack, ISelectablePack), 'Pack %s must provide ISelectablePack interface' % bind_pack
-                    item.default_text = bind_pack.get_display_text(value, item.display_field)
+                    if hasattr(bind_pack, 'get_record'):
+                        item.set_value_from_model(bind_pack.get_record(value))
+                    else:
+                        item.default_text = bind_pack.get_display_text(value, item.display_field)
 #                    # Нельзя импортировать, будет циклический импорт
 #                    #assert isinstance(item.bind_pack, BaseDictionaryActions)
 #                    row = bind_pack.get_row(value)

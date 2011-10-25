@@ -372,7 +372,7 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
         Метод который возвращает записи грида в виде обычного питоновского списка.
         '''
         raise NotImplementedError()
-    
+
     def get_row(self, id):
         '''
         Метод, который возвращает запись справочника с указанным идентификатором.  
@@ -421,7 +421,12 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
                 return text()
             else:
                 return text
-    
+
+    #ISelectablePack
+    def get_record(self, key):
+        """ Получить запись по ключу key """
+        return self.get_row(key)
+
     #====================== РАБОТА С ОКНАМИ ===============================
     def get_list_window(self, win):
         ''' Возвращает настроенное окно типа "Список" справочника '''        
@@ -577,7 +582,7 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
 
         result = {'rows': data, 'total': len(data)}
         return result
-    
+
     def get_row(self, id):
         ''' Заглушка для работы биндинга. В случае с перечислениями сам id хранится в БД '''
         assert isinstance(id, int)
@@ -590,4 +595,7 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
         row_id = self.get_row(key)
         text = self.enumerate_class.values.get(row_id,'')
         return text
-    
+
+    #ISelectablePack
+    def get_record(self, key):
+        return self.get_row(key)

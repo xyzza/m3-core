@@ -424,6 +424,11 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
         raise NotImplementedError()
 
+    #ISelectablePack
+    def get_record(self, key):
+        """ Получить значение записи по ключу key """
+        raise NotImplementedError()
+
     #IMultiSelectablePack
     def get_display_dict(self, key, value_field='id', display_field='name'):
         """
@@ -582,6 +587,11 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
                 return text
         return None
 
+    #ISelectablePack
+    def get_record(self, key):
+        """ Получить значение записи по ключу key """
+        return self.get_row(key)
+
     #IMultiSelectablePack
     def get_display_dict(self, key, value_field='id', display_field='name'):
         """
@@ -645,6 +655,11 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
         row_id = self.get_row(key)
         text = self.enumerate_class.values.get(row_id,'')
         return text
+
+    #ISelectablePack
+    def get_record(self, key):
+        """ Получить значение записи по ключу key """
+        return self.get_row(key)
 
     #IMultiSelectablePack
     def get_display_dict(self, key, value_field='id', display_field='name'):
