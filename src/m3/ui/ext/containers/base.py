@@ -175,7 +175,7 @@ class BaseExtPanel(BaseExtContainer):
         super(BaseExtPanel, self).render_base_config()
         self._put_config_value('title', self.title)
         self._put_config_value('border', self.border)
-        if not self.title:
+        if not self.title or not self.header is None:
             self._put_config_value('header', self.header)
             
         self._put_config_value('iconCls', self.icon_cls)

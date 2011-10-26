@@ -22,6 +22,9 @@ function(){
 	    ,useArrows: true
 	    ,autoScroll: false
 	    ,animate: true
+	    
+	    ,collapsible: {{ component.collapsible|lower }}
+	    {% if component.collapse_mode %} ,collapseMode: '{{ component.collapse_mode }}' {% endif %}
 
 		{% if component.drag_drop and not component.read_only%} 
 			,enableDD: true

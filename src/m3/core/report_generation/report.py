@@ -12,7 +12,6 @@ from django.conf import settings
 
 from m3.helpers import logger, date2str
 
-
 #FIXME: грязный хак для WIN и OSX
 can_use_uno = False
 
@@ -56,7 +55,7 @@ if can_use_uno:
 #else:
     #FIXME: убрал, чтобы хоть как-то работать!  raise Exception(u'Unable to find OpenOffice (LibreOffice) in PATH variable') 
     
-# FIXME:
+# FIXME: очень крутой путь до дефолтной папки сохранения отчетов!
 DEFAULT_REPORT_TEMPLATE_PATH = os.path.abspath(settings.PROJECT_ROOT) 
 
 IMAGE_REGEX = '<img .*>'
@@ -116,13 +115,15 @@ class OOParser(object):
     '''
     Этот класс преобразовывает текст в соответствии с языком шаблонов.
     '''        
+    # FIXME: Все методы работают c параметром document, почему он не атрибут экземпляра?
+    
     TIME_FORMAT = "%H:%M:%S" 
                 
     def find_image_tags(self, document, image_name):
         '''
         Находит, и возвращает в списке все теги изображений. 
         ''' 
-        image_tag = IMAGE_TAG %image_name
+        image_tag = IMAGE_TAG % image_name
         return self.find_regex_cells(document, image_tag)        
                
     def find_and_replace(self, document, regex, replace):
@@ -138,13 +139,33 @@ class OOParser(object):
         replace_descriptor.ReplaceString = replace
         document.replaceAll(replace_descriptor)
     
+    def find(self, document, regex):
+        u"""
+        Находит все строки, соответсвующие регулярному выражение  
+        в документе 
+        
+        @param document: Документ, в котором осуществляется поиск
+        @param regext: Регулярное выражение 
+                  
+        Использовать:
+            params = document.find(regexp)
+            for i in xrange(params.Count):
+                print params.getByIndex(i)                
+        """
+        search_descriptor = document.createSearchDescriptor()
+        search_descriptor.SearchRegularExpression = True
+        search_descriptor.SearchString = regex
+        return document.findAll(search_descriptor)
+        
+    
     def find_regex_cells(self, document, regex):
-        u'''
+        u'''        
         Находит все строки, соответствующие регулярному выражению(задается строкой,
         по правилам опенофиса). 
         Возвращает список ячеек таблицы, в которых было найдено совпадение.
         '''
-        
+        # FIXME: этого метода не должно быть, он нарушает абстракию. 
+        # Речь идет о ячейках, хотя класс работает не только с Calc'овскими документами
         search_descriptor = document.createSearchDescriptor()
         search_descriptor.SearchRegularExpression = True
         search_descriptor.SearchString = regex
@@ -163,6 +184,8 @@ class OOParser(object):
         что начало секции в шаблоне обозначается знаком '+' (напр., '+Шапка'), конец
         секции - знаком '-' ('-Шапка')
         '''   
+        # FIXME: Смотри метод выше
+    
         all_sections = {}
         annotations = document.getAnnotations()
         annotations_iter = annotations.createEnumeration()
@@ -295,15 +318,14 @@ class Section(object):
     
     def get_all_parameters(self):
         u"""
-        Возвращает список параметров, которые используются внутри секции        
+        Возвращает список-итератор параметров, которые используются внутри секции        
         """
         index_object = self.find(VARIABLE_REGEX)        
         if not index_object is None:
-            # Производится поиск по всем выражениям по условию '#\w+#' - так определяются параметры
-            res = []
-            for i in xrange(index_object.Count):
-                res.extend( re.findall('#\w+#', index_object.getByIndex(i).getString() ) )                
-            return res            
+            # self.find - вернет найденные ячейки, в которых могут быть несколько параметров
+            # В найденных ячейках производится поиск по всем выражениям по условию '#\w+#' - так определяются параметры       
+            return (y for i in xrange(index_object.Count) 
+                    for y in re.findall('#\w+#', index_object.getByIndex(i).getString() ) )                                                                  
         else:
             return []
     
@@ -582,38 +604,66 @@ class DocumentReport(object):
     При инициализации объекта происходит соединение с сервером OpenOffice и 
     открывается файл шаблона, заданный в параметре template_name.
     '''
-    def __init__(self, template_name):
+    
+    # TODO: Как бэ не True описывать эти значения прикладникам, как это описано в
+    # примере тут http://m3.bars-open.ru/report_generation.html#id6
+    
+    # Возможные форматы сохранения документа
+    PDF = "writer_pdf_Export"
+    DOC = "MS Word 97"
+    RTF = "Rich Text Format"
+    HTML = "html"
+    TEXT = "txt"
+    ODT = "writer8"
+    
+    def __init__(self, template_name, use_temp_file=True):
         if not template_name:
-            raise ReportGeneratorException, "Не указан путь до шаблона"   
-        self.desktop = OORunner.get_desktop()         
-        self.document = self.get_template_document(template_name)
-        self.temporary_file_path = None
+            raise ReportGeneratorException(u"Не указан путь до шаблона")   
+        self.desktop = OORunner.get_desktop()
+        if use_temp_file:
+            self.document = self.get_template_document(template_name)
+        else:
+            self.document = create_document(self.desktop, template_name)
+
+	self.temporary_file_path = None
         
     def show(self, result_name, params, filter=None):    
         '''
         Производит подстановку значений переменных в шаблоне. 
         Соответствие имен переменных и значений задается в словаре params. 
         Сохраняет отчет в файл, указанный в result_name. 
-        Параметр filter задает формат результирующего файла
+        Параметр output_format задает формат результирующего файла
         '''
         assert isinstance(params, dict) 
         if not result_name:
             raise ReportGeneratorException, "Не указан путь до файла с отчетом"
+        
         properties = []
-        if filter:
+        if output_format:
             filter_property = PropertyValue()
             filter_property.Name = "FilterName"
-            filter_property.Value = filter
+            filter_property.Value = output_format
             properties.append(filter_property)
+            
+        # FIXME: Экземпляр объекта предполагает, что будет использоваться метод
+        # show для вывода, почему бы не определить объект parser в конструкторе?
+        # Иначе приходится получать экземпляр (создавать объект) и в других методах
+        # например get_params
         parser = OOParser()
         for key, value in params.items():
             if not isinstance(key, str):
                 raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым"
+            
+            #FIXME: Мдаа... А почему бы не поместить вызов parser.convert_value
+            # внутрь parser.find_and_replace. Это один и тот же экземпляр. Такое 
+            # ощущение, что используется подход максимального запутывания кода 
             value = parser.convert_value(value)
-            parser.find_and_replace(self.document, '#'+key+'#', value)    
+            parser.find_and_replace(self.document, '#%s#' % key, value)    
+            
         #Если не все переменные в шаблоне были заменены, стираем оставшиеся
         parser.find_and_replace(self.document, VARIABLE_REGEX, '')
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
+        
         save_document_as(self.document, result_path, tuple(properties))
         # Удаление временного файла
         if self.temporary_file_path:
@@ -624,8 +674,15 @@ class DocumentReport(object):
         Создает копию файла шаблона в директории для временных файлов и возвращает 
         объект открытого документа шаблона.
         '''
+        
+        #FIXME: Разработчик, открой для себя gettempdir() и не замусоривай проект
+        # Если по не удалиться файл с шаблоном
         template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
-        temporary_file_name = 'report_template_%s.odt' %str(uuid4())[:8]
+        
+        #FIXME: Крутое название шаблонов, а не пофик ли, что они будут перетираться
+        temporary_file_name = 'report_template_%s.odt' % str(uuid4())[:8]
+        
+        
         self.temporary_file_path = get_temporary_file_path(temporary_file_name)
         document = copy_document(self.desktop, template_path, self.temporary_file_path)
         return document 
@@ -633,7 +690,7 @@ class DocumentReport(object):
     def clean_temporary_file(self):
         '''
         Закрывает и удаляет временный файл шаблона.
-        '''
+        '''        
         self.document.close(True)
         if os.path.exists(self.temporary_file_path):
             try:
@@ -962,3 +1019,5 @@ def copy_document(desktop, src_file_path, dest_file_path, filter=None):
         source_document.close(True)
     document = create_document(desktop, dest_file_path)
     return document         
+
+#FIXME: Автору документа требуется срочно прочитать Макконнелла!!
