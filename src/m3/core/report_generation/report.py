@@ -587,6 +587,7 @@ class DocumentReport(object):
             raise ReportGeneratorException, "Не указан путь до шаблона"   
         self.desktop = OORunner.get_desktop()         
         self.document = self.get_template_document(template_name)
+        self.temporary_file_path = None
         
     def show(self, result_name, params, filter=None):    
         '''
@@ -615,7 +616,8 @@ class DocumentReport(object):
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
         save_document_as(self.document, result_path, tuple(properties))
         # Удаление временного файла
-        self.clean_temporary_file()
+        if self.temporary_file_path:
+            self.clean_temporary_file()
         
     def get_template_document(self, template_name):
         '''
@@ -714,6 +716,8 @@ class SpreadsheetReport(object):
         optimal_height_cells = parser.find_regex_cells(self.template_sheet, OPTIMAL_HEIGHT_ROW_REGEX)
         self.optimal_height_rows = [cell.CellAddress.Row for cell in optimal_height_cells]
 
+        self.temporary_file_path = None
+
     def get_section(self, section_name):
         '''
         Возвращает секцию по ее названию.
@@ -744,7 +748,8 @@ class SpreadsheetReport(object):
             self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)           
         save_document_as(self.document, result_path, tuple(properties))
         # Удаление временного файла
-        self.clean_temporary_file()        
+        if self.temporary_file_path:
+            self.clean_temporary_file()
         
     def find_section_position(self, vertical):
         u'''
