@@ -19,7 +19,7 @@ class IBackgroundWorker(Thread):
     '''
     __metaclass__ = ABCMeta
 
-    def start(self):
+    def start(self, *args, **kwargs):
         '''
         Запускает исполнение кода. Метод не абстрактный, при замещении обязательно вызывать суперкласс
         '''
@@ -86,25 +86,25 @@ class AsyncAction(Action):
             ACD(name='command', type=str, required=True)
         ]
 
-    def run(self, request, context):
+    def run(self, *args, **kwargs):
         if self.worker_cls is None:
             raise NotImplementedError('Worker class in not defined')
 
         if context.command == self.COMMAND_START:
-            return self.start_operation()
+            return self.start_operation(*args, **kwargs)
         elif context.command == self.COMMAND_STOP:
             return self.stop_operation()
         elif context.command == self.COMMAND_PING:
             return self.ping_operation()
-        
-    def start_operation(self):
+
+    def start_operation(self, *args, **kwargs):
         #если операция уже запущенна, то перезапустим
         #надо подумать насколько корректно такое поведение
         if AsyncAction._worker_instance is not None:
             AsyncAction._worker_instance.stop()
 
         AsyncAction._worker_instance = self.worker_cls()
-        return AsyncAction._worker_instance.start()
+        return AsyncAction._worker_instance.start(*args, **kwargs)
 
     def stop_operation(self):
         if AsyncAction._worker_instance is None:
