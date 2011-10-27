@@ -295,10 +295,8 @@ class Section(object):
         Возвращает рабочую область секции
         """
         return self.report_object.template_sheet.getCellRangeByPosition(
-                                                self.left_cell_addr.Column, 
-                                                self.left_cell_addr.Row, 
-                                                self.right_cell_addr.Column, 
-                                                self.right_cell_addr.Row)
+                    self.left_cell_addr.Column, self.left_cell_addr.Row, 
+                    self.right_cell_addr.Column, self.right_cell_addr.Row)
     
     def find(self, regexp):
         u"""
@@ -327,7 +325,7 @@ class Section(object):
             return (y for i in xrange(index_object.Count) 
                     for y in re.findall('#\w+#', index_object.getByIndex(i).getString() ) )                                                                  
         else:
-            return []
+            return ()
     
     def add_new_cell(self, cell):
         '''
@@ -346,7 +344,7 @@ class Section(object):
                 self.set_right_cell_addr(cell)
             elif (cell.Row < self.left_cell_addr.Row) and (cell.Column < self.left_cell_addr.Column):   
                 self.left_cell_addr = cell  
-                self.set_right_cell_addr(self.left_cell_addr)   
+                self.set_right_cell_addr(self.left_cell_addr)
             # Секция задана неверно, не записываем такую ерунду
             else:    
                 raise OOParserException, "Неверно задана секция %s. \
@@ -625,9 +623,16 @@ class DocumentReport(object):
         else:
             self.document = create_document(self.desktop, template_name)
 
-	self.temporary_file_path = None
+        self.temporary_file_path = None
         
-    def show(self, result_name, params, filter=None):    
+    def get_params(self):
+        """
+        Возвращает итератор по параметрам документа
+        """                
+        params = OOParser().find(self.document, VARIABLE_REGEX)                
+        return (params.getByIndex(i).getString() for i in xrange(params.Count)) 
+    
+    def show(self, result_name, params, output_format=ODT, *args, **kwargs):  
         '''
         Производит подстановку значений переменных в шаблоне. 
         Соответствие имен переменных и значений задается в словаре params. 
