@@ -10558,7 +10558,13 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             /**
              * Отрабатывает, когда изменилось значение
              */
-            'change'
+            'change',
+            
+            /**
+             * Событие, возникающее до изменения значения поля. Если вернуть false
+             * то изменения поля не будет, true - изменить значение поля.
+             */
+            'beforechange'
         );
     }
 
@@ -10665,19 +10671,20 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
                      return;
                  }
                  var v = this.fileInput.dom.value;
-                 this.setValue(v);
-                 this.fireEvent('fileselected', this, v);
-                 this.fireEvent('change', this, v);
-                 
-
-                 if (v) {
-                    // Очищаем ссылку на файл
-                    this.fileUrl = null;
-
-                    if (!this.buttonClear.isVisible()) {
-                        this.buttonClear.show();
-                        this.el.setWidth( this.el.getWidth() - this.buttonClear.getWidth());
-                    }
+                 if (this.fireEvent('beforechange', this, v)) {	                 		                 
+	                 this.setValue(v);
+	                 this.fireEvent('fileselected', this, v);
+	                 this.fireEvent('change', this, v);
+	                 
+	                 if (v) {
+	                    // Очищаем ссылку на файл
+	                    this.fileUrl = null;
+	
+	                    if (!this.buttonClear.isVisible()) {
+	                        this.buttonClear.show();
+	                        this.el.setWidth( this.el.getWidth() - this.buttonClear.getWidth());
+	                    }
+	                 }
                  }
              }
         });
@@ -10779,8 +10786,13 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
     }
 
     //private
-    ,clickClearField: function(){
-        this.reset();
+    ,clickClearField: function(){    	
+    	if (this.fireEvent('beforechange', this, '')){
+			this.clearFeild();
+    	}
+    }
+	,clearFeild: function(){
+		this.reset();
         this.setValue('');
         this.fireEvent('change', this, '');
         var width = this.el.getWidth() + this.buttonClear.getWidth();
@@ -10790,9 +10802,8 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         }
         this.el.setWidth(width);
         this.buttonClear.hide();
-
-    },
-
+	},
+    
     getFileUrl: function(url){
         return document.location.protocol + '//' + document.location.host +
             '/' + url;
