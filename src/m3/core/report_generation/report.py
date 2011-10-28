@@ -322,8 +322,11 @@ class Section(object):
         if not index_object is None:
             # self.find - вернет найденные ячейки, в которых могут быть несколько параметров
             # В найденных ячейках производится поиск по всем выражениям по условию '#\w+#' - так определяются параметры       
-            return (y for i in xrange(index_object.Count) 
-                    for y in re.findall('#\w+#', index_object.getByIndex(i).getString() ) )                                                                  
+            return (value 
+                for i in xrange(index_object.Count)   
+                    for data_tuple in index_object.getByIndex(i).getDataArray()
+                        for item in data_tuple
+                            for value in re.findall('#\w+#', item) )                                                              
         else:
             return ()
     
@@ -625,7 +628,7 @@ class DocumentReport(object):
 
         self.temporary_file_path = None
         
-    def get_params(self):
+    def get_all_parameters(self):
         """
         Возвращает итератор по параметрам документа
         """                
