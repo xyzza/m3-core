@@ -8015,6 +8015,14 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
              *   @param {Object} action - то что проходит в success обработчик сабмита
              */
             ,'aftersubmit'
+            /**
+             * Генерируется при ошибке в момент сабмита формы, позволяет реагировать на ошибки сохранения
+             * Параметры:
+             *   this - Сам компонент
+             *   @param {Object} form - то что проходит в success обработчик сабмита
+             *   @param {Object} action - то что проходит в success обработчик сабмита
+             */
+            ,'submitfailed'
 			/**
 			 * Генерируется, если произошел запрос на закрытие окна
 			 * (через win.close()) при несохраненных изменениях, а пользователь
@@ -8125,14 +8133,14 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
             params[cControl.name] = Ext.util.JSON.encode(cStoreData);
         }
 
-		// вытащим из формы все поля и исключим их из наших параметров, иначе они будут повторяться в submite
-		var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext.getDom(form.el.dom)).elements;
-		var name;
-		Ext.each(fElements, function(element){
-        	name = element.name;
-        	if (!element.disabled && name) {
-        		delete params[name];
-        	}
+        // вытащим из формы все поля и исключим их из наших параметров, иначе они будут повторяться в submite
+        var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext.getDom(form.el.dom)).elements;
+        var name;
+        Ext.each(fElements, function(element){
+            name = element.name;
+            if (!element.disabled && name) {
+                delete params[name];
+            }
         });
 
         var submit = {
@@ -8153,7 +8161,9 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
                 }
             },
             failure: function(form, action) {
-                uiAjaxFailMessage.apply(this, arguments);
+                if (this.fireEvent('submitfailed', this, form, action)) {
+                    uiAjaxFailMessage.apply(this, arguments);
+                }
                 mask.hide();
                 this.disableToolbars(false);
             }
