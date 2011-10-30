@@ -415,3 +415,15 @@ Ext.override(Ext.ux.tree.TreeGrid, {
         return r;
     }
 });
+
+/**
+ * По-умолчанию ExtJS отправляет за картинкой на 'http://www.extjs.com/s.gif'
+ * Тут укажем что они не правы
+ */
+Ext.apply(Ext, function(){
+    return {
+        BLANK_IMAGE_URL : Ext.isIE6 || Ext.isIE7 || Ext.isAir ?
+            '/m3static/vendor/extjs/resources/images/default/s.gif' :
+            'data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
+    };
+}());
