@@ -46,19 +46,26 @@ class ExtDataStore(BaseExtStore):
         return super(ExtDataStore, self).render()
     
     def t_render_fields(self):
-        '''Прописывается в шаблоне и заполняется при рендеринге'''        
+        '''Прописывается в шаблоне и заполняется при рендеринге'''
         res = ['{name: "%s", mapping: %d}' % (self.id_property, 0)] # ID
+        # чтобы правильно выставить mapping надо определить, есть ли в списке колонок поле с таким же именем
+        # если такая колонка встречается, то пропускаем её
+        ind = 1
         for i, col in enumerate(self.__columns):
             if isinstance(col, basestring):
                 if col != self.id_property:
-                    res.append('{name: "%s", mapping: %d}' % (col, i+1))
+                    res.append('{name: "%s", mapping: %d}' % (col, ind+i))
+                else:
+                    ind = 0
             else:
                 if col.data_index != self.id_property:
-                    d = {'name': col.data_index, 'mapping': i+1} # 1-ое поле - ID
+                    d = {'name': col.data_index, 'mapping': ind+i} # 1-ое поле - ID
                     if hasattr(col, 'format'): # ExtDateField
                         d['type'] = 'date'
                         d['dateFormat'] = col.format
-                    res.append(json.dumps(d))                
+                    res.append(json.dumps(d))
+                else:
+                    ind = 0
         return ','.join(res) 
     
     def t_render_data(self):

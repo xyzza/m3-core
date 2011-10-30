@@ -195,6 +195,15 @@ class BaseExtTriggerField(BaseExtField):
         # иные имена полей (кроме id и display_field), которые будут попадать в store
         self.fields = []
 
+        # ширина выпадающего списка
+        self.list_width = None
+
+        # шаблон рендера выпадающего списка
+        self.list_tpl = None
+
+        # изменение ширины выпадающего списка
+        self.resizable = False
+
     def set_store(self, store):
         self.mode = 'local' if isinstance(store, ExtDataStore) else 'remote'
         self.__store = store
@@ -287,3 +296,6 @@ class BaseExtTriggerField(BaseExtField):
         self._put_config_value('valueNotFoundText', self.not_found_text)
         self._put_config_value('loadingText', self.loading_text)
         self._put_config_value('store', self.t_render_store, self.get_store())
+        self._put_config_value('listWidth', self.list_width, self.list_width)
+        self._put_config_value('tpl', self.list_tpl, self.list_tpl)
+        self._put_config_value('resizable', self.resizable, self.resizable)
