@@ -14,6 +14,7 @@ from django.conf import settings
 
 from m3.ui.actions import ActionController, Action, ActionPack
 from m3.helpers import logger
+import datetime
 
 
 
@@ -121,17 +122,28 @@ class SOAPAction(Action):
         Посылка данных (XML)
         '''
         if settings.DEBUG or getattr(settings, 'SOAP_LOGING', None):
+            self.log_request_info(kw['request_info'])
             logger.info('Response %i %s with %i bytes' % (code, self.url, len(text)))
             if not kw.get('not_loging_body'):
                 l = getattr(settings, 'SOAP_LOGING_BODY_LENGTH', 1000)
                 logger.info(smart_unicode(text[:l], errors='replace'))
         return HttpResponse(text, 'text/xml', code)
 
+    def log_request_info(self, request_info):
+        '''
+        печатаем информацию по запросу
+        '''
+        delta = datetime.datetime.now() - request_info['start_time'] 
+        logger.info(request_info['data_head'] + 'Processed in %i sec ' % delta.seconds)
+        logger.info(request_info['data_body'])
+        
+
     def sendFault(self, f, **kw):
         '''
         Посылка ошибки
         '''
         if settings.DEBUG or getattr(settings, 'SOAP_LOGING', None):
+            self.log_request_info(kw['request_info'])
             logger.info('!!!!!----ERROR----!!!!!')
         #попробуем отдать эту ошибку sentry (служба логирования ошибок)
         exc_info = sys.exc_info()
@@ -150,12 +162,16 @@ class SOAPAction(Action):
         '''
         Обработка запроса к веб-сервису
         '''
+        request_info = {
+            'start_time': datetime.datetime.now()
+        }
 
         if request.method != 'POST':
             if request.GET.has_key('wsdl') or request.GET.has_key('WSDL'):
                 if settings.DEBUG or getattr(settings, 'SOAP_LOGING', None):
-                    logger.info('Request wsdl %s' % (self.url))
-                return self.sendXML(self.getWSDL(request), not_loging_body=True)
+                    request_info['data_head'] = 'Request wsdl %s. ' % (self.url)
+                    request_info['data_body'] = ''
+                return self.sendXML(self.getWSDL(request), not_loging_body=True, request_info=request_info)
             return self.sendXML(Fault(Fault.Client, 'Must use POST'))
 
         #for k,v in request.META.iteritems(): print k, '=', v
@@ -168,9 +184,9 @@ class SOAPAction(Action):
             soapAction = soapAction.strip('\'"')
         post = post.strip('\'"')
         if settings.DEBUG or getattr(settings, 'SOAP_LOGING', None):
-            logger.info('Request %s:%s with %i bytes' % (self.url, soapAction, len(request.raw_post_data)))
+            request_info['data_head'] = 'Request %s:%s with %i bytes. ' % (self.url, soapAction, len(request.raw_post_data)) 
             l = getattr(settings, 'SOAP_LOGING_BODY_LENGTH', 1000)
-            logger.info(force_unicode(request.raw_post_data[:l], errors='replace'))
+            request_info['data_body'] = force_unicode(request.raw_post_data[:l], errors='replace')
 
         environ = request.environ
         ct = environ['CONTENT_TYPE']
@@ -188,7 +204,7 @@ class SOAPAction(Action):
 
         #kw['request'] = request
         ps.request = request #чтоб передать запрос в обработчик акшена
-        return self.dispatch(ps, self.sendXML, self.sendFault, post=post, action=soapAction)
+        return self.dispatch(ps, self.sendXML, self.sendFault, post=post, action=soapAction, request_info=request_info)
 
 
 class SOAPController(ActionController):
