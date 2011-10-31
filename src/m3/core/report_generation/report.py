@@ -102,11 +102,11 @@ class OORunner(object):
         try:
             OORunner.CONTEXT = resolver.resolve("uno:socket,host=%s,port=%d;urp;StarOffice.ComponentContext" % (OORunner.HOST, OORunner.PORT))
         except NoConnectException:
-            raise ReportGeneratorException, "Не удалось соединиться с сервером openoffice на порту %d" % OORunner.PORT    
+            raise ReportGeneratorException(u"Не удалось соединиться с сервером openoffice на порту %d" % OORunner.PORT)
         
         desktop = OORunner.CONTEXT.ServiceManager.createInstanceWithContext("com.sun.star.frame.Desktop", OORunner.CONTEXT)
         if not desktop:
-            raise ReportGeneratorException, "Не удалось создать объект рабочей области Desktop на порту %d" % OORunner.PORT
+            raise ReportGeneratorException(u"Не удалось создать объект рабочей области Desktop на порту %d" % OORunner.PORT)
         
         return desktop    
                               
@@ -185,17 +185,19 @@ class OOParser(object):
         секции - знаком '-' ('-Шапка')
         '''   
         # FIXME: Смотри метод выше
-    
         all_sections = {}
         annotations = document.getAnnotations()
         annotations_iter = annotations.createEnumeration()
+
         while annotations_iter.hasMoreElements():
             annotation = annotations_iter.nextElement()
             value = annotation.String
             position = annotation.Position
             section_names = value.split()
+
             for section_name in section_names:
                 section_name = section_name.strip()
+
                 if section_name[0] in ['+', '-']:
                     if all_sections.has_key(section_name[1:]):
                         all_sections[section_name[1:]].add_new_cell(position)
@@ -205,20 +207,23 @@ class OOParser(object):
                         new_section.add_new_cell(position)
                         all_sections[section_name[1:]] = new_section    
                 else:
-                    raise OOParserException, "Секции в ячейке (%s, %s) \
-                    должны начинаться со знака '+' или '-'" %(position.Row+1, position.Column+1)            
+                    raise OOParserException(u"Секции в ячейке (%s, %s)"
+                        u"должны начинаться со знака '+' или '-'"
+                        %(position.Row+1, position.Column+1))
+
         for section in all_sections.values():
             if not section.is_valid():
-                raise OOParserException, u"Неверно задана секция %s. \
-                Определена одна из двух ячеек" %section.name  
+                raise OOParserException(u"Неверно задана секция %s."
+                    u"Определена одна из двух ячеек" %section.name)
+
         #Находим разрывы страниц в секции
         for section in all_sections.values():
-            self.find_page_breaks(section, document)    
+            self.find_page_breaks(section, document)
+
         #Флаг 8 отвечает за удаление аннотаций.
         document.clearContents(8)          
         return all_sections  
     
-
     def convert_value(self, value):
         '''
         Преобразовывает значение в тип, подходящий для отображения в openoffice
@@ -295,8 +300,8 @@ class Section(object):
         Возвращает рабочую область секции
         """
         return self.report_object.template_sheet.getCellRangeByPosition(
-                    self.left_cell_addr.Column, self.left_cell_addr.Row, 
-                    self.right_cell_addr.Column, self.right_cell_addr.Row)
+            self.left_cell_addr.Column, self.left_cell_addr.Row,
+            self.right_cell_addr.Column, self.right_cell_addr.Row)
     
     def find(self, regexp):
         u"""
@@ -340,18 +345,22 @@ class Section(object):
             self.left_cell_addr = cell
         #Если пытаются добавить третью ячейку, ругаемся    
         elif self.left_cell_addr and self.right_cell_addr:
-            raise OOParserException, "Секция %s задается двумя ячейками, невозможно добавить третью." %self.name    
+            raise OOParserException(u"Секция %s задается двумя ячейками, "
+                u"невозможно добавить третью." %self.name)
+
         #Если левая ячейка уже задана, определяем, действительно ли она левая    
         elif self.left_cell_addr:
             if (cell.Row >= self.left_cell_addr.Row) and (cell.Column >= self.left_cell_addr.Column):
                 self.set_right_cell_addr(cell)
+
             elif (cell.Row < self.left_cell_addr.Row) and (cell.Column < self.left_cell_addr.Column):   
                 self.left_cell_addr = cell  
                 self.set_right_cell_addr(self.left_cell_addr)
+
             # Секция задана неверно, не записываем такую ерунду
             else:    
-                raise OOParserException, "Неверно задана секция %s. \
-                Определите верхнюю левую и нижнюю правую ячейки" %self.name
+                raise OOParserException(u"Неверно задана секция %s."
+                    u"Определите верхнюю левую и нижнюю правую ячейки" %self.name)
         # И то же самое, если задана правая ячейка
         elif self.right_cell_addr:
             if (cell.Row >= self.right_cell_addr.Row) and (cell.Column >= self.right_cell_addr.Column):
@@ -361,8 +370,8 @@ class Section(object):
                 self.left_cell_addr = cell 
             # Секция задана неверно, не записываем такую ерунду
             else:    
-                raise OOParserException, "Неверно задана секция %s. \
-                Определите верхнюю левую и нижнюю правую ячейки" %self.name       
+                raise OOParserException(u"Неверно задана секция %s."
+                    u"Определите верхнюю левую и нижнюю правую ячейки" %self.name)
     
     def set_right_cell_addr(self, cell_addr):
         '''
@@ -375,10 +384,12 @@ class Section(object):
         if document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             src_sheet = document.getSheets().getByName(TEMPORARY_SHEET_NAME)
         else:
-            raise ReportGeneratorException, "Лист-шаблон отсутствует. Возможно, отчет уже был отображен."
+            raise ReportGeneratorException(u"Лист-шаблон отсутствует. Возможно, отчет уже был отображен.")
+        
         right_cell = src_sheet.getCellByPosition(cell_addr.Column, cell_addr.Row)
-        # Смотрим, объединена ли ячейка. Если да, адресом правой ячейки секции 
-        # будем считать адрес правой нижней ячейки 
+
+        # Смотрим, объединена ли ячейка. Если да, адресом правой ячейки секции
+        # будем считать адрес правой нижней ячейки
         if right_cell.IsMerged:
             cursor = src_sheet.createCursorByRange(right_cell)
             cursor.collapseToMergedArea()
@@ -388,7 +399,8 @@ class Section(object):
             new_right_position.Column = column
             new_right_position.Row = row
         else:
-            new_right_position = cell_addr 
+            new_right_position = cell_addr
+
         self.right_cell_addr = new_right_position                
             
     def is_valid(self):
@@ -402,14 +414,13 @@ class Section(object):
         Копирует секцию в документе из листа src_sheet начиная с ячейки cell
         Ячейку можно получить из листа так: cell = sheet.getCellByPosition(2,5) 
         '''
-        src_section_range = src_sheet.getCellRangeByPosition(self.left_cell_addr.Column,
-                                                      self.left_cell_addr.Row,
-                                                      self.right_cell_addr.Column,
-                                                      self.right_cell_addr.Row)
+        src_section_range = src_sheet.getCellRangeByPosition(
+            self.left_cell_addr.Column, self.left_cell_addr.Row,
+            self.right_cell_addr.Column, self.right_cell_addr.Row)
+        
         src_section_addr = src_section_range.getRangeAddress()
         dest_cell_addr = dest_cell.getCellAddress()
         src_sheet.copyRange(dest_cell_addr, src_section_addr)
-        
             
     def flush(self, params, vertical=True):
         '''
@@ -430,18 +441,20 @@ class Section(object):
         self.report_object.update_previous_render_info(vertical, (x,y), section_width, section_height)
         
         dest_cell = dest_sheet.getCellByPosition(x,y)
+
         if document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
             src_sheet = document.getSheets().getByName(TEMPORARY_SHEET_NAME)
         else:
-            raise ReportGeneratorException, "Невозможно вывести секцию в отчет, \
-            лист-шаблон отсутствует. Возможно, отчет уже был отображен."    
+            raise ReportGeneratorException(u"Невозможно вывести секцию в отчет, "
+                u"лист-шаблон отсутствует. Возможно, отчет уже был отображен.")
+
         self.copy(src_sheet, dest_cell)
         section_range = dest_sheet.getCellRangeByPosition(x,y,x+section_width-1,y+section_height-1)
         
         parser = OOParser()
         for key, value in params.items():
             if not isinstance(key, basestring):
-                raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым: %s" % key
+                raise ReportGeneratorException, u"Значение ключа для подстановки в шаблоне должно быть строковым: %s" % key
             value = parser.convert_value(value)
             parser.find_and_replace(section_range, u'#%s#' %key, value)      
         
@@ -467,6 +480,7 @@ class Section(object):
             #Если у ряда уже устанавливали высоту, перезаписывать не будем
             if dest_row_index in self.report_object.defined_height_rows:
                 return
+
             else:
                 #Если у ряда выставлена автовысота, устанавливать высоту не нужно 
                 if (src_sheet.getRows().getByIndex(src_row_index).OptimalHeight or 
@@ -476,6 +490,7 @@ class Section(object):
                     dest_sheet.getRows().getByIndex(dest_row_index).Height = \
                     src_sheet.getRows().getByIndex(src_row_index).Height
                 self.report_object.defined_height_rows.append(dest_row_index)
+                
             dest_row_index+=1    
     
     def set_columns_width(self, x, src_sheet, dest_sheet):
@@ -484,12 +499,20 @@ class Section(object):
         в секции
         '''
         dest_column_index = x
-        for src_column_index in range(self.left_cell_addr.Column,self.right_cell_addr.Column+1):
+
+        for src_column_index in range(self.left_cell_addr.Column,
+            self.right_cell_addr.Column+1):
             #Если у колонки уже устанавливали ширину, перезаписывать не будем
+
             if not(dest_column_index in self.report_object.defined_width_columns):
                 dest_sheet.getColumns().getByIndex(dest_column_index).Width = \
-                src_sheet.getColumns().getByIndex(src_column_index).Width
+                    src_sheet.getColumns().getByIndex(src_column_index).Width
+
+                # FIXME(Excinsky): И что интересно делает строчка выше?
+                # Объявляет переменную???? Такое неочевидное изменение состояния
+                # какого-то непонятного объекта чревато очень неочевидными багами.
                 self.report_object.defined_width_columns.append(dest_column_index)
+                
             dest_column_index+=1          
             
     def create_image(self, name):
@@ -506,11 +529,13 @@ class Section(object):
         '''
         for image in self.images:
             parser = OOParser()
-            image_tags = parser.find_image_tags(section_range, image.name)  
+            image_tags = parser.find_image_tags(section_range, image.name)
+            
             if not image_tags:
                 error_message = u"В секции %s не найден тег, соответствующий \
                                 изображению с именем %s" %(self.name, image.name)
-                raise ReportGeneratorException, error_message 
+                raise ReportGeneratorException, error_message
+
             for image_tag in image_tags:
                 image.create_graphic_shape()
                 image.set_image_location(image.position[0]+image_tag.Position.X, image.position[1]+image_tag.Position.Y)
@@ -523,9 +548,11 @@ class Section(object):
         '''
         columns = sheet.Columns
         rows = sheet.Rows
+        
         for column_index in self.column_page_breaks:
             column = columns.getByIndex(section_render_x + column_index)
             column.IsStartOfNewPage = True
+
         for row_index in self.row_page_breaks:
             row = rows.getByIndex(section_render_y + row_index)
             row.IsStartOfNewPage = True                        
@@ -534,8 +561,7 @@ class Section(object):
 class OOImage(object):
     '''
     Класс для удобной работы с изображениями. 
-    '''    
-    
+    '''
     def __init__(self, name, document):
         self.document = document
         self.name = name
@@ -551,12 +577,13 @@ class OOImage(object):
         '''  
         self.path = str(path)
         image_url = path_to_file_url(path)        
-        bitmap = self.document.createInstance( "com.sun.star.drawing.BitmapTable" )
+        bitmap = self.document.createInstance("com.sun.star.drawing.BitmapTable" )
         #Это такой хитрый трюк получить само изображение, а не ссылку на него
         if not bitmap.hasByName(self.path):
             bitmap.insertByName(self.path, image_url)
         if not bitmap.hasByName(self.path):
-            raise ReportGeneratorException, u"Не удалось загрузить изображение %s по адресу %s" %(self.name, path)                
+            raise ReportGeneratorException(u"Не удалось загрузить изображение "
+                u"%s по адресу %s" %(self.name, path))
                 
     def set_image_size(self, width, height):
         '''
@@ -642,9 +669,9 @@ class DocumentReport(object):
         Сохраняет отчет в файл, указанный в result_name. 
         Параметр output_format задает формат результирующего файла
         '''
-        assert isinstance(params, dict) 
+        assert isinstance(params, dict)
         if not result_name:
-            raise ReportGeneratorException, "Не указан путь до файла с отчетом"
+            raise ReportGeneratorException(u"Не указан путь до файла с отчетом")
         
         properties = []
         if output_format:
@@ -659,8 +686,9 @@ class DocumentReport(object):
         # например get_params
         parser = OOParser()
         for key, value in params.items():
-            if not isinstance(key, str):
-                raise ReportGeneratorException, "Значение ключа для подстановки в шаблоне должно быть строковым"
+            if not isinstance(key, (str, unicode)):
+                raise ReportGeneratorException(u"Значение ключа для "
+                    u"подстановки в шаблоне должно быть строковым")
             
             #FIXME: Мдаа... А почему бы не поместить вызов parser.convert_value
             # внутрь parser.find_and_replace. Это один и тот же экземпляр. Такое 
@@ -689,11 +717,11 @@ class DocumentReport(object):
         
         #FIXME: Крутое название шаблонов, а не пофик ли, что они будут перетираться
         temporary_file_name = 'report_template_%s.odt' % str(uuid4())[:8]
-        
-        
+                
         self.temporary_file_path = get_temporary_file_path(temporary_file_name)
         document = copy_document(self.desktop, template_path, self.temporary_file_path)
-        return document 
+
+        return document
     
     def clean_temporary_file(self):
         '''
@@ -704,10 +732,9 @@ class DocumentReport(object):
             try:
                 os.remove(self.temporary_file_path)
             except OSError as e:
-                logger.exception("Не удалось удалить временный файл %s: %s " %(self.temporary_file_path, e.message))                
-                
-            
-            
+                logger.exception(u"Не удалось удалить временный файл %s: %s " %(self.temporary_file_path, e.message))
+
+
 class SpreadsheetReport(object): 
     '''
     Класс для представления отчета-электронной таблицы.
@@ -792,8 +819,8 @@ class SpreadsheetReport(object):
                 section_name = section_name.decode('utf-8')
             return self.sections[section_name]
         except KeyError:
-            raise ReportGeneratorException, u"Секция с именем %s не найдена. Список \
-            доступных секций: %s" %(section_name, self.sections.keys())
+            raise ReportGeneratorException(u"Секция с именем %s не найдена. Список"
+                u"доступных секций: %s" %(section_name, self.sections.keys()))
             
     def show(self, result_name, filter=None):    
         '''        
@@ -801,17 +828,23 @@ class SpreadsheetReport(object):
         Параметр filter задает формат результирующего файла.
         '''
         if not result_name:
-            raise ReportGeneratorException, "Не указан путь до файла с отчетом"
+            raise ReportGeneratorException(u"Не указан путь до файла с"
+                u"отчетом")
+
         properties = []
         if filter:
             filter_property = PropertyValue()
             filter_property.Name = "FilterName"
             filter_property.Value = filter
-            properties.append(filter_property)     
+            properties.append(filter_property)
+
         result_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, result_name)
+
         if self.document.getSheets().hasByName(TEMPORARY_SHEET_NAME):
-            self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)           
+            self.document.getSheets().removeByName(TEMPORARY_SHEET_NAME)
+
         save_document_as(self.document, result_path, tuple(properties))
+
         # Удаление временного файла
         if self.temporary_file_path:
             self.clean_temporary_file()
@@ -846,7 +879,8 @@ class SpreadsheetReport(object):
         if self.current_position[0] is None or self.current_position[1] is None:
             self.previous_position = section_position
             self.previous_vertical = vertical
-            self.previous_width = section_width    
+            self.previous_width = section_width
+            
             if vertical:
                 self.previous_height = section_height
             else:
@@ -879,9 +913,13 @@ class SpreadsheetReport(object):
         объект открытого документа шаблона.
         '''
         template_path = os.path.join(DEFAULT_REPORT_TEMPLATE_PATH, template_name)
+
         temporary_file_name = 'report_template_%s.ods' %str(uuid4())[:8]
+
         self.temporary_file_path = get_temporary_file_path(temporary_file_name)
+
         document = copy_document(self.desktop, template_path, self.temporary_file_path)
+
         return document 
     
     def clean_temporary_file(self):
@@ -893,7 +931,7 @@ class SpreadsheetReport(object):
             try:
                 os.remove(self.temporary_file_path)
             except OSError as e:
-                logger.exception("Не удалось удалить временный файл %s: %s " %(self.temporary_file_path, e.message))                
+                logger.exception(u"Не удалось удалить временный файл %s: %s " %(self.temporary_file_path, e.message))
                  
     def set_result_sheet_style(self):
         '''
@@ -937,10 +975,10 @@ class SpreadsheetReport(object):
                 prefix_rows_height = prefix_rows_height % self.print_area_height 
                    
             #Если блок не помещается на странице, ставим разрыв в начале блока
-            if (self.print_area_height-prefix_rows_height) <= (block_height):
+            if (self.print_area_height-prefix_rows_height) <= block_height:
                 self.solid_block_begin.IsStartOfNewPage = True
         else:
-            raise ReportGeneratorException, u"Невозможно закрыть неделимый блок до того, как он был открыт"
+            raise ReportGeneratorException(u"Невозможно закрыть неделимый блок до того, как он был открыт")
                        
         
     def calculate_print_area_height(self):
@@ -954,7 +992,8 @@ class SpreadsheetReport(object):
         #Вычитаем из общей высоты высоту полей и колонтитулов
         total_height = page_style.Height
         footer = page_style.FooterHeight + page_style.FooterBodyDistance if page_style.FooterIsOn else 0
-        header = page_style.HeaderHeight + page_style.HeaderBodyDistance if page_style.HeaderIsOn else 0     
+        header = page_style.HeaderHeight + page_style.HeaderBodyDistance if page_style.HeaderIsOn else 0
+
         top_margin = page_style.TopMargin
         bottom_margin = page_style.BottomMargin    
         height = total_height - (footer + header + top_margin + bottom_margin)
@@ -1019,12 +1058,15 @@ def copy_document(desktop, src_file_path, dest_file_path, filter=None):
         filter_property = PropertyValue()
         filter_property.Name = "FilterName"
         filter_property.Value = filter
-        properties.append(filter_property)    
+        properties.append(filter_property)
+
     source_document = create_document(desktop, src_file_path)
+
     try:
         save_document_as(source_document, dest_file_path, tuple(properties))
     finally:
         source_document.close(True)
+
     document = create_document(desktop, dest_file_path)
     return document         
 
