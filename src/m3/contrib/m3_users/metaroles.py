@@ -66,7 +66,10 @@ class MetaroleManager(object):
         '''
         self._populate()
         if self._metaroles.has_key(code):
-            return self._metaroles[code]
+            metarole = self._metaroles[code]
+            # грязный хак для правильной работы DictSelectField'ов в условиях iSelectablePack ()
+            metarole.id = metarole.code
+            return metarole
         return None
     
     def get_registered_metaroles(self):
