@@ -266,28 +266,35 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
                     switch (operation){
                         case 'edit':
                             var selectedNode = scope.getSelectionModel().getSelectedNode();
-                            var parentNode = selectedNode.parentNode
+                            var parentNode = selectedNode.parentNode;
                             parentNode.reload(function(){
                                 var newSelectNode = scope.getNodeById(obj.data.id);
                                 newSelectNode.select();
                             })
-                        break;
+                            break;
+
+                        // Добавление нового узла в корень
                         case 'new':
-                            var rootNode = scope.getRootNode()
+                            var rootNode = scope.getRootNode();
                             rootNode.reload(function(){
                                 var newSelectNode = scope.getNodeById(obj.data.id);
                                 newSelectNode.select();
-                             })
-                        break;
+                            })
+                            break;
+
+                        // Добавление происходит в текущий выделенный узел
                         case 'newChild':
                             var parentNode = scope.getSelectionModel().getSelectedNode();
-                            parentNode.leaf = false
-                            parentNode.reload(function(){
+                            scope.getLoader().load(parentNode, function(){
+                                // После перезагрузки уровня узел нужно развернуть, чтобы
+                                // его дети отрисовались, иначе нельзя будет сделать выделение
+                                parentNode.leaf = false;
+                                if (!parentNode.expanded)
+                                    parentNode.expand(false, false);
                                 var newSelectNode = scope.getNodeById(obj.data.id)
                                 newSelectNode.select();
                             })
-                        break;
-                    
+                            break;
                     }                   
                 }
                 else {

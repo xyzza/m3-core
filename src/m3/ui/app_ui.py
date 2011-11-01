@@ -22,9 +22,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from m3.helpers.datastructures import TypedList
 from m3.helpers import logger
 
-from m3.ui.actions.packs import BaseDictionaryActions
 from m3.ui.actions import ControllerCache, Action
-from m3.ui.actions.tree_packs import BaseTreeDictionaryActions
 from m3.core.json import M3JSONEncoder
 
 #from mis.users.metaroles import UserMetaRole, get_metarole
@@ -42,10 +40,10 @@ class DesktopException(Exception):
 
 class DesktopModel(object):
     '''
-        Класс, агрегирующий в себе список модулей (start_menu и toolbox) в меню пуск 
+        Класс, агрегирующий в себе список модулей (start_menu и toolbox) в меню пуск
         и список модулей на Рабочем Столе (desktop)
     '''
-    
+
     def __init__(self):
         '''
         @param start_menu: список основных модулей для меню Пуск
@@ -78,11 +76,11 @@ class BaseDesktopElement(object):
         for k, v in kwargs.items():
             assert self.__dict__.has_key(k), 'Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__)
             self.__setattr__(k, v)
-            
+
     def render(self):
         ''' Должен быть переопределен в классе-наследнике'''
         raise NotImplementedError()
-    
+
     def __cmp__(self, obj):
         res = self.id == obj.id if isinstance(obj, BaseDesktopElement) else False
         return not res
@@ -100,11 +98,11 @@ class DesktopLaunchGroup(BaseDesktopElement):
         self.index = 10
         self.icon = 'default-launch-group'
         self._init_component(*args, **kwargs)
-        
+
     def t_is_subitems(self):
         ''' Для удобства понимания что рендерить. Используется в шаблонах.'''
         return True
-    
+
     def render(self):
         ''' Рендерит имеющийся объект. Вызывается из функции render. '''
         if self.subitems:
@@ -112,10 +110,10 @@ class DesktopLaunchGroup(BaseDesktopElement):
             res += ',iconCls: "%s"' % self.icon
             res += ',handler: function(){return false;}'
             res += ',menu: %s' % self.render_items()
-            return '{%s}' % res 
+            return '{%s}' % res
         else:
             return None
-        
+
     def __deepcopy__(self, memo):
         clone = DesktopLaunchGroup()
         clone.name = self.name
@@ -125,8 +123,8 @@ class DesktopLaunchGroup(BaseDesktopElement):
         for subitem in self.subitems:
             clone.subitems.append( copy.deepcopy(subitem) )
         return clone
-     
-    def render_items(self):   
+
+    def render_items(self):
         ''' Рендерит имеющийся список объектов. Вызывается из шаблона.'''
         res = []
         for item in self.subitems:
@@ -134,14 +132,14 @@ class DesktopLaunchGroup(BaseDesktopElement):
             if rendered:
                 res.append(rendered)
         return '{items: [%s]}' % ','.join(res)
-    
+
     def __str__(self):
         return u'Группа: "%s" at %s' % (self.name, id(self))
-    
-    
+
+
 class DesktopLauncher(BaseDesktopElement):
-    '''    
-        Класс для работы модулей. Модули могут находится в меню Пуск, на рабочем столе. 
+    '''
+        Класс для работы модулей. Модули могут находится в меню Пуск, на рабочем столе.
         Данные модули могут включать в себя класс DesktopLaunchGroup в атрибут subitems
     '''
     def __init__(self, *args, **kwargs):
@@ -163,10 +161,10 @@ class DesktopLauncher(BaseDesktopElement):
     def t_is_subitems(self):
         ''' Для удобства понимания что рендерить. Используется в шаблонах.'''
         return False
-    
+
     def t_render_context(self):
         return M3JSONEncoder().encode(self.context)
-        
+
     def render(self):
         '''Рендерит текущий объект. Вызывается из метода render_items класса DesktopLaunchGroup'''
         res = 'text:"%s"' % self.name.replace('"', "&quot;")
@@ -174,7 +172,7 @@ class DesktopLauncher(BaseDesktopElement):
         res += ',handler: %s' %self.handler
         res += ',scope: this'
         return '{%s}' % res
-    
+
     def __str__(self):
         return u'Ярлык: "%s" at %s' % (self.name, id(self))
 
@@ -214,7 +212,7 @@ class MenuSeparator(BaseDesktopElement):
     def __init__(self, *args, **kwargs):
         super(MenuSeparator, self).__init__(*args, **kwargs)
         self._init_component(*args, **kwargs)
-        
+
     def render(self):
         return '"-"'
 
@@ -232,14 +230,14 @@ class DesktopLoader(object):
     # Флаг того, что кэш загружен. Из-за ошибок при сборке он может недозаполниться, а поскольку
     # это операция разовая, больше ошибки не будет. Флаг будет повторять ошибку для облегчения
     # ее обнаружения.
-    _success = False 
-    
+    _success = False
+
     #Константы определяющие куда добавить элемент
     DESKTOP = 0
     START_MENU = 1
     TOOLBOX = 2
     TOPTOOLBAR = 3
-    
+
     @classmethod
     def _load_desktop_from_apps(cls):
         cls._lock.acquire()
@@ -261,7 +259,7 @@ class DesktopLoader(object):
             cls._success = True
         finally:
             cls._lock.release()
-        
+
     @classmethod
     def populate(cls, user, desktop, sorting=SORTING):
         '''
@@ -269,7 +267,7 @@ class DesktopLoader(object):
         '''
         def join_list(existing_list, in_list):
             '''
-            Складывает два списка с объектами DesktopLaunchGroup и DesktopLauncher 
+            Складывает два списка с объектами DesktopLaunchGroup и DesktopLauncher
             произвольного уровня вложенности.
             Критерием равенства является имя элемента!
             '''
@@ -277,7 +275,7 @@ class DesktopLoader(object):
             for existing_el in existing_list:
                 assert isinstance(existing_el, BaseDesktopElement)
                 names_dict[existing_el.name] = existing_el
-             
+
             for in_el in in_list:
                 assert isinstance(in_el, BaseDesktopElement)
                 # Группа ярлыков, которая уже есть в списке
@@ -285,19 +283,19 @@ class DesktopLoader(object):
                     # Запускаем рекурсивное слияние
                     ex_el = names_dict[in_el.name]
                     join_list(ex_el.subitems, in_el.subitems)
-                
+
                 # Если ярлык уже в списке, то добавлять повторно не нужно
                 elif names_dict.has_key(in_el.name):
                     continue
-                
+
                 else:
                     existing_list.append(in_el)
-        
+
         def add_el_to_desktop(cls, desktop, metarole_code):
             '''
             Добавляет элементы к интерфейсу в зависимости от метароли
             '''
-            
+
             items_for_role = cls._cache.get(metarole_code, {})
             for place, items in items_for_role.items():
                 if place == cls.DESKTOP:
@@ -308,7 +306,7 @@ class DesktopLoader(object):
                     join_list(desktop.toolbox, items)
                 elif place == cls.TOPTOOLBAR:
                     join_list(desktop.toptoolbar, items)
-                    
+
         def sort_desktop(desktop_list):
             '''
             Сортирует все контейнеры десктопа в зависимости от индекса (index)
@@ -318,8 +316,8 @@ class DesktopLoader(object):
             for item in desktop_list:
                 if isinstance(item, DesktopLaunchGroup):
                     sort_desktop(item.subitems)
-                
-                    
+
+
         assert isinstance(desktop, DesktopModel)
         assert isinstance(user, (User, AnonymousUser))
 
@@ -341,8 +339,8 @@ class DesktopLoader(object):
         sort_desktop(desktop.start_menu)
         sort_desktop(desktop.toolbox)
         sort_desktop(desktop.toptoolbar)
-            
-    
+
+
     @classmethod
     def add(cls, metarole, place, element):
         '''
@@ -376,30 +374,29 @@ class DesktopLoader(object):
             else:
                 if item not in existed_list:
                     existed_list.append(item)
-        
+
         def insert_for_role(metarole, el, processed_metaroles=[]):
             if metarole in processed_metaroles:
                 return
             processed_metaroles.append(metarole)
             element = copy.deepcopy(el)
-            
+
             # Кэш состоит из 3х уровней: словарь с метаролями, словарь с местами и список конечных элементов
             items_for_role = cls._cache.get(metarole.code, {})
             items_for_place = items_for_role.get(place, [])
             insert_item(items_for_place, element)
-            items_for_role[place] = items_for_place 
+            items_for_role[place] = items_for_place
             cls._cache[metarole.code] = items_for_role
-            
+
             # Не достаточно добавить элементы только в одну метароль, т.к. она может входить внутрь
             # другой метароли. Так что нужно пробежаться по ролям которые включают в себя нашу роль.
 
             for role in metarole.get_owner_metaroles():
                 insert_for_role(role, element, processed_metaroles)
-        
+
         #===============================================
         assert place >= 0 and place <=3
-        assert isinstance(metarole, UserMetarole)
-        
+
         insert_for_role(metarole, element)
 
 #===============================================================================
@@ -410,13 +407,13 @@ def add_desktop_launcher(name = '', url = '', icon='',
                          path = None, metaroles = None, places=None):
     '''
     Шорткат для добавления ланчеров в элементы рабочего стола.
-    
+
     @param name: подпись ланчера на рабочем столе/в меню
     @param url: url, по которому происходит обращение к ланчеру
     @param icon: класс, на основе которого рисуется иконка ланчера
     @param path: список кортежей, которые задают путь к ланчеру в случае, если
-                 этот ланчер спрятан в подменю. каждый элемент пути задается либо 
-                 в формате "(название,)", либо "(название, иконка,)", 
+                 этот ланчер спрятан в подменю. каждый элемент пути задается либо
+                 в формате "(название,)", либо "(название, иконка,)",
                  либо "(название, иконка, индекс)"
     @param metaroles: список метаролей (либо одиночная метароль)
     '''
