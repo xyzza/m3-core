@@ -11395,3 +11395,24 @@ Ext.apply(Ext, function(){
             'data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
     };
 }());
+
+
+/**
+ * Исправление поведения Ext.ComboBox, когда значения списка с value '' и 0
+ * считаются идентичными: теперь сравнение происходит с приведением к строке.
+ * Описание ошибки и патч отсюда: http://www.sencha.com/forum/showthread.php?79285
+ */
+Ext.override(Ext.form.ComboBox, {
+    findRecord : function(prop, value){
+        var record;
+        if(this.store.getCount() > 0){
+            this.store.each(function(r){
+                if(String(r.data[prop]) == String(value)){
+                    record = r;
+                    return false;
+                }
+            });
+        }
+        return record;
+    }
+});
