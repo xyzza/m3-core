@@ -7,7 +7,7 @@ from m3.helpers import logger
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-TEST_RUNNER = 'm3.contrib.tests.M3TestSuiteRunner'
+#TEST_RUNNER = 'm3.contrib.tests.M3TestSuiteRunner'
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -103,23 +103,23 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.auth',
     'south',
-    'm3.contrib.m3_storage',
-    'm3.contrib.m3_mutex',
-    'm3.contrib.ssacc_client',
+#    'm3_storage',
+#    'm3_mutex',
+#    'm3_ssacc_client',
     # Test applications here
     'tests.tests_core',
-    'tests.contrib.m3_mutex_tests',
+#    'tests.contrib.m3_mutex_tests',
     'tests.data.caching_tests',
     'tests.data.mie_tests',
-    'tests.data.repo_tests',
+#    'tests.data.repo_tests',
     'tests.ui.ext_tests',
     'tests.helpers.urls_tests',
-    'tests.contrib.m3_audit_tests',
+#    'tests.contrib.m3_audit_tests',
 #    'tests.contrib.palo_olap',
     'tests.core.registry_tests',
     'tests.db.ddl_tests',
 #    'tests.contrib.m3_storage_tests',
-    'tests.contrib.ssacc_client_tests',
+#    'tests.contrib.ssacc_client_tests',
 )
 
 logger.init_logging('./logs')
