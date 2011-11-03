@@ -38,9 +38,14 @@ def get_users_query(filter=''):
         else:
             query = User.objects.all()
         return query.order_by('first_name', 'last_name', 'username')
-    
-def get_assigned_users_query(role):
-    return AssignedRole.objects.filter(role = role).select_related('user').select_related('role')
+
+def get_assigned_users_query(role, filter):
+    filter_ = Q()
+    if filter:
+        for field in ['username', 'first_name', 'last_name', 'email']:
+            filter_ |= Q(**{'user__'+field+'__icontains': filter})
+    query = AssignedRole.objects.filter(Q(role = role) & filter_).select_related('user').select_related('role')
+    return query
 
 def get_unassigned_users(role, filter):
     '''
