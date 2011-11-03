@@ -970,6 +970,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
         this.view.showLoadMask(true);
         Ext.Ajax.request({
             url : this.exportUrl,
+            timeout: 9999999,
             success : function(res,opt){
             	this.view.showLoadMask(false);
                 location.href = res.responseText;
