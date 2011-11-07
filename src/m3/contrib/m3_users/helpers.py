@@ -39,7 +39,7 @@ def get_users_query(filter=''):
             query = User.objects.all()
         return query.order_by('first_name', 'last_name', 'username')
 
-def get_assigned_users_query(role, filter):
+def get_assigned_users_query(role, filter=None):
     filter_ = Q()
     if filter:
         for field in ['username', 'first_name', 'last_name', 'email']:
