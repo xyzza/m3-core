@@ -395,7 +395,8 @@ class DesktopLoader(object):
                 insert_for_role(role, element, processed_metaroles)
 
         #===============================================
-        assert place >= 0 and place <=3
+        assert 0 <= place <= 3
+        assert isinstance(metarole, UserMetarole)
 
         insert_for_role(metarole, element)
 
