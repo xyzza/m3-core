@@ -96,9 +96,9 @@ class BaseExtContainer(ExtUIComponent):
     
     def render_base_config(self):
         super(BaseExtContainer, self).render_base_config()
-        self._put_config_value('layoutConfig', 
-                                      self.t_render_layout_config,
-                                      self.layout)
+        if self.layout_config and self.layout:
+            self._put_config_value('layoutConfig', self.t_render_layout_config)
+
         self._put_config_value('layout', self.layout)
         
         if self.region == BaseExtContainer.BORDER:
@@ -188,7 +188,7 @@ class BaseExtPanel(BaseExtContainer):
                                       self.footer_bar)
         self._put_config_value('split', self.split)
         self._put_config_value('collapseMode', self.collapse_mode)        
-        self._put_config_value('collapsed', self.collapsed)        
+        self._put_config_value('collapsed', self.collapsed, self.collapsed)
 
         
     def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):

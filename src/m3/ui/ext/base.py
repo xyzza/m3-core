@@ -570,7 +570,7 @@ class ExtUIComponent(BaseExtComponent):
         self._put_config_value('fieldLabel', self.label)
         if  self.label_style:
             self._put_config_value('labelStyle', self.t_render_label_style())
-        self._put_config_value('hideLabel', self.hide_label)
+        self._put_config_value('hideLabel', self.hide_label, self.hide_label)
                         
     def pre_make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
         '''
