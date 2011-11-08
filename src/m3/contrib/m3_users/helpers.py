@@ -42,6 +42,7 @@ def get_users_query(filter=''):
 def get_assigned_users_query(role, filter=None):
     filter_ = Q()
     if filter:
+        #поиск по полям логин, фамилия, имя, email
         for field in ['username', 'first_name', 'last_name', 'email']:
             filter_ |= Q(**{'user__'+field+'__icontains': filter})
     query = AssignedRole.objects.filter(Q(role = role) & filter_).select_related('user').select_related('role')
