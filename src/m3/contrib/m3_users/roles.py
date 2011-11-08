@@ -200,9 +200,7 @@ class RoleAssignedUsersDataAction(actions.Action):
         ]
 
     def run(self, request, context):
-        filter = None
-        if hasattr(context, 'filter'):
-            filter = context.filter
+        filter = getattr(context, 'filter', None)
         return actions.ExtGridDataQueryResult(helpers.get_assigned_users_query(context.userrole_id, filter), context.start, context.limit)
 
 class UsersForRoleAssignmentData(actions.Action):
