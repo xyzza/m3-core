@@ -118,6 +118,39 @@ def apply_search_filter(query, filter, fields):
     return query
 
 def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id', exclusion=[]):
+    """
+    Определяет необходимость выполнения select_related на запросе.
+    """
+    # Люди любят указывать в list_columns такие вещи как client.contragent
+    # и вообще цеплять вложенные модели. Специально для них генерируем удобный
+    # одиночный запрос, который выбирает все что нужно.
+    related_models = []
+    for column in list_columns:
+        if isinstance(column, (tuple, list)):
+            column_name = column[0]
+        elif isinstance(column, str):
+            column_name = column
+        elif isinstance(column, dict):
+            column_name = column.get('data_index')
+            if not column_name:
+                continue
+        else:
+            continue
+
+        if '.' in column_name:
+            column_fields = column_name.split('.')
+            model_name = column_fields[0]
+
+            # Считаем все что не является последним после точки моделью
+            for deep_model in column_fields[1:-1]:
+                model_name = model_name +'__'+ deep_model
+
+            related_models.append(model_name)
+
+    new_query = query.select_related(*related_models)
+    return new_query
+
+def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id'):
     '''
     Функция извлекает объект из запроса по id, создает его экземпляр и биндит к форме
     @param request:     Запрос от клиента содержащий id объекта

@@ -650,6 +650,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             else:
                 query = self.tree_model.objects.filter(parent = parent_id)
             query = utils.apply_sort_order(query, self.tree_columns, self.tree_sort_order)
+            query = utils.detect_related_fields(query, self.list_columns)
             
             # кастомная функция модификации запроса
             # при реализации контестных справочников в большинстве случаев
@@ -687,6 +688,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             query = query.select_related(self.list_parent_field)
             query = utils.apply_sort_order(query, self.list_columns, self.list_sort_order)
             query = utils.apply_search_filter(query, filter, self.filter_fields)
+            query = utils.detect_related_fields(query, self.list_columns)
             # Для работы пейджинга нужно передавать общее количество записей
             query = self.modify_get_rows(query, request, context)
             total = query.count()
@@ -697,7 +699,8 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             result = {'rows': list(query.all()), 'total': total}
             return result
         else:
-            return self.get_nodes(parent_id, filter)
+            return self.get_nodes(request, context, parent_id, filter)
+
 
     def modify_get_rows(self, query, request, context):
         '''
