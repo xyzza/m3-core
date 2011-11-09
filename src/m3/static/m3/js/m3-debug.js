@@ -11416,3 +11416,30 @@ Ext.override(Ext.form.ComboBox, {
         return record;
     }
 });
+
+/**
+ * 
+ */
+var setReadOnlyField = Ext.form.Field.prototype.setReadOnly;
+var restoreClass = function(readOnly){
+    if(readOnly) {         
+        //this.removeClass('x-form-text');
+        this.addClass('m3-grey-field');
+    } else {
+        this.removeClass('m3-grey-field');
+        //this.addClass('x-form-text');            
+    }
+}
+Ext.override(Ext.form.Field, {
+    setReadOnly : function(readOnly){
+        setReadOnlyField.call(this, readOnly);
+        restoreClass.call(this, readOnly);
+    }
+});
+var setReadOnlyTriggerField = Ext.form.TriggerField.prototype.setReadOnly;
+Ext.override(Ext.form.TriggerField, {
+    setReadOnly : function(readOnly){
+        setReadOnlyTriggerField.call(this, readOnly);
+        restoreClass.call(this, readOnly);
+    }
+});
