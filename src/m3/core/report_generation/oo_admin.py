@@ -8,11 +8,11 @@ def start_server(host='localhost', port=8010, headless_mode=True):
     '''
     Запускает сервер OpenOffice.
     ''' 
-    command = 'soffice -accept="socket,host=%s,port=%d;urp;\
-               StarOffice.Service" -norestore -nofirstwizard -nologo' % (host, port)            
+    command = 'soffice --accept="socket,host=%s,port=%d;urp;\
+               StarOffice.Service" --norestore --nofirstwizard --nologo' % (host, port)            
     args = shlex.split(command)
     if headless_mode:
-        args.append('-headless')
+        args.append('--headless')
     try:
         subprocess.Popen(args)
         logger.info(u"Сервер OpenOffice успешно запущен на порту %s" %port)
