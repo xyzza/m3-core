@@ -150,7 +150,7 @@ def detect_related_fields(query, list_columns):
     new_query = query.select_related(*related_models)
     return new_query
 
-def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id'):
+def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id', exclusion=[]):
     '''
     Функция извлекает объект из запроса по id, создает его экземпляр и биндит к форме
     @param request:     Запрос от клиента содержащий id объекта
