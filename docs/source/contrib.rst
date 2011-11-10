@@ -1,6 +1,6 @@
 .. _contrib:
 
-contrib
+Приложения и сторонние компоненты
 ============
 
 .. toctree::
@@ -10,21 +10,5 @@ contrib
    contrib/m3_logview.rst
    contrib/m3_autologin.rst
    contrib/m3_query_builder.rst
-   
-kladr
------
-
-licensing
----------
-
--------
-
-m3_plugins
-----------
-
-m3_users
---------
-
-usermon
--------
+   contrib/sqlalchemy.rst
 
