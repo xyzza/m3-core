@@ -485,8 +485,10 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         else:
             sort_order =  self.list_sort_order
         filter_fields = self._default_filter()
+
         query = utils.apply_sort_order(self.model.objects, self.list_columns, sort_order)
         query = utils.apply_search_filter(query, filter, filter_fields)
+        query = utils.detect_related_fields(query, self.list_columns)
 
         query = self.modify_get_rows(query, request, context)
         total = query.count()
@@ -502,13 +504,6 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         метод для переопределения запроса на получение данных справочника
         '''
         return query
-    
-#    def modify_rows_query(self, query, request, context):
-#        '''
-#        Модифицирует запрос на получение данных. Данный метод необходимо определить в 
-#        дочерних классах.
-#        '''
-#        return query
     
     def get_row(self, id):
         assert isinstance(id, int)
