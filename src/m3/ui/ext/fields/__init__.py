@@ -9,5 +9,8 @@ from simple import (ExtDateField,
                     ExtTimeField,
                     ExtHiddenField,
                     ExtDisplayField)
-from complex import (ExtDictSelectField, ExtSearchField, ExtFileUploadField, 
+from complex import (ExtDictSelectField,
+                     ExtMultiSelectField,
+                     ExtSearchField,
+                     ExtFileUploadField,
                      ExtImageUploadField)
