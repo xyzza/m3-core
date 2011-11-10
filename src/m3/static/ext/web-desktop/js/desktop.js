@@ -661,7 +661,7 @@ Ext.ux.TaskBar.TaskButton = function(win, el){
     this.win = win;
     Ext.ux.TaskBar.TaskButton.superclass.constructor.call(this, {
         iconCls: win.iconCls,
-        text: Ext.util.Format.ellipsis(win.title, 28),
+        text: Ext.util.Format.ellipsis(win.title, win.iconCls ? 25 : 29),
         tooltip: win.title,
         renderTo: el,
         handler : function(){
