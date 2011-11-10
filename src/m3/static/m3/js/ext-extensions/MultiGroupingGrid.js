@@ -1172,7 +1172,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
                     if (scope.localEdit){
                         // то на самом деле нам пришла строка грида
                         var obj = Ext.util.JSON.decode(data);
-                        var record = new Ext.data.Record(obj.data);
+                        var record = new Ext.data.Record(obj.data, obj.data.id);
                         record.json = obj.data;
                         var store = scope.getStore();
                         // и надо ее заменить в сторе
