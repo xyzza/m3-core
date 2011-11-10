@@ -117,7 +117,7 @@ def apply_search_filter(query, filter, fields):
         query = query.filter(condition)
     return query
 
-def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id', exclusion=[]):
+def detect_related_fields(query, list_columns):
     """
     Определяет необходимость выполнения select_related на запросе.
     """
