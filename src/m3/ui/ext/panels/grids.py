@@ -367,6 +367,9 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         # Признак отображения информации о записях
         self.display_info = True
         
+        # Формат отображения информации о записях
+        self.display_message = u'Показано {0}-{1} из {2}'
+        
         # Объем буфера записей - должен быть больше чем число соседних элементов + число видимых строк 
         self.buffer_size = 200
         
@@ -419,6 +422,7 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         self._put_params_value('localEdit',self.local_edit)
         self._put_params_value('groupable',self.groupable)
         self._put_params_value('displayInfo',self.display_info)
+        self._put_params_value('displayMsg', self.display_message)
         self._put_params_value('bufferSize',self.buffer_size)
         self._put_params_value('nearLimit',self.near_limit)
         
