@@ -11418,16 +11418,16 @@ Ext.override(Ext.form.ComboBox, {
 });
 
 /**
- * 
+ * Добавление/удаление пользовательского класса m3-grey-field после использования
+ * setReadOnly для Ext.form.Field и Ext.form.TriggerField
+ * см m3.css - стр. 137 .m3-grey-field
  */
 var setReadOnlyField = Ext.form.Field.prototype.setReadOnly;
 var restoreClass = function(readOnly){
     if(readOnly) {         
-        //this.removeClass('x-form-text');
         this.addClass('m3-grey-field');
     } else {
         this.removeClass('m3-grey-field');
-        //this.addClass('x-form-text');            
     }
 }
 Ext.override(Ext.form.Field, {

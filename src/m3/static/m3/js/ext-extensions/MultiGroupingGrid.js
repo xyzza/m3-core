@@ -844,7 +844,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
     	        displayInfo: params.displayInfo,
     	        view: mgView,
     	        items: tools,
-    	        displayMsg: 'Показано {0}-{1} из {2}',
+    	        displayMsg: params.displayMsg,
     	        emptyMsg: 'Нет данных',
     	        refreshText: "Обновить"
 	       	})
