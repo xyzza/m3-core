@@ -376,6 +376,9 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         # Число соседних элементов сверху и снизу от видимой области для предотвращения запросов.
         # Обычно 1/4 или 1/2 от объема буфера
         self.near_limit = 100
+
+        # Стиль заголовка колонки. Применяется ко всем колонкам. Например: 'text-align: center;'
+        self.header_style = ''
         
         self.init_component()
 
@@ -388,6 +391,12 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         self.render_base_config()
         self.render_params()
         return render_component(self)
+
+    def render_base_config(self):
+        # Добавление происходит перед вызовом родителя, т.к. в нём _view_config уже будет сериализован
+        if self.header_style:
+            self._view_config['headerStyle'] = self.header_style
+        super(ExtMultiGroupinGrid, self).render_base_config()
 
     def render_params(self):
         super(ExtMultiGroupinGrid, self).render_params()
