@@ -364,6 +364,12 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
      * @private
      */
     _loadMaskAnchor : null,
+
+    /**
+     * Позволяет добавить свой стиль к заголовкам колонок.
+     * Vadim 14.11.2011.
+     */
+    headerStyle: '',
     
 // }}}
 
@@ -678,6 +684,18 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         for(var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++){
             Ext.removeNode(bd.childNodes[firstRow]);
         }
+    },
+
+    /**
+     * Позволяет добавить свой стиль к заголовкам колонок.
+     * Vadim 14.11.2011.
+     */
+    getColumnStyle : function(colIndex, isHeader) {
+        var style = Ext.ux.grid.livegrid.GridView.superclass.getColumnStyle.call(this, colIndex, isHeader);
+        if (isHeader){
+            style += this.headerStyle;
+        }
+        return style;
     },
 
 // {{{ ----------------------dom/mouse listeners--------------------------------
