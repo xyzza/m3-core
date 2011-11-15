@@ -7,6 +7,7 @@ import decimal
 from uuid import uuid4
 import tempfile
 import re
+import shutil
 
 from django.conf import settings
 
@@ -1049,25 +1050,10 @@ def get_temporary_file_path(temporary_file_name):
         temporary_path = tempfile.gettempdir()
     return os.path.join(temporary_path, temporary_file_name)
 
-def copy_document(desktop, src_file_path, dest_file_path, filter=None):
+def copy_document(desktop, src_file_path, dest_file_path):
     '''
     Создает копию файла и возвращает объект документа созданного файла.
     '''
-    properties = []
-    if filter:
-        filter_property = PropertyValue()
-        filter_property.Name = "FilterName"
-        filter_property.Value = filter
-        properties.append(filter_property)
-
-    source_document = create_document(desktop, src_file_path)
-
-    try:
-        save_document_as(source_document, dest_file_path, tuple(properties))
-    finally:
-        source_document.close(True)
-
+    shutil.copy(src_file_path, dest_file_path)
     document = create_document(desktop, dest_file_path)
-    return document         
-
-#FIXME: Автору документа требуется срочно прочитать Макконнелла!!
+    return document       
