@@ -8288,52 +8288,75 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
             }
         }
     }
-    /*
+    /**
      * Динамическая загрузка данных формы
      */
-    ,loadForm: function() {
-        assert(this.dataUrl, 'Не задан dataUrl для формы');
-        var form = this.getForm();
-        var mask = new Ext.LoadMask(this.body, {msg:'Чтение данных...'});
-        var load = {
-            url: this.dataUrl
-            ,params: Ext.applyIf({isGetData: true}, this.actionContextJson || {})
-            ,success: function(form, action){
-                // Сложным контролам, данные которых хранятся в Store, недостаточно присвоить value.
-                // Для них передаются готовые записи Store целиком.
-                var complex_data = action.result.complex_data;
-                for (var fieldName in complex_data){
-                    var field = form.findField(fieldName);
-
-                    // Создаем запись и добавляем в стор
-                    var record = new Ext.data.Record();
-                    var id = complex_data[fieldName].id;
-                    record['id'] = id;
-                    record[field.displayField] = complex_data[fieldName].value;
-                    field.getStore().add([record]);
-
-                    // Устанавливаем новое значение
-                    field.setValue(id);
-                    field.collapse();
-                }
-                
-            	mask.hide();
-                this.disableToolbars(false);
-                this.fireEvent('dataloaded', action);
-            }
-            ,failure: function (){
-                uiAjaxFailMessage.apply(this, arguments);
-                mask.hide();
-                this.disableToolbars(false);
-           }
-           ,scope: this
-        };
+    ,loadForm: function() {        
         this.disableToolbars(true);
+   
+        var mask = new Ext.LoadMask(this.body, {msg:'Чтение данных...'});
         mask.show();
-        if (this.fireEvent('beforeloaddata', load)) {
-        	form.doAction('load', load);
+        if (this.fireEvent('beforeloaddata', this)) {
+        	
+        	assert(this.dataUrl, 'Не задан dataUrl для формы');
+        	this.getForm().doAction('load', {
+                url: this.dataUrl
+                ,params: Ext.applyIf({isGetData: true}, this.actionContextJson || {})
+                ,success: this.onSuccessLoadForm.createDelegate(this, [mask], true)
+                ,failure: this.onFailureLoadForm.createDelegate(this, [mask], true)
+               ,scope: this
+            });
         }
-    }
+    },
+    /**
+     * Функция выполнения в момент успешной загрузки данных на форму окна
+     * @param form Ссылка на форму
+     * @param action Действия объекта для операции
+     * @param mask Параметр маскирования
+     */
+    onSuccessLoadForm: function(form, action, mask){
+        // Сложным контролам, данные которых хранятся в Store, недостаточно присвоить value.
+        // Для них передаются готовые записи Store целиком.
+        var field,
+            id,
+            record,            
+            complexData = action.result['complex_data'];
+            
+        for (var fieldName in complexData){
+            field = form.findField(fieldName);
+            assert(field instanceof Ext.form.TriggerField,
+                String.format('Поле {0} не предназначено для загрузки данных', fieldName));
+            
+            id = complexData[fieldName].id;
+            
+            // Создаем запись и добавляем в стор
+            record = new Ext.data.Record();                    
+            record.set('id', id);
+            record.set(field.displayField, complexData[fieldName].value);
+            
+            
+            field.getStore().add([record]);
+
+            // Устанавливаем новое значение
+            field.setValue(id);
+            field.collapse();
+        }
+        
+        mask.hide();
+        this.disableToolbars(false);
+        this.fireEvent('dataloaded', action);
+    },
+    /**
+     * Функция, в случае ошибочной загрузки данных в форму окна
+     * @param form Ссылка на форму
+     * @param action Действия объекта для операции
+     * @param mask Параметр маскирования
+     */
+    onFailureLoadForm: function (form, action, mask){
+        uiAjaxFailMessage.apply(this, arguments);
+        mask.hide();
+        this.disableToolbars(false);
+   }
 })
 Ext.ns('Ext.ux.grid');
 
