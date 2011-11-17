@@ -88,7 +88,7 @@ class GroupingRecordProvider(object):
     aggregates = {}
     xls_style = {}
 
-    def __init__(self, proxy=None, data=None, totals=None, aggregates=None):
+    def __init__(self, proxy=None, data=None, totals=None, aggregates=None, detail_attrs_map=None):
         if proxy:
             self.proxy_class = proxy
         if data is not None:
@@ -97,6 +97,12 @@ class GroupingRecordProvider(object):
             self.count_totals = totals
         if aggregates is not None:
             self.aggregates = aggregates
+
+        # Словарь, определяющий дополнительные поля, которые добавляются в узловые записи,
+        # создаваемые самим провайдером. Они могут пригодиться для последующей обработки узлов.
+        # Например, detail_attrs_map={'a_name': 'a_id', 'b_name': 'b_id'}
+        # Если группировка будет по полям a_name и b_name, то вместе с ними будет добавлены a_id и b_id.
+        self.detail_attrs_map = detail_attrs_map or {}
 
     def get_data(self, *args, **kwargs):
         return self.data_source
@@ -860,7 +866,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             level[group_value] = 1
                             aggr_rec = {}
                             aggregate_values[group_value] = aggr_rec
-                            prepared.append(group_value)
+                            prepared.append( (group_value, rec) )
                         else:
                             level[group_value] = level[group_value] + 1
                             aggr_rec = aggregate_values[group_value]
@@ -879,10 +885,10 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             elif agg_type == 'avg':
                                 aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
                     else:
-                        prepared.append(rec)
+                        prepared.append( (rec, rec) )
             # теперь выведем запрошенные элементы уровня
             # придется обработать все записи уровня, т.к. требуется еще отсортировать их и лишь потом ограничить количество
-            for i in prepared:
+            for i, rec in prepared:
                 if field:
                     item = self.create_record()
                     self.setattr(item, field, i)
@@ -895,11 +901,23 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             self.setattr(item, agg, aggregate_values[i][agg] / self.getattr(item, 'count'))
                         else:
                             self.setattr(item, agg, aggregate_values[i][agg])
+
+                    # Добавляем в прокси расшифровку для группируемого поля
+                    detail_attr = self.detail_attrs_map.get(field)
+                    if detail_attr:
+                        self.setattr(item, detail_attr, self.getattr(rec, detail_attr))
+
                     # проставим значения ключей уровня
                     for lev in range(0, level_index):
                         lev_field = grouped[lev]
                         key = level_keys[lev]
                         self.setattr(item, lev_field, key)
+
+                        # Добавляем в прокси атрибуты для расшифровки
+                        detail_attr = self.detail_attrs_map.get(lev_field)
+                        if detail_attr:
+                            self.setattr(item, detail_attr, self.getattr(rec, detail_attr))
+
                     self.calc(item)
                 else:
                     item = self.create_record()
@@ -930,7 +948,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
             self.setattr(item, 'index', offset + index + begin)
             self.setattr(item, 'lindex', index + begin)
             res.append(item)
-            index = index + 1
+            index += 1
 
         #print 'out_data()= total=%s, res_count=%s' % (total_of_level, len(res))
         #out_cache[cache_key] = (res,total_of_level)
