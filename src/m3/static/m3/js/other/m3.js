@@ -270,11 +270,15 @@ function uiAjaxFailMessage (response, opt) {
 		return;
 	}
 	
-	if (opt['failureType'] === "server"){ 
+    // response['status'] === 200 -- Пользовательская ошибка, sucess == false
+	if (response['status'] === 200 || opt['failureType'] === "server"){
 	    // Пришел OperationResult('success':False)
 	    if (opt && opt.response && opt.response.responseText) {
 	        smart_eval( opt.response.responseText );
-	    }	    	    
+	    } else {
+            // grid.load обрабатывается тут
+            smart_eval( response.responseText );
+        }
 	} else {
     	var bodySize = Ext.getBody().getViewSize(),
     		width = (bodySize.width < 500) ? bodySize.width - 50 : 500,
