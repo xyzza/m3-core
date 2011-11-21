@@ -108,10 +108,10 @@ INSTALLED_APPS = (
     'm3.contrib.ssacc_client',
     # Test applications here
     'tests.tests_core',
-    'tests.contrib.m3_mutex_tests',
+    #'tests.contrib.m3_mutex_tests',
     'tests.data.caching_tests',
     'tests.data.mie_tests',
-    'tests.data.repo_tests',
+    #'tests.data.repo_tests',
     'tests.ui.ext_tests',
     'tests.helpers.urls_tests',
     'tests.contrib.m3_audit_tests',
@@ -120,6 +120,7 @@ INSTALLED_APPS = (
     'tests.db.ddl_tests',
 #    'tests.contrib.m3_storage_tests',
     'tests.contrib.ssacc_client_tests',
+    'tests.ui.actions_tests',
 )
 
 logger.init_logging('./logs')
