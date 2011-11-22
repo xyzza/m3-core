@@ -7590,26 +7590,27 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
 
     /**
      * @public Команда старта операции
+     * params содержит параметры начала выполнения операции
      */
-    start:function() {
-        this.doRequest('start', this.run);
+    start:function(params) {
+        this.doRequest('start', this.run, params);
     },
 
     /**
      * @public Команда остановки операции
      */
-    stop:function() {
+    stop:function(params) {
         this.stopWaiting();
         this.doRequest('stop', function(response) {
             this.fireEvent('update', this.parseResponse(response));
-        });
+        }, params);
     },
 
     /**
      * @public Команда проверки прогресса
      */
-    ping:function() {
-        this.doRequest('request', this.run);
+    ping:function(params) {
+        this.doRequest('request', this.run, params);
     },
 
     /**
@@ -7661,17 +7662,20 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
     /**
      * @private Запрос на сервер
      */
-    doRequest:function(command,successCallback) {
-        var params = {};
-        params[this.commandParam] = command;
-        params[this.boundaryParam] = this.boundary;
+    doRequest:function(command,successCallback, params) {
+        var request_params = {};
+        request_params[this.commandParam] = command;
+        request_params[this.boundaryParam] = this.boundary;
+        if(params != undefined){
+            Ext.applyIf(request_params, params);
+        }
 
         Ext.Ajax.request({
             url:this.url,
             success:successCallback,
             failure:this.requestError,
             scope:this,
-            params: params
+            params: request_params
         });
     },
 
@@ -7730,15 +7734,15 @@ Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
         this.on('destroy', this.onDestroy)
     },
 
-    ping:function() {
-        this.serverProxy.ping();
+    ping:function(params) {
+        this.serverProxy.ping(params);
     },
 
-    start:function() {
-        this.serverProxy.start();
+    start:function(params) {
+        this.serverProxy.start(params);
     },
 
-    stop:function() {
+    stop:function(params) {
         this.serverProxy.stop();
     },
 
