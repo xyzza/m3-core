@@ -322,7 +322,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
                 if (sm.hasSelection()) {
                     // только для режима выделения строк
                     if (sm instanceof Ext.grid.RowSelectionModel) {
-                        var rec = sm.getSelected();
+                        var rec = sm.getSelections();
                         store.remove(rec);
                     }
                 }
