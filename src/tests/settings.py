@@ -104,7 +104,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'south',
 #    'm3_storage',
-#    'm3_mutex',
+    'm3_mutex',
 #    'm3_ssacc_client',
     # Test applications here
     'tests.tests_core',
