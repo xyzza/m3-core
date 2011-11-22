@@ -7615,7 +7615,7 @@ Ext.ns('Ext.m3');
  * аргумента к событию передается объект следуеющего вида
  * {
  *     value:0.3, //текущий прогресс от 0 до 1
- *     isActive: true, // производиться ли операция на серврере
+ *     alive: true, // производиться ли операция на серврере
  *     text:'' // строка сообщение с сервера
  * }
  */
@@ -7631,9 +7631,19 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
     interval:1000,
 
     /**
+     * @boundary {String} значение, используемое для идентификации фоновой операции
+     */
+    boundary:'default-boundary',
+
+    /**
      * @cfg {String} Название парамтетра с командой серверу
      */
     commandParam:'command',
+
+    /**
+     * @cfg {String} Название параметра с\о значением баундари
+     */
+    boundaryParam:'boundary',
 
     constructor:function(cfg) {
         Ext.apply(this, cfg);
@@ -7650,6 +7660,7 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
         this.isRunning = false;
 
         this.addEvents('update');
+        this.addEvents('result_ready');
     },
 
     /**
@@ -7673,7 +7684,7 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
      * @public Команда проверки прогресса
      */
     ping:function() {
-        this.doRequest('ping', this.run);
+        this.doRequest('request', this.run);
     },
 
     /**
@@ -7703,8 +7714,13 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
      */
     waitCallback:function(response) {
         var responseObj = this.parseResponse(response);
-        if (!responseObj.isActive) {
+        if (!responseObj.alive) {
             this.stopWaiting();
+
+            /* запрашиваем результат операции с сервера */
+            this.doRequest('result', function(responseResult){
+               this.fireEvent('result_ready', this.parseResponse(responseResult));
+            });
         }
 
         this.fireEvent('update',responseObj);
@@ -7714,7 +7730,7 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
      * @private Это функция запускается в бексонечном цикле
      */
     wait:function() {
-        this.doRequest('ping', this.waitCallback);
+        this.doRequest('request', this.waitCallback);
     },
 
     /**
@@ -7723,6 +7739,7 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
     doRequest:function(command,successCallback) {
         var params = {};
         params[this.commandParam] = command;
+        params[this.boundaryParam] = this.boundary;
 
         Ext.Ajax.request({
             url:this.url,
@@ -7779,7 +7796,8 @@ Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
         Ext.m3.BackgroundOperationBar.superclass.initComponent.call(this);
         this.serverProxy = new Ext.m3.BackgroundOperationProxy({
             url:this.url,
-            interval:this.interval
+            interval:this.interval,
+            boundary:this.boundary
         });
 
         //mon вместо on чтобы функция хендлер уничтожалась вместе с объектом прогрес бара
