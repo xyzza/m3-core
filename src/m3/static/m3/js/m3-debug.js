@@ -7731,7 +7731,8 @@ Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
         Ext.m3.BackgroundOperationBar.superclass.initComponent.call(this);
         this.serverProxy = new Ext.m3.BackgroundOperationProxy({
             url:this.url,
-            interval:this.interval
+            interval:this.interval,
+            boundary:this.boundary
         });
 
         //mon вместо on чтобы функция хендлер уничтожалась вместе с объектом прогрес бара
