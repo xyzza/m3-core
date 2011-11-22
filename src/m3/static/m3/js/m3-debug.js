@@ -7585,7 +7585,7 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
         this.isRunning = false;
 
         this.addEvents('update');
-        this.addEvents('result_ready')
+        this.addEvents('result_ready');
     },
 
     /**
@@ -7630,7 +7630,7 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
     stopWaiting:function() {
         if (this.isRunning) {
             this.isRunning = false;
-            this.taskRunner.stop(this.task);    
+            this.taskRunner.stop(this.task);
         }
     },
 
@@ -7721,7 +7721,8 @@ Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
         Ext.m3.BackgroundOperationBar.superclass.initComponent.call(this);
         this.serverProxy = new Ext.m3.BackgroundOperationProxy({
             url:this.url,
-            interval:this.interval
+            interval:this.interval,
+            boundary:this.boundary
         });
 
         //mon вместо on чтобы функция хендлер уничтожалась вместе с объектом прогрес бара
