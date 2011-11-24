@@ -7426,7 +7426,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             this.wrap.removeClass(this.wrapFocusClass);
         }
         // Очистка значения, если введено пустое значение
-        if (!this.getRawValue()) {
+        if (!this.getRawValue() & this.getValue()) {
             this.clearValue();
         }
         this.validate();
@@ -7450,6 +7450,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 });
 
 Ext.reg('m3-select', Ext.m3.AdvancedComboBox);
+
 /**
  * Компонент поля даты. 
  * Добавлена кнопа установки текущий даты
