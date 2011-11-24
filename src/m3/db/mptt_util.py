@@ -15,16 +15,22 @@ def enable_mptt_signals(model):
     '''
     model_signals.pre_save.connect(receiver = mptt_signals.pre_save, sender = model)
 
-def rebuild_mptt_tree(model, manage_mptt_signals = True):
+def rebuild_mptt_tree(model, manage_mptt_signals=True, query_manager='objects'):
     '''
     Метод пересчета атрибутов MPTT-модели. Может использоваться:
     - при включении новой модели в MPTT
     - при массовой загрузке данных
-    
-    manage_mptt_signals - признак выполнения отключения/включения сигналов MPTT для обработки дерева, иначе их надо отключать/включать вручную в вызывающем методе
+
+    Параметры:
+        model - сама пересчитываемая модель
+        manage_mptt_signals - признак выполнения отключения/включения сигналов MPTT для обработки дерева,
+            иначе их надо отключать/включать вручную в вызывающем методе
+        query_manager - вместо штатного менеджера запросов objects можно использовать собственный
     '''
+    model_manager = getattr(model, query_manager)
+
     def build_node(model, opts, parent_id, tree_id, left, level):
-        qs = model.objects.filter(**{opts.parent_attr: parent_id})
+        qs = model_manager.filter(**{opts.parent_attr: parent_id})
         #print 'tree=',tree_id,'left=',left,'level=',level
         right = left
         for node in qs:
@@ -41,7 +47,7 @@ def rebuild_mptt_tree(model, manage_mptt_signals = True):
         disable_mptt_signals(model)
     
     opts = model._meta
-    qs = model.objects.filter(**{'%s__isnull' % opts.parent_attr: True})
+    qs = model_manager.filter(**{'%s__isnull' % opts.parent_attr: True})
     tree_id = 1
     #l = len(qs)
     for node in qs:
