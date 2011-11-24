@@ -7497,7 +7497,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
         this.validate();
 	},
 
-    /**werwerw
+    /**
      * Проверка поля на корректность
      */
     validateField: function(value){
