@@ -270,13 +270,13 @@ function uiAjaxFailMessage (response, opt) {
 		return;
 	}
 	
-    // response['status'] === 200 -- Пользовательская ошибка, sucess == false
+    // response['status'] === 200 -- Пользовательская ошибка, success == false
 	if (response['status'] === 200 || opt['failureType'] === "server"){
 	    // Пришел OperationResult('success':False)
 	    if (opt && opt.response && opt.response.responseText) {
 	        smart_eval( opt.response.responseText );
 	    } else {
-            // grid.load обрабатывается тут
+            // grid and tree load обрабатывается тут
             smart_eval( response.responseText );
         }
 	} else {
