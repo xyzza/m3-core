@@ -44,6 +44,13 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 	 * Если пусто, то нет группировки.
 	 */
 	groupedColumns: [],
+    /**
+     * Формат вывода группировочной колонки
+     * {0} - Заголовок колонки
+     * {1} - Значение группировки
+     * {2} - Количество дочерних элементов
+     */
+    groupTextFormat: '{0}: {1} ({2})',
 	/**
      * Инициализация плагина
      *
@@ -500,7 +507,7 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
 			if (column) {
 				var col_name = this.grid.colModel.getColumnHeader(this.grid.colModel.findColumnIndex(column));
 				var count = record.json.count;
-				res = String.format('{0}: {1} ({2})',col_name, v, count);
+				res = String.format(this.groupTextFormat,col_name, v, count);
 			} else {
 				res = v;
 			}
