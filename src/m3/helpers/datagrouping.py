@@ -53,6 +53,7 @@ class RecordProxy(object):
         self.is_leaf = False # признак конечной записи (больше не раскрывается) (заполняется при выводе)
         self.expanded = False # признак что элемент развернут (заполняется при выводе)
         self.count = 0 # количество дочерних узлов, если они есть
+        self.grouped = [] # Список атрибутов, по которым происходит группировка
         self.init_component(*args, **kwargs)
 
     def init_component(self, *args, **kwargs):
@@ -890,7 +891,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
             # придется обработать все записи уровня, т.к. требуется еще отсортировать их и лишь потом ограничить количество
             for i, rec in prepared:
                 if field:
-                    item = self.create_record()
+                    item = self.create_record(grouped=grouped)
                     self.setattr(item, field, i)
                     self.setattr(item, 'id', i)
                     self.setattr(item, 'indent', level_index)
@@ -920,7 +921,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
 
                     self.calc(item)
                 else:
-                    item = self.create_record()
+                    item = self.create_record(grouped=grouped)
                     self.setattr(item, 'is_leaf', True)
                     self.setattr(item, 'indent', level_index)
                     self.load(item, i)
