@@ -1145,30 +1145,38 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 	 * @param {Object} response Ответ
 	 * @param {Object} opts Доп. параметры
 	 */
-	,onNewRecordWindowOpenHandler: function (response, opts){
-	    var window = smart_eval(response.responseText);
-	    if(window){
-			var scope = this;
-	        window.on('closed_ok', function(data){
+    ,onNewRecordWindowOpenHandler: function (response, opts){
+        var window = smart_eval(response.responseText);
+        if(window){
+            var scope = this;
+            window.on('closed_ok', function(data){
                 if (scope.fireEvent('rowadded', scope, data)) {
                     // если локальное редактирование
                     if (scope.localEdit){
                         // то на самом деле нам пришла строка грида
                         var obj = Ext.util.JSON.decode(data);
-                        var record = new Ext.data.Record(obj.data);
+                        var record = new Ext.data.Record(obj.data, obj.data.id);
                         record.json = obj.data;
                         var store = scope.getStore();
+                        // найдем запись в сторе, вдруг она уже есть!
+                        var recordPosition = store.findExact('id', obj.data.id);
+                        if (recordPosition >= 0) {
+                            // если нашли, то зменим
+                            store.remove(store.getAt(recordPosition));
+                        } else {
+                            recordPosition = 0;
+                        }
                         // и надо ее добавить в стор
-                        store.insert(0, record);
+                        store.insert(recordPosition, record);
                         var sm = scope.getSelectionModel();
-                        sm.selectRow(0);
+                        sm.selectRow(recordPosition);
                     } else {
                         return scope.refreshStore();
                     }
                 }
-			});
-	    }
-	}
+            });
+        }
+    }
 	,onEditRecordWindowOpenHandler: function (response, opts){
 	    var window = smart_eval(response.responseText);
 	    if(window){
