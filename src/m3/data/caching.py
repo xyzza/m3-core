@@ -36,13 +36,13 @@ class RuntimeCacheMetaclass(type):
                 self.custom_init(*args, **kwargs)
 
             # в случае, если внутри класса кеша задан обработчик, то мы пытаемся его зарегистировать
-            if hasattr(self, 'handler') and callable(self.handler) and not self.handler_registered(self.handler):
+            if hasattr(self, 'handler') and callable(self.handler) and not self.is_instance_registered():
                 self.register_handler(self.handler)
 
         klass = super(RuntimeCacheMetaclass, cls).__new__(cls, name, bases, attrs)
 
         klass._shared_state = dict(
-            handlers = {}, # список хендлеров, которые используются для
+            handlers = {}, # словарь Хэндлеров, с ключом в виде имени класса Хэндлера
             handler_run_rules = {},
             data = {}, # собственно те данные, которые лежат в кеше
             write_lock = threading.RLock(),
@@ -78,12 +78,11 @@ class RuntimeCache(object):
         finally:
             self.write_lock.release()
 
-    def handler_registered(self, handler):
+    def is_instance_registered(self):
         '''
         Проверяет, если ли в списке обработчиков кеша указанный хендлер
         '''
         return self.handlers.has_key(self.__class__.__name__)
-        #return handler in self.handlers
 
     def _normalize_dimensions(self, dimensions):
         '''
