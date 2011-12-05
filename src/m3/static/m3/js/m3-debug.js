@@ -9685,54 +9685,50 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
         
         var window = smart_eval(response.responseText);
         if(window){
-            var scope = this;
             window.on('closed_ok', function(data){
-                if (scope.incrementalUpdate){
+                if (this.incrementalUpdate){
                     // нам пришел узел дерева
                     var obj = Ext.util.JSON.decode(data);
+                    var selectedNode = this.getSelectionModel().getSelectedNode();
+                    var newSelectNode = this.getLoader().createNode(obj.data);
                     switch (operation){
                         case 'edit':
-                            var selectedNode = scope.getSelectionModel().getSelectedNode();
+                            // при редактировании заменим старый узел на новый
                             var parentNode = selectedNode.parentNode;
-                            parentNode.reload(function(){
-                                var newSelectNode = scope.getNodeById(obj.data.id);
-                                newSelectNode.select();
-                            })
+                            parentNode.removeChild(selectedNode);
+                            parentNode.appendChild(newSelectNode);
                             break;
 
                         // Добавление нового узла в корень
                         case 'new':
-                            var rootNode = scope.getRootNode();
-                            rootNode.reload(function(){
-                                var newSelectNode = scope.getNodeById(obj.data.id);
-                                newSelectNode.select();
-                            })
+                            var rootNode = this.getRootNode();
+                            rootNode.appendChild(newSelectNode);
                             break;
 
                         // Добавление происходит в текущий выделенный узел
                         case 'newChild':
-                            var parentNode = scope.getSelectionModel().getSelectedNode();
-                            scope.getLoader().load(parentNode, function(){
-                                // После перезагрузки уровня узел нужно развернуть, чтобы
-                                // его дети отрисовались, иначе нельзя будет сделать выделение
-                                parentNode.leaf = false;
-                                if (!parentNode.expanded)
-                                    parentNode.expand(false, false);
-                                var newSelectNode = scope.getNodeById(obj.data.id)
-                                newSelectNode.select();
-                            })
+                            selectedNode.appendChild(newSelectNode);
                             break;
-                    }                   
+                    }
+                    newSelectNode.select();
                 }
                 else {
-                    return scope.refreshStore()
+                    return this.refreshStore()
                 }
-            });
+            }, this);
         }
     }
 	,deleteOkHandler: function (response, opts){
-		smart_eval(response.responseText);
-		this.refreshStore();
+        if (this.incrementalUpdate){
+            // нам просто надо удалить выделенный элемент
+            var selectedNode = this.getSelectionModel().getSelectedNode();
+            var parentNode = selectedNode.parentNode;
+            parentNode.removeChild(selectedNode);
+            parentNode.select();
+        } else {
+            smart_eval(response.responseText);
+            this.refreshStore();
+        }
 	}
 	,refreshStore: function (){
 		this.getLoader().baseParams = this.getMainContext();
