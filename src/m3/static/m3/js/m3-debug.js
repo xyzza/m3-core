@@ -8226,7 +8226,32 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		
 		window.updateTitle();
 		sender.updateLabel();
+    },
+
+    /**
+     * Сбрасывает признаки модифицированности формы.
+     * Пропадает звездочка в заголовке и возвращаются исходные стили контролов.
+     * @param {Object} container контейнер с которого начинается сброс.
+     */
+    clearModificationFlag: function(container){
+        var cont = container || this;
+        assert(cont instanceof Ext.Container, 'Должен быть контейнер');
+
+        this.changesCount = 0;
+        this.updateTitle();
+
+        cont.items.each(function(item){
+            if (item instanceof Ext.form.Field && item.isEdit){
+                item.originalValue = item.getValue();
+                // Это не стандартные атрибуты. Они объявлены в m3.js
+                item.isModified = false;
+                item.updateLabel();
+            } else if (item instanceof Ext.Container){
+                this.clearModificationFlag(item);
+            }
+        }, this);
     }
+
 	/**
 	 * Рекурсивная установка функции на изменение поля
 	 * @param {Object} item
