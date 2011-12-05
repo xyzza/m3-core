@@ -8234,9 +8234,17 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	,setFieldOnChange: function (item, window){
 		if (item) {
 			if (item instanceof Ext.form.Field && item.isEdit) {
-				item.on('change', function(scope, newValue, oldValue){
-					window.onChangeFieldValue(scope, newValue, oldValue, window);
-				});
+                if (item instanceof Ext.form.Checkbox){
+                    // Комбобокс, в отличие от остальных полей, вызывает change только после blur, а
+                    // в случае клика не работает совсем. Поэтому доверять можно только эвенту check.
+                    item.on('check', function(scope, checked){
+                        window.onChangeFieldValue(scope, checked, !checked, window);
+                    });
+                } else {
+                    item.on('change', function(scope, newValue, oldValue){
+                        window.onChangeFieldValue(scope, newValue, oldValue, window);
+                    });
+                }
 			};
 			if (item.items) {
 				if (!(item.items instanceof Array)) {	
