@@ -8243,6 +8243,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
         cont.items.each(function(item){
             if (item instanceof Ext.form.Field && item.isEdit){
                 item.originalValue = item.getValue();
+                item.startValue = item.getValue();
                 // Это не стандартные атрибуты. Они объявлены в m3.js
                 item.isModified = false;
                 item.updateLabel();
@@ -8658,9 +8659,23 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
             this.refreshItem(record);
 
 			this.setValue(this.getValue());
+            this.fireChangeEventOnDemand();
             this.fireEvent("select", this, this.checkedItems);
         }
 	},
+
+    /**
+     * Чтобы сохранить совместимость c концепцией изменения полей ExtJS
+     * приходится имитировать поведение Ext.form.Field.onBlur().
+     * иначе событие 'change' у нашего поля никогда не вызывается.
+     */
+    fireChangeEventOnDemand: function(){
+        var newValue = this.getValue();
+        if (String(newValue) !== String(this.startValue)){
+            this.fireEvent('change', this, newValue, this.startValue);
+        }
+        this.startValue = newValue;
+    },
 
     refreshItem:function(record) {
         if (this.view) {
@@ -8680,7 +8695,8 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
                         win.initMultiSelect(this.checkedItems);
 				        win.on('closed_ok',function(records){
                             this.addRecordsToStore( records);
-                            this.fireEvent('select', this, this.checkedItems)
+                            this.fireChangeEventOnDemand();
+                            this.fireEvent('select', this, this.checkedItems);
 				        }, this);
 				    }
 				}
@@ -8692,9 +8708,17 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 		}
 	},
 
+    /**
+     * Срабатывает при нажатии на кнопку "Очистить".
+     * Отменяет выбор в DataView this.view и очищает строку на форме.
+     */
     clearValue:function() {
         this.checkedItems = [];
+        if (this.view)
+            this.view.refresh();
+
         this.setValue(this.getValue());
+        this.fireChangeEventOnDemand();
     },
 
     addRecordsToStore: function(records){
@@ -8708,6 +8732,8 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         }
 
         this.checkedItems = newRecords;
+        if (this.view)
+            this.view.refresh();
         this.setValue(this.getValue());
 	},
 
