@@ -122,6 +122,13 @@ Ext.ux.grid.livegrid.GridView = function(config) {
 
     this.addEvents({
         /**
+         * @event reset
+         * Fires when the grid resets.
+         * @param {Ext.ux.grid.livegrid.GridView} this
+         * @param {Boolean} forceReload
+         */
+        'reset' : true,
+        /**
          * @event beforebuffer
          * Fires when the store is about to buffer new data.
          * @param {Ext.ux.BufferedGridView} this
@@ -370,7 +377,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
      * Vadim 14.11.2011.
      */
     headerStyle: '',
-    
+
 // }}}
 
 // {{{ --------------------------public API methods-----------------------------
@@ -402,13 +409,16 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 
             var _ofn = this.processRows;
             this.processRows = Ext.emptyFn;
+            this.suspendEvents();
             this.refresh(true);
+            this.resumeEvents();
             this.processRows = _ofn;
             this.processRows(0);
 
             this.fireEvent('cursormove', this, 0,
                            Math.min(this.ds.totalLength, this.visibleRows-this.rowClipped),
                            this.ds.totalLength);
+            this.fireEvent('reset', this, forceReload);
             return false;
         } else {
 
@@ -422,6 +432,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
                 };
             }
 
+            this.fireEvent('reset', this, forceReload);
             return this.ds.load({params : params});
         }
 
@@ -1229,6 +1240,8 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         var cursor     = this.rowIndex;
         var rows       = this.getRows();
         var index      = 0;
+        var sm          = this.grid.selModel;
+        var allSelected = sm.isAllSelected();
 
         var row = null;
         for (var idx = 0, len = rows.length; idx < len; idx++) {
@@ -1241,7 +1254,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
             }
 
             if (paintSelections !== false) {
-                if (this.grid.selModel.isSelected(this.ds.getAt(index)) === true) {
+                if (sm.isSelected(this.ds.getAt(index)) === true) {
                     this.addRowClass(index, this.selectedRowClass);
                 } else {
                     this.removeRowClass(index, this.selectedRowClass);
@@ -2052,6 +2065,9 @@ Ext.ux.grid.livegrid.RowSelectionModel = function(config) {
 
     Ext.apply(this, config);
 
+    this.allSelected = false;
+    this.excludes    = [];
+
     this.pendingSelections = {};
 
     Ext.ux.grid.livegrid.RowSelectionModel.superclass.constructor.call(this);
@@ -2302,6 +2318,11 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
         }
 
         var r = index;
+
+        if (this.allSelected && !this.excludes[r.id]) {
+            return true;
+        }
+
         return (r && this.selections.key(r.id) ? true : false);
     },
 
@@ -2321,6 +2342,10 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
 
         if (!isSelected) {
             return;
+        }
+
+        if (this.allSelected) {
+            this.excludes[record.id] = true;
         }
 
         var store = this.grid.store;
@@ -2374,6 +2399,9 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
         delete this.pendingSelections[index];
 
         if (r) {
+            if (this.allSelected) {
+                this.excludes[r.id] = true;
+            }
             this.selections.remove(r);
         }
         if(!preventViewNotify){
@@ -2409,6 +2437,7 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
             if (r) {
                 this.selections.add(r);
                 delete this.pendingSelections[index];
+                delete this.excludes[r.id];
             } else {
                 this.pendingSelections[index] = true;
             }
@@ -2561,6 +2590,8 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
             this.pendingSelections    = {};
         }
         this.last = false;
+        this.allSelected = false;
+        this.excludes = [];
     },
 
 
@@ -2592,6 +2623,39 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
             }
         }
 
+    },
+
+    /**
+     * Returns true if all rows available are selected.
+     */
+    isAllSelected : function()
+    {
+        return this.allSelected;
+    },
+
+    /**
+     * Selects all rows if the selection model
+     * {@link Ext.grid.AbstractSelectionModel#isLocked is not locked}.
+     */
+    selectAll : function()
+    {
+        if(this.isLocked()){
+            return;
+        }
+
+        this.excludes = [];
+        this.selectRange(0, this.grid.store.getTotalCount(), false);
+        this.allSelected = true;
+    },
+
+    /**
+     * Returns an object with all records currently being excluded,
+     * whereas the key is the id of the record, and it's value is
+     * set to boolean true.
+     */
+    getExcludes : function()
+    {
+        return this.excludes;
     }
 
 });
@@ -3611,5 +3675,190 @@ Ext.ux.grid.livegrid.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 
         return Ext.ux.grid.livegrid.EditorGridPanel.superclass.initComponent.call(this);
     }
+
+});
+
+/**
+* Ext.ux.grid.livegrid.CheckboxSelectionModel
+* Copyright (c) 2007-2008, http://www.siteartwork.de
+*
+* Ext.ux.grid.livegrid.CheckboxSelectionModel is licensed under the terms of the
+*                  GNU Open Source GPL 3.0
+    * license.
+    *
+* Commercial use is prohibited. Visit <http://www.siteartwork.de/livegrid>
+* if you need to obtain a commercial license.
+    *
+* This program is free software: you can redistribute it and/or modify it under
+* the terms of the GNU General Public License as published by the Free Software
+    * Foundation, either version 3 of the License, or any later version.
+    *
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+                                                                       * details.
+    *
+                                                                       * You should have received a copy of the GNU General Public License along with
+    * this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+*
+*/
+
+Ext.namespace('Ext.ux.grid.livegrid');
+
+/**
+ * @class Ext.ux.grid.livegrid.CheckboxSelectionModel
+ * @extends Ext.ux.grid.livegrid.RowSelectionModel
+ * @constructor
+ * @param {Object} config
+ *
+ * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
+ */
+Ext.ux.grid.livegrid.CheckboxSelectionModel = Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, {
+
+    /**
+     * @cfg {Boolean} checkOnly <tt>true</tt> if rows can only be selected by clicking on the
+     * checkbox column (defaults to <tt>false</tt>).
+     */
+    /**
+     * @cfg {Number} width The default width in pixels of the checkbox column (defaults to <tt>20</tt>).
+     */
+    width : 20,
+
+    // private
+    menuDisabled : true,
+    sortable : false,
+    fixed : true,
+    dataIndex : '',
+    id : 'checker',
+    headerCheckbox : null,
+    markAll : false,
+
+    constructor : function()
+    {
+        if (!this.header) {
+            this.header = Ext.grid.CheckboxSelectionModel.prototype.header;
+        }
+
+        this.sortable = false;
+
+        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.constructor.call(this);
+    },
+
+    // private
+    initEvents : function()
+    {
+        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.initEvents.call(this);
+
+        this.grid.view.on('reset', function(gridView, forceReload) {
+            this.headerCheckbox = new Ext.Element(
+                gridView.getHeaderCell(this.grid.getColumnModel().getIndexById(this.id)).firstChild
+            );
+            if (this.markAll && forceReload === false) {
+                this.headerCheckbox.addClass('x-grid3-hd-checker-on');
+            }
+        }, this);
+
+        Ext.grid.CheckboxSelectionModel.prototype.initEvents.call(this);
+    },
+
+    /**
+     * @private
+     * Process and refire events routed from the GridView's processEvent method.
+     */
+    processEvent : function(name, e, grid, rowIndex, colIndex){
+        if (name == 'mousedown') {
+            this.onMouseDown(e, e.getTarget());
+            return false;
+        } else {
+            return Ext.grid.Column.prototype.processEvent.apply(this, arguments);
+        }
+    },
+
+    // private
+    onMouseDown : function(e, t)
+    {
+        if(e.button === 0 && t.className == 'x-grid3-row-checker') {
+            e.stopEvent();
+            var row = e.getTarget('.x-grid3-row');
+            if(row){
+                if (this.headerCheckbox) {
+                    this.markAll = false;
+                    this.headerCheckbox.removeClass('x-grid3-hd-checker-on');
+                }
+            }
+        }
+
+        return Ext.grid.CheckboxSelectionModel.prototype.onMouseDown.call(this, e, t);
+    },
+
+    // private
+    onHdMouseDown : function(e, t)
+    {
+        if (t.className == 'x-grid3-hd-checker' && !this.headerCheckbox) {
+            this.headerCheckbox = new Ext.Element(t.parentNode);
+        }
+
+        return Ext.grid.CheckboxSelectionModel.prototype.onHdMouseDown.call(this, e, t);
+    },
+
+    // private
+    renderer : function(v, p, record)
+    {
+        return Ext.grid.CheckboxSelectionModel.prototype.renderer.call(this, v, p, record);
+    },
+
+// -------- overrides
+
+    /**
+     * Overriden to prevent selections by shift-clicking
+     */
+    handleMouseDown : function(g, rowIndex, e)
+    {
+        if (e.shiftKey) {
+            return;
+        }
+
+        this.markAll = false;
+
+        if (this.headerCheckbox) {
+            this.headerCheckbox.removeClass('x-grid3-hd-checker-on');
+        }
+
+        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.handleMouseDown.call(this, g, rowIndex, e);
+    },
+
+    /**
+     * Overriden to clear header sort state
+     */
+    clearSelections : function(fast)
+    {
+        if(this.isLocked()){
+            return;
+        }
+
+        this.markAll = false;
+
+        if (this.headerCheckbox) {
+            this.headerCheckbox.removeClass('x-grid3-hd-checker-on');
+        }
+
+        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.clearSelections.call(this, fast);
+    },
+
+    /**
+     * Selects all rows if the selection model
+     * {@link Ext.grid.AbstractSelectionModel#isLocked is not locked}.
+     */
+    selectAll : function()
+    {
+        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.selectAll.call(this);
+
+        this.markAll = true;
+
+        if (this.headerCheckbox) {
+            this.headerCheckbox.addClass('x-grid3-hd-checker-on');
+        }
+    }
+
 
 });

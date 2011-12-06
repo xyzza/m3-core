@@ -908,3 +908,18 @@ class ExtGridLockingHeaderGroupView(BaseExtComponent):
     def render(self):
         result = 'new Ext.ux.grid.LockingHeaderGroupGridView({rows:%s})' % self.grid.t_render_banded_columns()
         return result
+
+class ExtLiveGridCheckBoxSelModel(ExtGridCheckBoxSelModel):
+    '''
+    Модель выбора для live-грида с возможностью отметки чек-боксом
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtLiveGridCheckBoxSelModel, self).__init__(*args, **kwargs)
+        self.single_select = False
+        self.check_only = False
+        self.init_component(*args, **kwargs)
+
+    def render(self):
+        self._put_config_value('singleSelect', self.single_select)
+        self._put_config_value('checkOnly', self.check_only)
+        return 'new Ext.ux.grid.livegrid.CheckboxSelectionModel({ %s })' %self._get_config_str()
