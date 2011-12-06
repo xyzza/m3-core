@@ -749,7 +749,8 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 		//var selModel = params.selModel;
 		var selModel = params.selModel ? params.selModel : new Ext.ux.grid.livegrid.RowSelectionModel({singleSelect: true});
 		var gridColumns = params.colModel || [];
-		if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
+		if (selModel && (selModel instanceof Ext.grid.CheckboxSelectionModel ||
+            selModel instanceof Ext.ux.grid.livegrid.CheckboxSelectionModel) ) {
 			gridColumns.columns.unshift(selModel);
 		}
 		
@@ -1387,7 +1388,7 @@ Ext.extend(Ext.ux.grid.MultiGroupingSummary, Ext.util.Observable, {
         grid.on('columnresize', this.refreshSummary, this);//kirov
         grid.on('columnmove', this.refreshSummary, this);//kirov
         grid.getColumnModel().on('hiddenchange', this.refreshSummary, this);//kirov
-        grid.on('bodyresize', this.refreshSummary, this);//kirov
+        grid.on('resize', this.refreshSummary, this);//kirov
         
 
         if (Ext.isGecko || Ext.isOpera) {
