@@ -9733,10 +9733,40 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 
                         // Добавление происходит в текущий выделенный узел
                         case 'newChild':
-                            selectedNode.appendChild(newSelectNode);
+                            // если детки уже загружены, то сразу добавляем
+                            if (selectedNode.children) {
+                                if (!selectedNode.expanded) {
+                                    selectedNode.expand(false, false);
+                                }
+                                selectedNode.appendChild(newSelectNode);
+                            } else {
+                                // если узел еще не раскрыт
+                                if (!selectedNode.expanded) {
+                                    // если узел еще не загружен
+                                    if (!selectedNode.leaf && selectedNode.childNodes.length == 0) {
+                                        // загружаем его так, чтобы после загрузки выделить элемент
+                                        selectedNode.on('expand', function(){
+                                            var newSelectNode = this.getNodeById(obj.data.id);
+                                            newSelectNode.select();
+                                        }, this, {single: true});
+                                        selectedNode.expand(false, false);
+                                        newSelectNode = undefined;
+                                    } else {
+                                        // если загружен, то добавляем
+                                        selectedNode.leaf = false;
+                                        selectedNode.expand(false, false);
+                                        selectedNode.appendChild(newSelectNode);
+                                    }
+                                } else {
+                                    // если раскрыт, то сразу добавляем
+                                    selectedNode.appendChild(newSelectNode);
+                                }
+                            }
                             break;
                     }
-                    newSelectNode.select();
+                    if (newSelectNode) {
+                        newSelectNode.select();
+                    }
                 }
                 else {
                     return this.refreshStore()
