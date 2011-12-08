@@ -923,3 +923,17 @@ class ExtLiveGridCheckBoxSelModel(ExtGridCheckBoxSelModel):
         self._put_config_value('singleSelect', self.single_select)
         self._put_config_value('checkOnly', self.check_only)
         return 'new Ext.ux.grid.livegrid.CheckboxSelectionModel({ %s })' %self._get_config_str()
+
+
+class ExtLiveGridRowSelModel(ExtGridRowSelModel):
+    '''
+    Модель выбора для live-грида с выбором строк
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ExtLiveGridRowSelModel, self).__init__(*args, **kwargs)
+        self.single_select = False
+        self.init_component(*args, **kwargs)
+
+    def render(self):
+        single_sel = 'singleSelect: true' if self.single_select else ''
+        return 'new Ext.ux.grid.livegrid.RowSelectionModel({ %s })' % single_sel
