@@ -1140,82 +1140,60 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
             });
         }
     }
-	
-	/**
-	 * Показ и подписка на сообщения в дочерних окнах
-	 * @param {Object} response Ответ
-	 * @param {Object} opts Доп. параметры
-	 */
+
+    /**
+     * Показ и подписка на сообщения в дочерних окнах
+     * @param {Object} response Ответ
+     * @param {Object} opts Доп. параметры
+     */
     ,onNewRecordWindowOpenHandler: function (response, opts){
         var window = smart_eval(response.responseText);
         if(window){
-            var scope = this;
             window.on('closed_ok', function(data){
-                if (scope.fireEvent('rowadded', scope, data)) {
-                    // если локальное редактирование
-                    if (scope.localEdit){
-                        // то на самом деле нам пришла строка грида
-                        var obj = Ext.util.JSON.decode(data);
-                        var record = new Ext.data.Record(obj.data, obj.data.id);
-                        record.json = obj.data;
-                        var store = scope.getStore();
-                        // найдем запись в сторе, вдруг она уже есть!
-                        var recordPosition = store.findExact('id', obj.data.id);
-                        if (recordPosition >= 0) {
-                            // если нашли, то зменим
-                            store.remove(store.getAt(recordPosition));
-                        } else {
-                            recordPosition = 0;
-                        }
-                        // и надо ее добавить в стор
-                        store.insert(recordPosition, record);
-                        var sm = scope.getSelectionModel();
-                        sm.selectRow(recordPosition);
-                    } else {
-                        return scope.refreshStore();
-                    }
+                if (this.fireEvent('rowadded', this, data)) {
+                    this.createOrReplaceRecord(data);
                 }
-            });
+            }, this);
         }
     }
-	,onEditRecordWindowOpenHandler: function (response, opts){
-	    var window = smart_eval(response.responseText);
-	    if(window){
-			var scope = this;
-	        window.on('closed_ok', function(data){
-                if (scope.fireEvent('rowedited', scope, data)) {
-                    // если локальное редактирование
-                    if (scope.localEdit){
-                        // то на самом деле нам пришла строка грида
-                        var obj = Ext.util.JSON.decode(data);
-                        var record = new Ext.data.Record(obj.data, obj.data.id);
-                        record.json = obj.data;
-                        var store = scope.getStore();
-                        // и надо ее заменить в сторе
-                        var sm = scope.getSelectionModel();
-                        if (sm.hasSelection()) {
-                            var baseConf = {};
-                            // только для режима выделения строк
-                            if (sm instanceof Ext.grid.RowSelectionModel) {
-                                if (sm.singleSelect) {
-                                    var rec = sm.getSelected();
-                                    var index = store.indexOf(rec);
-                                    store.remove(rec);
-                                    if (index < 0) {
-                                        index = 0;
-                                    }
-                                    store.insert(index, record);
-                                    sm.selectRow(index);
-                                }
-                            }
-                        }
-                    } else {
-                        return scope.refreshStore();
-                    }
+    ,onEditRecordWindowOpenHandler: function (response, opts){
+        var window = smart_eval(response.responseText);
+        if(window){
+            window.on('closed_ok', function(data){
+                if (this.fireEvent('rowedited', this, data)) {
+                    this.createOrReplaceRecord(data);
                 }
-			});
-	    }
-	}
+            }, this);
+        }
+    }
+    /**
+     * Общий метод создания новой записи в store
+     * Используется при локальном редактировании (инкрементальном обновлении)
+     * @param {Object} data json-данные, полученные с сервера при локальном редактировании
+     */
+    ,createOrReplaceRecord: function(data){
+        // если локальное редактирование
+        if (this.localEdit){
+            // на самом деле нам пришла строка грида
+            var obj = Ext.util.JSON.decode(data);
+            var record = new Ext.data.Record(obj.data, obj.data.id);
+            record.json = obj.data;
+            var store = this.getStore();
+            // и надо ее заменить в сторе
+            // найдем запись в сторе, вдруг она уже есть!
+            var recordPosition = store.findExact('id', obj.data.id);
+            if (recordPosition >= 0) {
+                // если нашли, то зменим
+                store.remove(store.getAt(recordPosition));
+            } else {
+                recordPosition = 0;
+            }
+            store.insert(recordPosition, record);
+            this.getSelectionModel().selectRow(recordPosition);
+        } else {
+            return this.refreshStore();
+        }
+    }
 	/**
 	 * Хендлер на удаление окна
 	 * @param {Object} response Ответ
@@ -1238,6 +1216,8 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
                             if (index < 0) {
                                 index = 0;
                             }
+                        } else {
+                            this.refreshStore();
                         }
                     }
                 }

@@ -173,9 +173,9 @@ class BaseInfoModel(models.Model):
                 raise OverlapError()
         # если объект уже хранится, то найдем записи для изменения
         if self.pk:
-            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_prev)
+            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_prev).exclude(pk = self.pk)
             old_prev_rec = q.get() if len(q) == 1 else None
-            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_next)
+            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_next).exclude(pk = self.pk)
             old_next_rec = q.get() if len(q) == 1 else None
         else:
             old_prev_rec = None
