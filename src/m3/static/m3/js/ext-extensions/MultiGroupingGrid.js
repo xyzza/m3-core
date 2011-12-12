@@ -64,8 +64,9 @@ Ext.extend(Ext.ux.grid.MultiGrouping, Ext.util.Observable, {
             this.cm = this.grid.getColumnModel();
             // добавим новый столбец, в котором будет отображаться группировка (если она будет)
             this.grouppingColumn = new Ext.grid.Column({header: this.groupFieldTitle, dataIndex: this.groupFieldId, id: this.groupFieldId, width: 160, renderer: {fn:this.groupRenderer, scope: this}});
-            var cmConfig = [this.grouppingColumn].concat(this.cm.config); 
-            this.cm.setConfig(cmConfig);            
+            this.cm.config.unshift(this.grouppingColumn);
+            this.cm.lookup[this.groupFieldId] = this.grouppingColumn;
+            this.cm.fireEvent('configchange', this.cm);
             this.grouppingColumn.hidden=!(this.groupedColumns.length>0);
 
             // повесимся на клик, чтобы раскрывать/скрывать уровни группировки
