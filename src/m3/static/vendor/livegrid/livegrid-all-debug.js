@@ -3728,6 +3728,7 @@ Ext.ux.grid.livegrid.CheckboxSelectionModel = Ext.extend(Ext.ux.grid.livegrid.Ro
     menuDisabled : true,
     sortable : false,
     fixed : true,
+    hideable: false, //yuldashev
     dataIndex : '',
     id : 'checker',
     headerCheckbox : null,
