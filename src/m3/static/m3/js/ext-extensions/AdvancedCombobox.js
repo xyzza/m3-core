@@ -537,7 +537,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             this.wrap.removeClass(this.wrapFocusClass);
         }
         // Очистка значения, если введено пустое значение
-        if (!this.getRawValue()) {
+        if (!this.getRawValue() & this.getValue()) {
             this.clearValue();
         }
         this.validate();

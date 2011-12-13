@@ -10,7 +10,7 @@ Ext.ns('Ext.m3');
  * аргумента к событию передается объект следуеющего вида
  * {
  *     value:0.3, //текущий прогресс от 0 до 1
- *     isActive: true, // производиться ли операция на серврере
+ *     alive: true, // производиться ли операция на серврере
  *     text:'' // строка сообщение с сервера
  * }
  */
@@ -26,9 +26,19 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
     interval:1000,
 
     /**
+     * @boundary {String} значение, используемое для идентификации фоновой операции
+     */
+    boundary:'default-boundary',
+
+    /**
      * @cfg {String} Название парамтетра с командой серверу
      */
     commandParam:'command',
+
+    /**
+     * @cfg {String} Название параметра с\о значением баундари
+     */
+    boundaryParam:'boundary',
 
     constructor:function(cfg) {
         Ext.apply(this, cfg);
@@ -45,30 +55,32 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
         this.isRunning = false;
 
         this.addEvents('update');
+        this.addEvents('result_ready');
     },
 
     /**
      * @public Команда старта операции
+     * params содержит параметры начала выполнения операции
      */
-    start:function() {
-        this.doRequest('start', this.run);
+    start:function(params) {
+        this.doRequest('start', this.run, params);
     },
 
     /**
      * @public Команда остановки операции
      */
-    stop:function() {
+    stop:function(params) {
         this.stopWaiting();
         this.doRequest('stop', function(response) {
             this.fireEvent('update', this.parseResponse(response));
-        });
+        }, params);
     },
 
     /**
      * @public Команда проверки прогресса
      */
-    ping:function() {
-        this.doRequest('ping', this.run);
+    ping:function(params) {
+        this.doRequest('request', this.run, params);
     },
 
     /**
@@ -98,8 +110,13 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
      */
     waitCallback:function(response) {
         var responseObj = this.parseResponse(response);
-        if (!responseObj.isActive) {
+        if (!responseObj.alive) {
             this.stopWaiting();
+
+            /* запрашиваем результат операции с сервера */
+            this.doRequest('result', function(responseResult){
+               this.fireEvent('result_ready', this.parseResponse(responseResult));
+            });
         }
 
         this.fireEvent('update',responseObj);
@@ -109,22 +126,26 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
      * @private Это функция запускается в бексонечном цикле
      */
     wait:function() {
-        this.doRequest('ping', this.waitCallback);
+        this.doRequest('request', this.waitCallback);
     },
 
     /**
      * @private Запрос на сервер
      */
-    doRequest:function(command,successCallback) {
-        var params = {};
-        params[this.commandParam] = command;
+    doRequest:function(command,successCallback, params) {
+        var request_params = {};
+        request_params[this.commandParam] = command;
+        request_params[this.boundaryParam] = this.boundary;
+        if(params != undefined){
+            Ext.applyIf(request_params, params);
+        }
 
         Ext.Ajax.request({
             url:this.url,
             success:successCallback,
             failure:this.requestError,
             scope:this,
-            params: params
+            params: request_params
         });
     },
 
@@ -174,7 +195,8 @@ Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
         Ext.m3.BackgroundOperationBar.superclass.initComponent.call(this);
         this.serverProxy = new Ext.m3.BackgroundOperationProxy({
             url:this.url,
-            interval:this.interval
+            interval:this.interval,
+            boundary:this.boundary
         });
 
         //mon вместо on чтобы функция хендлер уничтожалась вместе с объектом прогрес бара
@@ -182,15 +204,15 @@ Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
         this.on('destroy', this.onDestroy)
     },
 
-    ping:function() {
-        this.serverProxy.ping();
+    ping:function(params) {
+        this.serverProxy.ping(params);
     },
 
-    start:function() {
-        this.serverProxy.start();
+    start:function(params) {
+        this.serverProxy.start(params);
     },
 
-    stop:function() {
+    stop:function(params) {
         this.serverProxy.stop();
     },
 
