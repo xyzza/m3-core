@@ -38,11 +38,8 @@ class BaseExtWindow(ExtUIComponent):
         
         # Шаблон, который будет отрендерен после основного
         self.template_globals = ''
-        
-        # TODO: убрать т.к. не используется
+
         self.renderer = ExtWindowRenderer()
-        
-        # TODO: убрать, т.к. не используется
         self.renderer.window = self
 
         # Название 
