@@ -221,27 +221,38 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		
         this.triggers = ts.elements;
     }
-
+    , getWidth: function() {
+        // неверно пересчитывался размер поля
+        //Ext.m3.AdvancedComboBox.superclass.getWidth.call(this);
+        return(this.el.getWidth() + this.getTriggerWidth());
+    }
     /**
      * Устанавливает или снимает с кнопок обработчики,
      * в зависимости от того, доступно ли поле.
      */
     ,disableTriggers: function(disabled){
-        var ts = this.trigger.select('.x-form-trigger', true);
-        ts.each(function(t, all, index){
-            var handler = this.allTriggers[index].handler;
-            if (!disabled) {
-                // Чтобы не добавлять событие несколько раз, нужно проверить есть ли оно уже
-                var events = Ext.elCache[t.id].events;
-                if (!events['click'] || events.click.length == 0){
-                    t.on('click', handler, this, {preventDefault:true});
-                    t.addClassOnOver('x-form-trigger-over');
-                    t.addClassOnClick('x-form-trigger-click');
+        if (this.trigger) {
+            var ts = this.trigger.select('.x-form-trigger', true);
+            ts.each(function(t, all, index){
+                var handler = this.allTriggers[index].handler;
+                if (!disabled) {
+                    // Чтобы не добавлять событие несколько раз, нужно проверить есть ли оно уже
+                    var events = Ext.elCache[t.id].events;
+                    if (!events['click'] || events.click.length == 0){
+                        t.on('click', handler, this, {preventDefault:true});
+                        t.addClassOnOver('x-form-trigger-over');
+                        t.addClassOnClick('x-form-trigger-click');
+                    }
+                } else {
+                    t.un('click', handler, this, {preventDefault:true});
                 }
-            } else {
-                t.un('click', handler, this, {preventDefault:true});
-            }
-        }, this);
+            }, this);
+        } else {
+            this.baseTriggers[0].hide = disabled;
+            this.baseTriggers[1].hide = disabled;
+            this.baseTriggers[2].hide = disabled;
+            this.baseTriggers[3].hide = disabled;
+        }
     }
 
 	/**
@@ -270,12 +281,13 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
         Ext.each(this.triggers, function(t, index){
             var triggerIndex = 'Trigger' + (index + 1),
                 w = t.getWidth();
-				
-            if(w === 0 && !this['hidden' + triggerIndex]){
-                tw += this.defaultTriggerWidth;
-            }else{
-                tw += w;
-            }
+
+            //if(w === 0 && !this['hidden' + triggerIndex]){
+            //    tw += this.defaultTriggerWidth;
+            //}else{
+            //    tw += w;
+            //}
+            tw += w;
         }, this);
         return tw;
     },
@@ -345,10 +357,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	,onSelect: function(record, index){
 		if (this.fireEvent('afterselect', this, record.data[this.valueField], record.data[this.displayField] )) {
 			Ext.m3.AdvancedComboBox.superclass.onSelect.call(this, record, index);
-            if (this.rendered) {
-			    this.showClearBtn();
-			    this.showEditBtn();
-            }
+            this.showClearBtn();
+            this.showEditBtn();
 			this.fireEvent('change', this, record.data[this.valueField || this.displayField]);
 			this.fireEvent('changed', this);
 		}
@@ -357,35 +367,41 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Показывает кнопку очистки значения
 	 */
 	,showClearBtn: function(){
-		if (!this.hideTriggerClear) {
-			this.el.parent().setOverflow('hidden');
-			this.getTrigger(0).show();
-		}
+        if (!this.hideTriggerClear && this.rendered && !this.readOnly && !this.disabled) {
+            this.getTrigger(0).show();
+        } else {
+            this['hiddenTrigger1'] = false || this.hideTriggerClear || this.readOnly || this.disabled;
+        }
 	}
 	/**
 	 * Скрывает кнопку очистки значения
 	 */
 	,hideClearBtn: function(){
-		this.el.parent().setOverflow('auto');
-		this.getTrigger(0).hide();
+        if (this.rendered) {
+            this.getTrigger(0).hide();
+        } else {
+            this['hiddenTrigger1'] = true;
+        }
 	}
 	/**
 	 * Показывает кнопку открытия карточки элемента
 	 */
 	,showEditBtn: function(){
-		if (this.actionEditUrl && !this.hideTriggerDictEdit && this.getValue()) {
-			this.el.parent().setOverflow('hidden');
-			this.getTrigger(3).show();
-		}
+        if (this.actionEditUrl && this.rendered && !this.hideTriggerDictEdit && this.getValue()) {
+            this.getTrigger(3).show();
+        } else {
+            this['hiddenTrigger4'] = false || this.actionEditUrl || this.hideTriggerDictEdit || this.readOnly || this.disabled;
+        }
 	}
 	/**
 	 * Скрывает кнопку открытия карточки элемента
 	 */
 	,hideEditBtn: function(){
-		if (this.actionEditUrl) {
-			this.el.parent().setOverflow('auto');
-			this.getTrigger(3).hide();
-		}
+        if (this.actionEditUrl && this.rendered) {
+            this.getTrigger(3).hide();
+        } else {
+            this['hiddenTrigger4'] = true;
+        }
 	}
 	/**
 	 * Перегруженный метод очистки значения, плюс ко всему скрывает 
@@ -407,13 +423,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	,setValue: function(value){
 		Ext.m3.AdvancedComboBox.superclass.setValue.call(this, value);
 		if (value) {
-			if (this.rendered) {
-				this.showClearBtn();
-				this.showEditBtn();
-			} else {
-				this.hideTrigger1 = true;
-				this.hideTrigger4 = true;
-			}
+			this.showClearBtn();
+			this.showEditBtn();
 		}
 	}
 	/**
@@ -557,6 +568,33 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
     setDisabled: function(disabled){
         this.disableTriggers(disabled);
         Ext.m3.AdvancedComboBox.superclass.setDisabled.call(this, disabled);
+    },
+
+    /**
+     * При изменении доступности поля, нужно также поменять доступность всех его кнопок
+     */
+    setReadOnly: function(readOnly){
+        var width = this.getWidth();
+        this.disableTriggers(readOnly);
+        Ext.m3.AdvancedComboBox.superclass.setReadOnly.call(this, readOnly);
+        if (readOnly){
+            this.el.setWidth(width);
+            if (this.wrap) this.wrap.setWidth(width);
+        } else {
+            // покажем нужные триггеры
+            if (this.getValue()) {
+                this.showClearBtn();
+                this.showEditBtn();
+            }
+            if (!this.hideTriggerDictSelect){
+                this.getTrigger(2).show();
+            }
+            if (!this.hideTriggerDropDown){
+                this.getTrigger(1).show();
+            }
+            this.el.setWidth(width-this.getTriggerWidth());
+            if (this.wrap) this.wrap.setWidth(width);
+        }
     }
 });
 
