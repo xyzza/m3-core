@@ -6879,7 +6879,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			addr_text = addr_text+', '+'корп. '+corps;
 		}
         if (flat != '' && flat != undefined) {
-            addr_text = addr_text+', '+'к. '+flat;
+            addr_text = addr_text+', '+'кв. '+flat;
         }
 		return addr_text;
 	}
