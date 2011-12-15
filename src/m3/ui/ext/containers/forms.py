@@ -543,6 +543,8 @@ class ExtPanel(BaseExtPanel):
         self.auto_scroll = True
         # Позволять ли панели быть "плавающей" (см Ext.layout.BorderLayout.Region)
         self.floatable = True
+        # Сворачивать панель при щелчке на заголовке?
+        self.title_collapse = False
         
         self.init_component(*args, **kwargs)
     
@@ -561,6 +563,7 @@ class ExtPanel(BaseExtPanel):
         if self._items:
             self._put_config_value('items', self.t_render_items)
         self._put_config_value('floatable', self.floatable, not self.floatable)
+        self._put_config_value('titleCollapse', self.title_collapse, self.title_collapse)
         
     def render(self):
         self.pre_render() # Тут рендерится контекст
