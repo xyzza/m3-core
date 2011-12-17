@@ -316,6 +316,12 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
         if (this.fireEvent('rowdeleted', this, response)) {
             // если локальное редактирование
             if (this.localEdit){
+                // проверка на ошибки уровня приложения
+                var res = Ext.util.JSON.decode(response.responseText);
+                if(!res.success){
+                    smart_eval(response.responseText);
+                    return;
+                }
                 var store = this.getStore();
                 // и надо ее заменить в сторе
                 var sm = this.getSelectionModel();

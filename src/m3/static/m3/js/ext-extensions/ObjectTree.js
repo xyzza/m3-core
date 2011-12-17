@@ -323,6 +323,12 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
     }
 	,deleteOkHandler: function (response, opts){
         if (this.incrementalUpdate){
+            // проверка на ошибки уровня приложения
+            var res = Ext.util.JSON.decode(response.responseText);
+            if(!res.success){
+                smart_eval(response.responseText);
+                return;
+            }
             // нам просто надо удалить выделенный элемент
             var selectedNode = this.getSelectionModel().getSelectedNode();
             var parentNode = selectedNode.parentNode;
