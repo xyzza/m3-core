@@ -13,7 +13,7 @@ from m3.ui.ext.controls.buttons import ExtButton
 from m3.ui.ext.windows.window import ExtWindow
 from m3.ui.gears.edit_windows import GearEditWindow
 from m3.ui.ext.fields.simple import ExtDateField, ExtComboBox, ExtStringField, ExtNumberField
-from m3_calendar.models import ExceptedDayTypeEnum
+from m3.contrib.m3_calendar.models import ExceptedDayTypeEnum
 from m3.ui.ext.misc.store import ExtDataStore
 
 
