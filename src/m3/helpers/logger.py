@@ -134,21 +134,22 @@ def exception(msg='', *args, **kwargs):
       
     except:        
         _old_good_exception(msg, exception_info, *args, **kwargs)
-            
+
 def _old_good_exception(msg, exception_info, *args, **kwargs):
-    """ 
+    """
     Старый добрый способ вывода ошибки, без переменных, зато надежный.
       msg - гневное сообщение разработчикам
       exception_info - информация о оригинальной ошибке
     """
     log = logging.getLogger('error_logger')
-    msg = get_session_info(kwargs.get('request')) + msg
     try:
         tb = traceback.format_exception(*exception_info)
-        msg = force_unicode(msg) + '\n' + u''.join(tb)
-        log.error(msg)
+        log.error( force_unicode(get_session_info(kwargs.get('request')) + msg) + '\n' + u''.join(tb) )
     except:
-        log.error(u'Некорректная работа логгера')
+        try:
+            log.error( force_unicode(msg) + '\n' )
+        except:
+            log.error(u'Некорректная работа логгера')
 
 def warning(msg, *args, **kwargs):
     log = logging.getLogger('warning_logger')
@@ -174,26 +175,35 @@ def send_mail_log(msg, err_name='', level=''):
     if hasattr(settings, 'EMAIL_ERRORLOG_ADMIN') and getattr(settings, 'EMAIL_ERRORLOG_ADMIN') \
         and  hasattr(settings, 'EMAIL_ADDRESS_FROM') and getattr(settings, 'EMAIL_ADDRESS_FROM'):
 
-        emails_admin = getattr(settings, 'EMAIL_ERRORLOG_ADMIN')
-        if isinstance(emails_admin, list):
-            email_list = [emails_admin,]            
-        elif isinstance(emails_admin, basestring):
-            email_list = emails_admin.split(',')        
-            
-        email_from = getattr(settings, 'EMAIL_ADDRESS_FROM')
-        
-        conn = get_connection(auth_user = settings.EMAIL_HOST_USER,
-                      auth_password= settings.EMAIL_HOST_PASSWORD)
-        
-        # uname есть только по nix системами, на остальных смотрим переменную
-        # среды os.getenv('USERNAME')
-        # 2-ой параметр - имя системы 
-        uname = os.uname()[1] if hasattr(os, 'uname') and callable(os.uname) else os.getenv('USERNAME')
-         
-        msg = linebreaks(msg)
-        d = {'body': msg, 'from_email': email_from, 'to': email_list,
-             'subject': u'Логер - %s - %s %s' % (uname, level, err_name)}
-        message = EmailMessage(**d)
-        message.content_subtype = "html"
-        conn.send_messages([message,])
-        
+        try:
+            emails_admin = getattr(settings, 'EMAIL_ERRORLOG_ADMIN')
+            if isinstance(emails_admin, list):
+                email_list = [emails_admin,]
+            elif isinstance(emails_admin, basestring):
+                email_list = emails_admin.split(',')
+
+            email_from = getattr(settings, 'EMAIL_ADDRESS_FROM')
+
+            conn = get_connection(auth_user = settings.EMAIL_HOST_USER,
+                          auth_password= settings.EMAIL_HOST_PASSWORD)
+
+            # uname есть только по nix системами, на остальных смотрим переменную
+            # среды os.getenv('USERNAME')
+            # 2-ой параметр - имя системы
+            uname = os.uname()[1] if hasattr(os, 'uname') and callable(os.uname) else os.getenv('USERNAME')
+
+            msg = linebreaks(msg)
+            d = {'body': msg, 'from_email': email_from, 'to': email_list,
+                 'subject': u'Логер - %s - %s %s' % (uname, level, err_name)}
+            message = EmailMessage(**d)
+            message.content_subtype = "html"
+            #TODO: на этом моменте сильно тормозит, если есть проблемы с доставкой письма
+            #      типа нет связи с почтовым сервером
+            #      или неверный логин и(или) пароль
+            #  с другой стороны, ускорение отработки доставки писем (в отдельном потоке) приводит к отказу
+            #  на почтовом сервере (слишком частые !неудачные! попытки соединения) и он вообще все блочит!
+            conn.send_messages([message,])
+        except:
+            log = logging.getLogger('error_logger')
+            msg = 'Error sending e-mail\n'
+            log.error(msg)
