@@ -290,6 +290,7 @@ class ExtRadio(BaseExtField):
 
         # Признак того, что значение выбрано
         self.checked = False
+
         # Текст рядом с полем выбора значения 
         self.box_label = None
         self.init_component(*args, **kwargs)
@@ -302,8 +303,8 @@ class ExtRadio(BaseExtField):
             self._put_config_value('checked', True)
         if self.box_label:
             self._put_config_value('boxLabel', self.box_label)
-        self._put_config_value('inputValue', value) 
-        
+        self._put_config_value('inputValue', value)
+
     def render(self):
         try:
             self.render_base_config()

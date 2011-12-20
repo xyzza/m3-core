@@ -345,7 +345,7 @@ class ExtRadioGroup(BaseExtContainer):
         if self.columns:
             self._put_config_value('columns', self.columns)
         if self.label:
-            self._put_config_value('label', self.label)
+            self._put_config_value('fieldLabel', self.label)
 
     def render(self):
         try:
