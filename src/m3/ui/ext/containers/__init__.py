@@ -17,6 +17,7 @@ from trees import ExtTree, ExtTreeNode
 from containers import (ExtContainer,
                         ExtToolBar,
                         ExtButtonGroup,
-                        ExtPagingBar)
+                        ExtPagingBar,
+                        ExtRadioGroup)
 from context_menu import ExtContextMenu, ExtContextMenuItem
 from list_view import ExtListView

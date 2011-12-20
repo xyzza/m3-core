@@ -8,7 +8,8 @@ from simple import (ExtDateField,
                     ExtCheckBox,
                     ExtTimeField,
                     ExtHiddenField,
-                    ExtDisplayField)
+                    ExtDisplayField,
+                    ExtRadio)
 from complex import (ExtDictSelectField,
                      ExtMultiSelectField,
                      ExtSearchField,
