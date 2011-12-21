@@ -10,6 +10,7 @@ from decimal import Decimal
 from m3.helpers import normalize
 
 from m3.ui.ext.base import BaseExtComponent
+import datetime
 
 from base_store import BaseExtStore
 
@@ -74,11 +75,15 @@ class ExtDataStore(BaseExtStore):
         for item in self.data:    
             res_tmp = []
             for subitem in item:
-                if isinstance(subitem, bool):
+                if subitem is None:
+                    res_tmp.append('""')
+                elif isinstance(subitem, bool):
                     res_tmp.append( str(subitem).lower() )
                 elif isinstance(subitem, int) or isinstance(subitem, Decimal) \
                     or isinstance(subitem, float):
                     res_tmp.append( str(subitem) )
+                elif isinstance(subitem, datetime.date):
+                    res_tmp.append('new Date("%s")' % subitem.ctime())
                 else:
                     res_tmp.append('"%s"' % normalize(subitem) )
                     
