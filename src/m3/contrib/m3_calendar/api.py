@@ -388,11 +388,19 @@ class M3Calendar(object):
             # постарался минимизировать количество итераций. Если будут проблемы
             # с производительностью, надобно хорошенько переписать класс.
             if bound_since:
-                days.extend(self.days_by_period(temp_date,
-                    temp_date + timedelta(daycount)))
+                new_days = self.days_by_period(temp_date,
+                                               temp_date + timedelta(daycount))
             else:
-                days.extend(self.days_by_period(temp_date - timedelta(daycount),
-                    temp_date))
+                new_days = self.days_by_period(temp_date - timedelta(daycount),
+                                               temp_date)
+            # если в текущем рассматриваемом промежутке не нашлось рабочих дней,
+            # ищем их в следующем промежутке той же длины
+            if not new_days:
+                temp_date -= (-1)**bound_since * timedelta(daycount)
+                continue
+            else:
+                days.extend(new_days)
+                
             if len(days) < count:
                 if bound_since:
                     temp_date = days[-1] + timedelta(1)
