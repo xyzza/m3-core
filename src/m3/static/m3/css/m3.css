@@ -252,3 +252,31 @@ span.CodeMirror-selected {
 .cm-s-default span.cm-attribute {color: #00c;}
 
 .cm-s-default { background: white;}
+
+
+/*Paging node styles*/
+.gs_tree_pgbtn {
+    float:left;
+    overflow:hidden;
+    padding:0 5px;
+    zoom:1;
+}
+.gs_tree_pgbtn :hover {
+  background-color:#99bbe8;
+}
+.gs_tree_pgbtn_sel {
+  background-color:#d6e3f2;
+}
+
+.x-tree-pagingnode:hover{
+  background-color:#ffffff; !important
+}
+.x-tree-pagingnode{
+  border-color:#ccc; !important
+}
+.x-tree-pagingnode-td:hover{
+  border-right: solid;
+  border-width: 1px;
+  border-color: #EDEDED;
+}
+/*-------------------------*/
