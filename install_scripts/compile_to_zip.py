@@ -116,6 +116,9 @@ def execute(config_temp_dir, config_result_file, config_project_dir):
             if '/.build/' in linuxed_filename or '/log/' in linuxed_filename:
                 #для папки .build и log не нужно копировать файлы
                 continue
+            if file[-1:] == '~' or file[-5:] == '.orig' :
+                #выкинем всякую хрень
+                continue
             if file[-3:] == 'pyc' and os.path.exists(file[:-1]):
                 #есть py, pyc на не нужен
                 continue
