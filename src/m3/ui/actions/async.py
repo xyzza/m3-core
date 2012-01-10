@@ -19,11 +19,12 @@ from m3.ui.actions.results import ActionResult
 
 # TODO: переделать по правильному - платформа не должна импортировать модули контрибов
 
+
 if not 'm3_mutex' in settings.INSTALLED_APPS:
-    raise ImportError(u'Для работы асинхронных (фоновых) операций необходимо наличие приложения m3_mutex в INSTALLED_APPS проекта.')
+    raise ImportError(u'For working async operations "m3_mutex" must be define in INSTALLED_APPS')
 
 from m3_mutex import (capture_mutex, release_mutex, request_mutex,
-                      MutexID, MutexOwner, MutexBusy, MutexState, TimeoutAutoRelease)
+                          MutexID, MutexOwner, MutexBusy, MutexState, TimeoutAutoRelease)
 
 
 class IBackgroundWorker(Thread):
