@@ -205,7 +205,7 @@ def inner_name_cache_handler(for_actions=True):
             packs.extend(pack.subpacks)
             
             for subpack in pack.subpacks:
-                fullpaths[subpack] = '%s.%s' % (fullpaths.get(controller, ''), get_shortname(pack))
+                fullpaths[subpack] = '%s.%s' % (fullpaths.get(pack, ''), get_shortname(subpack))
             
         if for_actions and hasattr(pack, 'actions'):
             for action in pack.actions:
