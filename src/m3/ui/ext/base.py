@@ -232,7 +232,10 @@ class BaseExtComponent(object):
             res = item
         
         elif isinstance(item, datetime.date):    
-            res = None # нефиг даты передавать
+            try:
+                res = "'%s'" % item.strftime(settings.DATE_FORMAT)
+            except:
+                res = "'%s'" % item.strftime('%d.%m.%Y')
         
         elif isinstance(item, dict):
             # рекурсивный обход вложенных свойств
