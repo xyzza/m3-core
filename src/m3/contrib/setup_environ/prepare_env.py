@@ -1,6 +1,6 @@
 #coding:utf-8
 '''
-Модуль, который выполняет подготовку 
+Модуль, который выполняет подготовку
 '''
 import sys
 import os
@@ -21,84 +21,84 @@ TOPMOST_VERSION = 'zzzzzzzzz'
 
 def start(project_path, as_repos=False):
     '''
-    Точка входа. 
+    Точка входа.
     '''
     has_error= False
-        
+
     env_root = os.path.join(project_path, 'env')
     envbuild_root = os.environ.get('ENV_BUILD_ROOT', os.path.join(env_root, '.build'))
-    
+
     # достаем версию и зависимости основного продукта
     module = import_module('version')
-    
+
     # словарь уже обработанных приложений
-    app_queue = Queue.Queue()  
+    app_queue = Queue.Queue()
     processed_apps = {}
-    synced_locally = {} 
-    
+    synced_locally = {}
+
     root_version, root_appname, root_require, root_require_locals = app_version('')
-    
+
     print u'--------------------------------------------------------------------'
     print u'Сборка окружения для проекта \'%s\', версия %s' % (root_appname, root_version)
     print u'--------------------------------------------------------------------'
-    
+
     # создаем папки для хранения информации
     if not os.path.exists(env_root):
         os.mkdir(env_root)
-        
+
     #sys.path.insert(0, env_root)
     sys.path.insert(0, os.path.dirname(__file__))
-    
-        
+
+
     if not os.path.exists(envbuild_root):
         os.mkdir(envbuild_root)
-    
+
     # забираем зависимости корневого приложения
     for require_app, require_version in root_require.iteritems():
         app_queue.put(AppDescription(require_app, require_version))
-        
+
     for require_app, require_path in root_require_locals.iteritems():
         app_queue.put(AppDescription(require_app, require_path, is_local=True))
-        
-    
+
+
     #os.chdir('../')
     # основной цикл обработки
     while not app_queue.empty():
-        
+
         # забираем приложение из очереди на обработку
         app = app_queue.get_nowait()
         print '>>', app.name, '(' + app.version + ')'
-        
+
         if app.is_local:
-            
+
             print '  ', u'Выполняется ЛОКАЛЬНАЯ синхронизация исходных текстов приложения', app.name
-            
+
             # данное приложение необходимо синхронизировать только локально
             # поэтому тупо копируем данные
             # путь к исходным текстам по счастливой случайности хранится
             # в app.version
-            
+
             if not os.path.exists(app.version):
                 print '!!', u'Папка исходных текстов', app.version, u'не найдена'
                 has_error = True
                 continue
-            
+
             copy_sources(app.name, env_root, app.version)
-            
+
             # отмечаем, что данное приложение имеет наивысшую версию
             # и не может быть замещено ни одиним другим набором исходников
             # из репозитариев или других папок
             processed_apps[app.name] = TOPMOST_VERSION
             synced_locally[app.name] = app.version
-            
+
         else:
-            
+
             if processed_apps.get(app.name, '.') >= app.version:
                 # точка всегда "меньше" любого другого символа
                 print '  ', u'Исходные тексты', app.name, u'находятся в актуальном состоянии'
                 continue
             # подготовка приложения
-            app_repo_root = os.path.join(envbuild_root, app.name) 
+            app_repo_root = os.path.join(envbuild_root, app.name)
             if not os.path.exists(app_repo_root):
                 print '  ', u'Клонирование репозитария приложения', app.name
                 if not clone_repo(app.name, app_repo_root):
@@ -107,95 +107,95 @@ def start(project_path, as_repos=False):
                     continue
             else:
                 print '  ', u'Пул репозитария приложения', app.name
-                if not pull_repo(app_repo_root):
+                if not pull_repo(app.name, app_repo_root):
                     has_error = True
                     print '!!', u'Исходные тексты приложения', app.name, u'из-за возникшей ошибки находятся в неактуальном состоянии'
                     continue
-            
+
             print '  ', u'Обновление репозитария приложения', app.name, u'на ветку', app.version
             if not update_repo(app_repo_root, app.version):
                 has_error = True
                 print '!!', u'Исходные тексты приложения', app.name, u'из-за возникшей ошибки находятся в неактуальном состоянии'
                 continue
-        
+
             # копируем получившееся в ./env
-            print '  ', u'Копирование исходных кодов приложения в env'    
+            print '  ', u'Копирование исходных кодов приложения в env'
             copy_sources(app.name, env_root, app_repo_root)
-            
+
             processed_apps[app.name] = app.version
-            
+
         # производим разбор
         app_source_path = os.path.join(env_root, app.name)
         if os.path.exists(os.path.join(app_source_path, 'version.py')):
             sys.path.insert(0, app_source_path)
             _, _, require, require_locals = app_version()
-            
+
             for require_app, require_version in require.iteritems():
                 print '  ', app.name, 'требует приложение', require_app, u'версии', require_version
                 app_queue.put(AppDescription(require_app, require_version))
-    
+
     print u'--------------------------------------------------------------------'
     if has_error:
         print u'Сборка окружения завершена С ОШИБКАМИ.'
     else:
         print u'Сборка окружения успешно завершена'
-        
+
     print u'--------------------------------------------------------------------'
     print u'Выполнена синхронизация следующих пакетов:'
     print '  ', root_appname + ':', root_version
     for app, version in processed_apps.iteritems():
         print '  ', app + ':', synced_locally.get(app, version)
-    
+
 def clone_repo(app_name, app_repo_root):
-    
+
     out, err = run_command(['hg', 'clone', '--insecure', REPO_LOCATION + app_name, app_repo_root])
     if err:
         print '  ', u'Клонирование репозитория', REPO_LOCATION + app_name, u'завершено с ошибкой:', err
-        
+
     return not err
 
-def pull_repo(app_repo_root):
-    
-    out, err = run_command(['hg', 'pull', '-R', app_repo_root])
+def pull_repo(app_name, app_repo_root):
+
+    out, err = run_command(['hg', 'pull', REPO_LOCATION + app_name, '-R', app_repo_root])
     if err:
         print '  ', u'Пул репозитория', app_repo_root, u'завершен с ошибкой:', err
-        
+
     return not err
 
 def update_repo(app_repo_root, app_version):
-    
+
     out, err = run_command(['hg', 'update', app_version, '-R', app_repo_root])
     if err:
         print '  ', u'Обновление репозитория', app_repo_root, u'не ветку', app_version, u'завершено с ошибкой:', err
-        
+
     return not err
 
 def copy_sources(app_name, env_root, app_repo_root):
-    
+
     app_source_root = os.path.join(env_root, app_name)
     if os.path.exists(app_source_root):
         shutil.rmtree(path=app_source_root)
-    
-    shutil.copytree(src=os.path.join(app_repo_root, 'src/' + app_name), dst=app_source_root)
-    
 
-def app_version(app_name=''):    
+    shutil.copytree(src=os.path.join(app_repo_root, 'src/' + app_name), dst=app_source_root)
+
+
+def app_version(app_name=''):
     '''
     Возвращает кортеж из трех элементов (app_version, require, require_local)
     '''
     module = import_module('%s.version' % app_name if app_name else 'version' )
     reload(module)
-        
+
     return (module.__version__,
             module.__appname__,
             module.__require__,
             module.__require_local__ if hasattr(module, '__require_local__') else {},)
-    
+
 #===============================================================================
 # Внутренние классы
 #===============================================================================
 class AppDescription(object):
-    
+
     def __init__(self, name='', version='', is_local = False):
         self.name = name
         self.version = version
@@ -207,7 +207,7 @@ class AppDescription(object):
 def run_command(command):
     '''
     Выполняет команду как subprocess,
-    возвращает (stdout, stderr) процесса 
+    возвращает (stdout, stderr) процесса
     '''
     popen = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     popen.wait()
@@ -287,7 +287,7 @@ def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
             s = s.decode(encoding, errors)
     except UnicodeDecodeError, e:
         if isinstance(s, Exception):
-            
+
             # If we get to here, the caller has passed in an Exception
             # subclass populated with non-ASCII bytestring data without a
             # working unicode method. Try to handle this without raising a
@@ -312,19 +312,19 @@ def is_protected_type(obj):
 
 
 if __name__ == '__main__':
-    path_to_manage_py = os.path.abspath(__file__)        
-    path_to_src = os.path.dirname( os.path.dirname( path_to_manage_py ) )      
+    path_to_manage_py = os.path.abspath(__file__)
+    path_to_src = os.path.dirname( os.path.dirname( path_to_manage_py ) )
     start(path_to_src)
 else:
     # здесь отрабатывается код, который происходит при импорте prepare_env
     # в manage.py
 
     project_path = os.path.dirname(__file__)
-    
+
     # добавляем в sys.path путь до папки env и текущей папки
     sys.path.insert(0, os.path.join(project_path, '../'))
     sys.path.insert(0, os.path.join(project_path, '../env'))
-    
+
     if os.path.exists(os.path.join(project_path, 'version.py')):
         root_version, root_appname, root_require, root_require_locals = app_version('')
         for require_app, require_path in root_require_locals.iteritems():
