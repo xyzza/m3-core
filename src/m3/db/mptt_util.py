@@ -1,19 +1,26 @@
 #coding:utf-8
 
 from django.db.models import signals as model_signals
-from mptt import signals as mptt_signals   
+
+import mptt
+
 
 def disable_mptt_signals(model):
     '''
     Метод выключения обработки сигналов обработки дерева
     '''
-    model_signals.pre_save.disconnect(receiver = mptt_signals.pre_save, sender = model)
+    # Начиная с версии 0.5 сигналов в MPTT больше нет
+    if mptt.VERSION < (0, 5):
+        from mptt import signals as mptt_signals
+        model_signals.pre_save.disconnect(receiver = mptt_signals.pre_save, sender = model)
     
 def enable_mptt_signals(model):
     '''
     Метод включения обработки сигналов обработки дерева
     '''
-    model_signals.pre_save.connect(receiver = mptt_signals.pre_save, sender = model)
+    if mptt.VERSION < (0, 5):
+        from mptt import signals as mptt_signals
+        model_signals.pre_save.connect(receiver = mptt_signals.pre_save, sender = model)
 
 def rebuild_mptt_tree(model, manage_mptt_signals=True, query_manager='objects'):
     '''
