@@ -18,6 +18,7 @@
    ui.rst
    vendor.rst
    workflow.rst
+   report_generator/index.rst
 
 Изменения в m3
 ==============
