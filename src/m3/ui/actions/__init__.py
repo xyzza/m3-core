@@ -339,7 +339,15 @@ class ActionController(object):
     verbose_name = None
     
     class FakePacks:
-        pass
+        """
+        Класс содержит заглушки методов, чтобы инспектор кода не ругался,
+        т.к. настоящие методы присваиваются классу в рантайме.
+        """
+        def append(self, item):
+            pass
+
+        def extend(self, items_list):
+            pass
     
     def __init__(self, url = '', name=None):
         '''
