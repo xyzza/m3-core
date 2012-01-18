@@ -756,7 +756,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
                 branch_node = self.tree_model.objects.get(id = branch_id)
                 nodes = branch_node.get_descendants()
             else:
-                nodes = self.tree_model.objects
+                nodes = self.tree_model.objects.all()
         # кастомная функция модификации запроса
         # при реализации контестных справочников в большинстве случаев
         # достаточно будет просто переопределить данную функцию  
