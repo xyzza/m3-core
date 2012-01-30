@@ -191,6 +191,8 @@ Ext.override(Ext.form.Field, {
 			if (e.getKey() == e.ENTER) {
 				// этот метод делает применение изменений
 				this.onBlur();
+				// проставим значение, как будто мы ушли с поля и вернулись обратно
+				this.startValue = this.getValue();
 			};
             this.fireEvent('specialkey', this, e);
         }
