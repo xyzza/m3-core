@@ -962,12 +962,12 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
             totalLength: this.view.ds.totalLength
         };
         // передадим параметры сортировки
-        if (this.getStore().sortInfo != undefined){
+        if (this.getStore().sortInfo !== undefined){
         	params.sort = this.getStore().sortInfo.field;
         	params.dir = this.getStore().sortInfo.direction;
         }
         // передадим параметры группировки и раскрытых элементов
-        if (groupPlugin != undefined) {
+        if (groupPlugin !== undefined) {
         	params.grouped = Ext.util.JSON.encode(groupPlugin.groupedColumns);
         	params.exp = Ext.util.JSON.encode(groupPlugin.expandedItems);
         }
@@ -980,14 +980,15 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
         Ext.Ajax.request({
             url : this.exportUrl,
             timeout: 9999999,
-            success : function(res,opt){
+            success : function(res, opt){
             	this.view.showLoadMask(false);
                 location.href = res.responseText;
             },
             failure : function(){
             	this.view.showLoadMask(false);
+                uiAjaxFailMessage.apply(this, arguments);
             },
-            params : params,
+            params: params,
             scope: this
         });
     }
