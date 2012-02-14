@@ -103,8 +103,8 @@ class ActionContext(object):
 
         elif arg_type == Decimal:
             # В версиях питона ниже 2.7 в Decimal не поддерживалось создание из float
-            if isinstance(value, float) and sys.version_info < (2, 7):
-                value = Decimal(repr(value))
+            if isinstance(raw_value, float) and sys.version_info < (2, 7):
+                value = Decimal(repr(raw_value))
             else:
                 value = Decimal(raw_value)
 
