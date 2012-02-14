@@ -7,6 +7,7 @@
 import datetime
 import json
 from decimal import Decimal
+import sys
 
 from django.utils.encoding import force_unicode
 
@@ -101,7 +102,11 @@ class ActionContext(object):
             value = float(raw_value)
 
         elif arg_type == Decimal:
-            value = Decimal(raw_value)
+            # В версиях питона ниже 2.7 в Decimal не поддерживалось создание из float
+            if isinstance(value, float) and sys.version_info < (2, 7):
+                value = Decimal(repr(value))
+            else:
+                value = Decimal(raw_value)
 
         elif arg_type in [str, unicode]:
             value = unicode(raw_value)
