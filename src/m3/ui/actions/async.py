@@ -105,7 +105,8 @@ class IBackgroundWorker(Thread):
         Устанавливает глобальную блокировку по инстансу с использованием механизма мютексов
         '''
         try:
-            capture_mutex(mutex_id=self._mutex_id(), owner=self._mutex_owner(), auto_release=TimeoutAutoRelease(timeout=IBackgroundWorker.MUTEX_TIMEOUT))
+            capture_mutex(mutex_id=self._mutex_id(), owner=self._mutex_owner(),
+                auto_release=TimeoutAutoRelease(timeout=self.MUTEX_TIMEOUT))
         except MutexBusy:
             raise Exception(u'asyncop: Не удалось установить глобальную блокировку операции.')
 
@@ -130,7 +131,8 @@ class IBackgroundWorker(Thread):
         Обновляет состояние блокировки
         '''
         try:
-            capture_mutex(mutex_id=self._mutex_id(), owner=self._mutex_owner(), status_data=status_data, auto_release=TimeoutAutoRelease(timeout=IBackgroundWorker.MUTEX_TIMEOUT))
+            capture_mutex(mutex_id=self._mutex_id(), owner=self._mutex_owner(), status_data=status_data,
+                auto_release=TimeoutAutoRelease(timeout=self.MUTEX_TIMEOUT))
         except MutexBusy:
             raise Exception(u'asyncop: Не удалось установить глобальную блокировку операции.')
 
@@ -141,7 +143,7 @@ class IBackgroundWorker(Thread):
         try:
             capture_mutex(mutex_id=self._result_mutex_id(),
                           owner=self._result_mutex_owner(),
-                          auto_release=TimeoutAutoRelease(timeout=IBackgroundWorker.RESULT_MUTEX_TIMEOUT),
+                          auto_release=TimeoutAutoRelease(timeout=self.RESULT_MUTEX_TIMEOUT),
                           status_data=result or '')
         except MutexBusy:
             raise Exception(u'asyncop: Не удалось сохранить результат выполнения оajyjперации.')
