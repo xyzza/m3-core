@@ -1,16 +1,16 @@
+'use strict';
 /**
  * Расширенный комбобокс, включает несколько кнопок
  * @param {Object} baseConfig
  * @param {Object} params
  */
+
 Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	constructor: function(baseConfig, params){
 
 		/**
 		 * Инициализация значений
 		 */
-        "use strict";
-
 		
 		// Будет ли задаваться вопрос перед очисткой значения
 		this.askBeforeDeleting = true;
@@ -54,7 +54,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		assert(params.actions, 'params.actions is undefined');
 		
 		if (params.actions.actionSelectUrl) {
-			this.actionSelectUrl = params.actions.actionSelectUrl
+			this.actionSelectUrl = params.actions.actionSelectUrl;
 		}
 		
 		if (params.actions.actionEditUrl) {
@@ -220,7 +220,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
     },
 
     getWidth: function() {
-        "use strict";
         // неверно пересчитывался размер поля
         //Ext.m3.AdvancedComboBox.superclass.getWidth.call(this);
         return(this.el.getWidth() + this.getTriggerWidth());
@@ -230,15 +229,14 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
      * в зависимости от того, доступно ли поле.
      */
     disableTriggers: function(disabled){
-        "use strict";
         if (this.trigger) {
             var ts = this.trigger.select('.x-form-trigger', true);
             ts.each(function(t, all, index){
-                var handler = this.allTriggers[index].handler;
+                var handler = this.allTriggers[index].handler,
+                    events = Ext.elCache[t.id].events;
                 if (!disabled) {
                     // Чтобы не добавлять событие несколько раз, нужно проверить есть ли оно уже
-                    var events = Ext.elCache[t.id].events;
-                    if (!events['click'] || events.click.length == 0){
+                    if (!events.click || events.click.length === 0){
                         t.on('click', handler, this, {preventDefault:true});
                         t.addClassOnOver('x-form-trigger-over');
                         t.addClassOnClick('x-form-trigger-click');
@@ -259,7 +257,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Инициализация первоначальной настройки триггеров 
 	 */
 	,initBaseTrigger: function(){
-        "use strict";
 		this.baseTriggers[0].handler = this.onTriggerClearClick;
 		this.baseTriggers[1].handler = this.onTriggerDropDownClick;
 		this.baseTriggers[2].handler = this.onTriggerDictSelectClick;
@@ -278,7 +275,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	
 	// см. TwinTriggerField
     getTriggerWidth: function(){
-        "use strict";
         var tw = 0;
         Ext.each(this.triggers, function(t, index){
             var triggerIndex = 'Trigger' + (index + 1),
@@ -296,7 +292,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	// см. TwinTriggerField
     // private
     onDestroy : function() {
-        "use strict";
         Ext.destroy(this.triggers);
 		Ext.destroy(this.allTriggers);
 		Ext.destroy(this.baseTriggers);
@@ -307,7 +302,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Вызывает метод выпадающего меню у комбобокса
 	 **/
 	onTriggerDropDownClick: function() {
-        "use strict";
 		if (this.fireEvent('beforerequest', this)) {
 
 			if (this.isExpanded()) {
@@ -323,14 +317,12 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Кнопка открытия справочника в режиме выбора
 	 */
 	onTriggerDictSelectClick: function() {
-        "use strict";
 		this.onSelectInDictionary();
 	},
 	/**
 	 * Кнопка очистки значения комбобокса
 	 */
 	onTriggerClearClick: function() {
-        "use strict";
 		if (this.askBeforeDeleting) {
 			var scope = this;
 			Ext.Msg.show({
@@ -352,7 +344,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Кнопка открытия режима редактирования записи
 	 */
 	onTriggerDictEditClick: function() {
-        "use strict";
 		this.onEditBtn();
 	},
 	/**
@@ -361,7 +352,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * @param {Object} index
 	 */
 	onSelect: function(record, index){
-        "use strict";
 		if (this.fireEvent('afterselect', this, record.data[this.valueField], record.data[this.displayField] )) {
 			Ext.m3.AdvancedComboBox.superclass.onSelect.call(this, record, index);
             this.showClearBtn();
@@ -374,7 +364,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Показывает кнопку очистки значения
 	 */
 	showClearBtn: function(){
-        "use strict";
         if (!this.hideTriggerClear && this.rendered && !this.readOnly && !this.disabled) {
             this.getTrigger(0).show();
         } else {
@@ -385,7 +374,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Скрывает кнопку очистки значения
 	 */
 	hideClearBtn: function(){
-        "use strict";
         if (this.rendered) {
             this.getTrigger(0).hide();
         } else {
@@ -396,7 +384,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Показывает кнопку открытия карточки элемента
 	 */
 	showEditBtn: function(){
-        "use strict";
         if (this.actionEditUrl && this.rendered && !this.hideTriggerDictEdit && this.getValue()) {
             this.getTrigger(3).show();
         } else {
@@ -407,7 +394,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Скрывает кнопку открытия карточки элемента
 	 */
 	hideEditBtn: function(){
-        "use strict";
         if (this.actionEditUrl && this.rendered) {
             this.getTrigger(3).hide();
         } else {
@@ -419,7 +405,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * кнопку очистки
 	 */
 	clearValue: function(){
-        "use strict";
 		var oldValue = this.getValue();
 		Ext.m3.AdvancedComboBox.superclass.clearValue.call(this);
 		this.hideClearBtn();
@@ -475,7 +460,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * @param {Object} value Отображаемое значение
 	 */
 	addRecordToStore: function(id, value){
-        "use strict";
         var record = new Ext.data.Record(),
             oldValue = this.getValue();
         record.id = id;
@@ -494,13 +478,13 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
      * @param {Ext.data.Record} record Запись-значение
      */
     setRecord: function(record){
-        'use strict';
         if (record){
-            var store = this.getStore();
+            var store = this.getStore(),
             // узнаем ключ новой записи
-            var key = record.data[this.valueField];
+                key = record.data[this.valueField],
             // найдем похожую запись
-            var index = store.find(this.valueField, key);
+                index = store.find(this.valueField, key);
+
             // если нашли, то заменим запись
             if (index >= 0) {
                 store.removeAt(index);
@@ -518,7 +502,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
      * @return {Ext.data.Record} Запись-значение
      */
     getRecord: function(){
-        'use strict';
         var store = this.getStore(),
         // узнаем ключ записи
             key = this.getValue(),
@@ -557,7 +540,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * Не нужно вызывать change после потери фокуса
 	 */
 	triggerBlur: function () {
-        'use strict';
 		if(this.focusClass){
             this.el.removeClass(this.focusClass);
         }
@@ -565,7 +547,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             this.wrap.removeClass(this.wrapFocusClass);
         }
         // Очистка значения, если введено пустое значение
-        if (!this.getRawValue() & this.getValue()) {
+        if (!this.getRawValue() && this.getValue()) {
             this.clearValue();
         }
         this.validate();
@@ -575,7 +557,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
      * Проверка поля на корректность
      */
     validateField: function(value) {
-        'use strict';
         // поле неверно, если в него ввели текст, который не совпадает с выбранным текстом
         return (this.getRawValue() === this.getText());
     },
@@ -584,7 +565,6 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
      * При изменении доступности поля, нужно также поменять доступность всех его кнопок
      */
     setDisabled: function(disabled){
-        'use strict';
         this.disableTriggers(disabled);
         Ext.m3.AdvancedComboBox.superclass.setDisabled.call(this, disabled);
     },
