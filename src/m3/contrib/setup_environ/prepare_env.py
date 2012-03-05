@@ -12,7 +12,7 @@ import shutil
 from decimal import Decimal
 
 
-REPO_LOCATION = 'https://readonly:onlyread@repos.med.bars-open.ru/'
+REPO_LOCATION = 'https://readonly:onlyread@src.bars-open.ru/'
 TOPMOST_VERSION = 'zzzzzzzzz'
 
 #===============================================================================
