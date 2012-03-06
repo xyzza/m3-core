@@ -6845,19 +6845,8 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		if (this.addr != undefined) {
 			this.addr.setValue(new_addr);
 		}
-		
-		/*
-		var addrCmp = this;
-		Ext.Ajax.request({
-			url: this.get_addr_url,
-			params: Ext.applyIf({ place: place_id, street: street_id, house: house_num, flat: flat_num, zipcode: zipcode, addr_cmp: this.addr.id }, this.params),
-			success: function(response, opts){
-			    smart_eval(response.responseText);
-			    addrCmp.fireEvent('change');
-			    },
-			failure: function(){Ext.Msg.show({ title:'', msg: 'Не удалось получить адрес.<br>Причина: сервер временно недоступен.', buttons:Ext.Msg.OK, icon: Ext.Msg.WARNING });}
-		});
-		*/
+
+        return new_addr;
     }
 	, generateTextAddr: function(place, street, house, corps, flat, zipcode) {
 		/* Формирование текстового представления полного адреса */
