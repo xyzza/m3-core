@@ -6,6 +6,7 @@
 '''
 
 import json
+from copy import copy
 
 from django import http
 
@@ -242,5 +243,18 @@ class ActionRedirectResult(object):
     Перенаправляет обработку запроса на другой экшен.
     Экшен предварительно находится с помощью метода ActionController.get_action_url()
     """
-    def __init__(self, action):
+    def __init__(self, action, context=None):
         self.action = action
+        self.context = context
+        
+    def prepare_request(self, request):
+        if self.context:
+            new_post = copy(request.POST)
+            for k,v in self.context.__dict__.iteritems():
+                if not new_post.has_key(k):
+                    new_post[k] = v
+            request.POST = new_post
+            del request._request
+        return request
+                
+    
