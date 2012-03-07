@@ -554,6 +554,7 @@ class ActionController(object):
                     raise ActionNotFoundException(result.action)
 
                 request.path = new_path
+                result.prepare_request(request)
                 return self.process_request(request)
 
             return result
