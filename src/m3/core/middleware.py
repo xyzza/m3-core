@@ -155,7 +155,7 @@ def get_thread_data():
     if not hasattr(_thread_locals, 'm3_data'):
         default_data = ThreadData()
         default_data.apply_defaults()
-        return default_data  
+        _thread_locals.m3_data = default_data
     
     return _thread_locals.m3_data
 
