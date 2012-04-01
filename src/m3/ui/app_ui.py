@@ -52,8 +52,8 @@ class DesktopModel(object):
         @param toptoolbar: список модулей на верхней панели
         '''
         self.start_menu = TypedList(BaseDesktopElement)
-        self.toolbox    = TypedList(BaseDesktopElement)
-        self.desktop    = TypedList(DesktopLauncher)
+        self.toolbox = TypedList(BaseDesktopElement)
+        self.desktop = TypedList(DesktopLauncher)
         self.toptoolbar = TypedList(BaseDesktopElement)
 
 
@@ -121,7 +121,7 @@ class DesktopLaunchGroup(BaseDesktopElement):
         clone.index = self.index
         clone.id = self.id
         for subitem in self.subitems:
-            clone.subitems.append( copy.deepcopy(subitem) )
+            clone.subitems.append(copy.deepcopy(subitem))
         return clone
 
     def render_items(self):
@@ -169,7 +169,7 @@ class DesktopLauncher(BaseDesktopElement):
         '''Рендерит текущий объект. Вызывается из метода render_items класса DesktopLaunchGroup'''
         res = 'text:"%s"' % self.name.replace('"', "&quot;")
         res += ',iconCls:"%s"' % self.icon
-        res += ',handler: %s' %self.handler
+        res += ',handler: %s' % self.handler
         res += ',scope: this'
         return '{%s}' % res
 
@@ -188,20 +188,25 @@ class DesktopShortcut(DesktopLauncher):
         """
         super(DesktopShortcut, self).__init__(*args, **kwargs)
         # Если это экшен, то получаем его адрес
-        if hasattr(pack, '__dict__') and issubclass(pack, Action):
-            self.url = pack.absolute_url()
-        elif isinstance(pack, Action):
+        if isinstance(pack, Action):
             self.url = pack.get_absolute_url()
         else:
-            # Пробуем найти как пак
-            p = ControllerCache.find_pack(pack)
-            if not p:
-                raise DesktopException('Pack %s not found in ControllerCache' % pack)
+            try:
+                is_action_class = issubclass(pack, Action)
+            except TypeError:
+                is_action_class = False
+            if is_action_class:
+                self.url = pack.absolute_url()
+            else:
+                # Пробуем найти как пак
+                p = ControllerCache.find_pack(pack)
+                if not p:
+                    raise DesktopException('Pack %s not found in ControllerCache' % pack)
 
-            self.url = p.get_list_url()
-            # Если не задано имя ярлыка, то название берем из справочника
-            if not kwargs.get('name'):
-                self.name = p.title
+                self.url = p.get_list_url()
+                # Если не задано имя ярлыка, то название берем из справочника
+                if not kwargs.get('name'):
+                    self.name = p.title
 
         self._set_default_handler()
 
@@ -404,8 +409,8 @@ class DesktopLoader(object):
 # Разные полезные шорткаты
 #===============================================================================
 
-def add_desktop_launcher(name = '', url = '', icon='',
-                         path = None, metaroles = None, places=None):
+def add_desktop_launcher(name='', url='', icon='',
+                         path=None, metaroles=None, places=None):
     '''
     Шорткат для добавления ланчеров в элементы рабочего стола.
 
@@ -420,18 +425,18 @@ def add_desktop_launcher(name = '', url = '', icon='',
     '''
     if not metaroles or not places:
         return
-    
+
     launcher = DesktopLauncher(url=url,
                                name=name,
                                icon=icon)
     # "чистый" список металорей, для которых выполняется регистрация метаролей
     # 
-    cleaned_metaroles = [] 
+    cleaned_metaroles = []
     cleaned_places = []
-    
-    cleaned_metaroles.extend(metaroles if isinstance(metaroles, list) else [metaroles,])
-    cleaned_places.extend(places if isinstance(places, list) else [places,])
-    
+
+    cleaned_metaroles.extend(metaroles if isinstance(metaroles, list) else [metaroles, ])
+    cleaned_places.extend(places if isinstance(places, list) else [places, ])
+
     root = None
     parent_group = None
     for slug in (path or []):
@@ -444,16 +449,16 @@ def add_desktop_launcher(name = '', url = '', icon='',
             root = group
         if parent_group:
             parent_group.subitems.append(group)
-        
+
         parent_group = group
-        
+
     if root:
         root.subitems.append(launcher)
         launcher = root # мы в ланчеры, значится, будем добавлять самого рута.
-    
+
     for metarole in cleaned_metaroles:
-        mt = get_metarole(metarole) if isinstance(metarole, str) else metarole 
+        mt = get_metarole(metarole) if isinstance(metarole, str) else metarole
         if mt:
             for place in cleaned_places:
                 DesktopLoader.add(mt, place, launcher)
-        
+
