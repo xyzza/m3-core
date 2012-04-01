@@ -190,6 +190,7 @@ class DesktopShortcut(DesktopLauncher):
         # Если это экшен, то получаем его адрес
         if isinstance(pack, Action):
             self.url = pack.get_absolute_url()
+            pack.title = getattr(pack.parent, 'title', '???')
         else:
             try:
                 is_action_class = issubclass(pack, Action)
@@ -197,6 +198,7 @@ class DesktopShortcut(DesktopLauncher):
                 is_action_class = False
             if is_action_class:
                 self.url = pack.absolute_url()
+                pack.title = pack.__name__
             else:
                 if not isinstance(pack, ActionPack):
                     # Пробуем найти как пак
@@ -207,8 +209,8 @@ class DesktopShortcut(DesktopLauncher):
 
                 self.url = pack.get_list_url()
                 # Если не задано имя ярлыка, то название берем из справочника
-                if not kwargs.get('name'):
-                    self.name = p.title
+                if not kwargs.get('name', None):
+                    self.name = pack.title
 
         self._set_default_handler()
 
