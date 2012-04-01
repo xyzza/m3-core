@@ -198,12 +198,14 @@ class DesktopShortcut(DesktopLauncher):
             if is_action_class:
                 self.url = pack.absolute_url()
             else:
-                # Пробуем найти как пак
-                p = ControllerCache.find_pack(pack)
-                if not p:
-                    raise DesktopException('Pack %s not found in ControllerCache' % pack)
+                if not isinstance(pack, ActionPack):
+                    # Пробуем найти как пак
+                    pack = ControllerCache.find_pack(pack)
+                    if not pack:
+                        raise DesktopException(
+                            'Pack %s not found in ControllerCache' % pack)
 
-                self.url = p.get_list_url()
+                self.url = pack.get_list_url()
                 # Если не задано имя ярлыка, то название берем из справочника
                 if not kwargs.get('name'):
                     self.name = p.title
