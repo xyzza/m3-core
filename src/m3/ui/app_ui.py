@@ -22,7 +22,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from m3.helpers.datastructures import TypedList
 from m3.helpers import logger
 
-from m3.ui.actions import ControllerCache, Action
+from m3.ui.actions import ControllerCache, Action, ActionPack
 from m3.core.json import M3JSONEncoder
 
 #from mis.users.metaroles import UserMetaRole, get_metarole
