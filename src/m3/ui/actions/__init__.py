@@ -593,7 +593,7 @@ class ActionController(object):
         """
         ControllerCache.populate()
         
-        if isinstance(type, str):
+        if isinstance(type, basestring):
             clazz, _ = self._actions_by_name.get(type, (None, None))
         elif issubclass(type, Action):
             clazz, _ =  self._actions_by_type.get(type, (None, None))
