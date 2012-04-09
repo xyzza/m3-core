@@ -299,7 +299,7 @@ class ListWindowAction(Action):
             win.url_edit_grid = base.edit_grid_window_action.get_absolute_url()
             win.url_delete_grid = base.delete_row_action.get_absolute_url()
             # Драг&Дроп
-            if not base.tree_readonly:
+            if not base.tree_readonly and base.list_drag_and_drop:
                 win.url_drag_grid = base.drag_list.get_absolute_url()
 
     def configure_tree(self, win, request, context):
@@ -330,7 +330,8 @@ class ListWindowAction(Action):
             win.url_edit_tree = base.edit_node_window_action.get_absolute_url()
             win.url_delete_tree = base.delete_node_action.get_absolute_url()
             # Драг&Дроп
-            win.url_drag_tree = base.drag_tree.get_absolute_url()
+            if base.list_drag_and_drop:
+                win.url_drag_tree = base.drag_tree.get_absolute_url()
 
     def configure_other(self, win, request, context):
         pass
@@ -625,6 +626,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     list_readonly = False # Если истина, то адреса экшенов гриду не назначаются
     list_order_field = ''
     list_paging = True
+    list_drag_and_drop = True # Разрешает перетаскивание элементов из грида в другие группы дерева
 
     # Порядок сортировки элементов списка. Работает следующим образом:
     # 1. Если в list_columns модели списка есть поле code, то устанавливается сортировка по возрастанию этого поля;
