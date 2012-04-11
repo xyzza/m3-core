@@ -112,7 +112,8 @@ class Action(object):
         # т.к. эти права проверяются уже внутри действия (т.е. уже при его выполнении)
         # Но должно быть право проверять права в родительском наборе действий!
         # Если переданный код не прописан в правах этого действия, то это не наш код - значит всё разрешено 
-        if self.parent.need_check_permission and sub_code in self.sub_permissions.keys():
+        # Добавление проверки прав в родительском элементе из экшна
+        if self.parent.need_check_permission and (sub_code in self.sub_permissions.keys() or sub_code in self.parent.sub_permissions.keys()):
             # если пользователя нет, значит аноним - ему дадим отпор
             if user_obj:
                 # проверим что права на выполнение есть
