@@ -269,10 +269,11 @@ class DesktopLoader(object):
         finally:
             cls._lock.release()
 
+
     @classmethod
-    def populate(cls, user, desktop, sorting=SORTING):
+    def add_el_to_desktop(cls, desktop, metarole_code):
         '''
-        Метод, который выполняет всю работу по настройке десктопа во вьюшке
+        Добавляет элементы к интерфейсу в зависимости от метароли
         '''
         def join_list(existing_list, in_list):
             '''
@@ -300,21 +301,27 @@ class DesktopLoader(object):
                 else:
                     existing_list.append(in_el)
 
-        def add_el_to_desktop(cls, desktop, metarole_code):
-            '''
-            Добавляет элементы к интерфейсу в зависимости от метароли
-            '''
 
-            items_for_role = cls._cache.get(metarole_code, {})
-            for place, items in items_for_role.items():
-                if place == cls.DESKTOP:
-                    join_list(desktop.desktop, items)
-                elif place == cls.START_MENU:
-                    join_list(desktop.start_menu, items)
-                elif place == cls.TOOLBOX:
-                    join_list(desktop.toolbox, items)
-                elif place == cls.TOPTOOLBAR:
-                    join_list(desktop.toptoolbar, items)
+        # Загрузка кеша
+        if not cls._success:
+            cls._load_desktop_from_apps()
+
+        items_for_role = cls._cache.get(metarole_code, {})
+        for place, items in items_for_role.items():
+            if place == cls.DESKTOP:
+                join_list(desktop.desktop, items)
+            elif place == cls.START_MENU:
+                join_list(desktop.start_menu, items)
+            elif place == cls.TOOLBOX:
+                join_list(desktop.toolbox, items)
+            elif place == cls.TOPTOOLBAR:
+                join_list(desktop.toptoolbar, items)
+
+    @classmethod
+    def populate(cls, user, desktop, sorting=SORTING):
+        '''
+        Метод, который выполняет всю работу по настройке десктопа во вьюшке
+        '''
 
         def sort_desktop(desktop_list):
             '''
@@ -330,19 +337,16 @@ class DesktopLoader(object):
         assert isinstance(desktop, DesktopModel)
         assert isinstance(user, (User, AnonymousUser))
 
-        # Загрузка кеша
-        if not cls._success:
-            cls._load_desktop_from_apps()
-
         if not isinstance(user, AnonymousUser):
             assign_roles = get_assigned_metaroles_query(user)
             if user.is_superuser:
-                add_el_to_desktop(cls, desktop, SUPER_ADMIN)
+                cls.add_el_to_desktop(desktop, SUPER_ADMIN)
         else:
             assign_roles = []
-        add_el_to_desktop(cls, desktop, GENERIC_USER) #добавим все ярлычки обобщенного пользователя
+
+        cls.add_el_to_desktop(desktop, GENERIC_USER) #добавим все ярлычки обобщенного пользователя
         for role in assign_roles:
-            add_el_to_desktop(cls, desktop, role)
+            cls.add_el_to_desktop(desktop, role)
 
         sort_desktop(desktop.desktop)
         sort_desktop(desktop.start_menu)
