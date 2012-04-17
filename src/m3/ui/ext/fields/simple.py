@@ -41,6 +41,11 @@ class ExtStringField(BaseExtField):
     def render_base_config(self):
         if self.input_mask:
             self.plugins.append("new Ext.ux.Mask('%s')" % self.input_mask)
+
+        # Экранирование значений с обратным слешем
+        # Кавычки, апострафы, символы переноса строки и т.д. отрежутся функцией normalize в helpers/__init__.py
+        self.value = self.value.replace('\\','\\\\')
+
         super(ExtStringField, self).render_base_config()
         self._put_config_value('inputType', self.input_type)
         self._put_config_value('maskRe', self.t_render_mask_re, self.mask_re)
