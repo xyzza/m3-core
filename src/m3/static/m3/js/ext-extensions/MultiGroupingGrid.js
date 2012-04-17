@@ -1232,6 +1232,11 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
             } else {
                 smart_eval(response.responseText);
                 this.refreshStore();
+                // Если после удаления в гриде остались какие-нибудь выделения -
+                // надо все очистить, так как строк уже не осталось.
+                if (this.getSelectionModel().hasSelection()) {
+                    this.getSelectionModel().clearSelections();
+                }
             }
         }
 	}
