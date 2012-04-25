@@ -9756,6 +9756,9 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
                             // при редактировании заменим старый узел на новый
                             var parentNode = selectedNode.parentNode;
                             parentNode.removeChild(selectedNode);
+		    	     if (!parentNode.expanded) {
+               		 parentNode.expand(false, false);
+           		     }
                             parentNode.appendChild(newSelectNode);
                             break;
 
