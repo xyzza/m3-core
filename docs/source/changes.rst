@@ -14,20 +14,18 @@ Release 1.0
 * В класс ``m3.ui.ext.containers.forms.ExtForm`` добавлен метод ``try_to_list``.
 * В класс ``m3.ui.ext.containers.forms.ExtPanel`` добавлен атрибут ``title_collapse``. Атрибут указывает нужно ли сворачивать
   панель при щелчке на заголовке.
-* В класс ``m3.ui.actions.dicts.tree.BaseTreeDictionaryActions`` добавлен метод ``get_default_action``:
-    .. autoclass:: m3.ui.actions.dicts.tree.BaseTreeDictionaryActions
-        :members: get_default_action
+* В класс ``m3.ui.actions.dicts.tree.BaseTreeDictionaryActions`` добавлен метод ``get_default_action``, который возвращает
+  экшн по-умолчанию.
 * В класс ``m3.ui.actions.dicts.tree.BaseTreeDictionaryModelActions`` добавлена настройка ``list_drag_and_drop`` разрешающая
   перетаскивание элементов из грида в другие группы дерева.
-* В класс ``m3.ui.actions.dicts.tree.BaseDictionaryActions`` добавлен метод ``get_default_action``:
-    .. autoclass:: m3.ui.actions.dicts.tree.BaseDictionaryActions
-        :members: get_default_action
+* В класс ``m3.ui.actions.dicts.simple.BaseDictionaryActions`` добавлен метод ``get_default_action``, который возвращает
+  экшн по-умолчанию.
 * В класс ``m3.ui.actions.results.ActionRedirectResult`` добавлен атрибут ``context`` и метод ``prepare_request``.
 * В метод ``convert_value`` класса ``m3.ui.actions.context.ActionContext`` добавлена проверка версии Python, т.к. в версиях
   ниже 2.7 в `Decimal` не поддерживается создание из `float`.
 * В классе ``Action`` добавлена проверка прав в родительском элементе из экшена
 * В класс ``m3.ui.app_ui.DesktopLauncher`` добавлен метод ``_set_default_handler``
-* Добавлен модуль ``m3_tags``
+* Добавлен модуль ``m3_tags``. Там описан темплейт таг, который возвращает URL экшена.
 * В метод ``deleteOkHandler`` классa ``Ext.m3.ObjectGrid`` добавлена проверка на ошибки уровня приложения.
 * В класс ``Ext.m3.MultiSelectField`` добавлен метод ``fireChangeEventOnDemand``, который имитирует поведение ``Ext.form.Field.onBlur()``.
 * В класс ``Ext.ux.form.FileUploadField`` добавлены события ``change`` (отрабатывает, когда изменилось значение) и
@@ -51,7 +49,7 @@ Release 0.92
 * Реализовано добавление/удаление пользовательского класса ``m3-grey-field`` после использования ``setReadOnly`` для
   ``Ext.form.Field`` и ``Ext.form.TriggerField``.
 * В модуль ``m3.ui.actions.utils`` добавлена функция ``detect_related_fields``
-  .. autofunction:: m3.ui.actions.utils.detect_related_fields
+    .. autofunction:: m3.ui.actions.utils.detect_related_fields
 * В классе ``m3.ui.ext.base.BaseExtComponent`` поправлен метод ``_put_base_value``. Теперь возможно передавать даты.
 * В класс ``m3.ui.ext.containers.trees.ExtTreeLoader`` добавлен атрибут ``ui_providers``.
 * В класс ``m3.ui.ext.panels.grids.ExtMultiGroupinGrid`` добавлен атрибут ``display_message`` -- формат отображения
