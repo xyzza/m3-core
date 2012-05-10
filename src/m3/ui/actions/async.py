@@ -8,8 +8,10 @@ import json
 from django import http
 from django.conf import settings
 
+from m3.helpers import logger
 from m3.ui.actions import Action, ACD
 from m3.ui.actions.results import ActionResult
+
 
 
 
@@ -19,13 +21,16 @@ from m3.ui.actions.results import ActionResult
 
 # TODO: переделать по правильному - платформа не должна импортировать модули контрибов
 
-
 if not 'm3_mutex' in settings.INSTALLED_APPS:
-    raise ImportError(u'For working async operations "m3_mutex" must be define in INSTALLED_APPS')
+    # При сборке документации внешняя Django ничего не знает про m3_mutex
+    logger.warning(u'For working async operations "m3_mutex" must be define in INSTALLED_APPS')
+#    raise ImportError(u'For working async operations "m3_mutex" must be define in INSTALLED_APPS')
 
-from m3_mutex import (capture_mutex, release_mutex, request_mutex,
+try:
+    from m3_mutex import (capture_mutex, release_mutex, request_mutex,
                           MutexID, MutexOwner, MutexBusy, MutexState, TimeoutAutoRelease)
-
+except ImportError:
+    logger.warning(u'm3_mutex import error')
 
 class IBackgroundWorker(Thread):
     '''
