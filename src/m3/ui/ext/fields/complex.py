@@ -294,6 +294,7 @@ class ExtDictSelectField(BaseExtTriggerField):
         
     def render_params(self):
         action_context = None
+        # FIXME: Почему то нет в конструкторе.
         if self.action_context:
             # функция
             action_context = self.action_context.json

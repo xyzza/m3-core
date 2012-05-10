@@ -121,29 +121,6 @@ class BaseExtComponent(object):
         '''
         self.pre_render()
         return render_component(self)
-    # Код ниже раскомментировать как только все компоненты будут поддерживать 
-    # новый рендеринг
-#        assert getattr(self, '_ext_name'), 'Class %s is not define "_ext_name"' % \
-#            (self.__class__.__name__,)
-#        
-#        self.pre_render()
-#        
-#        try:
-#            self.render_base_config()
-#            self.render_params()
-#        except UnicodeDecodeError:
-#            raise Exception('Some attribute is not unicode')
-#        except Exception as msg:
-#            raise Exception(msg) 
-#        
-#        base_config = self._get_config_str()
-#        params = self._get_params_str()
-#        res =  '%(ext_name)s({%(base_config)s},{%(params)s})' \
-#                            % {'ext_name': self._ext_name,
-#                            'base_config': base_config,
-#                            'params': params }
-                            
-#        return 'new %s' % res if not self._is_function_render else res
     
     def render_globals(self):
         '''

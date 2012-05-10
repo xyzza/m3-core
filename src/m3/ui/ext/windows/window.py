@@ -35,7 +35,7 @@ class ExtWindow(BaseExtWindow):
         
         base_config = self._get_config_str()
         params = self._get_params_str()
-        res =  '%(ext_name)s({%(base_config)s},{%(params)s})' \
+        res = '%(ext_name)s({%(base_config)s},{%(params)s})' \
                             % {'ext_name': self._ext_name,
                             'base_config': base_config,
                             'params': params }

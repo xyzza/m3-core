@@ -15,6 +15,7 @@ from PIL import Image # require PIL module
 from django.core.files.base import ContentFile
 from django.conf import settings
 
+from m3.ui.ext import render_template
 from m3.ui.ext.fields.base import BaseExtField
 from m3.ui.ext.fields import (ExtNumberField, 
                               ExtStringField, 
@@ -29,6 +30,8 @@ from m3.ui.ext.fields.complex import ExtDictSelectField, ExtMultiSelectField
 from m3.helpers import get_img_size, logger
 from m3.helpers.datastructures import TypedList
 from m3.ui.actions.interfaces import ISelectablePack, IMultiSelectablePack
+
+
 
 
 #===============================================================================
@@ -460,7 +463,7 @@ class ExtForm(BaseExtPanel):
 
             elif isinstance(item, ExtMultiSelectField):
                 val = try_to_list(val)
-                    
+
             elif isinstance(item, ExtDictSelectField):
                 val = try_to_int(val)
                 
@@ -529,7 +532,7 @@ class ExtPanel(BaseExtPanel):
         
         # Показывать ли внутреннюю границу у элемента
         self.body_border = True
-        
+
         # Базовый CSS класс, по умолчанию 'x-panel'
         self.base_cls = ''
         
@@ -571,6 +574,17 @@ class ExtPanel(BaseExtPanel):
         self.render_params() # Пусто
         base_config = self._get_config_str()
         return 'new Ext.Panel({%s})' % base_config
+
+    def render_globals(self):
+        """
+        Рендерит и возвращает js-код, который помещен в template_globals
+        """
+        self.pre_render_globals()
+        if self.template_globals:
+            return render_template(self.template_globals,
+                    {'component': self, 'self' : self, 'panel': self})
+
+        return ''
     
     @property
     def items(self):
