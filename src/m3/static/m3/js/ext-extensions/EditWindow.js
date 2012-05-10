@@ -358,30 +358,33 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 * откажется закрывать окно, возбуждается событие 'closing_canceled'
 	 */
 	,close: function (forceClose) {
-
-		if (this.changesCount !== 0 && !forceClose ) {
-			var scope = this;
-			Ext.Msg.show({
-				title: "Внимание",
-				msg: "Данные были изменены! Cохранить изменения?",
-				buttons: Ext.Msg.YESNOCANCEL,
-				fn: function(buttonId, text, opt){
-					if (buttonId === 'yes') {
-						this.submitForm();
-					} else if (buttonId === 'no') {
-					    Ext.m3.EditWindow.superclass.close.call(scope);					  
-					} else {
-					   scope.fireEvent('closing_canceled');  
-					}
-				},
-				animEl: 'elId',
-				icon: Ext.MessageBox.QUESTION,
-				scope: this				
-			});
-
-			return;
-		};
-		Ext.m3.EditWindow.superclass.close.call(this);
+        if (this.changesCount !== 0 && !forceClose ) {
+            if(this.fireEvent('beforeclose', this) !== false){
+                Ext.Msg.show({
+                    title: "Внимание",
+                    msg: "Данные были изменены! Cохранить изменения?",
+                    buttons: Ext.Msg.YESNOCANCEL,
+                    fn: function(buttonId, text, opt){
+                        if (buttonId === 'yes') {
+                            this.submitForm();
+                        } else if (buttonId === 'no') {
+                            if(this.hidden){
+                                this.doClose();
+                            }else{
+                                this.hide(null, this.doClose, this);
+                            }
+                        } else {
+                           this.fireEvent('closing_canceled');
+                        }
+                    },
+                    animEl: 'elId',
+                    icon: Ext.MessageBox.QUESTION,
+                    scope: this
+                });
+            }
+        } else {
+            Ext.m3.EditWindow.superclass.close.call(this);
+        }
 	}
     ,disableToolbars: function(disabled){
         var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
