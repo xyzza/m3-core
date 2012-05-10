@@ -1,3 +1,95 @@
+Release 1.0
+=============================
+
+* В базовое окно для линейного, иерархического и сомещенного справочника ``m3.ui.ext.windows.complex.ExtDictionaryWindow``
+  добавлен режим множественного выбора.
+* В класс ``m3.ui.ext.panels.grids.ExtMultiGroupinGrid`` добавлен атрибут ``header_style`` -- стиль заголовка колонки.
+  А также метод ``render_base_config``.
+* В ``m3.ui.ext.misc.store.ExtDataStore`` добавлена возможность прописывать в шаблоне даты.
+* В методе ``render_base_config`` класса ``m3.ui.ext.fields.simple.ExtStringField`` реализовано экранирование значений с
+  обратным слэшем.
+* В модуль ``m3.ui.ext.containers.grids`` добавлены два класса:
+    .. autoclass:: m3.ui.ext.containers.grids.ExtLiveGridCheckBoxSelModel
+    .. autoclass:: m3.ui.ext.containers.grids.ExtLiveGridRowSelModel
+* В класс ``m3.ui.ext.containers.forms.ExtForm`` добавлен метод ``try_to_list``.
+* В класс ``m3.ui.ext.containers.forms.ExtPanel`` добавлен атрибут ``title_collapse``. Атрибут указывает нужно ли сворачивать
+  панель при щелчке на заголовке.
+* В класс ``m3.ui.actions.dicts.tree.BaseTreeDictionaryActions`` добавлен метод ``get_default_action``:
+    .. autoclass:: m3.ui.actions.dicts.tree.BaseTreeDictionaryActions
+        :members: get_default_action
+* В класс ``m3.ui.actions.dicts.tree.BaseTreeDictionaryModelActions`` добавлена настройка ``list_drag_and_drop`` разрешающая
+  перетаскивание элементов из грида в другие группы дерева.
+* В класс ``m3.ui.actions.dicts.tree.BaseDictionaryActions`` добавлен метод ``get_default_action``:
+    .. autoclass:: m3.ui.actions.dicts.tree.BaseDictionaryActions
+        :members: get_default_action
+* В класс ``m3.ui.actions.results.ActionRedirectResult`` добавлен атрибут ``context`` и метод ``prepare_request``.
+* В метод ``convert_value`` класса ``m3.ui.actions.context.ActionContext`` добавлена проверка версии Python, т.к. в версиях
+  ниже 2.7 в `Decimal` не поддерживается создание из `float`.
+* В классе ``Action`` добавлена проверка прав в родительском элементе из экшена
+* В класс ``m3.ui.app_ui.DesktopLauncher`` добавлен метод ``_set_default_handler``
+* Добавлен модуль ``m3_tags``
+* В метод ``deleteOkHandler`` классa ``Ext.m3.ObjectGrid`` добавлена проверка на ошибки уровня приложения.
+* В класс ``Ext.m3.MultiSelectField`` добавлен метод ``fireChangeEventOnDemand``, который имитирует поведение ``Ext.form.Field.onBlur()``.
+* В класс ``Ext.ux.form.FileUploadField`` добавлены события ``change`` (отрабатывает, когда изменилось значение) и
+  ``beforechange`` (срабатывает до изменения поля)
+* В класс ``Ext.m3.EditWindow`` добавлен метод ``clearModificationFlag``, который отбрасывает признаки модифицированности формы.
+* Для ``Ext.m3.AdvancedComboBox`` корректирована функция ``getWidth``, которая вычисляет ширину поля.
+* В класс ``Ext.m3.AddrField`` добавлено событие ``change_corps``, которое срабатывает при изменение корпуса.
+* В класс ``m3.helpers.datagrouping.RecordProxy`` добавлен атрибут ``grouped`` -- список атрибуто, по которым происходит
+  группироровка
+* В класс ``m3.helpers.datagrouping.GroupingRecordProvider`` добавлен атрибут ``detail_attrs_map`` -- словарь, определяющий
+  дополнительные поля, которые добавляются в узловые записи, создаваемые самим провайдером.
+* Добавлен контриб `setupenv`
+* Добавлен контриб `prepare_env`
+* Множественные исправления, которые можно увидеть выполнив, например, визуальное сравнение веток через TortoiseHG.
+
+Release 0.92
+=============================
+
+* Добавлен ExtJs класс ``Ext.ux.PagingTreeNodeUI`` (`m3/static/m3/js/ext-extensions/PagingNodeUI.js`).
+  Добавлено описание стилей в `m3/static/m3/css`
+* Реализовано добавление/удаление пользовательского класса ``m3-grey-field`` после использования ``setReadOnly`` для
+  ``Ext.form.Field`` и ``Ext.form.TriggerField``.
+* В модуль ``m3.ui.actions.utils`` добавлена функция ``detect_related_fields``
+  .. autofunction:: m3.ui.actions.utils.detect_related_fields
+* В классе ``m3.ui.ext.base.BaseExtComponent`` поправлен метод ``_put_base_value``. Теперь возможно передавать даты.
+* В класс ``m3.ui.ext.containers.trees.ExtTreeLoader`` добавлен атрибут ``ui_providers``.
+* В класс ``m3.ui.ext.panels.grids.ExtMultiGroupinGrid`` добавлен атрибут ``display_message`` -- формат отображения
+  информации о записях.
+* Переделан M3 календарь.
+
+Release 0.91
+=============================
+
+* В класс ``m3.ui.actions.packs.BaseDictionaryActions`` добавлен метод ``get_record``:
+    .. autoclass:: m3.ui.actions.packs.BaseDictionaryActions
+        :members: get_record
+    Данный метод переопределен в классе ``m3.ui.actions.packs.BaseEnumerateDictionary``.
+* В класс ``m3.ui.actions.tree_packs.BaseTreeDictionaryActions`` добавлен метод ``get_record``:
+    .. autoclass:: m3.ui.actions.tree_packs.BaseTreeDictionaryActions
+        :members: get_record
+    Данный метод переопределен в классе ``m3.ui.actions.tree_packs.BaseTreeDictionaryModelActions``.
+* В класс ``m3.ui.actions.dicts.simple.BaseDictionaryActions`` добавлен метод ``get_record``:
+    .. autoclass:: m3.ui.actions.dicts.simple.BaseDictionaryActions
+        :members: get_record
+    Данный метод переопределен в классах ``m3.ui.actions.dicts.simple.BaseEnumerateDictionary`` и ``m3.ui.actions.dicts.simple.BaseDictionaryModelActions``.
+* В класс ``m3.ui.actions.dicts.tree.BaseTreeDictionaryActions`` добавлен метод ``get_record``:
+    .. autoclass:: m3.ui.actions.dicts.tree.BaseTreeDictionaryActions
+        :members: get_record
+    Данный метод переопределен в классе ``m3.ui.actions.dicts.tree.BaseTreeDictionaryModelActions``.
+* В класс ``m3.ui.ext.fields.base.BaseExtTriggerField`` добавлены атрибуты:
+    ``fields`` - иные имена полей (кроме id и display_field), которые будут попадать в store
+    ``list_width`` -  ширина выпадающего списка
+    ``list_tpl`` - шаблон рендера выпадающего списка
+    ``resizable`` - изменение ширины выпадающего списка
+* В класс ``m3.ui.ext.fields.complex.ExtDictSelectField`` добавлено свойство ``record_value`` (значение, которое будет передано в store)
+* В классе ``m3.ui.ext.misc.store.ExtDataStore`` поправлен метод ``t_render_fields``.
+* Исправлено поведение ``Ext.ComboBox``, когда значения списка с ``value`` '' и 0 считаются идентичными
+* В класс ``Ext.m3.EditWindow`` добавлено событие ``submitfailed``, которое генерируется при ошибке в момент сабмита формы
+* В класс ``Ext.m3.AdvancedComboBox`` добавлен атрибут ``defaultRecord`` -- значение по-умолчанию
+* В классе ``m3.contrib.m3_users.metaroles.MetaroleManager`` поправлен метод ``get_metarole``. Внесенные изменения необходимы
+  для правильной работы ``DictSelectField`` в условии ``iSelectablePack``.
+
 Release 0.9 (19.08.2011)
 =============================
 

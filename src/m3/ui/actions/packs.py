@@ -11,8 +11,14 @@ from m3.ui.ext.containers import ExtPagingBar
 from m3.ui.actions.results import ActionResult
 from m3.db import BaseObjectModel, safe_delete
 from m3.core.exceptions import RelatedError
+from m3.helpers import logger
 
-from m3_audit import AuditManager
+try:
+    from m3_audit import AuditManager
+except ImportError:
+    # При сборке документации, внешняя Django ничего не знает про m3_audit
+    logger.warning('m3_audit import error')
+
 from m3.ui.actions.interfaces import ISelectablePack
 
 MSG_DOESNOTEXISTS = u'Запись справочника с id=%s не найдена в базе данных.<br/>' + \
