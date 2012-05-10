@@ -8343,30 +8343,33 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 * откажется закрывать окно, возбуждается событие 'closing_canceled'
 	 */
 	,close: function (forceClose) {
-
-		if (this.changesCount !== 0 && !forceClose ) {
-			var scope = this;
-			Ext.Msg.show({
-				title: "Внимание",
-				msg: "Данные были изменены! Cохранить изменения?",
-				buttons: Ext.Msg.YESNOCANCEL,
-				fn: function(buttonId, text, opt){
-					if (buttonId === 'yes') {
-						this.submitForm();
-					} else if (buttonId === 'no') {
-					    Ext.m3.EditWindow.superclass.close.call(scope);					  
-					} else {
-					   scope.fireEvent('closing_canceled');  
-					}
-				},
-				animEl: 'elId',
-				icon: Ext.MessageBox.QUESTION,
-				scope: this				
-			});
-
-			return;
-		};
-		Ext.m3.EditWindow.superclass.close.call(this);
+        if (this.changesCount !== 0 && !forceClose ) {
+            if(this.fireEvent('beforeclose', this) !== false){
+                Ext.Msg.show({
+                    title: "Внимание",
+                    msg: "Данные были изменены! Cохранить изменения?",
+                    buttons: Ext.Msg.YESNOCANCEL,
+                    fn: function(buttonId, text, opt){
+                        if (buttonId === 'yes') {
+                            this.submitForm();
+                        } else if (buttonId === 'no') {
+                            if(this.hidden){
+                                this.doClose();
+                            }else{
+                                this.hide(null, this.doClose, this);
+                            }
+                        } else {
+                           this.fireEvent('closing_canceled');
+                        }
+                    },
+                    animEl: 'elId',
+                    icon: Ext.MessageBox.QUESTION,
+                    scope: this
+                });
+            }
+        } else {
+            Ext.m3.EditWindow.superclass.close.call(this);
+        }
 	}
     ,disableToolbars: function(disabled){
         var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
@@ -8447,6 +8450,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
         this.disableToolbars(false);
    }
 })
+
 Ext.ns('Ext.ux.grid');
 
 Ext.ux.grid.Exporter = Ext.extend(Ext.util.Observable,{
@@ -9756,8 +9760,8 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
                             // при редактировании заменим старый узел на новый
                             var parentNode = selectedNode.parentNode;
                             parentNode.removeChild(selectedNode);
-		    	     if (!parentNode.expanded) {
-               		 parentNode.expand(false, false);
+		             if (!parentNode.expanded) {
+               	         parentNode.expand(false, false);
            		     }
                             parentNode.appendChild(newSelectNode);
                             break;
@@ -11449,7 +11453,7 @@ Ext.onReady(function(){
 					}
 				}
 			}
-			,'beforeclose': function (){
+			,'close': function (){
 				if (this.tmpModal && this.parentWindow) {			
 					this.parentWindow.un('activate', this.activateChildWindow, this);
 					this.parentWindow.setDisabled(false);
@@ -11841,3 +11845,4 @@ Ext.override(Ext.form.TriggerField, {
         restoreClass.call(this, readOnly);
     }
 });
+
