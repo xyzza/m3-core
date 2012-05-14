@@ -818,12 +818,13 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
             self.setattr(item, 'indent', None)
             self.setattr(item, 'lindex', None)
             self.setattr(item, 'count', count)
-            for agg in aggregates.keys():
-                # для средних - посчитаем среднее
-                if aggregates[agg] == 'avg':
-                    self.setattr(item, agg, aggr_rec[agg] / self.getattr(item, 'count'))
-                else:
-                    self.setattr(item, agg, aggr_rec[agg])
+            if aggr_rec:
+                for agg in aggregates.keys():
+                    # для средних - посчитаем среднее
+                    if aggregates[agg] == 'avg':
+                        self.setattr(item, agg, aggr_rec[agg] / self.getattr(item, 'count'))
+                    else:
+                        self.setattr(item, agg, aggr_rec[agg])
             self.calc(item)
             return item
 
