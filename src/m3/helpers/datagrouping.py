@@ -113,9 +113,15 @@ class GroupingRecordProvider(object):
         Получить атрибут объекта или элемент словаря
         """
         if isinstance(obj, dict):
-            return obj[attr]
+            if obj.has_key(attr):
+                return obj[attr]
+            else:
+                return None
         else:
-            return getattr(obj, attr)
+            if hasattr(obj, attr):
+                return getattr(obj, attr)
+            else:
+                return None
         
     def setattr(self, obj, attr, value):
         """
