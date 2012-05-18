@@ -1,9 +1,9 @@
-Ext.ns('Ext.ux.form');
+Ext3.ns('Ext3.ux.form');
 
-Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
+Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
 
     /**
-     * @cfg {Object} buttonCfg A standard {@link Ext.Button} config object.
+     * @cfg {Object} buttonCfg A standard {@link Ext3.Button} config object.
      */
 
     // private
@@ -13,22 +13,22 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
      * @hide
      * @method autoSize
      */
-    ,autoSize: Ext.emptyFn
+    ,autoSize: Ext3.emptyFn
 
      /**
      * Класс иконки для выбора файла
      */
-    ,iconClsSelectFile: 'x-form-file-icon'
+    ,iconClsSelectFile: 'x3-form-file-icon'
 
     /**
      * Класс иконки для очистки файла
      */
-    ,iconClsClearFile: 'x-form-file-clear-icon'
+    ,iconClsClearFile: 'x3-form-file-clear-icon'
 
     /**
      * Класс иконки для скачивания файла
      */
-    ,iconClsDownloadFile: 'x-form-file-download-icon'
+    ,iconClsDownloadFile: 'x3-form-file-download-icon'
 
     ,constructor: function(baseConfig, params){
         if (params) {
@@ -46,19 +46,19 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             }
         }
 
-        Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
+        Ext3.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
     }
 
     // private
     ,initComponent: function(){
-        Ext.ux.form.FileUploadField.superclass.initComponent.call(this);
+        Ext3.ux.form.FileUploadField.superclass.initComponent.call(this);
 
         this.addEvents(
             /**
              * @event fileselected
              * Fires when the underlying file input field's value has changed from the user
              * selecting a new file from the system file selection dialog.
-             * @param {Ext.ux.form.FileUploadField} this
+             * @param {Ext3.ux.form.FileUploadField} this
              * @param {String} value The file value returned by the underlying file input field
              */
             'fileselected',
@@ -78,34 +78,34 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
     // private
     ,onRender : function(ct, position){
-        Ext.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
+        Ext3.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
 
         // Используем название файла
         this.value = this.getFileName();
 
-        this.wrap = this.el.wrap({cls:'x-form-field-wrap x-form-file-wrap'});
-        this.el.addClass('x-form-file-text');
+        this.wrap = this.el.wrap({cls:'x3-form-field-wrap x3-form-file-wrap'});
+        this.el.addClass('x3-form-file-text');
         //this.el.dom.removeAttribute('name');
 
         this.createFileInput();
 
-        var btnCfg = Ext.applyIf(this.buttonCfg || {}, {
+        var btnCfg = Ext3.applyIf(this.buttonCfg || {}, {
             iconCls: this.iconClsSelectFile
         });
-        this.buttonFile = new Ext.Button(Ext.apply(btnCfg, {
+        this.buttonFile = new Ext3.Button(Ext3.apply(btnCfg, {
             renderTo: this.wrap
             ,width: 16
-            ,cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
+            ,cls: 'x3-form-file-btn' + (btnCfg.iconCls ? ' x3-btn-icon' : '')
             ,tooltip: {
                 text:'Выбрать файл'
                 ,width: 150
             }
         }));
 
-        this.buttonClear = new Ext.Button({
+        this.buttonClear = new Ext3.Button({
             renderTo: this.wrap
             ,width: 16
-            ,cls: 'x-form-file-clear'
+            ,cls: 'x3-form-file-clear'
             ,iconCls: this.iconClsClearFile
             ,handler: this.clickClearField
             ,scope: this
@@ -133,10 +133,10 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
     }
     ,renderHelperBtn: function() {
-        this.buttonDownload = new Ext.Button({
+        this.buttonDownload = new Ext3.Button({
             renderTo: this.wrap
             ,width: 16
-            ,cls: 'x-form-file-download'
+            ,cls: 'x3-form-file-download'
             ,iconCls: this.iconClsDownloadFile
             ,handler: this.clickDownload
             ,scope: this
@@ -154,26 +154,26 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.fileInput.on({
             scope: this,
             mouseenter: function() {
-                this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
+                this.buttonFile.addClass(['x3-btn-over','x3-btn-focus'])
             },
             mouseleave: function(){
-                this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+                this.buttonFile.removeClass(['x3-btn-over','x3-btn-focus','x3-btn-click'])
             },
             mousedown: function(){
-                this.buttonFile.addClass('x-btn-click')
+                this.buttonFile.addClass('x3-btn-click')
             },
             mouseup: function(){
-                this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+                this.buttonFile.removeClass(['x3-btn-over','x3-btn-focus','x3-btn-click'])
             },
              change: function(){
                  if (!this.isFileExtensionOK()){
-                     Ext.Msg.show({
+                     Ext3.Msg.show({
                        title:'Внимание'
                        ,msg: 'Неверное расширение файла'
-                       ,buttons: Ext.Msg.OK
-                       ,fn: Ext.emptyFn
+                       ,buttons: Ext3.Msg.OK
+                       ,fn: Ext3.emptyFn
                        ,animEl: 'elId'
-                       ,icon: Ext.MessageBox.WARNING
+                       ,icon: Ext3.MessageBox.WARNING
                     });
                      this.reset();
                      return;
@@ -202,15 +202,15 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.fileInput = this.wrap.createChild({
             id: this.getFileInputId(),
             name: (this.prefixUploadField || '') + this.name,
-            cls: 'x-form-file',
+            cls: 'x3-form-file',
             tag: 'input',
             type: 'file',
             size: 1,
             width: 20
         });
 
-        Ext.QuickTips.unregister(this.fileInput);
-        Ext.QuickTips.register({
+        Ext3.QuickTips.unregister(this.fileInput);
+        Ext3.QuickTips.register({
             target: this.fileInput,
             text: 'Выбрать файл',
             width: 86,
@@ -222,7 +222,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.fileInput.remove();
         this.createFileInput();
         this.bindListeners();
-        Ext.ux.form.FileUploadField.superclass.reset.call(this);
+        Ext3.ux.form.FileUploadField.superclass.reset.call(this);
     }
 
     // private
@@ -232,7 +232,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
     // private
     ,onResize : function(w, h) {
-        Ext.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
+        Ext3.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
 
         this.wrap.setWidth(w);
 
@@ -246,7 +246,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             w -= btnDonwloadWidth;
         }
 
-        if (Ext.isWebKit) {
+        if (Ext3.isWebKit) {
             // Юлядть
             // Некорректная верстка в вебкитовских движках
             this.el.setWidth(w + 5);
@@ -258,19 +258,19 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
     // private
     ,onDestroy: function(){
-        Ext.ux.form.FileUploadField.superclass.onDestroy.call(this);
-        Ext.QuickTips.unregister(this.fileInput);
-        Ext.destroy(this.fileInput, this.buttonFile, this.buttonClear,
+        Ext3.ux.form.FileUploadField.superclass.onDestroy.call(this);
+        Ext3.QuickTips.unregister(this.fileInput);
+        Ext3.destroy(this.fileInput, this.buttonFile, this.buttonClear,
             this.getHelperBtn(), this.wrap);
     }
 
     ,onDisable: function(){
-        Ext.ux.form.FileUploadField.superclass.onDisable.call(this);
+        Ext3.ux.form.FileUploadField.superclass.onDisable.call(this);
         this.doDisable(true);
     }
 
     ,onEnable: function(){
-        Ext.ux.form.FileUploadField.superclass.onEnable.call(this);
+        Ext3.ux.form.FileUploadField.superclass.onEnable.call(this);
         this.doDisable(false);
 
     }
@@ -286,7 +286,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
     }
 
     // private
-    ,preFocus : Ext.emptyFn
+    ,preFocus : Ext3.emptyFn
 
     // private
     ,alignErrorIcon : function(){
@@ -336,11 +336,11 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
     }
     //override
     ,setReadOnly: function(readOnly){
-         Ext.ux.form.FileUploadField.superclass.setReadOnly.call(this, readOnly);
+         Ext3.ux.form.FileUploadField.superclass.setReadOnly.call(this, readOnly);
     }
 });
 
-Ext.reg('fileuploadfield', Ext.ux.form.FileUploadField);
+Ext3.reg('fileuploadfield', Ext3.ux.form.FileUploadField);
 
 // backwards compat
-Ext.form.FileUploadField = Ext.ux.form.FileUploadField;
+Ext3.form.FileUploadField = Ext3.ux.form.FileUploadField;

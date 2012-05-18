@@ -1,13 +1,13 @@
-Ext.ux.Mask = function(mask) {
+Ext3.ux.Mask = function(mask) {
     var config = {
         mask: mask
     };
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
 };
-Ext.extend(Ext.ux.Mask, Object, {
+Ext3.extend(Ext3.ux.Mask, Object, {
     init: function(c) {
         this.LetrasL = 'abcdefghijklmnopqrstuvwxyz';
-        this.LetrasU = Ext.util.Format.uppercase(this.LetrasL);
+        this.LetrasU = Ext3.util.Format.uppercase(this.LetrasL);
         this.Letras  = this.LetrasL + this.LetrasU;
         this.Numeros = '0123456789';
         this.Fixos  = '().-:/ '; 
@@ -31,7 +31,7 @@ Ext.extend(Ext.ux.Mask, Object, {
             if(key < 32 || evt.isNavKeyPress() || key == evt.BACKSPACE){
                 return true;
             }
-            if(Ext.isGecko || Ext.isGecko2 || Ext.isGecko3)
+            if(Ext3.isGecko || Ext3.isGecko2 || Ext3.isGecko3)
                 if((evt.charCode == 0 && evt.keyCode == 46) || evt.isSpecialKey()) return true; // DELETE (conflict with dot(.))
             var tamanho = value.length;
             if(tamanho >= mask.length){

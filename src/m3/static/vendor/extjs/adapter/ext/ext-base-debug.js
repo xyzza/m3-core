@@ -1,5 +1,5 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
@@ -8,12 +8,12 @@
 window.undefined = window.undefined;
 
 /**
- * @class Ext
- * Ext core utilities and functions.
+ * @class Ext3
+ * Ext3 core utilities and functions.
  * @singleton
  */
 
-Ext = {
+Ext3 = {
     /**
      * The version of the framework
      * @type String
@@ -32,12 +32,12 @@ Ext = {
  * @param {Object} config The source of the properties
  * @param {Object} defaults A different object that will also be applied for default values
  * @return {Object} returns obj
- * @member Ext apply
+ * @member Ext3 apply
  */
-Ext.apply = function(o, c, defaults){
+Ext3.apply = function(o, c, defaults){
     // no "this" reference for friendly out of scope calls
     if(defaults){
-        Ext.apply(o, defaults);
+        Ext3.apply(o, defaults);
     }
     if(o && c && typeof c == 'object'){
         for(var p in c){
@@ -86,9 +86,9 @@ Ext.apply = function(o, c, defaults){
         }catch(e){}
     }
 
-    Ext.apply(Ext, {
+    Ext3.apply(Ext3, {
         /**
-         * URL to a blank file used by Ext when in secure mode for iframe src and onReady src to prevent
+         * URL to a blank file used by Ext3 when in secure mode for iframe src and onReady src to prevent
          * the IE insecure content warning (<tt>'about:blank'</tt>, except for IE in secure mode, which is <tt>'javascript:""'</tt>).
          * @type String
          */
@@ -110,7 +110,7 @@ Ext.apply = function(o, c, defaults){
         isReady : false,
 
         /**
-         * True if the {@link Ext.Fx} Class is available
+         * True if the {@link Ext3.Fx} Class is available
          * @type Boolean
          * @property enableFx
          */
@@ -124,7 +124,7 @@ Ext.apply = function(o, c, defaults){
         enableForcedBoxModel : false,
 
         /**
-         * True to automatically uncache orphaned Ext.Elements periodically (defaults to true)
+         * True to automatically uncache orphaned Ext3.Elements periodically (defaults to true)
          * @type Boolean
          */
         enableGarbageCollector : true,
@@ -160,7 +160,7 @@ Ext.apply = function(o, c, defaults){
         applyIf : function(o, c){
             if(o){
                 for(var p in c){
-                    if(!Ext.isDefined(o[p])){
+                    if(!Ext3.isDefined(o[p])){
                         o[p] = c[p];
                     }
                 }
@@ -171,13 +171,13 @@ Ext.apply = function(o, c, defaults){
         /**
          * Generates unique ids. If the element already has an id, it is unchanged
          * @param {Mixed} el (optional) The element to generate an id for
-         * @param {String} prefix (optional) Id prefix (defaults "ext-gen")
+         * @param {String} prefix (optional) Id prefix (defaults "ext3-gen")
          * @return {String} The generated Id.
          */
         id : function(el, prefix){
-            el = Ext.getDom(el, true) || {};
+            el = Ext3.getDom(el, true) || {};
             if (!el.id) {
-                el.id = (prefix || "ext-gen") + (++idSeed);
+                el.id = (prefix || "ext3-gen") + (++idSeed);
             }
             return el.id;
         },
@@ -185,18 +185,18 @@ Ext.apply = function(o, c, defaults){
         /**
          * <p>Extends one class to create a subclass and optionally overrides members with the passed literal. This method
          * also adds the function "override()" to the subclass that can be used to override members of the class.</p>
-         * For example, to create a subclass of Ext GridPanel:
+         * For example, to create a subclass of Ext3 GridPanel:
          * <pre><code>
-MyGridPanel = Ext.extend(Ext.grid.GridPanel, {
+MyGridPanel = Ext3.extend(Ext3.grid.GridPanel, {
     constructor: function(config) {
 
 //      Create configuration for this Grid.
-        var store = new Ext.data.Store({...});
-        var colModel = new Ext.grid.ColumnModel({...});
+        var store = new Ext3.data.Store({...});
+        var colModel = new Ext3.grid.ColumnModel({...});
 
 //      Create a new config object containing our computed properties
 //      *plus* whatever was in the config parameter.
-        config = Ext.apply({
+        config = Ext3.apply({
             store: store,
             colModel: colModel
         }, config);
@@ -258,14 +258,14 @@ MyGridPanel = Ext.extend(Ext.grid.GridPanel, {
                     spp.constructor=sp;
                 }
                 sb.override = function(o){
-                    Ext.override(sb, o);
+                    Ext3.override(sb, o);
                 };
                 sbp.superclass = sbp.supr = (function(){
                     return spp;
                 });
                 sbp.override = io;
-                Ext.override(sb, overrides);
-                sb.extend = function(o){return Ext.extend(sb, o);};
+                Ext3.override(sb, overrides);
+                sb.extend = function(o){return Ext3.extend(sb, o);};
                 return sb;
             };
         }(),
@@ -273,7 +273,7 @@ MyGridPanel = Ext.extend(Ext.grid.GridPanel, {
         /**
          * Adds a list of functions to the prototype of an existing class, overwriting any existing methods with the same name.
          * Usage:<pre><code>
-Ext.override(MyClass, {
+Ext3.override(MyClass, {
     newMethod1: function(){
         // etc.
     },
@@ -290,8 +290,8 @@ Ext.override(MyClass, {
         override : function(origclass, overrides){
             if(overrides){
                 var p = origclass.prototype;
-                Ext.apply(p, overrides);
-                if(Ext.isIE && overrides.hasOwnProperty('toString')){
+                Ext3.apply(p, overrides);
+                if(Ext3.isIE && overrides.hasOwnProperty('toString')){
                     p.toString = overrides.toString;
                 }
             }
@@ -301,8 +301,8 @@ Ext.override(MyClass, {
          * Creates namespaces to be used for scoping variables and classes so that they are not global.
          * Specifying the last node of a namespace implicitly creates all other nodes. Usage:
          * <pre><code>
-Ext.namespace('Company', 'Company.data');
-Ext.namespace('Company.data'); // equivalent and preferable to above syntax
+Ext3.namespace('Company', 'Company.data');
+Ext3.namespace('Company.data'); // equivalent and preferable to above syntax
 Company.Widget = function() { ... }
 Company.data.CustomStore = function(config) { ... }
 </code></pre>
@@ -339,7 +339,7 @@ Company.data.CustomStore = function(config) { ... }
         },
 
         /**
-         * Takes an object and converts it to an encoded URL. e.g. Ext.urlEncode({foo: 1, bar: 2}); would return "foo=1&bar=2".  Optionally, property values can be arrays, instead of keys and the resulting string that's returned will contain a name/value pair for each array value.
+         * Takes an object and converts it to an encoded URL. e.g. Ext3.urlEncode({foo: 1, bar: 2}); would return "foo=1&bar=2".  Optionally, property values can be arrays, instead of keys and the resulting string that's returned will contain a name/value pair for each array value.
          * @param {Object} o
          * @param {String} pre (optional) A prefix to add to the url encoded string
          * @return {String}
@@ -349,10 +349,10 @@ Company.data.CustomStore = function(config) { ... }
                 buf = [],
                 e = encodeURIComponent;
 
-            Ext.iterate(o, function(key, item){
-                empty = Ext.isEmpty(item);
-                Ext.each(empty ? key : item, function(val){
-                    buf.push('&', e(key), '=', (!Ext.isEmpty(val) && (val != key || !empty)) ? (Ext.isDate(val) ? Ext.encode(val).replace(/"/g, '') : e(val)) : '');
+            Ext3.iterate(o, function(key, item){
+                empty = Ext3.isEmpty(item);
+                Ext3.each(empty ? key : item, function(val){
+                    buf.push('&', e(key), '=', (!Ext3.isEmpty(val) && (val != key || !empty)) ? (Ext3.isDate(val) ? Ext3.encode(val).replace(/"/g, '') : e(val)) : '');
                 });
             });
             if(!pre){
@@ -364,15 +364,15 @@ Company.data.CustomStore = function(config) { ... }
 
         /**
          * Takes an encoded URL and and converts it to an object. Example: <pre><code>
-Ext.urlDecode("foo=1&bar=2"); // returns {foo: "1", bar: "2"}
-Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2", "3", "4"]}
+Ext3.urlDecode("foo=1&bar=2"); // returns {foo: "1", bar: "2"}
+Ext3.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2", "3", "4"]}
 </code></pre>
          * @param {String} string
          * @param {Boolean} overwrite (optional) Items of the same name will overwrite previous values instead of creating an an array (Defaults to false).
          * @return {Object} A literal with members
          */
         urlDecode : function(string, overwrite){
-            if(Ext.isEmpty(string)){
+            if(Ext3.isEmpty(string)){
                 return {};
             }
             var obj = {},
@@ -380,7 +380,7 @@ Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2"
                 d = decodeURIComponent,
                 name,
                 value;
-            Ext.each(pairs, function(pair) {
+            Ext3.each(pairs, function(pair) {
                 pair = pair.split('=');
                 name = d(pair[0]);
                 value = d(pair[1]);
@@ -398,7 +398,7 @@ Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2"
          * @return (String) The resulting URL
          */
         urlAppend : function(url, s){
-            if(!Ext.isEmpty(s)){
+            if(!Ext3.isEmpty(s)){
                 return url + (url.indexOf('?') === -1 ? '?' : '&') + s;
             }
             return url;
@@ -427,7 +427,7 @@ Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2"
 
         isIterable : function(v){
             //check for array or arguments
-            if(Ext.isArray(v) || v.callee){
+            if(Ext3.isArray(v) || v.callee){
                 return true;
             }
             //check for node list type
@@ -436,7 +436,7 @@ Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2"
             }
             //NodeList has an item and length property
             //IXMLDOMNodeList has nextNode method, needs to be checked first.
-            return ((typeof v.nextNode != 'undefined' || v.item) && Ext.isNumber(v.length));
+            return ((typeof v.nextNode != 'undefined' || v.item) && Ext3.isNumber(v.length));
         },
 
         /**
@@ -455,7 +455,7 @@ Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2"
          * <div class="sub-desc">The current index within the array</div></li>
          * <li><code>allItems</code> : <i>Array</i>
          * <div class="sub-desc">The <code>array</code> passed as the first
-         * argument to <code>Ext.each</code>.</div></li>
+         * argument to <code>Ext3.each</code>.</div></li>
          * </ul></div>
          * @param {Object} scope The scope (<code>this</code> reference) in which the specified function is executed.
          * Defaults to the <code>item</code> at the current <code>index</code>
@@ -463,10 +463,10 @@ Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2"
          * @return See description for the fn parameter.
          */
         each : function(array, fn, scope){
-            if(Ext.isEmpty(array, true)){
+            if(Ext3.isEmpty(array, true)){
                 return;
             }
-            if(!Ext.isIterable(array) || Ext.isPrimitive(array)){
+            if(!Ext3.isIterable(array) || Ext3.isPrimitive(array)){
                 array = [array];
             }
             for(var i = 0, len = array.length; i < len; i++){
@@ -497,11 +497,11 @@ Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2"
          * the <code>object</code> being iterated.
          */
         iterate : function(obj, fn, scope){
-            if(Ext.isEmpty(obj)){
+            if(Ext3.isEmpty(obj)){
                 return;
             }
-            if(Ext.isIterable(obj)){
-                Ext.each(obj, fn, scope);
+            if(Ext3.isIterable(obj)){
+                Ext3.each(obj, fn, scope);
                 return;
             }else if(typeof obj == 'object'){
                 for(var prop in obj){
@@ -515,20 +515,20 @@ Ext.urlDecode("foo=1&bar=2&bar=3&bar=4", false); // returns {foo: "1", bar: ["2"
         },
 
         /**
-         * Return the dom node for the passed String (id), dom node, or Ext.Element.
+         * Return the dom node for the passed String (id), dom node, or Ext3.Element.
          * Optional 'strict' flag is needed for IE since it can return 'name' and
          * 'id' elements by using getElementById.
          * Here are some examples:
          * <pre><code>
 // gets dom node based on id
-var elDom = Ext.getDom('elId');
+var elDom = Ext3.getDom('elId');
 // gets dom node based on the dom node
-var elDom1 = Ext.getDom(elDom);
+var elDom1 = Ext3.getDom(elDom);
 
 // If we don&#39;t know if we are working with an
-// Ext.Element or a dom node use Ext.getDom
+// Ext3.Element or a dom node use Ext3.getDom
 function(el){
-    var dom = Ext.getDom(el);
+    var dom = Ext3.getDom(el);
     // do something with the dom node
 }
          * </code></pre>
@@ -563,23 +563,23 @@ function(el){
         },
 
         /**
-         * Returns the current document body as an {@link Ext.Element}.
-         * @return Ext.Element The document body
+         * Returns the current document body as an {@link Ext3.Element}.
+         * @return Ext3.Element The document body
          */
         getBody : function(){
-            return Ext.get(DOC.body || DOC.documentElement);
+            return Ext3.get(DOC.body || DOC.documentElement);
         },
         
         /**
-         * Returns the current document body as an {@link Ext.Element}.
-         * @return Ext.Element The document body
+         * Returns the current document body as an {@link Ext3.Element}.
+         * @return Ext3.Element The document body
          */
         getHead : function() {
             var head;
             
             return function() {
                 if (head == undefined) {
-                    head = Ext.get(DOC.getElementsByTagName("head")[0]);
+                    head = Ext3.get(DOC.getElementsByTagName("head")[0]);
                 }
                 
                 return head;
@@ -591,7 +591,7 @@ function(el){
          */
         /**
          * <p>Removes this element from the document, removes all DOM event listeners, and deletes the cache reference.
-         * All DOM event listeners are removed from this element. If {@link Ext#enableNestedListenerRemoval} is
+         * All DOM event listeners are removed from this element. If {@link Ext3#enableNestedListenerRemoval} is
          * <code>true</code>, then DOM event listeners are also removed from all child nodes. The body node
          * will be ignored if passed in.</p>
          * @param {HTMLElement} node The node to remove
@@ -600,18 +600,18 @@ function(el){
             var d;
             return function(n){
                 if(n && n.tagName != 'BODY'){
-                    (Ext.enableNestedListenerRemoval) ? Ext.EventManager.purgeElement(n, true) : Ext.EventManager.removeAll(n);
+                    (Ext3.enableNestedListenerRemoval) ? Ext3.EventManager.purgeElement(n, true) : Ext3.EventManager.removeAll(n);
                     d = d || DOC.createElement('div');
                     d.appendChild(n);
                     d.innerHTML = '';
-                    delete Ext.elCache[n.id];
+                    delete Ext3.elCache[n.id];
                 }
             };
         }() : function(n){
             if(n && n.parentNode && n.tagName != 'BODY'){
-                (Ext.enableNestedListenerRemoval) ? Ext.EventManager.purgeElement(n, true) : Ext.EventManager.removeAll(n);
+                (Ext3.enableNestedListenerRemoval) ? Ext3.EventManager.purgeElement(n, true) : Ext3.EventManager.removeAll(n);
                 n.parentNode.removeChild(n);
-                delete Ext.elCache[n.id];
+                delete Ext3.elCache[n.id];
             }
         },
 
@@ -628,7 +628,7 @@ function(el){
          * @return {Boolean}
          */
         isEmpty : function(v, allowBlank){
-            return v === null || v === undefined || ((Ext.isArray(v) && !v.length)) || (!allowBlank ? v === '' : false);
+            return v === null || v === undefined || ((Ext3.isArray(v) && !v.length)) || (!allowBlank ? v === '' : false);
         },
 
         /**
@@ -664,7 +664,7 @@ function(el){
          * @return {Boolean}
          */
         isPrimitive : function(v){
-            return Ext.isString(v) || Ext.isNumber(v) || Ext.isBoolean(v);
+            return Ext3.isString(v) || Ext3.isNumber(v) || Ext3.isBoolean(v);
         },
 
         /**
@@ -827,8 +827,8 @@ function(el){
      * Creates namespaces to be used for scoping variables and classes so that they are not global.
      * Specifying the last node of a namespace implicitly creates all other nodes. Usage:
      * <pre><code>
-Ext.namespace('Company', 'Company.data');
-Ext.namespace('Company.data'); // equivalent and preferable to above syntax
+Ext3.namespace('Company', 'Company.data');
+Ext3.namespace('Company.data'); // equivalent and preferable to above syntax
 Company.Widget = function() { ... }
 Company.data.CustomStore = function(config) { ... }
 </code></pre>
@@ -838,18 +838,18 @@ Company.data.CustomStore = function(config) { ... }
      * @return {Object} The namespace object. (If multiple arguments are passed, this will be the last namespace created)
      * @method ns
      */
-    Ext.ns = Ext.namespace;
+    Ext3.ns = Ext3.namespace;
 })();
 
-Ext.ns('Ext.util', 'Ext.lib', 'Ext.data', 'Ext.supports');
+Ext3.ns('Ext3.util', 'Ext3.lib', 'Ext3.data', 'Ext3.supports');
 
-Ext.elCache = {};
+Ext3.elCache = {};
 
 /**
  * @class Function
  * These functions are available on every Function object (any JavaScript function).
  */
-Ext.apply(Function.prototype, {
+Ext3.apply(Function.prototype, {
      /**
      * Creates an interceptor function. The passed function is called before the original one. If it returns false,
      * the original one is not called. The resulting function returns the results of the original function.
@@ -877,7 +877,7 @@ sayHiToFriend('Brian'); // alerts "Hi, Brian"
      */
     createInterceptor : function(fcn, scope){
         var method = this;
-        return !Ext.isFunction(fcn) ?
+        return !Ext3.isFunction(fcn) ?
                 this :
                 function() {
                     var me = this,
@@ -906,9 +906,9 @@ var sayHi = function(name){
 }
 
 // clicking the button alerts "Hi, Fred"
-new Ext.Button({
+new Ext3.Button({
     text: 'Say Hi',
-    renderTo: Ext.getBody(),
+    renderTo: Ext3.getBody(),
     handler: sayHi.createCallback('Fred')
 });
 </code></pre>
@@ -937,9 +937,9 @@ var sayHi = function(name){
     alert('Hi, ' + name + '. You clicked the "' + this.text + '" button.');
 }
 
-var btn = new Ext.Button({
+var btn = new Ext3.Button({
     text: 'Say Hi',
-    renderTo: Ext.getBody()
+    renderTo: Ext3.getBody()
 });
 
 // This callback will execute in the scope of the
@@ -961,7 +961,7 @@ btn.on('click', sayHi.createDelegate(btn, ['Fred']));
             if (appendArgs === true){
                 callArgs = Array.prototype.slice.call(arguments, 0);
                 callArgs = callArgs.concat(args);
-            }else if (Ext.isNumber(appendArgs)){
+            }else if (Ext3.isNumber(appendArgs)){
                 callArgs = Array.prototype.slice.call(arguments, 0); // copy arguments first
                 var applyArgs = [appendArgs, 0].concat(args); // create method call params
                 Array.prototype.splice.apply(callArgs, applyArgs); // splice them in
@@ -1011,7 +1011,7 @@ sayHi.defer(2000, this, ['Fred']);
  * @class String
  * These functions are available on every String object.
  */
-Ext.applyIf(String, {
+Ext3.applyIf(String, {
     /**
      * Allows you to define a tokenized string and pass an arbitrary number of arguments to replace the tokens.  Each
      * token must be unique, and must increment in the format {0}, {1}, etc.  Example usage:
@@ -1027,7 +1027,7 @@ var s = String.format('&lt;div class="{0}">{1}&lt;/div>', cls, text);
      * @static
      */
     format : function(format){
-        var args = Ext.toArray(arguments, 1);
+        var args = Ext3.toArray(arguments, 1);
         return format.replace(/\{(\d+)\}/g, function(m, i){
             return args[i];
         });
@@ -1037,7 +1037,7 @@ var s = String.format('&lt;div class="{0}">{1}&lt;/div>', cls, text);
 /**
  * @class Array
  */
-Ext.applyIf(Array.prototype, {
+Ext3.applyIf(Array.prototype, {
     /**
      * Checks whether or not the specified object exists in the array.
      * @param {Object} o The object to check for
@@ -1070,39 +1070,39 @@ Ext.applyIf(Array.prototype, {
     }
 });
 /**
- * @class Ext.util.TaskRunner
+ * @class Ext3.util.TaskRunner
  * Provides the ability to execute one or more arbitrary tasks in a multithreaded
- * manner.  Generally, you can use the singleton {@link Ext.TaskMgr} instead, but
+ * manner.  Generally, you can use the singleton {@link Ext3.TaskMgr} instead, but
  * if needed, you can create separate instances of TaskRunner.  Any number of
  * separate tasks can be started at any time and will run independently of each
  * other. Example usage:
  * <pre><code>
 // Start a simple clock task that updates a div once per second
 var updateClock = function(){
-    Ext.fly('clock').update(new Date().format('g:i:s A'));
+    Ext3.fly('clock').update(new Date().format('g:i:s A'));
 } 
 var task = {
     run: updateClock,
     interval: 1000 //1 second
 }
-var runner = new Ext.util.TaskRunner();
+var runner = new Ext3.util.TaskRunner();
 runner.start(task);
 
 // equivalent using TaskMgr
-Ext.TaskMgr.start({
+Ext3.TaskMgr.start({
     run: updateClock,
     interval: 1000
 });
 
  * </code></pre>
  * <p>See the {@link #start} method for details about how to configure a task object.</p>
- * Also see {@link Ext.util.DelayedTask}. 
+ * Also see {@link Ext3.util.DelayedTask}. 
  * 
  * @constructor
  * @param {Number} interval (optional) The minimum precision in milliseconds supported by this TaskRunner instance
  * (defaults to 10)
  */
-Ext.util.TaskRunner = function(interval){
+Ext3.util.TaskRunner = function(interval){
     interval = interval || 10;
     var tasks = [], 
     	removeQueue = [],
@@ -1184,7 +1184,7 @@ Ext.util.TaskRunner = function(interval){
      * <li><code>repeat</code> : Number<div class="sub-desc">(optional) The number of times to invoke the task before
      * stopping automatically (defaults to indefinite).</div></li>
      * </ul></p>
-     * <p>Before each invocation, Ext injects the property <code>taskRunCount</code> into the task object so
+     * <p>Before each invocation, Ext3 injects the property <code>taskRunCount</code> into the task object so
      * that calculations based on the repeat count can be performed.</p>
      * @return {Object} The task
      */
@@ -1225,29 +1225,29 @@ Ext.util.TaskRunner = function(interval){
 };
 
 /**
- * @class Ext.TaskMgr
- * @extends Ext.util.TaskRunner
- * A static {@link Ext.util.TaskRunner} instance that can be used to start and stop arbitrary tasks.  See
- * {@link Ext.util.TaskRunner} for supported methods and task config properties.
+ * @class Ext3.TaskMgr
+ * @extends Ext3.util.TaskRunner
+ * A static {@link Ext3.util.TaskRunner} instance that can be used to start and stop arbitrary tasks.  See
+ * {@link Ext3.util.TaskRunner} for supported methods and task config properties.
  * <pre><code>
 // Start a simple clock task that updates a div once per second
 var task = {
     run: function(){
-        Ext.fly('clock').update(new Date().format('g:i:s A'));
+        Ext3.fly('clock').update(new Date().format('g:i:s A'));
     },
     interval: 1000 //1 second
 }
-Ext.TaskMgr.start(task);
+Ext3.TaskMgr.start(task);
 </code></pre>
  * <p>See the {@link #start} method for details about how to configure a task object.</p>
  * @singleton
  */
-Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
+Ext3.TaskMgr = new Ext3.util.TaskRunner();(function(){
 	var libFlyweight;
 	
 	function fly(el) {
         if (!libFlyweight) {
-            libFlyweight = new Ext.Element.Flyweight();
+            libFlyweight = new Ext3.Element.Flyweight();
         }
         libFlyweight.dom = el;
         return libFlyweight;
@@ -1260,12 +1260,12 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
         ROUND = Math.round,
 		PARSEINT = parseInt;
 		
-	Ext.lib.Dom = {
+	Ext3.lib.Dom = {
 	    isAncestor : function(p, c) {
 		    var ret = false;
 			
-			p = Ext.getDom(p);
-			c = Ext.getDom(c);
+			p = Ext3.getDom(p);
+			c = Ext3.getDom(c);
 			if (p && c) {
 				if (p.contains) {
 					return p.contains(c);
@@ -1297,14 +1297,14 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
         },
 
         getViewportHeight: function(){
-	        return Ext.isIE ? 
-	        	   (Ext.isStrict ? doc.documentElement.clientHeight : doc.body.clientHeight) :
+	        return Ext3.isIE ? 
+	        	   (Ext3.isStrict ? doc.documentElement.clientHeight : doc.body.clientHeight) :
 	        	   self.innerHeight;
         },
 
         getViewportWidth : function() {
-	        return !Ext.isStrict && !Ext.isOpera ? doc.body.clientWidth :
-	        	   Ext.isIE ? doc.documentElement.clientWidth : self.innerWidth;
+	        return !Ext3.isStrict && !Ext3.isOpera ? doc.body.clientWidth :
+	        	   Ext3.isIE ? doc.documentElement.clientWidth : self.innerWidth;
         },
         
         getY : function(el) {
@@ -1329,7 +1329,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
             	bd = (doc.body || doc.documentElement),
             	ret = [0,0];
             	
-            el = Ext.getDom(el);
+            el = Ext3.getDom(el);
 
             if(el != bd){
 	            if (el.getBoundingClientRect) {
@@ -1347,7 +1347,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
 		
 		                hasAbsolute = hasAbsolute || pe.isStyle("position", "absolute");
 		                		
-		                if (Ext.isGecko) {		                    
+		                if (Ext3.isGecko) {		                    
 		                    y += bt = PARSEINT(pe.getStyle("borderTopWidth"), 10) || 0;
 		                    x += bl = PARSEINT(pe.getStyle("borderLeftWidth"), 10) || 0;	
 		
@@ -1359,12 +1359,12 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
 		                p = p.offsetParent;
 		            }
 		
-		            if (Ext.isSafari && hasAbsolute) {
+		            if (Ext3.isSafari && hasAbsolute) {
 		                x -= bd.offsetLeft;
 		                y -= bd.offsetTop;
 		            }
 		
-		            if (Ext.isGecko && !hasAbsolute) {
+		            if (Ext3.isGecko && !hasAbsolute) {
 		                dbd = fly(bd);
 		                x += PARSEINT(dbd.getStyle("borderLeftWidth"), 10) || 0;
 		                y += PARSEINT(dbd.getStyle("borderTopWidth"), 10) || 0;
@@ -1372,7 +1372,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
 		
 		            p = el.parentNode;
 		            while (p && p != bd) {
-		                if (!Ext.isOpera || (p.tagName != 'TR' && !fly(p).isStyle("display", "inline"))) {
+		                if (!Ext3.isOpera || (p.tagName != 'TR' && !fly(p).isStyle("display", "inline"))) {
 		                    x -= p.scrollLeft;
 		                    y -= p.scrollTop;
 		                }
@@ -1385,7 +1385,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
         },
 
         setXY : function(el, xy) {
-            (el = Ext.fly(el, '_setXY')).position();
+            (el = Ext3.fly(el, '_setXY')).position();
             
             var pts = el.translatePoints(xy),
             	style = el.dom.style,
@@ -1406,7 +1406,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
             this.setXY(el, [false, y]);
         }
     };
-})();Ext.lib.Event = function() {
+})();Ext3.lib.Event = function() {
     var loadComplete = false,
         unloadListeners = {},
         retryCount = 0,
@@ -1563,7 +1563,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
         if (!coord && coord !== 0) {
             coord = ev['client' + xy] || 0;
 
-            if (Ext.isIE) {
+            if (Ext3.isIE) {
                 coord += getScroll()[xy == "X" ? 0 : 1];
             }
         }
@@ -1585,9 +1585,9 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
             startInterval();
         },
 
-        // This function should ALWAYS be called from Ext.EventManager
+        // This function should ALWAYS be called from Ext3.EventManager
         addListener: function(el, eventName, fn) {
-            el = Ext.getDom(el);
+            el = Ext3.getDom(el);
             if (el && fn) {
                 if (eventName == UNLOAD) {
                     if (unloadListeners[el.id] === undefined) {
@@ -1601,9 +1601,9 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
             return false;
         },
 
-        // This function should ALWAYS be called from Ext.EventManager
+        // This function should ALWAYS be called from Ext3.EventManager
         removeListener: function(el, eventName, fn) {
-            el = Ext.getDom(el);
+            el = Ext3.getDom(el);
             var i, len, li, lis;
             if (el && fn) {
                 if(eventName == UNLOAD){
@@ -1625,7 +1625,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
             return this.resolveTextNode(ev.target || ev.srcElement);
         },
 
-        resolveTextNode : Ext.isGecko ? function(node){
+        resolveTextNode : Ext3.isGecko ? function(node){
             if(!node){
                 return;
             }
@@ -1708,18 +1708,18 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
         //clearCache: function() {},
         // deprecated, call from EventManager
         getListeners : function(el, eventName) {
-            Ext.EventManager.getListeners(el, eventName);
+            Ext3.EventManager.getListeners(el, eventName);
         },
 
         // deprecated, call from EventManager
         purgeElement : function(el, recurse, eventName) {
-            Ext.EventManager.purgeElement(el, recurse, eventName);
+            Ext3.EventManager.purgeElement(el, recurse, eventName);
         },
 
         _load : function(e) {
             loadComplete = true;
             
-            if (Ext.isIE && e !== true) {
+            if (Ext3.isIE && e !== true) {
                 // IE8 complains that _load is null or not an object
                 // so lets remove self via arguments.callee
                 doRemove(win, "load", arguments.callee);
@@ -1727,7 +1727,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
         },
 
         _unload : function(e) {
-             var EU = Ext.lib.Event,
+             var EU = Ext3.lib.Event,
                 i, v, ul, id, len, scope;
 
             for (id in unloadListeners) {
@@ -1743,7 +1743,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
                 }
             };
 
-            Ext.EventManager._unload();
+            Ext3.EventManager._unload();
 
             doRemove(win, UNLOAD, EU._unload);
         }
@@ -1768,7 +1768,7 @@ Ext.TaskMgr = new Ext.util.TaskRunner();(function(){
 * YUI licensed under the BSD License:
 * http://developer.yahoo.net/yui/license.txt
 */
-Ext.lib.Ajax = function() {
+Ext3.lib.Ajax = function() {
     var activeX = ['Msxml2.XMLHTTP.6.0',
                    'Msxml2.XMLHTTP.3.0',
                    'Msxml2.XMLHTTP'],
@@ -1788,7 +1788,7 @@ Ext.lib.Ajax = function() {
             }
         }
 
-        Ext.apply(headers, pub.headers, pub.defaultHeaders);
+        Ext3.apply(headers, pub.headers, pub.defaultHeaders);
         setTheHeaders(conn, headers);
         delete pub.headers;
     }
@@ -1822,7 +1822,7 @@ Ext.lib.Ajax = function() {
 
         try {
             headerStr = o.conn.getAllResponseHeaders();
-            Ext.each(headerStr.replace(/\r\n/g, '\n').split('\n'), function(v){
+            Ext3.each(headerStr.replace(/\r\n/g, '\n').split('\n'), function(v){
                 t = v.indexOf(':');
                 if(t >= 0){
                     s = v.substr(0, t).toLowerCase();
@@ -1877,7 +1877,7 @@ Ext.lib.Ajax = function() {
             httpStatus = 13030;
         }
 
-        if ((httpStatus >= 200 && httpStatus < 300) || (Ext.isIE && httpStatus == 1223)) {
+        if ((httpStatus >= 200 && httpStatus < 300) || (Ext3.isIE && httpStatus == 1223)) {
             responseObject = createResponseObject(o, callback.argument);
             if (callback.success) {
                 if (!callback.scope) {
@@ -2002,7 +2002,7 @@ Ext.lib.Ajax = function() {
         try {
             http = new XMLHttpRequest();
         } catch(e) {
-            for (var i = Ext.isIE6 ? 1 : 0; i < activeX.length; ++i) {
+            for (var i = Ext3.isIE6 ? 1 : 0; i < activeX.length; ++i) {
                 try {
                     http = new ActiveXObject(activeX[i]);
                     break;
@@ -2021,21 +2021,21 @@ Ext.lib.Ajax = function() {
                     jsonData = options.jsonData,
                     hs;
 
-                Ext.applyIf(me, options);
+                Ext3.applyIf(me, options);
 
                 if(xmlData || jsonData){
                     hs = me.headers;
                     if(!hs || !hs[CONTENTTYPE]){
                         initHeader(CONTENTTYPE, xmlData ? 'text/xml' : 'application/json');
                     }
-                    data = xmlData || (!Ext.isPrimitive(jsonData) ? Ext.encode(jsonData) : jsonData);
+                    data = xmlData || (!Ext3.isPrimitive(jsonData) ? Ext3.encode(jsonData) : jsonData);
                 }
             }
             return asyncRequest(method || options.method || "POST", uri, cb, data);
         },
 
         serializeForm : function(form) {
-            var fElements = form.elements || (document.forms[form] || Ext.getDom(form)).elements, 
+            var fElements = form.elements || (document.forms[form] || Ext3.getDom(form)).elements, 
                 hasSubmit = false, 
                 encoder = encodeURIComponent, 
                 name, 
@@ -2043,13 +2043,13 @@ Ext.lib.Ajax = function() {
                 type, 
                 hasValue;
     
-            Ext.each(fElements, function(element){
+            Ext3.each(fElements, function(element){
                 name = element.name;
                 type = element.type;
         
                 if (!element.disabled && name) {
                     if (/select-(one|multiple)/i.test(type)) {
-                        Ext.each(element.options, function(opt){
+                        Ext3.each(element.options, function(opt){
                             if (opt.selected) {
                                 hasValue = opt.hasAttribute ? opt.hasAttribute('value') : opt.getAttributeNode('value').specified;
                                 data += String.format("{0}={1}&", encoder(name), encoder(hasValue ? opt.value : opt.text));
@@ -2067,7 +2067,7 @@ Ext.lib.Ajax = function() {
         },
 
         useDefaultHeader : true,
-        defaultPostHeader : 'application/x-www-form-urlencoded; charset=UTF-8',
+        defaultPostHeader : 'application/x3-www-form-urlencoded; charset=UTF-8',
         useDefaultXhrHeader : true,
         defaultXhrHeader : 'XMLHttpRequest',
         poll : {},
@@ -2127,7 +2127,7 @@ Ext.lib.Ajax = function() {
     };
     return pub;
 }();(function(){
-    var EXTLIB = Ext.lib,
+    var EXTLIB = Ext3.lib,
         noNegatives = /width|height|opacity|padding/i,
         offsetAttribute = /^((width|height)|(top|left))$/,
         defaultUnit = /width|height|top$|bottom$|left$|right$/i,
@@ -2141,17 +2141,17 @@ Ext.lib.Ajax = function() {
 
     EXTLIB.Anim = {
         motion : function(el, args, duration, easing, cb, scope) {
-            return this.run(el, args, duration, easing, cb, scope, Ext.lib.Motion);
+            return this.run(el, args, duration, easing, cb, scope, Ext3.lib.Motion);
         },
 
         run : function(el, args, duration, easing, cb, scope, type) {
-            type = type || Ext.lib.AnimBase;
+            type = type || Ext3.lib.AnimBase;
             if (typeof easing == "string") {
-                easing = Ext.lib.Easing[easing];
+                easing = Ext3.lib.Easing[easing];
             }
             var anim = new type(el, args, duration, easing);
             anim.animateX(function() {
-                if(Ext.isFunction(cb)){
+                if(Ext3.isFunction(cb)){
                     cb.call(scope);
                 }
             });
@@ -2176,12 +2176,12 @@ Ext.lib.Ajax = function() {
             if (noNegatives.test(attr) && val < 0) {
                 val = 0;
             }
-            Ext.fly(this.el, '_anim').setStyle(attr, val + unit);
+            Ext3.fly(this.el, '_anim').setStyle(attr, val + unit);
         },
 
 
         getAttr: function(attr) {
-            var el = Ext.fly(this.el),
+            var el = Ext3.fly(this.el),
                 val = el.getStyle(attr),
                 a = offsetAttribute.exec(attr) || [];
 
@@ -2201,7 +2201,7 @@ Ext.lib.Ajax = function() {
             var me = this,
                 f = function() {
                 me.onComplete.removeListener(f);
-                if (Ext.isFunction(callback)) {
+                if (Ext3.isFunction(callback)) {
                     callback.call(scope || me, me);
                 }
             };
@@ -2228,7 +2228,7 @@ Ext.lib.Ajax = function() {
             if (isset(to)) {
                 end = to;
             }else if(isset(by)) {
-                if (Ext.isArray(start)){
+                if (Ext3.isArray(start)){
                     end = [];
                     for(var i=0,len=start.length; i<len; i++) {
                         end[i] = start[i] + by[i];
@@ -2238,7 +2238,7 @@ Ext.lib.Ajax = function() {
                 }
             }
 
-            Ext.apply(ra, {
+            Ext3.apply(ra, {
                 start: start,
                 end: end,
                 unit: isset(unit) ? unit : me.getDefaultUnit(attr)
@@ -2251,10 +2251,10 @@ Ext.lib.Ajax = function() {
                 actualFrames = 0,
                 mgr = EXTLIB.AnimMgr;
 
-            Ext.apply(me, {
+            Ext3.apply(me, {
                 isAnimated: false,
                 startTime: null,
-                el: Ext.getDom(el),
+                el: Ext3.getDom(el),
                 attributes: attributes || {},
                 duration: duration || 1,
                 method: method || EXTLIB.Easing.easeNone,
@@ -2332,24 +2332,24 @@ Ext.lib.Ajax = function() {
                 me.onComplete.fire(data);
             };
 
-            me.onStart = new Ext.util.Event(me);
-            me.onTween = new Ext.util.Event(me);
-            me.onComplete = new Ext.util.Event(me);
-            (me._onStart = new Ext.util.Event(me)).addListener(onStart);
-            (me._onTween = new Ext.util.Event(me)).addListener(onTween);
-            (me._onComplete = new Ext.util.Event(me)).addListener(onComplete);
+            me.onStart = new Ext3.util.Event(me);
+            me.onTween = new Ext3.util.Event(me);
+            me.onComplete = new Ext3.util.Event(me);
+            (me._onStart = new Ext3.util.Event(me)).addListener(onStart);
+            (me._onTween = new Ext3.util.Event(me)).addListener(onTween);
+            (me._onComplete = new Ext3.util.Event(me)).addListener(onComplete);
         }
     };
 
 
-    Ext.lib.AnimMgr = new function() {
+    Ext3.lib.AnimMgr = new function() {
         var me = this,
             thread = null,
             queue = [],
             tweenCount = 0;
 
 
-        Ext.apply(me, {
+        Ext3.apply(me, {
             fps: 1000,
             delay: 1,
             registerElement: function(tween){
@@ -2495,12 +2495,12 @@ Ext.lib.Ajax = function() {
             }
         };
 
-        Ext.extend(EXTLIB.Motion, Ext.lib.AnimBase);
+        Ext3.extend(EXTLIB.Motion, Ext3.lib.AnimBase);
 
         var superclass = EXTLIB.Motion.superclass,
             pointsRe = /^points$/i;
 
-        Ext.apply(EXTLIB.Motion.prototype, {
+        Ext3.apply(EXTLIB.Motion.prototype, {
             setAttr: function(attr, val, unit){
                 var me = this,
                     setAttr = superclass.setAttr;
@@ -2547,7 +2547,7 @@ Ext.lib.Ajax = function() {
                         ra;
 
 
-                    if(control.length > 0 && !Ext.isArray(control[0])){
+                    if(control.length > 0 && !Ext3.isArray(control[0])){
                         control = [control];
                     }else{
                         /*
@@ -2559,7 +2559,7 @@ Ext.lib.Ajax = function() {
                         */
                     }
 
-                    Ext.fly(el, '_anim').position();
+                    Ext3.fly(el, '_anim').position();
                     DOM.setXY(el, isset(from) ? from : DOM.getXY(el));
                     start = me.getAttr('points');
 
@@ -2602,9 +2602,9 @@ Ext.lib.Ajax = function() {
         asin = Math.asin,
         pow = Math.pow,
         sin = Math.sin,
-        EXTLIB = Ext.lib;
+        EXTLIB = Ext3.lib;
 
-    Ext.apply(EXTLIB.Easing, {
+    Ext3.apply(EXTLIB.Easing, {
 
         easeBoth: function (t, b, c, d) {
             return ((t /= d / 2) < 1)  ?  c / 2 * t * t + b  :  -c / 2 * ((--t) * (t - 2) - 1) + b;
@@ -2726,7 +2726,7 @@ Ext.lib.Ajax = function() {
 })();
 
 (function() {
-    var EXTLIB = Ext.lib;
+    var EXTLIB = Ext3.lib;
     // Color Animation
     EXTLIB.Anim.color = function(el, args, duration, easing, cb, scope) {
         return EXTLIB.Anim.run(el, args, duration, easing, cb, scope, EXTLIB.ColorAnim);
@@ -2736,7 +2736,7 @@ Ext.lib.Ajax = function() {
         EXTLIB.ColorAnim.superclass.constructor.call(this, el, attributes, duration, method);
     };
 
-    Ext.extend(EXTLIB.ColorAnim, EXTLIB.AnimBase);
+    Ext3.extend(EXTLIB.ColorAnim, EXTLIB.AnimBase);
 
     var superclass = EXTLIB.ColorAnim.superclass,
         colorRE = /color$/i,
@@ -2759,7 +2759,7 @@ Ext.lib.Ajax = function() {
             return s;
         }
 
-        Ext.each([hexRE, rgbRE, hex3RE], function(re, idx){
+        Ext3.each([hexRE, rgbRE, hex3RE], function(re, idx){
             base = (idx % 2 == 0) ? 16 : 10;
             c = re.exec(s);
             if(c && c.length == 4){
@@ -2770,13 +2770,13 @@ Ext.lib.Ajax = function() {
         return out;
     }
 
-    Ext.apply(EXTLIB.ColorAnim.prototype, {
+    Ext3.apply(EXTLIB.ColorAnim.prototype, {
         getAttr : function(attr) {
             var me = this,
                 el = me.el,
                 val;
             if(colorRE.test(attr)){
-                while(el && transparentRE.test(val = Ext.fly(el).getStyle(attr))){
+                while(el && transparentRE.test(val = Ext3.fly(el).getStyle(attr))){
                     el = el.parentNode;
                     val = "fff";
                 }
@@ -2838,7 +2838,7 @@ Ext.lib.Ajax = function() {
 
 (function() {
     // Scroll Animation
-    var EXTLIB = Ext.lib;
+    var EXTLIB = Ext3.lib;
     EXTLIB.Anim.scroll = function(el, args, duration, easing, cb, scope) {
         return EXTLIB.Anim.run(el, args, duration, easing, cb, scope, EXTLIB.Scroll);
     };
@@ -2849,12 +2849,12 @@ Ext.lib.Ajax = function() {
         }
     };
 
-    Ext.extend(EXTLIB.Scroll, EXTLIB.ColorAnim);
+    Ext3.extend(EXTLIB.Scroll, EXTLIB.ColorAnim);
 
     var superclass = EXTLIB.Scroll.superclass,
         SCROLL = 'scroll';
 
-    Ext.apply(EXTLIB.Scroll.prototype, {
+    Ext3.apply(EXTLIB.Scroll.prototype, {
 
         doMethod : function(attr, start, end) {
             var val,
@@ -2893,7 +2893,7 @@ Ext.lib.Ajax = function() {
         }
     });
 })();	
-	if (Ext.isIE) {
+	if (Ext3.isIE) {
         function fnCleanUp() {
             var p = Function.prototype;
             delete p.createSequence;

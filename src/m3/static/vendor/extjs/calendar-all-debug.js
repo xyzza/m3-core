@@ -1,13 +1,13 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-Ext.ns('Ext.calendar');
+Ext3.ns('Ext3.calendar');
 
  (function() {
-    Ext.apply(Ext.calendar, {
+    Ext3.apply(Ext3.calendar, {
         Date: {
             diffDays: function(start, end) {
                 day = 1000 * 60 * 60 * 24;
@@ -58,33 +58,33 @@ Ext.ns('Ext.calendar');
         }
     });
 })();/**
- * @class Ext.calendar.DayHeaderTemplate
- * @extends Ext.XTemplate
- * <p>This is the template used to render the all-day event container used in {@link Ext.calendar.DayView DayView} and 
- * {@link Ext.calendar.WeekView WeekView}. Internally the majority of the layout logic is deferred to an instance of
- * {@link Ext.calendar.BoxLayoutTemplate}.</p> 
+ * @class Ext3.calendar.DayHeaderTemplate
+ * @extends Ext3.XTemplate
+ * <p>This is the template used to render the all-day event container used in {@link Ext3.calendar.DayView DayView} and 
+ * {@link Ext3.calendar.WeekView WeekView}. Internally the majority of the layout logic is deferred to an instance of
+ * {@link Ext3.calendar.BoxLayoutTemplate}.</p> 
  * <p>This template is automatically bound to the underlying event store by the 
- * calendar components and expects records of type {@link Ext.calendar.EventRecord}.</p>
- * <p>Note that this template would not normally be used directly. Instead you would use the {@link Ext.calendar.DayViewTemplate}
- * that internally creates an instance of this template along with a {@link Ext.calendar.DayBodyTemplate}.</p>
+ * calendar components and expects records of type {@link Ext3.calendar.EventRecord}.</p>
+ * <p>Note that this template would not normally be used directly. Instead you would use the {@link Ext3.calendar.DayViewTemplate}
+ * that internally creates an instance of this template along with a {@link Ext3.calendar.DayBodyTemplate}.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.DayHeaderTemplate = function(config){
+Ext3.calendar.DayHeaderTemplate = function(config){
     
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
     
-    this.allDayTpl = new Ext.calendar.BoxLayoutTemplate(config);
+    this.allDayTpl = new Ext3.calendar.BoxLayoutTemplate(config);
     this.allDayTpl.compile();
     
-    Ext.calendar.DayHeaderTemplate.superclass.constructor.call(this,
-        '<div class="ext-cal-hd-ct">',
-            '<table class="ext-cal-hd-days-tbl" cellspacing="0" cellpadding="0">',
+    Ext3.calendar.DayHeaderTemplate.superclass.constructor.call(this,
+        '<div class="ext3-cal-hd-ct">',
+            '<table class="ext3-cal-hd-days-tbl" cellspacing="0" cellpadding="0">',
                 '<tbody>',
                     '<tr>',
-                        '<td class="ext-cal-gutter"></td>',
-                        '<td class="ext-cal-hd-days-td"><div class="ext-cal-hd-ad-inner">{allDayTpl}</div></td>',
-                        '<td class="ext-cal-gutter-rt"></td>',
+                        '<td class="ext3-cal-gutter"></td>',
+                        '<td class="ext3-cal-hd-days-td"><div class="ext3-cal-hd-ad-inner">{allDayTpl}</div></td>',
+                        '<td class="ext3-cal-gutter-rt"></td>',
                     '</tr>',
                 '</tobdy>',
             '</table>',
@@ -92,41 +92,41 @@ Ext.calendar.DayHeaderTemplate = function(config){
     );
 };
 
-Ext.extend(Ext.calendar.DayHeaderTemplate, Ext.XTemplate, {
+Ext3.extend(Ext3.calendar.DayHeaderTemplate, Ext3.XTemplate, {
     applyTemplate : function(o){
-        return Ext.calendar.DayHeaderTemplate.superclass.applyTemplate.call(this, {
+        return Ext3.calendar.DayHeaderTemplate.superclass.applyTemplate.call(this, {
             allDayTpl: this.allDayTpl.apply(o)
         });
     }
 });
 
-Ext.calendar.DayHeaderTemplate.prototype.apply = Ext.calendar.DayHeaderTemplate.prototype.applyTemplate;
+Ext3.calendar.DayHeaderTemplate.prototype.apply = Ext3.calendar.DayHeaderTemplate.prototype.applyTemplate;
 /**
- * @class Ext.calendar.DayBodyTemplate
- * @extends Ext.XTemplate
- * <p>This is the template used to render the scrolling body container used in {@link Ext.calendar.DayView DayView} and 
- * {@link Ext.calendar.WeekView WeekView}. This template is automatically bound to the underlying event store by the 
- * calendar components and expects records of type {@link Ext.calendar.EventRecord}.</p>
- * <p>Note that this template would not normally be used directly. Instead you would use the {@link Ext.calendar.DayViewTemplate}
- * that internally creates an instance of this template along with a {@link Ext.calendar.DayHeaderTemplate}.</p>
+ * @class Ext3.calendar.DayBodyTemplate
+ * @extends Ext3.XTemplate
+ * <p>This is the template used to render the scrolling body container used in {@link Ext3.calendar.DayView DayView} and 
+ * {@link Ext3.calendar.WeekView WeekView}. This template is automatically bound to the underlying event store by the 
+ * calendar components and expects records of type {@link Ext3.calendar.EventRecord}.</p>
+ * <p>Note that this template would not normally be used directly. Instead you would use the {@link Ext3.calendar.DayViewTemplate}
+ * that internally creates an instance of this template along with a {@link Ext3.calendar.DayHeaderTemplate}.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.DayBodyTemplate = function(config){
+Ext3.calendar.DayBodyTemplate = function(config){
     
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
     
-    Ext.calendar.DayBodyTemplate.superclass.constructor.call(this,
-        '<table class="ext-cal-bg-tbl" cellspacing="0" cellpadding="0">',
+    Ext3.calendar.DayBodyTemplate.superclass.constructor.call(this,
+        '<table class="ext3-cal-bg-tbl" cellspacing="0" cellpadding="0">',
             '<tbody>',
                 '<tr height="1">',
-                    '<td class="ext-cal-gutter"></td>',
+                    '<td class="ext3-cal-gutter"></td>',
                     '<td colspan="{dayCount}">',
-                        '<div class="ext-cal-bg-rows">',
-                            '<div class="ext-cal-bg-rows-inner">',
+                        '<div class="ext3-cal-bg-rows">',
+                            '<div class="ext3-cal-bg-rows-inner">',
                                 '<tpl for="times">',
-                                    '<div class="ext-cal-bg-row">',
-                                        '<div class="ext-cal-bg-row-div ext-row-{[xindex]}"></div>',
+                                    '<div class="ext3-cal-bg-row">',
+                                        '<div class="ext3-cal-bg-row-div ext3-row-{[xindex]}"></div>',
                                     '</div>',
                                 '</tpl>',
                             '</div>',
@@ -134,17 +134,17 @@ Ext.calendar.DayBodyTemplate = function(config){
                     '</td>',
                 '</tr>',
                 '<tr>',
-                    '<td class="ext-cal-day-times">',
+                    '<td class="ext3-cal-day-times">',
                         '<tpl for="times">',
-                            '<div class="ext-cal-bg-row">',
-                                '<div class="ext-cal-day-time-inner">{.}</div>',
+                            '<div class="ext3-cal-bg-row">',
+                                '<div class="ext3-cal-day-time-inner">{.}</div>',
                             '</div>',
                         '</tpl>',
                     '</td>',
                     '<tpl for="days">',
-                        '<td class="ext-cal-day-col">',
-                            '<div class="ext-cal-day-col-inner">',
-                                '<div id="{[this.id]}-day-col-{.:date("Ymd")}" class="ext-cal-day-col-gutter"></div>',
+                        '<td class="ext3-cal-day-col">',
+                            '<div class="ext3-cal-day-col-inner">',
+                                '<div id="{[this.id]}-day-col-{.:date("Ymd")}" class="ext3-cal-day-col-gutter"></div>',
                             '</div>',
                         '</td>',
                     '</tpl>',
@@ -154,7 +154,7 @@ Ext.calendar.DayBodyTemplate = function(config){
     );
 };
 
-Ext.extend(Ext.calendar.DayBodyTemplate, Ext.XTemplate, {
+Ext3.extend(Ext3.calendar.DayBodyTemplate, Ext3.XTemplate, {
     // private
     applyTemplate : function(o){
         this.today = new Date().clearTime();
@@ -175,7 +175,7 @@ Ext.extend(Ext.calendar.DayBodyTemplate, Ext.XTemplate, {
             dt = dt.add(Date.HOUR, 1);
         }
         
-        return Ext.calendar.DayBodyTemplate.superclass.applyTemplate.call(this, {
+        return Ext3.calendar.DayBodyTemplate.superclass.applyTemplate.call(this, {
             days: days,
             dayCount: days.length,
             times: times
@@ -183,69 +183,69 @@ Ext.extend(Ext.calendar.DayBodyTemplate, Ext.XTemplate, {
     }
 });
 
-Ext.calendar.DayBodyTemplate.prototype.apply = Ext.calendar.DayBodyTemplate.prototype.applyTemplate;
+Ext3.calendar.DayBodyTemplate.prototype.apply = Ext3.calendar.DayBodyTemplate.prototype.applyTemplate;
 /**
- * @class Ext.calendar.DayViewTemplate
- * @extends Ext.XTemplate
- * <p>This is the template used to render the all-day event container used in {@link Ext.calendar.DayView DayView} and 
- * {@link Ext.calendar.WeekView WeekView}. Internally this class simply defers to instances of {@link Ext.calerndar.DayHeaderTemplate}
- * and  {@link Ext.calerndar.DayBodyTemplate} to perform the actual rendering logic, but it also provides the overall calendar view
+ * @class Ext3.calendar.DayViewTemplate
+ * @extends Ext3.XTemplate
+ * <p>This is the template used to render the all-day event container used in {@link Ext3.calendar.DayView DayView} and 
+ * {@link Ext3.calendar.WeekView WeekView}. Internally this class simply defers to instances of {@link Ext3.calerndar.DayHeaderTemplate}
+ * and  {@link Ext3.calerndar.DayBodyTemplate} to perform the actual rendering logic, but it also provides the overall calendar view
  * container that contains them both.  As such this is the template that should be used when rendering day or week views.</p> 
  * <p>This template is automatically bound to the underlying event store by the 
- * calendar components and expects records of type {@link Ext.calendar.EventRecord}.</p>
+ * calendar components and expects records of type {@link Ext3.calendar.EventRecord}.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.DayViewTemplate = function(config){
+Ext3.calendar.DayViewTemplate = function(config){
     
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
     
-    this.headerTpl = new Ext.calendar.DayHeaderTemplate(config);
+    this.headerTpl = new Ext3.calendar.DayHeaderTemplate(config);
     this.headerTpl.compile();
     
-    this.bodyTpl = new Ext.calendar.DayBodyTemplate(config);
+    this.bodyTpl = new Ext3.calendar.DayBodyTemplate(config);
     this.bodyTpl.compile();
     
-    Ext.calendar.DayViewTemplate.superclass.constructor.call(this,
-        '<div class="ext-cal-inner-ct">',
+    Ext3.calendar.DayViewTemplate.superclass.constructor.call(this,
+        '<div class="ext3-cal-inner-ct">',
             '{headerTpl}',
             '{bodyTpl}',
         '</div>'
     );
 };
 
-Ext.extend(Ext.calendar.DayViewTemplate, Ext.XTemplate, {
+Ext3.extend(Ext3.calendar.DayViewTemplate, Ext3.XTemplate, {
     // private
     applyTemplate : function(o){
-        return Ext.calendar.DayViewTemplate.superclass.applyTemplate.call(this, {
+        return Ext3.calendar.DayViewTemplate.superclass.applyTemplate.call(this, {
             headerTpl: this.headerTpl.apply(o),
             bodyTpl: this.bodyTpl.apply(o)
         });
     }
 });
 
-Ext.calendar.DayViewTemplate.prototype.apply = Ext.calendar.DayViewTemplate.prototype.applyTemplate;
+Ext3.calendar.DayViewTemplate.prototype.apply = Ext3.calendar.DayViewTemplate.prototype.applyTemplate;
 /**
- * @class Ext.calendar.BoxLayoutTemplate
- * @extends Ext.XTemplate
+ * @class Ext3.calendar.BoxLayoutTemplate
+ * @extends Ext3.XTemplate
  * <p>This is the template used to render calendar views based on small day boxes within a non-scrolling container (currently
- * the {@link Ext.calendar.MonthView MonthView} and the all-day headers for {@link Ext.calendar.DayView DayView} and 
- * {@link Ext.calendar.WeekView WeekView}. This template is automatically bound to the underlying event store by the 
- * calendar components and expects records of type {@link Ext.calendar.EventRecord}.</p>
+ * the {@link Ext3.calendar.MonthView MonthView} and the all-day headers for {@link Ext3.calendar.DayView DayView} and 
+ * {@link Ext3.calendar.WeekView WeekView}. This template is automatically bound to the underlying event store by the 
+ * calendar components and expects records of type {@link Ext3.calendar.EventRecord}.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.BoxLayoutTemplate = function(config){
+Ext3.calendar.BoxLayoutTemplate = function(config){
     
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
     
-    var weekLinkTpl = this.showWeekLinks ? '<div id="{weekLinkId}" class="ext-cal-week-link">{weekNum}</div>' : '';
+    var weekLinkTpl = this.showWeekLinks ? '<div id="{weekLinkId}" class="ext3-cal-week-link">{weekNum}</div>' : '';
     
-    Ext.calendar.BoxLayoutTemplate.superclass.constructor.call(this,
+    Ext3.calendar.BoxLayoutTemplate.superclass.constructor.call(this,
         '<tpl for="weeks">',
-            '<div id="{[this.id]}-wk-{[xindex-1]}" class="ext-cal-wk-ct" style="top:{[this.getRowTop(xindex, xcount)]}%; height:{[this.getRowHeight(xcount)]}%;">',
+            '<div id="{[this.id]}-wk-{[xindex-1]}" class="ext3-cal-wk-ct" style="top:{[this.getRowTop(xindex, xcount)]}%; height:{[this.getRowHeight(xcount)]}%;">',
                 weekLinkTpl,
-                '<table class="ext-cal-bg-tbl" cellpadding="0" cellspacing="0">',
+                '<table class="ext3-cal-bg-tbl" cellpadding="0" cellspacing="0">',
                     '<tbody>',
                         '<tr>',
                             '<tpl for=".">',
@@ -254,7 +254,7 @@ Ext.calendar.BoxLayoutTemplate = function(config){
                         '</tr>',
                     '</tbody>',
                 '</table>',
-                '<table class="ext-cal-evt-tbl" cellpadding="0" cellspacing="0">',
+                '<table class="ext3-cal-evt-tbl" cellpadding="0" cellspacing="0">',
                     '<tbody>',
                         '<tr>',
                             '<tpl for=".">',
@@ -275,11 +275,11 @@ Ext.calendar.BoxLayoutTemplate = function(config){
     );
 };
 
-Ext.extend(Ext.calendar.BoxLayoutTemplate, Ext.XTemplate, {
+Ext3.extend(Ext3.calendar.BoxLayoutTemplate, Ext3.XTemplate, {
     // private
     applyTemplate : function(o){
         
-        Ext.apply(this, o);
+        Ext3.apply(this, o);
         
         var w = 0, title = '', first = true, isToday = false, showMonth = false, prevMonth = false, nextMonth = false,
             weeks = [[]],
@@ -303,7 +303,7 @@ Ext.extend(Ext.calendar.BoxLayoutTemplate, Ext.XTemplate, {
                     // The ISO week format 'W' is relative to a Monday week start. If we
                     // make this check on Sunday the week number will be off.
                     weeks[w].weekNum = this.showWeekNumbers ? dt.format('W') : '&nbsp;';
-                    weeks[w].weekLinkId = 'ext-cal-week-'+dt.format('Ymd');
+                    weeks[w].weekLinkId = 'ext3-cal-week-'+dt.format('Ymd');
                 }
                 
                 if(showMonth){
@@ -322,21 +322,21 @@ Ext.extend(Ext.calendar.BoxLayoutTemplate, Ext.XTemplate, {
                 weeks[w].push({
                     title: title,
                     date: dt.clone(),
-                    titleCls: 'ext-cal-dtitle ' + (isToday ? ' ext-cal-dtitle-today' : '') + 
-                        (w==0 ? ' ext-cal-dtitle-first' : '') +
-                        (prevMonth ? ' ext-cal-dtitle-prev' : '') + 
-                        (nextMonth ? ' ext-cal-dtitle-next' : ''),
-                    cellCls: 'ext-cal-day ' + (isToday ? ' ext-cal-day-today' : '') + 
-                        (d==0 ? ' ext-cal-day-first' : '') +
-                        (prevMonth ? ' ext-cal-day-prev' : '') +
-                        (nextMonth ? ' ext-cal-day-next' : '')
+                    titleCls: 'ext3-cal-dtitle ' + (isToday ? ' ext3-cal-dtitle-today' : '') + 
+                        (w==0 ? ' ext3-cal-dtitle-first' : '') +
+                        (prevMonth ? ' ext3-cal-dtitle-prev' : '') + 
+                        (nextMonth ? ' ext3-cal-dtitle-next' : ''),
+                    cellCls: 'ext3-cal-day ' + (isToday ? ' ext3-cal-day-today' : '') + 
+                        (d==0 ? ' ext3-cal-day-first' : '') +
+                        (prevMonth ? ' ext3-cal-day-prev' : '') +
+                        (nextMonth ? ' ext3-cal-day-next' : '')
                 });
                 dt = dt.add(Date.DAY, 1);
                 first = false;
             }
         }
         
-        return Ext.calendar.BoxLayoutTemplate.superclass.applyTemplate.call(this, {
+        return Ext3.calendar.BoxLayoutTemplate.superclass.applyTemplate.call(this, {
             weeks: weeks
         });
     },
@@ -345,7 +345,7 @@ Ext.extend(Ext.calendar.BoxLayoutTemplate, Ext.XTemplate, {
     getTodayText : function(){
         var dt = new Date().format('l, F j, Y'),
             todayText = this.showTodayText !== false ? this.todayText : '',
-            timeText = this.showTime !== false ? ' <span id="'+this.id+'-clock" class="ext-cal-dtitle-time">' + 
+            timeText = this.showTime !== false ? ' <span id="'+this.id+'-clock" class="ext3-cal-dtitle-time">' + 
                     new Date().format('g:i a') + '</span>' : '',
             separator = todayText.length > 0 || timeText.length > 0 ? ' &mdash; ' : '';
         
@@ -357,47 +357,47 @@ Ext.extend(Ext.calendar.BoxLayoutTemplate, Ext.XTemplate, {
     }
 });
 
-Ext.calendar.BoxLayoutTemplate.prototype.apply = Ext.calendar.BoxLayoutTemplate.prototype.applyTemplate;
+Ext3.calendar.BoxLayoutTemplate.prototype.apply = Ext3.calendar.BoxLayoutTemplate.prototype.applyTemplate;
 /**
- * @class Ext.calendar.MonthViewTemplate
- * @extends Ext.XTemplate
- * <p>This is the template used to render the {@link Ext.calendar.MonthView MonthView}. Internally this class defers to an
- * instance of {@link Ext.calerndar.BoxLayoutTemplate} to handle the inner layout rendering and adds containing elements around
+ * @class Ext3.calendar.MonthViewTemplate
+ * @extends Ext3.XTemplate
+ * <p>This is the template used to render the {@link Ext3.calendar.MonthView MonthView}. Internally this class defers to an
+ * instance of {@link Ext3.calerndar.BoxLayoutTemplate} to handle the inner layout rendering and adds containing elements around
  * that to form the month view.</p> 
  * <p>This template is automatically bound to the underlying event store by the 
- * calendar components and expects records of type {@link Ext.calendar.EventRecord}.</p>
+ * calendar components and expects records of type {@link Ext3.calendar.EventRecord}.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.MonthViewTemplate = function(config){
+Ext3.calendar.MonthViewTemplate = function(config){
     
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
     
-    this.weekTpl = new Ext.calendar.BoxLayoutTemplate(config);
+    this.weekTpl = new Ext3.calendar.BoxLayoutTemplate(config);
     this.weekTpl.compile();
     
-    var weekLinkTpl = this.showWeekLinks ? '<div class="ext-cal-week-link-hd">&nbsp;</div>' : '';
+    var weekLinkTpl = this.showWeekLinks ? '<div class="ext3-cal-week-link-hd">&nbsp;</div>' : '';
     
-    Ext.calendar.MonthViewTemplate.superclass.constructor.call(this,
-        '<div class="ext-cal-inner-ct {extraClasses}">',
-            '<div class="ext-cal-hd-ct ext-cal-month-hd">',
+    Ext3.calendar.MonthViewTemplate.superclass.constructor.call(this,
+        '<div class="ext3-cal-inner-ct {extraClasses}">',
+            '<div class="ext3-cal-hd-ct ext3-cal-month-hd">',
                 weekLinkTpl,
-                '<table class="ext-cal-hd-days-tbl" cellpadding="0" cellspacing="0">',
+                '<table class="ext3-cal-hd-days-tbl" cellpadding="0" cellspacing="0">',
                     '<tbody>',
                         '<tr>',
                             '<tpl for="days">',
-                                '<th class="ext-cal-hd-day{[xindex==1 ? " ext-cal-day-first" : ""]}" title="{.:date("l, F j, Y")}">{.:date("D")}</th>',
+                                '<th class="ext3-cal-hd-day{[xindex==1 ? " ext3-cal-day-first" : ""]}" title="{.:date("l, F j, Y")}">{.:date("D")}</th>',
                             '</tpl>',
                         '</tr>',
                     '</tbody>',
                 '</table>',
             '</div>',
-            '<div class="ext-cal-body-ct">{weeks}</div>',
+            '<div class="ext3-cal-body-ct">{weeks}</div>',
         '</div>'
     );
 };
 
-Ext.extend(Ext.calendar.MonthViewTemplate, Ext.XTemplate, {
+Ext3.extend(Ext3.calendar.MonthViewTemplate, Ext3.XTemplate, {
     // private
     applyTemplate : function(o){
         var days = [],
@@ -408,12 +408,12 @@ Ext.extend(Ext.calendar.MonthViewTemplate, Ext.XTemplate, {
             days.push(dt.add(Date.DAY, i));
         }
         
-        var extraClasses = this.showHeader === true ? '' : 'ext-cal-noheader';
+        var extraClasses = this.showHeader === true ? '' : 'ext3-cal-noheader';
         if(this.showWeekLinks){
-            extraClasses += ' ext-cal-week-links';
+            extraClasses += ' ext3-cal-week-links';
         }
         
-        return Ext.calendar.MonthViewTemplate.superclass.applyTemplate.call(this, {
+        return Ext3.calendar.MonthViewTemplate.superclass.applyTemplate.call(this, {
             days: days,
             weeks: weeks,
             extraClasses: extraClasses 
@@ -421,29 +421,29 @@ Ext.extend(Ext.calendar.MonthViewTemplate, Ext.XTemplate, {
     }
 });
 
-Ext.calendar.MonthViewTemplate.prototype.apply = Ext.calendar.MonthViewTemplate.prototype.applyTemplate;
+Ext3.calendar.MonthViewTemplate.prototype.apply = Ext3.calendar.MonthViewTemplate.prototype.applyTemplate;
 /**
- * @class Ext.dd.ScrollManager
+ * @class Ext3.dd.ScrollManager
  * <p>Provides automatic scrolling of overflow regions in the page during drag operations.</p>
  * <p>The ScrollManager configs will be used as the defaults for any scroll container registered with it,
  * but you can also override most of the configs per scroll container by adding a 
  * <tt>ddScrollConfig</tt> object to the target element that contains these properties: {@link #hthresh},
  * {@link #vthresh}, {@link #increment} and {@link #frequency}.  Example usage:
  * <pre><code>
-var el = Ext.get('scroll-ct');
+var el = Ext3.get('scroll-ct');
 el.ddScrollConfig = {
     vthresh: 50,
     hthresh: -1,
     frequency: 100,
     increment: 200
 };
-Ext.dd.ScrollManager.register(el);
+Ext3.dd.ScrollManager.register(el);
 </code></pre>
  * <b>Note: This class uses "Point Mode" and is untested in "Intersect Mode".</b>
  * @singleton
  */
-Ext.dd.ScrollManager = function() {
-    var ddm = Ext.dd.DragDropMgr,
+Ext3.dd.ScrollManager = function() {
+    var ddm = Ext3.dd.DragDropMgr,
         els = {},
         dragEl = null,
         proc = {},
@@ -458,7 +458,7 @@ Ext.dd.ScrollManager = function() {
         },
         doScroll = function() {
             if (ddm.dragCurrent) {
-                var dds = Ext.dd.ScrollManager,
+                var dds = Ext3.dd.ScrollManager,
                     inc = proc.el.ddScrollConfig ? proc.el.ddScrollConfig.increment: dds.increment;
                 if (!dds.animate) {
                     if (proc.el.scroll(proc.dir, inc)) {
@@ -482,7 +482,7 @@ Ext.dd.ScrollManager = function() {
             proc.el = el;
             proc.dir = dir;
             var freq = (el.ddScrollConfig && el.ddScrollConfig.frequency) ?
-                            el.ddScrollConfig.frequency: Ext.dd.ScrollManager.frequency,
+                            el.ddScrollConfig.frequency: Ext3.dd.ScrollManager.frequency,
                 group = el.ddScrollConfig ? el.ddScrollConfig.ddGroup: undefined;
 
             if (group === undefined || ddm.dragCurrent.ddGroup == group) {
@@ -493,15 +493,15 @@ Ext.dd.ScrollManager = function() {
             if (isDrop || !ddm.dragCurrent) {
                 return;
             }
-            var dds = Ext.dd.ScrollManager;
+            var dds = Ext3.dd.ScrollManager;
             if (!dragEl || dragEl != ddm.dragCurrent) {
                 dragEl = ddm.dragCurrent;
                 // refresh regions on drag start
                 dds.refreshCache();
             }
 
-            var xy = Ext.lib.Event.getXY(e),
-                pt = new Ext.lib.Point(xy[0], xy[1]),
+            var xy = Ext3.lib.Event.getXY(e),
+                pt = new Ext3.lib.Point(xy[0], xy[1]),
                 id,
                 el,
                 r,
@@ -548,14 +548,14 @@ Ext.dd.ScrollManager = function() {
          * @param {Mixed/Array} el The id of or the element to be scrolled or an array of either
          */
         register: function(el) {
-            if (Ext.isArray(el)) {
+            if (Ext3.isArray(el)) {
                 var i = 0,
                     len = el.length;
                 for (; i < len; i++) {
                     this.register(el[i]);
                 }
             } else {
-                el = Ext.get(el);
+                el = Ext3.get(el);
                 els[el.id] = el;
             }
         },
@@ -565,14 +565,14 @@ Ext.dd.ScrollManager = function() {
          * @param {Mixed/Array} el The id of or the element to be removed or an array of either
          */
         unregister: function(el) {
-            if (Ext.isArray(el)) {
+            if (Ext3.isArray(el)) {
                 var i = 0,
                     len = el.length;
                 for (; i < len; i++) {
                     this.unregister(el[i]);
                 }
             } else {
-                el = Ext.get(el);
+                el = Ext3.get(el);
                 delete els[el.id];
             }
         },
@@ -610,7 +610,7 @@ Ext.dd.ScrollManager = function() {
 
         /**
          * The animation duration in seconds - 
-         * MUST BE less than Ext.dd.ScrollManager.frequency! (defaults to .4)
+         * MUST BE less than Ext3.dd.ScrollManager.frequency! (defaults to .4)
          * @type Number
          */
         animDuration: 0.4,
@@ -631,32 +631,32 @@ Ext.dd.ScrollManager = function() {
         }
     };
 }();/*
- * @class Ext.calendar.StatusProxy
- * A specialized drag proxy that supports a drop status icon, {@link Ext.Layer} styles and auto-repair. It also
+ * @class Ext3.calendar.StatusProxy
+ * A specialized drag proxy that supports a drop status icon, {@link Ext3.Layer} styles and auto-repair. It also
  * contains a calendar-specific drag status message containing details about the dragged event's target drop date range.  
  * This is the default drag proxy used by all calendar views.
  * @constructor
  * @param {Object} config
  */
-Ext.calendar.StatusProxy = function(config) {
-    Ext.apply(this, config);
-    this.id = this.id || Ext.id();
-    this.el = new Ext.Layer({
+Ext3.calendar.StatusProxy = function(config) {
+    Ext3.apply(this, config);
+    this.id = this.id || Ext3.id();
+    this.el = new Ext3.Layer({
         dh: {
             id: this.id,
-            cls: 'ext-dd-drag-proxy x-dd-drag-proxy ' + this.dropNotAllowed,
+            cls: 'ext3-dd-drag-proxy x3-dd-drag-proxy ' + this.dropNotAllowed,
             cn: [
             {
-                cls: 'x-dd-drop-icon'
+                cls: 'x3-dd-drop-icon'
             },
             {
-                cls: 'ext-dd-ghost-ct',
+                cls: 'ext3-dd-ghost-ct',
                 cn: [
                 {
-                    cls: 'x-dd-drag-ghost'
+                    cls: 'x3-dd-drag-ghost'
                 },
                 {
-                    cls: 'ext-dd-msg'
+                    cls: 'ext3-dd-msg'
                 }
                 ]
             }
@@ -664,22 +664,22 @@ Ext.calendar.StatusProxy = function(config) {
         },
         shadow: !config || config.shadow !== false
     });
-    this.ghost = Ext.get(this.el.dom.childNodes[1].childNodes[0]);
-    this.message = Ext.get(this.el.dom.childNodes[1].childNodes[1]);
+    this.ghost = Ext3.get(this.el.dom.childNodes[1].childNodes[0]);
+    this.message = Ext3.get(this.el.dom.childNodes[1].childNodes[1]);
     this.dropStatus = this.dropNotAllowed;
 };
 
-Ext.extend(Ext.calendar.StatusProxy, Ext.dd.StatusProxy, {
+Ext3.extend(Ext3.calendar.StatusProxy, Ext3.dd.StatusProxy, {
     /**
      * @cfg {String} moveEventCls
-     * The CSS class to apply to the status element when an event is being dragged (defaults to 'ext-cal-dd-move').
+     * The CSS class to apply to the status element when an event is being dragged (defaults to 'ext3-cal-dd-move').
      */
-    moveEventCls: 'ext-cal-dd-move',
+    moveEventCls: 'ext3-cal-dd-move',
     /**
      * @cfg {String} addEventCls
-     * The CSS class to apply to the status element when drop is not allowed (defaults to 'ext-cal-dd-add').
+     * The CSS class to apply to the status element when drop is not allowed (defaults to 'ext3-cal-dd-add').
      */
-    addEventCls: 'ext-cal-dd-add',
+    addEventCls: 'ext3-cal-dd-add',
 
     // inherit docs
     update: function(html) {
@@ -692,8 +692,8 @@ Ext.extend(Ext.calendar.StatusProxy, Ext.dd.StatusProxy, {
         }
         var el = this.ghost.dom.firstChild;
         if (el) {
-            Ext.fly(el).setStyle('float', 'none').setHeight('auto');
-            Ext.getDom(el).id += '-ddproxy';
+            Ext3.fly(el).setStyle('float', 'none').setHeight('auto');
+            Ext3.getDom(el).id += '-ddproxy';
         }
     },
 
@@ -708,16 +708,16 @@ Ext.extend(Ext.calendar.StatusProxy, Ext.dd.StatusProxy, {
  * Internal drag zone implementation for the calendar components. This provides base functionality
  * and is primarily for the month view -- DayViewDD adds day/week view-specific functionality.
  */
-Ext.calendar.DragZone = Ext.extend(Ext.dd.DragZone, {
+Ext3.calendar.DragZone = Ext3.extend(Ext3.dd.DragZone, {
     ddGroup: 'CalendarDD',
-    eventSelector: '.ext-cal-evt',
+    eventSelector: '.ext3-cal-evt',
 
     constructor: function(el, config) {
-        if (!Ext.calendar._statusProxyInstance) {
-            Ext.calendar._statusProxyInstance = new Ext.calendar.StatusProxy();
+        if (!Ext3.calendar._statusProxyInstance) {
+            Ext3.calendar._statusProxyInstance = new Ext3.calendar.StatusProxy();
         }
-        this.proxy = Ext.calendar._statusProxyInstance;
-        Ext.calendar.DragZone.superclass.constructor.call(this, el, config);
+        this.proxy = Ext3.calendar._statusProxyInstance;
+        Ext3.calendar.DragZone.superclass.constructor.call(this, el, config);
     },
 
     getDragData: function(e) {
@@ -728,8 +728,8 @@ Ext.calendar.DragZone = Ext.extend(Ext.dd.DragZone, {
             return {
                 type: 'eventdrag',
                 ddel: t,
-                eventStart: rec.data[Ext.calendar.EventMappings.StartDate.name],
-                eventEnd: rec.data[Ext.calendar.EventMappings.EndDate.name],
+                eventStart: rec.data[Ext3.calendar.EventMappings.StartDate.name],
+                eventEnd: rec.data[Ext3.calendar.EventMappings.EndDate.name],
                 proxy: this.proxy
             };
         }
@@ -750,9 +750,9 @@ Ext.calendar.DragZone = Ext.extend(Ext.dd.DragZone, {
     onInitDrag: function(x, y) {
         if (this.dragData.ddel) {
             var ghost = this.dragData.ddel.cloneNode(true),
-            child = Ext.fly(ghost).child('dl');
+            child = Ext3.fly(ghost).child('dl');
 
-            Ext.fly(ghost).setWidth('auto');
+            Ext3.fly(ghost).setWidth('auto');
 
             if (child) {
                 // for IE/Opera
@@ -769,20 +769,20 @@ Ext.calendar.DragZone = Ext.extend(Ext.dd.DragZone, {
     },
 
     afterRepair: function() {
-        if (Ext.enableFx && this.dragData.ddel) {
-            Ext.Element.fly(this.dragData.ddel).highlight(this.hlColor || 'c3daf9');
+        if (Ext3.enableFx && this.dragData.ddel) {
+            Ext3.Element.fly(this.dragData.ddel).highlight(this.hlColor || 'c3daf9');
         }
         this.dragging = false;
     },
 
     getRepairXY: function(e) {
         if (this.dragData.ddel) {
-            return Ext.Element.fly(this.dragData.ddel).getXY();
+            return Ext3.Element.fly(this.dragData.ddel).getXY();
         }
     },
 
     afterInvalidDrop: function(e, id) {
-        Ext.select('.ext-dd-shim').hide();
+        Ext3.select('.ext3-dd-shim').hide();
     }
 });
 
@@ -790,9 +790,9 @@ Ext.calendar.DragZone = Ext.extend(Ext.dd.DragZone, {
  * Internal drop zone implementation for the calendar components. This provides base functionality
  * and is primarily for the month view -- DayViewDD adds day/week view-specific functionality.
  */
-Ext.calendar.DropZone = Ext.extend(Ext.dd.DropZone, {
+Ext3.calendar.DropZone = Ext3.extend(Ext3.dd.DropZone, {
     ddGroup: 'CalendarDD',
-    eventSelector: '.ext-cal-evt',
+    eventSelector: '.ext3-cal-evt',
 
     // private
     shims: [],
@@ -806,7 +806,7 @@ Ext.calendar.DropZone = Ext.extend(Ext.dd.DropZone, {
     },
 
     onNodeOver: function(n, dd, e, data) {
-        var D = Ext.calendar.Date,
+        var D = Ext3.calendar.Date,
         start = data.type == 'eventdrag' ? n.date: D.min(data.start, n.date),
         end = data.type == 'eventdrag' ? n.date.add(Date.DAY, D.diffDays(data.eventStart, data.eventEnd)) :
         D.max(data.start, n.date);
@@ -832,9 +832,9 @@ Ext.calendar.DropZone = Ext.extend(Ext.dd.DropZone, {
             i = 0,
             shim,
             box,
-            cnt = Ext.calendar.Date.diffDays(dt, end) + 1;
+            cnt = Ext3.calendar.Date.diffDays(dt, end) + 1;
 
-        Ext.each(this.shims,
+        Ext3.each(this.shims,
             function(shim) {
                 if (shim) {
                     shim.isActive = false;
@@ -870,7 +870,7 @@ Ext.calendar.DropZone = Ext.extend(Ext.dd.DropZone, {
             dt = dt.add(Date.DAY, 1);
         }
 
-        Ext.each(this.shims,
+        Ext3.each(this.shims,
         function(shim) {
             if (shim) {
                 if (shim.isActive) {
@@ -886,18 +886,18 @@ Ext.calendar.DropZone = Ext.extend(Ext.dd.DropZone, {
 
     createShim: function() {
         if (!this.shimCt) {
-            this.shimCt = Ext.get('ext-dd-shim-ct');
+            this.shimCt = Ext3.get('ext3-dd-shim-ct');
             if (!this.shimCt) {
                 this.shimCt = document.createElement('div');
-                this.shimCt.id = 'ext-dd-shim-ct';
-                Ext.getBody().appendChild(this.shimCt);
+                this.shimCt.id = 'ext3-dd-shim-ct';
+                Ext3.getBody().appendChild(this.shimCt);
             }
         }
         var el = document.createElement('div');
-        el.className = 'ext-dd-shim';
+        el.className = 'ext3-dd-shim';
         this.shimCt.appendChild(el);
 
-        return new Ext.Layer({
+        return new Ext3.Layer({
             shadow: false,
             useDisplay: true,
             constrain: false
@@ -906,7 +906,7 @@ Ext.calendar.DropZone = Ext.extend(Ext.dd.DropZone, {
     },
 
     clearShims: function() {
-        Ext.each(this.shims,
+        Ext3.each(this.shims,
         function(shim) {
             if (shim) {
                 shim.hide();
@@ -928,7 +928,7 @@ Ext.calendar.DropZone = Ext.extend(Ext.dd.DropZone, {
         if (n && data) {
             if (data.type == 'eventdrag') {
                 var rec = this.view.getEventRecordFromEl(data.ddel),
-                dt = Ext.calendar.Date.copyTime(rec.data[Ext.calendar.EventMappings.StartDate.name], n.date);
+                dt = Ext3.calendar.Date.copyTime(rec.data[Ext3.calendar.EventMappings.StartDate.name], n.date);
 
                 this.view.onEventDrop(rec, dt);
                 this.onCalendarDragComplete();
@@ -952,17 +952,17 @@ Ext.calendar.DropZone = Ext.extend(Ext.dd.DropZone, {
     },
 
     destroy: function() {
-        Ext.calendar.DropZone.superclass.destroy.call(this);
-        Ext.destroy(this.shimCt);
+        Ext3.calendar.DropZone.superclass.destroy.call(this);
+        Ext3.destroy(this.shimCt);
     }
 });
 
 /*
  * Internal drag zone implementation for the calendar day and week views.
  */
-Ext.calendar.DayViewDragZone = Ext.extend(Ext.calendar.DragZone, {
+Ext3.calendar.DayViewDragZone = Ext3.extend(Ext3.calendar.DragZone, {
     ddGroup: 'DayViewDD',
-    resizeSelector: '.ext-evt-rsz',
+    resizeSelector: '.ext3-evt-rsz',
 
     getDragData: function(e) {
         var t = e.getTarget(this.resizeSelector, 2, true),
@@ -975,8 +975,8 @@ Ext.calendar.DayViewDragZone = Ext.extend(Ext.calendar.DragZone, {
             return {
                 type: 'eventresize',
                 ddel: p.dom,
-                eventStart: rec.data[Ext.calendar.EventMappings.StartDate.name],
-                eventEnd: rec.data[Ext.calendar.EventMappings.EndDate.name],
+                eventStart: rec.data[Ext3.calendar.EventMappings.StartDate.name],
+                eventEnd: rec.data[Ext3.calendar.EventMappings.EndDate.name],
                 proxy: this.proxy
             };
         }
@@ -986,8 +986,8 @@ Ext.calendar.DayViewDragZone = Ext.extend(Ext.calendar.DragZone, {
             return {
                 type: 'eventdrag',
                 ddel: t,
-                eventStart: rec.data[Ext.calendar.EventMappings.StartDate.name],
-                eventEnd: rec.data[Ext.calendar.EventMappings.EndDate.name],
+                eventStart: rec.data[Ext3.calendar.EventMappings.StartDate.name],
+                eventEnd: rec.data[Ext3.calendar.EventMappings.EndDate.name],
                 proxy: this.proxy
             };
         }
@@ -1009,7 +1009,7 @@ Ext.calendar.DayViewDragZone = Ext.extend(Ext.calendar.DragZone, {
 /*
  * Internal drop zone implementation for the calendar day and week views.
  */
-Ext.calendar.DayViewDropZone = Ext.extend(Ext.calendar.DropZone, {
+Ext3.calendar.DayViewDropZone = Ext3.extend(Ext3.calendar.DropZone, {
     ddGroup: 'DayViewDD',
 
     onNodeOver: function(n, dd, e, data) {
@@ -1051,14 +1051,14 @@ Ext.calendar.DayViewDropZone = Ext.extend(Ext.calendar.DropZone, {
             }
             this.shim(this.dragCreateDt, box);
 
-            curr = Ext.calendar.Date.copyTime(n.date, this.dragCreateDt);
-            this.dragStartDate = Ext.calendar.Date.min(this.dragCreateDt, curr);
-            this.dragEndDate = endDt || Ext.calendar.Date.max(this.dragCreateDt, curr);
+            curr = Ext3.calendar.Date.copyTime(n.date, this.dragCreateDt);
+            this.dragStartDate = Ext3.calendar.Date.min(this.dragCreateDt, curr);
+            this.dragEndDate = endDt || Ext3.calendar.Date.max(this.dragCreateDt, curr);
 
             dt = this.dragStartDate.format('g:ia-') + this.dragEndDate.format('g:ia');
         }
         else {
-            evtEl = Ext.get(data.ddel);
+            evtEl = Ext3.get(data.ddel);
             dayCol = evtEl.parent().parent();
             box = evtEl.getBox();
 
@@ -1092,9 +1092,9 @@ Ext.calendar.DayViewDropZone = Ext.extend(Ext.calendar.DropZone, {
                 }
                 this.shim(this.resizeDt, box);
 
-                curr = Ext.calendar.Date.copyTime(n.date, this.resizeDt);
-                start = Ext.calendar.Date.min(data.eventStart, curr);
-                end = Ext.calendar.Date.max(data.eventStart, curr);
+                curr = Ext3.calendar.Date.copyTime(n.date, this.resizeDt);
+                start = Ext3.calendar.Date.min(data.eventStart, curr);
+                end = Ext3.calendar.Date.max(data.eventStart, curr);
 
                 data.resizeDates = {
                     StartDate: start,
@@ -1110,7 +1110,7 @@ Ext.calendar.DayViewDropZone = Ext.extend(Ext.calendar.DropZone, {
     },
 
     shim: function(dt, box) {
-        Ext.each(this.shims,
+        Ext3.each(this.shims,
         function(shim) {
             if (shim) {
                 shim.isActive = false;
@@ -1147,7 +1147,7 @@ Ext.calendar.DayViewDropZone = Ext.extend(Ext.calendar.DropZone, {
                 return true;
             }
             if (data.type == 'caldrag') {
-                Ext.destroy(this.dragStartMarker);
+                Ext3.destroy(this.dragStartMarker);
                 delete this.dragStartMarker;
                 delete this.dragCreateDt;
                 this.view.onCalendarEndDrag(this.dragStartDate, this.dragEndDate,
@@ -1162,11 +1162,11 @@ Ext.calendar.DayViewDropZone = Ext.extend(Ext.calendar.DropZone, {
     }
 });
 /**
- * @class Ext.calendar.EventMappings
+ * @class Ext3.calendar.EventMappings
  * @extends Object
  * A simple object that provides the field definitions for EventRecords so that they can be easily overridden.
  */
-Ext.calendar.EventMappings = {
+Ext3.calendar.EventMappings = {
     EventId: {
         name: 'EventId',
         mapping: 'id',
@@ -1227,28 +1227,28 @@ Ext.calendar.EventMappings = {
 };
 
 /**
- * @class Ext.calendar.EventRecord
- * @extends Ext.data.Record
- * <p>This is the {@link Ext.data.Record Record} specification for calendar event data used by the
- * {@link Ext.calendar.CalendarPanel CalendarPanel}'s underlying store. It can be overridden as 
+ * @class Ext3.calendar.EventRecord
+ * @extends Ext3.data.Record
+ * <p>This is the {@link Ext3.data.Record Record} specification for calendar event data used by the
+ * {@link Ext3.calendar.CalendarPanel CalendarPanel}'s underlying store. It can be overridden as 
  * necessary to customize the fields supported by events, although the existing column names should
  * not be altered. If your model fields are named differently you should update the <b>mapping</b>
  * configs accordingly.</p>
  * <p>The only required fields when creating a new event record instance are StartDate and
  * EndDate.  All other fields are either optional are will be defaulted if blank.</p>
  * <p>Here is a basic example for how to create a new record of this type:<pre><code>
-rec = new Ext.calendar.EventRecord({
+rec = new Ext3.calendar.EventRecord({
     StartDate: '2101-01-12 12:00:00',
     EndDate: '2101-01-12 13:30:00',
     Title: 'My cool event',
     Notes: 'Some notes'
 });
 </code></pre>
- * If you have overridden any of the record's data mappings via the Ext.calendar.EventMappings object
+ * If you have overridden any of the record's data mappings via the Ext3.calendar.EventMappings object
  * you may need to set the values using this alternate syntax to ensure that the fields match up correctly:<pre><code>
-var M = Ext.calendar.EventMappings;
+var M = Ext3.calendar.EventMappings;
 
-rec = new Ext.calendar.EventRecord();
+rec = new Ext3.calendar.EventRecord();
 rec.data[M.StartDate.name] = '2101-01-12 12:00:00';
 rec.data[M.EndDate.name] = '2101-01-12 13:30:00';
 rec.data[M.Title.name] = 'My cool event';
@@ -1256,18 +1256,18 @@ rec.data[M.Notes.name] = 'Some notes';
 </code></pre>
  * @constructor
  * @param {Object} data (Optional) An object, the properties of which provide values for the new Record's
- * fields. If not specified the {@link Ext.data.Field#defaultValue defaultValue}
+ * fields. If not specified the {@link Ext3.data.Field#defaultValue defaultValue}
  * for each field will be assigned.
  * @param {Object} id (Optional) The id of the Record. The id is used by the
- * {@link Ext.data.Store} object which owns the Record to index its collection
+ * {@link Ext3.data.Store} object which owns the Record to index its collection
  * of Records (therefore this id should be unique within each store). If an
  * id is not specified a {@link #phantom}
  * Record will be created with an {@link #Record.id automatically generated id}.
  */
  (function() {
-    var M = Ext.calendar.EventMappings;
+    var M = Ext3.calendar.EventMappings;
 
-    Ext.calendar.EventRecord = Ext.data.Record.create([
+    Ext3.calendar.EventRecord = Ext3.data.Record.create([
     M.EventId,
     M.CalendarId,
     M.Title,
@@ -1282,10 +1282,10 @@ rec.data[M.Notes.name] = 'Some notes';
     ]);
 
     /**
-     * Reconfigures the default record definition based on the current Ext.calendar.EventMappings object
+     * Reconfigures the default record definition based on the current Ext3.calendar.EventMappings object
      */
-    Ext.calendar.EventRecord.reconfigure = function() {
-        Ext.calendar.EventRecord = Ext.data.Record.create([
+    Ext3.calendar.EventRecord.reconfigure = function() {
+        Ext3.calendar.EventRecord = Ext3.data.Record.create([
         M.EventId,
         M.CalendarId,
         M.Title,
@@ -1306,9 +1306,9 @@ rec.data[M.Notes.name] = 'Some notes';
  * a link at the bottom to view all events for that day. When clicked, a panel pops up that
  * uses this view to display the events for that day.
  */
-Ext.calendar.MonthDayDetailView = Ext.extend(Ext.BoxComponent, {
+Ext3.calendar.MonthDayDetailView = Ext3.extend(Ext3.BoxComponent, {
     initComponent: function() {
-        Ext.calendar.CalendarView.superclass.initComponent.call(this);
+        Ext3.calendar.CalendarView.superclass.initComponent.call(this);
 
         this.addEvents({
             eventsrendered: true
@@ -1322,7 +1322,7 @@ Ext.calendar.MonthDayDetailView = Ext.extend(Ext.BoxComponent, {
     afterRender: function() {
         this.tpl = this.getTemplate();
 
-        Ext.calendar.MonthDayDetailView.superclass.afterRender.call(this);
+        Ext3.calendar.MonthDayDetailView.superclass.afterRender.call(this);
 
         this.el.on({
             'click': this.view.onClick,
@@ -1334,12 +1334,12 @@ Ext.calendar.MonthDayDetailView = Ext.extend(Ext.BoxComponent, {
 
     getTemplate: function() {
         if (!this.tpl) {
-            this.tpl = new Ext.XTemplate(
-            '<div class="ext-cal-mdv x-unselectable">',
-            '<table class="ext-cal-mvd-tbl" cellpadding="0" cellspacing="0">',
+            this.tpl = new Ext3.XTemplate(
+            '<div class="ext3-cal-mdv x3-unselectable">',
+            '<table class="ext3-cal-mvd-tbl" cellpadding="0" cellspacing="0">',
             '<tbody>',
             '<tpl for=".">',
-            '<tr><td class="ext-cal-ev">{markup}</td></tr>',
+            '<tr><td class="ext3-cal-ev">{markup}</td></tr>',
             '</tpl>',
             '</tbody>',
             '</table>',
@@ -1365,12 +1365,12 @@ Ext.calendar.MonthDayDetailView = Ext.extend(Ext.BoxComponent, {
 
         evts = this.store.queryBy(function(rec) {
             var thisDt = this.date.clearTime(true).getTime(),
-                recStart = rec.data[Ext.calendar.EventMappings.StartDate.name].clearTime(true).getTime(),
+                recStart = rec.data[Ext3.calendar.EventMappings.StartDate.name].clearTime(true).getTime(),
                 startsOnDate = (thisDt == recStart),
                 spansDate = false;
 
             if (!startsOnDate) {
-                var recEnd = rec.data[Ext.calendar.EventMappings.EndDate.name].clearTime(true).getTime();
+                var recEnd = rec.data[Ext3.calendar.EventMappings.EndDate.name].clearTime(true).getTime();
                 spansDate = recStart < thisDt && recEnd >= thisDt;
             }
             return startsOnDate || spansDate;
@@ -1379,13 +1379,13 @@ Ext.calendar.MonthDayDetailView = Ext.extend(Ext.BoxComponent, {
 
         evts.each(function(evt) {
             var item = evt.data,
-            M = Ext.calendar.EventMappings;
+            M = Ext3.calendar.EventMappings;
 
-            item._renderAsAllDay = item[M.IsAllDay.name] || Ext.calendar.Date.diffDays(item[M.StartDate.name], item[M.EndDate.name]) > 0;
-            item.spanLeft = Ext.calendar.Date.diffDays(item[M.StartDate.name], this.date) > 0;
-            item.spanRight = Ext.calendar.Date.diffDays(this.date, item[M.EndDate.name]) > 0;
-            item.spanCls = (item.spanLeft ? (item.spanRight ? 'ext-cal-ev-spanboth':
-            'ext-cal-ev-spanleft') : (item.spanRight ? 'ext-cal-ev-spanright': ''));
+            item._renderAsAllDay = item[M.IsAllDay.name] || Ext3.calendar.Date.diffDays(item[M.StartDate.name], item[M.EndDate.name]) > 0;
+            item.spanLeft = Ext3.calendar.Date.diffDays(item[M.StartDate.name], this.date) > 0;
+            item.spanRight = Ext3.calendar.Date.diffDays(this.date, item[M.EndDate.name]) > 0;
+            item.spanCls = (item.spanLeft ? (item.spanRight ? 'ext3-cal-ev-spanboth':
+            'ext3-cal-ev-spanleft') : (item.spanRight ? 'ext3-cal-ev-spanright': ''));
 
             templateData.push({
                 markup: eventTpl.apply(this.getTemplateEventData(item))
@@ -1404,10 +1404,10 @@ Ext.calendar.MonthDayDetailView = Ext.extend(Ext.BoxComponent, {
     }
 });
 
-Ext.reg('monthdaydetailview', Ext.calendar.MonthDayDetailView);
+Ext3.reg('monthdaydetailview', Ext3.calendar.MonthDayDetailView);
 /**
- * @class Ext.calendar.CalendarPicker
- * @extends Ext.form.ComboBox
+ * @class Ext3.calendar.CalendarPicker
+ * @extends Ext3.form.ComboBox
  * <p>A custom combo used for choosing from the list of available calendars to assign an event to.</p>
  * <p>This is pretty much a standard combo that is simply pre-configured for the options needed by the
  * calendar components. The default configs are as follows:<pre><code>
@@ -1422,7 +1422,7 @@ Ext.reg('monthdaydetailview', Ext.calendar.MonthDayDetailView);
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.CalendarPicker = Ext.extend(Ext.form.ComboBox, {
+Ext3.calendar.CalendarPicker = Ext3.extend(Ext3.form.ComboBox, {
     fieldLabel: 'Calendar',
     valueField: 'CalendarId',
     displayField: 'Title',
@@ -1433,57 +1433,57 @@ Ext.calendar.CalendarPicker = Ext.extend(Ext.form.ComboBox, {
 
     // private
     initComponent: function() {
-        Ext.calendar.CalendarPicker.superclass.initComponent.call(this);
+        Ext3.calendar.CalendarPicker.superclass.initComponent.call(this);
         this.tpl = this.tpl ||
-        '<tpl for="."><div class="x-combo-list-item ext-color-{' + this.valueField +
-        '}"><div class="ext-cal-picker-icon">&nbsp;</div>{' + this.displayField + '}</div></tpl>';
+        '<tpl for="."><div class="x3-combo-list-item ext3-color-{' + this.valueField +
+        '}"><div class="ext3-cal-picker-icon">&nbsp;</div>{' + this.displayField + '}</div></tpl>';
     },
 
     // private
     afterRender: function() {
-        Ext.calendar.CalendarPicker.superclass.afterRender.call(this);
+        Ext3.calendar.CalendarPicker.superclass.afterRender.call(this);
 
-        this.wrap = this.el.up('.x-form-field-wrap');
-        this.wrap.addClass('ext-calendar-picker');
+        this.wrap = this.el.up('.x3-form-field-wrap');
+        this.wrap.addClass('ext3-calendar-picker');
 
-        this.icon = Ext.DomHelper.append(this.wrap, {
+        this.icon = Ext3.DomHelper.append(this.wrap, {
             tag: 'div',
-            cls: 'ext-cal-picker-icon ext-cal-picker-mainicon'
+            cls: 'ext3-cal-picker-icon ext3-cal-picker-mainicon'
         });
     },
 
     // inherited docs
     setValue: function(value) {
-        this.wrap.removeClass('ext-color-' + this.getValue());
+        this.wrap.removeClass('ext3-color-' + this.getValue());
         if (!value && this.store !== undefined) {
             // always default to a valid calendar
             value = this.store.getAt(0).data.CalendarId;
         }
-        Ext.calendar.CalendarPicker.superclass.setValue.call(this, value);
-        this.wrap.addClass('ext-color-' + value);
+        Ext3.calendar.CalendarPicker.superclass.setValue.call(this, value);
+        this.wrap.addClass('ext3-color-' + value);
     }
 });
 
-Ext.reg('calendarpicker', Ext.calendar.CalendarPicker);
+Ext3.reg('calendarpicker', Ext3.calendar.CalendarPicker);
 /*
  * This is an internal helper class for the calendar views and should not be overridden.
  * It is responsible for the base event rendering logic underlying all of the calendar views.
  */
-Ext.calendar.WeekEventRenderer = function() {
+Ext3.calendar.WeekEventRenderer = function() {
 
     var getEventRow = function(id, week, index) {
         var indexOffset = 1,
             //skip row with date #'s
             evtRow,
-            wkRow = Ext.get(id + '-wk-' + week);
+            wkRow = Ext3.get(id + '-wk-' + week);
         if (wkRow) {
-            var table = wkRow.child('.ext-cal-evt-tbl', true);
+            var table = wkRow.child('.ext3-cal-evt-tbl', true);
                 evtRow = table.tBodies[0].childNodes[index + indexOffset];
             if (!evtRow) {
-                evtRow = Ext.DomHelper.append(table.tBodies[0], '<tr></tr>');
+                evtRow = Ext3.DomHelper.append(table.tBodies[0], '<tr></tr>');
             }
         }
-        return Ext.get(evtRow);
+        return Ext3.get(evtRow);
     };
 
     return {
@@ -1504,14 +1504,14 @@ Ext.calendar.WeekEventRenderer = function() {
                         row = getEventRow(o.id, w, 0);
                         cellCfg = {
                             tag: 'td',
-                            cls: 'ext-cal-ev',
+                            cls: 'ext3-cal-ev',
                             id: o.id + '-empty-0-day-' + dt.format('Ymd'),
                             html: '&nbsp;'
                         };
                         if (dayCount > 1) {
                             cellCfg.colspan = dayCount;
                         }
-                        Ext.DomHelper.append(row, cellCfg);
+                        Ext3.DomHelper.append(row, cellCfg);
                     }
                     dt = dt.add(Date.DAY, 7);
                 } else {
@@ -1537,13 +1537,13 @@ Ext.calendar.WeekEventRenderer = function() {
                                     row = getEventRow(o.id, w, ev - emptyCells);
                                     cellCfg = {
                                         tag: 'td',
-                                        cls: 'ext-cal-ev',
+                                        cls: 'ext3-cal-ev',
                                         id: o.id + '-empty-' + ct + '-day-' + dt.format('Ymd')
                                     };
                                     if (emptyCells > 1 && max - ev > emptyCells) {
                                         cellCfg.rowspan = Math.min(emptyCells, max - ev);
                                     }
-                                    Ext.DomHelper.append(row, cellCfg);
+                                    Ext3.DomHelper.append(row, cellCfg);
                                     emptyCells = 0;
                                 }
 
@@ -1557,33 +1557,33 @@ Ext.calendar.WeekEventRenderer = function() {
                                     //skip non-starting span cells
                                     var item = evt.data || evt.event.data;
                                     item._weekIndex = w;
-                                    item._renderAsAllDay = item[Ext.calendar.EventMappings.IsAllDay.name] || evt.isSpanStart;
-                                    item.spanLeft = item[Ext.calendar.EventMappings.StartDate.name].getTime() < startOfWeek.getTime();
-                                    item.spanRight = item[Ext.calendar.EventMappings.EndDate.name].getTime() > endOfWeek.getTime();
-                                    item.spanCls = (item.spanLeft ? (item.spanRight ? 'ext-cal-ev-spanboth':
-                                    'ext-cal-ev-spanleft') : (item.spanRight ? 'ext-cal-ev-spanright': ''));
+                                    item._renderAsAllDay = item[Ext3.calendar.EventMappings.IsAllDay.name] || evt.isSpanStart;
+                                    item.spanLeft = item[Ext3.calendar.EventMappings.StartDate.name].getTime() < startOfWeek.getTime();
+                                    item.spanRight = item[Ext3.calendar.EventMappings.EndDate.name].getTime() > endOfWeek.getTime();
+                                    item.spanCls = (item.spanLeft ? (item.spanRight ? 'ext3-cal-ev-spanboth':
+                                    'ext3-cal-ev-spanleft') : (item.spanRight ? 'ext3-cal-ev-spanright': ''));
 
                                     row = getEventRow(o.id, w, ev);
                                     cellCfg = {
                                         tag: 'td',
-                                        cls: 'ext-cal-ev',
+                                        cls: 'ext3-cal-ev',
                                         cn: eventTpl.apply(o.templateDataFn(item))
                                     };
-                                    var diff = Ext.calendar.Date.diffDays(dt, item[Ext.calendar.EventMappings.EndDate.name]) + 1,
+                                    var diff = Ext3.calendar.Date.diffDays(dt, item[Ext3.calendar.EventMappings.EndDate.name]) + 1,
                                         cspan = Math.min(diff, dayCount - d);
 
                                     if (cspan > 1) {
                                         cellCfg.colspan = cspan;
                                     }
-                                    Ext.DomHelper.append(row, cellCfg);
+                                    Ext3.DomHelper.append(row, cellCfg);
                                 }
                             }
                             if (ev > max) {
                                 row = getEventRow(o.id, w, max);
-                                Ext.DomHelper.append(row, {
+                                Ext3.DomHelper.append(row, {
                                     tag: 'td',
-                                    cls: 'ext-cal-ev-more',
-                                    id: 'ext-cal-ev-more-' + dt.format('Ymd'),
+                                    cls: 'ext3-cal-ev-more',
+                                    id: 'ext3-cal-ev-more-' + dt.format('Ymd'),
                                     cn: {
                                         tag: 'a',
                                         html: '+' + skipped + ' more...'
@@ -1595,14 +1595,14 @@ Ext.calendar.WeekEventRenderer = function() {
                                 if (row) {
                                     cellCfg = {
                                         tag: 'td',
-                                        cls: 'ext-cal-ev',
+                                        cls: 'ext3-cal-ev',
                                         id: o.id + '-empty-' + (ct + 1) + '-day-' + dt.format('Ymd')
                                     };
                                     var rowspan = o.evtMaxCount[w] - ct;
                                     if (rowspan > 1) {
                                         cellCfg.rowspan = rowspan;
                                     }
-                                    Ext.DomHelper.append(row, cellCfg);
+                                    Ext3.DomHelper.append(row, cellCfg);
                                 }
                             }
                         } else {
@@ -1610,13 +1610,13 @@ Ext.calendar.WeekEventRenderer = function() {
                             if (row) {
                                 cellCfg = {
                                     tag: 'td',
-                                    cls: 'ext-cal-ev',
+                                    cls: 'ext3-cal-ev',
                                     id: o.id + '-empty-day-' + dt.format('Ymd')
                                 };
                                 if (o.evtMaxCount[w] > 1) {
                                     cellCfg.rowSpan = o.evtMaxCount[w];
                                 }
-                                Ext.DomHelper.append(row, cellCfg);
+                                Ext3.DomHelper.append(row, cellCfg);
                             }
                         }
                         dt = dt.add(Date.DAY, 1);
@@ -1627,8 +1627,8 @@ Ext.calendar.WeekEventRenderer = function() {
     };
 }();
 /**
- * @class Ext.calendar.CalendarView
- * @extends Ext.BoxComponent
+ * @class Ext3.calendar.CalendarView
+ * @extends Ext3.BoxComponent
  * <p>This is an abstract class that serves as the base for other calendar views. This class is not
  * intended to be directly instantiated.</p>
  * <p>When extending this class to create a custom calendar view, you must provide an implementation
@@ -1638,7 +1638,7 @@ Ext.calendar.WeekEventRenderer = function() {
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
+Ext3.calendar.CalendarView = Ext3.extend(Ext3.BoxComponent, {
     /**
      * @cfg {Number} startDay
      * The 0-based index for the day on which the calendar week begins (0=Sunday, which is the default)
@@ -1725,74 +1725,74 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     //private properties -- do not override:
     weekCount: 1,
     dayCount: 1,
-    eventSelector: '.ext-cal-evt',
-    eventOverClass: 'ext-evt-over',
+    eventSelector: '.ext3-cal-evt',
+    eventOverClass: 'ext3-evt-over',
     eventElIdDelimiter: '-evt-',
     dayElIdDelimiter: '-day-',
 
     /**
      * Returns a string of HTML template markup to be used as the body portion of the event template created
      * by {@link #getEventTemplate}. This provdes the flexibility to customize what's in the body without
-     * having to override the entire XTemplate. This string can include any valid {@link Ext.Template} code, and
+     * having to override the entire XTemplate. This string can include any valid {@link Ext3.Template} code, and
      * any data tokens accessible to the containing event template can be referenced in this string.
      * @return {String} The body template string
      */
-    getEventBodyMarkup: Ext.emptyFn,
+    getEventBodyMarkup: Ext3.emptyFn,
     // must be implemented by a subclass
     /**
      * <p>Returns the XTemplate that is bound to the calendar's event store (it expects records of type
-     * {@link Ext.calendar.EventRecord}) to populate the calendar views with events. Internally this method
+     * {@link Ext3.calendar.EventRecord}) to populate the calendar views with events. Internally this method
      * by default generates different markup for browsers that support CSS border radius and those that don't.
      * This method can be overridden as needed to customize the markup generated.</p>
      * <p>Note that this method calls {@link #getEventBodyMarkup} to retrieve the body markup for events separately
      * from the surrounding container markup.  This provdes the flexibility to customize what's in the body without
      * having to override the entire XTemplate. If you do override this method, you should make sure that your 
      * overridden version also does the same.</p>
-     * @return {Ext.XTemplate} The event XTemplate
+     * @return {Ext3.XTemplate} The event XTemplate
      */
-    getEventTemplate: Ext.emptyFn,
+    getEventTemplate: Ext3.emptyFn,
     // must be implemented by a subclass
     // private
     initComponent: function() {
         this.setStartDate(this.startDate || new Date());
 
-        Ext.calendar.CalendarView.superclass.initComponent.call(this);
+        Ext3.calendar.CalendarView.superclass.initComponent.call(this);
 
         this.addEvents({
             /**
              * @event eventsrendered
              * Fires after events are finished rendering in the view
-             * @param {Ext.calendar.CalendarView} this 
+             * @param {Ext3.calendar.CalendarView} this 
              */
             eventsrendered: true,
             /**
              * @event eventclick
              * Fires after the user clicks on an event element
-             * @param {Ext.calendar.CalendarView} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that was clicked on
+             * @param {Ext3.calendar.CalendarView} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that was clicked on
              * @param {HTMLNode} el The DOM node that was clicked on
              */
             eventclick: true,
             /**
              * @event eventover
              * Fires anytime the mouse is over an event element
-             * @param {Ext.calendar.CalendarView} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that the cursor is over
+             * @param {Ext3.calendar.CalendarView} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that the cursor is over
              * @param {HTMLNode} el The DOM node that is being moused over
              */
             eventover: true,
             /**
              * @event eventout
              * Fires anytime the mouse exits an event element
-             * @param {Ext.calendar.CalendarView} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that the cursor exited
+             * @param {Ext3.calendar.CalendarView} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that the cursor exited
              * @param {HTMLNode} el The DOM node that was exited
              */
             eventout: true,
             /**
              * @event datechange
              * Fires after the start date of the view changes
-             * @param {Ext.calendar.CalendarView} this
+             * @param {Ext3.calendar.CalendarView} this
              * @param {Date} startDate The start date of the view (as explained in {@link #getStartDate}
              * @param {Date} viewStart The first displayed date in the view
              * @param {Date} viewEnd The last displayed date in the view
@@ -1801,7 +1801,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
             /**
              * @event rangeselect
              * Fires after the user drags on the calendar to select a range of dates/times in which to create an event
-             * @param {Ext.calendar.CalendarView} this
+             * @param {Ext3.calendar.CalendarView} this
              * @param {Object} dates An object containing the start (StartDate property) and end (EndDate property) dates selected
              * @param {Function} callback A callback function that MUST be called after the event handling is complete so that
              * the view is properly cleaned up (shim elements are persisted in the view while the user is prompted to handle the
@@ -1812,39 +1812,39 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
             /**
              * @event eventmove
              * Fires after an event element is dragged by the user and dropped in a new position
-             * @param {Ext.calendar.CalendarView} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that was moved with
+             * @param {Ext3.calendar.CalendarView} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that was moved with
              * updated start and end dates
              */
             eventmove: true,
             /**
              * @event initdrag
              * Fires when a drag operation is initiated in the view
-             * @param {Ext.calendar.CalendarView} this
+             * @param {Ext3.calendar.CalendarView} this
              */
             initdrag: true,
             /**
              * @event dayover
              * Fires while the mouse is over a day element 
-             * @param {Ext.calendar.CalendarView} this
+             * @param {Ext3.calendar.CalendarView} this
              * @param {Date} dt The date that is being moused over
-             * @param {Ext.Element} el The day Element that is being moused over
+             * @param {Ext3.Element} el The day Element that is being moused over
              */
             dayover: true,
             /**
              * @event dayout
              * Fires when the mouse exits a day element 
-             * @param {Ext.calendar.CalendarView} this
+             * @param {Ext3.calendar.CalendarView} this
              * @param {Date} dt The date that is exited
-             * @param {Ext.Element} el The day Element that is exited
+             * @param {Ext3.Element} el The day Element that is exited
              */
             dayout: true
             /*
              * @event eventdelete
              * Fires after an event element is deleted by the user. Not currently implemented directly at the view level -- currently 
              * deletes only happen from one of the forms.
-             * @param {Ext.calendar.CalendarView} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that was deleted
+             * @param {Ext3.calendar.CalendarView} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that was deleted
              */
             //eventdelete: true
         });
@@ -1852,7 +1852,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
 
     // private
     afterRender: function() {
-        Ext.calendar.CalendarView.superclass.afterRender.call(this);
+        Ext3.calendar.CalendarView.superclass.afterRender.call(this);
 
         this.renderTemplate();
 
@@ -1882,8 +1882,8 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     // private
     forceSize: function() {
         if (this.el && this.el.child) {
-            var hd = this.el.child('.ext-cal-hd-ct'),
-            bd = this.el.child('.ext-cal-body-ct');
+            var hd = this.el.child('.ext3-cal-hd-ct'),
+            bd = this.el.child('.ext3-cal-body-ct');
 
             if (bd == null || hd == null) return;
 
@@ -1901,7 +1901,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     },
 
     getWeekCount: function() {
-        var days = Ext.calendar.Date.diffDays(this.viewStart, this.viewEnd);
+        var days = Ext3.calendar.Date.diffDays(this.viewStart, this.viewEnd);
         return Math.ceil(days / this.dayCount);
     },
 
@@ -1934,8 +1934,8 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
             for (d = 0; d < this.dayCount; d++) {
                 if (evtsInView.getCount() > 0) {
                     var evts = evtsInView.filterBy(function(rec) {
-                        var startsOnDate = (dt.getTime() == rec.data[Ext.calendar.EventMappings.StartDate.name].clearTime(true).getTime());
-                        var spansFromPrevView = (w == 0 && d == 0 && (dt > rec.data[Ext.calendar.EventMappings.StartDate.name]));
+                        var startsOnDate = (dt.getTime() == rec.data[Ext3.calendar.EventMappings.StartDate.name].clearTime(true).getTime());
+                        var spansFromPrevView = (w == 0 && d == 0 && (dt > rec.data[Ext3.calendar.EventMappings.StartDate.name]));
                         return startsOnDate || spansFromPrevView;
                     },
                     this);
@@ -1956,12 +1956,12 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
         max = this.maxEventsPerDay ? this.maxEventsPerDay: 999;
 
         evts.each(function(evt) {
-            var M = Ext.calendar.EventMappings,
-            days = Ext.calendar.Date.diffDays(
-            Ext.calendar.Date.max(this.viewStart, evt.data[M.StartDate.name]),
-            Ext.calendar.Date.min(this.viewEnd, evt.data[M.EndDate.name])) + 1;
+            var M = Ext3.calendar.EventMappings,
+            days = Ext3.calendar.Date.diffDays(
+            Ext3.calendar.Date.max(this.viewStart, evt.data[M.StartDate.name]),
+            Ext3.calendar.Date.min(this.viewEnd, evt.data[M.EndDate.name])) + 1;
 
-            if (days > 1 || Ext.calendar.Date.diffDays(evt.data[M.StartDate.name], evt.data[M.EndDate.name]) > 1) {
+            if (days > 1 || Ext3.calendar.Date.diffDays(evt.data[M.StartDate.name], evt.data[M.EndDate.name]) > 1) {
                 this.prepareEventGridSpans(evt, this.eventGrid, w, d, days);
                 this.prepareEventGridSpans(evt, this.allDayGrid, w, d, days, true);
             } else {
@@ -2075,13 +2075,13 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
 
     // private
     onEventDrop: function(rec, dt) {
-        if (Ext.calendar.Date.compare(rec.data[Ext.calendar.EventMappings.StartDate.name], dt) === 0) {
+        if (Ext3.calendar.Date.compare(rec.data[Ext3.calendar.EventMappings.StartDate.name], dt) === 0) {
             // no changes
             return;
         }
-        var diff = dt.getTime() - rec.data[Ext.calendar.EventMappings.StartDate.name].getTime();
-        rec.set(Ext.calendar.EventMappings.StartDate.name, dt);
-        rec.set(Ext.calendar.EventMappings.EndDate.name, rec.data[Ext.calendar.EventMappings.EndDate.name].add(Date.MILLI, diff));
+        var diff = dt.getTime() - rec.data[Ext3.calendar.EventMappings.StartDate.name].getTime();
+        rec.set(Ext3.calendar.EventMappings.StartDate.name, dt);
+        rec.set(Ext3.calendar.EventMappings.EndDate.name, rec.data[Ext3.calendar.EventMappings.EndDate.name].add(Date.MILLI, diff));
 
         this.fireEvent('eventmove', this, rec);
     },
@@ -2093,8 +2093,8 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
 
         // have to wait for the user to save or cancel before finalizing the dd interation
         var o = {};
-        o[Ext.calendar.EventMappings.StartDate.name] = start;
-        o[Ext.calendar.EventMappings.EndDate.name] = end;
+        o[Ext3.calendar.EventMappings.StartDate.name] = start;
+        o[Ext3.calendar.EventMappings.EndDate.name] = end;
 
         this.fireEvent('rangeselect', this, o, this.onCalendarEndDragComplete.createDelegate(this, [onComplete]));
     },
@@ -2112,10 +2112,10 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
         if (this.monitorStoreEvents === false) {
             return;
         }
-        if (operation == Ext.data.Record.COMMIT) {
+        if (operation == Ext3.data.Record.COMMIT) {
             this.refresh();
             if (this.enableFx && this.enableUpdateFx) {
-                this.doUpdateFx(this.getEventEls(rec.data[Ext.calendar.EventMappings.EventId.name]), {
+                this.doUpdateFx(this.getEventEls(rec.data[Ext3.calendar.EventMappings.EventId.name]), {
                     scope: this
                 });
             }
@@ -2137,14 +2137,14 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
         this.refresh();
 
         if (this.enableFx && this.enableAddFx) {
-            this.doAddFx(this.getEventEls(rec.data[Ext.calendar.EventMappings.EventId.name]), {
+            this.doAddFx(this.getEventEls(rec.data[Ext3.calendar.EventMappings.EventId.name]), {
                 scope: this
             });
         };
     },
 
     doAddFx: function(els, o) {
-        els.fadeIn(Ext.apply(o, {
+        els.fadeIn(Ext3.apply(o, {
             duration: 2
         }));
     },
@@ -2155,14 +2155,14 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
             return;
         }
         if (this.enableFx && this.enableRemoveFx) {
-            this.doRemoveFx(this.getEventEls(rec.data[Ext.calendar.EventMappings.EventId.name]), {
+            this.doRemoveFx(this.getEventEls(rec.data[Ext3.calendar.EventMappings.EventId.name]), {
                 remove: true,
                 scope: this,
                 callback: this.refresh
             });
         }
         else {
-            this.getEventEls(rec.data[Ext.calendar.EventMappings.EventId.name]).remove();
+            this.getEventEls(rec.data[Ext3.calendar.EventMappings.EventId.name]).remove();
             this.refresh();
         }
     },
@@ -2172,26 +2172,26 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     },
 
     /**
-     * Visually highlights an event using {@link Ext.Fx#highlight} config options.
+     * Visually highlights an event using {@link Ext3.Fx#highlight} config options.
      * If {@link #highlightEventActions} is false this method will have no effect.
-     * @param {Ext.CompositeElement} els The element(s) to highlight
+     * @param {Ext3.CompositeElement} els The element(s) to highlight
      * @param {Object} color (optional) The highlight color. Should be a 6 char hex 
      * color without the leading # (defaults to yellow: 'ffff9c')
-     * @param {Object} o (optional) Object literal with any of the {@link Ext.Fx} config 
-     * options. See {@link Ext.Fx#highlight} for usage examples.
+     * @param {Object} o (optional) Object literal with any of the {@link Ext3.Fx} config 
+     * options. See {@link Ext3.Fx#highlight} for usage examples.
      */
     highlightEvent: function(els, color, o) {
         if (this.enableFx) {
             var c;
-            ! (Ext.isIE || Ext.isOpera) ?
+            ! (Ext3.isIE || Ext3.isOpera) ?
             els.highlight(color, o) :
             // Fun IE/Opera handling:
             els.each(function(el) {
-                el.highlight(color, Ext.applyIf({
+                el.highlight(color, Ext3.applyIf({
                     attr: 'color'
                 },
                 o));
-                c = el.child('.ext-cal-evm');
+                c = el.child('.ext3-cal-evm');
                 if (c) {
                     c.highlight(color, o);
                 }
@@ -2202,10 +2202,10 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
 
     /**
      * Retrieve an Event object's id from its corresponding node in the DOM.
-     * @param {String/Element/HTMLElement} el An {@link Ext.Element}, DOM node or id
+     * @param {String/Element/HTMLElement} el An {@link Ext3.Element}, DOM node or id
      */
     getEventIdFromEl: function(el) {
-        el = Ext.get(el);
+        el = Ext3.get(el);
         var id = el.id.split(this.eventElIdDelimiter)[1];
         if (id.indexOf('-') > -1) {
             //This id has the index of the week it is rendered in as the suffix.
@@ -2237,13 +2237,13 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     /**
      * 
      * @param {String} eventId
-     * @return {Ext.CompositeElement} The matching CompositeElement of nodes
+     * @return {Ext3.CompositeElement} The matching CompositeElement of nodes
      * that comprise the rendered event.  Any event that spans across a view 
      * boundary will contain more than one internal Element.
      */
     getEventEls: function(eventId) {
-        var els = Ext.select(this.getEventSelectorCls(this.getEventId(eventId), true), false, this.el.id);
-        return new Ext.CompositeElement(els);
+        var els = Ext3.select(this.getEventSelectorCls(this.getEventId(eventId), true), false, this.el.id);
+        return new Ext3.CompositeElement(els);
     },
 
     /**
@@ -2264,7 +2264,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     isEventVisible: function(evt) {
         var start = this.viewStart.getTime(),
         end = this.viewEnd.getTime(),
-        M = Ext.calendar.EventMappings,
+        M = Ext3.calendar.EventMappings,
         evStart = (evt.data ? evt.data[M.StartDate.name] : evt[M.StartDate.name]).getTime(),
         evEnd = (evt.data ? evt.data[M.EndDate.name] : evt[M.EndDate.name]).add(Date.SECOND, -1).getTime(),
 
@@ -2279,7 +2279,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     isOverlapping: function(evt1, evt2) {
         var ev1 = evt1.data ? evt1.data: evt1,
         ev2 = evt2.data ? evt2.data: evt2,
-        M = Ext.calendar.EventMappings,
+        M = Ext3.calendar.EventMappings,
         start1 = ev1[M.StartDate.name].getTime(),
         end1 = ev1[M.EndDate.name].add(Date.SECOND, -1).getTime(),
         start2 = ev2[M.StartDate.name].getTime(),
@@ -2300,11 +2300,11 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     },
 
     getDayEl: function(dt) {
-        return Ext.get(this.getDayId(dt));
+        return Ext3.get(this.getDayId(dt));
     },
 
     getDayId: function(dt) {
-        if (Ext.isDate(dt)) {
+        if (Ext3.isDate(dt)) {
             dt = dt.format('Ymd');
         }
         return this.id + this.dayElIdDelimiter + dt;
@@ -2391,8 +2391,8 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
      * events first, then non-allday events are sorted either based on event start
      * priority or span priority based on the value of {@link #spansHavePriority} 
      * (defaults to event start priority).
-     * @param {MixedCollection} evts A {@link Ext.util.MixedCollection MixedCollection}  
-     * of {@link #Ext.calendar.EventRecord EventRecord} objects
+     * @param {MixedCollection} evts A {@link Ext3.util.MixedCollection MixedCollection}  
+     * of {@link #Ext3.calendar.EventRecord EventRecord} objects
      */
     sortEventRecordsForDay: function(evts) {
         if (evts.length < 2) {
@@ -2402,7 +2402,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
         function(evtA, evtB) {
             var a = evtA.data,
             b = evtB.data,
-            M = Ext.calendar.EventMappings;
+            M = Ext3.calendar.EventMappings;
 
             // Always sort all day events before anything else
             if (a[M.IsAllDay.name]) {
@@ -2417,7 +2417,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
                 // be the approach used by Google calendar and can lead to a more
                 // visually appealing layout in complex cases, but event order is
                 // not guaranteed to be consistent.
-                var diff = Ext.calendar.Date.diffDays;
+                var diff = Ext3.calendar.Date.diffDays;
                 if (diff(a[M.StartDate.name], a[M.EndDate.name]) > 0) {
                     if (diff(b[M.StartDate.name], b[M.EndDate.name]) > 0) {
                         // Both events are multi-day
@@ -2450,7 +2450,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
      * @param {Date} dt The date to display
      */
     moveTo: function(dt, noRefresh) {
-        if (Ext.isDate(dt)) {
+        if (Ext3.isDate(dt)) {
             this.setStartDate(dt);
             if (noRefresh !== false) {
                 this.refresh();
@@ -2471,7 +2471,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
      * Updates the view to the previous consecutive date(s)
      */
     movePrev: function(noRefresh) {
-        var days = Ext.calendar.Date.diffDays(this.viewStart, this.viewEnd) + 1;
+        var days = Ext3.calendar.Date.diffDays(this.viewStart, this.viewEnd) + 1;
         return this.moveDays( - days, noRefresh);
     },
 
@@ -2507,8 +2507,8 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     },
 
     /**
-     * Sets the event store used by the calendar to display {@link Ext.calendar.EventRecord events}.
-     * @param {Ext.data.Store} store
+     * Sets the event store used by the calendar to display {@link Ext3.calendar.EventRecord events}.
+     * @param {Ext3.data.Store} store
      */
     setStore: function(store, initial) {
         if (!initial && this.store) {
@@ -2532,7 +2532,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     },
 
     getEventRecord: function(id) {
-        var idx = this.store.find(Ext.calendar.EventMappings.EventId.name, id);
+        var idx = this.store.find(Ext3.calendar.EventMappings.EventId.name, id);
         return this.store.getAt(idx);
     },
 
@@ -2595,7 +2595,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
             els,
             evtId;
         if (el) {
-            rel = Ext.get(e.getRelatedTarget());
+            rel = Ext3.get(e.getRelatedTarget());
             if (el == rel || el.contains(rel)) {
                 return true;
             }
@@ -2624,7 +2624,7 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
         if (t) {
             if (t.id && t.id.indexOf(this.dayElIdDelimiter) > -1) {
                 var dt = this.getDateFromId(t.id, this.dayElIdDelimiter),
-                rel = Ext.get(e.getRelatedTarget()),
+                rel = Ext3.get(e.getRelatedTarget()),
                 relTD,
                 relDate;
 
@@ -2649,15 +2649,15 @@ Ext.calendar.CalendarView = Ext.extend(Ext.BoxComponent, {
     }
 });
 /**
- * @class Ext.calendar.MonthView
- * @extends Ext.calendar.CalendarView
+ * @class Ext3.calendar.MonthView
+ * @extends Ext3.calendar.CalendarView
  * <p>Displays a calendar view by month. This class does not usually need ot be used directly as you can
- * use a {@link Ext.calendar.CalendarPanel CalendarPanel} to manage multiple calendar views at once including
+ * use a {@link Ext3.calendar.CalendarPanel CalendarPanel} to manage multiple calendar views at once including
  * the month view.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
+Ext3.calendar.MonthView = Ext3.extend(Ext3.calendar.CalendarView, {
     /**
      * @cfg {Boolean} showTime
      * True to display the current time in today's box in the calendar, false to not display it (defautls to true)
@@ -2681,7 +2681,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
     showHeader: false,
     /**
      * @cfg {Boolean} showWeekLinks
-     * True to display an extra column before the first day in the calendar that links to the {@link Ext.calendar.WeekView view}
+     * True to display an extra column before the first day in the calendar that links to the {@link Ext3.calendar.WeekView view}
      * for each individual week, false to not show it (defaults to false). If true, the week links can also contain the week 
      * number depending on the value of {@link #showWeekNumbers}.
      */
@@ -2695,38 +2695,38 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
     /**
      * @cfg {String} weekLinkOverClass
      * The CSS class name applied when the mouse moves over a week link element (only applies when {@link #showWeekLinks} is true,
-     * defaults to 'ext-week-link-over').
+     * defaults to 'ext3-week-link-over').
      */
-    weekLinkOverClass: 'ext-week-link-over',
+    weekLinkOverClass: 'ext3-week-link-over',
 
     //private properties -- do not override:
-    daySelector: '.ext-cal-day',
-    moreSelector: '.ext-cal-ev-more',
-    weekLinkSelector: '.ext-cal-week-link',
+    daySelector: '.ext3-cal-day',
+    moreSelector: '.ext3-cal-ev-more',
+    weekLinkSelector: '.ext3-cal-week-link',
     weekCount: -1,
     // defaults to auto by month
     dayCount: 7,
     moreElIdDelimiter: '-more-',
-    weekLinkIdDelimiter: 'ext-cal-week-',
+    weekLinkIdDelimiter: 'ext3-cal-week-',
 
     // private
     initComponent: function() {
-        Ext.calendar.MonthView.superclass.initComponent.call(this);
+        Ext3.calendar.MonthView.superclass.initComponent.call(this);
         this.addEvents({
             /**
              * @event dayclick
              * Fires after the user clicks within the view container and not on an event element
-             * @param {Ext.calendar.MonthView} this
+             * @param {Ext3.calendar.MonthView} this
              * @param {Date} dt The date/time that was clicked on
              * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks within the 
              * MonthView always return true for this param.
-             * @param {Ext.Element} el The Element that was clicked on
+             * @param {Ext3.Element} el The Element that was clicked on
              */
             dayclick: true,
             /**
              * @event weekclick
              * Fires after the user clicks within a week link (when {@link #showWeekLinks is true)
-             * @param {Ext.calendar.MonthView} this
+             * @param {Ext3.calendar.MonthView} this
              * @param {Date} dt The start date of the week that was clicked on
              */
             weekclick: true,
@@ -2746,22 +2746,22 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
             ddGroup: 'MonthViewDD'
         };
 
-        this.dragZone = new Ext.calendar.DragZone(this.el, cfg);
-        this.dropZone = new Ext.calendar.DropZone(this.el, cfg);
+        this.dragZone = new Ext3.calendar.DragZone(this.el, cfg);
+        this.dropZone = new Ext3.calendar.DropZone(this.el, cfg);
     },
 
     // private
     onDestroy: function() {
-        Ext.destroy(this.ddSelector);
-        Ext.destroy(this.dragZone);
-        Ext.destroy(this.dropZone);
-        Ext.calendar.MonthView.superclass.onDestroy.call(this);
+        Ext3.destroy(this.ddSelector);
+        Ext3.destroy(this.dragZone);
+        Ext3.destroy(this.dropZone);
+        Ext3.calendar.MonthView.superclass.onDestroy.call(this);
     },
 
     // private
     afterRender: function() {
         if (!this.tpl) {
-            this.tpl = new Ext.calendar.MonthViewTemplate({
+            this.tpl = new Ext3.calendar.MonthViewTemplate({
                 id: this.id,
                 showTodayText: this.showTodayText,
                 todayText: this.todayText,
@@ -2772,9 +2772,9 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
             });
         }
         this.tpl.compile();
-        this.addClass('ext-cal-monthview ext-cal-ct');
+        this.addClass('ext3-cal-monthview ext3-cal-ct');
 
-        Ext.calendar.MonthView.superclass.afterRender.call(this);
+        Ext3.calendar.MonthView.superclass.afterRender.call(this);
     },
 
     // private
@@ -2789,29 +2789,29 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
     forceSize: function() {
         // Compensate for the week link gutter width if visible
         if (this.showWeekLinks && this.el && this.el.child) {
-            var hd = this.el.select('.ext-cal-hd-days-tbl'),
-            bgTbl = this.el.select('.ext-cal-bg-tbl'),
-            evTbl = this.el.select('.ext-cal-evt-tbl'),
-            wkLinkW = this.el.child('.ext-cal-week-link').getWidth(),
+            var hd = this.el.select('.ext3-cal-hd-days-tbl'),
+            bgTbl = this.el.select('.ext3-cal-bg-tbl'),
+            evTbl = this.el.select('.ext3-cal-evt-tbl'),
+            wkLinkW = this.el.child('.ext3-cal-week-link').getWidth(),
             w = this.el.getWidth() - wkLinkW;
 
             hd.setWidth(w);
             bgTbl.setWidth(w);
             evTbl.setWidth(w);
         }
-        Ext.calendar.MonthView.superclass.forceSize.call(this);
+        Ext3.calendar.MonthView.superclass.forceSize.call(this);
     },
 
     //private
     initClock: function() {
-        if (Ext.fly(this.id + '-clock') !== null) {
+        if (Ext3.fly(this.id + '-clock') !== null) {
             this.prevClockDay = new Date().getDay();
             if (this.clockTask) {
-                Ext.TaskMgr.stop(this.clockTask);
+                Ext3.TaskMgr.stop(this.clockTask);
             }
-            this.clockTask = Ext.TaskMgr.start({
+            this.clockTask = Ext3.TaskMgr.start({
                 run: function() {
-                    var el = Ext.fly(this.id + '-clock'),
+                    var el = Ext3.fly(this.id + '-clock'),
                     t = new Date();
 
                     if (t.getDay() == this.prevClockDay) {
@@ -2835,16 +2835,16 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
         if (!this.eventBodyMarkup) {
             this.eventBodyMarkup = ['{Title}',
             '<tpl if="_isReminder">',
-            '<i class="ext-cal-ic ext-cal-ic-rem">&nbsp;</i>',
+            '<i class="ext3-cal-ic ext3-cal-ic-rem">&nbsp;</i>',
             '</tpl>',
             '<tpl if="_isRecurring">',
-            '<i class="ext-cal-ic ext-cal-ic-rcr">&nbsp;</i>',
+            '<i class="ext3-cal-ic ext3-cal-ic-rcr">&nbsp;</i>',
             '</tpl>',
             '<tpl if="spanLeft">',
-            '<i class="ext-cal-spl">&nbsp;</i>',
+            '<i class="ext3-cal-spl">&nbsp;</i>',
             '</tpl>',
             '<tpl if="spanRight">',
-            '<i class="ext-cal-spr">&nbsp;</i>',
+            '<i class="ext3-cal-spr">&nbsp;</i>',
             '</tpl>'
             ].join('');
         }
@@ -2857,20 +2857,20 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
             var tpl,
             body = this.getEventBodyMarkup();
 
-            tpl = !(Ext.isIE || Ext.isOpera) ?
-            new Ext.XTemplate(
-            '<div id="{_elId}" class="{_selectorCls} {_colorCls} {values.spanCls} ext-cal-evt ext-cal-evr">',
+            tpl = !(Ext3.isIE || Ext3.isOpera) ?
+            new Ext3.XTemplate(
+            '<div id="{_elId}" class="{_selectorCls} {_colorCls} {values.spanCls} ext3-cal-evt ext3-cal-evr">',
             body,
             '</div>'
             )
-            : new Ext.XTemplate(
+            : new Ext3.XTemplate(
             '<tpl if="_renderAsAllDay">',
-            '<div id="{_elId}" class="{_selectorCls} {values.spanCls} {_colorCls} ext-cal-evt ext-cal-evo">',
-            '<div class="ext-cal-evm">',
-            '<div class="ext-cal-evi">',
+            '<div id="{_elId}" class="{_selectorCls} {values.spanCls} {_colorCls} ext3-cal-evt ext3-cal-evo">',
+            '<div class="ext3-cal-evm">',
+            '<div class="ext3-cal-evi">',
             '</tpl>',
             '<tpl if="!_renderAsAllDay">',
-            '<div id="{_elId}" class="{_selectorCls} {_colorCls} ext-cal-evt ext-cal-evr">',
+            '<div id="{_elId}" class="{_selectorCls} {_colorCls} ext3-cal-evt ext3-cal-evr">',
             '</tpl>',
             body,
             '<tpl if="_renderAsAllDay">',
@@ -2887,13 +2887,13 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     getTemplateEventData: function(evt) {
-        var M = Ext.calendar.EventMappings,
+        var M = Ext3.calendar.EventMappings,
         selector = this.getEventSelectorCls(evt[M.EventId.name]),
         title = evt[M.Title.name];
 
-        return Ext.applyIf({
+        return Ext3.applyIf({
             _selectorCls: selector,
-            _colorCls: 'ext-color-' + (evt[M.CalendarId.name] ?
+            _colorCls: 'ext3-color-' + (evt[M.CalendarId.name] ?
             evt[M.CalendarId.name] : 'default') + (evt._renderAsAllDay ? '-ad': ''),
             _elId: selector + '-' + evt._weekIndex,
             _isRecurring: evt.Recurrence && evt.Recurrence != '',
@@ -2908,7 +2908,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
         if (this.detailPanel) {
             this.detailPanel.hide();
         }
-        Ext.calendar.MonthView.superclass.refresh.call(this);
+        Ext3.calendar.MonthView.superclass.refresh.call(this);
 
         if (this.showTime !== false) {
             this.initClock();
@@ -2917,7 +2917,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     renderItems: function() {
-        Ext.calendar.WeekEventRenderer.render({
+        Ext3.calendar.WeekEventRenderer.render({
             eventGrid: this.allDayOnly ? this.allDayGrid: this.eventGrid,
             viewStart: this.viewStart,
             tpl: this.getEventTemplate(),
@@ -2933,12 +2933,12 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     getDayEl: function(dt) {
-        return Ext.get(this.getDayId(dt));
+        return Ext3.get(this.getDayId(dt));
     },
 
     // private
     getDayId: function(dt) {
-        if (Ext.isDate(dt)) {
+        if (Ext3.isDate(dt)) {
             dt = dt.format('Ymd');
         }
         return this.id + this.dayElIdDelimiter + dt;
@@ -2946,7 +2946,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     getWeekIndex: function(dt) {
-        var el = this.getDayEl(dt).up('.ext-cal-wk-ct');
+        var el = this.getDayEl(dt).up('.ext3-cal-wk-ct');
         return parseInt(el.id.split('-wk-')[1], 10);
     },
 
@@ -2957,7 +2957,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
         h = box.height / this.getWeekCount();
 
         if (contentOnly) {
-            var hd = this.el.select('.ext-cal-dtitle').first().parent('tr');
+            var hd = this.el.select('.ext3-cal-dtitle').first().parent('tr');
             h = hd ? h - hd.getHeight(true) : h;
         }
         return {
@@ -2969,7 +2969,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
     // private
     getEventHeight: function() {
         if (!this.eventHeight) {
-            var evt = this.el.select('.ext-cal-evt').first();
+            var evt = this.el.select('.ext3-cal-evt').first();
             this.eventHeight = evt ? evt.parent('tr').getHeight() : 18;
         }
         return this.eventHeight;
@@ -3010,8 +3010,8 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     onInitDrag: function() {
-        Ext.calendar.MonthView.superclass.onInitDrag.call(this);
-        Ext.select(this.daySelector).removeClass(this.dayOverClass);
+        Ext3.calendar.MonthView.superclass.onInitDrag.call(this);
+        Ext3.select(this.daySelector).removeClass(this.dayOverClass);
         if (this.detailPanel) {
             this.detailPanel.hide();
         }
@@ -3020,12 +3020,12 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
     // private
     onMoreClick: function(dt) {
         if (!this.detailPanel) {
-            this.detailPanel = new Ext.Panel({
+            this.detailPanel = new Ext3.Panel({
                 id: this.id + '-details-panel',
                 title: dt.format('F j'),
                 layout: 'fit',
                 floating: true,
-                renderTo: Ext.getBody(),
+                renderTo: Ext3.getBody(),
                 tools: [{
                     id: 'close',
                     handler: function(e, t, p) {
@@ -3068,7 +3068,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     onHide: function() {
-        Ext.calendar.MonthView.superclass.onHide.call(this);
+        Ext3.calendar.MonthView.superclass.onHide.call(this);
         if (this.detailPanel) {
             this.detailPanel.hide();
         }
@@ -3079,7 +3079,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
         if (this.detailPanel) {
             this.detailPanel.hide();
         }
-        if (Ext.calendar.MonthView.superclass.onClick.apply(this, arguments)) {
+        if (Ext3.calendar.MonthView.superclass.onClick.apply(this, arguments)) {
             // The superclass handled the click already so exit
             return;
         }
@@ -3106,7 +3106,7 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
                 parts = el.id.split(this.dayElIdDelimiter);
                 dt = parts[parts.length - 1];
 
-                this.fireEvent('dayclick', this, Date.parseDate(dt, 'Ymd'), false, Ext.get(this.getDayId(dt)));
+                this.fireEvent('dayclick', this, Date.parseDate(dt, 'Ymd'), false, Ext3.get(this.getDayId(dt)));
                 return;
             }
         }
@@ -3119,22 +3119,22 @@ Ext.calendar.MonthView = Ext.extend(Ext.calendar.CalendarView, {
             el[type == 'over' ? 'addClass': 'removeClass'](this.weekLinkOverClass);
             return;
         }
-        Ext.calendar.MonthView.superclass.handleDayMouseEvent.apply(this, arguments);
+        Ext3.calendar.MonthView.superclass.handleDayMouseEvent.apply(this, arguments);
     }
 });
 
-Ext.reg('monthview', Ext.calendar.MonthView);
+Ext3.reg('monthview', Ext3.calendar.MonthView);
 /**
- * @class Ext.calendar.DayHeaderView
- * @extends Ext.calendar.MonthView
+ * @class Ext3.calendar.DayHeaderView
+ * @extends Ext3.calendar.MonthView
  * <p>This is the header area container within the day and week views where all-day events are displayed.
- * Normally you should not need to use this class directly -- instead you should use {@link Ext.calendar.DayView DayView}
- * which aggregates this class and the {@link Ext.calendar.DayBodyView DayBodyView} into the single unified view
- * presented by {@link Ext.calendar.CalendarPanel CalendarPanel}.</p>
+ * Normally you should not need to use this class directly -- instead you should use {@link Ext3.calendar.DayView DayView}
+ * which aggregates this class and the {@link Ext3.calendar.DayBodyView DayBodyView} into the single unified view
+ * presented by {@link Ext3.calendar.CalendarPanel CalendarPanel}.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.DayHeaderView = Ext.extend(Ext.calendar.MonthView, {
+Ext3.calendar.DayHeaderView = Ext3.extend(Ext3.calendar.MonthView, {
     // private configs
     weekCount: 1,
     dayCount: 1,
@@ -3144,17 +3144,17 @@ Ext.calendar.DayHeaderView = Ext.extend(Ext.calendar.MonthView, {
     /**
      * @event dayclick
      * Fires after the user clicks within the day view container and not on an event element
-     * @param {Ext.calendar.DayBodyView} this
+     * @param {Ext3.calendar.DayBodyView} this
      * @param {Date} dt The date/time that was clicked on
      * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks within the 
      * DayHeaderView always return true for this param.
-     * @param {Ext.Element} el The Element that was clicked on
+     * @param {Ext3.Element} el The Element that was clicked on
      */
 
     // private
     afterRender: function() {
         if (!this.tpl) {
-            this.tpl = new Ext.calendar.DayHeaderTemplate({
+            this.tpl = new Ext3.calendar.DayHeaderTemplate({
                 id: this.id,
                 showTodayText: this.showTodayText,
                 todayText: this.todayText,
@@ -3162,34 +3162,34 @@ Ext.calendar.DayHeaderView = Ext.extend(Ext.calendar.MonthView, {
             });
         }
         this.tpl.compile();
-        this.addClass('ext-cal-day-header');
+        this.addClass('ext3-cal-day-header');
 
-        Ext.calendar.DayHeaderView.superclass.afterRender.call(this);
+        Ext3.calendar.DayHeaderView.superclass.afterRender.call(this);
     },
 
     // private
-    forceSize: Ext.emptyFn,
+    forceSize: Ext3.emptyFn,
 
     // private
     refresh: function() {
-        Ext.calendar.DayHeaderView.superclass.refresh.call(this);
+        Ext3.calendar.DayHeaderView.superclass.refresh.call(this);
         this.recalcHeaderBox();
     },
 
     // private
     recalcHeaderBox: function() {
-        var tbl = this.el.child('.ext-cal-evt-tbl'),
+        var tbl = this.el.child('.ext3-cal-evt-tbl'),
         h = tbl.getHeight();
 
         this.el.setHeight(h + 7);
 
-        if (Ext.isIE && Ext.isStrict) {
-            this.el.child('.ext-cal-hd-ad-inner').setHeight(h + 4);
+        if (Ext3.isIE && Ext3.isStrict) {
+            this.el.child('.ext3-cal-hd-ad-inner').setHeight(h + 4);
         }
-        if (Ext.isOpera) {
+        if (Ext3.isOpera) {
             //TODO: figure out why Opera refuses to refresh height when
             //the new height is lower than the previous one
-            //            var ct = this.el.child('.ext-cal-hd-ct');
+            //            var ct = this.el.child('.ext3-cal-hd-ct');
             //            ct.repaint();
             }
     },
@@ -3214,50 +3214,50 @@ Ext.calendar.DayHeaderView = Ext.extend(Ext.calendar.MonthView, {
                 parts = el.id.split(this.dayElIdDelimiter);
                 dt = parts[parts.length - 1];
 
-                this.fireEvent('dayclick', this, Date.parseDate(dt, 'Ymd'), true, Ext.get(this.getDayId(dt)));
+                this.fireEvent('dayclick', this, Date.parseDate(dt, 'Ymd'), true, Ext3.get(this.getDayId(dt)));
                 return;
             }
         }
-        Ext.calendar.DayHeaderView.superclass.onClick.apply(this, arguments);
+        Ext3.calendar.DayHeaderView.superclass.onClick.apply(this, arguments);
     }
 });
 
-Ext.reg('dayheaderview', Ext.calendar.DayHeaderView);
+Ext3.reg('dayheaderview', Ext3.calendar.DayHeaderView);
 /**S
- * @class Ext.calendar.DayBodyView
- * @extends Ext.calendar.CalendarView
+ * @class Ext3.calendar.DayBodyView
+ * @extends Ext3.calendar.CalendarView
  * <p>This is the scrolling container within the day and week views where non-all-day events are displayed.
- * Normally you should not need to use this class directly -- instead you should use {@link Ext.calendar.DayView DayView}
- * which aggregates this class and the {@link Ext.calendar.DayHeaderView DayHeaderView} into the single unified view
- * presented by {@link Ext.calendar.CalendarPanel CalendarPanel}.</p>
+ * Normally you should not need to use this class directly -- instead you should use {@link Ext3.calendar.DayView DayView}
+ * which aggregates this class and the {@link Ext3.calendar.DayHeaderView DayHeaderView} into the single unified view
+ * presented by {@link Ext3.calendar.CalendarPanel CalendarPanel}.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
+Ext3.calendar.DayBodyView = Ext3.extend(Ext3.calendar.CalendarView, {
     //private
     dayColumnElIdDelimiter: '-day-col-',
 
     //private
     initComponent: function() {
-        Ext.calendar.DayBodyView.superclass.initComponent.call(this);
+        Ext3.calendar.DayBodyView.superclass.initComponent.call(this);
 
         this.addEvents({
             /**
              * @event eventresize
              * Fires after the user drags the resize handle of an event to resize it
-             * @param {Ext.calendar.DayBodyView} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that was resized
+             * @param {Ext3.calendar.DayBodyView} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that was resized
              * containing the updated start and end dates
              */
             eventresize: true,
             /**
              * @event dayclick
              * Fires after the user clicks within the day view container and not on an event element
-             * @param {Ext.calendar.DayBodyView} this
+             * @param {Ext3.calendar.DayBodyView} this
              * @param {Date} dt The date/time that was clicked on
              * @param {Boolean} allday True if the day clicked on represents an all-day box, else false. Clicks within the 
              * DayBodyView always return false for this param.
-             * @param {Ext.Element} el The Element that was clicked on
+             * @param {Ext3.Element} el The Element that was clicked on
              */
             dayclick: true
         });
@@ -3274,19 +3274,19 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
         this.el.ddScrollConfig = {
             // scrolling is buggy in IE/Opera for some reason.  A larger vthresh
             // makes it at least functional if not perfect
-            vthresh: Ext.isIE || Ext.isOpera ? 100: 40,
+            vthresh: Ext3.isIE || Ext3.isOpera ? 100: 40,
             hthresh: -1,
             frequency: 50,
             increment: 100,
             ddGroup: 'DayViewDD'
         };
-        this.dragZone = new Ext.calendar.DayViewDragZone(this.el, Ext.apply({
+        this.dragZone = new Ext3.calendar.DayViewDragZone(this.el, Ext3.apply({
             view: this,
             containerScroll: true
         },
         cfg));
 
-        this.dropZone = new Ext.calendar.DayViewDropZone(this.el, Ext.apply({
+        this.dropZone = new Ext3.calendar.DayViewDropZone(this.el, Ext3.apply({
             view: this
         },
         cfg));
@@ -3318,7 +3318,7 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
      * <p>Note that this method should not generally need to be called directly as scroll position is managed internally.</p>
      */
     scrollTo: function(y, defer) {
-        defer = defer || (Ext.isIE || Ext.isOpera);
+        defer = defer || (Ext3.isIE || Ext3.isOpera);
         if (defer) {
             (function() {
                 this.el.scrollTo('top', y);
@@ -3334,7 +3334,7 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
     // private
     afterRender: function() {
         if (!this.tpl) {
-            this.tpl = new Ext.calendar.DayBodyTemplate({
+            this.tpl = new Ext3.calendar.DayBodyTemplate({
                 id: this.id,
                 dayCount: this.dayCount,
                 showTodayText: this.showTodayText,
@@ -3344,22 +3344,22 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
         }
         this.tpl.compile();
 
-        this.addClass('ext-cal-body-ct');
+        this.addClass('ext3-cal-body-ct');
 
-        Ext.calendar.DayBodyView.superclass.afterRender.call(this);
+        Ext3.calendar.DayBodyView.superclass.afterRender.call(this);
 
         // default scroll position to 7am:
         this.scrollTo(7 * 42);
     },
 
     // private
-    forceSize: Ext.emptyFn,
+    forceSize: Ext3.emptyFn,
 
     // private
     onEventResize: function(rec, data) {
-        var D = Ext.calendar.Date,
-        start = Ext.calendar.EventMappings.StartDate.name,
-        end = Ext.calendar.EventMappings.EndDate.name;
+        var D = Ext3.calendar.Date,
+        start = Ext3.calendar.EventMappings.StartDate.name,
+        end = Ext3.calendar.EventMappings.EndDate.name;
 
         if (D.compare(rec.data[start], data.StartDate) === 0 &&
         D.compare(rec.data[end], data.EndDate) === 0) {
@@ -3377,16 +3377,16 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
         if (!this.eventBodyMarkup) {
             this.eventBodyMarkup = ['{Title}',
             '<tpl if="_isReminder">',
-            '<i class="ext-cal-ic ext-cal-ic-rem">&nbsp;</i>',
+            '<i class="ext3-cal-ic ext3-cal-ic-rem">&nbsp;</i>',
             '</tpl>',
             '<tpl if="_isRecurring">',
-            '<i class="ext-cal-ic ext-cal-ic-rcr">&nbsp;</i>',
+            '<i class="ext3-cal-ic ext3-cal-ic-rcr">&nbsp;</i>',
             '</tpl>'
             //                '<tpl if="spanLeft">',
-            //                    '<i class="ext-cal-spl">&nbsp;</i>',
+            //                    '<i class="ext3-cal-spl">&nbsp;</i>',
             //                '</tpl>',
             //                '<tpl if="spanRight">',
-            //                    '<i class="ext-cal-spr">&nbsp;</i>',
+            //                    '<i class="ext3-cal-spr">&nbsp;</i>',
             //                '</tpl>'
             ].join('');
         }
@@ -3396,23 +3396,23 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
     // inherited docs
     getEventTemplate: function() {
         if (!this.eventTpl) {
-            this.eventTpl = !(Ext.isIE || Ext.isOpera) ?
-            new Ext.XTemplate(
-            '<div id="{_elId}" class="{_selectorCls} {_colorCls} ext-cal-evt ext-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px;">',
-            '<div class="ext-evt-bd">', this.getEventBodyMarkup(), '</div>',
-            '<div class="ext-evt-rsz"><div class="ext-evt-rsz-h">&nbsp;</div></div>',
+            this.eventTpl = !(Ext3.isIE || Ext3.isOpera) ?
+            new Ext3.XTemplate(
+            '<div id="{_elId}" class="{_selectorCls} {_colorCls} ext3-cal-evt ext3-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px;">',
+            '<div class="ext3-evt-bd">', this.getEventBodyMarkup(), '</div>',
+            '<div class="ext3-evt-rsz"><div class="ext3-evt-rsz-h">&nbsp;</div></div>',
             '</div>'
             )
-            : new Ext.XTemplate(
-            '<div id="{_elId}" class="ext-cal-evt {_selectorCls} {_colorCls}-x" style="left: {_left}%; width: {_width}%; top: {_top}px;">',
-            '<div class="ext-cal-evb">&nbsp;</div>',
-            '<dl style="height: {_height}px;" class="ext-cal-evdm">',
-            '<dd class="ext-evt-bd">',
+            : new Ext3.XTemplate(
+            '<div id="{_elId}" class="ext3-cal-evt {_selectorCls} {_colorCls}-x" style="left: {_left}%; width: {_width}%; top: {_top}px;">',
+            '<div class="ext3-cal-evb">&nbsp;</div>',
+            '<dl style="height: {_height}px;" class="ext3-cal-evdm">',
+            '<dd class="ext3-evt-bd">',
             this.getEventBodyMarkup(),
             '</dd>',
-            '<div class="ext-evt-rsz"><div class="ext-evt-rsz-h">&nbsp;</div></div>',
+            '<div class="ext3-evt-rsz"><div class="ext3-evt-rsz-h">&nbsp;</div></div>',
             '</dl>',
-            '<div class="ext-cal-evb">&nbsp;</div>',
+            '<div class="ext3-cal-evb">&nbsp;</div>',
             '</div>'
             );
             this.eventTpl.compile();
@@ -3422,31 +3422,31 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
 
     /**
      * <p>Returns the XTemplate that is bound to the calendar's event store (it expects records of type
-     * {@link Ext.calendar.EventRecord}) to populate the calendar views with <strong>all-day</strong> events. 
+     * {@link Ext3.calendar.EventRecord}) to populate the calendar views with <strong>all-day</strong> events. 
      * Internally this method by default generates different markup for browsers that support CSS border radius 
      * and those that don't. This method can be overridden as needed to customize the markup generated.</p>
      * <p>Note that this method calls {@link #getEventBodyMarkup} to retrieve the body markup for events separately
      * from the surrounding container markup.  This provdes the flexibility to customize what's in the body without
      * having to override the entire XTemplate. If you do override this method, you should make sure that your 
      * overridden version also does the same.</p>
-     * @return {Ext.XTemplate} The event XTemplate
+     * @return {Ext3.XTemplate} The event XTemplate
      */
     getEventAllDayTemplate: function() {
         if (!this.eventAllDayTpl) {
             var tpl,
             body = this.getEventBodyMarkup();
 
-            tpl = !(Ext.isIE || Ext.isOpera) ?
-            new Ext.XTemplate(
-            '<div id="{_elId}" class="{_selectorCls} {_colorCls} {values.spanCls} ext-cal-evt ext-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px;">',
+            tpl = !(Ext3.isIE || Ext3.isOpera) ?
+            new Ext3.XTemplate(
+            '<div id="{_elId}" class="{_selectorCls} {_colorCls} {values.spanCls} ext3-cal-evt ext3-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px;">',
             body,
             '</div>'
             )
-            : new Ext.XTemplate(
-            '<div id="{_elId}" class="ext-cal-evt" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px;">',
-            '<div class="{_selectorCls} {values.spanCls} {_colorCls} ext-cal-evo">',
-            '<div class="ext-cal-evm">',
-            '<div class="ext-cal-evi">',
+            : new Ext3.XTemplate(
+            '<div id="{_elId}" class="ext3-cal-evt" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px;">',
+            '<div class="{_selectorCls} {values.spanCls} {_colorCls} ext3-cal-evo">',
+            '<div class="ext3-cal-evm">',
+            '<div class="ext3-cal-evi">',
             body,
             '</div>',
             '</div>',
@@ -3460,28 +3460,28 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     getTemplateEventData: function(evt) {
-        var selector = this.getEventSelectorCls(evt[Ext.calendar.EventMappings.EventId.name]),
+        var selector = this.getEventSelectorCls(evt[Ext3.calendar.EventMappings.EventId.name]),
         data = {},
-        M = Ext.calendar.EventMappings;
+        M = Ext3.calendar.EventMappings;
 
         this.getTemplateEventBox(evt);
 
         data._selectorCls = selector;
-        data._colorCls = 'ext-color-' + evt[M.CalendarId.name] + (evt._renderAsAllDay ? '-ad': '');
+        data._colorCls = 'ext3-color-' + evt[M.CalendarId.name] + (evt._renderAsAllDay ? '-ad': '');
         data._elId = selector + (evt._weekIndex ? '-' + evt._weekIndex: '');
         data._isRecurring = evt.Recurrence && evt.Recurrence != '';
         data._isReminder = evt[M.Reminder.name] && evt[M.Reminder.name] != '';
         var title = evt[M.Title.name];
         data.Title = (evt[M.IsAllDay.name] ? '': evt[M.StartDate.name].format('g:ia ')) + (!title || title.length == 0 ? '(No title)': title);
 
-        return Ext.applyIf(data, evt);
+        return Ext3.applyIf(data, evt);
     },
 
     // private
     getTemplateEventBox: function(evt) {
         var heightFactor = 0.7,
-            start = evt[Ext.calendar.EventMappings.StartDate.name],
-            end = evt[Ext.calendar.EventMappings.EndDate.name],
+            start = evt[Ext3.calendar.EventMappings.StartDate.name],
+            end = evt[Ext3.calendar.EventMappings.EndDate.name],
             startMins = start.getHours() * 60 + start.getMinutes(),
             endMins = end.getHours() * 60 + end.getMinutes(),
             diffMins = endMins - startMins;
@@ -3523,8 +3523,8 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
                 if (item._renderAsAllDay) {
                     continue;
                 }
-                Ext.apply(item, {
-                    cls: 'ext-cal-ev',
+                Ext3.apply(item, {
+                    cls: 'ext3-cal-ev',
                     _positioned: true
                 });
                 evts.push({
@@ -3572,7 +3572,7 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
             markup = this.getEventTemplate().apply(evt);
             target = this.id + '-day-col-' + evts[i].date.format('Ymd');
 
-            Ext.DomHelper.append(target, markup);
+            Ext3.DomHelper.append(target, markup);
         }
 
         this.fireEvent('eventsrendered', this);
@@ -3580,12 +3580,12 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     getDayEl: function(dt) {
-        return Ext.get(this.getDayId(dt));
+        return Ext3.get(this.getDayId(dt));
     },
 
     // private
     getDayId: function(dt) {
-        if (Ext.isDate(dt)) {
+        if (Ext3.isDate(dt)) {
             dt = dt.format('Ymd');
         }
         return this.id + this.dayColumnElIdDelimiter + dt;
@@ -3593,7 +3593,7 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     getDaySize: function() {
-        var box = this.el.child('.ext-cal-day-col-inner').getBox();
+        var box = this.el.child('.ext3-cal-day-col-inner').getBox();
         return {
             height: box.height,
             width: box.width
@@ -3602,15 +3602,15 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     getDayAt: function(x, y) {
-        var sel = '.ext-cal-body-ct',
-        xoffset = this.el.child('.ext-cal-day-times').getWidth(),
+        var sel = '.ext3-cal-body-ct',
+        xoffset = this.el.child('.ext3-cal-day-times').getWidth(),
         viewBox = this.el.getBox(),
         daySize = this.getDaySize(false),
         relX = x - viewBox.x - xoffset,
         dayIndex = Math.floor(relX / daySize.width),
         // clicked col index
         scroll = this.el.getScroll(),
-        row = this.el.child('.ext-cal-bg-row'),
+        row = this.el.child('.ext3-cal-bg-row'),
         // first avail row, just to calc size
         rowH = row.getHeight() / 2,
         // 30 minute increment since a row is 60 minutes
@@ -3640,11 +3640,11 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
 
     // private
     onClick: function(e, t) {
-        if (this.dragPending || Ext.calendar.DayBodyView.superclass.onClick.apply(this, arguments)) {
+        if (this.dragPending || Ext3.calendar.DayBodyView.superclass.onClick.apply(this, arguments)) {
             // The superclass handled the click already so exit
             return;
         }
-        if (e.getTarget('.ext-cal-day-times', 3) !== null) {
+        if (e.getTarget('.ext3-cal-day-times', 3) !== null) {
             // ignore clicks on the times-of-day gutter
             return;
         }
@@ -3652,7 +3652,7 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
         if (el) {
             if (el.id && el.id.indexOf(this.dayElIdDelimiter) > -1) {
                 var dt = this.getDateFromId(el.id, this.dayElIdDelimiter);
-                this.fireEvent('dayclick', this, Date.parseDate(dt, 'Ymd'), true, Ext.get(this.getDayId(dt, true)));
+                this.fireEvent('dayclick', this, Date.parseDate(dt, 'Ymd'), true, Ext3.get(this.getDayId(dt, true)));
                 return;
             }
         }
@@ -3663,20 +3663,20 @@ Ext.calendar.DayBodyView = Ext.extend(Ext.calendar.CalendarView, {
     }
 });
 
-Ext.reg('daybodyview', Ext.calendar.DayBodyView);
+Ext3.reg('daybodyview', Ext3.calendar.DayBodyView);
 /**
- * @class Ext.calendar.DayView
- * @extends Ext.Container
- * <p>Unlike other calendar views, is not actually a subclass of {@link Ext.calendar.CalendarView CalendarView}.
- * Instead it is a {@link Ext.Container Container} subclass that internally creates and manages the layouts of
- * a {@link Ext.calendar.DayHeaderView DayHeaderView} and a {@link Ext.calendar.DayBodyView DayBodyView}. As such
+ * @class Ext3.calendar.DayView
+ * @extends Ext3.Container
+ * <p>Unlike other calendar views, is not actually a subclass of {@link Ext3.calendar.CalendarView CalendarView}.
+ * Instead it is a {@link Ext3.Container Container} subclass that internally creates and manages the layouts of
+ * a {@link Ext3.calendar.DayHeaderView DayHeaderView} and a {@link Ext3.calendar.DayBodyView DayBodyView}. As such
  * DayView accepts any config values that are valid for DayHeaderView and DayBodyView and passes those through
  * to the contained views. It also supports the interface required of any calendar view and in turn calls methods
  * on the contained views as necessary.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.DayView = Ext.extend(Ext.Container, {
+Ext3.calendar.DayView = Ext3.extend(Ext3.Container, {
     /**
      * @cfg {Boolean} showTime
      * True to display the current time in today's box in the calendar, false to not display it (defautls to true)
@@ -3715,35 +3715,35 @@ Ext.calendar.DayView = Ext.extend(Ext.Container, {
         // rendering more than 7 days per view is not supported
         this.dayCount = this.dayCount > 7 ? 7 : this.dayCount;
         
-        var cfg = Ext.apply({}, this.initialConfig);
+        var cfg = Ext3.apply({}, this.initialConfig);
         cfg.showTime = this.showTime;
         cfg.showTodatText = this.showTodayText;
         cfg.todayText = this.todayText;
         cfg.dayCount = this.dayCount;
         cfg.wekkCount = 1; 
         
-        var header = Ext.applyIf({
+        var header = Ext3.applyIf({
             xtype: 'dayheaderview',
             id: this.id+'-hd'
         }, cfg);
         
-        var body = Ext.applyIf({
+        var body = Ext3.applyIf({
             xtype: 'daybodyview',
             id: this.id+'-bd'
         }, cfg);
         
         this.items = [header, body];
-        this.addClass('ext-cal-dayview ext-cal-ct');
+        this.addClass('ext3-cal-dayview ext3-cal-ct');
         
-        Ext.calendar.DayView.superclass.initComponent.call(this);
+        Ext3.calendar.DayView.superclass.initComponent.call(this);
     },
     
     // private
     afterRender : function(){
-        Ext.calendar.DayView.superclass.afterRender.call(this);
+        Ext3.calendar.DayView.superclass.afterRender.call(this);
         
-        this.header = Ext.getCmp(this.id+'-hd');
-        this.body = Ext.getCmp(this.id+'-bd');
+        this.header = Ext3.getCmp(this.id+'-hd');
+        this.body = Ext3.getCmp(this.id+'-bd');
         this.body.on('eventsrendered', this.forceSize, this);
     },
     
@@ -3759,11 +3759,11 @@ Ext.calendar.DayView = Ext.extend(Ext.Container, {
         // general to make sure that the window resize is good and done first
         // so that we can properly calculate sizes.
         (function(){
-            var ct = this.el.up('.x-panel-body'),
-                hd = this.el.child('.ext-cal-day-header'),
+            var ct = this.el.up('.x3-panel-body'),
+                hd = this.el.child('.ext3-cal-day-header'),
                 h = ct.getHeight() - hd.getHeight();
             
-            this.el.child('.ext-cal-body-ct').setHeight(h);
+            this.el.child('.ext3-cal-body-ct').setHeight(h);
         }).defer(10, this);
     },
     
@@ -3854,17 +3854,17 @@ Ext.calendar.DayView = Ext.extend(Ext.Container, {
     }
 });
 
-Ext.reg('dayview', Ext.calendar.DayView);
+Ext3.reg('dayview', Ext3.calendar.DayView);
 /**
- * @class Ext.calendar.WeekView
- * @extends Ext.calendar.DayView
+ * @class Ext3.calendar.WeekView
+ * @extends Ext3.calendar.DayView
  * <p>Displays a calendar view by week. This class does not usually need ot be used directly as you can
- * use a {@link Ext.calendar.CalendarPanel CalendarPanel} to manage multiple calendar views at once including
+ * use a {@link Ext3.calendar.CalendarPanel CalendarPanel} to manage multiple calendar views at once including
  * the week view.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.WeekView = Ext.extend(Ext.calendar.DayView, {
+Ext3.calendar.WeekView = Ext3.extend(Ext3.calendar.DayView, {
     /**
      * @cfg {Number} dayCount
      * The number of days to display in the view (defaults to 7)
@@ -3872,14 +3872,14 @@ Ext.calendar.WeekView = Ext.extend(Ext.calendar.DayView, {
     dayCount: 7
 });
 
-Ext.reg('weekview', Ext.calendar.WeekView);/**
- * @class Ext.calendar.DateRangeField
- * @extends Ext.form.Field
+Ext3.reg('weekview', Ext3.calendar.WeekView);/**
+ * @class Ext3.calendar.DateRangeField
+ * @extends Ext3.form.Field
  * <p>A combination field that includes start and end dates and times, as well as an optional all-day checkbox.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
+Ext3.calendar.DateRangeField = Ext3.extend(Ext3.form.Field, {
     /**
      * @cfg {String} toText
      * The text to display in between the date/time fields (defaults to 'to')
@@ -3894,7 +3894,7 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
     // private
     onRender: function(ct, position) {
         if (!this.el) {
-            this.startDate = new Ext.form.DateField({
+            this.startDate = new Ext3.form.DateField({
                 id: this.id + '-start-date',
                 format: 'n/j/Y',
                 width: 100,
@@ -3907,7 +3907,7 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
                     }
                 }
             });
-            this.startTime = new Ext.form.TimeField({
+            this.startTime = new Ext3.form.TimeField({
                 id: this.id + '-start-time',
                 hidden: this.showTimes === false,
                 labelWidth: 0,
@@ -3922,7 +3922,7 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
                     }
                 }
             });
-            this.endTime = new Ext.form.TimeField({
+            this.endTime = new Ext3.form.TimeField({
                 id: this.id + '-end-time',
                 hidden: this.showTimes === false,
                 labelWidth: 0,
@@ -3937,7 +3937,7 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
                     }
                 }
             });
-            this.endDate = new Ext.form.DateField({
+            this.endDate = new Ext3.form.DateField({
                 id: this.id + '-end-date',
                 format: 'n/j/Y',
                 hideLabel: true,
@@ -3951,7 +3951,7 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
                     }
                 }
             });
-            this.allDay = new Ext.form.Checkbox({
+            this.allDay = new Ext3.form.Checkbox({
                 id: this.id + '-allday',
                 hidden: this.showTimes === false || this.showAllDay === false,
                 boxLabel: this.allDayText,
@@ -3961,18 +3961,18 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
                 },
                 scope: this
             });
-            this.toLabel = new Ext.form.Label({
+            this.toLabel = new Ext3.form.Label({
                 xtype: 'label',
                 id: this.id + '-to-label',
                 text: this.toText
             });
 
-            this.fieldCt = new Ext.Container({
+            this.fieldCt = new Ext3.Container({
                 autoEl: {
                     id: this.id
                 },
                 //make sure the container el has the field's id
-                cls: 'ext-dt-range',
+                cls: 'ext3-dt-range',
                 renderTo: ct,
                 layout: 'table',
                 layoutConfig: {
@@ -3993,16 +3993,16 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
 
             this.fieldCt.ownerCt = this;
             this.el = this.fieldCt.getEl();
-            this.items = new Ext.util.MixedCollection();
+            this.items = new Ext3.util.MixedCollection();
             this.items.addAll([this.startDate, this.endDate, this.toLabel, this.startTime, this.endTime, this.allDay]);
         }
-        Ext.calendar.DateRangeField.superclass.onRender.call(this, ct, position);
+        Ext3.calendar.DateRangeField.superclass.onRender.call(this, ct, position);
     },
 
     // private
     checkDates: function(type, startend) {
-        var startField = Ext.getCmp(this.id + '-start-' + type),
-        endField = Ext.getCmp(this.id + '-end-' + type),
+        var startField = Ext3.getCmp(this.id + '-start-' + type),
+        endField = Ext3.getCmp(this.id + '-end-' + type),
         startValue = this.getDT('start'),
         endValue = this.getDT('end');
 
@@ -4040,7 +4040,7 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
         var time = this[startend + 'Time'].getValue(),
         dt = this[startend + 'Date'].getValue();
 
-        if (Ext.isDate(dt)) {
+        if (Ext3.isDate(dt)) {
             dt = dt.format(this[startend + 'Date'].format);
         }
         else {
@@ -4061,32 +4061,32 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
      * <li><b><code>DateTime</code></b> : <div class="sub-desc">A single Date object, which will be used for both the start and
      * end dates in the range.  The all-day flag will be defaulted to false.</div></li>
      * <li><b><code>Object</code></b> : <div class="sub-desc">An object containing properties for StartDate, EndDate and IsAllDay
-     * as defined in {@link Ext.calendar.EventMappings}.</div></li><ul></div>
+     * as defined in {@link Ext3.calendar.EventMappings}.</div></li><ul></div>
      */
     setValue: function(v) {
-        if (Ext.isArray(v)) {
+        if (Ext3.isArray(v)) {
             this.setDT(v[0], 'start');
             this.setDT(v[1], 'end');
             this.allDay.setValue( !! v[2]);
         }
-        else if (Ext.isDate(v)) {
+        else if (Ext3.isDate(v)) {
             this.setDT(v, 'start');
             this.setDT(v, 'end');
             this.allDay.setValue(false);
         }
-        else if (v[Ext.calendar.EventMappings.StartDate.name]) {
+        else if (v[Ext3.calendar.EventMappings.StartDate.name]) {
             //object
-            this.setDT(v[Ext.calendar.EventMappings.StartDate.name], 'start');
-            if (!this.setDT(v[Ext.calendar.EventMappings.EndDate.name], 'end')) {
-                this.setDT(v[Ext.calendar.EventMappings.StartDate.name], 'end');
+            this.setDT(v[Ext3.calendar.EventMappings.StartDate.name], 'start');
+            if (!this.setDT(v[Ext3.calendar.EventMappings.EndDate.name], 'end')) {
+                this.setDT(v[Ext3.calendar.EventMappings.StartDate.name], 'end');
             }
-            this.allDay.setValue( !! v[Ext.calendar.EventMappings.IsAllDay.name]);
+            this.allDay.setValue( !! v[Ext3.calendar.EventMappings.IsAllDay.name]);
         }
     },
 
     // private setValue helper
     setDT: function(dt, startend) {
-        if (dt && Ext.isDate(dt)) {
+        if (dt && Ext3.isDate(dt)) {
             this[startend + 'Date'].setValue(dt);
             this[startend + 'Time'].setValue(dt.format(this[startend + 'Time'].format));
             return true;
@@ -4133,26 +4133,26 @@ Ext.calendar.DateRangeField = Ext.extend(Ext.form.Field, {
 
     // private
     beforeDestroy: function() {
-        Ext.destroy(this.fieldCt);
-        Ext.calendar.DateRangeField.superclass.beforeDestroy.call(this);
+        Ext3.destroy(this.fieldCt);
+        Ext3.calendar.DateRangeField.superclass.beforeDestroy.call(this);
     },
 
     /**
      * @method getRawValue
      * @hide
      */
-    getRawValue: Ext.emptyFn,
+    getRawValue: Ext3.emptyFn,
     /**
      * @method setRawValue
      * @hide
      */
-    setRawValue: Ext.emptyFn
+    setRawValue: Ext3.emptyFn
 });
 
-Ext.reg('daterangefield', Ext.calendar.DateRangeField);
+Ext3.reg('daterangefield', Ext3.calendar.DateRangeField);
 /**
- * @class Ext.calendar.ReminderField
- * @extends Ext.form.ComboBox
+ * @class Ext3.calendar.ReminderField
+ * @extends Ext3.form.ComboBox
  * <p>A custom combo used for choosing a reminder setting for an event.</p>
  * <p>This is pretty much a standard combo that is simply pre-configured for the options needed by the
  * calendar components. The default configs are as follows:<pre><code>
@@ -4167,7 +4167,7 @@ Ext.reg('daterangefield', Ext.calendar.DateRangeField);
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.ReminderField = Ext.extend(Ext.form.ComboBox, {
+Ext3.calendar.ReminderField = Ext3.extend(Ext3.form.ComboBox, {
     width: 200,
     fieldLabel: 'Reminder',
     mode: 'local',
@@ -4178,9 +4178,9 @@ Ext.calendar.ReminderField = Ext.extend(Ext.form.ComboBox, {
 
     // private
     initComponent: function() {
-        Ext.calendar.ReminderField.superclass.initComponent.call(this);
+        Ext3.calendar.ReminderField.superclass.initComponent.call(this);
 
-        this.store = this.store || new Ext.data.ArrayStore({
+        this.store = this.store || new Ext3.data.ArrayStore({
             fields: ['value', 'desc'],
             idIndex: 0,
             data: [
@@ -4218,13 +4218,13 @@ Ext.calendar.ReminderField = Ext.extend(Ext.form.ComboBox, {
     }
 });
 
-Ext.reg('reminderfield', Ext.calendar.ReminderField);
+Ext3.reg('reminderfield', Ext3.calendar.ReminderField);
 /**
- * @class Ext.calendar.EventEditForm
- * @extends Ext.form.FormPanel
+ * @class Ext3.calendar.EventEditForm
+ * @extends Ext3.form.FormPanel
  * <p>A custom form used for detailed editing of events.</p>
  * <p>This is pretty much a standard form that is simply pre-configured for the options needed by the
- * calendar components. It is also configured to automatically bind records of type {@link Ext.calendar.EventRecord}
+ * calendar components. It is also configured to automatically bind records of type {@link Ext3.calendar.EventRecord}
  * to and from the form.</p>
  * <p>This form also provides custom events specific to the calendar so that other calendar components can be easily
  * notified when an event has been edited via this component.</p>
@@ -4237,12 +4237,12 @@ Ext.reg('reminderfield', Ext.calendar.ReminderField);
     border: false,
     buttonAlign: 'center',
     autoHeight: true,
-    cls: 'ext-evt-edit-form',
+    cls: 'ext3-evt-edit-form',
 </code></pre>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
+Ext3.calendar.EventEditForm = Ext3.extend(Ext3.form.FormPanel, {
     labelWidth: 65,
     title: 'Event Form',
     titleTextAdd: 'Add Event',
@@ -4252,7 +4252,7 @@ Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
     buttonAlign: 'center',
     autoHeight: true,
     // to allow for the notes field to autogrow
-    cls: 'ext-evt-edit-form',
+    cls: 'ext3-evt-edit-form',
 
     // private properties:
     newId: 10000,
@@ -4265,60 +4265,60 @@ Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
             /**
              * @event eventadd
              * Fires after a new event is added
-             * @param {Ext.calendar.EventEditForm} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was added
+             * @param {Ext3.calendar.EventEditForm} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was added
              */
             eventadd: true,
             /**
              * @event eventupdate
              * Fires after an existing event is updated
-             * @param {Ext.calendar.EventEditForm} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was updated
+             * @param {Ext3.calendar.EventEditForm} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was updated
              */
             eventupdate: true,
             /**
              * @event eventdelete
              * Fires after an event is deleted
-             * @param {Ext.calendar.EventEditForm} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was deleted
+             * @param {Ext3.calendar.EventEditForm} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was deleted
              */
             eventdelete: true,
             /**
              * @event eventcancel
              * Fires after an event add/edit operation is canceled by the user and no store update took place
-             * @param {Ext.calendar.EventEditForm} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was canceled
+             * @param {Ext3.calendar.EventEditForm} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was canceled
              */
             eventcancel: true
         });
 
-        this.titleField = new Ext.form.TextField({
+        this.titleField = new Ext3.form.TextField({
             fieldLabel: 'Title',
-            name: Ext.calendar.EventMappings.Title.name,
+            name: Ext3.calendar.EventMappings.Title.name,
             anchor: '90%'
         });
-        this.dateRangeField = new Ext.calendar.DateRangeField({
+        this.dateRangeField = new Ext3.calendar.DateRangeField({
             fieldLabel: 'When',
             anchor: '90%'
         });
-        this.reminderField = new Ext.calendar.ReminderField({
+        this.reminderField = new Ext3.calendar.ReminderField({
             name: 'Reminder'
         });
-        this.notesField = new Ext.form.TextArea({
+        this.notesField = new Ext3.form.TextArea({
             fieldLabel: 'Notes',
-            name: Ext.calendar.EventMappings.Notes.name,
+            name: Ext3.calendar.EventMappings.Notes.name,
             grow: true,
             growMax: 150,
             anchor: '100%'
         });
-        this.locationField = new Ext.form.TextField({
+        this.locationField = new Ext3.form.TextField({
             fieldLabel: 'Location',
-            name: Ext.calendar.EventMappings.Location.name,
+            name: Ext3.calendar.EventMappings.Location.name,
             anchor: '100%'
         });
-        this.urlField = new Ext.form.TextField({
+        this.urlField = new Ext3.form.TextField({
             fieldLabel: 'Web Link',
-            name: Ext.calendar.EventMappings.Url.name,
+            name: Ext3.calendar.EventMappings.Url.name,
             anchor: '100%'
         });
 
@@ -4326,9 +4326,9 @@ Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
         rightFields = [this.notesField, this.locationField, this.urlField];
 
         if (this.calendarStore) {
-            this.calendarField = new Ext.calendar.CalendarPicker({
+            this.calendarField = new Ext3.calendar.CalendarPicker({
                 store: this.calendarStore,
-                name: Ext.calendar.EventMappings.CalendarId.name
+                name: Ext3.calendar.EventMappings.CalendarId.name
             });
             leftFields.splice(2, 0, this.calendarField);
         };
@@ -4354,7 +4354,7 @@ Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
             handler: this.onSave
         },
         {
-            cls: 'ext-del-btn',
+            cls: 'ext3-del-btn',
             text: 'Delete',
             scope: this,
             handler: this.onDelete
@@ -4365,7 +4365,7 @@ Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
             handler: this.onCancel
         }];
 
-        Ext.calendar.EventEditForm.superclass.initComponent.call(this);
+        Ext3.calendar.EventEditForm.superclass.initComponent.call(this);
     },
 
     // inherited docs
@@ -4375,18 +4375,18 @@ Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
         this.dateRangeField.setValue(rec.data);
         if (this.calendarStore) {
             this.form.setValues({
-                'calendar': rec.data[Ext.calendar.EventMappings.CalendarId.name]
+                'calendar': rec.data[Ext3.calendar.EventMappings.CalendarId.name]
             });
         }
-        this.isAdd = !!rec.data[Ext.calendar.EventMappings.IsNew.name];
+        this.isAdd = !!rec.data[Ext3.calendar.EventMappings.IsNew.name];
         if (this.isAdd) {
             rec.markDirty();
             this.setTitle(this.titleTextAdd);
-            Ext.select('.ext-del-btn').setDisplayed(false);
+            Ext3.select('.ext3-del-btn').setDisplayed(false);
         }
         else {
             this.setTitle(this.titleTextEdit);
-            Ext.select('.ext-del-btn').setDisplayed(true);
+            Ext3.select('.ext3-del-btn').setDisplayed(true);
         }
         this.titleField.focus();
     },
@@ -4396,9 +4396,9 @@ Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
         var dates = this.dateRangeField.getValue();
 
         this.form.updateRecord(this.activeRecord);
-        this.activeRecord.set(Ext.calendar.EventMappings.StartDate.name, dates[0]);
-        this.activeRecord.set(Ext.calendar.EventMappings.EndDate.name, dates[1]);
-        this.activeRecord.set(Ext.calendar.EventMappings.IsAllDay.name, dates[2]);
+        this.activeRecord.set(Ext3.calendar.EventMappings.StartDate.name, dates[0]);
+        this.activeRecord.set(Ext3.calendar.EventMappings.EndDate.name, dates[1]);
+        this.activeRecord.set(Ext3.calendar.EventMappings.IsAllDay.name, dates[2]);
     },
 
     // private
@@ -4440,17 +4440,17 @@ Ext.calendar.EventEditForm = Ext.extend(Ext.form.FormPanel, {
     }
 });
 
-Ext.reg('eventeditform', Ext.calendar.EventEditForm);
+Ext3.reg('eventeditform', Ext3.calendar.EventEditForm);
 /**
- * @class Ext.calendar.EventEditWindow
- * @extends Ext.Window
+ * @class Ext3.calendar.EventEditWindow
+ * @extends Ext3.Window
  * <p>A custom window containing a basic edit form used for quick editing of events.</p>
  * <p>This window also provides custom events specific to the calendar so that other calendar components can be easily
  * notified when an event has been edited via this component.</p>
  * @constructor
  * @param {Object} config The config object
  */
-Ext.calendar.EventEditWindow = function(config) {
+Ext3.calendar.EventEditWindow = function(config) {
     var formPanelCfg = {
         xtype: 'form',
         labelWidth: 65,
@@ -4460,7 +4460,7 @@ Ext.calendar.EventEditWindow = function(config) {
         border: false,
         items: [{
             id: 'title',
-            name: Ext.calendar.EventMappings.Title.name,
+            name: Ext3.calendar.EventMappings.Title.name,
             fieldLabel: 'Title',
             xtype: 'textfield',
             anchor: '100%'
@@ -4486,7 +4486,7 @@ Ext.calendar.EventEditWindow = function(config) {
         });
     }
 
-    Ext.calendar.EventEditWindow.superclass.constructor.call(this, Ext.apply({
+    Ext3.calendar.EventEditWindow.superclass.constructor.call(this, Ext3.apply({
         titleTextAdd: 'Add Event',
         titleTextEdit: 'Edit Event',
         width: 600,
@@ -4528,13 +4528,13 @@ Ext.calendar.EventEditWindow = function(config) {
     config));
 };
 
-Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
+Ext3.extend(Ext3.calendar.EventEditWindow, Ext3.Window, {
     // private
     newId: 10000,
 
     // private
     initComponent: function() {
-        Ext.calendar.EventEditWindow.superclass.initComponent.call(this);
+        Ext3.calendar.EventEditWindow.superclass.initComponent.call(this);
 
         this.formPanel = this.items.items[0];
 
@@ -4542,39 +4542,39 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
             /**
              * @event eventadd
              * Fires after a new event is added
-             * @param {Ext.calendar.EventEditWindow} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was added
+             * @param {Ext3.calendar.EventEditWindow} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was added
              */
             eventadd: true,
             /**
              * @event eventupdate
              * Fires after an existing event is updated
-             * @param {Ext.calendar.EventEditWindow} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was updated
+             * @param {Ext3.calendar.EventEditWindow} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was updated
              */
             eventupdate: true,
             /**
              * @event eventdelete
              * Fires after an event is deleted
-             * @param {Ext.calendar.EventEditWindow} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was deleted
+             * @param {Ext3.calendar.EventEditWindow} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was deleted
              */
             eventdelete: true,
             /**
              * @event eventcancel
              * Fires after an event add/edit operation is canceled by the user and no store update took place
-             * @param {Ext.calendar.EventEditWindow} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was canceled
+             * @param {Ext3.calendar.EventEditWindow} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was canceled
              */
             eventcancel: true,
             /**
              * @event editdetails
              * Fires when the user selects the option in this window to continue editing in the detailed edit form
-             * (by default, an instance of {@link Ext.calendar.EventEditForm}. Handling code should hide this window
+             * (by default, an instance of {@link Ext3.calendar.EventEditForm}. Handling code should hide this window
              * and transfer the current event record to the appropriate instance of the detailed form by showing it
-             * and calling {@link Ext.calendar.EventEditForm#loadRecord loadRecord}.
-             * @param {Ext.calendar.EventEditWindow} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} that is currently being edited
+             * and calling {@link Ext3.calendar.EventEditForm#loadRecord loadRecord}.
+             * @param {Ext3.calendar.EventEditWindow} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} that is currently being edited
              */
             editdetails: true
         });
@@ -4582,11 +4582,11 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
 
     // private
     afterRender: function() {
-        Ext.calendar.EventEditWindow.superclass.afterRender.call(this);
+        Ext3.calendar.EventEditWindow.superclass.afterRender.call(this);
 
-        this.el.addClass('ext-cal-event-win');
+        this.el.addClass('ext3-cal-event-win');
 
-        Ext.get('tblink').on('click',
+        Ext3.get('tblink').on('click',
         function(e) {
             e.stopEvent();
             this.updateRecord();
@@ -4597,29 +4597,29 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
 
     /**
      * Shows the window, rendering it first if necessary, or activates it and brings it to front if hidden.
-	 * @param {Ext.data.Record/Object} o Either a {@link Ext.data.Record} if showing the form
+	 * @param {Ext3.data.Record/Object} o Either a {@link Ext3.data.Record} if showing the form
 	 * for an existing event in edit mode, or a plain object containing a StartDate property (and 
 	 * optionally an EndDate property) for showing the form in add mode. 
      * @param {String/Element} animateTarget (optional) The target element or id from which the window should
      * animate while opening (defaults to null with no animation)
-     * @return {Ext.Window} this
+     * @return {Ext3.Window} this
      */
     show: function(o, animateTarget) {
         // Work around the CSS day cell height hack needed for initial render in IE8/strict:
-        var anim = (Ext.isIE8 && Ext.isStrict) ? null: animateTarget;
+        var anim = (Ext3.isIE8 && Ext3.isStrict) ? null: animateTarget;
 
-        Ext.calendar.EventEditWindow.superclass.show.call(this, anim,
+        Ext3.calendar.EventEditWindow.superclass.show.call(this, anim,
         function() {
-            Ext.getCmp('title').focus(false, 100);
+            Ext3.getCmp('title').focus(false, 100);
         });
-        Ext.getCmp('delete-btn')[o.data && o.data[Ext.calendar.EventMappings.EventId.name] ? 'show': 'hide']();
+        Ext3.getCmp('delete-btn')[o.data && o.data[Ext3.calendar.EventMappings.EventId.name] ? 'show': 'hide']();
 
         var rec,
         f = this.formPanel.form;
 
         if (o.data) {
             rec = o;
-            this.isAdd = !!rec.data[Ext.calendar.EventMappings.IsNew.name];
+            this.isAdd = !!rec.data[Ext3.calendar.EventMappings.IsNew.name];
             if (this.isAdd) {
                 // Enable adding the default record that was passed in
                 // if it's new even if the user makes no changes
@@ -4636,12 +4636,12 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
             this.isAdd = true;
             this.setTitle(this.titleTextAdd);
 
-            var M = Ext.calendar.EventMappings,
+            var M = Ext3.calendar.EventMappings,
             eventId = M.EventId.name,
             start = o[M.StartDate.name],
             end = o[M.EndDate.name] || start.add('h', 1);
 
-            rec = new Ext.calendar.EventRecord();
+            rec = new Ext3.calendar.EventRecord();
             rec.data[M.EventId.name] = this.newId++;
             rec.data[M.StartDate.name] = start;
             rec.data[M.EndDate.name] = end;
@@ -4653,9 +4653,9 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
         }
 
         if (this.calendarStore) {
-            Ext.getCmp('calendar').setValue(rec.data[Ext.calendar.EventMappings.CalendarId.name]);
+            Ext3.getCmp('calendar').setValue(rec.data[Ext3.calendar.EventMappings.CalendarId.name]);
         }
-        Ext.getCmp('date-range').setValue(rec.data);
+        Ext3.getCmp('date-range').setValue(rec.data);
         this.activeRecord = rec;
 
         return this;
@@ -4683,7 +4683,7 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
 
         if (hide === true) {
             // Work around the CSS day cell height hack needed for initial render in IE8/strict:
-            //var anim = afterDelete || (Ext.isIE8 && Ext.isStrict) ? null : this.animateTarget;
+            //var anim = afterDelete || (Ext3.isIE8 && Ext3.isStrict) ? null : this.animateTarget;
             this.hide();
         }
     },
@@ -4691,8 +4691,8 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
     // private
     updateRecord: function() {
         var f = this.formPanel.form,
-        dates = Ext.getCmp('date-range').getValue(),
-        M = Ext.calendar.EventMappings;
+        dates = Ext3.getCmp('date-range').getValue(),
+        M = Ext3.calendar.EventMappings;
 
         f.updateRecord(this.activeRecord);
         this.activeRecord.set(M.StartDate.name, dates[0]);
@@ -4721,11 +4721,11 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
         this.fireEvent('eventdelete', this, this.activeRecord);
     }
 });/**
- * @class Ext.calendar.CalendarPanel
- * @extends Ext.Panel
- * <p>This is the default container for Ext calendar views. It supports day, week and month views as well
+ * @class Ext3.calendar.CalendarPanel
+ * @extends Ext3.Panel
+ * <p>This is the default container for Ext3 calendar views. It supports day, week and month views as well
  * as a built-in event edit form. The only requirement for displaying a calendar is passing in a valid
- * {@link #calendarStore} config containing records of type {@link Ext.calendar.EventRecord EventRecord}. In order
+ * {@link #calendarStore} config containing records of type {@link Ext3.calendar.EventRecord EventRecord}. In order
  * to make the calendar interactive (enable editing, drag/drop, etc.) you can handle any of the various
  * events fired by the underlying views and exposed through the CalendarPanel.</p>
  * {@link #layoutConfig} option if needed.</p>
@@ -4733,7 +4733,7 @@ Ext.extend(Ext.calendar.EventEditWindow, Ext.Window, {
  * @param {Object} config The config object
  * @xtype calendarpanel
  */
-Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
+Ext3.calendar.CalendarPanel = Ext3.extend(Ext3.Panel, {
     /**
      * @cfg {Boolean} showDayView
      * True to include the day view (and toolbar button), false to hide them (defaults to true).
@@ -4802,14 +4802,14 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
     // private
     initComponent: function() {
         this.tbar = {
-            cls: 'ext-cal-toolbar',
+            cls: 'ext3-cal-toolbar',
             border: true,
             buttonAlign: 'center',
             items: [{
                 id: this.id + '-tb-prev',
                 handler: this.onPrevClick,
                 scope: this,
-                iconCls: 'x-tbar-page-prev'
+                iconCls: 'x3-tbar-page-prev'
             }]
         };
 
@@ -4850,7 +4850,7 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
             id: this.id + '-tb-next',
             handler: this.onNextClick,
             scope: this,
-            iconCls: 'x-tbar-page-next'
+            iconCls: 'x3-tbar-page-next'
         });
         this.tbar.items.push('->');
 
@@ -4859,45 +4859,45 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
 
         if (this.showNavBar === false) {
             delete this.tbar;
-            this.addClass('x-calendar-nonav');
+            this.addClass('x3-calendar-nonav');
         }
 
-        Ext.calendar.CalendarPanel.superclass.initComponent.call(this);
+        Ext3.calendar.CalendarPanel.superclass.initComponent.call(this);
 
         this.addEvents({
             /**
              * @event eventadd
              * Fires after a new event is added to the underlying store
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was added
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was added
              */
             eventadd: true,
             /**
              * @event eventupdate
              * Fires after an existing event is updated
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was updated
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was updated
              */
             eventupdate: true,
             /**
              * @event eventdelete
              * Fires after an event is removed from the underlying store
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was removed
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was removed
              */
             eventdelete: true,
             /**
              * @event eventcancel
              * Fires after an event add/edit operation is canceled by the user and no store update took place
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The new {@link Ext.calendar.EventRecord record} that was canceled
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The new {@link Ext3.calendar.EventRecord record} that was canceled
              */
             eventcancel: true,
             /**
              * @event viewchange
              * Fires after a different calendar view is activated (but not when the event edit form is activated)
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.CalendarView} view The view being activated (any valid {@link Ext.calendar.CalendarView CalendarView} subclass)
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.CalendarView} view The view being activated (any valid {@link Ext3.calendar.CalendarView CalendarView} subclass)
              * @param {Object} info Extra information about the newly activated view. This is a plain object 
              * with following properties:<div class="mdetail-params"><ul>
              * <li><b><code>activeDate</code></b> : <div class="sub-desc">The currently-selected date</div></li>
@@ -4913,33 +4913,33 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
             /**
              * @event eventsrendered
              * Fires after events are finished rendering in the view
-             * @param {Ext.calendar.CalendarPanel} this 
+             * @param {Ext3.calendar.CalendarPanel} this 
              */
             /**
              * @event eventclick
              * Fires after the user clicks on an event element
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that was clicked on
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that was clicked on
              * @param {HTMLNode} el The DOM node that was clicked on
              */
             /**
              * @event eventover
              * Fires anytime the mouse is over an event element
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that the cursor is over
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that the cursor is over
              * @param {HTMLNode} el The DOM node that is being moused over
              */
             /**
              * @event eventout
              * Fires anytime the mouse exits an event element
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that the cursor exited
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that the cursor exited
              * @param {HTMLNode} el The DOM node that was exited
              */
             /**
              * @event datechange
              * Fires after the start date of the view changes
-             * @param {Ext.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.CalendarPanel} this
              * @param {Date} startDate The start date of the view (as explained in {@link #getStartDate}
              * @param {Date} viewStart The first displayed date in the view
              * @param {Date} viewEnd The last displayed date in the view
@@ -4947,7 +4947,7 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
             /**
              * @event rangeselect
              * Fires after the user drags on the calendar to select a range of dates/times in which to create an event
-             * @param {Ext.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.CalendarPanel} this
              * @param {Object} dates An object containing the start (StartDate property) and end (EndDate property) dates selected
              * @param {Function} callback A callback function that MUST be called after the event handling is complete so that
              * the view is properly cleaned up (shim elements are persisted in the view while the user is prompted to handle the
@@ -4957,36 +4957,36 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
             /**
              * @event eventmove
              * Fires after an event element is dragged by the user and dropped in a new position
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that was moved with
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that was moved with
              * updated start and end dates
              */
             /**
              * @event initdrag
              * Fires when a drag operation is initiated in the view
-             * @param {Ext.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.CalendarPanel} this
              */
             /**
              * @event eventresize
              * Fires after the user drags the resize handle of an event to resize it
-             * @param {Ext.calendar.CalendarPanel} this
-             * @param {Ext.calendar.EventRecord} rec The {@link Ext.calendar.EventRecord record} for the event that was resized
+             * @param {Ext3.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.EventRecord} rec The {@link Ext3.calendar.EventRecord record} for the event that was resized
              * containing the updated start and end dates
              */
             /**
              * @event dayclick
              * Fires after the user clicks within a day/week view container and not on an event element
-             * @param {Ext.calendar.CalendarPanel} this
+             * @param {Ext3.calendar.CalendarPanel} this
              * @param {Date} dt The date/time that was clicked on
              * @param {Boolean} allday True if the day clicked on represents an all-day box, else false.
-             * @param {Ext.Element} el The Element that was clicked on
+             * @param {Ext3.Element} el The Element that was clicked on
              */
         });
 
         this.layout = 'card';
         // do not allow override
         if (this.showDayView) {
-            var day = Ext.apply({
+            var day = Ext3.apply({
                 xtype: 'dayview',
                 title: this.dayText,
                 showToday: this.showToday,
@@ -5001,7 +5001,7 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
             this.add(day);
         }
         if (this.showWeekView) {
-            var wk = Ext.applyIf({
+            var wk = Ext3.applyIf({
                 xtype: 'weekview',
                 title: this.weekText,
                 showToday: this.showToday,
@@ -5016,7 +5016,7 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
             this.add(wk);
         }
         if (this.showMonthView) {
-            var month = Ext.applyIf({
+            var month = Ext3.applyIf({
                 xtype: 'monthview',
                 title: this.monthText,
                 showToday: this.showToday,
@@ -5039,7 +5039,7 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
             this.add(month);
         }
 
-        this.add(Ext.applyIf({
+        this.add(Ext3.applyIf({
             xtype: 'eventeditform',
             id: this.id + '-edit',
             calendarStore: this.calendarStore,
@@ -5081,13 +5081,13 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
 
     // private
     afterRender: function() {
-        Ext.calendar.CalendarPanel.superclass.afterRender.call(this);
+        Ext3.calendar.CalendarPanel.superclass.afterRender.call(this);
         this.fireViewChange();
     },
 
     // private
     onLayout: function() {
-        Ext.calendar.CalendarPanel.superclass.onLayout.call(this);
+        Ext3.calendar.CalendarPanel.superclass.onLayout.call(this);
         if (!this.navInitComplete) {
             this.updateNavState();
             this.navInitComplete = true;
@@ -5096,7 +5096,7 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
 
     // private
     onEventAdd: function(form, rec) {
-        rec.data[Ext.calendar.EventMappings.IsNew.name] = false;
+        rec.data[Ext3.calendar.EventMappings.IsNew.name] = false;
         this.eventStore.add(rec);
         this.hideEditForm();
         this.fireEvent('eventadd', this, rec);
@@ -5125,8 +5125,8 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
     /**
      * Shows the built-in event edit form for the passed in event record.  This method automatically
      * hides the calendar views and navigation toolbar.  To return to the calendar, call {@link #hideEditForm}.
-     * @param {Ext.calendar.EventRecord} record The event record to edit
-     * @return {Ext.calendar.CalendarPanel} this
+     * @param {Ext3.calendar.EventRecord} record The event record to edit
+     * @return {Ext3.calendar.CalendarPanel} this
      */
     showEditForm: function(rec) {
         this.preEditView = this.layout.activeItem.id;
@@ -5138,7 +5138,7 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
     /**
      * Hides the built-in event edit form and returns to the previous calendar view. If the edit form is
      * not currently visible this method has no effect.
-     * @return {Ext.calendar.CalendarPanel} this
+     * @return {Ext3.calendar.CalendarPanel} this
      */
     hideEditForm: function() {
         if (this.preEditView) {
@@ -5188,7 +5188,7 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
             var item = this.layout.activeItem,
             suffix = item.id.split(this.id + '-')[1];
 
-            var btn = Ext.getCmp(this.id + '-tb-' + suffix);
+            var btn = Ext3.getCmp(this.id + '-tb-' + suffix);
             btn.toggle(true);
         }
     },
@@ -5240,12 +5240,12 @@ Ext.calendar.CalendarPanel = Ext.extend(Ext.Panel, {
 
     /**
      * Return the calendar view that is currently active, which will be a subclass of
-     * {@link Ext.calendar.CalendarView CalendarView}.
-     * @return {Ext.calendar.CalendarView} The active view
+     * {@link Ext3.calendar.CalendarView CalendarView}.
+     * @return {Ext3.calendar.CalendarView} The active view
      */
     getActiveView: function() {
         return this.layout.activeItem;
     }
 });
 
-Ext.reg('calendarpanel', Ext.calendar.CalendarPanel);
+Ext3.reg('calendarpanel', Ext3.calendar.CalendarPanel);

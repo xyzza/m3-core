@@ -47,7 +47,7 @@ class ExtDataView(ExtUIComponent):
 
 class ExtListView(ExtDataView):
     '''
-    Класс list view в соответствии с Ext.list.ListView
+    Класс list view в соответствии с Ext3.list.ListView
     '''
     def __init__(self, *args, **kwargs):
         super(ExtListView, self).__init__(*args, **kwargs)
@@ -75,7 +75,7 @@ class ExtListView(ExtDataView):
         self.render_base_config() # Тут конфиги
         self.render_params() # Пусто
         base_config = self._get_config_str()
-        return 'new Ext.list.ListView({%s})' % base_config
+        return 'new Ext3.list.ListView({%s})' % base_config
 
     def t_render_store(self):
         assert self.store, 'Store is not define'

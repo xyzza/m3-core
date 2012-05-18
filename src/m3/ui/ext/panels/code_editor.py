@@ -32,4 +32,4 @@ class ExtCodeEditor(ExtPanel):
         self.render_base_config()
         self.render_params()
         base_config = self._get_config_str()
-        return 'new Ext.m3.CodeEditor({%s})' % base_config
+        return 'new Ext3.m3.CodeEditor({%s})' % base_config

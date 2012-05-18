@@ -90,7 +90,7 @@ class ExtPivotGrid(BaseExtPanel):
         self.render_params()
         config = self._get_config_str()
         params = self._get_params_str()
-        return 'new Ext.grid.PivotGrid({%s}, {%s})' % (config, params)
+        return 'new Ext3.grid.PivotGrid({%s}, {%s})' % (config, params)
 
     def set_store(self, store):
         self.__store = store
@@ -149,7 +149,7 @@ class ExtGrid(BaseExtPanel):
     Таблица (Grid)
     Внимание! Грид реализует двуличное поведение в зависимости от атрибута editor.
     Порождающая его функция createGridPanel может вернуть экземпляр
-    Ext.m3.GridPanel (False) или Ext.m3.EditorGridPanel (True), поэтому некоторые
+    Ext3.m3.GridPanel (False) или Ext3.m3.EditorGridPanel (True), поэтому некоторые
     атрибуты могут действовать в одном, но не действовать в другом гриде.
     """
     
@@ -465,7 +465,7 @@ class ExtGrid(BaseExtPanel):
         # проверим набор колонок на наличие фильтров, если есть, то добавим плагин с фильтрами
         for col in self.columns:
             if col.filter:
-                self.plugins.append(u"new Ext.ux.grid.GridFilters({menuFilterText:'Фильтр'})")
+                self.plugins.append(u"new Ext3.ux.grid.GridFilters({menuFilterText:'Фильтр'})")
                 break                
         self._put_params_value('plugins', self.t_render_plugins)
 
@@ -554,7 +554,7 @@ class BaseExtGridColumn(ExtUIComponent):
         # дополнительные атрибуты колонки
         self.extra = {}
         
-        # Настройки фильтра колонки для плагина Ext.ux.grid.GridFilters
+        # Настройки фильтра колонки для плагина Ext3.ux.grid.GridFilters
         self.filter = None 
 
         self.menu_disabled = False
@@ -713,7 +713,7 @@ class ExtGridCheckBoxSelModel(BaseExtGridSelModel):
     def render(self):
         self._put_config_value('singleSelect', self.single_select)
         self._put_config_value('checkOnly', self.check_only)
-        return 'new Ext.grid.CheckboxSelectionModel({ %s })' %self._get_config_str()
+        return 'new Ext3.grid.CheckboxSelectionModel({ %s })' %self._get_config_str()
 
 #===============================================================================
 class ExtGridRowSelModel(BaseExtGridSelModel):
@@ -727,7 +727,7 @@ class ExtGridRowSelModel(BaseExtGridSelModel):
 
     def render(self):
         single_sel = 'singleSelect: true' if self.single_select else ''
-        return 'new Ext.grid.RowSelectionModel({ %s })' % single_sel
+        return 'new Ext3.grid.RowSelectionModel({ %s })' % single_sel
 
 #===============================================================================
 class ExtGridCellSelModel(BaseExtGridSelModel):
@@ -739,7 +739,7 @@ class ExtGridCellSelModel(BaseExtGridSelModel):
         self.init_component(*args, **kwargs)
 
     def render(self):
-        return 'new Ext.grid.CellSelectionModel()'
+        return 'new Ext3.grid.CellSelectionModel()'
 
 #===============================================================================
 class ExtGridDefaultColumnModel(BaseExtComponent):
@@ -753,7 +753,7 @@ class ExtGridDefaultColumnModel(BaseExtComponent):
         self.init_component(*args, **kwargs)
 
     def render(self):
-        return 'new Ext.grid.ColumnModel({columns:%s})' % self.grid.t_render_columns()
+        return 'new Ext3.grid.ColumnModel({columns:%s})' % self.grid.t_render_columns()
 
 #===============================================================================
 class ExtGridLockingColumnModel(BaseExtComponent):
@@ -767,7 +767,7 @@ class ExtGridLockingColumnModel(BaseExtComponent):
         self.init_component(*args, **kwargs)
 
     def render(self):
-        return 'new Ext.ux.grid.LockingColumnModel({columns:%s})' % self.grid.t_render_columns()
+        return 'new Ext3.ux.grid.LockingColumnModel({columns:%s})' % self.grid.t_render_columns()
 
 #===============================================================================
 class ExtGridLockingHeaderGroupColumnModel(BaseExtComponent):
@@ -778,14 +778,14 @@ class ExtGridLockingHeaderGroupColumnModel(BaseExtComponent):
         self.init_component(*args, **kwargs)
 
     def render(self):
-        return 'new Ext.ux.grid.LockingGroupColumnModel({columns:%s})' % self.grid.t_render_columns()
+        return 'new Ext3.ux.grid.LockingGroupColumnModel({columns:%s})' % self.grid.t_render_columns()
 
 #===============================================================================
 # Компонент - расширенное дерево, включающее колонки, с возможностью добавлять
 # view и column model
 class ExtAdvancedTreeGrid(ExtGrid):
     '''
-    Расширенное дерево на базе Ext.ux.maximgb.TreeGrid
+    Расширенное дерево на базе Ext3.ux.maximgb.TreeGrid
     '''
     def __init__(self, *args, **kwargs):
         super(ExtAdvancedTreeGrid, self).__init__(*args, **kwargs)
@@ -874,7 +874,7 @@ class ExtGridGroupingView(BaseExtComponent):
         except UnicodeDecodeError as msg:
             raise Exception(msg)
         params = self._get_params_str()
-        return 'new Ext.grid.GroupingView({%s})' % (params)
+        return 'new Ext3.grid.GroupingView({%s})' % (params)
 
     # если требуется вывести какое-либо слово после количества, шаблон должен
     #иметь след вид:
@@ -892,7 +892,7 @@ class ExtGridLockingView(BaseExtComponent):
         self.init_component(*args, **kwargs)
 
     def render(self):
-        result = 'new Ext.ux.grid.LockingGridView()'
+        result = 'new Ext3.ux.grid.LockingGridView()'
         return result
 
 #===============================================================================
@@ -906,7 +906,7 @@ class ExtGridLockingHeaderGroupView(BaseExtComponent):
         self.init_component(*args, **kwargs)
 
     def render(self):
-        result = 'new Ext.ux.grid.LockingHeaderGroupGridView({rows:%s})' % self.grid.t_render_banded_columns()
+        result = 'new Ext3.ux.grid.LockingHeaderGroupGridView({rows:%s})' % self.grid.t_render_banded_columns()
         return result
 
 class ExtLiveGridCheckBoxSelModel(ExtGridCheckBoxSelModel):
@@ -922,7 +922,7 @@ class ExtLiveGridCheckBoxSelModel(ExtGridCheckBoxSelModel):
     def render(self):
         self._put_config_value('singleSelect', self.single_select)
         self._put_config_value('checkOnly', self.check_only)
-        return 'new Ext.ux.grid.livegrid.CheckboxSelectionModel({ %s })' %self._get_config_str()
+        return 'new Ext3.ux.grid.livegrid.CheckboxSelectionModel({ %s })' %self._get_config_str()
 
 
 class ExtLiveGridRowSelModel(ExtGridRowSelModel):
@@ -936,4 +936,4 @@ class ExtLiveGridRowSelModel(ExtGridRowSelModel):
 
     def render(self):
         single_sel = 'singleSelect: true' if self.single_select else ''
-        return 'new Ext.ux.grid.livegrid.RowSelectionModel({ %s })' % single_sel
+        return 'new Ext3.ux.grid.livegrid.RowSelectionModel({ %s })' % single_sel

@@ -13,7 +13,7 @@ class ExtConnection(ExtUIComponent):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtConnection, self).__init__(*args, **kwargs)
-        self.template = 'ext-misc/ext-connection.js' # TODO: Отрефакторить под внутриклассовый рендеринг 
+        self.template = 'ext-misc/ext-connection.js' # TODO: Отрефакторить под внутриклассовый рендеринг
         
         # url для запроса на сервер 
         self.url = ''

@@ -13,11 +13,11 @@ from m3.ui.ext.controls import ExtButton
 #===============================================================================
 class ExtContainer(BaseExtContainer):
     '''
-    Класс, имитирующий работу Ext.Container
+    Класс, имитирующий работу Ext3.Container
     '''
     def __init__(self, *args, **kwargs):
         super(ExtContainer, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.Container'
+        self._ext_name = 'Ext3.Container'
         self.init_component(*args, **kwargs)
 
     @property
@@ -58,7 +58,7 @@ class ExtContainer(BaseExtContainer):
 #===============================================================================
 class ExtToolBar(BaseExtContainer):
     '''
-    Класс, имитирующий работу Ext.Toolbar
+    Класс, имитирующий работу Ext3.Toolbar
     '''
 
     class Fill(object):
@@ -89,7 +89,7 @@ class ExtToolBar(BaseExtContainer):
 
     def __init__(self, *args, **kwargs):
         super(ExtToolBar, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.Toolbar'
+        self._ext_name = 'Ext3.Toolbar'
         self._items = []
         self.init_component(*args, **kwargs)
 
@@ -217,11 +217,11 @@ class ExtTextToolBarItem(ExtUIComponent):
 #===============================================================================
 class ExtPagingBar(BaseExtContainer):
     '''
-    Класс, имитирующий работу Ext.PagingToolbar
+    Класс, имитирующий работу Ext3.PagingToolbar
     '''
     def __init__(self, *args, **kwargs):
         super(ExtPagingBar, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.PagingToolbar'
+        self._ext_name = 'Ext3.PagingToolbar'
 
         self.page_size = 25
         self.display_message = u'Показано записей {0} - {1} из {2}'
@@ -294,7 +294,7 @@ class ExtToolbarMenu(ExtUIComponent):
 #===============================================================================
 class ExtButtonGroup(BaseExtContainer):
     '''
-    Класс, имитирующий работу Ext.ButtonGroup
+    Класс, имитирующий работу Ext3.ButtonGroup
     '''
     def __init__(self, *args, **kwargs):
         super(ExtButtonGroup, self).__init__(*args, **kwargs)
@@ -326,7 +326,7 @@ class ExtRadioGroup(BaseExtContainer):
 
     def __init__(self, *args, **kwargs):
         super(ExtRadioGroup, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.form.RadioGroup'
+        self._ext_name = 'Ext3.form.RadioGroup'
 
         # количество колонок в контейнере
         self.columns = None
@@ -361,12 +361,12 @@ class ExtStatusBar(ExtToolBar):
     '''
     Рассширенный тулбар с иконкой, текстом статуса и другими причиндалами.
     Примеры использования:
-    http://dev.sencha.com/deploy/ext-3.4.0/examples/statusbar/statusbar-demo.html
-    http://dev.sencha.com/deploy/ext-3.4.0/examples/statusbar/statusbar-advanced.html
+    http://dev.sencha.com/deploy/ext3-3.4.0/examples/statusbar/statusbar-demo.html
+    http://dev.sencha.com/deploy/ext3-3.4.0/examples/statusbar/statusbar-advanced.html
     '''
     def __init__(self, *args, **kwargs):
         super(ExtStatusBar, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.ux.StatusBar'
+        self._ext_name = 'Ext3.ux.StatusBar'
         self.icon_cls = None
         self.text = None
         self.init_component(*args, **kwargs)

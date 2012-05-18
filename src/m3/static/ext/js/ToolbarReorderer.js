@@ -1,18 +1,18 @@
 /*!
- * Ext JS Library 3.3.1
+ * Ext3 JS Library 3.3.1
  * Copyright(c) 2006-2010 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
 /**
- * @class Ext.ux.ToolbarReorderer
- * @extends Ext.ux.Reorderer
- * Plugin which can be attached to any Ext.Toolbar instance. Provides ability to reorder toolbar items
+ * @class Ext3.ux.ToolbarReorderer
+ * @extends Ext3.ux.Reorderer
+ * Plugin which can be attached to any Ext3.Toolbar instance. Provides ability to reorder toolbar items
  * with drag and drop. Example:
  * <pre>
- * new Ext.Toolbar({
+ * new Ext3.Toolbar({
  *     plugins: [
- *         new Ext.ux.ToolbarReorderer({
+ *         new Ext3.ux.ToolbarReorderer({
  *             defaultReorderable: true
  *         })
  *     ],
@@ -26,7 +26,7 @@
  * In the example above, buttons 2 and 3 will be reorderable via drag and drop. An event named 'reordered'
  * is added to the Toolbar, and is fired whenever a reorder has been completed.
  */
-Ext.ux.ToolbarReorderer = Ext.extend(Ext.ux.Reorderer, {
+Ext3.ux.ToolbarReorderer = Ext3.extend(Ext3.ux.Reorderer, {
     /**
      * Initializes the plugin, decorates the toolbar with additional functionality
      */
@@ -46,12 +46,12 @@ Ext.ux.ToolbarReorderer = Ext.extend(Ext.ux.Reorderer, {
         });
         
         //super sets a reference to the toolbar in this.target
-        Ext.ux.ToolbarReorderer.superclass.init.apply(this, arguments);
+        Ext3.ux.ToolbarReorderer.superclass.init.apply(this, arguments);
     },
         
     /**
      * Sets up the given Toolbar item as a draggable
-     * @param {Mixed} button The item to make draggable (usually an Ext.Button instance)
+     * @param {Mixed} button The item to make draggable (usually an Ext3.Button instance)
      */
     createItemDD: function(button) {
         if (button.dd != undefined) {
@@ -63,7 +63,7 @@ Ext.ux.ToolbarReorderer = Ext.extend(Ext.ux.Reorderer, {
             tbar = this.target,
             me   = this;
         
-        button.dd = new Ext.dd.DD(el, undefined, {
+        button.dd = new Ext3.dd.DD(el, undefined, {
             isTarget: false
         });
         
@@ -72,7 +72,7 @@ Ext.ux.ToolbarReorderer = Ext.extend(Ext.ux.Reorderer, {
             return false;
         };
         
-        Ext.apply(button.dd, {
+        Ext3.apply(button.dd, {
             b4StartDrag: function() {       
                 this.startPosition = el.getXY();
                 

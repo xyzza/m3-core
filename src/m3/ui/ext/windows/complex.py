@@ -44,7 +44,7 @@ class ExtDictionaryWindow(BaseExtWindow):
 
         # Кнопка "Закрыть" по-умолчанию 
         self.buttons.append(ExtButton(name='close_btn', text=u'Закрыть',
-                                      handler='function(){Ext.getCmp("%s").close();}' % self.client_id))
+                                      handler='function(){Ext3.getCmp("%s").close();}' % self.client_id))
 
         # Основные контролы должны быть доступны для изменения
         # Грид

@@ -16,7 +16,7 @@ class ExtDataView(ExtUIComponent):
     
     def __init__(self, *args, **kwargs):
         super(ExtDataView, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.DataView'
+        self._ext_name = 'Ext3.DataView'
         
         # шаблон, при помощи которого будут отображаться данные
         self.tpl = None

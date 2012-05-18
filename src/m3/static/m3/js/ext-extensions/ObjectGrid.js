@@ -2,7 +2,7 @@
  * Объектный грид, включает в себя тулбар с кнопками добавить, редактировать и удалить
  * @param {Object} config
  */
-Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
+Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 	constructor: function(baseConfig, params){
 		
 		assert(params.allowPaging !== undefined,'allowPaging is undefined');
@@ -23,13 +23,13 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
         // имя для сабмита в режиме клиентского редактирования
         this.name = params.name;
 		
-		Ext.m3.ObjectGrid.superclass.constructor.call(this, baseConfig, params);
+		Ext3.m3.ObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
 	
 	,initComponent: function(){
-		Ext.m3.ObjectGrid.superclass.initComponent.call(this);
+		Ext3.m3.ObjectGrid.superclass.initComponent.call(this);
 		var store = this.getStore();
-		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});
+		store.baseParams = Ext3.applyIf(store.baseParams || {}, this.actionContextJson || {});
 		
 		
 		this.addEvents(
@@ -98,7 +98,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	 */
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
-		var mask = new Ext.LoadMask(this.body),
+		var mask = new Ext3.LoadMask(this.body),
 		    params = this.getMainContext();
 		params[this.rowIdName] = '';
 
@@ -131,7 +131,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 
 			this.disableToolbars(true);
 			mask.show();
-			Ext.Ajax.request(req);
+			Ext3.Ajax.request(req);
 		}
 		
 	}
@@ -145,7 +145,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	    if (this.getSelectionModel().hasSelection()) {
 	    	// при локальном редактировании запросим также текущую строку
 			var baseConf = this.getSelectionContext(this.localEdit);
-			var mask = new Ext.LoadMask(this.body);
+			var mask = new Ext3.LoadMask(this.body);
 			var req = {
 				url: this.actionEditUrl,
 				params: baseConf,
@@ -173,14 +173,14 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 				var scope = this;
 				this.disableToolbars(true);
 				mask.show();
-				Ext.Ajax.request(req);
+				Ext3.Ajax.request(req);
 			}
 	    } else {
-		Ext.Msg.show({
+		Ext3.Msg.show({
 			title: 'Редактирование',
 			msg: 'Элемент не выбран',
-			buttons: Ext.Msg.OK,
-			icon: Ext.MessageBox.INFO
+			buttons: Ext3.Msg.OK,
+			icon: Ext3.MessageBox.INFO
 		    });
 	    }
 	}
@@ -193,15 +193,15 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		
 		var scope = this;
 		if (scope.getSelectionModel().hasSelection()) {
-		    Ext.Msg.show({
+		    Ext3.Msg.show({
 		        title: 'Удаление записи',
 			    msg: 'Вы действительно хотите удалить выбранную запись?',
-			    icon: Ext.Msg.QUESTION,
-		        buttons: Ext.Msg.YESNO,
+			    icon: Ext3.Msg.QUESTION,
+		        buttons: Ext3.Msg.YESNO,
 		        fn:function(btn, text, opt){ 
 		            if (btn == 'yes') {
 						var baseConf = scope.getSelectionContext(scope.localEdit);
-						var mask = new Ext.LoadMask(scope.body);
+						var mask = new Ext3.LoadMask(scope.body);
 						var req = {
 		                   url: scope.actionDeleteUrl,
 		                   params: baseConf,
@@ -227,17 +227,17 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 						if (scope.fireEvent('beforedeleterequest', scope, req)) {
 						    scope.disableToolbars(true);
 						    mask.show();
-							Ext.Ajax.request(req);
+							Ext3.Ajax.request(req);
 						}
 	                }
 	            }
 	        });
 		} else {
-                    Ext.Msg.show({
+                    Ext3.Msg.show({
                             title: 'Удаление',
                             msg: 'Элемент не выбран',
-                            buttons: Ext.Msg.OK,
-                            icon: Ext.MessageBox.INFO
+                            buttons: Ext3.Msg.OK,
+                            icon: Ext3.MessageBox.INFO
                         });
                 }
 	}
@@ -256,8 +256,8 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
                     // если локальное редактирование
                     if (scope.localEdit){
                         // то на самом деле нам пришла строка грида
-                        var obj = Ext.util.JSON.decode(data);
-                        var record = new Ext.data.Record(obj.data);
+                        var obj = Ext3.util.JSON.decode(data);
+                        var record = new Ext3.data.Record(obj.data);
                         record.json = obj.data;
                         var store = scope.getStore();
                         // и надо ее добавить в стор
@@ -280,8 +280,8 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
                     // если локальное редактирование
                     if (scope.localEdit){
                         // то на самом деле нам пришла строка грида
-                        var obj = Ext.util.JSON.decode(data);
-                        var record = new Ext.data.Record(obj.data);
+                        var obj = Ext3.util.JSON.decode(data);
+                        var record = new Ext3.data.Record(obj.data);
                         record.json = obj.data;
                         var store = scope.getStore();
                         // и надо ее заменить в сторе
@@ -289,7 +289,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
                         if (sm.hasSelection()) {
                             var baseConf = {};
                             // пока только для режима выделения строк
-                            if (sm instanceof Ext.grid.RowSelectionModel) {
+                            if (sm instanceof Ext3.grid.RowSelectionModel) {
                                 var rec = sm.getSelected();
                                 var index = store.indexOf(rec);
                                 store.remove(rec);
@@ -317,7 +317,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
             // если локальное редактирование
             if (this.localEdit){
                 // проверка на ошибки уровня приложения
-                var res = Ext.util.JSON.decode(response.responseText);
+                var res = Ext3.util.JSON.decode(response.responseText);
                 if(!res.success){
                     smart_eval(response.responseText);
                     return;
@@ -327,7 +327,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
                 var sm = this.getSelectionModel();
                 if (sm.hasSelection()) {
                     // только для режима выделения строк
-                    if (sm instanceof Ext.grid.RowSelectionModel) {
+                    if (sm instanceof Ext3.grid.RowSelectionModel) {
                         var rec = sm.getSelections();
                         store.remove(rec);
                     }
@@ -341,7 +341,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	,refreshStore: function (){
 		if (this.allowPaging) {
 			var pagingBar = this.getBottomToolbar(); 
-			if(pagingBar &&  pagingBar instanceof Ext.PagingToolbar){
+			if(pagingBar &&  pagingBar instanceof Ext3.PagingToolbar){
 			    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
 		        pagingBar.changePage(active_page);
 			}
@@ -364,7 +364,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return Ext.applyIf({}, this.actionContextJson);
+    	return Ext3.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек
@@ -376,7 +376,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		var sm = this.getSelectionModel();
 		var record;
 		// для режима выделения строк
-		if (sm instanceof Ext.grid.RowSelectionModel) {
+		if (sm instanceof Ext3.grid.RowSelectionModel) {
 			if (sm.singleSelect) {
 				record = sm.getSelected();
 				baseConf[this.rowIdName] = record.id;
@@ -393,7 +393,7 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 			}
 		}
 		// для режима выделения ячейки
-		else if (sm instanceof Ext.grid.CellSelectionModel) {
+		else if (sm instanceof Ext3.grid.CellSelectionModel) {
 			assert(this.columnParamName, 'columnParamName is not define');
 			
 			var cell = sm.getSelectedCell();
@@ -406,18 +406,18 @@ Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 		// если просят выделенную строку
         if (withRow){
         	// то нужно добавить в параметры текущую строку грида
-        	if (Ext.isArray(record)){
+        	if (Ext3.isArray(record)){
         		// пока х.з. что делать - возьмем первую
-        		baseConf = Ext.applyIf(baseConf, record[0].json);
+        		baseConf = Ext3.applyIf(baseConf, record[0].json);
         	} else {
-        		baseConf = Ext.applyIf(baseConf, record.json);
+        		baseConf = Ext3.applyIf(baseConf, record.json);
         	}
         }
 		return baseConf;
     }
 });
 
-Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
+Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 	constructor: function(baseConfig, params){
 //		console.log(baseConfig);
 //		console.log(params);
@@ -441,13 +441,13 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
         // имя для сабмита в режиме клиентского редактирования
         this.name = params.name;
 		
-		Ext.m3.EditorObjectGrid.superclass.constructor.call(this, baseConfig, params);
+		Ext3.m3.EditorObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
 	
 	,initComponent: function(){
-		Ext.m3.EditorObjectGrid.superclass.initComponent.call(this);
+		Ext3.m3.EditorObjectGrid.superclass.initComponent.call(this);
 		var store = this.getStore();
-		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});
+		store.baseParams = Ext3.applyIf(store.baseParams || {}, this.actionContextJson || {});
 		
 		
 		this.addEvents(
@@ -510,12 +510,12 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 					return scope.childWindowOpenHandler(res, opt);
 				}
 			},
-			failure: Ext.emptyFn
+			failure: Ext3.emptyFn
 		};
 		
 		if (this.fireEvent('beforenewrequest', this, req)) {
 			var scope = this;
-			Ext.Ajax.request(req);
+			Ext3.Ajax.request(req);
 		}
 		
 	}
@@ -536,19 +536,19 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 						return scope.childWindowOpenHandler(res, opt);
 					}
 				},
-				failure: Ext.emptyFn
+				failure: Ext3.emptyFn
 			};
 			
 			if (this.fireEvent('beforeeditrequest', this, req)) {
 				var scope = this;
-				Ext.Ajax.request(req);
+				Ext3.Ajax.request(req);
 			}
 	    } else {
-		Ext.Msg.show({
+		Ext3.Msg.show({
 			title: 'Редактирование',
 			msg: 'Элемент не выбран',
-			buttons: Ext.Msg.OK,
-			icon: Ext.MessageBox.INFO
+			buttons: Ext3.Msg.OK,
+			icon: Ext3.MessageBox.INFO
 		    });
 	    }
 	}
@@ -561,11 +561,11 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 		
 		var scope = this;
 		if (scope.getSelectionModel().hasSelection()) {
-		    Ext.Msg.show({
+		    Ext3.Msg.show({
 		        title: 'Удаление записи',
 			    msg: 'Вы действительно хотите удалить выбранную запись?',
-			    icon: Ext.Msg.QUESTION,
-		        buttons: Ext.Msg.YESNO,
+			    icon: Ext3.Msg.QUESTION,
+		        buttons: Ext3.Msg.YESNO,
 		        fn:function(btn, text, opt){ 
 		            if (btn == 'yes') {
 						var baseConf = scope.getSelectionContext(scope.localEdit);
@@ -577,20 +577,20 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 		                		   return scope.deleteOkHandler(res, opt);
 		                	   }
 						   },
-		                   failure: Ext.emptyFn
+		                   failure: Ext3.emptyFn
 		                };
 						if (scope.fireEvent('beforedeleterequest', scope, req)) {
-							Ext.Ajax.request(req);
+							Ext3.Ajax.request(req);
 						}
 	                }
 	            }
 	        });
 		} else {
-                    Ext.Msg.show({
+                    Ext3.Msg.show({
                             title: 'Удаление',
                             msg: 'Элемент не выбран',
-                            buttons: Ext.Msg.OK,
-                            icon: Ext.MessageBox.INFO
+                            buttons: Ext3.Msg.OK,
+                            icon: Ext3.MessageBox.INFO
                         });
                 }
 	}
@@ -622,7 +622,7 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 	,refreshStore: function (){
 		if (this.allowPaging) {
 			var pagingBar = this.getBottomToolbar(); 
-			if(pagingBar &&  pagingBar instanceof Ext.PagingToolbar){
+			if(pagingBar &&  pagingBar instanceof Ext3.PagingToolbar){
 			    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
 		        pagingBar.changePage(active_page);
 			}
@@ -636,7 +636,7 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return Ext.applyIf({}, this.actionContextJson);
+    	return Ext3.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек
@@ -648,7 +648,7 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 		var sm = this.getSelectionModel();
 		var record;
 		// для режима выделения строк
-		if (sm instanceof Ext.grid.RowSelectionModel) {
+		if (sm instanceof Ext3.grid.RowSelectionModel) {
 			if (sm.singleSelect) {
 				record = sm.getSelected();
 				baseConf[this.rowIdName] = record.id;
@@ -665,7 +665,7 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 			}
 		}
 		// для режима выделения ячейки
-		else if (sm instanceof Ext.grid.CellSelectionModel) {
+		else if (sm instanceof Ext3.grid.CellSelectionModel) {
 			assert(this.columnParamName, 'columnParamName is not define');
 			
 			var cell = sm.getSelectedCell();
@@ -678,11 +678,11 @@ Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 		// если просят выделенную строку
         if (withRow){
         	// то нужно добавить в параметры текущую строку грида
-        	if (Ext.isArray(record)){
+        	if (Ext3.isArray(record)){
         		// пока х.з. что делать - возьмем первую
-        		baseConf = Ext.applyIf(baseConf, record[0].json);
+        		baseConf = Ext3.applyIf(baseConf, record[0].json);
         	} else {
-        		baseConf = Ext.applyIf(baseConf, record.json);
+        		baseConf = Ext3.applyIf(baseConf, record.json);
         	}
         }
 		return baseConf;

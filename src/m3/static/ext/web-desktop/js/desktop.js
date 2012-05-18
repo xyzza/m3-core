@@ -1,12 +1,12 @@
 /*!
- * Ext JS Library 3.3.0
- * Copyright(c) 2006-2010 Ext JS, Inc.
+ * Ext3 JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext3 JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
 /**
- * @class Ext.ux.StartMenu
- * @extends Ext.menu.Menu
+ * @class Ext3.ux.StartMenu
+ * @extends Ext3.menu.Menu
  * A start menu object.
  * @constructor
  * Creates a new StartMenu
@@ -14,7 +14,7 @@
  *
  * SAMPLE USAGE:
  *
- * this.startMenu = new Ext.ux.StartMenu({
+ * this.startMenu = new Ext3.ux.StartMenu({
  *      iconCls: 'user',
  *      height: 300,
  *      shadow: true,
@@ -37,15 +37,15 @@
  *  });
  */
 
-Ext.namespace("Ext.ux");
+Ext3.namespace("Ext3.ux");
 
-Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
+Ext3.ux.StartMenu = Ext3.extend(Ext3.menu.Menu, {
     toolsPanelWidth: 100,
     initComponent: function(config) {
-        Ext.ux.StartMenu.superclass.initComponent.call(this, config);
-		this.items = new Ext.util.MixedCollection();
+        Ext3.ux.StartMenu.superclass.initComponent.call(this, config);
+		this.items = new Ext3.util.MixedCollection();
         var tools = this.toolItems;
-        this.toolItems = new Ext.util.MixedCollection();
+        this.toolItems = new Ext3.util.MixedCollection();
         if(tools){
             this.addTool.apply(this, tools);
         }
@@ -53,19 +53,19 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
 
     // private
     onRender : function(ct, position){
-        Ext.ux.StartMenu.superclass.onRender.call(this, ct, position);
+        Ext3.ux.StartMenu.superclass.onRender.call(this, ct, position);
         var el = this.el.addClass('ux-start-menu');
 
         var header = el.createChild({
             tag: "div",
-            cls: "x-window-header x-unselectable x-panel-icon "+this.iconCls
+            cls: "x3-window-header x3-unselectable x3-panel-icon "+this.iconCls
         });
 
         this.header = header;
 
         var headerText = header.createChild({
             tag: "span",
-            cls: "x-window-header-text"
+            cls: "x3-window-header-text"
         });
         var tl = header.wrap({
             cls: "ux-start-menu-tl"
@@ -79,31 +79,31 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
 
         this.menuBWrap = el.createChild({
             tag: "div",
-            cls: "x-window-body x-border-layout-ct ux-start-menu-body"
+            cls: "x3-window-body x3-border-layout-ct ux-start-menu-body"
         });
         var ml = this.menuBWrap.wrap({
             cls: "ux-start-menu-ml"
         });
         var mc = this.menuBWrap.wrap({
-            cls: "x-window-mc ux-start-menu-bwrap"
+            cls: "x3-window-mc ux-start-menu-bwrap"
         });
 
         this.menuPanel = this.menuBWrap.createChild({
             tag: "div",
-            cls: "x-panel x-border-panel ux-start-menu-apps-panel"
+            cls: "x3-panel x3-border-panel ux-start-menu-apps-panel"
         });
         this.toolsPanel = this.menuBWrap.createChild({
             tag: "div",
-            cls: "x-panel x-border-panel ux-start-menu-tools-panel"
+            cls: "x3-panel x3-border-panel ux-start-menu-tools-panel"
         });
 
-        var bwrap = ml.wrap({cls: "x-window-bwrap"});
+        var bwrap = ml.wrap({cls: "x3-window-bwrap"});
         var bc = bwrap.createChild({
             tag: "div",
             cls: "ux-start-menu-bc"
         });
         var bl = bc.wrap({
-            cls: "ux-start-menu-bl x-panel-nofooter"
+            cls: "ux-start-menu-bl x3-panel-nofooter"
         });
         var br = bc.wrap({
             cls: "ux-start-menu-br"
@@ -113,7 +113,7 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
 
         var toolsUl = this.toolsPanel.createChild({
             tag: "ul",
-            cls: "x-menu-list"
+            cls: "x3-menu-list"
         });
 
         this.mon(toolsUl, 'click', this.onClick, this);
@@ -127,7 +127,7 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
         this.toolItems.each(
             function(item){
                 var li = document.createElement("li");
-                li.className = "x-menu-list-item";
+                li.className = "x3-menu-list-item";
                 toolsUl.dom.appendChild(li);
                 item.render(li);
                 item.parentMenu = this;
@@ -155,7 +155,7 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
 
     // private
     findTargetItem : function(e){
-        var t = e.getTarget(".x-menu-list-item", this.ul,  true);
+        var t = e.getTarget(".x3-menu-list-item", this.ul,  true);
         if(t && t.menuItemId){
             if(this.items.get(t.menuItemId)){
                 return this.items.get(t.menuItemId);
@@ -168,9 +168,9 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
     /**
      * Displays this menu relative to another element
      * @param {Mixed} element The element to align to
-     * @param {String} position (optional) The {@link Ext.Element#alignTo} anchor position to use in aligning to
+     * @param {String} position (optional) The {@link Ext3.Element#alignTo} anchor position to use in aligning to
      * the element (defaults to this.defaultAlign)
-     * @param {Ext.ux.StartMenu} parentMenu (optional) This menu's parent menu, if applicable (defaults to undefined)
+     * @param {Ext3.ux.StartMenu} parentMenu (optional) This menu's parent menu, if applicable (defaults to undefined)
      */
     show : function(el, pos, parentMenu){
         this.parentMenu = parentMenu;
@@ -220,17 +220,17 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
 
     /**
      * Adds a separator bar to the Tools
-     * @return {Ext.menu.Item} The menu item that was added
+     * @return {Ext3.menu.Item} The menu item that was added
      */
     addToolSeparator : function(){
-        return this.addToolItem(new Ext.menu.Separator({itemCls: 'ux-toolmenu-sep'}));
+        return this.addToolItem(new Ext3.menu.Separator({itemCls: 'ux-toolmenu-sep'}));
     },
 
     addToolItem : function(item){
         this.toolItems.add(item);
         if(this.ul){
             var li = document.createElement("li");
-            li.className = "x-menu-list-item";
+            li.className = "x3-menu-list-item";
             this.ul.dom.appendChild(li);
             item.render(li, this);
             this.delayAutoWidth();
@@ -239,11 +239,11 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
     },
 
     addToolMenuItem : function(config){
-        if(!(config instanceof Ext.menu.Item)){
+        if(!(config instanceof Ext3.menu.Item)){
             if(typeof config.checked == "boolean"){ // must be check menu item config?
-                config = new Ext.menu.CheckItem(config);
+                config = new Ext3.menu.CheckItem(config);
             }else{
-                config = new Ext.menu.Item(config);
+                config = new Ext3.menu.Item(config);
             }
         }
         return this.addToolItem(config);
@@ -258,23 +258,23 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
 
 
 /*!
- * Ext JS Library 3.3.0
- * Copyright(c) 2006-2010 Ext JS, Inc.
+ * Ext3 JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext3 JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
 /**
- * @class Ext.ux.TaskBar
- * @extends Ext.util.Observable
+ * @class Ext3.ux.TaskBar
+ * @extends Ext3.util.Observable
  */
-Ext.ux.TaskBar = function(app){
+Ext3.ux.TaskBar = function(app){
     this.app = app;
     this.init();
 }
 
-Ext.extend(Ext.ux.TaskBar, Ext.util.Observable, {
+Ext3.extend(Ext3.ux.TaskBar, Ext3.util.Observable, {
     init : function(){
-        this.startMenu = new Ext.ux.StartMenu(Ext.apply({
+        this.startMenu = new Ext3.ux.StartMenu(Ext3.apply({
             iconCls: 'user',
             height: 360,
             shadow: true,
@@ -282,7 +282,7 @@ Ext.extend(Ext.ux.TaskBar, Ext.util.Observable, {
             width: 300
         }, this.app.startConfig));
 
-        this.startBtn = new Ext.Button({
+        this.startBtn = new Ext3.Button({
             text: 'Пуск',
             id: 'ux-startbutton',
             iconCls:'start',
@@ -290,11 +290,11 @@ Ext.extend(Ext.ux.TaskBar, Ext.util.Observable, {
             menuAlign: 'bl-tl',
             renderTo: 'ux-taskbar-start',
             clickEvent: 'mousedown',
-            template: new Ext.Template(
-                '<table cellspacing="0" class="x-btn {3}"><tbody><tr>',
+            template: new Ext3.Template(
+                '<table cellspacing="0" class="x3-btn {3}"><tbody><tr>',
                 '<td class="ux-startbutton-left"><i>&#160;</i></td>',
                 '<td class="ux-startbutton-center"><em class="{5} unselectable="on">',
-                    '<button class="x-btn-text {2}" type="{1}" style="height:30px;">{0}</button>',
+                    '<button class="x3-btn-text {2}" type="{1}" style="height:30px;">{0}</button>',
                 '</em></td>',
                 '<td class="ux-startbutton-right"><i>&#160;</i></td>',
                 "</tr></tbody></table>")
@@ -302,7 +302,7 @@ Ext.extend(Ext.ux.TaskBar, Ext.util.Observable, {
 
         var width = this.startBtn.getEl().getWidth()+10;
 
-        var sbBox = new Ext.BoxComponent({
+        var sbBox = new Ext3.BoxComponent({
             el: 'ux-taskbar-start',
             id: 'TaskBarStart',
             minWidth: width,
@@ -311,13 +311,13 @@ Ext.extend(Ext.ux.TaskBar, Ext.util.Observable, {
             width: width
         });
 
-        this.tbPanel = new Ext.ux.TaskButtonsPanel({
+        this.tbPanel = new Ext3.ux.TaskButtonsPanel({
             el: 'ux-taskbuttons-panel',
             id: 'TaskBarButtons',
             region:'center'
         });
 
-        var container = new Ext.ux.TaskBarContainer({
+        var container = new Ext3.ux.TaskBarContainer({
             el: 'ux-taskbar',
             layout: 'border',
             items: [sbBox,this.tbPanel]
@@ -342,17 +342,17 @@ Ext.extend(Ext.ux.TaskBar, Ext.util.Observable, {
 
 
 /**
- * @class Ext.ux.TaskBarContainer
- * @extends Ext.Container
+ * @class Ext3.ux.TaskBarContainer
+ * @extends Ext3.Container
  */
-Ext.ux.TaskBarContainer = Ext.extend(Ext.Container, {
+Ext3.ux.TaskBarContainer = Ext3.extend(Ext3.Container, {
     initComponent : function() {
-        Ext.ux.TaskBarContainer.superclass.initComponent.call(this);
+        Ext3.ux.TaskBarContainer.superclass.initComponent.call(this);
 
-        this.el = Ext.get(this.el) || Ext.getBody();
-        this.el.setHeight = Ext.emptyFn;
-        this.el.setWidth = Ext.emptyFn;
-        this.el.setSize = Ext.emptyFn;
+        this.el = Ext3.get(this.el) || Ext3.getBody();
+        this.el.setHeight = Ext3.emptyFn;
+        this.el.setWidth = Ext3.emptyFn;
+        this.el.setSize = Ext3.emptyFn;
         this.el.setStyle({
             overflow:'hidden',
             margin:'0',
@@ -362,7 +362,7 @@ Ext.ux.TaskBarContainer = Ext.extend(Ext.Container, {
         this.allowDomMove = false;
         this.autoWidth = true;
         this.autoHeight = true;
-        Ext.EventManager.onWindowResize(this.fireResize, this);
+        Ext3.EventManager.onWindowResize(this.fireResize, this);
         this.renderTo = this.el;
     },
 
@@ -375,10 +375,10 @@ Ext.ux.TaskBarContainer = Ext.extend(Ext.Container, {
 
 
 /**
- * @class Ext.ux.TaskButtonsPanel
- * @extends Ext.BoxComponent
+ * @class Ext3.ux.TaskButtonsPanel
+ * @extends Ext3.BoxComponent
  */
-Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
+Ext3.ux.TaskButtonsPanel = Ext3.extend(Ext3.BoxComponent, {
     activeButton: null,
     enableScroll: true,
     scrollIncrement: 0,
@@ -392,33 +392,33 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
     buttonWidthSet: false,
 
     initComponent : function() {
-        Ext.ux.TaskButtonsPanel.superclass.initComponent.call(this);
+        Ext3.ux.TaskButtonsPanel.superclass.initComponent.call(this);
         this.on('resize', this.delegateUpdates);
         this.items = [];
 
-        this.stripWrap = Ext.get(this.el).createChild({
+        this.stripWrap = Ext3.get(this.el).createChild({
             cls: 'ux-taskbuttons-strip-wrap',
             cn: {
                 tag:'ul', cls:'ux-taskbuttons-strip'
             }
         });
-        this.stripSpacer = Ext.get(this.el).createChild({
+        this.stripSpacer = Ext3.get(this.el).createChild({
             cls:'ux-taskbuttons-strip-spacer'
         });
-        this.strip = new Ext.Element(this.stripWrap.dom.firstChild);
+        this.strip = new Ext3.Element(this.stripWrap.dom.firstChild);
 
         this.edge = this.strip.createChild({
             tag:'li',
             cls:'ux-taskbuttons-edge'
         });
         this.strip.createChild({
-            cls:'x-clear'
+            cls:'x3-clear'
         });
     },
 
     addButton : function(win){
         var li = this.strip.createChild({tag:'li'}, this.edge); // insert before the edge
-        var btn = new Ext.ux.TaskBar.TaskButton(win, li);
+        var btn = new Ext3.ux.TaskBar.TaskButton(win, li);
 
         this.items.push(btn);
 
@@ -475,12 +475,12 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
         var each = Math.max(Math.min(Math.floor((aw-4) / count) - this.buttonMargin, this.buttonWidth), this.minButtonWidth); // -4 for float errors in IE
         var btns = this.stripWrap.dom.getElementsByTagName('button');
 
-        this.lastButtonWidth = Ext.get(btns[0].id).findParent('li').offsetWidth;
+        this.lastButtonWidth = Ext3.get(btns[0].id).findParent('li').offsetWidth;
 
         for(var i = 0, len = btns.length; i < len; i++) {
             var btn = btns[i];
 
-            var tw = Ext.get(btns[i].id).findParent('li').offsetWidth;
+            var tw = Ext3.get(btns[i].id).findParent('li').offsetWidth;
             var iw = btn.offsetWidth;
 
             btn.style.width = (each - (tw-iw)) + 'px';
@@ -508,13 +508,13 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
             //wrap.setWidth(tw); moved from here because of problem in Safari
             if(this.scrolling){
                 this.scrolling = false;
-                this.el.removeClass('x-taskbuttons-scrolling');
+                this.el.removeClass('x3-taskbuttons-scrolling');
                 this.scrollLeft.hide();
                 this.scrollRight.hide();
             }
         }else{
             if(!this.scrolling){
-                this.el.addClass('x-taskbuttons-scrolling');
+                this.el.addClass('x3-taskbuttons-scrolling');
             }
             tw -= wrap.getMargins('lr');
             wrap.setWidth(tw > 20 ? tw : 20);
@@ -545,7 +545,7 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
         });
         sl.setHeight(h);
         sl.addClassOnOver('ux-taskbuttons-scroller-left-over');
-        this.leftRepeater = new Ext.util.ClickRepeater(sl, {
+        this.leftRepeater = new Ext3.util.ClickRepeater(sl, {
             interval : this.scrollRepeatInterval,
             handler: this.onScrollLeft,
             scope: this
@@ -558,7 +558,7 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
         });
         sr.setHeight(h);
         sr.addClassOnOver('ux-taskbuttons-scroller-right-over');
-        this.rightRepeater = new Ext.util.ClickRepeater(sr, {
+        this.rightRepeater = new Ext3.util.ClickRepeater(sr, {
             interval : this.scrollRepeatInterval,
             handler: this.onScrollRight,
             scope: this
@@ -599,7 +599,7 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
         if(!item){ return; }
         var el = item; //this.getBtnEl(item);
         var pos = this.getScrollPos(), area = this.getScrollArea();
-        var left = Ext.fly(el).getOffsetsTo(this.stripWrap)[0] + pos;
+        var left = Ext3.fly(el).getOffsetsTo(this.stripWrap)[0] + pos;
         var right = left + el.offsetWidth;
         if(left < pos){
             this.scrollTo(left, animate);
@@ -654,14 +654,14 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
 
 
 /**
- * @class Ext.ux.TaskBar.TaskButton
- * @extends Ext.Button
+ * @class Ext3.ux.TaskBar.TaskButton
+ * @extends Ext3.Button
  */
-Ext.ux.TaskBar.TaskButton = function(win, el){
+Ext3.ux.TaskBar.TaskButton = function(win, el){
     this.win = win;
-    Ext.ux.TaskBar.TaskButton.superclass.constructor.call(this, {
+    Ext3.ux.TaskBar.TaskButton.superclass.constructor.call(this, {
         iconCls: win.iconCls,
-        text: Ext.util.Format.ellipsis(win.title, win.iconCls ? 25 : 29),
+        text: Ext3.util.Format.ellipsis(win.title, win.iconCls ? 25 : 29),
         tooltip: win.title,
         renderTo: el,
         handler : function(){
@@ -679,22 +679,22 @@ Ext.ux.TaskBar.TaskButton = function(win, el){
             }
         },
         clickEvent:'mousedown',
-        template: new Ext.Template(
-            '<table cellspacing="0" class="x-btn {3}"><tbody><tr>',
+        template: new Ext3.Template(
+            '<table cellspacing="0" class="x3-btn {3}"><tbody><tr>',
             '<td class="ux-taskbutton-left"><i>&#160;</i></td>',
             '<td class="ux-taskbutton-center"><em class="{5} unselectable="on">',
-                '<button class="x-btn-text {2}" type="{1}" style="height:28px;">{0}</button>',
+                '<button class="x3-btn-text {2}" type="{1}" style="height:28px;">{0}</button>',
             '</em></td>',
             '<td class="ux-taskbutton-right"><i>&#160;</i></td>',
             "</tr></tbody></table>")
     });
 };
 
-Ext.extend(Ext.ux.TaskBar.TaskButton, Ext.Button, {
+Ext3.extend(Ext3.ux.TaskBar.TaskButton, Ext3.Button, {
     onRender : function(){
-        Ext.ux.TaskBar.TaskButton.superclass.onRender.apply(this, arguments);
+        Ext3.ux.TaskBar.TaskButton.superclass.onRender.apply(this, arguments);
 
-        this.cmenu = new Ext.menu.Menu({
+        this.cmenu = new Ext3.menu.Menu({
             items: [{
                 text: 'Восстановить',
                 handler: function(){
@@ -758,7 +758,7 @@ Ext.extend(Ext.ux.TaskBar.TaskButton, Ext.Button, {
 });
 
 
-Ext.ux.Clock = Ext.extend(Ext.Toolbar.TextItem,{
+Ext3.ux.Clock = Ext3.extend(Ext3.Toolbar.TextItem,{
 	shortdays: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
     currTime: function(){
 		var d = new Date();
@@ -767,55 +767,55 @@ Ext.ux.Clock = Ext.extend(Ext.Toolbar.TextItem,{
 		return dateStr.replace('XXX', day);
 	}
     ,initComponent: function() {
-        Ext.apply(this, {
+        Ext3.apply(this, {
             text: this.currTime()
-            ,cls: "x-text-icon"
+            ,cls: "x3-text-icon"
             ,icon: "clock.png" //Lick to a clock icon
         });
-        Ext.ux.Clock.superclass.initComponent.apply(this, arguments);
+        Ext3.ux.Clock.superclass.initComponent.apply(this, arguments);
         
         this.clock_updater = {
             run: this.update,
             scope: this,
             interval: 1000 //1 second
         }
-        Ext.TaskMgr.start(this.clock_updater);
+        Ext3.TaskMgr.start(this.clock_updater);
     }
     ,update: function() {
         this.setText(this.currTime())
     }
 });
-Ext.reg('ux_clock', Ext.ux.Clock);
+Ext3.reg('ux_clock', Ext3.ux.Clock);
 
 /*!
- * Ext JS Library 3.3.0
- * Copyright(c) 2006-2010 Ext JS, Inc.
+ * Ext3 JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext3 JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
-Ext.Desktop = function(app){
-    this.taskbar = new Ext.ux.TaskBar(app);
+Ext3.Desktop = function(app){
+    this.taskbar = new Ext3.ux.TaskBar(app);
     this.xTickSize = this.yTickSize = 1;
     var taskbar = this.taskbar;
 
-    var desktopEl = Ext.get('x-desktop');
-    var taskbarEl = Ext.get('ux-taskbar');
-    var shortcuts = Ext.get('x-shortcuts');
+    var desktopEl = Ext3.get('x3-desktop');
+    var taskbarEl = Ext3.get('ux-taskbar');
+    var shortcuts = Ext3.get('x3-shortcuts');
 
 
     //ZIgi 16.12 дабы окна рендерились только внутри десктопа
     //оставляя верхний и нижний тулбары
-    Ext.override(Ext.Window,
+    Ext3.override(Ext3.Window,
     {
-        renderTo: 'x-desktop'
+        renderTo: 'x3-desktop'
     });
 
-    var windows = new Ext.WindowGroup();
+    var windows = new Ext3.WindowGroup();
     var activeWindow;
 
-    var toptoolbarEl = Ext.get('ux-toptoolbar');
+    var toptoolbarEl = Ext3.get('ux-toptoolbar');
     
-    var TopToolbar = Ext.extend(Ext.Panel, {
+    var TopToolbar = Ext3.extend(Ext3.Panel, {
         monitorResize: true,
         autoWidth: true,
         autoHeight: true,
@@ -827,7 +827,7 @@ Ext.Desktop = function(app){
         tbar: [],
         initComponent : function() {
             TopToolbar.superclass.initComponent.call(this);
-            Ext.EventManager.onWindowResize(this.fireResize, this);
+            Ext3.EventManager.onWindowResize(this.fireResize, this);
         },
         fireResize : function(w, h){
             this.onResize(w, 0, w, 0);
@@ -852,7 +852,7 @@ Ext.Desktop = function(app){
                     if(m.launcher.text == 'FILLBLOCK'){
                         tbar.add('->');
                     } else if(m.launcher.text == 'TIMEBLOCK'){
-                        var clock = new Ext.ux.Clock();
+                        var clock = new Ext3.ux.Clock();
                         tbar.add(clock);
                     } else if(m.launcher.text == '-'){
                         tbar.add('-');
@@ -888,14 +888,14 @@ Ext.Desktop = function(app){
         }
         taskbar.setActiveButton(win.taskButton);
         activeWindow = win;
-        Ext.fly(win.taskButton.el).addClass('active-win');
+        Ext3.fly(win.taskButton.el).addClass('active-win');
         win.minimized = false;
     }
 
     function markInactive(win){
         if(win == activeWindow){
             activeWindow = null;
-            Ext.fly(win.taskButton.el).removeClass('active-win');
+            Ext3.fly(win.taskButton.el).removeClass('active-win');
         }
     }
 
@@ -905,9 +905,9 @@ Ext.Desktop = function(app){
     }
 
     function layout(){
-        desktopEl.setHeight(Ext.lib.Dom.getViewHeight()-taskbarEl.getHeight()-toptoolbarEl.getHeight());
+        desktopEl.setHeight(Ext3.lib.Dom.getViewHeight()-taskbarEl.getHeight()-toptoolbarEl.getHeight());
     }
-    Ext.EventManager.onWindowResize(layout);
+    Ext3.EventManager.onWindowResize(layout);
 
     this.layout = layout;
 
@@ -916,8 +916,8 @@ Ext.Desktop = function(app){
          * modify @config parameter to @win parameter
          * win - Готовое окно
          * >>
-        var win = new (cls||Ext.Window)(
-            Ext.applyIf(config||{}, {
+        var win = new (cls||Ext3.Window)(
+            Ext3.applyIf(config||{}, {
                 renderTo: desktopEl,
                 manager: windows,
                 minimizable: true,
@@ -928,7 +928,7 @@ Ext.Desktop = function(app){
 
         win.taskButton = taskbar.addTaskButton(win);
 
-        //win.cmenu = new Ext.menu.Menu({
+        //win.cmenu = new Ext3.menu.Menu({
         //    items: []
         //});
 
@@ -965,26 +965,26 @@ Ext.Desktop = function(app){
     }
 
     this.getWinWidth = function(){
-        var width = Ext.lib.Dom.getViewWidth();
+        var width = Ext3.lib.Dom.getViewWidth();
         return width < 200 ? 200 : width;
     }
 
     this.getWinHeight = function(){
-        var height = (Ext.lib.Dom.getViewHeight()-taskbarEl.getHeight());
+        var height = (Ext3.lib.Dom.getViewHeight()-taskbarEl.getHeight());
         return height < 100 ? 100 : height;
     }
 
     this.getWinX = function(width){
-        return (Ext.lib.Dom.getViewWidth() - width) / 2
+        return (Ext3.lib.Dom.getViewWidth() - width) / 2
     }
 
     this.getWinY = function(height){
-        return (Ext.lib.Dom.getViewHeight()-taskbarEl.getHeight() - height - toptoolbarEl.getHeight()) / 2;
+        return (Ext3.lib.Dom.getViewHeight()-taskbarEl.getHeight() - height - toptoolbarEl.getHeight()) / 2;
     }
 
     layout();
 
-    // Если в прикладном приложении при создании Ext.app.App передать в словаре
+    // Если в прикладном приложении при создании Ext3.app.App передать в словаре
     // параметр primaryEvent, то срабатывание именно этого эвента запустит
     // действие, назначенное на ярлык на рабочем столе.
     // Пример: если передать primaryEvent: 'dblclick', то ярлыки будут
@@ -1005,22 +1005,22 @@ Ext.Desktop = function(app){
 };
 
 /*!
- * Ext JS Library 3.3.0
- * Copyright(c) 2006-2010 Ext JS, Inc.
+ * Ext3 JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext3 JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
-Ext.app.App = function(cfg){
-    Ext.apply(this, cfg);
+Ext3.app.App = function(cfg){
+    Ext3.apply(this, cfg);
     this.addEvents({
         'ready' : true,
         'beforeunload' : true
     });
 
-    Ext.onReady(this.initApp, this);
+    Ext3.onReady(this.initApp, this);
 };
 
-Ext.extend(Ext.app.App, Ext.util.Observable, {
+Ext3.extend(Ext3.app.App, Ext3.util.Observable, {
     isReady: false,
     startMenu: null,
     modules: null,
@@ -1032,7 +1032,7 @@ Ext.extend(Ext.app.App, Ext.util.Observable, {
     initApp : function(){
         this.startConfig = this.startConfig || this.getStartConfig();
 
-        this.desktop = new Ext.Desktop(this);
+        this.desktop = new Ext3.Desktop(this);
 
         this.launcher = this.desktop.taskbar.startMenu;
 
@@ -1043,13 +1043,13 @@ Ext.extend(Ext.app.App, Ext.util.Observable, {
 
         this.init();
 
-        Ext.EventManager.on(window, 'beforeunload', this.onUnload, this);
+        Ext3.EventManager.on(window, 'beforeunload', this.onUnload, this);
         this.fireEvent('ready', this);
         this.isReady = true;
     },
 
-    getModules : Ext.emptyFn,
-    init : Ext.emptyFn,
+    getModules : Ext3.emptyFn,
+    init : Ext3.emptyFn,
 
     initModules : function(ms){
         for(var i = 0, len = ms.length; i < len; i++){
@@ -1098,17 +1098,17 @@ Ext.extend(Ext.app.App, Ext.util.Observable, {
 });
 
 /*!
- * Ext JS Library 3.3.0
- * Copyright(c) 2006-2010 Ext JS, Inc.
+ * Ext3 JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext3 JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
-Ext.app.Module = function(config){
-    Ext.apply(this, config);
-    Ext.app.Module.superclass.constructor.call(this);
+Ext3.app.Module = function(config){
+    Ext3.apply(this, config);
+    Ext3.app.Module.superclass.constructor.call(this);
     this.init();
 }
 
-Ext.extend(Ext.app.Module, Ext.util.Observable, {
-    init : Ext.emptyFn
+Ext3.extend(Ext3.app.Module, Ext3.util.Observable, {
+    init : Ext3.emptyFn
 });

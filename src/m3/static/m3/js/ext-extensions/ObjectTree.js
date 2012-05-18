@@ -2,7 +2,7 @@
  * Объектное дерево, включает в себя тулбар с кнопками добавить (в корень и дочерний элемент), редактировать и удалить
  * @param {Object} config
  */
-Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
+Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 	constructor: function(baseConfig, params){
 		assert(params.rowIdName !== undefined,'rowIdName is undefined');
 		assert(params.actions !== undefined,'actions is undefined');
@@ -17,7 +17,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		this.parentIdName = params.parentIdName;
         this.incrementalUpdate = params.incrementalUpdate;
 		if (params.customLoad) {
-			var ajax = Ext.Ajax;
+			var ajax = Ext3.Ajax;
 			this.on('expandnode',function (node){
 				var nodeList = new Array();
 				if (node.hasChildNodes()){
@@ -32,12 +32,12 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 						url: params.actions.dataUrl
 						,params: {'list_nodes': nodeList.join(',')}
 						,success: function(response, opts){
-							var res = Ext.util.JSON.decode(response.responseText);
+							var res = Ext3.util.JSON.decode(response.responseText);
 							if (res) {
 								for (var i=0; i < res.length; i++){
 									var curr_node = node.childNodes[i];
 									for (var j=0; j < res[i].children.length; j++){
-										var newNode = new Ext.tree.AsyncTreeNode(res[i].children[j]);
+										var newNode = new Ext3.tree.AsyncTreeNode(res[i].children[j]);
 										curr_node.appendChild(newNode);
 										curr_node.loaded = true;
 									}
@@ -45,7 +45,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 							} 
 						}
 						,failure: function(response, opts){
-						   Ext.Msg.alert('','failed');
+						   Ext3.Msg.alert('','failed');
 						}
 					});
 				}
@@ -59,16 +59,16 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		if (params.folderSort != undefined) {
 			baseConfig.folderSort = params.folderSort; 
 		}
-		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
+		Ext3.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
 	},
 
 	initComponent: function(){
 		var loader = this.getLoader(); 
 		loader.baseParams = this.getMainContext();
 		
-		Ext.m3.ObjectTree.superclass.initComponent.call(this);
+		Ext3.m3.ObjectTree.superclass.initComponent.call(this);
 		// Созадем свой сортировщик с переданными параметрами
-		var sorter = new Ext.ux.tree.TreeGridSorter(this, {folderSort: this.folderSort, property: this.columns[0].dataIndex || 'text'});        
+		var sorter = new Ext3.ux.tree.TreeGridSorter(this, {folderSort: this.folderSort, property: this.columns[0].dataIndex || 'text'});        
         // Повесим отображение маски при загрузке дерева
         loader.on('beforeload', this.onBeforeLoad, this);
         loader.on('load', this.onLoad, this);
@@ -104,7 +104,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 	showMask: function(visible) {
 		var loader = this.getLoader();
 		if (this.treeLoadingMask == undefined) {
-			this.treeLoadingMask = new Ext.LoadMask(this.el, {msg:"Загрузка..."});
+			this.treeLoadingMask = new Ext3.LoadMask(this.el, {msg:"Загрузка..."});
 		}
 		if (visible) {
 			this.treeLoadingMask.show();
@@ -142,7 +142,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
     	};
 
         if (this.fireEvent('beforenewrequest', this, req, false)) {
-			Ext.Ajax.request(req);
+			Ext3.Ajax.request(req);
 		}
 	},
 
@@ -150,11 +150,11 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
 		if (!this.getSelectionModel().getSelectedNode()) {
-			Ext.Msg.show({
+			Ext3.Msg.show({
 			   title: 'Новый',
 			   msg: 'Элемент не выбран',
-			   buttons: Ext.Msg.OK,
-			   icon: Ext.MessageBox.INFO
+			   buttons: Ext3.Msg.OK,
+			   icon: Ext3.MessageBox.INFO
 			});
 			return;
 		}
@@ -177,7 +177,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
     	};
 
         if (this.fireEvent('beforenewrequest', this, req, true)) {
-			Ext.Ajax.request(req);
+			Ext3.Ajax.request(req);
 		}
 	},
 
@@ -202,7 +202,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 		    };
 
             if (this.fireEvent('beforeeditrequest', this, req)) {
-			    Ext.Ajax.request(req);
+			    Ext3.Ajax.request(req);
 		    }
     	}
 	},
@@ -213,12 +213,12 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
         var node = this.getSelectionModel().getSelectedNode()
         if (node) {
         
-            Ext.Msg.show({
+            Ext3.Msg.show({
                title: 'Удаление записи',
                scope: this,
                msg: 'Вы действительно хотите удалить выбранную запись?',
-               icon: Ext.Msg.QUESTION,
-               buttons: Ext.Msg.YESNO,
+               icon: Ext3.Msg.QUESTION,
+               buttons: Ext3.Msg.YESNO,
                fn: function(btn, text, opt){
                    if (btn != 'yes')
                     return;
@@ -239,17 +239,17 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
                         };
     
                         if (this.fireEvent('beforedeleterequest', this, req)) {
-                            Ext.Ajax.request(req);
+                            Ext3.Ajax.request(req);
                         }
                     }
                 }
            });
         } else {
-            Ext.Msg.show({
+            Ext3.Msg.show({
                 title: 'Удаление',
                 msg: 'Элемент не выбран',
-                buttons: Ext.Msg.OK,
-                icon: Ext.MessageBox.INFO
+                buttons: Ext3.Msg.OK,
+                icon: Ext3.MessageBox.INFO
             });
         }
     },
@@ -261,7 +261,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
             window.on('closed_ok', function(data){
                 if (this.incrementalUpdate){
                     // нам пришел узел дерева
-                    var obj = Ext.util.JSON.decode(data);
+                    var obj = Ext3.util.JSON.decode(data);
                     var selectedNode = this.getSelectionModel().getSelectedNode();
                     var newSelectNode = this.getLoader().createNode(obj.data);
                     switch (operation){
@@ -327,7 +327,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 	,deleteOkHandler: function (response, opts){
         if (this.incrementalUpdate){
             // проверка на ошибки уровня приложения
-            var res = Ext.util.JSON.decode(response.responseText);
+            var res = Ext3.util.JSON.decode(response.responseText);
             if(!res.success){
                 smart_eval(response.responseText);
                 return;
@@ -351,7 +351,7 @@ Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return Ext.applyIf({}, this.actionContextJson);
+    	return Ext3.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек

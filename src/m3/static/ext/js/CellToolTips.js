@@ -1,8 +1,8 @@
 // Create the namespace
-Ext.ns('Ext.ux.plugins.grid');
+Ext3.ns('Ext3.ux.plugins.grid');
 
 /**
- * Ext.ux.plugins.grid.CellToolTips plugin for Ext.grid.GridPanel
+ * Ext3.ux.plugins.grid.CellToolTips plugin for Ext3.grid.GridPanel
  *
  * A GridPanel plugin that enables the creation of record based,
  * per-column tooltips that can also be dynamically loaded via Ajax
@@ -26,7 +26,7 @@ Ext.ns('Ext.ux.plugins.grid');
  *
  * An example configuration:
  * <pre><code>
-	var tts = new Ext.ux.plugins.grid.CellToolTips([
+	var tts = new Ext3.ux.plugins.grid.CellToolTips([
 		{
 			// 'Standard' CellToolTip, the current row record is applied
 			// to the template.
@@ -40,7 +40,7 @@ Ext.ns('Ext.ux.plugins.grid');
 			field: 'price', 
 			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%<br />{ADDITIONAL}', 
 			url: 'json_ajaxtip1.php',
-			afterFn: function(data) { return Ext.apply({ ADDITIONAL: 'Test' }, data; }
+			afterFn: function(data) { return Ext3.apply({ ADDITIONAL: 'Test' }, data; }
 		},
 		{
 			// Advanced Ajax CellToolTip, the current row record is passed to the
@@ -50,13 +50,13 @@ Ext.ns('Ext.ux.plugins.grid');
 			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%', 
 			fn: function(parms) {
 				parms.price = parms.price * 100;
-				return Ext.apply({},parms);
+				return Ext3.apply({},parms);
 			},
 			url: '/json_ajaxtip2.php'
 		}
 	]);
 	
-	var grid = new Ext.grid.GridPanel({
+	var grid = new Ext3.grid.GridPanel({
 		... normal config ...
 		,plugins:	[ tts ]
 		// Optional: filter which rows should have a tooltip:
@@ -75,18 +75,18 @@ Ext.ns('Ext.ux.plugins.grid');
  * @date    July 08, 2009
  * @version 1.3
  *
- * @class Ext.ux.plugins.grid.CellToolTips
- * @extends Ext.util.Observable
+ * @class Ext3.ux.plugins.grid.CellToolTips
+ * @extends Ext3.util.Observable
  */
-Ext.ux.plugins.grid.CellToolTips = function(config) {
+Ext3.ux.plugins.grid.CellToolTips = function(config) {
     var cfgTips;
-    if( Ext.isArray(config) ) {
+    if( Ext3.isArray(config) ) {
         cfgTips = config;
         config = {};
     } else {
     	cfgTips = config.ajaxTips;
     }
-    Ext.ux.plugins.grid.CellToolTips.superclass.constructor.call(this, config);
+    Ext3.ux.plugins.grid.CellToolTips.superclass.constructor.call(this, config);
     if( config.tipConfig ) {
     	this.tipConfig = config.tipConfig;
     }
@@ -94,7 +94,7 @@ Ext.ux.plugins.grid.CellToolTips = function(config) {
 } // End of constructor
 
 // plugin code
-Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
+Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
     version: 1.3,
     /**
      * Temp storage from the config object
@@ -141,7 +141,7 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
     /**
      * Plugin initialization routine
      *
-     * @param {Ext.grid.GridPanel} grid
+     * @param {Ext3.grid.GridPanel} grid
      */
     init: function(grid) {
         if( ! this.ajaxTips ) {
@@ -152,8 +152,8 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
       	this.tipAfterFns = {};
         this.tipUrls = {};
         // Generate tooltip templates
-        Ext.each( this.ajaxTips, function(tip) {
-        	this.tipTpls[tip.field] = new Ext.XTemplate( tip.tpl );
+        Ext3.each( this.ajaxTips, function(tip) {
+        	this.tipTpls[tip.field] = new Ext3.XTemplate( tip.tpl );
         	if( tip.url ) {
         		this.tipUrls[tip.field] = tip.url;
         	}
@@ -174,17 +174,17 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
      * Set/Add a template for a column
      *
      * @param {String} fld
-     * @param {String | Ext.XTemplate} tpl
+     * @param {String | Ext3.XTemplate} tpl
      */
     ,setFieldTpl: function(fld, tpl) {
-        this.tipTpls[fld] = Ext.isObject(tpl) ? tpl : new Ext.XTemplate(tpl);
+        this.tipTpls[fld] = Ext3.isObject(tpl) ? tpl : new Ext3.XTemplate(tpl);
     } // End of function setFieldTpl
 
     /**
      * Set up the tooltip when the grid is rendered
      *
      * @private
-     * @param {Ext.grid.GridPanel} grid
+     * @param {Ext3.grid.GridPanel} grid
      */
     ,onGridRender: function(grid) 
     {
@@ -192,13 +192,13 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
             return;
         }
         // Create one new tooltip for the whole grid
-        Ext.apply(this.tipConfig, {
+        Ext3.apply(this.tipConfig, {
             target:      grid.getView().mainBody,
-            delegate:    '.x-grid3-cell-inner',
+            delegate:    '.x3-grid3-cell-inner',
             renderTo:    document.body,
             finished:	 false
         });
-        Ext.applyIf(this.tipConfig, {
+        Ext3.applyIf(this.tipConfig, {
             
             //prefer M: В ie с запятой не будет работать. 
             // monkey pathcing mode true
@@ -206,7 +206,7 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
             trackMouse:  true
     	});
 
-        this.tip = new Ext.ToolTip( this.tipConfig );
+        this.tip = new Ext3.ToolTip( this.tipConfig );
         this.tip.ctt = this;
         // Hook onto the beforeshow event to update the tooltip content
         this.tip.on('beforeshow', this.beforeTipShow.createDelegate(this.tip, [this, grid], true));
@@ -217,9 +217,9 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
      * Replace the tooltip body by applying current row data to the template
      *
      * @private
-     * @param {Ext.ToolTip} tip
-     * @param {Ext.ux.plugins.grid.CellToolTips} ctt
-     * @param {Ext.grid.GridPanel} grid
+     * @param {Ext3.ToolTip} tip
+     * @param {Ext3.ux.plugins.grid.CellToolTips} ctt
+     * @param {Ext3.grid.GridPanel} grid
      */
     ,beforeTipShow: function(tip, ctt, grid) {
 	// Get column id and check if a tip is defined for it
@@ -253,7 +253,7 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
      * Fired when the tooltip is hidden, resets the finished handler.
      *
      * @private
-     * @param {Ext.ToolTip} tip
+     * @param {Ext3.ToolTip} tip
      */
     ,hideTip: function(tip) {
     	tip.finished = false;
@@ -264,19 +264,19 @@ Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
      *
      * @private
      * @param {object} data Parameters for the Ajax request
-     * @param {Ext.ToolTip} tip The tooltip object
-     * @param {Ext.grid.GridPanel} grid The grid
-     * @param {Ext.ux.plugins.grid.CellToolTips} ctt The CellToolTips object
+     * @param {Ext3.ToolTip} tip The tooltip object
+     * @param {Ext3.grid.GridPanel} grid The grid
+     * @param {Ext3.ux.plugins.grid.CellToolTips} ctt The CellToolTips object
      * @param {String} tipid Id of the tooltip (= field name)
      */
     ,loadDetails: function(data, tip, grid, ctt, tipid) {
-    	Ext.Ajax.request({
+    	Ext3.Ajax.request({
     		url:	ctt.tipUrls[tipid],
     		params:	data,
     		method: 'POST',
     		success:	function(resp, opt) {
     			tip.finished = true;
-    			tip.tipdata  = Ext.decode(resp.responseText);
+    			tip.tipdata  = Ext3.decode(resp.responseText);
     			if( ctt.tipAfterFns[tipid] ) {
     				tip.tipdata = ctt.tipAfterFns[tipid](tip.tipdata);
     			}

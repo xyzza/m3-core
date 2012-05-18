@@ -8,7 +8,7 @@
  * @param {Object} params Дрополнительные параметра для правильной конф-ии
  */
 function createAdvancedTreeGrid(baseConfig, params){
-	return new Ext.m3.AdvancedTreeGrid(baseConfig, params);
+	return new Ext3.m3.AdvancedTreeGrid(baseConfig, params);
 }
 
 /**
@@ -18,10 +18,10 @@ function createAdvancedTreeGrid(baseConfig, params){
  */
 function createGridPanel(baseConfig, params){
   if (baseConfig.editor) {
-    return new Ext.m3.EditorGridPanel(baseConfig, params);
+    return new Ext3.m3.EditorGridPanel(baseConfig, params);
   }
   else {
-	  return new Ext.m3.GridPanel(baseConfig, params);
+	  return new Ext3.m3.GridPanel(baseConfig, params);
 	}
 }
 
@@ -32,10 +32,10 @@ function createGridPanel(baseConfig, params){
  */
 function createObjectGrid(baseConfig, params){
   if (baseConfig.editor) {
-    return new Ext.m3.EditorObjectGrid(baseConfig, params);
+    return new Ext3.m3.EditorObjectGrid(baseConfig, params);
   }
   else {
-	  return new Ext.m3.ObjectGrid(baseConfig, params);
+	  return new Ext3.m3.ObjectGrid(baseConfig, params);
 	}
 }
 
@@ -45,7 +45,7 @@ function createObjectGrid(baseConfig, params){
  * @param {Object} params
  */
 function createObjectTree(baseConfig, params){
-	return new Ext.m3.ObjectTree(baseConfig, params);
+	return new Ext3.m3.ObjectTree(baseConfig, params);
 }
 
 /**
@@ -54,7 +54,7 @@ function createObjectTree(baseConfig, params){
  * @param {Object} params
  */
 function createAdvancedComboBox(baseConfig, params){
-	var adv_combo = new Ext.m3.AdvancedComboBox(baseConfig, params);
+	var adv_combo = new Ext3.m3.AdvancedComboBox(baseConfig, params);
 //	adv_combo.on('beforeselect',function(){
 //		console.log('beforeselect');
 //	});
@@ -88,5 +88,5 @@ function createAdvancedComboBox(baseConfig, params){
  * @param {Object} baseConfig
  */
 function createAdvancedDataField(baseConfig, params){
-	return new Ext.m3.AdvancedDataField(baseConfig, params);
+	return new Ext3.m3.AdvancedDataField(baseConfig, params);
 }

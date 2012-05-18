@@ -2,7 +2,7 @@
  * Расширенный функционал комбобокса
  */
 
-Ext.m3.ComboBox =  Ext.extend(Ext.form.ComboBox,{
+Ext3.m3.ComboBox =  Ext3.extend(Ext3.form.ComboBox,{
 	/**
 	 * Возвращает текстовое представление комбобокса
 	 */

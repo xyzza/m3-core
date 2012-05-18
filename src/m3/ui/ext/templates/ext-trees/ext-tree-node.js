@@ -1,4 +1,4 @@
-{# new Ext.tree.AsyncTreeNode -- нельзя использовать, так как работает некорректно с вложеной иерархией #} 
+{# new Ext3.tree.AsyncTreeNode -- нельзя использовать, так как работает некорректно с вложеной иерархией #} 
 {
 	expanded: {{ component.expanded|lower }}
 	,id: '{{ component.client_id }}'

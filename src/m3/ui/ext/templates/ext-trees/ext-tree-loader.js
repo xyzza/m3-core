@@ -1,7 +1,7 @@
-new Ext.tree.TreeLoader({
+new Ext3.tree.TreeLoader({
 	'id': '{{ component.client_id }}'
 	,xtype:'treeloader'
-	,baseParams: Ext.applyIf({
+	,baseParams: Ext3.applyIf({
 		{% for key,value in component.base_params.items %}
     			'{{ key }}': '{{ value}}'{% if not forloop.last %},{% endif %}
     		{% endfor %}

@@ -9,7 +9,7 @@ function(){
 		{% endifequal %}
 	{% endfor%}
 	
-	var tree = new Ext.ux.tree.TreeGrid({
+	var tree = new Ext3.ux.tree.TreeGrid({
 		{% include 'base-ext-ui.js'%}
 		
 		{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}
@@ -42,7 +42,7 @@ function(){
 		,columns:{{ component.t_render_columns|safe }}
 		,loader: {{ component.t_render_tree_loader|safe }}	
 		
-		,root: new Ext.tree.AsyncTreeNode({
+		,root: new Ext3.tree.AsyncTreeNode({
 			id: '-1'
 			,expanded: true
 			,allowDrag: false
@@ -81,7 +81,7 @@ function(){
 	
 	{% if component.custom_load %}
 
-		var ajax = Ext.Ajax;
+		var ajax = Ext3.Ajax;
 		tree.on('expandnode',function (node){
 			var nodeList = new Array();
 			if (node.hasChildNodes()){
@@ -98,13 +98,13 @@ function(){
 						'list_nodes': nodeList.join(',')
 					}
 					,success: function(response, opts){
-						var res = Ext.util.JSON.decode(response.responseText);
+						var res = Ext3.util.JSON.decode(response.responseText);
 	
 						if (res) {
 							for (var i=0; i < res.length; i++){
 								var curr_node = node.childNodes[i];
 								for (var j=0; j < res[i].children.length; j++){
-									var newNode = new Ext.tree.AsyncTreeNode(res[i].children[j]);
+									var newNode = new Ext3.tree.AsyncTreeNode(res[i].children[j]);
 									curr_node.appendChild(newNode);
 									curr_node.loaded = true;
 								}
@@ -112,7 +112,7 @@ function(){
 						} 
 					}
 					,failure: function(response, opts){
-					   Ext.Msg.alert('','failed');
+					   Ext3.Msg.alert('','failed');
 					}
 				});
 			

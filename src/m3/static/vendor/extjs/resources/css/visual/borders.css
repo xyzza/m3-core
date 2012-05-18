@@ -1,25 +1,25 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-panel-noborder .x-panel-header-noborder {
+.x3-panel-noborder .x3-panel-header-noborder {
     border-bottom-color:#99bbe8;
 }
 
-.x-panel-noborder .x-panel-tbar-noborder .x-toolbar {
+.x3-panel-noborder .x3-panel-tbar-noborder .x3-toolbar {
     border-bottom-color:#99bbe8;
 }
 
-.x-panel-noborder .x-panel-bbar-noborder .x-toolbar {
+.x3-panel-noborder .x3-panel-bbar-noborder .x3-toolbar {
     border-top-color:#99bbe8;
 }
 
-.x-tab-panel-bbar-noborder .x-toolbar {
+.x3-tab-panel-bbar-noborder .x3-toolbar {
     border-top-color:#99bbe8;
 }
 
-.x-tab-panel-tbar-noborder .x-toolbar {
+.x3-tab-panel-tbar-noborder .x3-toolbar {
     border-bottom-color:#99bbe8;
 }

@@ -1,15 +1,15 @@
-Ext.ns('Ext.m3');
+Ext3.ns('Ext3.m3');
 
 /**
- * @class Ext.ux.form.MultiSelectField
- * @extends Ext.m3.AdvancedComboBox
+ * @class Ext3.ux.form.MultiSelectField
+ * @extends Ext3.m3.AdvancedComboBox
  *
  * Контрол для выбора множества значений. Может быть использован как локальное комбо,
  * с галочками в выпадающем списке. Или же так же как выбор из справочника, с установкой пака
  * Отличается от выбора из спровочника переопределенным шаблоном для отображения выпадающего списка
  * с галочками. Реальные значения храняться как массив рекордов в свойстве checkedItems
  */
-Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
+Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
 
     /**
      * @cfg {String} delimeter Разделитель для отображение текста в поле
@@ -24,17 +24,17 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         this.editable = false;
 
         if (!this.tpl) {
-             this.tpl = '<tpl for="."><div class="x-combo-list-item x-multi-combo-item">' +
-            '<img src="' + Ext.BLANK_IMAGE_URL + '" class="{[this.getImgClass(values)]}" />' +
+             this.tpl = '<tpl for="."><div class="x3-combo-list-item x3-multi-combo-item">' +
+            '<img src="' + Ext3.BLANK_IMAGE_URL + '" class="{[this.getImgClass(values)]}" />' +
             '<div>{' + this.displayField + '}</div></div></tpl>';
             
-            this.tpl = new Ext.XTemplate(this.tpl, {
+            this.tpl = new Ext3.XTemplate(this.tpl, {
                 getImgClass: this.getCheckboxCls.createDelegate(this)
             })
 
         }
 
-       Ext.m3.MultiSelectField.superclass.initComponent.apply(this);
+       Ext3.m3.MultiSelectField.superclass.initComponent.apply(this);
     },
 
     setValue:function(v) {
@@ -61,10 +61,10 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
     getValue : function () {
         var value = [];
-		Ext.each(this.checkedItems, function (record) {
+		Ext3.each(this.checkedItems, function (record) {
 			value.push(record.get(this.valueField));
 		}, this);
-		return Ext.util.JSON.encode(value);
+		return Ext3.util.JSON.encode(value);
 	},
 
     initValue:function() {
@@ -73,9 +73,9 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         if (this.store && this.value && this.mode === 'local') {
             //Случай, если контрол используется как локальный комбобокс
             //со множественным выбором
-            values = Ext.util.JSON.decode(this.value);
+            values = Ext3.util.JSON.decode(this.value);
             this.store.each(function (r) {
-			    Ext.each(values, function (value) {
+			    Ext3.each(values, function (value) {
 			        if (r.get(this.valueField) == value) {
 			            this.checkedItems.push(r);
 			            return false;
@@ -86,7 +86,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         else if (this.value) {
             //Попробуем создать значения из того что нам прислали с сервера
             //ожидаем что там будут некие объекты с полями значения и отображения
-            values = Ext.util.JSON.decode(this.value);
+            values = Ext3.util.JSON.decode(this.value);
 
             for (;i < values.length; i++) {
                 val = values[i];
@@ -96,7 +96,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
                     continue;
                 }
                 
-                record = new Ext.data.Record();
+                record = new Ext3.data.Record();
                 record.data[this.valueField] = val[this.valueField];
                 record.data[this.displayField] = val[this.displayField];
 
@@ -104,12 +104,12 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
             }
         }
 
-       Ext.m3.MultiSelectField.superclass.initValue.call(this);
+       Ext3.m3.MultiSelectField.superclass.initValue.call(this);
     },
 
     getText : function () {
 		var value = [];
-		Ext.each(this.checkedItems, function (record) {
+		Ext3.each(this.checkedItems, function (record) {
 			value.push(record.get(this.displayField));
 		}, this);
 		if (value.length > 1 && this.multipleDisplayValue){
@@ -123,11 +123,11 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
         var i = 0;
         for (; i < this.checkedItems.length; i++) {
             if ( record[this.valueField] == this.checkedItems[i].data[this.valueField] ) {
-                return 'x-grid3-check-col-on';
+                return 'x3-grid3-check-col-on';
             }
         }
 
-        return 'x-grid3-check-col';
+        return 'x3-grid3-check-col';
     },
 
     getCheckedRecords:function() {
@@ -156,7 +156,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
     /**
      * Чтобы сохранить совместимость c концепцией изменения полей ExtJS
-     * приходится имитировать поведение Ext.form.Field.onBlur().
+     * приходится имитировать поведение Ext3.form.Field.onBlur().
      * иначе событие 'change' у нашего поля никогда не вызывается.
      */
     fireChangeEventOnDemand: function(){
@@ -175,7 +175,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
     onSelectInDictionary: function(){
 		if(this.fireEvent('beforerequest', this)) {
-			Ext.Ajax.request({
+			Ext3.Ajax.request({
 				url: this.actionSelectUrl
 				,method: 'POST'
 				,params: this.actionContextJson
@@ -215,7 +215,7 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
     	var i = 0, newRecords = [], record;
 
         for (; i< records.length;i++) {
-            record = new Ext.data.Record();
+            record = new Ext3.data.Record();
             record.data[this.valueField] = records[i].data[this.valueField];
             record.data[this.displayField] = records[i].data[this.displayField];
             newRecords.push( record );
@@ -255,4 +255,4 @@ Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
 });
 
-Ext.reg('m3-multiselect', Ext.m3.MultiSelectField );
+Ext3.reg('m3-multiselect', Ext3.m3.MultiSelectField );

@@ -1,79 +1,79 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-menu {
+.x3-menu {
 	border-color:#222;
     background-color:#414551;
 	background-image:url(../images/access/menu/menu.gif);
 }
 
-.x-menu-nosep {
+.x3-menu-nosep {
 	background-image:none;
 }
 
-.x-menu-list-item{
+.x3-menu-list-item{
 	font:normal 14px tahoma,arial, sans-serif;
 }
 
-.x-menu-item-arrow{
+.x3-menu-item-arrow{
 	background-image:url(../images/access/menu/menu-parent.gif);
 }
 
-.x-menu-sep {
+.x3-menu-sep {
     background-color:#223;
 	border-bottom-color:#666;
 }
 
-a.x-menu-item {
+a.x3-menu-item {
 	color:#fffff6;
 }
 
-.x-menu-item-active {
+.x3-menu-item-active {
 	background-color: #f09134;
 	background-image: none;
     border-color:#b36427;
 }
 
-.x-menu-item-active a.x-menu-item {
+.x3-menu-item-active a.x3-menu-item {
 	border-color:#b36427;
 }
 
-.x-menu-check-item .x-menu-item-icon{
+.x3-menu-check-item .x3-menu-item-icon{
 	background-image:url(../images/default/menu/unchecked.gif);
 }
 
-.x-menu-item-checked .x-menu-item-icon{
+.x3-menu-item-checked .x3-menu-item-icon{
 	background-image:url(../images/default/menu/checked.gif);
 }
 
-.x-menu-item-checked .x-menu-group-item .x-menu-item-icon{
+.x3-menu-item-checked .x3-menu-group-item .x3-menu-item-icon{
     background-image:url(../images/access/menu/group-checked.gif);
 }
 
-.x-menu-group-item .x-menu-item-icon{
+.x3-menu-group-item .x3-menu-item-icon{
     background-image:none;
 }
 
-.x-menu-plain {
+.x3-menu-plain {
 	background-color:#fff !important;
 }
 
-.x-menu .x-date-picker{
+.x3-menu .x3-date-picker{
     border-color:#a3bad9;
 }
 
-.x-cycle-menu .x-menu-item-checked {
+.x3-cycle-menu .x3-menu-item-checked {
     border-color:#a3bae9 !important;
     background-color:#def8f6;
 }
 
-.x-menu-scroller-top {
+.x3-menu-scroller-top {
     background-image:url(../images/default/layout/mini-top.gif);
 }
 
-.x-menu-scroller-bottom {
+.x3-menu-scroller-bottom {
     background-image:url(../images/default/layout/mini-bottom.gif);
 }

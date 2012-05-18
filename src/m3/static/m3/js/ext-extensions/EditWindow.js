@@ -1,5 +1,5 @@
 /**
- * Окно на базе Ext.m3.Window, которое включает такие вещи, как:
+ * Окно на базе Ext3.m3.Window, которое включает такие вещи, как:
  * 1) Submit формы, если она есть;
  * 2) Навешивание функции на изменение поля, в связи с чем обновляется заголовок 
  * окна;
@@ -7,7 +7,7 @@
  * действительно хотите отказаться от внесенных измений";
  */
 
-Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
+Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
 	/**
 	 * Инициализация первонального фунционала
 	 * @param {Object} baseConfig Базовый конфиг компонента
@@ -55,13 +55,13 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			}
 		}
 
-		Ext.m3.EditWindow.superclass.constructor.call(this, baseConfig, params);
+		Ext3.m3.EditWindow.superclass.constructor.call(this, baseConfig, params);
 	}
 	/**
 	 * Инициализация дополнительного функционала
 	 */
 	,initComponent: function(){
-		Ext.m3.EditWindow.superclass.initComponent.call(this);
+		Ext3.m3.EditWindow.superclass.initComponent.call(this);
 
 		// Устанавливает функции на изменение значения
 		this.items.each(function(item){
@@ -124,7 +124,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	,getForm: function() {
 		assert(this.formId, 'Не задан formId для формы');
 
-		return Ext.getCmp(this.formId).getForm();
+		return Ext3.getCmp(this.formId).getForm();
 	}
 	/**
 	 * Проверяет форму на наличие некорректных полей, отдает список label'ов этих полей
@@ -144,11 +144,11 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 * @param {list} invalidNames
 	 */
     ,showInvalidFields: function(invalidNames){
-        Ext.Msg.show({
+        Ext3.Msg.show({
           title: 'Проверка формы',
           msg: 'На форме имеются некорректно заполненные поля:' + invalidNames.toString() + '.',
-          buttons: Ext.Msg.OK,
-          icon: Ext.Msg.WARNING
+          buttons: Ext3.Msg.OK,
+          icon: Ext3.Msg.WARNING
         });
     } 
 	/**
@@ -160,7 +160,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	,submitForm: function(btn, e, baseParams){
 		assert(this.formUrl, 'Не задан url для формы');
 
-		var form = Ext.getCmp(this.formId).getForm();
+		var form = Ext3.getCmp(this.formId).getForm();
 		if (form){
             var invalidNames = this.getInvalidNames(form);
             if (invalidNames.length){
@@ -170,8 +170,8 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		}
 				
         var scope = this;
-		var mask = new Ext.LoadMask(this.body, {msg:'Сохранение...'});
-		var params = Ext.applyIf(baseParams || {}, this.actionContextJson || {});
+		var mask = new Ext3.LoadMask(this.body, {msg:'Сохранение...'});
+		var params = Ext3.applyIf(baseParams || {}, this.actionContextJson || {});
 
         // На форме могут находиться компоненты, которые не являются полями, но их можно сабмитить
         // Находим такие компоненты по наличию атрибутов name и localEdit
@@ -181,7 +181,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
                 var control = items.get(i);
                 if (control.name && control.localEdit){
                     result.push(control);
-                } else if (control instanceof Ext.Container && control.items != undefined) {
+                } else if (control instanceof Ext3.Container && control.items != undefined) {
                     var cc = getControls(control.items);
                     result = result.concat(cc);
                 }
@@ -200,13 +200,13 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
             for (var k = 0; k < cStore.data.items.length; k++){
                 cStoreData.push(cStore.data.items[k].data);
             }
-            params[cControl.name] = Ext.util.JSON.encode(cStoreData);
+            params[cControl.name] = Ext3.util.JSON.encode(cStoreData);
         }
 
         // вытащим из формы все поля и исключим их из наших параметров, иначе они будут повторяться в submite
-        var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext.getDom(form.el.dom)).elements;
+        var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext3.getDom(form.el.dom)).elements;
         var name;
-        Ext.each(fElements, function(element){
+        Ext3.each(fElements, function(element){
             name = element.name;
             if (!element.disabled && name) {
                 delete params[name];
@@ -278,19 +278,19 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
      */
     clearModificationFlag: function(container){
         var cont = container || this;
-        assert(cont instanceof Ext.Container, 'Должен быть контейнер');
+        assert(cont instanceof Ext3.Container, 'Должен быть контейнер');
 
         this.changesCount = 0;
         this.updateTitle();
 
         cont.items.each(function(item){
-            if (item instanceof Ext.form.Field && item.isEdit){
+            if (item instanceof Ext3.form.Field && item.isEdit){
                 item.originalValue = item.getValue();
                 item.startValue = item.getValue();
                 // Это не стандартные атрибуты. Они объявлены в m3.js
                 item.isModified = false;
                 item.updateLabel();
-            } else if (item instanceof Ext.Container){
+            } else if (item instanceof Ext3.Container){
                 this.clearModificationFlag(item);
             }
         }, this);
@@ -302,8 +302,8 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	 */
 	,setFieldOnChange: function (item, window){
 		if (item) {
-			if (item instanceof Ext.form.Field && item.isEdit) {
-                if (item instanceof Ext.form.Checkbox){
+			if (item instanceof Ext3.form.Field && item.isEdit) {
+                if (item instanceof Ext3.form.Checkbox){
                     // Комбобокс, в отличие от остальных полей, вызывает change только после blur, а
                     // в случае клика не работает совсем. Поэтому доверять можно только эвенту check.
                     item.on('check', function(scope, checked){
@@ -360,10 +360,10 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	,close: function (forceClose) {
         if (this.changesCount !== 0 && !forceClose ) {
             if(this.fireEvent('beforeclose', this) !== false){
-                Ext.Msg.show({
+                Ext3.Msg.show({
                     title: "Внимание",
                     msg: "Данные были изменены! Cохранить изменения?",
-                    buttons: Ext.Msg.YESNOCANCEL,
+                    buttons: Ext3.Msg.YESNOCANCEL,
                     fn: function(buttonId, text, opt){
                         if (buttonId === 'yes') {
                             this.submitForm();
@@ -378,12 +378,12 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
                         }
                     },
                     animEl: 'elId',
-                    icon: Ext.MessageBox.QUESTION,
+                    icon: Ext3.MessageBox.QUESTION,
                     scope: this
                 });
             }
         } else {
-            Ext.m3.EditWindow.superclass.close.call(this);
+            Ext3.m3.EditWindow.superclass.close.call(this);
         }
 	}
     ,disableToolbars: function(disabled){
@@ -401,14 +401,14 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
     ,loadForm: function() {        
         this.disableToolbars(true);
    
-        var mask = new Ext.LoadMask(this.body, {msg:'Чтение данных...'});
+        var mask = new Ext3.LoadMask(this.body, {msg:'Чтение данных...'});
         mask.show();
         if (this.fireEvent('beforeloaddata', this)) {
         	
         	assert(this.dataUrl, 'Не задан dataUrl для формы');
         	this.getForm().doAction('load', {
                 url: this.dataUrl
-                ,params: Ext.applyIf({isGetData: true}, this.actionContextJson || {})
+                ,params: Ext3.applyIf({isGetData: true}, this.actionContextJson || {})
                 ,success: this.onSuccessLoadForm.createDelegate(this, [mask], true)
                 ,failure: this.onFailureLoadForm.createDelegate(this, [mask], true)
                ,scope: this
@@ -431,13 +431,13 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
             
         for (var fieldName in complexData){
             field = form.findField(fieldName);
-            assert(field instanceof Ext.form.TriggerField,
+            assert(field instanceof Ext3.form.TriggerField,
                 String.format('Поле {0} не предназначено для загрузки данных', fieldName));
             
             id = complexData[fieldName].id;
             
             // Создаем запись и добавляем в стор
-            record = new Ext.data.Record();                    
+            record = new Ext3.data.Record();                    
             record.set('id', id);
             record.set(field.displayField, complexData[fieldName].value);
             

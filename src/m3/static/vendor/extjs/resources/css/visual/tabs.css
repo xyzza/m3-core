@@ -1,115 +1,115 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-tab-panel-header, .x-tab-panel-footer {
+.x3-tab-panel-header, .x3-tab-panel-footer {
 	background-color: #deecfd;
 	border-color:#8db2e3;
     overflow:hidden;
     zoom:1;
 }
 
-.x-tab-panel-header, .x-tab-panel-footer {
+.x3-tab-panel-header, .x3-tab-panel-footer {
 	border-color:#8db2e3;
 }
 
-ul.x-tab-strip-top{
+ul.x3-tab-strip-top{
     background-color:#cedff5;
 	background-image: url(../images/default/tabs/tab-strip-bg.gif);
 	border-bottom-color:#8db2e3;
 }
 
-ul.x-tab-strip-bottom{
+ul.x3-tab-strip-bottom{
     background-color:#cedff5;
 	background-image: url(../images/default/tabs/tab-strip-btm-bg.gif);
 	border-top-color:#8db2e3;
 }
 
-.x-tab-panel-header-plain .x-tab-strip-spacer,
-.x-tab-panel-footer-plain .x-tab-strip-spacer {
+.x3-tab-panel-header-plain .x3-tab-strip-spacer,
+.x3-tab-panel-footer-plain .x3-tab-strip-spacer {
     border-color:#8db2e3;
     background-color: #deecfd;
 }
 
-.x-tab-strip span.x-tab-strip-text {
+.x3-tab-strip span.x3-tab-strip-text {
 	font:normal 11px tahoma,arial,helvetica;
 	color:#416aa3;
 }
 
-.x-tab-strip-over span.x-tab-strip-text {
+.x3-tab-strip-over span.x3-tab-strip-text {
 	color:#15428b;
 }
 
-.x-tab-strip-active span.x-tab-strip-text {
+.x3-tab-strip-active span.x3-tab-strip-text {
 	color:#15428b;
     font-weight:bold;
 }
 
-.x-tab-strip-disabled .x-tabs-text {
+.x3-tab-strip-disabled .x3-tabs-text {
 	color:#aaaaaa;
 }
 
-.x-tab-strip-top .x-tab-right, .x-tab-strip-top .x-tab-left, .x-tab-strip-top .x-tab-strip-inner{
+.x3-tab-strip-top .x3-tab-right, .x3-tab-strip-top .x3-tab-left, .x3-tab-strip-top .x3-tab-strip-inner{
 	background-image: url(../images/default/tabs/tabs-sprite.gif);
 }
 
-.x-tab-strip-bottom .x-tab-right {
+.x3-tab-strip-bottom .x3-tab-right {
 	background-image: url(../images/default/tabs/tab-btm-inactive-right-bg.gif);
 }
 
-.x-tab-strip-bottom .x-tab-left {
+.x3-tab-strip-bottom .x3-tab-left {
 	background-image: url(../images/default/tabs/tab-btm-inactive-left-bg.gif);
 }
 
-.x-tab-strip-bottom .x-tab-strip-over .x-tab-right {
+.x3-tab-strip-bottom .x3-tab-strip-over .x3-tab-right {
 	background-image: url(../images/default/tabs/tab-btm-over-right-bg.gif);
 }
 
-.x-tab-strip-bottom .x-tab-strip-over .x-tab-left {
+.x3-tab-strip-bottom .x3-tab-strip-over .x3-tab-left {
 	background-image: url(../images/default/tabs/tab-btm-over-left-bg.gif);
 }
 
-.x-tab-strip-bottom .x-tab-strip-active .x-tab-right {
+.x3-tab-strip-bottom .x3-tab-strip-active .x3-tab-right {
 	background-image: url(../images/default/tabs/tab-btm-right-bg.gif);
 }
 
-.x-tab-strip-bottom .x-tab-strip-active .x-tab-left {
+.x3-tab-strip-bottom .x3-tab-strip-active .x3-tab-left {
 	background-image: url(../images/default/tabs/tab-btm-left-bg.gif);
 }
 
-.x-tab-strip .x-tab-strip-closable a.x-tab-strip-close {
+.x3-tab-strip .x3-tab-strip-closable a.x3-tab-strip-close {
 	background-image:url(../images/default/tabs/tab-close.gif);
 }
 
-.x-tab-strip .x-tab-strip-closable a.x-tab-strip-close:hover{
+.x3-tab-strip .x3-tab-strip-closable a.x3-tab-strip-close:hover{
 	background-image:url(../images/default/tabs/tab-close.gif);
 }
 
-.x-tab-panel-body {
+.x3-tab-panel-body {
     border-color:#8db2e3;
     background-color:#fff;
 }
 
-.x-tab-panel-body-top {
+.x3-tab-panel-body-top {
     border-top: 0 none;
 }
 
-.x-tab-panel-body-bottom {
+.x3-tab-panel-body-bottom {
     border-bottom: 0 none;
 }
 
-.x-tab-scroller-left {
+.x3-tab-scroller-left {
     background-image:url(../images/default/tabs/scroll-left.gif);
     border-bottom-color:#8db2e3;
 }
 
-.x-tab-scroller-left-over {
+.x3-tab-scroller-left-over {
     background-position: 0 0;
 }
 
-.x-tab-scroller-left-disabled {
+.x3-tab-scroller-left-disabled {
     background-position: -18px 0;
     opacity:.5;
     -moz-opacity:.5;
@@ -117,11 +117,11 @@ ul.x-tab-strip-bottom{
     cursor:default;
 }
 
-.x-tab-scroller-right {
+.x3-tab-scroller-right {
     background-image:url(../images/default/tabs/scroll-right.gif);
     border-bottom-color:#8db2e3;
 }
 
-.x-tab-panel-bbar .x-toolbar, .x-tab-panel-tbar .x-toolbar {
+.x3-tab-panel-bbar .x3-toolbar, .x3-tab-panel-tbar .x3-toolbar {
     border-color:#99bbe8;
 }

@@ -178,7 +178,7 @@ class ExtJsonWriter(BaseExtStore):
         super(ExtJsonWriter, self).__init__(*args, **kwargs)
         
         # Если True, записи (records) переводится в хешированные данные, имя беруться из
-        # ридера (Reader). Подробности http://extjs.docs/d/?class=Ext.data.JsonWriter
+        # ридера (Reader). Подробности http://extjs.docs/d/?class=Ext3.data.JsonWriter
         self.encode = True
         
         # Если False, при удалении будет отправляться только id записи на сервер
@@ -191,7 +191,7 @@ class ExtJsonWriter(BaseExtStore):
     
     def render(self):
         result = '''
-new Ext.data.JsonWriter({
+new Ext3.data.JsonWriter({
     %(writeAllFields)s
     %(encode)s
     %(encodeDelete)s
@@ -254,7 +254,7 @@ class ExtGroupingStore(ExtJsonStore):
         self.group_field = None
         
         # Объект, в котором может указываться например порядок сортировки
-        # см: http://extjs.docs/d/?class=Ext.data.GroupingStore
+        # см: http://extjs.docs/d/?class=Ext3.data.GroupingStore
         self.sort_info = None
         self.init_component(*args, **kwargs)
         

@@ -1,12 +1,12 @@
-if(Ext.ux.tree.TreeGridSorter){
-  Ext.apply(Ext.ux.tree.TreeGridSorter.prototype, {
+if(Ext3.ux.tree.TreeGridSorter){
+  Ext3.apply(Ext3.ux.tree.TreeGridSorter.prototype, {
     sortAscText  : "Сортировать по возрастанию",
     sortDescText : "Сортировать по убыванию"
   });
 }
 
-if(Ext.ux.tree.TreeGrid){
-  Ext.apply(Ext.ux.tree.TreeGrid.prototype, {
+if(Ext3.ux.tree.TreeGrid){
+  Ext3.apply(Ext3.ux.tree.TreeGrid.prototype, {
     columnsText  : "Столбцы"
   });
 }

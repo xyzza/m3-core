@@ -1,5 +1,5 @@
 /**
- * Ext.ux.DateTimePicker & Ext.ux.form.DateTimeField
+ * Ext3.ux.DateTimePicker & Ext3.ux.form.DateTimeField
  * http://www.sencha.com/forum/showthread.php?98292-DateTime-field-again-and-again-)
  * Copyright(c) 2011, Andrew Pleshkov andrew.pleshkov@gmail.com
  * *** DATATEX CHANGES IN ORDER TO ADD A NEW SLIDER FOR SECONDS. 
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-Ext.namespace('Ext.ux');
+Ext3.namespace('Ext3.ux');
 
 (function () {
 
-    var UX = Ext.ux;
+    var UX = Ext3.ux;
 
-    UX.BaseTimePicker = Ext.extend(Ext.Panel, {
+    UX.BaseTimePicker = Ext3.extend(Ext3.Panel, {
 
         timeFormat: 'H:i:s',
 
@@ -60,7 +60,7 @@ Ext.namespace('Ext.ux');
         initComponent: function () {
             this.addEvents('select');
 
-            this.hourSlider = new Ext.slider.SingleSlider({
+            this.hourSlider = new Ext3.slider.SingleSlider({
                 increment: this.hourIncrement,
                 minValue: 0,
                 maxValue: 23,
@@ -69,10 +69,10 @@ Ext.namespace('Ext.ux');
                     change: this._updateTimeValue,
                     scope: this
                 },
-                plugins: new Ext.slider.Tip()
+                plugins: new Ext3.slider.Tip()
             });
 
-            this.minSlider = new Ext.slider.SingleSlider({
+            this.minSlider = new Ext3.slider.SingleSlider({
                 increment: this.minIncrement,
                 minValue: 0,
                 maxValue: 59,
@@ -81,10 +81,10 @@ Ext.namespace('Ext.ux');
                     change: this._updateTimeValue,
                     scope: this
                 },
-                plugins: new Ext.slider.Tip()
+                plugins: new Ext3.slider.Tip()
             });
 
-            this.secSlider = new Ext.slider.SingleSlider({
+            this.secSlider = new Ext3.slider.SingleSlider({
                 increment: this.secIncrement,
                 minValue: 0,
                 maxValue: 59,
@@ -93,7 +93,7 @@ Ext.namespace('Ext.ux');
                     change: this._updateTimeValue,
                     scope: this
                 },
-                plugins: new Ext.slider.Tip()
+                plugins: new Ext3.slider.Tip()
             });
 
             this.setCurrentTime(false);
@@ -175,18 +175,18 @@ Ext.namespace('Ext.ux');
 
     });
 
-    Ext.reg('basetimepicker', UX.BaseTimePicker);
+    Ext3.reg('basetimepicker', UX.BaseTimePicker);
 
 })();
-Ext.namespace('Ext.ux');
+Ext3.namespace('Ext3.ux');
 
 (function () {
 
-    var UX = Ext.ux;
+    var UX = Ext3.ux;
 
     var CLS = 'ux-date-time-picker';
 
-    UX.DateTimePicker = Ext.extend(Ext.BoxComponent, {
+    UX.DateTimePicker = Ext3.extend(Ext3.BoxComponent, {
 
         timeLabel: 'Time',
 
@@ -201,7 +201,7 @@ Ext.namespace('Ext.ux');
 
             this.addEvents('select');
 
-            this.timePickerButton = new Ext.Button({
+            this.timePickerButton = new Ext3.Button({
                 text: this.changeTimeText,
                 handler: this._showTimePicker,
                 scope: this
@@ -222,10 +222,10 @@ Ext.namespace('Ext.ux');
                 var menuConfig = this.initialConfig.timeMenu;
 
                 if (menuConfig && menuConfig.xtype) {
-                    this.timeMenu = Ext.create(menuConfig);
+                    this.timeMenu = Ext3.create(menuConfig);
                 } else {                          
-                    var picker = Ext.create(
-                            Ext.applyIf(this.initialConfig.timePicker || {}, {
+                    var picker = Ext3.create(
+                            Ext3.applyIf(this.initialConfig.timePicker || {}, {
                                 timeFormat: this.timeFormat
                             }),
                             'basetimepicker'
@@ -233,7 +233,7 @@ Ext.namespace('Ext.ux');
                     this.timeMenu = new Menu(picker, menuConfig || {});
                 }
 
-                if (!Ext.isFunction(this.timeMenu.getPicker)) {
+                if (!Ext3.isFunction(this.timeMenu.getPicker)) {
                     throw 'Your time menu must provide the getPicker() method';
                 }
 
@@ -246,11 +246,11 @@ Ext.namespace('Ext.ux');
 
             config.internalRender = this.initialConfig.internalRender;
 
-            Ext.applyIf(config, {
-                format: this.dateFormat || Ext.DatePicker.prototype.format
+            Ext3.applyIf(config, {
+                format: this.dateFormat || Ext3.DatePicker.prototype.format
             });
 
-            var picker = this.datePicker = Ext.create(config, 'datepicker');
+            var picker = this.datePicker = Ext3.create(config, 'datepicker');
 
             picker.update = picker.update.createSequence(function () {
                 if (this.el != null && this.datePicker.rendered) {
@@ -265,7 +265,7 @@ Ext.namespace('Ext.ux');
 
             picker.render(ct);
 
-            var bottomEl = picker.getEl().child('.x-date-bottom');
+            var bottomEl = picker.getEl().child('.x3-date-bottom');
 
             var size = bottomEl.getSize(true);
             var style = [
@@ -279,7 +279,7 @@ Ext.namespace('Ext.ux');
 
             var div = ct.createChild({
                 tag: 'div',
-                cls: 'x-date-bottom',
+                cls: 'x3-date-bottom',
                 style: style,
                 children: [
                     {
@@ -307,13 +307,13 @@ Ext.namespace('Ext.ux');
 
             if (picker.showToday) {
                 var todayConfig = {};
-                Ext.each(['text', 'tooltip', 'handler', 'scope'], function (key) {
+                Ext3.each(['text', 'tooltip', 'handler', 'scope'], function (key) {
                     todayConfig[key] = picker.todayBtn.initialConfig[key];
                 });
-                this.todayBtn = new Ext.Button(todayConfig).render(div.child('td:first'));
+                this.todayBtn = new Ext3.Button(todayConfig).render(div.child('td:first'));
             }
 
-            this.doneBtn = new Ext.Button({
+            this.doneBtn = new Ext3.Button({
                 text: this.doneText,
                 handler: this.onDone,
                 scope: this
@@ -327,13 +327,13 @@ Ext.namespace('Ext.ux');
         _renderValueField: function (ct) {
             var cls = CLS + '-value-ct';
 
-            var timeLabel = !Ext.isEmpty(this.timeLabel)
+            var timeLabel = !Ext3.isEmpty(this.timeLabel)
                     ? '<span class="' + cls + '-value-label">' + this.timeLabel + ':</span>&nbsp;'
                     : '';
 
             var div = ct.insertFirst({
                 tag: 'div',
-                cls: [cls, 'x-date-bottom'].join(' ')
+                cls: [cls, 'x3-date-bottom'].join(' ')
             });
 
             var table = div.createChild({
@@ -432,7 +432,7 @@ Ext.namespace('Ext.ux');
         },
 
         destroy: function () {
-            Ext.destroy(this.timePickerButton);
+            Ext3.destroy(this.timePickerButton);
             this.timePickerButton = null;
 
             if (this.timeValueEl) {
@@ -440,21 +440,21 @@ Ext.namespace('Ext.ux');
                 this.timeValueEl = null;
             }
 
-            Ext.destroy(this.datePicker);
+            Ext3.destroy(this.datePicker);
             this.datePicker = null;
 
             if (this.timeMenu) {
-                Ext.destroy(this.timeMenu);
+                Ext3.destroy(this.timeMenu);
                 this.timeMenu = null;
             }
 
             if (this.todayBtn) {
-                Ext.destroy(this.todayBtn);
+                Ext3.destroy(this.todayBtn);
                 this.todayBtn = null;
             }
 
             if (this.doneBtn) {
-                Ext.destroy(this.doneBtn);
+                Ext3.destroy(this.doneBtn);
                 this.doneBtn = null;
             }
 
@@ -465,11 +465,11 @@ Ext.namespace('Ext.ux');
 
     });
 
-    Ext.reg('datetimepicker', UX.DateTimePicker);
+    Ext3.reg('datetimepicker', UX.DateTimePicker);
 
     //
 
-    var Menu = UX.DateTimePicker.Menu = Ext.extend(Ext.menu.Menu, {
+    var Menu = UX.DateTimePicker.Menu = Ext3.extend(Ext3.menu.Menu, {
 
         enableScrolling : false,
 
@@ -486,9 +486,9 @@ Ext.namespace('Ext.ux');
                 delete config.picker;
             }
 
-            this.picker = Ext.create(picker);
+            this.picker = Ext3.create(picker);
 
-            Menu.superclass.constructor.call(this, Ext.applyIf({
+            Menu.superclass.constructor.call(this, Ext3.applyIf({
                 items: this.picker
             }, config));
 
@@ -516,15 +516,15 @@ Ext.namespace('Ext.ux');
 
     });
 
-})();Ext.namespace('Ext.ux.form');
+})();Ext3.namespace('Ext3.ux.form');
 
 (function () {
 
-    var F = Ext.ux.form;
+    var F = Ext3.ux.form;
 
-    var STRICT = Ext.isIE7 && Ext.isStrict;
+    var STRICT = Ext3.isIE7 && Ext3.isStrict;
 
-    var Menu = Ext.extend(Ext.menu.Menu, {
+    var Menu = Ext3.extend(Ext3.menu.Menu, {
 
         enableScrolling : false,
 
@@ -536,10 +536,10 @@ Ext.namespace('Ext.ux');
 
         pickerId : null,
 
-        cls : 'x-date-menu x-date-time-menu',
+        cls : 'x3-date-menu x3-date-time-menu',
 
         constructor: function (picker, config) {
-            Menu.superclass.constructor.call(this, Ext.applyIf({
+            Menu.superclass.constructor.call(this, Ext3.applyIf({
                 items: picker
             }, config || {}));
 
@@ -596,8 +596,8 @@ Ext.namespace('Ext.ux');
     //
 
     //kirov
-    F.DateTimeField = Ext.extend(Ext.m3.AdvancedDataField, {
-    //F.DateTimeField = Ext.extend(Ext.form.DateField, {
+    F.DateTimeField = Ext3.extend(Ext3.m3.AdvancedDataField, {
+    //F.DateTimeField = Ext3.extend(Ext3.form.DateField, {
 
         timeFormat: 'H:i:s',
 
@@ -625,17 +625,17 @@ Ext.namespace('Ext.ux');
         _createPicker: function () {
             var config = this.initialConfig.picker || {};
 
-            Ext.apply(config, {
-                ctCls: 'x-menu-date-item',
-                internalRender: STRICT || !Ext.isIE
+            Ext3.apply(config, {
+                ctCls: 'x3-menu-date-item',
+                internalRender: STRICT || !Ext3.isIE
             });
 
-            Ext.applyIf(config, {
+            Ext3.applyIf(config, {
                 dateFormat: this.dateFormat,
                 timeFormat: this.timeFormat
             });
 
-            return Ext.create(config, 'datetimepicker');
+            return Ext3.create(config, 'datetimepicker');
         },
 
         onTriggerClick: function () {
@@ -646,34 +646,34 @@ Ext.namespace('Ext.ux');
 
     });
 
-    Ext.reg('datetimefield', F.DateTimeField);
+    Ext3.reg('datetimefield', F.DateTimeField);
 })();
 
 // <kirov
 // локализация
-if(Ext.ux.DateTimePicker){
-    Ext.ux.DateTimePicker.prototype.timeLabel = "Время";
-    Ext.ux.DateTimePicker.prototype.changeTimeText = "Изменить...";
-    Ext.ux.DateTimePicker.prototype.doneText = "ОК";
+if(Ext3.ux.DateTimePicker){
+    Ext3.ux.DateTimePicker.prototype.timeLabel = "Время";
+    Ext3.ux.DateTimePicker.prototype.changeTimeText = "Изменить...";
+    Ext3.ux.DateTimePicker.prototype.doneText = "ОК";
 }
 
-if(Ext.ux.BaseTimePicker){
-    Ext.ux.BaseTimePicker.prototype.nowText = "Текущее";
-    Ext.ux.BaseTimePicker.prototype.doneText = "ОК";
-    Ext.ux.BaseTimePicker.prototype.hoursLabel = 'Часы';
-    Ext.ux.BaseTimePicker.prototype.minsLabel = 'Минуты';
-    Ext.ux.BaseTimePicker.prototype.secsLabel = 'Секунды';
+if(Ext3.ux.BaseTimePicker){
+    Ext3.ux.BaseTimePicker.prototype.nowText = "Текущее";
+    Ext3.ux.BaseTimePicker.prototype.doneText = "ОК";
+    Ext3.ux.BaseTimePicker.prototype.hoursLabel = 'Часы';
+    Ext3.ux.BaseTimePicker.prototype.minsLabel = 'Минуты';
+    Ext3.ux.BaseTimePicker.prototype.secsLabel = 'Секунды';
 }
 // kirov>
 
 // <kirov
 (function () {
 
-    var F = Ext.ux.form;
+    var F = Ext3.ux.form;
 
-    var STRICT = Ext.isIE7 && Ext.isStrict;
+    var STRICT = Ext3.isIE7 && Ext3.isStrict;
 
-    var Menu = Ext.extend(Ext.menu.Menu, {
+    var Menu = Ext3.extend(Ext3.menu.Menu, {
 
         enableScrolling : false,
 
@@ -690,9 +690,9 @@ if(Ext.ux.BaseTimePicker){
                 delete config.picker;
             }
 
-            this.picker = Ext.create(picker);
+            this.picker = Ext3.create(picker);
 
-            Menu.superclass.constructor.call(this, Ext.applyIf({
+            Menu.superclass.constructor.call(this, Ext3.applyIf({
                 items: this.picker
             }, config));
 
@@ -721,7 +721,7 @@ if(Ext.ux.BaseTimePicker){
     });
 
     //kirov
-    F.AdvTimeField = Ext.extend(Ext.m3.AdvancedDataField, {
+    F.AdvTimeField = Ext3.extend(Ext3.m3.AdvancedDataField, {
 
         timeFormat: 'H:i:s',
 
@@ -751,16 +751,16 @@ if(Ext.ux.BaseTimePicker){
         _createPicker: function () {
             var config = this.initialConfig.picker || {};
 
-            Ext.apply(config, {
-                ctCls: 'x-menu-date-item',
-                internalRender: STRICT || !Ext.isIE
+            Ext3.apply(config, {
+                ctCls: 'x3-menu-date-item',
+                internalRender: STRICT || !Ext3.isIE
             });
 
-            Ext.applyIf(config, {
+            Ext3.applyIf(config, {
                 timeFormat: this.timeFormat
             });
 
-            return Ext.create(config, 'basetimepicker');
+            return Ext3.create(config, 'basetimepicker');
         },
 
         onTriggerClick: function () {
@@ -787,6 +787,6 @@ if(Ext.ux.BaseTimePicker){
 
     });
 
-    Ext.reg('advtimefield', F.AdvTimeField);
+    Ext3.reg('advtimefield', F.AdvTimeField);
 })();
 //kirov >

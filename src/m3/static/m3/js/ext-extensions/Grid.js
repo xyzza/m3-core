@@ -1,8 +1,8 @@
 /**
- * Расширенный грид на базе Ext.grid.GridPanel
+ * Расширенный грид на базе Ext3.grid.GridPanel
  * @param {Object} config
  */
-Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
+Ext3.m3.GridPanel = Ext3.extend(Ext3.grid.GridPanel, {
 	constructor: function(baseConfig, params){
 //		console.log(baseConfig);
 //		console.log(params);
@@ -10,26 +10,26 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		// Добавлене selection model если нужно
 		var selModel = params.selModel;
 		var gridColumns = params.colModel || [];
-		if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
+		if (selModel && selModel instanceof Ext3.grid.CheckboxSelectionModel) {
 			gridColumns.columns.unshift(selModel);
 		}
 		
 		// Навешивание обработчиков на контекстное меню если нужно 
 		var funcContMenu;
 		if (params.menus.contextMenu && 
-			params.menus.contextMenu instanceof Ext.menu.Menu) {
+			params.menus.contextMenu instanceof Ext3.menu.Menu) {
 			
 			funcContMenu = function(e){
 				e.stopEvent();
 	            params.menus.contextMenu.showAt(e.getXY())
 			}
 		} else {
-			funcContMenu = Ext.emptyFn;
+			funcContMenu = Ext3.emptyFn;
 		}
 		
 		var funcRowContMenu;
 		if (params.menus.rowContextMenu && 
-			params.menus.rowContextMenu instanceof Ext.menu.Menu) {
+			params.menus.rowContextMenu instanceof Ext3.menu.Menu) {
 			
 			funcRowContMenu = function(grid, index, e){
 				e.stopEvent();
@@ -39,7 +39,7 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
                 params.menus.rowContextMenu.showAt(e.getXY())
 			}
 		} else {
-			funcRowContMenu = Ext.emptyFn;
+			funcRowContMenu = Ext3.emptyFn;
 		}
 		
 		var plugins = params.plugins || [];
@@ -48,19 +48,19 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			bundedColumns.length > 0) {
 
 			plugins.push( 
-				new Ext.ux.grid.ColumnHeaderGroup({
+				new Ext3.ux.grid.ColumnHeaderGroup({
 					rows: bundedColumns
 				})
 			);
 		}
 		
 		// объединение обработчиков
-		baseConfig.listeners = Ext.applyIf({
+		baseConfig.listeners = Ext3.applyIf({
 			contextmenu: funcContMenu
 			,rowcontextmenu: funcRowContMenu
 			,beforerender: function(){
 				var bbar = this.getBottomToolbar();
-				if (bbar && bbar instanceof Ext.PagingToolbar){
+				if (bbar && bbar instanceof Ext3.PagingToolbar){
 					var store = this.getStore();
 					store.setBaseParam('start',0);
 					store.setBaseParam('limit',bbar.pageSize);
@@ -70,16 +70,16 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		}
 		,baseConfig.listeners || {});
 
-		var config = Ext.applyIf({
+		var config = Ext3.applyIf({
 			sm: selModel
 			,colModel: gridColumns
 			,plugins: plugins
 		}, baseConfig);
 		
-		Ext.m3.GridPanel.superclass.constructor.call(this, config);
+		Ext3.m3.GridPanel.superclass.constructor.call(this, config);
 	}
 	,initComponent: function(){
-		Ext.m3.GridPanel.superclass.initComponent.call(this);
+		Ext3.m3.GridPanel.superclass.initComponent.call(this);
 		var store = this.getStore();
 		store.on('exception', this.storeException, this);
 	}
@@ -92,7 +92,7 @@ Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	}
 });
 
-Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
+Ext3.m3.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
   constructor: function(baseConfig, params){
 //    console.log(baseConfig);
 //    console.log(params);
@@ -100,26 +100,26 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     // Добавлене selection model если нужно
     var selModel = params.selModel;
     var gridColumns = params.colModel || [];
-    if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
+    if (selModel && selModel instanceof Ext3.grid.CheckboxSelectionModel) {
       gridColumns.columns.unshift(selModel);
     }
     
     // Навешивание обработчиков на контекстное меню если нужно 
     var funcContMenu;
     if (params.menus.contextMenu && 
-      params.menus.contextMenu instanceof Ext.menu.Menu) {
+      params.menus.contextMenu instanceof Ext3.menu.Menu) {
       
       funcContMenu = function(e){
         e.stopEvent();
               params.menus.contextMenu.showAt(e.getXY())
       }
     } else {
-      funcContMenu = Ext.emptyFn;
+      funcContMenu = Ext3.emptyFn;
     }
     
     var funcRowContMenu;
     if (params.menus.rowContextMenu && 
-      params.menus.contextMenu instanceof Ext.menu.Menu) {
+      params.menus.contextMenu instanceof Ext3.menu.Menu) {
       
       funcRowContMenu = function(grid, index, e){
         e.stopEvent();
@@ -127,7 +127,7 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
                 params.menus.rowContextMenu.showAt(e.getXY())
       }
     } else {
-      funcRowContMenu = Ext.emptyFn;
+      funcRowContMenu = Ext3.emptyFn;
     }
     
     var plugins = params.plugins || [];
@@ -136,19 +136,19 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
       bundedColumns.length > 0) {
 
       plugins.push( 
-        new Ext.ux.grid.ColumnHeaderGroup({
+        new Ext3.ux.grid.ColumnHeaderGroup({
           rows: bundedColumns
         })
       );
     }
     
     // объединение обработчиков
-    baseConfig.listeners = Ext.applyIf({
+    baseConfig.listeners = Ext3.applyIf({
       contextmenu: funcContMenu
       ,rowcontextmenu: funcRowContMenu
       ,beforerender: function(){
         var bbar = this.getBottomToolbar();
-        if (bbar && bbar instanceof Ext.PagingToolbar){
+        if (bbar && bbar instanceof Ext3.PagingToolbar){
           var store = this.getStore();
           store.setBaseParam('start',0);
           store.setBaseParam('limit',bbar.pageSize);
@@ -158,16 +158,16 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     }
     ,baseConfig.listeners || {});
 
-    var config = Ext.applyIf({
+    var config = Ext3.applyIf({
       sm: selModel
       ,colModel: gridColumns
       ,plugins: plugins
     }, baseConfig);
     
-    Ext.m3.EditorGridPanel.superclass.constructor.call(this, config);
+    Ext3.m3.EditorGridPanel.superclass.constructor.call(this, config);
   }
 	,initComponent: function(){
-		Ext.m3.EditorGridPanel.superclass.initComponent.call(this);
+		Ext3.m3.EditorGridPanel.superclass.initComponent.call(this);
 		var store = this.getStore();
 		store.on('exception', this.storeException, this);
 	}
@@ -176,13 +176,13 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 	 */
 	,storeException: function (proxy, type, action, options, response, arg){
 		//console.log(proxy, type, action, options, response, arg);
-		if (type == 'remote' && action != Ext.data.Api.actions.read) {
+		if (type == 'remote' && action != Ext3.data.Api.actions.read) {
 		  if (response.raw.message) {
-  		  Ext.Msg.show({
+  		  Ext3.Msg.show({
   		    title: 'Внимание!',
   		    msg: response.raw.message,
-  		    buttons: Ext.Msg.CANCEL,
-  		    icon: Ext.Msg.WARNING
+  		    buttons: Ext3.Msg.CANCEL,
+  		    icon: Ext3.Msg.WARNING
   		  });
   		};
 		} else {

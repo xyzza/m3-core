@@ -1,10 +1,10 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-pivotgrid .x-grid3-header-offset table td {
+.x3-pivotgrid .x3-grid3-header-offset table td {
     background: url(../images/default/grid/grid3-hrow.gif) repeat-x 50% 100%;
     border-left: 1px solid;
     border-right: 1px solid;
@@ -12,11 +12,11 @@
     border-right-color: #D0D0D0;
 }
 
-.x-pivotgrid .x-grid3-row-headers {
+.x3-pivotgrid .x3-grid3-row-headers {
     background-color: #f9f9f9;
 }
 
-.x-pivotgrid .x-grid3-row-headers table td {
+.x3-pivotgrid .x3-grid3-row-headers table td {
     background: #EEE url(../images/default/grid/grid3-rowheader.gif) repeat-x left top;
     border-left: 1px solid;
     border-right: 1px solid;

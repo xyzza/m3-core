@@ -1,4 +1,4 @@
-new Ext.data.JsonReader({
+new Ext3.data.JsonReader({
 	idProperty: '{{ component.id_property }}'
 	{% if component.root %} ,root: '{{ component.root }}' {% endif %}
 	{% if component.total_property %} ,totalProperty: '{{ component.total_property }}' {% endif %}

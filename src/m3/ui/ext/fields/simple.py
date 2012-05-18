@@ -40,7 +40,7 @@ class ExtStringField(BaseExtField):
 
     def render_base_config(self):
         if self.input_mask:
-            self.plugins.append("new Ext.ux.Mask('%s')" % self.input_mask)
+            self.plugins.append("new Ext3.ux.Mask('%s')" % self.input_mask)
 
         # Экранирование значений с обратным слешем
         # Кавычки, апострафы, символы переноса строки и т.д. отрежутся функцией normalize в helpers/__init__.py
@@ -63,7 +63,7 @@ class ExtStringField(BaseExtField):
             raise Exception(msg)
         
         base_config = self._get_config_str()
-        return 'new Ext.form.TextField({%s})' % base_config
+        return 'new Ext3.form.TextField({%s})' % base_config
 
 #===============================================================================
 class ExtDateField(BaseExtField):
@@ -193,7 +193,7 @@ class ExtNumberField(BaseExtField):
             raise Exception(msg)
         
         base_config = self._get_config_str()
-        return 'new Ext.form.NumberField({%s})' % base_config
+        return 'new Ext3.form.NumberField({%s})' % base_config
 
 
 #===============================================================================
@@ -248,7 +248,7 @@ class ExtTextArea(BaseExtField):
             raise Exception(msg)
         
         base_config = self._get_config_str()
-        return 'new Ext.form.TextArea({%s})' % base_config
+        return 'new Ext3.form.TextArea({%s})' % base_config
 
 #===============================================================================
 class ExtCheckBox(BaseExtField):
@@ -291,7 +291,7 @@ class ExtRadio(BaseExtField):
 
     def __init__(self, *args, **kwargs):
         super(ExtRadio, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.form.Radio'
+        self._ext_name = 'Ext3.form.Radio'
 
         # Признак того, что значение выбрано
         self.checked = False
@@ -337,7 +337,7 @@ class ExtComboBox(BaseExtTriggerField):
             raise Exception(msg)
        
         base_config = self._get_config_str()
-        return 'new Ext.form.ComboBox({%s})' % base_config
+        return 'new Ext3.form.ComboBox({%s})' % base_config
 
 
 #===============================================================================
@@ -369,7 +369,7 @@ class ExtTimeField(BaseExtField):
     def render(self):
         self.render_base_config()
         base_config = self._get_config_str()
-        return 'new Ext.form.TimeField({%s})' % base_config
+        return 'new Ext3.form.TimeField({%s})' % base_config
 
 #===============================================================================        
 class ExtHTMLEditor(BaseExtField):
@@ -391,7 +391,7 @@ class ExtHTMLEditor(BaseExtField):
             raise Exception(msg)
         
         base_config = self._get_config_str()
-        return 'new Ext.form.HtmlEditor({%s})' % base_config
+        return 'new Ext3.form.HtmlEditor({%s})' % base_config
 
 #===============================================================================
 class ExtDisplayField(BaseExtField):
@@ -417,7 +417,7 @@ class ExtDisplayField(BaseExtField):
             raise Exception(msg)
         
         base_config = self._get_config_str()
-        return 'new Ext.form.DisplayField({%s})' % base_config
+        return 'new Ext3.form.DisplayField({%s})' % base_config
 
 
 class ExtDateTimeField(ExtDateField):
@@ -434,7 +434,7 @@ class ExtDateTimeField(ExtDateField):
 
         base_config = self._get_config_str()
         params = self._get_params_str()
-        return 'new Ext.ux.form.DateTimeField({%s},{%s})' % (base_config, params)
+        return 'new Ext3.ux.form.DateTimeField({%s},{%s})' % (base_config, params)
 
 class ExtAdvTimeField(BaseExtField):
 
@@ -447,4 +447,4 @@ class ExtAdvTimeField(BaseExtField):
 
         base_config = self._get_config_str()
         params = self._get_params_str()
-        return 'new Ext.ux.form.AdvTimeField({%s},{%s})' % (base_config, params)
+        return 'new Ext3.ux.form.AdvTimeField({%s},{%s})' % (base_config, params)

@@ -1,85 +1,85 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
 /* all fields */
-.x-form-field{
+.x3-form-field{
     margin: 0 0 0 0;
 }
 
-.ext-webkit *:focus{
+.ext3-webkit *:focus{
     outline: none !important;
 }
 
 /* ---- text fields ---- */
-.x-form-text, textarea.x-form-field{
+.x3-form-text, textarea.x3-form-field{
     padding:1px 3px;
     background:repeat-x 0 0;
     border:1px solid;
 }
 
-textarea.x-form-field {
+textarea.x3-form-field {
     padding:2px 3px;
 }
 
-.x-form-text, .ext-ie .x-form-file {
+.x3-form-text, .ext3-ie .x3-form-file {
     height:22px;
     line-height:18px;
     vertical-align:middle;
 }
 
-.ext-ie6 .x-form-text, .ext-ie7 .x-form-text {
+.ext3-ie6 .x3-form-text, .ext3-ie7 .x3-form-text {
     margin:-1px 0; /* ie bogus margin bug */
     height:22px; /* ie quirks */
     line-height:18px;
 }
 
-.x-quirks .ext-ie9 .x-form-text {
+.x3-quirks .ext3-ie9 .x3-form-text {
     height: 22px;
     padding-top: 3px;
     padding-bottom: 0px;
 }
 
 /* Ugly hacks for the bogus 1px margin bug in IE9 quirks */
-.x-quirks .ext-ie9 .x-input-wrapper .x-form-text,
-.x-quirks .ext-ie9 .x-form-field-trigger-wrap .x-form-text {
+.x3-quirks .ext3-ie9 .x3-input-wrapper .x3-form-text,
+.x3-quirks .ext3-ie9 .x3-form-field-trigger-wrap .x3-form-text {
     margin-top: -1px;
     margin-bottom: -1px;
 }
-.x-quirks .ext-ie9 .x-input-wrapper .x-form-element {
+.x3-quirks .ext3-ie9 .x3-input-wrapper .x3-form-element {
     margin-bottom: -1px;
 }
 
-.ext-ie6 .x-form-field-wrap .x-form-file-btn, .ext-ie7 .x-form-field-wrap .x-form-file-btn {
+.ext3-ie6 .x3-form-field-wrap .x3-form-file-btn, .ext3-ie7 .x3-form-field-wrap .x3-form-file-btn {
     top: -1px; /* because of all these margin hacks, these buttons are off by one pixel in IE6,7 */
 }
 
-.ext-ie6 textarea.x-form-field, .ext-ie7 textarea.x-form-field {
+.ext3-ie6 textarea.x3-form-field, .ext3-ie7 textarea.x3-form-field {
     margin:-1px 0; /* ie bogus margin bug */
 }
 
-.ext-strict .x-form-text {
+.ext3-strict .x3-form-text {
     height:18px;
 }
 
-.ext-safari.ext-mac textarea.x-form-field {
+.ext3-safari.ext3-mac textarea.x3-form-field {
     margin-bottom:-2px; /* another bogus margin bug, safari/mac only */
 }
 
 /*
-.ext-strict .ext-ie8 .x-form-text, .ext-strict .ext-ie8 textarea.x-form-field {
+.ext3-strict .ext3-ie8 .x3-form-text, .ext3-strict .ext3-ie8 textarea.x3-form-field {
     margin-bottom: 1px;
 }
 */
 
-.ext-gecko .x-form-text , .ext-ie8 .x-form-text {
+.ext3-gecko .x3-form-text , .ext3-ie8 .x3-form-text {
     padding-top:2px; /* FF won't center the text vertically */
     padding-bottom:0;
 }
 
-.ext-ie6 .x-form-composite .x-form-text.x-box-item, .ext-ie7 .x-form-composite .x-form-text.x-box-item {
+.ext3-ie6 .x3-form-composite .x3-form-text.x3-box-item, .ext3-ie7 .x3-form-composite .x3-form-text.x3-box-item {
     margin: 0 !important; /* clear ie bogus margin bug fix */
 }
 
@@ -88,7 +88,7 @@ textarea {
 }
 
 /* select boxes */
-.x-form-select-one {
+.x3-form-select-one {
     height:20px;
     line-height:18px;
     vertical-align:middle;
@@ -100,29 +100,29 @@ textarea {
 /* --- TODO --- */
 
 /* 2.0.2 style */
-.x-form-check-wrap {
+.x3-form-check-wrap {
     line-height:18px;
     height: auto;
 }
 
-.ext-ie .x-form-check-wrap input {
+.ext3-ie .x3-form-check-wrap input {
     width:15px;
     height:15px;
 }
 
-.x-form-check-wrap input{
+.x3-form-check-wrap input{
     vertical-align: bottom;
 }
 
-.x-editor .x-form-check-wrap {
+.x3-editor .x3-form-check-wrap {
     padding:3px;
 }
 
-.x-editor .x-form-checkbox {
+.x3-editor .x3-form-checkbox {
     height:13px;
 }
 
-.x-form-check-group-label {
+.x3-form-check-group-label {
     border-bottom: 1px solid;
     margin-bottom: 5px;
     padding-left: 3px !important;
@@ -130,7 +130,7 @@ textarea {
 }
 
 /* wrapped fields and triggers */
-.x-form-field-wrap .x-form-trigger{
+.x3-form-field-wrap .x3-form-trigger{
     width:17px;
     height:21px;
     border:0;
@@ -141,17 +141,17 @@ textarea {
     top:0;
 }
 
-.x-form-field-wrap .x-form-date-trigger, .x-form-field-wrap .x-form-clear-trigger, .x-form-field-wrap .x-form-search-trigger{
+.x3-form-field-wrap .x3-form-date-trigger, .x3-form-field-wrap .x3-form-clear-trigger, .x3-form-field-wrap .x3-form-search-trigger{
     cursor:pointer;
 }
 
-.x-form-field-wrap .x-form-twin-triggers .x-form-trigger{
+.x3-form-field-wrap .x3-form-twin-triggers .x3-form-trigger{
     position:static;
     top:auto;
     vertical-align:top;
 }
 
-.x-form-field-wrap {
+.x3-form-field-wrap {
     position:relative;
     left:0;top:0;
     text-align: left;
@@ -159,71 +159,71 @@ textarea {
     white-space: nowrap;
 }
 
-.ext-strict .ext-ie8 .x-toolbar-cell .x-form-field-trigger-wrap .x-form-trigger {
+.ext3-strict .ext3-ie8 .x3-toolbar-cell .x3-form-field-trigger-wrap .x3-form-trigger {
     right: 0; /* IE8 Strict mode trigger bug */
 }
 
-.x-form-field-wrap .x-form-trigger-over{
+.x3-form-field-wrap .x3-form-trigger-over{
     background-position:-17px 0;
 }
 
-.x-form-field-wrap .x-form-trigger-click{
+.x3-form-field-wrap .x3-form-trigger-click{
     background-position:-34px 0;
 }
 
-.x-trigger-wrap-focus .x-form-trigger{
+.x3-trigger-wrap-focus .x3-form-trigger{
     background-position:-51px 0;
 }
 
-.x-trigger-wrap-focus .x-form-trigger-over{
+.x3-trigger-wrap-focus .x3-form-trigger-over{
     background-position:-68px 0;
 }
 
-.x-trigger-wrap-focus .x-form-trigger-click{
+.x3-trigger-wrap-focus .x3-form-trigger-click{
     background-position:-85px 0;
 }
 
-.x-trigger-wrap-focus .x-form-trigger{
+.x3-trigger-wrap-focus .x3-form-trigger{
     border-bottom: 1px solid;
 }
 
-.x-item-disabled .x-form-trigger-over{
+.x3-item-disabled .x3-form-trigger-over{
     background-position:0 0 !important;
     border-bottom: 1px solid;
 }
 
-.x-item-disabled .x-form-trigger-click{
+.x3-item-disabled .x3-form-trigger-click{
     background-position:0 0 !important;
     border-bottom: 1px solid;
 }
 
-.x-trigger-noedit{
+.x3-trigger-noedit{
     cursor:pointer;
 }
 
 /* field focus style */
-.x-form-focus, textarea.x-form-focus{
+.x3-form-focus, textarea.x3-form-focus{
     border: 1px solid;
 }
 
 /* invalid fields */
-.x-form-invalid, textarea.x-form-invalid{
+.x3-form-invalid, textarea.x3-form-invalid{
     background:repeat-x bottom;
     border: 1px solid;
 }
 
-.x-form-inner-invalid, textarea.x-form-inner-invalid{
+.x3-form-inner-invalid, textarea.x3-form-inner-invalid{
     background:repeat-x bottom;
 }
 
 /* editors */
-.x-editor {
+.x3-editor {
     visibility:hidden;
     padding:0;
     margin:0;
 }
 
-.x-form-grow-sizer {
+.x3-form-grow-sizer {
     left: -10000px;
     padding: 8px 3px;
     position: absolute;
@@ -237,7 +237,7 @@ textarea {
     zoom:1;
 }
 
-.x-form-grow-sizer p {
+.x3-form-grow-sizer p {
     margin:0 !important;
     border:0 none !important;
     padding:0 !important;
@@ -245,13 +245,13 @@ textarea {
 
 /* Form Items CSS */
 
-.x-form-item {
+.x3-form-item {
     display:block;
     margin-bottom:4px;
     zoom:1;
 }
 
-.x-form-item label.x-form-item-label {
+.x3-form-item label.x3-form-item-label {
     display:block;
     float:left;
     width:100px;
@@ -262,12 +262,12 @@ textarea {
     position:relative;
 }
 
-.x-form-element {
+.x3-form-element {
     padding-left:105px;
     position:relative;
 }
 
-.x-form-invalid-msg {
+.x3-form-invalid-msg {
     padding:2px;
     padding-left:18px;
     background: transparent no-repeat 0 2px;
@@ -275,15 +275,15 @@ textarea {
     width:200px;
 }
 
-.x-form-label-left label.x-form-item-label {
+.x3-form-label-left label.x3-form-item-label {
    text-align:left;
 }
 
-.x-form-label-right label.x-form-item-label {
+.x3-form-label-right label.x3-form-item-label {
    text-align:right;
 }
 
-.x-form-label-top .x-form-item label.x-form-item-label {
+.x3-form-label-top .x3-form-item label.x3-form-item-label {
     width:auto;
     float:none;
     clear:none;
@@ -292,70 +292,70 @@ textarea {
     position:static;
 }
 
-.x-form-label-top .x-form-element {
+.x3-form-label-top .x3-form-element {
     padding-left:0;
     padding-top:4px;
 }
 
-.x-form-label-top .x-form-item {
+.x3-form-label-top .x3-form-item {
     padding-bottom:4px;
 }
 
 /* Editor small font for grid, toolbar and tree */
-.x-small-editor .x-form-text {
+.x3-small-editor .x3-form-text {
     height:20px;
     line-height:16px;
     vertical-align:middle;
 }
 
-.ext-ie6 .x-small-editor .x-form-text, .ext-ie7 .x-small-editor .x-form-text {
+.ext3-ie6 .x3-small-editor .x3-form-text, .ext3-ie7 .x3-small-editor .x3-form-text {
     margin-top:-1px !important; /* ie bogus margin bug */
     margin-bottom:-1px !important;
     height:20px !important; /* ie quirks */
     line-height:16px !important;
 }
 
-.ext-strict .x-small-editor .x-form-text {
+.ext3-strict .x3-small-editor .x3-form-text {
     height:16px !important;
 }
 
-.ext-ie6 .x-small-editor .x-form-text, .ext-ie7 .x-small-editor .x-form-text {
+.ext3-ie6 .x3-small-editor .x3-form-text, .ext3-ie7 .x3-small-editor .x3-form-text {
     height:20px;
     line-height:16px;
 }
 
-.ext-border-box .x-small-editor .x-form-text {
+.ext3-border-box .x3-small-editor .x3-form-text {
     height:20px;
 }
 
-.x-small-editor .x-form-select-one {
+.x3-small-editor .x3-form-select-one {
     height:20px;
     line-height:16px;
     vertical-align:middle;
 }
 
-.x-small-editor .x-form-num-field {
+.x3-small-editor .x3-form-num-field {
     text-align:right;
 }
 
-.x-small-editor .x-form-field-wrap .x-form-trigger{
+.x3-small-editor .x3-form-field-wrap .x3-form-trigger{
     height:19px;
 }
 
-.ext-webkit .x-small-editor .x-form-text{padding-top:3px;font-size:100%;}
+.ext3-webkit .x3-small-editor .x3-form-text{padding-top:3px;font-size:100%;}
 
-.ext-strict .ext-webkit .x-small-editor .x-form-text{
+.ext3-strict .ext3-webkit .x3-small-editor .x3-form-text{
     height:14px !important;
 }
 
-.x-form-clear {
+.x3-form-clear {
     clear:both;
     height:0;
     overflow:hidden;
     line-height:0;
     font-size:0;
 }
-.x-form-clear-left {
+.x3-form-clear-left {
     clear:left;
     height:0;
     overflow:hidden;
@@ -363,41 +363,41 @@ textarea {
     font-size:0;
 }
 
-.ext-ie6 .x-form-check-wrap input, .ext-border-box .x-form-check-wrap input{
+.ext3-ie6 .x3-form-check-wrap input, .ext3-border-box .x3-form-check-wrap input{
    margin-top: 3px;
 }
 
-.x-form-cb-label {
+.x3-form-cb-label {
     position: relative;
     margin-left:4px;
     top: 2px;
 }
 
-.ext-ie .x-form-cb-label{
+.ext3-ie .x3-form-cb-label{
     top: 1px;
 }
 
-.ext-ie6 .x-form-cb-label, .ext-border-box .x-form-cb-label{
+.ext3-ie6 .x3-form-cb-label, .ext3-border-box .x3-form-cb-label{
     top: 3px;
 }
 
-.x-form-display-field{
+.x3-form-display-field{
     padding-top: 2px;
 }
 
-.ext-gecko .x-form-display-field, .ext-strict .ext-ie7 .x-form-display-field{
+.ext3-gecko .x3-form-display-field, .ext3-strict .ext3-ie7 .x3-form-display-field{
     padding-top: 1px;
 }
 
-.ext-ie .x-form-display-field{
+.ext3-ie .x3-form-display-field{
     padding-top: 3px;
 }
 
-.ext-strict .ext-ie8 .x-form-display-field{
+.ext3-strict .ext3-ie8 .x3-form-display-field{
     padding-top: 0;
 }
 
-.x-form-column {
+.x3-form-column {
     float:left;
     padding:0;
     margin:0;
@@ -407,63 +407,63 @@ textarea {
 }
 
 /* buttons */
-.x-form .x-form-btns-ct .x-btn{
+.x3-form .x3-form-btns-ct .x3-btn{
     float:right;
     clear:none;
 }
 
-.x-form .x-form-btns-ct .x-form-btns td {
+.x3-form .x3-form-btns-ct .x3-form-btns td {
     border:0;
     padding:0;
 }
 
-.x-form .x-form-btns-ct .x-form-btns-right table{
+.x3-form .x3-form-btns-ct .x3-form-btns-right table{
     float:right;
     clear:none;
 }
 
-.x-form .x-form-btns-ct .x-form-btns-left table{
+.x3-form .x3-form-btns-ct .x3-form-btns-left table{
     float:left;
     clear:none;
 }
 
-.x-form .x-form-btns-ct .x-form-btns-center{
+.x3-form .x3-form-btns-ct .x3-form-btns-center{
     text-align:center; /*ie*/
 }
 
-.x-form .x-form-btns-ct .x-form-btns-center table{
+.x3-form .x3-form-btns-ct .x3-form-btns-center table{
     margin:0 auto; /*everyone else*/
 }
 
-.x-form .x-form-btns-ct table td.x-form-btn-td{
+.x3-form .x3-form-btns-ct table td.x3-form-btn-td{
     padding:3px;
 }
 
-.x-form .x-form-btns-ct .x-btn-focus .x-btn-left{
+.x3-form .x3-form-btns-ct .x3-btn-focus .x3-btn-left{
     background-position:0 -147px;
 }
 
-.x-form .x-form-btns-ct .x-btn-focus .x-btn-right{
+.x3-form .x3-form-btns-ct .x3-btn-focus .x3-btn-right{
     background-position:0 -168px;
 }
 
-.x-form .x-form-btns-ct .x-btn-focus .x-btn-center{
+.x3-form .x3-form-btns-ct .x3-btn-focus .x3-btn-center{
     background-position:0 -189px;
 }
 
-.x-form .x-form-btns-ct .x-btn-click .x-btn-center{
+.x3-form .x3-form-btns-ct .x3-btn-click .x3-btn-center{
     background-position:0 -126px;
 }
 
-.x-form .x-form-btns-ct .x-btn-click  .x-btn-right{
+.x3-form .x3-form-btns-ct .x3-btn-click  .x3-btn-right{
     background-position:0 -84px;
 }
 
-.x-form .x-form-btns-ct .x-btn-click .x-btn-left{
+.x3-form .x3-form-btns-ct .x3-btn-click .x3-btn-left{
     background-position:0 -63px;
 }
 
-.x-form-invalid-icon {
+.x3-form-invalid-icon {
     width:16px;
     height:18px;
     visibility:hidden;
@@ -475,7 +475,7 @@ textarea {
 }
 
 /* fieldsets */
-.x-fieldset {
+.x3-fieldset {
     border:1px solid;
     padding:10px;
     margin-bottom:10px;
@@ -483,115 +483,115 @@ textarea {
 }
 
 /* make top of checkbox/tools visible in webkit */
-.ext-webkit .x-fieldset-header {
+.ext3-webkit .x3-fieldset-header {
     padding-top: 1px;
 }
 
-.ext-ie .x-fieldset legend {
+.ext3-ie .x3-fieldset legend {
     margin-bottom:10px;
 }
 
-.ext-strict .ext-ie9 .x-fieldset legend.x-fieldset-header {
+.ext3-strict .ext3-ie9 .x3-fieldset legend.x3-fieldset-header {
     padding-top: 1px;
 }
 
-.ext-ie .x-fieldset {
+.ext3-ie .x3-fieldset {
     padding-top: 0;
     padding-bottom:10px;
 }
 
-.x-fieldset legend .x-tool-toggle {
+.x3-fieldset legend .x3-tool-toggle {
     margin-right:3px;
     margin-left:0;
     float:left !important;
 }
 
-.x-fieldset legend input {
+.x3-fieldset legend input {
     margin-right:3px;
     float:left !important;
     height:13px;
     width:13px;
 }
 
-fieldset.x-panel-collapsed {
+fieldset.x3-panel-collapsed {
     padding-bottom:0 !important;
     border-width: 1px 1px 0 1px !important;
     border-left-color: transparent;
     border-right-color: transparent;
 }
 
-.ext-ie6 fieldset.x-panel-collapsed{
+.ext3-ie6 fieldset.x3-panel-collapsed{
     padding-bottom:0 !important;
     border-width: 1px 0 0 0 !important;
     margin-left: 1px;
     margin-right: 1px;
 }
 
-fieldset.x-panel-collapsed .x-fieldset-bwrap {
+fieldset.x3-panel-collapsed .x3-fieldset-bwrap {
     visibility:hidden;
     position:absolute;
     left:-1000px;
     top:-1000px;
 }
 
-.ext-ie .x-fieldset-bwrap {
+.ext3-ie .x3-fieldset-bwrap {
     zoom:1;
 }
 
-.x-fieldset-noborder {
+.x3-fieldset-noborder {
     border:0px none transparent;
 }
 
-.x-fieldset-noborder legend {
+.x3-fieldset-noborder legend {
     margin-left:-3px;
 }
 
 /* IE legend positioning bug */
-.ext-ie .x-fieldset-noborder legend {
+.ext3-ie .x3-fieldset-noborder legend {
     position: relative;
     margin-bottom:23px;
 }
-.ext-ie .x-fieldset-noborder legend span {
+.ext3-ie .x3-fieldset-noborder legend span {
     position: absolute;
     left:16px;
 }
 
-.ext-gecko .x-window-body .x-form-item {
+.ext3-gecko .x3-window-body .x3-form-item {
     -moz-outline: none;
     outline: none;
     overflow: auto;
 }
 
-.ext-mac.ext-gecko .x-window-body .x-form-item {
+.ext3-mac.ext3-gecko .x3-window-body .x3-form-item {
     overflow:hidden;
 }
 
-.ext-gecko .x-form-item {
+.ext3-gecko .x3-form-item {
     -moz-outline: none;
     outline: none;
 }
 
-.x-hide-label label.x-form-item-label {
+.x3-hide-label label.x3-form-item-label {
      display:none;
 }
 
-.x-hide-label .x-form-element {
+.x3-hide-label .x3-form-element {
      padding-left: 0 !important;
 }
 
-.x-form-label-top .x-hide-label label.x-form-item-label{
+.x3-form-label-top .x3-hide-label label.x3-form-item-label{
     display: none;
 }
 
-.x-fieldset {
+.x3-fieldset {
     overflow:hidden;
 }
 
-.x-fieldset-bwrap {
+.x3-fieldset-bwrap {
     overflow:hidden;
     zoom:1;
 }
 
-.x-fieldset-body {
+.x3-fieldset-body {
     overflow:hidden;
 }

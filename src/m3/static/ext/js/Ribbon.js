@@ -1,16 +1,16 @@
-Ext.namespace('Ext.ux.Ribbon');
+Ext3.namespace('Ext3.ux.Ribbon');
 
-Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
+Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
 
     titleId: null,
 
     constructor: function(config){
         this.titleId = new Array();
 
-        Ext.apply(config, {
-            baseCls: "x-plain ui-ribbon",
+        Ext3.apply(config, {
+            baseCls: "x3-plain ui-ribbon",
             margins: "0 0 0 0",
-            // plugins: new Ext.ux.TabScrollerMenu({
+            // plugins: new Ext3.ux.TabScrollerMenu({
             //     maxText: 15,
             //     pageSize: 5
             // }),
@@ -33,7 +33,7 @@ Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
                         //this.doLayout();
                         if (this.titleId.length > 0){
                             for (var key = 0; key < this.titleId.length; key++){
-                                r = Ext.get(this.titleId[key].id);
+                                r = Ext3.get(this.titleId[key].id);
                                 if (r)
                                 r.on('click', this.titleId[key].fn);
                             }
@@ -43,14 +43,14 @@ Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
             }
         });
 
-        Ext.apply(this, Ext.apply(this.initialConfig, config));
+        Ext3.apply(this, Ext3.apply(this.initialConfig, config));
 
         if (config.items){
             for (var i = 0; i < config.items.length; i++)
             this.initRibbon(config.items[i], i);
         }
 
-        Ext.ux.Ribbon.superclass.constructor.apply(this, arguments);
+        Ext3.ux.Ribbon.superclass.constructor.apply(this, arguments);
         
     },
 
@@ -64,7 +64,7 @@ Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
             //                         }
             c = {
                 xtype: "buttongroup",
-                cls: "x-btn-group-ribbonstyle",
+                cls: "x3-btn-group-ribbonstyle",
                 defaults: {
                     scale: "small",
                     iconAlign: "left",
@@ -78,7 +78,7 @@ Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
             onTitleClick = item.ribbon[j].onTitleClick || false;
 
             if (onTitleClick){
-                titleId = 'ux-ribbon-' + Ext.id();
+                titleId = 'ux-ribbon-' + Ext3.id();
                 title = '<span id="' + titleId + '" style="cursor:pointer;">' + title + '</span>';
                 this.titleId.push({
                     id: titleId,
@@ -87,15 +87,15 @@ Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
             }
             if (title !== ''){
                 if (!topTitle){
-                    Ext.apply(c, {
+                    Ext3.apply(c, {
                         footerCfg: {
-                            cls: "x-btn-group-header x-unselectable",
+                            cls: "x3-btn-group-header x3-unselectable",
                             tag: "span",
                             html: title
                         }
                     });
                 } else{
-                    Ext.apply(c, {
+                    Ext3.apply(c, {
                         title: title
                     });
                 }
@@ -104,16 +104,16 @@ Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
             cfg = item.ribbon[j].cfg || null;
 
             if (cfg){
-                Ext.applyIf(c, item.ribbon[j].cfg);
+                Ext3.applyIf(c, item.ribbon[j].cfg);
                 if (cfg.defaults)
-                Ext.apply(c.defaults, cfg.defaults);
+                Ext3.apply(c.defaults, cfg.defaults);
             }
 
             tbarr.push(c);
         }
 
-        Ext.apply(item, {
-            baseCls: "x-plain",
+        Ext3.apply(item, {
+            baseCls: "x3-plain",
             tbar: tbarr
         });
     }

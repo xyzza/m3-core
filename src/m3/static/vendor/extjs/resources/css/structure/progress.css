@@ -1,21 +1,21 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-progress-wrap {
+.x3-progress-wrap {
     border:1px solid;
     overflow:hidden;
 }
 
-.x-progress-inner {
+.x3-progress-inner {
     height:18px;
     background:repeat-x;
     position:relative;
 }
 
-.x-progress-bar {
+.x3-progress-bar {
     height:18px;
     float:left;
     width:0;
@@ -25,7 +25,7 @@
     border-right:1px solid;
 }
 
-.x-progress-text {
+.x3-progress-text {
     padding:1px 5px;
     overflow:hidden;
     position:absolute;
@@ -33,14 +33,14 @@
     text-align:center;
 }
 
-.x-progress-text-back {
+.x3-progress-text-back {
     line-height:16px;
 }
 
-.ext-ie .x-progress-text-back {
+.ext3-ie .x3-progress-text-back {
     line-height:15px;
 }
 
-.ext-strict .ext-ie7 .x-progress-text-back{
+.ext3-strict .ext3-ie7 .x3-progress-text-back{
     width: 100%;
 }

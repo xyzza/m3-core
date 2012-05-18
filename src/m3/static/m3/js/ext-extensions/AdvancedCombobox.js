@@ -5,7 +5,7 @@
  * @param {Object} params
  */
 
-Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
+Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 	constructor: function(baseConfig, params){
 
 		/**
@@ -45,9 +45,9 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		this.defaultLimit = '50';
 		
 		// css классы для иконок на триггеры 
-		this.triggerClearClass = 'x-form-clear-trigger';
-		this.triggerSelectClass = 'x-form-select-trigger';
-		this.triggerEditClass = 'x-form-edit-trigger';
+		this.triggerClearClass = 'x3-form-clear-trigger';
+		this.triggerSelectClass = 'x3-form-select-trigger';
+		this.triggerEditClass = 'x3-form-edit-trigger';
 
 
 
@@ -73,10 +73,10 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 
 		this.defaultValue = params.defaultValue;
 		this.defaultText = params.defaultText;
-        this.defaultRecord = Ext.decode(params.recordValue);
+        this.defaultRecord = Ext3.decode(params.recordValue);
 
 		this.baseTriggers = [{
-				iconCls: 'x-form-clear-trigger',
+				iconCls: 'x3-form-clear-trigger',
 				handler: null,
 				hide: null
 			},{
@@ -84,38 +84,38 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 				handler: null,
 				hide: null
 			},{
-				iconCls:'x-form-select-trigger', 
+				iconCls:'x3-form-select-trigger', 
 				handler: null,
 				hide: null
 			},{
-				iconCls:'x-form-edit-trigger', 
+				iconCls:'x3-form-edit-trigger', 
 				handler: null,
 				hide: true
 			}
 		];
 		this.allTriggers = [].concat(this.baseTriggers);
 		if (params.customTriggers) {
-			Ext.each(params.customTriggers, function(item, index, all){
+			Ext3.each(params.customTriggers, function(item, index, all){
 				this.allTriggers.push(item);
 			}, this);
 		
 		}
 
-		Ext.m3.AdvancedComboBox.superclass.constructor.call(this, baseConfig);
+		Ext3.m3.AdvancedComboBox.superclass.constructor.call(this, baseConfig);
 	},
 	/**
 	 * Конфигурация компонента 
 	 */
 	initComponent: function () {
-		Ext.m3.AdvancedComboBox.superclass.initComponent.call(this);
+		Ext3.m3.AdvancedComboBox.superclass.initComponent.call(this);
 		
 		// см. TwinTriggerField
         this.triggerConfig = {
-            tag:'span', cls:'x-form-twin-triggers', cn:[]};
+            tag:'span', cls:'x3-form-twin-triggers', cn:[]};
 
-		Ext.each(this.allTriggers, function(item, index, all){
+		Ext3.each(this.allTriggers, function(item, index, all){
 			this.triggerConfig.cn.push(
-				{tag: "img", src: Ext.BLANK_IMAGE_URL, cls: "x-form-trigger " + item.iconCls}
+				{tag: "img", src: Ext3.BLANK_IMAGE_URL, cls: "x3-form-trigger " + item.iconCls}
 			);
 		}, this);
 
@@ -133,7 +133,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 
 		// Значения по-умолчанию
         if (this.defaultRecord){
-            var record = new Ext.data.Record(this.defaultRecord);
+            var record = new Ext3.data.Record(this.defaultRecord);
             this.setRecord(record);
         } else {
             if (this.defaultValue && this.defaultText) {
@@ -181,7 +181,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			'changed'
 		);
 		
-		this.getStore().baseParams = Ext.applyIf({start:0, limit: this.defaultLimit }, this.getStore().baseParams );
+		this.getStore().baseParams = Ext3.applyIf({start:0, limit: this.defaultLimit }, this.getStore().baseParams );
         this.triggerAction = 'all';
 	},
 	// см. TwinTriggerField
@@ -190,7 +190,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
     },
 	// см. TwinTriggerField
     initTrigger : function(){
-        var ts = this.trigger.select('.x-form-trigger', true),
+        var ts = this.trigger.select('.x3-form-trigger', true),
             triggerField = this;
         ts.each(function(t, all, index){
 			
@@ -221,7 +221,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 
     getWidth: function() {
         // неверно пересчитывался размер поля
-        //Ext.m3.AdvancedComboBox.superclass.getWidth.call(this);
+        //Ext3.m3.AdvancedComboBox.superclass.getWidth.call(this);
         return(this.el.getWidth() + this.getTriggerWidth());
     },
     /**
@@ -230,16 +230,16 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
      */
     disableTriggers: function(disabled){
         if (this.trigger) {
-            var ts = this.trigger.select('.x-form-trigger', true);
+            var ts = this.trigger.select('.x3-form-trigger', true);
             ts.each(function(t, all, index){
                 var handler = this.allTriggers[index].handler,
-                    events = Ext.elCache[t.id].events;
+                    events = Ext3.elCache[t.id].events;
                 if (!disabled) {
                     // Чтобы не добавлять событие несколько раз, нужно проверить есть ли оно уже
                     if (!events.click || events.click.length === 0){
                         t.on('click', handler, this, {preventDefault:true});
-                        t.addClassOnOver('x-form-trigger-over');
-                        t.addClassOnClick('x-form-trigger-click');
+                        t.addClassOnOver('x3-form-trigger-over');
+                        t.addClassOnClick('x3-form-trigger-click');
                     }
                 } else {
                     t.un('click', handler, this, {preventDefault:true});
@@ -276,7 +276,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	// см. TwinTriggerField
     getTriggerWidth: function(){
         var tw = 0;
-        Ext.each(this.triggers, function(t, index){
+        Ext3.each(this.triggers, function(t, index){
             var triggerIndex = 'Trigger' + (index + 1),
                 w = t.getWidth();
 
@@ -292,10 +292,10 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	// см. TwinTriggerField
     // private
     onDestroy : function() {
-        Ext.destroy(this.triggers);
-		Ext.destroy(this.allTriggers);
-		Ext.destroy(this.baseTriggers);
-        Ext.m3.AdvancedComboBox.superclass.onDestroy.call(this);
+        Ext3.destroy(this.triggers);
+		Ext3.destroy(this.allTriggers);
+		Ext3.destroy(this.baseTriggers);
+        Ext3.m3.AdvancedComboBox.superclass.onDestroy.call(this);
     },
 
 	/**
@@ -325,11 +325,11 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	onTriggerClearClick: function() {
 		if (this.askBeforeDeleting) {
 			var scope = this;
-			Ext.Msg.show({
+			Ext3.Msg.show({
 	            title: 'Подтверждение',
 	            msg: 'Вы действительно хотите очистить выбранное значение?',
-	            icon: Ext.Msg.QUESTION,
-	            buttons: Ext.Msg.YESNO,
+	            icon: Ext3.Msg.QUESTION,
+	            buttons: Ext3.Msg.YESNO,
 	            fn: function(btn,text,opt){
 	                if (btn === 'yes') {
 	                    scope.clearValue(); 
@@ -353,7 +353,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 */
 	onSelect: function(record, index){
 		if (this.fireEvent('afterselect', this, record.data[this.valueField], record.data[this.displayField] )) {
-			Ext.m3.AdvancedComboBox.superclass.onSelect.call(this, record, index);
+			Ext3.m3.AdvancedComboBox.superclass.onSelect.call(this, record, index);
             this.showClearBtn();
             this.showEditBtn();
 			this.fireEvent('change', this, record.data[this.valueField || this.displayField]);
@@ -406,7 +406,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 */
 	clearValue: function(){
 		var oldValue = this.getValue();
-		Ext.m3.AdvancedComboBox.superclass.clearValue.call(this);
+		Ext3.m3.AdvancedComboBox.superclass.clearValue.call(this);
 		this.hideClearBtn();
 		this.hideEditBtn();
 		
@@ -418,7 +418,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * кнопку очистки
 	 */
 	setValue: function(value){
-		Ext.m3.AdvancedComboBox.superclass.setValue.call(this, value);
+		Ext3.m3.AdvancedComboBox.superclass.setValue.call(this, value);
 		if (value) {
 			this.showClearBtn();
 			this.showEditBtn();
@@ -433,7 +433,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		
 		if(this.fireEvent('beforerequest', this)) { 
 			var scope = this;
-			Ext.Ajax.request({
+			Ext3.Ajax.request({
 				url: this.actionSelectUrl,
 				method: 'POST',
 				params: this.actionContextJson,
@@ -460,7 +460,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	 * @param {Object} value Отображаемое значение
 	 */
 	addRecordToStore: function(id, value){
-        var record = new Ext.data.Record(),
+        var record = new Ext3.data.Record(),
             oldValue = this.getValue();
         record.id = id;
         record[this.displayField] = value;
@@ -475,7 +475,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
     },
     /**
      * Установка значения как готовой записи
-     * @param {Ext.data.Record} record Запись-значение
+     * @param {Ext3.data.Record} record Запись-значение
      */
     setRecord: function(record){
         if (record){
@@ -499,7 +499,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
     },
     /**
      * Получение значения как записи из store
-     * @return {Ext.data.Record} Запись-значение
+     * @return {Ext3.data.Record} Запись-значение
      */
     getRecord: function(){
         var store = this.getStore(),
@@ -524,10 +524,10 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 		var value_id = this.getValue();
 		assert( value_id, 'Value not selected but edit window called' );
 		
-		Ext.Ajax.request({
+		Ext3.Ajax.request({
 			url: this.actionEditUrl,
 			method: 'POST',
-			params: Ext.applyIf({id: value_id}, this.actionContextJson),
+			params: Ext3.applyIf({id: value_id}, this.actionContextJson),
 			success: function(response, opts){
 			    smart_eval(response.responseText);
 			},
@@ -566,7 +566,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
      */
     setDisabled: function(disabled){
         this.disableTriggers(disabled);
-        Ext.m3.AdvancedComboBox.superclass.setDisabled.call(this, disabled);
+        Ext3.m3.AdvancedComboBox.superclass.setDisabled.call(this, disabled);
     },
 
     /**
@@ -575,7 +575,7 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
     setReadOnly: function(readOnly){
         var width = this.getWidth();
         this.disableTriggers(readOnly);
-        Ext.m3.AdvancedComboBox.superclass.setReadOnly.call(this, readOnly);
+        Ext3.m3.AdvancedComboBox.superclass.setReadOnly.call(this, readOnly);
         if (readOnly){
             this.el.setWidth(width);
             if (this.wrap) this.wrap.setWidth(width);
@@ -597,4 +597,4 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
     }
 });
 
-Ext.reg('m3-select', Ext.m3.AdvancedComboBox);
+Ext3.reg('m3-select', Ext3.m3.AdvancedComboBox);

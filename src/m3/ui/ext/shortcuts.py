@@ -25,7 +25,7 @@ def js_submit_form(form, success_handler='', failure_handler='', invalid_handler
     assert isinstance(form, ExtForm)
     template = u'''
 function(){
-    var form = Ext.getCmp('%(form_id)s').getForm();
+    var form = Ext3.getCmp('%(form_id)s').getForm();
     if (!form.isValid()){
         %(invalid_handler)s
         return;
@@ -56,7 +56,7 @@ def js_success_response():
     '''
     @deprecated: Использовать OperationResult
     
-    Возвращает Ext Ajax ответ что операция прошла успешно
+    Возвращает Ext3 Ajax ответ что операция прошла успешно
     @deprecated: Нужно использовать OperationResult
     '''
     return http.HttpResponse('{success: true}')
@@ -65,7 +65,7 @@ def js_failure_response():
     '''
     @deprecated: Использовать OperationResult
     
-    Возвращает Ext Ajax ответ что операция прервана
+    Возвращает Ext3 Ajax ответ что операция прервана
     @deprecated: Нужно использовать OperationResult
     '''
     return http.HttpResponse('{success: false}')
@@ -78,7 +78,7 @@ def js_close_window(win, forceClose=False):
     '''
     assert isinstance(win, BaseExtWindow)
     forceClose = 'true' if forceClose else 'false'
-    return 'function(){Ext.getCmp("%s").close(%s);}' % (win.client_id, 
+    return 'function(){Ext3.getCmp("%s").close(%s);}' % (win.client_id, 
                                                         forceClose,)
 
 def js_submit_ajax(url, params = {}, success_handler = None, failure_handler = None):
@@ -89,7 +89,7 @@ def js_submit_ajax(url, params = {}, success_handler = None, failure_handler = N
     '''
     template = u'''
 function(){
-    Ext.Ajax.request({
+    Ext3.Ajax.request({
         url: '%(url)s'
         %(success_handler)s
         %(failure_handler)s
@@ -129,7 +129,7 @@ def js_fire_event(component, event_name, *args):
     '''
     template = u'''
 function(){
-    var component = Ext.getCmp("%(client_id)s");
+    var component = Ext3.getCmp("%(client_id)s");
     component.fireEvent("%(event_name)s" %(params)s);
 }
     '''
@@ -155,17 +155,17 @@ class MessageBox(object):
     Обёртка над стандартным MessageBox ExtJS
     '''
     # Константы определяющие значек формы
-    ICON_INFO     = 'Ext.MessageBox.INFO'
-    ICON_ERROR    = 'Ext.MessageBox.ERROR'
-    ICON_QUESTION = 'Ext.MessageBox.QUESTION'
-    ICON_WARNING  = 'Ext.MessageBox.WARNING'
+    ICON_INFO     = 'Ext3.MessageBox.INFO'
+    ICON_ERROR    = 'Ext3.MessageBox.ERROR'
+    ICON_QUESTION = 'Ext3.MessageBox.QUESTION'
+    ICON_WARNING  = 'Ext3.MessageBox.WARNING'
     
     # Константы определяющие доступные кнопки
-    BTN_OK          = 'Ext.Msg.OK'
-    BTN_CANCEL      = 'Ext.Msg.CANCEL'
-    BTN_OKCANCEL    = 'Ext.Msg.OKCANCEL'
-    BTN_YESNO       = 'Ext.Msg.YESNO'
-    BTN_YESNOCANCEL = 'Ext.Msg.YESNOCANCEL'
+    BTN_OK          = 'Ext3.Msg.OK'
+    BTN_CANCEL      = 'Ext3.Msg.CANCEL'
+    BTN_OKCANCEL    = 'Ext3.Msg.OKCANCEL'
+    BTN_YESNO       = 'Ext3.Msg.YESNO'
+    BTN_YESNOCANCEL = 'Ext3.Msg.YESNOCANCEL'
     
     def __init__(self, title = '', msg = '', icon = ICON_INFO, buttons = BTN_OK):
         self.title = title
@@ -180,7 +180,7 @@ class MessageBox(object):
         
     def get_script(self):
         template = '''
-Ext.Msg.show({
+Ext3.Msg.show({
    title: "%(title)s",
    msg: "%(msg)s",
    buttons: %(buttons)s,

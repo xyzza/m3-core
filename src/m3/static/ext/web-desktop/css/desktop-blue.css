@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.1.1
- * Copyright(c) 2006-2010 Ext JS, LLC
+ * Ext3 JS Library 3.1.1
+ * Copyright(c) 2006-2010 Ext3 JS, LLC
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -32,25 +32,25 @@ html, body {
 	float: right;
 }
 
-#dpanels .x-panel {
+#dpanels .x3-panel {
 	margin: 15px;
 }
 
-#dpanels .x-date-picker {
+#dpanels .x3-date-picker {
 	border: 0 none;
 	border-top: 0 none;
 	background: transparent;
 }
 
-#dpanels .x-date-picker td.x-date-active {
+#dpanels .x3-date-picker td.x3-date-active {
 	background: #ffffff;
 }
 
-#dpanels .x-date-picker {
+#dpanels .x3-date-picker {
 	width: 100% !important;
 }
 
-#x-desktop {
+#x3-desktop {
 	width: 100%;
 	height: 100%;
 	border: 0 none;
@@ -59,11 +59,11 @@ html, body {
     zoom:1;
 }
 
-#ux-taskbar .x-btn {
+#ux-taskbar .x3-btn {
 	margin: 1px 0 0 1px;
 }
 
-#ux-taskbar-start .x-btn {
+#ux-taskbar-start .x3-btn {
 	margin: 0;
 }
 
@@ -84,12 +84,12 @@ html, body {
 	float:left;
 }
 
-#x-logout {
+#x3-logout {
 	float:right;
 	padding:6px 7px;
 }
 
-.x-btn-text-icon .x-btn-center .logout {
+.x3-btn-text-icon .x3-btn-center .logout {
 	background-position:0pt 3px;
 	background-repeat:no-repeat;
 	padding:3px 0pt 3px 18px;
@@ -104,7 +104,7 @@ html, body {
 	z-index:12001;
 }
 
-.x-btn-icon .ux-taskbutton-center .x-btn-text{
+.x3-btn-icon .ux-taskbutton-center .x3-btn-text{
 	background-position: center;
 	background-repeat: no-repeat;
 	height: 16px;
@@ -113,17 +113,17 @@ html, body {
 	white-space: nowrap;
     padding:0;
 }
-.x-btn-icon .ux-taskbutton-center{
+.x3-btn-icon .ux-taskbutton-center{
 	padding:1px;
 }
 
-.x-btn-text-icon .ux-taskbutton-center .x-btn-text{
+.x3-btn-text-icon .ux-taskbutton-center .x3-btn-text{
 	background-position: 0 6px;
 	background-repeat: no-repeat;
 	padding:7px 0px 7px 20px;
 }
 
-.x-btn-text-icon .ux-startbutton-center .x-btn-text{
+.x3-btn-text-icon .ux-startbutton-center .x3-btn-text{
 	background-position: 0 4px;
 	background-repeat: no-repeat;
 	color:#000000 !important;
@@ -154,23 +154,23 @@ html, body {
 	background-position:0 -56px;
 }
 
-#ux-taskbar .x-btn-over .ux-taskbutton-left{
+#ux-taskbar .x3-btn-over .ux-taskbutton-left{
 	background-position:0 -252px;
 }
-#ux-taskbar .x-btn-over  .ux-taskbutton-right{
+#ux-taskbar .x3-btn-over  .ux-taskbutton-right{
 	background-position:0 -280px;
 }
-#ux-taskbar .x-btn-over .ux-taskbutton-center{
+#ux-taskbar .x3-btn-over .ux-taskbutton-center{
 	background-position:0 -308px;
 }
 
-#ux-taskbar .x-btn-click .ux-taskbutton-left{
+#ux-taskbar .x3-btn-click .ux-taskbutton-left{
 	background-position:0 -168px;
 }
-#ux-taskbar .x-btn-click  .ux-taskbutton-right{
+#ux-taskbar .x3-btn-click  .ux-taskbutton-right{
 	background-position:0 -196px;
 }
-#ux-taskbar .x-btn-click .ux-taskbutton-center{
+#ux-taskbar .x3-btn-click .ux-taskbutton-center{
 	background-position:0 -224px;
 }
 
@@ -190,13 +190,13 @@ html, body {
 	margin-top: 2px;
 }
 
-.x-window-body p,.x-panel-body p {
+.x3-window-body p,.x3-panel-body p {
 	padding: 10px;
 	margin: 0;
 }
 
 /* D prefer 28.03.10 - Нужно отображать футер! 
-.x-window-maximized .x-window-bc {
+.x3-window-maximized .x3-window-bc {
 	height:0;
 }
 */
@@ -206,26 +206,26 @@ html, body {
 	padding:0;
 }
 
-.ux-start-menu-tl .x-window-header {
+.ux-start-menu-tl .x3-window-header {
 	color:#f1f1f1;
 	font:bold 11px tahoma,arial,verdana,sans-serif;
     padding:5px 0 4px 0;
 }
 
-.x-panel-tl .x-panel-icon, .ux-start-menu-tl .x-panel-icon {
+.x3-panel-tl .x3-panel-icon, .ux-start-menu-tl .x3-panel-icon {
 	background-position:0pt 4px;
 	background-repeat:no-repeat;
 	padding-left:20px !important;
 }
 
-.ux-start-menu-bc .x-window-footer {
+.ux-start-menu-bc .x3-window-footer {
     padding-bottom:6px;
     zoom:1;
     font-size:0;
     line-height:0;
 }
 
-.x-panel-nofooter .ux-start-menu-bc {
+.x3-panel-nofooter .ux-start-menu-bc {
 	height:6px;
 }
 
@@ -244,7 +244,7 @@ html, body {
 	border:0px none;
 }
 
-#ux-taskbar-start .x-toolbar {
+#ux-taskbar-start .x3-toolbar {
 	background: none;
 	padding:0px;
 	border:0px none;
@@ -286,7 +286,7 @@ ul.ux-taskbuttons-strip li.ux-taskbuttons-edge {
     width:1px;
 }
 
-.x-clear {
+.x3-clear {
     clear:both;
     height:0;
     overflow:hidden;
@@ -294,11 +294,11 @@ ul.ux-taskbuttons-strip li.ux-taskbuttons-edge {
     font-size:0;
 }
 
-.x-taskbuttons-scrolling {
+.x3-taskbuttons-scrolling {
 	position:relative;
 }
 
-.x-taskbuttons-scrolling .ux-taskbuttons-strip-wrap {
+.x3-taskbuttons-scrolling .ux-taskbuttons-strip-wrap {
 	margin-left:18px;
 	margin-right:18px;
 }
@@ -347,15 +347,15 @@ td.ux-taskButtons-edge {
 	margin:2px 3px;
 }
 
-.ux-start-menu-tools-panel ul.x-menu-list li.x-menu-list-item a.x-menu-item {
+.ux-start-menu-tools-panel ul.x3-menu-list li.x3-menu-list-item a.x3-menu-item {
 	color:#ffffff;
 }
 
-.ux-start-menu-tools-panel ul.x-menu-list li.x-menu-list-item .x-menu-item-active a.x-menu-item {
+.ux-start-menu-tools-panel ul.x3-menu-list li.x3-menu-list-item .x3-menu-item-active a.x3-menu-item {
 	color:#000000;
 }
 
-.x-window-header-text {
+.x3-window-header-text {
 	cursor:default;
 }
 
@@ -385,23 +385,23 @@ td.ux-taskButtons-edge {
 	background-position:0 -60px;
 }
 
-#ux-taskbar .x-btn-over .ux-startbutton-left{
+#ux-taskbar .x3-btn-over .ux-startbutton-left{
 	background-position:0 -270px;
 }
-#ux-taskbar .x-btn-over  .ux-startbutton-right{
+#ux-taskbar .x3-btn-over  .ux-startbutton-right{
 	background-position:0 -300px;
 }
-#ux-taskbar .x-btn-over .ux-startbutton-center{
+#ux-taskbar .x3-btn-over .ux-startbutton-center{
 	background-position:0 -330px;
 }
 
-#ux-taskbar .x-btn-click .ux-startbutton-left{
+#ux-taskbar .x3-btn-click .ux-startbutton-left{
 	background-position:0 -180px;
 }
-#ux-taskbar .x-btn-click  .ux-startbutton-right{
+#ux-taskbar .x3-btn-click  .ux-startbutton-right{
 	background-position:0 -210px;
 }
-#ux-taskbar .x-btn-click .ux-startbutton-center{
+#ux-taskbar .x3-btn-click .ux-startbutton-center{
 	background-position:0 -240px;
 }
 
@@ -416,7 +416,7 @@ td.ux-taskButtons-edge {
  * End Start button
  */
 
-.x-resizable-proxy{
+.x3-resizable-proxy{
     background:#C7DFFC;
     opacity:.5;
     -moz-opacity:.5;
@@ -425,11 +425,11 @@ td.ux-taskButtons-edge {
 }
 
 /* Desktop Shortcuts */
-#x-shortcuts {
+#x3-shortcuts {
     position: absolute;
 }
 
-#x-shortcuts td {
+#x3-shortcuts td {
     float:left;
     margin:15px 0 0 15px;
    
@@ -439,24 +439,24 @@ td.ux-taskButtons-edge {
     zoom:1;
     display:block;
 }
-#x-shortcuts td a {
+#x3-shortcuts td a {
     width:75px;
     display:block;
     color:white;
     text-decoration:none;
 }
-#x-shortcuts td div {
+#x3-shortcuts td div {
     width:100%;
     color:white;
     overflow:hidden;
     text-overflow:ellipsis;
     cursor:pointer;
 }
-.ext-ie #x-shortcuts td img {
+.ext3-ie #x3-shortcuts td img {
     background:transparent !important;
 }
 /* 
-#x-shortcuts dt a:hover {
+#x3-shortcuts dt a:hover {
     text-decoration:underline;
 }
 */
@@ -591,13 +591,13 @@ td.ux-taskButtons-edge {
     cursor:pointer;
 }
 
-.ux-start-menu-tools-panel .x-menu-item-active {
+.ux-start-menu-tools-panel .x3-menu-item-active {
 	background: #525456 url( ../images/taskbar/blue/item-over.gif ) repeat-x left bottom;
 	border:1px solid #000000;
 	padding: 0;
 }
 
-#ux-taskbar .x-splitbar-h {
+#ux-taskbar .x3-splitbar-h {
 	background:#000000 url( ../images/taskbar/blue/taskbar-split-h.gif ) no-repeat 0 0;
 	width:8px;
 }

@@ -1,7 +1,7 @@
 {%if component.menu and component.handler %}
-new Ext.SplitButton({
+new Ext3.SplitButton({
 {%else%}
-new Ext.Button({
+new Ext3.Button({
 {%endif%}
 	{% include 'base-ext-ui.js'%}
 	{% if component.text %} ,text: '{{ component.text }}' {% endif %}

@@ -1,5 +1,5 @@
 (function(){
-    return new Ext.menu.Menu({
+    return new Ext3.menu.Menu({
     	{% include 'base-ext-ui.js'%}
     	,items: {{ component.t_render_items|safe }}
     	{# Прописываются имеющиеся обработчики #}

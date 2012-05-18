@@ -343,7 +343,7 @@ class ExtSearchField(BaseExtField):
         self.render_base_config()
         base_config = self._get_config_str()
         # Строка рендера как в шаблоне
-        s = 'new Ext.app.form.SearchField({%s, getComponentForSearch: function(){return Ext.getCmp("%s");}})'\
+        s = 'new Ext3.app.form.SearchField({%s, getComponentForSearch: function(){return Ext3.getCmp("%s");}})'\
             % (base_config, self.component_for_search.client_id)
         return s
 
@@ -387,7 +387,7 @@ class ExtFileUploadField(BaseExtField):
         self.render_params()
         base_config = self._get_config_str()
         params_config = self._get_params_str()
-        return 'new Ext.ux.form.FileUploadField({%s}, {%s})' % (base_config, 
+        return 'new Ext3.ux.form.FileUploadField({%s}, {%s})' % (base_config, 
                                                           params_config)
     
     @property
@@ -462,7 +462,7 @@ class ExtImageUploadField(ExtFileUploadField):
         self.render_params()
         base_config = self._get_config_str()
         params_config = self._get_params_str()
-        return 'new Ext.ux.form.ImageUploadField({%s}, {%s})' % (base_config, 
+        return 'new Ext3.ux.form.ImageUploadField({%s}, {%s})' % (base_config, 
                                                          params_config)
     @staticmethod
     def _prefix_by_type(type_img = None):
@@ -563,7 +563,7 @@ class ExtMultiSelectField(ExtDictSelectField):
 
         base_config = self._get_config_str()
         params = self._get_params_str()
-        return 'new Ext.m3.MultiSelectField({%s}, {%s})' % (base_config, params)
+        return 'new Ext3.m3.MultiSelectField({%s}, {%s})' % (base_config, params)
 
     def render_base_config(self):
         self.pre_render()

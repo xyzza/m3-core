@@ -1,37 +1,37 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-window-dlg .x-window-body {
+.x3-window-dlg .x3-window-body {
     border:0 none !important;
     padding:5px 10px;
     overflow:hidden !important;
 }
 
-.x-window-dlg .x-window-mc {
+.x3-window-dlg .x3-window-mc {
     border:0 none !important;
 }
 
-.x-window-dlg .ext-mb-input {
+.x3-window-dlg .ext3-mb-input {
     margin-top:4px;
     width:95%;
 }
 
-.x-window-dlg .ext-mb-textarea {
+.x3-window-dlg .ext3-mb-textarea {
     margin-top:4px;
 }
 
-.x-window-dlg .x-progress-wrap {
+.x3-window-dlg .x3-progress-wrap {
     margin-top:4px;
 }
 
-.ext-ie .x-window-dlg .x-progress-wrap {
+.ext3-ie .x3-window-dlg .x3-progress-wrap {
     margin-top:6px;
 }
 
-.x-window-dlg .x-msg-box-wait {
+.x3-window-dlg .x3-msg-box-wait {
     background:transparent no-repeat left;
     display:block;
     width:300px;
@@ -39,21 +39,21 @@
     line-height:18px;
 }
 
-.x-window-dlg .ext-mb-icon {
+.x3-window-dlg .ext3-mb-icon {
     float:left;
     width:47px;
     height:32px;
 }
 
-.x-window-dlg .x-dlg-icon .ext-mb-content{
+.x3-window-dlg .x3-dlg-icon .ext3-mb-content{
     zoom: 1; 
     margin-left: 47px;
 }
 
-.x-window-dlg .ext-mb-info, .x-window-dlg .ext-mb-warning, .x-window-dlg .ext-mb-question, .x-window-dlg .ext-mb-error {
+.x3-window-dlg .ext3-mb-info, .x3-window-dlg .ext3-mb-warning, .x3-window-dlg .ext3-mb-question, .x3-window-dlg .ext3-mb-error {
     background:transparent no-repeat top left;
 }
 
-.ext-gecko2 .ext-mb-fix-cursor {
+.ext3-gecko2 .ext3-mb-fix-cursor {
     overflow:auto;
 }

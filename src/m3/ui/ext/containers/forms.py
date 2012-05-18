@@ -533,7 +533,7 @@ class ExtPanel(BaseExtPanel):
         # Показывать ли внутреннюю границу у элемента
         self.body_border = True
 
-        # Базовый CSS класс, по умолчанию 'x-panel'
+        # Базовый CSS класс, по умолчанию 'x3-panel'
         self.base_cls = ''
         
         # Данное свойства - приватное в контексте extjs
@@ -544,7 +544,7 @@ class ExtPanel(BaseExtPanel):
         self.auto_load = None
         
         self.auto_scroll = True
-        # Позволять ли панели быть "плавающей" (см Ext.layout.BorderLayout.Region)
+        # Позволять ли панели быть "плавающей" (см Ext3.layout.BorderLayout.Region)
         self.floatable = True
         # Сворачивать панель при щелчке на заголовке?
         self.title_collapse = False
@@ -573,7 +573,7 @@ class ExtPanel(BaseExtPanel):
         self.render_base_config() # Тут конфиги
         self.render_params() # Пусто
         base_config = self._get_config_str()
-        return 'new Ext.Panel({%s})' % base_config
+        return 'new Ext3.Panel({%s})' % base_config
 
     def render_globals(self):
         """
@@ -597,7 +597,7 @@ class ExtTitlePanel(ExtPanel):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtTitlePanel, self).__init__(*args, **kwargs)
-        self.template = "ext-panels/ext-title-panel.js" #TODO: Отрефакторить под внутриклассовый рендеринг 
+        self.template = "ext-panels/ext-title-panel.js" #TODO: Отрефакторить под внутриклассовый рендеринг
         self.__title_items = TypedList(type=ExtUIComponent, on_after_addition=
             self._on_title_after_addition, on_before_deletion=
             self._on_title_before_deletion, on_after_deletion=
@@ -720,7 +720,7 @@ class ExtFieldSet(ExtPanel):
         self.render_base_config() # Тут конфиги
         self.render_params() # Пусто
         base_config = self._get_config_str()
-        return 'new Ext.form.FieldSet({%s})' % base_config
+        return 'new Ext3.form.FieldSet({%s})' % base_config
 
     @property
     def checkboxToggle(self):

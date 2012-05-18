@@ -80,7 +80,7 @@ class ExtRibbonTab(BaseExtContainer):
 class ExtRibbon(BaseExtPanel):
     def __init__(self, *args, **kwargs):
         super(ExtRibbon, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.ux.Ribbon'
+        self._ext_name = 'Ext3.ux.Ribbon'
         self.enable_tab_scroll = True
         self.activeTab = 0
         self._items = TypedList(type=ExtRibbonTab)

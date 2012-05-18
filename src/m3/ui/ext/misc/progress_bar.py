@@ -9,13 +9,13 @@ class ExtProgressBar(ExtUIComponent):
     '''
     def __init__(self, *args, **kwargs):
         super(ExtProgressBar,self).__init__(*args,**kwargs)
-        self._ext_name = 'Ext.ProgressBar'
+        self._ext_name = 'Ext3.ProgressBar'
 
         #Текст внутри прогресс бара(по умолчанию '')
         self.text = None
         #Значение между 0 и 1(например 0.5)
         self.value = None
-        #Css класс применяемый к врапперу прогрес бара(по умолчанию 'x-progress')
+        #Css класс применяемый к врапперу прогрес бара(по умолчанию 'x3-progress')
         self.base_cls = None
         #Анимация (дефолт false)
         self.animate = None

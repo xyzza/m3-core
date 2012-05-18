@@ -1,5 +1,5 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
@@ -9,65 +9,65 @@ body {
 	color:#fcfcfc;
 }
 
-.ext-el-mask {
+.ext3-el-mask {
     background-color: #ccc;
 }
 
-.ext-el-mask-msg {
+.ext3-el-mask-msg {
     border-color:#223;
     background-color:#3f4757;
     background-image:url(../images/access/box/tb-blue.gif);
 }
-.ext-el-mask-msg div {
+.ext3-el-mask-msg div {
     background-color: #232d38;
     border-color:#556;
     color:#fff;
     font:normal 14px tahoma, arial, helvetica, sans-serif;
 }
 
-.x-mask-loading div {
+.x3-mask-loading div {
     background-color:#232d38;
     background-image:url(../images/access/grid/loading.gif);
 }
 
-.x-item-disabled {
+.x3-item-disabled {
     color: #ddd;
 }
 
-.x-item-disabled * {
+.x3-item-disabled * {
     color: #ddd !important;
 }
 
-.x-splitbar-proxy {
+.x3-splitbar-proxy {
     background-color: #aaa;
 }
 
-.x-color-palette a {
+.x3-color-palette a {
     border-color:#fff;
 }
 
-.x-color-palette a:hover, .x-color-palette a.x-color-palette-sel {
+.x3-color-palette a:hover, .x3-color-palette a.x3-color-palette-sel {
     border-color:#8bb8f3;
     background-color: #deecfd;
 }
 
-.x-color-palette em {
+.x3-color-palette em {
     border-color:#aca899;
 }
 
-.x-ie-shadow {
+.x3-ie-shadow {
     background-color:#777;
 }
 
-.x-shadow .xsmc {
+.x3-shadow .xsmc {
     background-image: url(../images/default/shadow-c.png);
 }
 
-.x-shadow .xsml, .x-shadow .xsmr {
+.x3-shadow .xsml, .x3-shadow .xsmr {
     background-image: url(../images/default/shadow-lr.png);
 }
 
-.x-shadow .xstl, .x-shadow .xstc,  .x-shadow .xstr, .x-shadow .xsbl, .x-shadow .xsbc, .x-shadow .xsbr{
+.x3-shadow .xstl, .x3-shadow .xstc,  .x3-shadow .xstr, .x3-shadow .xsbl, .x3-shadow .xsbc, .x3-shadow .xsbr{
     background-image: url(../images/default/shadow.png);
 }
 
@@ -76,6 +76,6 @@ body {
     background-image: url(../images/access/grid/loading.gif);
 }
 
-.x-spotlight {
+.x3-spotlight {
     background-color: #ccc;
 }

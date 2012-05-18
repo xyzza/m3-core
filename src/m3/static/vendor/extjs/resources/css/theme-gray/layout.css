@@ -1,53 +1,53 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-border-layout-ct {
+.x3-border-layout-ct {
     background-color:#f0f0f0;
 }
 
-.x-accordion-hd {
+.x3-accordion-hd {
 	color:#222;
     font-weight:normal;
     background-image: url(../images/gray/panel/light-hd.gif);
 }
 
-.x-layout-collapsed{
+.x3-layout-collapsed{
     background-color:#dfdfdf;
 	border-color:#d0d0d0;
 }
 
-.x-layout-collapsed-over{
+.x3-layout-collapsed-over{
     background-color:#e7e7e7;
 }
 
-.x-layout-split-west .x-layout-mini {
+.x3-layout-split-west .x3-layout-mini {
     background-image:url(../images/default/layout/mini-left.gif);
 }
-.x-layout-split-east .x-layout-mini {
+.x3-layout-split-east .x3-layout-mini {
     background-image:url(../images/default/layout/mini-right.gif);
 }
-.x-layout-split-north .x-layout-mini {
+.x3-layout-split-north .x3-layout-mini {
     background-image:url(../images/default/layout/mini-top.gif);
 }
-.x-layout-split-south .x-layout-mini {
+.x3-layout-split-south .x3-layout-mini {
     background-image:url(../images/default/layout/mini-bottom.gif);
 }
 
-.x-layout-cmini-west .x-layout-mini {
+.x3-layout-cmini-west .x3-layout-mini {
     background-image:url(../images/default/layout/mini-right.gif);
 }
 
-.x-layout-cmini-east .x-layout-mini {
+.x3-layout-cmini-east .x3-layout-mini {
     background-image:url(../images/default/layout/mini-left.gif);
 }
 
-.x-layout-cmini-north .x-layout-mini {
+.x3-layout-cmini-north .x3-layout-mini {
     background-image:url(../images/default/layout/mini-bottom.gif);
 }
 
-.x-layout-cmini-south .x-layout-mini {
+.x3-layout-cmini-south .x3-layout-mini {
     background-image:url(../images/default/layout/mini-top.gif);
 }

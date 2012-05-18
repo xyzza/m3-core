@@ -1,6 +1,6 @@
-Ext.namespace('Ext.ux');
+Ext3.namespace('Ext3.ux');
 
-Ext.ux.OnDemandLoad = function(){
+Ext3.ux.OnDemandLoad = function(){
 
     loadComponent = function(component, callback){
         var fileType = component.substring(component.lastIndexOf('.'));

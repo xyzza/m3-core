@@ -43,7 +43,7 @@ class BaseExtWindow(ExtUIComponent):
         self.renderer.window = self
 
         # Название 
-        self._ext_name = 'Ext.m3.Window'
+        self._ext_name = 'Ext3.m3.Window'
 
         # Шрина окна
         self.width = 400

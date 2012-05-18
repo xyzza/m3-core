@@ -1,17 +1,17 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-Ext.ns('Ext.ux.grid');
+Ext3.ns('Ext3.ux.grid');
 
 /**
- * @class Ext.ux.grid.BufferView
- * @extends Ext.grid.GridView
+ * @class Ext3.ux.grid.BufferView
+ * @extends Ext3.grid.GridView
  * A custom GridView which renders rows on an as-needed basis.
  */
-Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
+Ext3.ux.grid.BufferView = Ext3.extend(Ext3.grid.GridView, {
 	/**
 	 * @cfg {Number} rowHeight
 	 * The height of a row in the grid.
@@ -47,19 +47,19 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
 	cleanDelay: 500,
 
 	initTemplates : function(){
-		Ext.ux.grid.BufferView.superclass.initTemplates.call(this);
+		Ext3.ux.grid.BufferView.superclass.initTemplates.call(this);
 		var ts = this.templates;
 		// empty div to act as a place holder for a row
-	        ts.rowHolder = new Ext.Template(
-		        '<div class="x-grid3-row {alt}" style="{tstyle}"></div>'
+	        ts.rowHolder = new Ext3.Template(
+		        '<div class="x3-grid3-row {alt}" style="{tstyle}"></div>'
 		);
 		ts.rowHolder.disableFormats = true;
 		ts.rowHolder.compile();
 
-		ts.rowBody = new Ext.Template(
-		        '<table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="{tstyle}">',
+		ts.rowBody = new Ext3.Template(
+		        '<table class="x3-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="{tstyle}">',
 			'<tbody><tr>{cells}</tr>',
-			(this.enableRowBody ? '<tr class="x-grid3-row-body-tr" style="{bodyStyle}"><td colspan="{cols}" class="x-grid3-body-cell" tabIndex="0" hidefocus="on"><div class="x-grid3-row-body">{body}</div></td></tr>' : ''),
+			(this.enableRowBody ? '<tr class="x3-grid3-row-body-tr" style="{bodyStyle}"><td colspan="{cols}" class="x3-grid3-body-cell" tabIndex="0" hidefocus="on"><div class="x3-grid3-row-body">{body}</div></td></tr>' : ''),
 			'</tbody></table>'
 		);
 		ts.rowBody.disableFormats = true;
@@ -67,7 +67,7 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
 	},
 
 	getStyleRowHeight : function(){
-		return Ext.isBorderBox ? (this.rowHeight + this.borderHeight) : this.rowHeight;
+		return Ext3.isBorderBox ? (this.rowHeight + this.borderHeight) : this.rowHeight;
 	},
 
 	getCalculatedRowHeight : function(){
@@ -114,7 +114,7 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
 				for (var i = 0; i < colCount; i++) {
 					c = cs[i];
 					p.id = c.id;
-					p.css = i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '');
+					p.css = i === 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '');
 					p.attr = p.cellAttr = "";
 					p.value = c.renderer(r.data[c.name], p, r, rowIndex, i, ds);
 					p.style = c.style;
@@ -122,17 +122,17 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
 						p.value = "&#160;";
 					}
 					if (r.dirty && typeof r.modified[c.name] !== 'undefined') {
-						p.css += ' x-grid3-dirty-cell';
+						p.css += ' x3-grid3-dirty-cell';
 					}
 					cb[cb.length] = ct.apply(p);
 				}
 			}
 			var alt = [];
 			if(stripe && ((rowIndex+1) % 2 === 0)){
-			    alt[0] = "x-grid3-row-alt";
+			    alt[0] = "x3-grid3-row-alt";
 			}
 			if(r.dirty){
-			    alt[1] = " x-grid3-dirty-row";
+			    alt[1] = " x3-grid3-dirty-row";
 			}
 			rp.cols = colCount;
 			if(this.getRowClass){
@@ -151,7 +151,7 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
 	},
 
 	syncScroll: function(){
-		Ext.ux.grid.BufferView.superclass.syncScroll.apply(this, arguments);
+		Ext3.ux.grid.BufferView.superclass.syncScroll.apply(this, arguments);
 		this.update();
 	},
 
@@ -159,7 +159,7 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
 	update: function(){
 		if (this.scrollDelay) {
 			if (!this.renderTask) {
-				this.renderTask = new Ext.util.DelayedTask(this.doUpdate, this);
+				this.renderTask = new Ext3.util.DelayedTask(this.doUpdate, this);
 			}
 			this.renderTask.delay(this.scrollDelay);
 		}else{
@@ -168,7 +168,7 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
 	},
     
     onRemove : function(ds, record, index, isUpdate){
-        Ext.ux.grid.BufferView.superclass.onRemove.apply(this, arguments);
+        Ext3.ux.grid.BufferView.superclass.onRemove.apply(this, arguments);
         if(isUpdate !== true){
             this.update();
         }
@@ -196,7 +196,7 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
 	// a buffered method to clean rows
 	clean : function(){
 		if(!this.cleanTask){
-			this.cleanTask = new Ext.util.DelayedTask(this.doClean, this);
+			this.cleanTask = new Ext3.util.DelayedTask(this.doClean, this);
 		}
 		this.cleanTask.delay(this.cleanDelay);
 	},
@@ -234,20 +234,20 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
     destroy : function(){
         this.removeTask('cleanTask');
         this.removeTask('renderTask');  
-        Ext.ux.grid.BufferView.superclass.destroy.call(this);
+        Ext3.ux.grid.BufferView.superclass.destroy.call(this);
     },
 
 	layout: function(){
-		Ext.ux.grid.BufferView.superclass.layout.call(this);
+		Ext3.ux.grid.BufferView.superclass.layout.call(this);
 		this.update();
 	}
 });// We are adding these custom layouts to a namespace that does not
-// exist by default in Ext, so we have to add the namespace first:
-Ext.ns('Ext.ux.layout');
+// exist by default in Ext3, so we have to add the namespace first:
+Ext3.ns('Ext3.ux.layout');
 
 /**
- * @class Ext.ux.layout.CenterLayout
- * @extends Ext.layout.FitLayout
+ * @class Ext3.ux.layout.CenterLayout
+ * @extends Ext3.layout.FitLayout
  * <p>This is a very simple layout style used to center contents within a container.  This layout works within
  * nested containers and can also be used as expected as a Viewport layout to center the page layout.</p>
  * <p>As a subclass of FitLayout, CenterLayout expects to have a single child panel of the container that uses
@@ -257,7 +257,7 @@ Ext.ns('Ext.ux.layout');
  * Example usage:</p>
  * <pre><code>
 // The content panel is centered in the container
-var p = new Ext.Panel({
+var p = new Ext3.Panel({
     title: 'Center Layout',
     layout: 'ux.center',
     items: [{
@@ -270,7 +270,7 @@ var p = new Ext.Panel({
 // If you leave the title blank and specify no border
 // you'll create a non-visual, structural panel just
 // for centering the contents in the main container.
-var p = new Ext.Panel({
+var p = new Ext3.Panel({
     layout: 'ux.center',
     border: false,
     items: [{
@@ -282,7 +282,7 @@ var p = new Ext.Panel({
 });
 </code></pre>
  */
-Ext.ux.layout.CenterLayout = Ext.extend(Ext.layout.FitLayout, {
+Ext3.ux.layout.CenterLayout = Ext3.extend(Ext3.layout.FitLayout, {
 	// private
     setItemSize : function(item, size){
         this.container.addClass('ux-layout-center');
@@ -296,17 +296,17 @@ Ext.ux.layout.CenterLayout = Ext.extend(Ext.layout.FitLayout, {
     }
 });
 
-Ext.Container.LAYOUTS['ux.center'] = Ext.ux.layout.CenterLayout;
-Ext.ns('Ext.ux.grid');
+Ext3.Container.LAYOUTS['ux.center'] = Ext3.ux.layout.CenterLayout;
+Ext3.ns('Ext3.ux.grid');
 
 /**
- * @class Ext.ux.grid.CheckColumn
- * @extends Ext.grid.Column
+ * @class Ext3.ux.grid.CheckColumn
+ * @extends Ext3.grid.Column
  * <p>A Column subclass which renders a checkbox in each column cell which toggles the truthiness of the associated data field on click.</p>
  * <p><b>Note. As of ExtJS 3.3 this no longer has to be configured as a plugin of the GridPanel.</b></p>
  * <p>Example usage:</p>
  * <pre><code>
-var cm = new Ext.grid.ColumnModel([{
+var cm = new Ext3.grid.ColumnModel([{
        header: 'Foo',
        ...
     },{
@@ -318,18 +318,18 @@ var cm = new Ext.grid.ColumnModel([{
 ]);
 
 // create the grid
-var grid = new Ext.grid.EditorGridPanel({
+var grid = new Ext3.grid.EditorGridPanel({
     ...
     colModel: cm,
     ...
 });
  * </code></pre>
  * In addition to toggling a Boolean value within the record data, this
- * class toggles a css class between <tt>'x-grid3-check-col'</tt> and
- * <tt>'x-grid3-check-col-on'</tt> to alter the background image used for
+ * class toggles a css class between <tt>'x3-grid3-check-col'</tt> and
+ * <tt>'x3-grid3-check-col-on'</tt> to alter the background image used for
  * a column.
  */
-Ext.ux.grid.CheckColumn = Ext.extend(Ext.grid.Column, {
+Ext3.ux.grid.CheckColumn = Ext3.extend(Ext3.grid.Column, {
 
     /**
      * @private
@@ -341,37 +341,37 @@ Ext.ux.grid.CheckColumn = Ext.extend(Ext.grid.Column, {
             record.set(this.dataIndex, !record.data[this.dataIndex]);
             return false; // Cancel row selection.
         } else {
-            return Ext.grid.ActionColumn.superclass.processEvent.apply(this, arguments);
+            return Ext3.grid.ActionColumn.superclass.processEvent.apply(this, arguments);
         }
     },
 
     renderer : function(v, p, record){
-        p.css += ' x-grid3-check-col-td'; 
-        return String.format('<div class="x-grid3-check-col{0}">&#160;</div>', v ? '-on' : '');
+        p.css += ' x3-grid3-check-col-td'; 
+        return String.format('<div class="x3-grid3-check-col{0}">&#160;</div>', v ? '-on' : '');
     },
 
     // Deprecate use as a plugin. Remove in 4.0
-    init: Ext.emptyFn
+    init: Ext3.emptyFn
 });
 
 // register ptype. Deprecate. Remove in 4.0
-Ext.preg('checkcolumn', Ext.ux.grid.CheckColumn);
+Ext3.preg('checkcolumn', Ext3.ux.grid.CheckColumn);
 
 // backwards compat. Remove in 4.0
-Ext.grid.CheckColumn = Ext.ux.grid.CheckColumn;
+Ext3.grid.CheckColumn = Ext3.ux.grid.CheckColumn;
 
 // register Column xtype
-Ext.grid.Column.types.checkcolumn = Ext.ux.grid.CheckColumn;Ext.ns('Ext.ux.grid');
+Ext3.grid.Column.types.checkcolumn = Ext3.ux.grid.CheckColumn;Ext3.ns('Ext3.ux.grid');
 
-Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
+Ext3.ux.grid.ColumnHeaderGroup = Ext3.extend(Ext3.util.Observable, {
 
     constructor: function(config){
         this.config = config;
     },
 
     init: function(grid){
-        Ext.applyIf(grid.colModel, this.config);
-        Ext.apply(grid.getView(), this.viewConfig);
+        Ext3.applyIf(grid.colModel, this.config);
+        Ext3.apply(grid.getView(), this.viewConfig);
     },
 
     viewConfig: {
@@ -379,7 +379,7 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
             this.constructor.prototype.initTemplates.apply(this, arguments);
             var ts = this.templates || {};
             if(!ts.gcell){
-                ts.gcell = new Ext.XTemplate('<td class="x-grid3-hd x-grid3-gcell x-grid3-td-{id} ux-grid-hd-group-row-{row} {cls}" style="{style}">', '<div {tooltip} class="x-grid3-hd-inner x-grid3-hd-{id}" unselectable="on" style="{istyle}">', this.grid.enableHdMenu ? '<a class="x-grid3-hd-btn" href="#"></a>' : '', '{value}</div></td>');
+                ts.gcell = new Ext3.XTemplate('<td class="x3-grid3-hd x3-grid3-gcell x3-grid3-td-{id} ux-grid-hd-group-row-{row} {cls}" style="{style}">', '<div {tooltip} class="x3-grid3-hd-inner x3-grid3-hd-{id}" unselectable="on" style="{istyle}">', this.grid.enableHdMenu ? '<a class="x3-grid3-hd-btn" href="#"></a>' : '', '{value}</div></td>');
             }
             this.templates = ts;
             this.hrowRe = new RegExp("ux-grid-hd-group-row-(\\d+)", "");
@@ -393,13 +393,13 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
                 for(var i = 0, gcol = 0, len = r.length; i < len; i++){
                     var group = r[i];
                     group.colspan = group.colspan || 1;
-                    var id = this.getColumnId(group.dataIndex ? cm.findColumnIndex(group.dataIndex) : gcol), gs = Ext.ux.grid.ColumnHeaderGroup.prototype.getGroupStyle.call(this, group, gcol);
+                    var id = this.getColumnId(group.dataIndex ? cm.findColumnIndex(group.dataIndex) : gcol), gs = Ext3.ux.grid.ColumnHeaderGroup.prototype.getGroupStyle.call(this, group, gcol);
                     cells[i] = ts.gcell.apply({
                         cls: 'ux-grid-hd-group-cell',
                         id: id,
                         row: row,
                         style: 'width:' + gs.width + ';' + (gs.hidden ? 'display:none;' : '') + (group.align ? 'text-align:' + group.align + ';' : ''),
-                        tooltip: group.tooltip ? (Ext.QuickTips.isEnabled() ? 'ext:qtip' : 'title') + '="' + group.tooltip + '"' : '',
+                        tooltip: group.tooltip ? (Ext3.QuickTips.isEnabled() ? 'ext:qtip' : 'title') + '="' + group.tooltip + '"' : '',
                         istyle: group.align == 'right' ? 'padding-right:16px' : '',
                         btn: this.grid.enableHdMenu && group.header,
                         value: group.header || '&nbsp;'
@@ -417,17 +417,17 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
 
         onColumnWidthUpdated: function(){
             this.constructor.prototype.onColumnWidthUpdated.apply(this, arguments);
-            Ext.ux.grid.ColumnHeaderGroup.prototype.updateGroupStyles.call(this);
+            Ext3.ux.grid.ColumnHeaderGroup.prototype.updateGroupStyles.call(this);
         },
 
         onAllColumnWidthsUpdated: function(){
             this.constructor.prototype.onAllColumnWidthsUpdated.apply(this, arguments);
-            Ext.ux.grid.ColumnHeaderGroup.prototype.updateGroupStyles.call(this);
+            Ext3.ux.grid.ColumnHeaderGroup.prototype.updateGroupStyles.call(this);
         },
 
         onColumnHiddenUpdated: function(){
             this.constructor.prototype.onColumnHiddenUpdated.apply(this, arguments);
-            Ext.ux.grid.ColumnHeaderGroup.prototype.updateGroupStyles.call(this);
+            Ext3.ux.grid.ColumnHeaderGroup.prototype.updateGroupStyles.call(this);
         },
 
         getHeaderCell: function(index){
@@ -435,7 +435,7 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
         },
 
         findHeaderCell: function(el){
-            return el ? this.fly(el).findParent('td.x-grid3-hd', this.cellSelectorDepth) : false;
+            return el ? this.fly(el).findParent('td.x3-grid3-hd', this.cellSelectorDepth) : false;
         },
 
         findHeaderIndex: function(el){
@@ -449,39 +449,39 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
         },
 
         handleHdDown: function(e, t){
-            var el = Ext.get(t);
-            if(el.hasClass('x-grid3-hd-btn')){
+            var el = Ext3.get(t);
+            if(el.hasClass('x3-grid3-hd-btn')){
                 e.stopEvent();
                 var hd = this.findHeaderCell(t);
-                Ext.fly(hd).addClass('x-grid3-hd-menu-open');
+                Ext3.fly(hd).addClass('x3-grid3-hd-menu-open');
                 var index = this.getCellIndex(hd);
                 this.hdCtxIndex = index;
                 var ms = this.hmenu.items, cm = this.cm;
                 ms.get('asc').setDisabled(!cm.isSortable(index));
                 ms.get('desc').setDisabled(!cm.isSortable(index));
                 this.hmenu.on('hide', function(){
-                    Ext.fly(hd).removeClass('x-grid3-hd-menu-open');
+                    Ext3.fly(hd).removeClass('x3-grid3-hd-menu-open');
                 }, this, {
                     single: true
                 });
                 this.hmenu.show(t, 'tl-bl?');
-            }else if(el.hasClass('ux-grid-hd-group-cell') || Ext.fly(t).up('.ux-grid-hd-group-cell')){
+            }else if(el.hasClass('ux-grid-hd-group-cell') || Ext3.fly(t).up('.ux-grid-hd-group-cell')){
                 e.stopEvent();
             }
         },
 
         handleHdMove: function(e, t){
             var hd = this.findHeaderCell(this.activeHdRef);
-            if(hd && !this.headersDisabled && !Ext.fly(hd).hasClass('ux-grid-hd-group-cell')){
+            if(hd && !this.headersDisabled && !Ext3.fly(hd).hasClass('ux-grid-hd-group-cell')){
                 var hw = this.splitHandleWidth || 5, r = this.activeHdRegion, x = e.getPageX(), ss = hd.style, cur = '';
                 if(this.grid.enableColumnResize !== false){
                     if(x - r.left <= hw && this.cm.isResizable(this.activeHdIndex - 1)){
-                        cur = Ext.isAir ? 'move' : Ext.isWebKit ? 'e-resize' : 'col-resize'; // col-resize
+                        cur = Ext3.isAir ? 'move' : Ext3.isWebKit ? 'e-resize' : 'col-resize'; // col-resize
                                                                                                 // not
                                                                                                 // always
                                                                                                 // supported
                     }else if(r.right - x <= (!this.activeHdBtn ? hw : 2) && this.cm.isResizable(this.activeHdIndex)){
-                        cur = Ext.isAir ? 'move' : Ext.isWebKit ? 'w-resize' : 'col-resize';
+                        cur = Ext3.isAir ? 'move' : Ext3.isWebKit ? 'w-resize' : 'col-resize';
                     }
                 }
                 ss.cursor = cur;
@@ -496,8 +496,8 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
                 var fly = this.fly(hd);
                 this.activeHdRegion = fly.getRegion();
                 if(!(this.cm.isMenuDisabled(this.activeHdIndex) || fly.hasClass('ux-grid-hd-group-cell'))){
-                    fly.addClass('x-grid3-hd-over');
-                    this.activeHdBtn = fly.child('.x-grid3-hd-btn');
+                    fly.addClass('x3-grid3-hd-over');
+                    this.activeHdBtn = fly.child('.x3-grid3-hd-btn');
                     if(this.activeHdBtn){
                         this.activeHdBtn.dom.style.height = (hd.firstChild.offsetHeight - 1) + 'px';
                     }
@@ -507,9 +507,9 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
 
         handleHdOut: function(e, t){
             var hd = this.findHeaderCell(t);
-            if(hd && (!Ext.isIE || !e.within(hd, true))){
+            if(hd && (!Ext3.isIE || !e.within(hd, true))){
                 this.activeHdRef = null;
-                this.fly(hd).removeClass('x-grid3-hd-over');
+                this.fly(hd).removeClass('x3-grid3-hd-over');
                 hd.style.cursor = '';
             }
         },
@@ -612,7 +612,7 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
                                     item = menu.items ? menu.getComponent(gid) : null,
                                     submenu = item ? item.menu : null;
                                 if(!submenu){
-                                    submenu = new Ext.menu.Menu({
+                                    submenu = new Ext3.menu.Menu({
                                         itemId: gid
                                     });
                                     submenu.on("itemclick", this.handleHdMenuClick, this);
@@ -641,7 +641,7 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
                         }
                     }
                     text.push(title);
-                    menu.add(new Ext.menu.CheckItem({
+                    menu.add(new Ext3.menu.CheckItem({
                         itemId: "col-" + cm.getColumnId(col),
                         text: text.join(' '),
                         checked: !cm.isHidden(col),
@@ -654,8 +654,8 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
 
         afterRenderUI: function(){
             this.constructor.prototype.afterRenderUI.apply(this, arguments);
-            Ext.apply(this.columnDrop, Ext.ux.grid.ColumnHeaderGroup.prototype.columnDropConfig);
-            Ext.apply(this.splitZone, Ext.ux.grid.ColumnHeaderGroup.prototype.splitZoneConfig);
+            Ext3.apply(this.columnDrop, Ext3.ux.grid.ColumnHeaderGroup.prototype.columnDropConfig);
+            Ext3.apply(this.splitZone, Ext3.ux.grid.ColumnHeaderGroup.prototype.splitZoneConfig);
         }
     },
 
@@ -667,12 +667,12 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
 
     columnDropConfig: {
         getTargetFromEvent: function(e){
-            var t = Ext.lib.Event.getTarget(e);
+            var t = Ext3.lib.Event.getTarget(e);
             return this.view.findHeaderCell(t);
         },
 
         positionIndicator: function(h, n, e){
-            var data = Ext.ux.grid.ColumnHeaderGroup.prototype.getDragDropData.call(this, h, n, e);
+            var data = Ext3.ux.grid.ColumnHeaderGroup.prototype.getDragDropData.call(this, h, n, e);
             if(data === false){
                 return false;
             }
@@ -687,7 +687,7 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
         onNodeDrop: function(n, dd, e, data){
             var h = data.header;
             if(h != n){
-                var d = Ext.ux.grid.ColumnHeaderGroup.prototype.getDragDropData.call(this, h, n, e);
+                var d = Ext3.ux.grid.ColumnHeaderGroup.prototype.getDragDropData.call(this, h, n, e);
                 if(d === false){
                     return false;
                 }
@@ -733,13 +733,13 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
             }
         }
         return {
-            width: (Ext.isBorderBox || (Ext.isWebKit && !Ext.isSafari2) ? width : Math.max(width - this.borderWidth, 0)) + 'px',
+            width: (Ext3.isBorderBox || (Ext3.isWebKit && !Ext3.isSafari2) ? width : Math.max(width - this.borderWidth, 0)) + 'px',
             hidden: hidden
         };
     },
 
     updateGroupStyles: function(col){
-        var tables = this.mainHd.query('.x-grid3-header-offset > table'), tw = this.getTotalWidth(), rows = this.cm.rows;
+        var tables = this.mainHd.query('.x3-grid3-header-offset > table'), tw = this.getTotalWidth(), rows = this.cm.rows;
         for(var row = 0; row < tables.length; row++){
             tables[row].style.width = tw;
             if(row < rows.length){
@@ -747,7 +747,7 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
                 for(var i = 0, gcol = 0; i < cells.length; i++){
                     var group = rows[row][i];
                     if((typeof col != 'number') || (col >= gcol && col < gcol + group.colspan)){
-                        var gs = Ext.ux.grid.ColumnHeaderGroup.prototype.getGroupStyle.call(this, group, gcol);
+                        var gs = Ext3.ux.grid.ColumnHeaderGroup.prototype.getGroupStyle.call(this, group, gcol);
                         cells[i].style.width = gs.width;
                         cells[i].style.display = gs.hidden ? 'none' : '';
                     }
@@ -801,7 +801,7 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
         if(h.parentNode != n.parentNode){
             return false;
         }
-        var cm = this.grid.colModel, x = Ext.lib.Event.getPageX(e), r = Ext.lib.Dom.getRegion(n.firstChild), px, pt;
+        var cm = this.grid.colModel, x = Ext3.lib.Event.getPageX(e), r = Ext3.lib.Dom.getRegion(n.firstChild), px, pt;
         if((r.right - x) <= (r.right - r.left) / 2){
             px = r.right + this.view.borderWidth;
             pt = "after";
@@ -813,15 +813,15 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
         if(cm.isFixed(newIndex)){
             return false;
         }
-        var row = Ext.ux.grid.ColumnHeaderGroup.prototype.getGroupRowIndex.call(this.view, h),
-            oldGroup = Ext.ux.grid.ColumnHeaderGroup.prototype.getGroupSpan.call(this.view, row, oldIndex),
-            newGroup = Ext.ux.grid.ColumnHeaderGroup.prototype.getGroupSpan.call(this.view, row, newIndex),
+        var row = Ext3.ux.grid.ColumnHeaderGroup.prototype.getGroupRowIndex.call(this.view, h),
+            oldGroup = Ext3.ux.grid.ColumnHeaderGroup.prototype.getGroupSpan.call(this.view, row, oldIndex),
+            newGroup = Ext3.ux.grid.ColumnHeaderGroup.prototype.getGroupSpan.call(this.view, row, newIndex),
             oldIndex = oldGroup.col;
             newIndex = newGroup.col + (pt == "after" ? newGroup.colspan : 0);
         if(newIndex >= oldGroup.col && newIndex <= oldGroup.col + oldGroup.colspan){
             return false;
         }
-        var parentGroup = Ext.ux.grid.ColumnHeaderGroup.prototype.getGroupSpan.call(this.view, row - 1, oldIndex);
+        var parentGroup = Ext3.ux.grid.ColumnHeaderGroup.prototype.getGroupSpan.call(this.view, row - 1, oldIndex);
         if(newIndex < parentGroup.col || newIndex > parentGroup.col + parentGroup.colspan){
             return false;
         }
@@ -835,58 +835,58 @@ Ext.ux.grid.ColumnHeaderGroup = Ext.extend(Ext.util.Observable, {
             colspan: oldGroup.colspan
         };
     }
-});Ext.ns('Ext.ux.tree');
+});Ext3.ns('Ext3.ux.tree');
 
 /**
- * @class Ext.ux.tree.ColumnTree
- * @extends Ext.tree.TreePanel
+ * @class Ext3.ux.tree.ColumnTree
+ * @extends Ext3.tree.TreePanel
  * 
  * @xtype columntree
  */
-Ext.ux.tree.ColumnTree = Ext.extend(Ext.tree.TreePanel, {
+Ext3.ux.tree.ColumnTree = Ext3.extend(Ext3.tree.TreePanel, {
     lines : false,
-    borderWidth : Ext.isBorderBox ? 0 : 2, // the combined left/right border for each cell
-    cls : 'x-column-tree',
+    borderWidth : Ext3.isBorderBox ? 0 : 2, // the combined left/right border for each cell
+    cls : 'x3-column-tree',
 
     onRender : function(){
-        Ext.tree.ColumnTree.superclass.onRender.apply(this, arguments);
-        this.headers = this.header.createChild({cls:'x-tree-headers'});
+        Ext3.tree.ColumnTree.superclass.onRender.apply(this, arguments);
+        this.headers = this.header.createChild({cls:'x3-tree-headers'});
 
         var cols = this.columns, c;
         var totalWidth = 0;
-        var scrollOffset = 19; // similar to Ext.grid.GridView default
+        var scrollOffset = 19; // similar to Ext3.grid.GridView default
 
         for(var i = 0, len = cols.length; i < len; i++){
              c = cols[i];
              totalWidth += c.width;
              this.headers.createChild({
-                 cls:'x-tree-hd ' + (c.cls?c.cls+'-hd':''),
+                 cls:'x3-tree-hd ' + (c.cls?c.cls+'-hd':''),
                  cn: {
-                     cls:'x-tree-hd-text',
+                     cls:'x3-tree-hd-text',
                      html: c.header
                  },
                  style:'width:'+(c.width-this.borderWidth)+'px;'
              });
         }
-        this.headers.createChild({cls:'x-clear'});
+        this.headers.createChild({cls:'x3-clear'});
         // prevent floats from wrapping when clipped
         this.headers.setWidth(totalWidth+scrollOffset);
         this.innerCt.setWidth(totalWidth);
     }
 });
 
-Ext.reg('columntree', Ext.ux.tree.ColumnTree);
+Ext3.reg('columntree', Ext3.ux.tree.ColumnTree);
 
 //backwards compat
-Ext.tree.ColumnTree = Ext.ux.tree.ColumnTree;
+Ext3.tree.ColumnTree = Ext3.ux.tree.ColumnTree;
 
 
 /**
- * @class Ext.ux.tree.ColumnNodeUI
- * @extends Ext.tree.TreeNodeUI
+ * @class Ext3.ux.tree.ColumnNodeUI
+ * @extends Ext3.tree.TreeNodeUI
  */
-Ext.ux.tree.ColumnNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
-    focus: Ext.emptyFn, // prevent odd scrolling behavior
+Ext3.ux.tree.ColumnNodeUI = Ext3.extend(Ext3.tree.TreeNodeUI, {
+    focus: Ext3.emptyFn, // prevent odd scrolling behavior
 
     renderElements : function(n, a, targetNode, bulkRender){
         this.indentMarkup = n.parentNode ? n.parentNode.ui.getChildIndent() : '';
@@ -897,32 +897,32 @@ Ext.ux.tree.ColumnNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
         var c = cols[0];
 
         var buf = [
-             '<li class="x-tree-node"><div ext:tree-node-id="',n.id,'" class="x-tree-node-el x-tree-node-leaf ', a.cls,'">',
-                '<div class="x-tree-col" style="width:',c.width-bw,'px;">',
-                    '<span class="x-tree-node-indent">',this.indentMarkup,"</span>",
-                    '<img src="', this.emptyIcon, '" class="x-tree-ec-icon x-tree-elbow">',
-                    '<img src="', a.icon || this.emptyIcon, '" class="x-tree-node-icon',(a.icon ? " x-tree-node-inline-icon" : ""),(a.iconCls ? " "+a.iconCls : ""),'" unselectable="on">',
-                    '<a hidefocus="on" class="x-tree-node-anchor" href="',a.href ? a.href : "#",'" tabIndex="1" ',
+             '<li class="x3-tree-node"><div ext:tree-node-id="',n.id,'" class="x3-tree-node-el x3-tree-node-leaf ', a.cls,'">',
+                '<div class="x3-tree-col" style="width:',c.width-bw,'px;">',
+                    '<span class="x3-tree-node-indent">',this.indentMarkup,"</span>",
+                    '<img src="', this.emptyIcon, '" class="x3-tree-ec-icon x3-tree-elbow">',
+                    '<img src="', a.icon || this.emptyIcon, '" class="x3-tree-node-icon',(a.icon ? " x3-tree-node-inline-icon" : ""),(a.iconCls ? " "+a.iconCls : ""),'" unselectable="on">',
+                    '<a hidefocus="on" class="x3-tree-node-anchor" href="',a.href ? a.href : "#",'" tabIndex="1" ',
                     a.hrefTarget ? ' target="'+a.hrefTarget+'"' : "", '>',
                     '<span unselectable="on">', n.text || (c.renderer ? c.renderer(a[c.dataIndex], n, a) : a[c.dataIndex]),"</span></a>",
                 "</div>"];
          for(var i = 1, len = cols.length; i < len; i++){
              c = cols[i];
 
-             buf.push('<div class="x-tree-col ',(c.cls?c.cls:''),'" style="width:',c.width-bw,'px;">',
-                        '<div class="x-tree-col-text">',(c.renderer ? c.renderer(a[c.dataIndex], n, a) : a[c.dataIndex]),"</div>",
+             buf.push('<div class="x3-tree-col ',(c.cls?c.cls:''),'" style="width:',c.width-bw,'px;">',
+                        '<div class="x3-tree-col-text">',(c.renderer ? c.renderer(a[c.dataIndex], n, a) : a[c.dataIndex]),"</div>",
                       "</div>");
          }
          buf.push(
-            '<div class="x-clear"></div></div>',
-            '<ul class="x-tree-node-ct" style="display:none;"></ul>',
+            '<div class="x3-clear"></div></div>',
+            '<ul class="x3-tree-node-ct" style="display:none;"></ul>',
             "</li>");
 
         if(bulkRender !== true && n.nextSibling && n.nextSibling.ui.getEl()){
-            this.wrap = Ext.DomHelper.insertHtml("beforeBegin",
+            this.wrap = Ext3.DomHelper.insertHtml("beforeBegin",
                                 n.nextSibling.ui.getEl(), buf.join(""));
         }else{
-            this.wrap = Ext.DomHelper.insertHtml("beforeEnd", targetNode, buf.join(""));
+            this.wrap = Ext3.DomHelper.insertHtml("beforeEnd", targetNode, buf.join(""));
         }
 
         this.elNode = this.wrap.childNodes[0];
@@ -937,24 +937,24 @@ Ext.ux.tree.ColumnNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
 });
 
 //backwards compat
-Ext.tree.ColumnNodeUI = Ext.ux.tree.ColumnNodeUI;
+Ext3.tree.ColumnNodeUI = Ext3.ux.tree.ColumnNodeUI;
 /**
- * @class Ext.DataView.LabelEditor
- * @extends Ext.Editor
+ * @class Ext3.DataView.LabelEditor
+ * @extends Ext3.Editor
  * 
  */
-Ext.DataView.LabelEditor = Ext.extend(Ext.Editor, {
+Ext3.DataView.LabelEditor = Ext3.extend(Ext3.Editor, {
     alignment: "tl-tl",
     hideEl : false,
-    cls: "x-small-editor",
+    cls: "x3-small-editor",
     shim: false,
     completeOnEnter: true,
     cancelOnEsc: true,
-    labelSelector: 'span.x-editable',
+    labelSelector: 'span.x3-editable',
     
     constructor: function(cfg, field){
-        Ext.DataView.LabelEditor.superclass.constructor.call(this,
-            field || new Ext.form.TextField({
+        Ext3.DataView.LabelEditor.superclass.constructor.call(this,
+            field || new Ext3.form.TextField({
                 allowBlank: false,
                 growMin:90,
                 growMax:240,
@@ -1003,10 +1003,10 @@ Ext.DataView.LabelEditor = Ext.extend(Ext.Editor, {
 });
 
 
-Ext.DataView.DragSelector = function(cfg){
+Ext3.DataView.DragSelector = function(cfg){
     cfg = cfg || {};
     var view, proxy, tracker;
-    var rs, bodyRegion, dragRegion = new Ext.lib.Region(0,0,0,0);
+    var rs, bodyRegion, dragRegion = new Ext3.lib.Region(0,0,0,0);
     var dragSafe = cfg.dragSafe === true;
 
     this.init = function(dataView){
@@ -1033,7 +1033,7 @@ Ext.DataView.DragSelector = function(cfg){
     function onStart(e){
         view.on('containerclick', cancelClick, view, {single:true});
         if(!proxy){
-            proxy = view.el.createChild({cls:'x-view-selector'});
+            proxy = view.el.createChild({cls:'x3-view-selector'});
         }else{
             if(proxy.dom.parentNode !== view.el.dom){
                 view.el.dom.appendChild(proxy.dom);
@@ -1074,7 +1074,7 @@ Ext.DataView.DragSelector = function(cfg){
     }
 
     function onEnd(e){
-        if (!Ext.isIE) {
+        if (!Ext3.isIE) {
             view.un('containerclick', cancelClick, view);    
         }        
         if(proxy){
@@ -1083,7 +1083,7 @@ Ext.DataView.DragSelector = function(cfg){
     }
 
     function onRender(view){
-        tracker = new Ext.dd.DragTracker({
+        tracker = new Ext3.dd.DragTracker({
             onBeforeStart: onBeforeStart,
             onStart: onStart,
             onDrag: onDrag,
@@ -1091,15 +1091,15 @@ Ext.DataView.DragSelector = function(cfg){
         });
         tracker.initEl(view.el);
     }
-};Ext.ns('Ext.ux.form');
+};Ext3.ns('Ext3.ux.form');
 
 /**
- * @class Ext.ux.form.FileUploadField
- * @extends Ext.form.TextField
+ * @class Ext3.ux.form.FileUploadField
+ * @extends Ext3.form.TextField
  * Creates a file upload field.
  * @xtype fileuploadfield
  */
-Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
+Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
     /**
      * @cfg {String} buttonText The button text to display on the upload button (defaults to
      * 'Browse...').  Note that if you supply a value for {@link #buttonCfg}, the buttonCfg.text
@@ -1117,7 +1117,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
      */
     buttonOffset: 3,
     /**
-     * @cfg {Object} buttonCfg A standard {@link Ext.Button} config object.
+     * @cfg {Object} buttonCfg A standard {@link Ext3.Button} config object.
      */
 
     // private
@@ -1127,18 +1127,18 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
      * @hide
      * @method autoSize
      */
-    autoSize: Ext.emptyFn,
+    autoSize: Ext3.emptyFn,
 
     // private
     initComponent: function(){
-        Ext.ux.form.FileUploadField.superclass.initComponent.call(this);
+        Ext3.ux.form.FileUploadField.superclass.initComponent.call(this);
 
         this.addEvents(
             /**
              * @event fileselected
              * Fires when the underlying file input field's value has changed from the user
              * selecting a new file from the system file selection dialog.
-             * @param {Ext.ux.form.FileUploadField} this
+             * @param {Ext3.ux.form.FileUploadField} this
              * @param {String} value The file value returned by the underlying file input field
              */
             'fileselected'
@@ -1147,19 +1147,19 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
     // private
     onRender : function(ct, position){
-        Ext.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
+        Ext3.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
 
-        this.wrap = this.el.wrap({cls:'x-form-field-wrap x-form-file-wrap'});
-        this.el.addClass('x-form-file-text');
+        this.wrap = this.el.wrap({cls:'x3-form-field-wrap x3-form-file-wrap'});
+        this.el.addClass('x3-form-file-text');
         this.el.dom.removeAttribute('name');
         this.createFileInput();
 
-        var btnCfg = Ext.applyIf(this.buttonCfg || {}, {
+        var btnCfg = Ext3.applyIf(this.buttonCfg || {}, {
             text: this.buttonText
         });
-        this.button = new Ext.Button(Ext.apply(btnCfg, {
+        this.button = new Ext3.Button(Ext3.apply(btnCfg, {
             renderTo: this.wrap,
-            cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
+            cls: 'x3-form-file-btn' + (btnCfg.iconCls ? ' x3-btn-icon' : '')
         }));
 
         if(this.buttonOnly){
@@ -1175,16 +1175,16 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.fileInput.on({
             scope: this,
             mouseenter: function() {
-                this.button.addClass(['x-btn-over','x-btn-focus'])
+                this.button.addClass(['x3-btn-over','x3-btn-focus'])
             },
             mouseleave: function(){
-                this.button.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+                this.button.removeClass(['x3-btn-over','x3-btn-focus','x3-btn-click'])
             },
             mousedown: function(){
-                this.button.addClass('x-btn-click')
+                this.button.addClass('x3-btn-click')
             },
             mouseup: function(){
-                this.button.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
+                this.button.removeClass(['x3-btn-over','x3-btn-focus','x3-btn-click'])
             },
             change: function(){
                 var v = this.fileInput.dom.value;
@@ -1198,7 +1198,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         this.fileInput = this.wrap.createChild({
             id: this.getFileInputId(),
             name: this.name||this.getId(),
-            cls: 'x-form-file',
+            cls: 'x3-form-file',
             tag: 'input',
             type: 'file',
             size: 1
@@ -1211,7 +1211,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
             this.createFileInput();
             this.bindListeners();
         }
-        Ext.ux.form.FileUploadField.superclass.reset.call(this);
+        Ext3.ux.form.FileUploadField.superclass.reset.call(this);
     },
 
     // private
@@ -1221,7 +1221,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
     // private
     onResize : function(w, h){
-        Ext.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
+        Ext3.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
 
         this.wrap.setWidth(w);
 
@@ -1233,17 +1233,17 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
     // private
     onDestroy: function(){
-        Ext.ux.form.FileUploadField.superclass.onDestroy.call(this);
-        Ext.destroy(this.fileInput, this.button, this.wrap);
+        Ext3.ux.form.FileUploadField.superclass.onDestroy.call(this);
+        Ext3.destroy(this.fileInput, this.button, this.wrap);
     },
     
     onDisable: function(){
-        Ext.ux.form.FileUploadField.superclass.onDisable.call(this);
+        Ext3.ux.form.FileUploadField.superclass.onDisable.call(this);
         this.doDisable(true);
     },
     
     onEnable: function(){
-        Ext.ux.form.FileUploadField.superclass.onEnable.call(this);
+        Ext3.ux.form.FileUploadField.superclass.onEnable.call(this);
         this.doDisable(false);
 
     },
@@ -1256,7 +1256,7 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
 
     // private
-    preFocus : Ext.emptyFn,
+    preFocus : Ext3.emptyFn,
 
     // private
     alignErrorIcon : function(){
@@ -1265,16 +1265,16 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
 });
 
-Ext.reg('fileuploadfield', Ext.ux.form.FileUploadField);
+Ext3.reg('fileuploadfield', Ext3.ux.form.FileUploadField);
 
 // backwards compat
-Ext.form.FileUploadField = Ext.ux.form.FileUploadField;
+Ext3.form.FileUploadField = Ext3.ux.form.FileUploadField;
 /**
- * @class Ext.ux.GMapPanel
- * @extends Ext.Panel
+ * @class Ext3.ux.GMapPanel
+ * @extends Ext3.Panel
  * @author Shea Frederick
  */
-Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
+Ext3.ux.GMapPanel = Ext3.extend(Ext3.Panel, {
     initComponent : function(){
         
         var defConfig = {
@@ -1287,17 +1287,17 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             border: false
         };
         
-        Ext.applyIf(this,defConfig);
+        Ext3.applyIf(this,defConfig);
         
-        Ext.ux.GMapPanel.superclass.initComponent.call(this);        
+        Ext3.ux.GMapPanel.superclass.initComponent.call(this);        
 
     },
     afterRender : function(){
         
         var wh = this.ownerCt.getSize();
-        Ext.applyIf(this, wh);
+        Ext3.applyIf(this, wh);
         
-        Ext.ux.GMapPanel.superclass.afterRender.call(this);    
+        Ext3.ux.GMapPanel.superclass.afterRender.call(this);    
         
         if (this.gmapType === 'map'){
             this.gmap = new GMap2(this.body.dom);
@@ -1344,7 +1344,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             this.gmap.checkResize();
         }
         
-        Ext.ux.GMapPanel.superclass.onResize.call(this, w, h);
+        Ext3.ux.GMapPanel.superclass.onResize.call(this, w, h);
 
     },
     setSize : function(width, height, animate){
@@ -1353,7 +1353,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             this.gmap.checkResize();
         }
         
-        Ext.ux.GMapPanel.superclass.setSize.call(this, width, height, animate);
+        Ext3.ux.GMapPanel.superclass.setSize.call(this, width, height, animate);
         
     },
     getMap : function(){
@@ -1374,7 +1374,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     },
     addMarkers : function(markers) {
         
-        if (Ext.isArray(markers)){
+        if (Ext3.isArray(markers)){
             for (var i = 0; i < markers.length; i++) {
                 var mkr_point = new GLatLng(markers[i].lat,markers[i].lng);
                 this.addMarker(mkr_point,markers[i].marker,false,markers[i].setCenter, markers[i].listeners);
@@ -1384,7 +1384,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     },
     addMarker : function(point, marker, clear, center, listeners){
         
-        Ext.applyIf(marker,G_DEFAULT_ICON);
+        Ext3.applyIf(marker,G_DEFAULT_ICON);
 
         if (clear === true){
             this.getMap().clearOverlays();
@@ -1405,7 +1405,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     addMapControls : function(){
         
         if (this.gmapType === 'map') {
-            if (Ext.isArray(this.mapControls)) {
+            if (Ext3.isArray(this.mapControls)) {
                 for(i=0;i<this.mapControls.length;i++){
                     this.addMapControl(this.mapControls[i]);
                 }
@@ -1427,7 +1427,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     },
     addOptions : function(){
         
-        if (Ext.isArray(this.mapConfOpts)) {
+        if (Ext3.isArray(this.mapConfOpts)) {
             var mc;
             for(i=0;i<this.mapConfOpts.length;i++){
                 this.addOption(this.mapConfOpts[i]);
@@ -1454,16 +1454,16 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     addAddressToMap : function(response) {
         
         if (!response || response.Status.code != 200) {
-            Ext.MessageBox.alert('Error', 'Code '+response.Status.code+' Error Returned');
+            Ext3.MessageBox.alert('Error', 'Code '+response.Status.code+' Error Returned');
         }else{
             place = response.Placemark[0];
             addressinfo = place.AddressDetails;
             accuracy = addressinfo.Accuracy;
             if (accuracy === 0) {
-                Ext.MessageBox.alert('Unable to Locate Address', 'Unable to Locate the Address you provided');
+                Ext3.MessageBox.alert('Unable to Locate Address', 'Unable to Locate the Address you provided');
             }else{
                 if (accuracy < 7) {
-                    Ext.MessageBox.alert('Address Accuracy', 'The address provided has a low accuracy.<br><br>Level '+accuracy+' Accuracy (8 = Exact Match, 1 = Vague Match)');
+                    Ext3.MessageBox.alert('Address Accuracy', 'The address provided has a low accuracy.<br><br>Level '+accuracy+' Accuracy (8 = Exact Match, 1 = Vague Match)');
                 }else{
                     point = new GLatLng(place.Point.coordinates[1], place.Point.coordinates[0]);
                     if (typeof this.setCenter.marker === 'object' && typeof point === 'object'){
@@ -1477,11 +1477,11 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
  
 });
 
-Ext.reg('gmappanel', Ext.ux.GMapPanel); Ext.namespace('Ext.ux.grid');
+Ext3.reg('gmappanel', Ext3.ux.GMapPanel); Ext3.namespace('Ext3.ux.grid');
 
 /**
- * @class Ext.ux.grid.GridFilters
- * @extends Ext.util.Observable
+ * @class Ext3.ux.grid.GridFilters
+ * @extends Ext3.util.Observable
  * <p>GridFilter is a plugin (<code>ptype='gridfilters'</code>) for grids that
  * allow for a slightly more robust representation of filtering than what is
  * provided by the default store.</p>
@@ -1493,8 +1493,8 @@ Ext.reg('gmappanel', Ext.ux.GMapPanel); Ext.namespace('Ext.ux.grid');
  * <li><b>Filtering implementations</b> :
  * <div class="sub-desc">
  * Default filtering for Strings, Numeric Ranges, Date Ranges, Lists (which can
- * be backed by a Ext.data.Store), and Boolean. Additional custom filter types
- * and menus are easily created by extending Ext.ux.grid.filter.Filter.
+ * be backed by a Ext3.data.Store), and Boolean. Additional custom filter types
+ * and menus are easily created by extending Ext3.ux.grid.filter.Filter.
  * </div></li>
  * <li><b>Graphical indicators</b> :
  * <div class="sub-desc">
@@ -1515,8 +1515,8 @@ Ext.reg('gmappanel', Ext.ux.GMapPanel); Ext.namespace('Ext.ux.grid');
  * <code>stateId</code> in the Grid configuration.
  * <div class="sub-desc">
  * The filter collection binds to the
- * <code>{@link Ext.grid.GridPanel#beforestaterestore beforestaterestore}</code>
- * and <code>{@link Ext.grid.GridPanel#beforestatesave beforestatesave}</code>
+ * <code>{@link Ext3.grid.GridPanel#beforestaterestore beforestaterestore}</code>
+ * and <code>{@link Ext3.grid.GridPanel#beforestatesave beforestatesave}</code>
  * events in order to be stateful.
  * </div></li>
  * <li><b>Grid Changes</b> :
@@ -1537,11 +1537,11 @@ Ext.reg('gmappanel', Ext.ux.GMapPanel); Ext.namespace('Ext.ux.grid');
  * </ul></div>
  * <p><b><u>Example usage:</u></b></p>
  * <pre><code>
-var store = new Ext.data.GroupingStore({
+var store = new Ext3.data.GroupingStore({
     ...
 });
 
-var filters = new Ext.ux.grid.GridFilters({
+var filters = new Ext3.ux.grid.GridFilters({
     autoReload: false, //don&#39;t reload automatically
     local: true, //only filter locally
     // filters may be configured through the plugin,
@@ -1568,18 +1568,18 @@ var filters = new Ext.ux.grid.GridFilters({
         dataIndex: 'visible'
     }]
 });
-var cm = new Ext.grid.ColumnModel([{
+var cm = new Ext3.grid.ColumnModel([{
     ...
 }]);
 
-var grid = new Ext.grid.GridPanel({
+var grid = new Ext3.grid.GridPanel({
      ds: store,
      cm: cm,
-     view: new Ext.grid.GroupingView(),
+     view: new Ext3.grid.GroupingView(),
      plugins: [filters],
      height: 400,
      width: 700,
-     bbar: new Ext.PagingToolbar({
+     bbar: new Ext3.PagingToolbar({
          store: store,
          pageSize: 15,
          plugins: [filters] //reset page to page 1 if filters change
@@ -1592,7 +1592,7 @@ store.load({params: {start: 0, limit: 15}});
 grid.filters
  * </code></pre>
  */
-Ext.ux.grid.GridFilters = Ext.extend(Ext.util.Observable, {
+Ext3.ux.grid.GridFilters = Ext3.extend(Ext3.util.Observable, {
     /**
      * @cfg {Boolean} autoReload
      * Defaults to true, reloading the datasource when a filter change happens.
@@ -1602,7 +1602,7 @@ Ext.ux.grid.GridFilters = Ext.extend(Ext.util.Observable, {
     autoReload : true,
     /**
      * @cfg {Boolean} encode
-     * Specify true for {@link #buildQuery} to use Ext.util.JSON.encode to
+     * Specify true for {@link #buildQuery} to use Ext3.util.JSON.encode to
      * encode the filter query parameter sent with a remote request.
      * Defaults to false.
      */
@@ -1621,7 +1621,7 @@ Ext.ux.grid.GridFilters = Ext.extend(Ext.util.Observable, {
     filterCls : 'ux-filtered-column',
     /**
      * @cfg {Boolean} local
-     * <tt>true</tt> to use Ext.data.Store filter functions (local filtering)
+     * <tt>true</tt> to use Ext3.data.Store filter functions (local filtering)
      * instead of the default (<tt>false</tt>) server side filtering.
      */
     local : false,
@@ -1655,19 +1655,19 @@ Ext.ux.grid.GridFilters = Ext.extend(Ext.util.Observable, {
     /** @private */
     constructor : function (config) {
         config = config || {};
-        this.deferredUpdate = new Ext.util.DelayedTask(this.reload, this);
-        this.filters = new Ext.util.MixedCollection();
+        this.deferredUpdate = new Ext3.util.DelayedTask(this.reload, this);
+        this.filters = new Ext3.util.MixedCollection();
         this.filters.getKey = function (o) {
             return o ? o.dataIndex : null;
         };
         this.addFilters(config.filters);
         delete config.filters;
-        Ext.apply(this, config);
+        Ext3.apply(this, config);
     },
 
     /** @private */
     init : function (grid) {
-        if (grid instanceof Ext.grid.GridPanel) {
+        if (grid instanceof Ext3.grid.GridPanel) {
             this.grid = grid;
 
             this.bindStore(this.grid.getStore(), true);
@@ -1698,7 +1698,7 @@ Ext.ux.grid.GridFilters = Ext.extend(Ext.util.Observable, {
                 });
             }
 
-        } else if (grid instanceof Ext.PagingToolbar) {
+        } else if (grid instanceof Ext3.PagingToolbar) {
             this.toolbar = grid;
         }
     },
@@ -1765,7 +1765,7 @@ Ext.ux.grid.GridFilters = Ext.extend(Ext.util.Observable, {
         this.purgeListeners();
 
         if(this.filterMenu){
-            Ext.menu.MenuMgr.unregister(this.filterMenu);
+            Ext3.menu.MenuMgr.unregister(this.filterMenu);
             this.filterMenu.destroy();
              this.filterMenu = this.menu.menu = null;
         }
@@ -1776,7 +1776,7 @@ Ext.ux.grid.GridFilters = Ext.extend(Ext.util.Observable, {
      */
     removeAll : function () {
         if(this.filters){
-            Ext.destroy.apply(Ext, this.filters.items);
+            Ext3.destroy.apply(Ext3, this.filters.items);
             // remove all items from the collection
             this.filters.clear();
         }
@@ -1824,7 +1824,7 @@ Ext.ux.grid.GridFilters = Ext.extend(Ext.util.Observable, {
         if (this.showMenu && hmenu) {
 
             this.sep  = hmenu.addSeparator();
-            this.filterMenu = new Ext.menu.Menu({
+            this.filterMenu = new Ext3.menu.Menu({
                 id: this.grid.id + '-filters-menu'
             });
             this.menu = hmenu.add({
@@ -1928,7 +1928,7 @@ TODO: lazy rendering
         options.params = options.params || {};
         this.cleanParams(options.params);
         var params = this.buildQuery(this.getFilterData());
-        Ext.apply(options.params, params);
+        Ext3.apply(options.params, params);
     },
 
     /**
@@ -1958,7 +1958,7 @@ TODO: lazy rendering
         if (view.mainHd) {
             for (i = 0, len = view.cm.config.length; i < len; i++) {
                 filter = this.getFilter(view.cm.config[i].dataIndex);
-                Ext.fly(view.getHeaderCell(i))[filter && filter.active ? 'addClass' : 'removeClass'](this.filterCls);
+                Ext3.fly(view.getHeaderCell(i))[filter && filter.active ? 'addClass' : 'removeClass'](this.filterCls);
             }
         }
     },
@@ -2008,29 +2008,29 @@ TODO: lazy rendering
 
     /**
      * Adds a filter to the collection and observes it for state change.
-     * @param {Object/Ext.ux.grid.filter.Filter} config A filter configuration or a filter object.
-     * @return {Ext.ux.grid.filter.Filter} The existing or newly created filter object.
+     * @param {Object/Ext3.ux.grid.filter.Filter} config A filter configuration or a filter object.
+     * @return {Ext3.ux.grid.filter.Filter} The existing or newly created filter object.
      */
     addFilter : function (config) {
         var Cls = this.getFilterClass(config.type),
             filter = config.menu ? config : (new Cls(config));
         this.filters.add(filter);
 
-        Ext.util.Observable.capture(filter, this.onStateChange, this);
+        Ext3.util.Observable.capture(filter, this.onStateChange, this);
         return filter;
     },
 
     /**
      * Adds filters to the collection.
-     * @param {Array/Ext.grid.ColumnModel} filters Either an Array of
-     * filter configuration objects or an Ext.grid.ColumnModel.  The columns
-     * of a passed Ext.grid.ColumnModel will be examined for a <code>filter</code>
+     * @param {Array/Ext3.grid.ColumnModel} filters Either an Array of
+     * filter configuration objects or an Ext3.grid.ColumnModel.  The columns
+     * of a passed Ext3.grid.ColumnModel will be examined for a <code>filter</code>
      * property and, if present, will be used as the filter configuration object.
      */
     addFilters : function (filters) {
         if (filters) {
             var i, len, filter, cm = false, dI;
-            if (filters instanceof Ext.grid.ColumnModel) {
+            if (filters instanceof Ext3.grid.ColumnModel) {
                 filters = filters.config;
                 cm = true;
             }
@@ -2041,7 +2041,7 @@ TODO: lazy rendering
                     filter = filters[i].filter || filters[i].filterable;
                     if (filter){
                         filter = (filter === true) ? {} : filter;
-                        Ext.apply(filter, {dataIndex:dI});
+                        Ext3.apply(filter, {dataIndex:dI});
                         // filter type is specified in order of preference:
                         //     filter type specified in config
                         //     type specified in store's field's type config
@@ -2061,7 +2061,7 @@ TODO: lazy rendering
     /**
      * Returns a filter for the given dataIndex, if one exists.
      * @param {String} dataIndex The dataIndex of the desired filter object.
-     * @return {Ext.ux.grid.filter.Filter}
+     * @return {Ext3.ux.grid.filter.Filter}
      */
     getFilter : function (dataIndex) {
         return this.filters.get(dataIndex);
@@ -2150,7 +2150,7 @@ filters[0][data][value]="someValue3"&
             tmp = [];
             for (i = 0; i < len; i++) {
                 f = filters[i];
-                tmp.push(Ext.apply(
+                tmp.push(Ext3.apply(
                     {},
                     {field: f.field},
                     f.data
@@ -2158,7 +2158,7 @@ filters[0][data][value]="someValue3"&
             }
             // only build if there is active filter
             if (tmp.length > 0){
-                p[this.paramPrefix] = Ext.util.JSON.encode(tmp);
+                p[this.paramPrefix] = Ext3.util.JSON.encode(tmp);
             }
         }
         return p;
@@ -2189,10 +2189,10 @@ filters[0][data][value]="someValue3"&
      * loader to provide dynamic filter loading.
      * @param {String} type The type of filter to load ('Filter' is automatically
      * appended to the passed type; eg, 'string' becomes 'StringFilter').
-     * @return {Class} The Ext.ux.grid.filter.Class
+     * @return {Class} The Ext3.ux.grid.filter.Class
      */
     getFilterClass : function (type) {
-        // map the supported Ext.data.Field type values into a supported filter
+        // map the supported Ext3.data.Field type values into a supported filter
         switch(type) {
             case 'auto':
               type = 'string';
@@ -2205,20 +2205,20 @@ filters[0][data][value]="someValue3"&
               type = 'boolean';
               break;
         }
-        return Ext.ux.grid.filter[type.substr(0, 1).toUpperCase() + type.substr(1) + 'Filter'];
+        return Ext3.ux.grid.filter[type.substr(0, 1).toUpperCase() + type.substr(1) + 'Filter'];
     }
 });
 
 // register ptype
-Ext.preg('gridfilters', Ext.ux.grid.GridFilters);
-Ext.namespace('Ext.ux.grid.filter');
+Ext3.preg('gridfilters', Ext3.ux.grid.GridFilters);
+Ext3.namespace('Ext3.ux.grid.filter');
 
 /** 
- * @class Ext.ux.grid.filter.Filter
- * @extends Ext.util.Observable
+ * @class Ext3.ux.grid.filter.Filter
+ * @extends Ext3.util.Observable
  * Abstract base class for filter implementations.
  */
-Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
+Ext3.ux.grid.filter.Filter = Ext3.extend(Ext3.util.Observable, {
     /**
      * @cfg {Boolean} active
      * Indicates the initial status of the filter (defaults to false).
@@ -2231,13 +2231,13 @@ Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
      */
     /**
      * @cfg {String} dataIndex 
-     * The {@link Ext.data.Store} dataIndex of the field this filter represents.
+     * The {@link Ext3.data.Store} dataIndex of the field this filter represents.
      * The dataIndex does not actually have to exist in the store.
      */
     dataIndex : null,
     /**
      * The filter configuration menu that will be installed into the filter submenu of a column menu.
-     * @type Ext.menu.Menu
+     * @type Ext3.menu.Menu
      * @property
      */
     menu : null,
@@ -2249,19 +2249,19 @@ Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
     updateBuffer : 500,
 
     constructor : function (config) {
-        Ext.apply(this, config);
+        Ext3.apply(this, config);
             
         this.addEvents(
             /**
              * @event activate
              * Fires when an inactive filter becomes active
-             * @param {Ext.ux.grid.filter.Filter} this
+             * @param {Ext3.ux.grid.filter.Filter} this
              */
             'activate',
             /**
              * @event deactivate
              * Fires when an active filter becomes inactive
-             * @param {Ext.ux.grid.filter.Filter} this
+             * @param {Ext3.ux.grid.filter.Filter} this
              */
             'deactivate',
             /**
@@ -2269,19 +2269,19 @@ Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
              * Fires after the serialization process. Use this to attach additional parameters to serialization
              * data before it is encoded and sent to the server.
              * @param {Array/Object} data A map or collection of maps representing the current filter configuration.
-             * @param {Ext.ux.grid.filter.Filter} filter The filter being serialized.
+             * @param {Ext3.ux.grid.filter.Filter} filter The filter being serialized.
              */
             'serialize',
             /**
              * @event update
              * Fires when a filter configuration has changed
-             * @param {Ext.ux.grid.filter.Filter} this The filter object.
+             * @param {Ext3.ux.grid.filter.Filter} this The filter object.
              */
             'update'
         );
-        Ext.ux.grid.filter.Filter.superclass.constructor.call(this);
+        Ext3.ux.grid.filter.Filter.superclass.constructor.call(this);
 
-        this.menu = new Ext.menu.Menu();
+        this.menu = new Ext3.menu.Menu();
         this.init(config);
         if(config && config.value){
             this.setValue(config.value);
@@ -2303,27 +2303,27 @@ Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
     /**
      * Template method to be implemented by all subclasses that is to
      * initialize the filter and install required menu items.
-     * Defaults to Ext.emptyFn.
+     * Defaults to Ext3.emptyFn.
      */
-    init : Ext.emptyFn,
+    init : Ext3.emptyFn,
     
     /**
      * Template method to be implemented by all subclasses that is to
      * get and return the value of the filter.
-     * Defaults to Ext.emptyFn.
+     * Defaults to Ext3.emptyFn.
      * @return {Object} The 'serialized' form of this filter
-     * @methodOf Ext.ux.grid.filter.Filter
+     * @methodOf Ext3.ux.grid.filter.Filter
      */
-    getValue : Ext.emptyFn,
+    getValue : Ext3.emptyFn,
     
     /**
      * Template method to be implemented by all subclasses that is to
      * set the value of the filter and fire the 'update' event.
-     * Defaults to Ext.emptyFn.
+     * Defaults to Ext3.emptyFn.
      * @param {Object} data The value to set the filter
-     * @methodOf Ext.ux.grid.filter.Filter
+     * @methodOf Ext3.ux.grid.filter.Filter
      */	
-    setValue : Ext.emptyFn,
+    setValue : Ext3.emptyFn,
     
     /**
      * Template method to be implemented by all subclasses that is to
@@ -2338,15 +2338,15 @@ Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
     /**
      * Template method to be implemented by all subclasses that is to
      * get and return serialized filter data for transmission to the server.
-     * Defaults to Ext.emptyFn.
+     * Defaults to Ext3.emptyFn.
      */
-    getSerialArgs : Ext.emptyFn,
+    getSerialArgs : Ext3.emptyFn,
 
     /**
      * Template method to be implemented by all subclasses that is to
-     * validates the provided Ext.data.Record against the filters configuration.
+     * validates the provided Ext3.data.Record against the filters configuration.
      * Defaults to <tt>return true</tt>.
-     * @param {Ext.data.Record} record The record to validate
+     * @param {Ext3.data.Record} record The record to validate
      * @return {Boolean} true if the record is valid within the bounds
      * of the filter, false otherwise.
      */
@@ -2359,7 +2359,7 @@ Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
      * and fires the 'serialize' event.
      * @return {Object/Array} An object or collection of objects containing
      * key value pairs representing the current configuration of the filter.
-     * @methodOf Ext.ux.grid.filter.Filter
+     * @methodOf Ext3.ux.grid.filter.Filter
      */
     serialize : function(){
         var args = this.getSerialArgs();
@@ -2379,7 +2379,7 @@ Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
      * Sets the status of the filter and fires the appropriate events.
      * @param {Boolean} active        The new filter state.
      * @param {Boolean} suppressEvent True to prevent events from being fired.
-     * @methodOf Ext.ux.grid.filter.Filter
+     * @methodOf Ext3.ux.grid.filter.Filter
      */
     setActive : function(active, suppressEvent){
         if(this.active != active){
@@ -2390,12 +2390,12 @@ Ext.ux.grid.filter.Filter = Ext.extend(Ext.util.Observable, {
         }
     }    
 });/** 
- * @class Ext.ux.grid.filter.BooleanFilter
- * @extends Ext.ux.grid.filter.Filter
+ * @class Ext3.ux.grid.filter.BooleanFilter
+ * @extends Ext3.ux.grid.filter.Filter
  * Boolean filters use unique radio group IDs (so you can have more than one!)
  * <p><b><u>Example Usage:</u></b></p>
  * <pre><code>    
-var filters = new Ext.ux.grid.GridFilters({
+var filters = new Ext3.ux.grid.GridFilters({
     ...
     filters: [{
         // required configs
@@ -2410,7 +2410,7 @@ var filters = new Ext.ux.grid.GridFilters({
 });
  * </code></pre>
  */
-Ext.ux.grid.filter.BooleanFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
+Ext3.ux.grid.filter.BooleanFilter = Ext3.extend(Ext3.ux.grid.filter.Filter, {
 	/**
 	 * @cfg {Boolean} defaultValue
 	 * Set this to null if you do not want either option to be checked by default. Defaults to false.
@@ -2432,10 +2432,10 @@ Ext.ux.grid.filter.BooleanFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
      * Template method that is to initialize the filter and install required menu items.
      */
     init : function (config) {
-        var gId = Ext.id();
+        var gId = Ext3.id();
 		this.options = [
-			new Ext.menu.CheckItem({text: this.yesText, group: gId, checked: this.defaultValue === true}),
-			new Ext.menu.CheckItem({text: this.noText, group: gId, checked: this.defaultValue === false})];
+			new Ext3.menu.CheckItem({text: this.yesText, group: gId, checked: this.defaultValue === true}),
+			new Ext3.menu.CheckItem({text: this.noText, group: gId, checked: this.defaultValue === false})];
 		
 		this.menu.add(this.options[0], this.options[1]);
 		
@@ -2476,9 +2476,9 @@ Ext.ux.grid.filter.BooleanFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
 	},
 	
     /**
-     * Template method that is to validate the provided Ext.data.Record
+     * Template method that is to validate the provided Ext3.data.Record
      * against the filters configuration.
-     * @param {Ext.data.Record} record The record to validate
+     * @param {Ext3.data.Record} record The record to validate
      * @return {Boolean} true if the record is valid within the bounds
      * of the filter, false otherwise.
      */
@@ -2486,12 +2486,12 @@ Ext.ux.grid.filter.BooleanFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
 		return record.get(this.dataIndex) == this.getValue();
 	}
 });/** 
- * @class Ext.ux.grid.filter.DateFilter
- * @extends Ext.ux.grid.filter.Filter
- * Filter by a configurable Ext.menu.DateMenu
+ * @class Ext3.ux.grid.filter.DateFilter
+ * @extends Ext3.ux.grid.filter.Filter
+ * Filter by a configurable Ext3.menu.DateMenu
  * <p><b><u>Example Usage:</u></b></p>
  * <pre><code>    
-var filters = new Ext.ux.grid.GridFilters({
+var filters = new Ext3.ux.grid.GridFilters({
     ...
     filters: [{
         // required configs
@@ -2512,7 +2512,7 @@ var filters = new Ext.ux.grid.GridFilters({
 });
  * </code></pre>
  */
-Ext.ux.grid.filter.DateFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
+Ext3.ux.grid.filter.DateFilter = Ext3.extend(Ext3.ux.grid.filter.Filter, {
     /**
      * @cfg {String} afterText
      * Defaults to 'After'.
@@ -2541,12 +2541,12 @@ Ext.ux.grid.filter.DateFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
 
     /**
      * @cfg {Date} maxDate
-     * Allowable date as passed to the Ext.DatePicker
+     * Allowable date as passed to the Ext3.DatePicker
      * Defaults to undefined.
      */
     /**
      * @cfg {Date} minDate
-     * Allowable date as passed to the Ext.DatePicker
+     * Allowable date as passed to the Ext3.DatePicker
      * Defaults to undefined.
      */
     /**
@@ -2586,7 +2586,7 @@ Ext.ux.grid.filter.DateFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
     init : function (config) {
         var menuCfg, i, len, item, cfg, Cls;
 
-        menuCfg = Ext.apply(this.pickerOpts, {
+        menuCfg = Ext3.apply(this.pickerOpts, {
             minDate: this.minDate, 
             maxDate: this.maxDate, 
             format:  this.dateFormat,
@@ -2603,8 +2603,8 @@ Ext.ux.grid.filter.DateFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
                 cfg = {
                     itemId: 'range-' + item,
                     text: this[item + 'Text'],
-                    menu: new Ext.menu.DateMenu(
-                        Ext.apply(menuCfg, {
+                    menu: new Ext3.menu.DateMenu(
+                        Ext3.apply(menuCfg, {
                             itemId: item
                         })
                     ),
@@ -2613,7 +2613,7 @@ Ext.ux.grid.filter.DateFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
                         checkchange: this.onCheckChange
                     }
                 };
-                Cls = Ext.menu.CheckItem;
+                Cls = Ext3.menu.CheckItem;
                 item = this.fields[item] = new Cls(cfg);
             }
             //this.add(item);
@@ -2759,9 +2759,9 @@ Ext.ux.grid.filter.DateFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
     },
 
     /**
-     * Template method that is to validate the provided Ext.data.Record
+     * Template method that is to validate the provided Ext3.data.Record
      * against the filters configuration.
-     * @param {Ext.data.Record} record The record to validate
+     * @param {Ext3.data.Record} record The record to validate
      * @return {Boolean} true if the record is valid within the bounds
      * of the filter, false otherwise.
      */
@@ -2770,7 +2770,7 @@ Ext.ux.grid.filter.DateFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
             pickerValue,
             val = record.get(this.dataIndex);
             
-        if(!Ext.isDate(val)){
+        if(!Ext3.isDate(val)){
             return false;
         }
         val = val.clearTime(true).getTime();
@@ -2792,17 +2792,17 @@ Ext.ux.grid.filter.DateFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
         return true;
     }
 });/** 
- * @class Ext.ux.grid.filter.ListFilter
- * @extends Ext.ux.grid.filter.Filter
- * <p>List filters are able to be preloaded/backed by an Ext.data.Store to load
+ * @class Ext3.ux.grid.filter.ListFilter
+ * @extends Ext3.ux.grid.filter.Filter
+ * <p>List filters are able to be preloaded/backed by an Ext3.data.Store to load
  * their options the first time they are shown. ListFilter utilizes the
- * {@link Ext.ux.menu.ListMenu} component.</p>
+ * {@link Ext3.ux.menu.ListMenu} component.</p>
  * <p>Although not shown here, this class accepts all configuration options
- * for {@link Ext.ux.menu.ListMenu}.</p>
+ * for {@link Ext3.ux.menu.ListMenu}.</p>
  * 
  * <p><b><u>Example Usage:</u></b></p>
  * <pre><code>    
-var filters = new Ext.ux.grid.GridFilters({
+var filters = new Ext3.ux.grid.GridFilters({
     ...
     filters: [{
         type: 'list',
@@ -2815,7 +2815,7 @@ var filters = new Ext.ux.grid.GridFilters({
  * </code></pre>
  * 
  */
-Ext.ux.grid.filter.ListFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
+Ext3.ux.grid.filter.ListFilter = Ext3.extend(Ext3.ux.grid.filter.Filter, {
 
     /**
      * @cfg {Array} options
@@ -2882,8 +2882,8 @@ filter : [{"type":"list","value":"small,medium","field":"size"}]
      */
     phpMode : false,
     /**
-     * @cfg {Ext.data.Store} store
-     * The {@link Ext.data.Store} this list should use as its data source
+     * @cfg {Ext3.data.Store} store
+     * The {@link Ext3.data.Store} this list should use as its data source
      * when the data source is <b>remote</b>. If the data for the list
      * is local, use the <code>{@link #options}</code> config instead.
      */
@@ -2894,13 +2894,13 @@ filter : [{"type":"list","value":"small,medium","field":"size"}]
      * @param {Object} config
      */
     init : function (config) {
-        this.dt = new Ext.util.DelayedTask(this.fireUpdate, this);
+        this.dt = new Ext3.util.DelayedTask(this.fireUpdate, this);
 
         // if a menu already existed, do clean up first
         if (this.menu){
             this.menu.destroy();
         }
-        this.menu = new Ext.ux.menu.ListMenu(config);
+        this.menu = new Ext3.ux.menu.ListMenu(config);
         this.menu.on('checkchange', this.onCheckChange, this);
     },
     
@@ -2951,9 +2951,9 @@ filter : [{"type":"list","value":"small,medium","field":"size"}]
     
     
     /**
-     * Template method that is to validate the provided Ext.data.Record
+     * Template method that is to validate the provided Ext3.data.Record
      * against the filters configuration.
-     * @param {Ext.data.Record} record The record to validate
+     * @param {Ext3.data.Record} record The record to validate
      * @return {Boolean} true if the record is valid within the bounds
      * of the filter, false otherwise.
      */
@@ -2961,12 +2961,12 @@ filter : [{"type":"list","value":"small,medium","field":"size"}]
         return this.getValue().indexOf(record.get(this.dataIndex)) > -1;
     }
 });/** 
- * @class Ext.ux.grid.filter.NumericFilter
- * @extends Ext.ux.grid.filter.Filter
- * Filters using an Ext.ux.menu.RangeMenu.
+ * @class Ext3.ux.grid.filter.NumericFilter
+ * @extends Ext3.ux.grid.filter.Filter
+ * Filters using an Ext3.ux.menu.RangeMenu.
  * <p><b><u>Example Usage:</u></b></p>
  * <pre><code>    
-var filters = new Ext.ux.grid.GridFilters({
+var filters = new Ext3.ux.grid.GridFilters({
     ...
     filters: [{
         type: 'numeric',
@@ -2975,16 +2975,16 @@ var filters = new Ext.ux.grid.GridFilters({
 });
  * </code></pre> 
  */
-Ext.ux.grid.filter.NumericFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
+Ext3.ux.grid.filter.NumericFilter = Ext3.extend(Ext3.ux.grid.filter.Filter, {
 
     /**
      * @cfg {Object} fieldCls
      * The Class to use to construct each field item within this menu
      * Defaults to:<pre>
-     * fieldCls : Ext.form.NumberField
+     * fieldCls : Ext3.form.NumberField
      * </pre>
      */
-    fieldCls : Ext.form.NumberField,
+    fieldCls : Ext3.form.NumberField,
     /**
      * @cfg {Object} fieldCfg
      * The default configuration options for any field item unless superseded
@@ -3008,7 +3008,7 @@ fieldCfg : {
 fields : {
     gt: { // override fieldCfg options
         width: 200,
-        fieldCls: Ext.ux.form.CustomNumberField // to override default {@link #fieldCls}
+        fieldCls: Ext3.ux.form.CustomNumberField // to override default {@link #fieldCls}
     }
 },
      * </code></pre>
@@ -3065,7 +3065,7 @@ menuItemCfgs : {
         if (this.menu){
             this.menu.destroy();
         }        
-        this.menu = new Ext.ux.menu.RangeMenu(Ext.apply(config, {
+        this.menu = new Ext3.ux.menu.RangeMenu(Ext3.apply(config, {
             // pass along filter configs to the menu
             fieldCfg : this.fieldCfg || {},
             fieldCls : this.fieldCls,
@@ -3135,9 +3135,9 @@ menuItemCfgs : {
     },
 
     /**
-     * Template method that is to validate the provided Ext.data.Record
+     * Template method that is to validate the provided Ext3.data.Record
      * against the filters configuration.
-     * @param {Ext.data.Record} record The record to validate
+     * @param {Ext3.data.Record} record The record to validate
      * @return {Boolean} true if the record is valid within the bounds
      * of the filter, false otherwise.
      */
@@ -3156,12 +3156,12 @@ menuItemCfgs : {
         return true;
     }
 });/** 
- * @class Ext.ux.grid.filter.StringFilter
- * @extends Ext.ux.grid.filter.Filter
- * Filter by a configurable Ext.form.TextField
+ * @class Ext3.ux.grid.filter.StringFilter
+ * @extends Ext3.ux.grid.filter.Filter
+ * Filter by a configurable Ext3.form.TextField
  * <p><b><u>Example Usage:</u></b></p>
  * <pre><code>    
-var filters = new Ext.ux.grid.GridFilters({
+var filters = new Ext3.ux.grid.GridFilters({
     ...
     filters: [{
         // required configs
@@ -3172,12 +3172,12 @@ var filters = new Ext.ux.grid.GridFilters({
         value: 'foo',
         active: true, // default is false
         iconCls: 'ux-gridfilter-text-icon' // default
-        // any Ext.form.TextField configs accepted
+        // any Ext3.form.TextField configs accepted
     }]
 });
  * </code></pre>
  */
-Ext.ux.grid.filter.StringFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
+Ext3.ux.grid.filter.StringFilter = Ext3.extend(Ext3.ux.grid.filter.Filter, {
 
     /**
      * @cfg {String} iconCls
@@ -3195,7 +3195,7 @@ Ext.ux.grid.filter.StringFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
      * Template method that is to initialize the filter and install required menu items.
      */
     init : function (config) {
-        Ext.applyIf(config, {
+        Ext3.applyIf(config, {
             enableKeyEvents: true,
             iconCls: this.iconCls,
             listeners: {
@@ -3204,9 +3204,9 @@ Ext.ux.grid.filter.StringFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
             }
         });
 
-        this.inputItem = new Ext.form.TextField(config); 
+        this.inputItem = new Ext3.form.TextField(config); 
         this.menu.add(this.inputItem);
-        this.updateTask = new Ext.util.DelayedTask(this.fireUpdate, this);
+        this.updateTask = new Ext3.util.DelayedTask(this.fireUpdate, this);
     },
     
     /**
@@ -3250,9 +3250,9 @@ Ext.ux.grid.filter.StringFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
     },
 
     /**
-     * Template method that is to validate the provided Ext.data.Record
+     * Template method that is to validate the provided Ext3.data.Record
      * against the filters configuration.
-     * @param {Ext.data.Record} record The record to validate
+     * @param {Ext3.data.Record} record The record to validate
      * @return {Boolean} true if the record is valid within the bounds
      * of the filter, false otherwise.
      */
@@ -3281,16 +3281,16 @@ Ext.ux.grid.filter.StringFilter = Ext.extend(Ext.ux.grid.filter.Filter, {
         this.updateTask.delay(this.updateBuffer);
     }
 });
-Ext.namespace('Ext.ux.menu');
+Ext3.namespace('Ext3.ux.menu');
 
 /** 
- * @class Ext.ux.menu.ListMenu
- * @extends Ext.menu.Menu
- * This is a supporting class for {@link Ext.ux.grid.filter.ListFilter}.
+ * @class Ext3.ux.menu.ListMenu
+ * @extends Ext3.menu.Menu
+ * This is a supporting class for {@link Ext3.ux.grid.filter.ListFilter}.
  * Although not listed as configuration options for this class, this class
- * also accepts all configuration options from {@link Ext.ux.grid.filter.ListFilter}.
+ * also accepts all configuration options from {@link Ext3.ux.grid.filter.ListFilter}.
  */
-Ext.ux.menu.ListMenu = Ext.extend(Ext.menu.Menu, {
+Ext3.ux.menu.ListMenu = Ext3.extend(Ext3.menu.Menu, {
     /**
      * @cfg {String} labelField
      * Defaults to 'text'.
@@ -3319,27 +3319,27 @@ Ext.ux.menu.ListMenu = Ext.extend(Ext.menu.Menu, {
             /**
              * @event checkchange
              * Fires when there is a change in checked items from this list
-             * @param {Object} item Ext.menu.CheckItem
+             * @param {Object} item Ext3.menu.CheckItem
              * @param {Object} checked The checked value that was set
              */
             'checkchange'
         );
       
-        Ext.ux.menu.ListMenu.superclass.constructor.call(this, cfg = cfg || {});
+        Ext3.ux.menu.ListMenu.superclass.constructor.call(this, cfg = cfg || {});
     
         if(!cfg.store && cfg.options){
             var options = [];
             for(var i=0, len=cfg.options.length; i<len; i++){
                 var value = cfg.options[i];
-                switch(Ext.type(value)){
+                switch(Ext3.type(value)){
                     case 'array':  options.push(value); break;
                     case 'object': options.push([value.id, value[this.labelField]]); break;
                     case 'string': options.push([value, value]); break;
                 }
             }
             
-            this.store = new Ext.data.Store({
-                reader: new Ext.data.ArrayReader({id: 0}, ['id', this.labelField]),
+            this.store = new Ext3.data.Store({
+                reader: new Ext3.data.ArrayReader({id: 0}, ['id', this.labelField]),
                 data:   options,
                 listeners: {
                     'load': this.onLoad,
@@ -3357,7 +3357,7 @@ Ext.ux.menu.ListMenu = Ext.extend(Ext.menu.Menu, {
         if (this.store) {
             this.store.destroy();    
         }
-        Ext.ux.menu.ListMenu.superclass.destroy.call(this);
+        Ext3.ux.menu.ListMenu.superclass.destroy.call(this);
     },
 
     /**
@@ -3371,13 +3371,13 @@ Ext.ux.menu.ListMenu = Ext.extend(Ext.menu.Menu, {
         var lastArgs = null;
         return function(){
             if(arguments.length === 0){
-                Ext.ux.menu.ListMenu.superclass.show.apply(this, lastArgs);
+                Ext3.ux.menu.ListMenu.superclass.show.apply(this, lastArgs);
             } else {
                 lastArgs = arguments;
                 if (this.loadOnShow && !this.loaded) {
                     this.store.load();
                 }
-                Ext.ux.menu.ListMenu.superclass.show.apply(this, arguments);
+                Ext3.ux.menu.ListMenu.superclass.show.apply(this, arguments);
             }
         };
     }(),
@@ -3389,9 +3389,9 @@ Ext.ux.menu.ListMenu = Ext.extend(Ext.menu.Menu, {
         
         this.removeAll(true);
         
-        var gid = this.single ? Ext.id() : null;
+        var gid = this.single ? Ext3.id() : null;
         for(var i=0, len=records.length; i<len; i++){
-            var item = new Ext.menu.CheckItem({
+            var item = new Ext3.menu.CheckItem({
                 text:    records[i].get(this.labelField), 
                 group:   gid,
                 checked: this.selected.indexOf(records[i].id) > -1,
@@ -3437,7 +3437,7 @@ Ext.ux.menu.ListMenu = Ext.extend(Ext.menu.Menu, {
     
     /**
      * Handler for the 'checkchange' event from an check item in this menu
-     * @param {Object} item Ext.menu.CheckItem
+     * @param {Object} item Ext3.menu.CheckItem
      * @param {Object} checked The checked value that was set
      */
     checkChange : function (item, checked) {
@@ -3451,34 +3451,34 @@ Ext.ux.menu.ListMenu = Ext.extend(Ext.menu.Menu, {
         
         this.fireEvent('checkchange', item, checked);
     }    
-});Ext.ns('Ext.ux.menu');
+});Ext3.ns('Ext3.ux.menu');
 
 /** 
- * @class Ext.ux.menu.RangeMenu
- * @extends Ext.menu.Menu
- * Custom implementation of Ext.menu.Menu that has preconfigured
+ * @class Ext3.ux.menu.RangeMenu
+ * @extends Ext3.menu.Menu
+ * Custom implementation of Ext3.menu.Menu that has preconfigured
  * items for gt, lt, eq.
  * <p><b><u>Example Usage:</u></b></p>
  * <pre><code>    
 
  * </code></pre> 
  */
-Ext.ux.menu.RangeMenu = Ext.extend(Ext.menu.Menu, {
+Ext3.ux.menu.RangeMenu = Ext3.extend(Ext3.menu.Menu, {
 
     constructor : function (config) {
 
-        Ext.ux.menu.RangeMenu.superclass.constructor.call(this, config);
+        Ext3.ux.menu.RangeMenu.superclass.constructor.call(this, config);
 
         this.addEvents(
             /**
              * @event update
              * Fires when a filter configuration has changed
-             * @param {Ext.ux.grid.filter.Filter} this The filter object.
+             * @param {Ext3.ux.grid.filter.Filter} this The filter object.
              */
             'update'
         );
       
-        this.updateTask = new Ext.util.DelayedTask(this.fireUpdate, this);
+        this.updateTask = new Ext3.util.DelayedTask(this.fireUpdate, this);
     
         var i, len, item, cfg, Cls;
 
@@ -3495,10 +3495,10 @@ Ext.ux.menu.RangeMenu = Ext.extend(Ext.menu.Menu, {
                         keyup: this.onInputKeyUp
                     }
                 };
-                Ext.apply(
+                Ext3.apply(
                     cfg,
                     // custom configs
-                    Ext.applyIf(this.fields[item] || {}, this.fieldCfg[item]),
+                    Ext3.applyIf(this.fields[item] || {}, this.fieldCfg[item]),
                     // configurable defaults
                     this.menuItemCfgs
                 );
@@ -3573,15 +3573,15 @@ Ext.ux.menu.RangeMenu = Ext.extend(Ext.menu.Menu, {
         this.updateTask.delay(this.updateBuffer);
     }
 });
-Ext.ns('Ext.ux.grid');
+Ext3.ns('Ext3.ux.grid');
 
 /**
- * @class Ext.ux.grid.GroupSummary
- * @extends Ext.util.Observable
+ * @class Ext3.ux.grid.GroupSummary
+ * @extends Ext3.util.Observable
  * A GridPanel plugin that enables dynamic column calculations and a dynamically
  * updated grouped summary row.
  */
-Ext.ux.grid.GroupSummary = Ext.extend(Ext.util.Observable, {
+Ext3.ux.grid.GroupSummary = Ext3.extend(Ext3.util.Observable, {
     /**
      * @cfg {Function} summaryRenderer Renderer example:<pre><code>
 summaryRenderer: function(v, params, data){
@@ -3596,8 +3596,8 @@ summaryRenderer: function(v, params, data){
      */
 
     constructor : function(config){
-        Ext.apply(this, config);
-        Ext.ux.grid.GroupSummary.superclass.constructor.call(this);
+        Ext3.apply(this, config);
+        Ext3.ux.grid.GroupSummary.superclass.constructor.call(this);
     },
     init : function(grid){
         this.grid = grid;
@@ -3611,9 +3611,9 @@ summaryRenderer: function(v, params, data){
         v.afterMethod('onRemove', this.doRemove, this);
 
         if(!this.rowTpl){
-            this.rowTpl = new Ext.Template(
-                '<div class="x-grid3-summary-row" style="{tstyle}">',
-                '<table class="x-grid3-summary-table" border="0" cellspacing="0" cellpadding="0" style="{tstyle}">',
+            this.rowTpl = new Ext3.Template(
+                '<div class="x3-grid3-summary-row" style="{tstyle}">',
+                '<table class="x3-grid3-summary-table" border="0" cellspacing="0" cellpadding="0" style="{tstyle}">',
                     '<tbody><tr>{cells}</tr></tbody>',
                 '</table></div>'
             );
@@ -3622,9 +3622,9 @@ summaryRenderer: function(v, params, data){
         this.rowTpl.compile();
 
         if(!this.cellTpl){
-            this.cellTpl = new Ext.Template(
-                '<td class="x-grid3-col x-grid3-cell x-grid3-td-{id} {css}" style="{style}">',
-                '<div class="x-grid3-cell-inner x-grid3-col-{id}" unselectable="on">{value}</div>',
+            this.cellTpl = new Ext3.Template(
+                '<td class="x3-grid3-col x3-grid3-cell x3-grid3-td-{id} {css}" style="{style}">',
+                '<div class="x3-grid3-cell-inner x3-grid3-col-{id}" unselectable="on">{value}</div>',
                 "</td>"
             );
             this.cellTpl.disableFormats = true;
@@ -3640,9 +3640,9 @@ summaryRenderer: function(v, params, data){
         var el = this.grid.getGridEl();
         if(el){
             if(visible === undefined){
-                visible = el.hasClass('x-grid-hide-summary');
+                visible = el.hasClass('x3-grid-hide-summary');
             }
-            el[visible ? 'removeClass' : 'addClass']('x-grid-hide-summary');
+            el[visible ? 'removeClass' : 'addClass']('x3-grid-hide-summary');
         }
     },
 
@@ -3655,7 +3655,7 @@ summaryRenderer: function(v, params, data){
             cf = cfg[i];
             p.id = c.id;
             p.style = c.style;
-            p.css = i == 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '');
+            p.css = i == 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '');
             if(cf.summaryType || cf.summaryRenderer){
                 p.value = (cf.summaryRenderer || c.renderer)(o.data[c.name], p, o);
             }else{
@@ -3684,7 +3684,7 @@ summaryRenderer: function(v, params, data){
                 c = cs[i];
                 cf = cfg[i];
                 if(cf.summaryType){
-                    data[c.name] = Ext.ux.grid.GroupSummary.Calculations[cf.summaryType](data[c.name] || 0, r, c.name, data);
+                    data[c.name] = Ext3.ux.grid.GroupSummary.Calculations[cf.summaryType](data[c.name] || 0, r, c.name, data);
                 }
             }
         }
@@ -3753,7 +3753,7 @@ summaryRenderer: function(v, params, data){
     },
     
     isGrouped : function(){
-        return !Ext.isEmpty(this.grid.getStore().groupField);
+        return !Ext3.isEmpty(this.grid.getStore().groupField);
     },
 
     // Note: requires that all (or the first) record in the
@@ -3764,15 +3764,15 @@ summaryRenderer: function(v, params, data){
     },
 
     getSummaryNode : function(gid){
-        var g = Ext.fly(gid, '_gsummary');
+        var g = Ext3.fly(gid, '_gsummary');
         if(g){
-            return g.down('.x-grid3-summary-row', true);
+            return g.down('.x3-grid3-summary-row', true);
         }
         return null;
     },
 
     refreshSummaryById : function(gid){
-        var g = Ext.getDom(gid);
+        var g = Ext3.getDom(gid);
         if(!g){
             return false;
         }
@@ -3790,7 +3790,7 @@ summaryRenderer: function(v, params, data){
         if(existing){
             g.removeChild(existing);
         }
-        Ext.DomHelper.append(g, markup);
+        Ext3.DomHelper.append(g, markup);
         return true;
     },
 
@@ -3808,7 +3808,7 @@ summaryRenderer: function(v, params, data){
      * Show a message in the summary row.
      * <pre><code>
 grid.on('afteredit', function(){
-    var groupValue = 'Ext Forms: Field Anchoring';
+    var groupValue = 'Ext3 Forms: Field Anchoring';
     summary.showSummaryMsg(groupValue, 'Updating Summary...');
 });
      * </code></pre>
@@ -3819,13 +3819,13 @@ grid.on('afteredit', function(){
         var gid = this.view.getGroupId(groupValue),
              node = this.getSummaryNode(gid);
         if(node){
-            node.innerHTML = '<div class="x-grid3-summary-msg">' + msg + '</div>';
+            node.innerHTML = '<div class="x3-grid3-summary-msg">' + msg + '</div>';
         }
     }
 });
 
 //backwards compat
-Ext.grid.GroupSummary = Ext.ux.grid.GroupSummary;
+Ext3.grid.GroupSummary = Ext3.ux.grid.GroupSummary;
 
 
 /**
@@ -3839,14 +3839,14 @@ Ext.grid.GroupSummary = Ext.ux.grid.GroupSummary;
  * <p>Custom calculations may be implemented.  An example of
  * custom <code>summaryType=totalCost</code>:</p><pre><code>
 // define a custom summary function
-Ext.ux.grid.GroupSummary.Calculations['totalCost'] = function(v, record, field){
+Ext3.ux.grid.GroupSummary.Calculations['totalCost'] = function(v, record, field){
     return v + (record.data.estimate * record.data.rate);
 };
  * </code></pre>
  * @property Calculations
  */
 
-Ext.ux.grid.GroupSummary.Calculations = {
+Ext3.ux.grid.GroupSummary.Calculations = {
     'sum' : function(v, record, field){
         return v + (record.data[field]||0);
     },
@@ -3873,11 +3873,11 @@ Ext.ux.grid.GroupSummary.Calculations = {
         return t === 0 ? 0 : t / c;
     }
 };
-Ext.grid.GroupSummary.Calculations = Ext.ux.grid.GroupSummary.Calculations;
+Ext3.grid.GroupSummary.Calculations = Ext3.ux.grid.GroupSummary.Calculations;
 
 /**
- * @class Ext.ux.grid.HybridSummary
- * @extends Ext.ux.grid.GroupSummary
+ * @class Ext3.ux.grid.HybridSummary
+ * @extends Ext3.ux.grid.GroupSummary
  * Adds capability to specify the summary data for the group via json as illustrated here:
  * <pre><code>
 {
@@ -3902,7 +3902,7 @@ Ext.grid.GroupSummary.Calculations = Ext.ux.grid.GroupSummary.Calculations;
  * </code></pre>
  *
  */
-Ext.ux.grid.HybridSummary = Ext.extend(Ext.ux.grid.GroupSummary, {
+Ext3.ux.grid.HybridSummary = Ext3.extend(Ext3.ux.grid.GroupSummary, {
     /**
      * @private
      * @param {Object} rs
@@ -3912,13 +3912,13 @@ Ext.ux.grid.HybridSummary = Ext.extend(Ext.ux.grid.GroupSummary, {
         var gcol = this.view.getGroupField(),
             gvalue = rs[0].data[gcol],
             gdata = this.getSummaryData(gvalue);
-        return gdata || Ext.ux.grid.HybridSummary.superclass.calculate.call(this, rs, cs);
+        return gdata || Ext3.ux.grid.HybridSummary.superclass.calculate.call(this, rs, cs);
     },
 
     /**
      * <pre><code>
 grid.on('afteredit', function(){
-    var groupValue = 'Ext Forms: Field Anchoring';
+    var groupValue = 'Ext3 Forms: Field Anchoring';
     summary.showSummaryMsg(groupValue, 'Updating Summary...');
     setTimeout(function(){ // simulate server call
         // HybridSummary class implements updateSummaryData
@@ -3965,8 +3965,8 @@ grid.on('afteredit', function(){
 });
 
 //backwards compat
-Ext.grid.HybridSummary = Ext.ux.grid.HybridSummary;
-Ext.ux.GroupTab = Ext.extend(Ext.Container, {
+Ext3.grid.HybridSummary = Ext3.ux.grid.HybridSummary;
+Ext3.ux.GroupTab = Ext3.extend(Ext3.Container, {
     mainItem: 0,
     
     expanded: true,
@@ -3984,19 +3984,19 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
     hideBorders: true,
     
     initComponent: function(config){
-        Ext.apply(this, config);
+        Ext3.apply(this, config);
         this.frame = false;
         
-        Ext.ux.GroupTab.superclass.initComponent.call(this);
+        Ext3.ux.GroupTab.superclass.initComponent.call(this);
         
         this.addEvents('activate', 'deactivate', 'changemainitem', 'beforetabchange', 'tabchange');
         
-        this.setLayout(new Ext.layout.CardLayout({
+        this.setLayout(new Ext3.layout.CardLayout({
             deferredRender: this.deferredRender
         }));
         
         if (!this.stack) {
-            this.stack = Ext.TabPanel.AccessStack();
+            this.stack = Ext3.TabPanel.AccessStack();
         }
         
         this.initItems();
@@ -4037,11 +4037,11 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
             if(this.activeTab && this.activeTab != this.mainItem){
                 var oldEl = this.getTabEl(this.activeTab);
                 if(oldEl){
-                    Ext.fly(oldEl).removeClass('x-grouptabs-strip-active');
+                    Ext3.fly(oldEl).removeClass('x3-grouptabs-strip-active');
                 }
             }
             var el = this.getTabEl(item);
-            Ext.fly(el).addClass('x-grouptabs-strip-active');
+            Ext3.fly(el).addClass('x3-grouptabs-strip-active');
             this.activeTab = item;
             this.stack.add(item);
 
@@ -4063,20 +4063,20 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
         if (item == this.mainItem) {
             return this.groupEl;
         }
-        return Ext.TabPanel.prototype.getTabEl.call(this, item);
+        return Ext3.TabPanel.prototype.getTabEl.call(this, item);
     },
     
     onRender: function(ct, position){
-        Ext.ux.GroupTab.superclass.onRender.call(this, ct, position);
+        Ext3.ux.GroupTab.superclass.onRender.call(this, ct, position);
         
-        this.strip = Ext.fly(this.groupEl).createChild({
+        this.strip = Ext3.fly(this.groupEl).createChild({
             tag: 'ul',
-            cls: 'x-grouptabs-sub'
+            cls: 'x3-grouptabs-sub'
         });
 
-        this.tooltip = new Ext.ToolTip({
+        this.tooltip = new Ext3.ToolTip({
            target: this.groupEl,
-           delegate: 'a.x-grouptabs-text',
+           delegate: 'a.x3-grouptabs-text',
            trackMouse: true,
            renderTo: document.body,
            listeners: {
@@ -4095,17 +4095,17 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
         });
                 
         if (!this.itemTpl) {
-            var tt = new Ext.Template('<li class="{cls}" id="{id}">', '<a onclick="return false;" class="x-grouptabs-text {iconCls}">{text}</a>', '</li>');
+            var tt = new Ext3.Template('<li class="{cls}" id="{id}">', '<a onclick="return false;" class="x3-grouptabs-text {iconCls}">{text}</a>', '</li>');
             tt.disableFormats = true;
             tt.compile();
-            Ext.ux.GroupTab.prototype.itemTpl = tt;
+            Ext3.ux.GroupTab.prototype.itemTpl = tt;
         }
         
         this.items.each(this.initTab, this);
     },
     
     afterRender: function(){
-        Ext.ux.GroupTab.superclass.afterRender.call(this);
+        Ext3.ux.GroupTab.superclass.afterRender.call(this);
         
         if (this.activeTab !== undefined) {
             var item = (typeof this.activeTab == 'object') ? this.activeTab : this.items.get(this.activeTab);
@@ -4117,11 +4117,11 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
     // private
     initTab: function(item, index){
         var before = this.strip.dom.childNodes[index];
-        var p = Ext.TabPanel.prototype.getTemplateArgs.call(this, item);
+        var p = Ext3.TabPanel.prototype.getTemplateArgs.call(this, item);
         
         if (item === this.mainItem) {
             item.tabEl = this.groupEl;
-            p.cls += ' x-grouptabs-main-item';
+            p.cls += ' x3-grouptabs-main-item';
         }
         
         var el = before ? this.itemTpl.insertBefore(before, p) : this.itemTpl.append(this.strip, p);
@@ -4165,7 +4165,7 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
     
     // private
     onRemove: function(tp, item){
-        Ext.destroy(Ext.get(this.getTabEl(item)));
+        Ext3.destroy(Ext3.get(this.getTabEl(item)));
         this.stack.remove(item);
         item.un('disable', this.onItemDisabled, this);
         item.un('enable', this.onItemEnabled, this);
@@ -4193,21 +4193,21 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
             this.setActiveTab(item);
             return false;
         }
-        Ext.TabPanel.superclass.onBeforeAdd.apply(this, arguments);
+        Ext3.TabPanel.superclass.onBeforeAdd.apply(this, arguments);
         var es = item.elements;
         item.elements = es ? es.replace(',header', '') : es;
         item.border = (item.border === true);
     },
     
     // private
-    onItemDisabled: Ext.TabPanel.prototype.onItemDisabled,
-    onItemEnabled: Ext.TabPanel.prototype.onItemEnabled,
+    onItemDisabled: Ext3.TabPanel.prototype.onItemDisabled,
+    onItemEnabled: Ext3.TabPanel.prototype.onItemEnabled,
     
     // private
     onItemTitleChanged: function(item){
         var el = this.getTabEl(item);
         if (el) {
-            Ext.fly(el).child('a.x-grouptabs-text', true).innerHTML = item.title;
+            Ext3.fly(el).child('a.x3-grouptabs-text', true).innerHTML = item.title;
         }
     },
     
@@ -4215,25 +4215,25 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
     onItemIconChanged: function(item, iconCls, oldCls){
         var el = this.getTabEl(item);
         if (el) {
-            Ext.fly(el).child('a.x-grouptabs-text').replaceClass(oldCls, iconCls);
+            Ext3.fly(el).child('a.x3-grouptabs-text').replaceClass(oldCls, iconCls);
         }
     },
     
     beforeDestroy: function(){
-        Ext.TabPanel.prototype.beforeDestroy.call(this);
+        Ext3.TabPanel.prototype.beforeDestroy.call(this);
         this.tooltip.destroy();
     }
 });
 
-Ext.reg('grouptab', Ext.ux.GroupTab);
-Ext.ns('Ext.ux');
+Ext3.reg('grouptab', Ext3.ux.GroupTab);
+Ext3.ns('Ext3.ux');
 
-Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
+Ext3.ux.GroupTabPanel = Ext3.extend(Ext3.TabPanel, {
     tabPosition: 'left',
 
     alternateColor: false,
 
-    alternateCls: 'x-grouptabs-panel-alt',
+    alternateCls: 'x3-grouptabs-panel-alt',
 
     defaultType: 'grouptab',
 
@@ -4242,7 +4242,7 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
     activeGroup : null,
 
     initComponent: function(){
-        Ext.ux.GroupTabPanel.superclass.initComponent.call(this);
+        Ext3.ux.GroupTabPanel.superclass.initComponent.call(this);
         
         this.addEvents(
             'beforegroupchange',
@@ -4253,10 +4253,10 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
 
         this.tabPosition = this.tabPosition == 'right' ? 'right' : 'left';
 
-        this.addClass('x-grouptabs-panel');
+        this.addClass('x3-grouptabs-panel');
 
         if (this.tabStyle && this.tabStyle != '') {
-            this.addClass('x-grouptabs-panel-' + this.tabStyle);
+            this.addClass('x3-grouptabs-panel-' + this.tabStyle);
         }
 
         if (this.alternateColor) {
@@ -4278,47 +4278,47 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
     },
 
     onRender: function(ct, position){
-        Ext.TabPanel.superclass.onRender.call(this, ct, position);
+        Ext3.TabPanel.superclass.onRender.call(this, ct, position);
         if(this.plain){
             var pos = this.tabPosition == 'top' ? 'header' : 'footer';
-            this[pos].addClass('x-tab-panel-'+pos+'-plain');
+            this[pos].addClass('x3-tab-panel-'+pos+'-plain');
         }
 
         var st = this[this.stripTarget];
 
-        this.stripWrap = st.createChild({cls:'x-tab-strip-wrap ', cn:{
-            tag:'ul', cls:'x-grouptabs-strip x-grouptabs-tab-strip-'+this.tabPosition}});
+        this.stripWrap = st.createChild({cls:'x3-tab-strip-wrap ', cn:{
+            tag:'ul', cls:'x3-grouptabs-strip x3-grouptabs-tab-strip-'+this.tabPosition}});
 
         var beforeEl = (this.tabPosition=='bottom' ? this.stripWrap : null);
-        this.strip = new Ext.Element(this.stripWrap.dom.firstChild);
+        this.strip = new Ext3.Element(this.stripWrap.dom.firstChild);
 
-        this.header.addClass('x-grouptabs-panel-header');
-        this.bwrap.addClass('x-grouptabs-bwrap');
-        this.body.addClass('x-tab-panel-body-'+this.tabPosition + ' x-grouptabs-panel-body');
+        this.header.addClass('x3-grouptabs-panel-header');
+        this.bwrap.addClass('x3-grouptabs-bwrap');
+        this.body.addClass('x3-tab-panel-body-'+this.tabPosition + ' x3-grouptabs-panel-body');
 
         if (!this.groupTpl) {
-            var tt = new Ext.Template(
+            var tt = new Ext3.Template(
                 '<li class="{cls}" id="{id}">',
-                '<a class="x-grouptabs-expand" onclick="return false;"></a>',
-                '<a class="x-grouptabs-text {iconCls}" href="#" onclick="return false;">',
+                '<a class="x3-grouptabs-expand" onclick="return false;"></a>',
+                '<a class="x3-grouptabs-text {iconCls}" href="#" onclick="return false;">',
                 '<span>{text}</span></a>',
                 '</li>'
             );
             tt.disableFormats = true;
             tt.compile();
-            Ext.ux.GroupTabPanel.prototype.groupTpl = tt;
+            Ext3.ux.GroupTabPanel.prototype.groupTpl = tt;
         }
         this.items.each(this.initGroup, this);
     },
 
     afterRender: function(){
-        Ext.ux.GroupTabPanel.superclass.afterRender.call(this);
+        Ext3.ux.GroupTabPanel.superclass.afterRender.call(this);
 
-        this.tabJoint = Ext.fly(this.body.dom.parentNode).createChild({
-            cls: 'x-tab-joint'
+        this.tabJoint = Ext3.fly(this.body.dom.parentNode).createChild({
+            cls: 'x3-tab-joint'
         });
 
-        this.addClass('x-tab-panel-' + this.tabPosition);
+        this.addClass('x3-tab-panel-' + this.tabPosition);
         this.header.setWidth(this.tabWidth);
 
         if (this.activeGroup !== undefined) {
@@ -4329,7 +4329,7 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
         }
     },
 
-    getGroupEl : Ext.TabPanel.prototype.getTabEl,
+    getGroupEl : Ext3.TabPanel.prototype.getTabEl,
 
     // private
     findTargets: function(e){
@@ -4346,8 +4346,8 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
             }
         }
         return {
-            expand: e.getTarget('.x-grouptabs-expand', this.strip),
-            isGroup: !e.getTarget('ul.x-grouptabs-sub', this.strip),
+            expand: e.getTarget('.x3-grouptabs-expand', this.strip),
+            isGroup: !e.getTarget('ul.x3-grouptabs-sub', this.strip),
             item: item,
             el: itemEl
         };
@@ -4377,7 +4377,7 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
         if(groupEl.isXType) {
             groupEl = this.getGroupEl(groupEl);
         }
-        Ext.fly(groupEl).addClass('x-grouptabs-expanded');
+        Ext3.fly(groupEl).addClass('x3-grouptabs-expanded');
         this.syncTabJoint();
     },
 
@@ -4385,7 +4385,7 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
         if(groupEl.isXType) {
             groupEl = this.getGroupEl(groupEl);
         }
-        Ext.fly(groupEl).toggleClass('x-grouptabs-expanded');
+        Ext3.fly(groupEl).toggleClass('x3-grouptabs-expanded');
         this.syncTabJoint();
     },
 
@@ -4393,7 +4393,7 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
         if(groupEl.isXType) {
             groupEl = this.getGroupEl(groupEl);
         }
-        Ext.fly(groupEl).removeClass('x-grouptabs-expanded');
+        Ext3.fly(groupEl).removeClass('x3-grouptabs-expanded');
         this.syncTabJoint();
     },
 
@@ -4404,9 +4404,9 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
 
         groupEl = groupEl || this.getGroupEl(this.activeGroup);
         if(groupEl) {
-            this.tabJoint.setHeight(Ext.fly(groupEl).getHeight() - 2);
+            this.tabJoint.setHeight(Ext3.fly(groupEl).getHeight() - 2);
 
-            var y = Ext.isGecko2 ? 0 : 1;
+            var y = Ext3.isGecko2 ? 0 : 1;
             if (this.tabPosition == 'left'){
                 this.tabJoint.alignTo(groupEl, 'tl-tr', [-2,y]);
             }
@@ -4425,13 +4425,13 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
     },
 
     onResize: function(){
-        Ext.ux.GroupTabPanel.superclass.onResize.apply(this, arguments);
+        Ext3.ux.GroupTabPanel.superclass.onResize.apply(this, arguments);
         this.syncTabJoint();
     },
 
     createCorner: function(el, pos){
-        return Ext.fly(el).createChild({
-            cls: 'x-grouptabs-corner x-grouptabs-corner-' + pos
+        return Ext3.fly(el).createChild({
+            cls: 'x3-grouptabs-corner x3-grouptabs-corner-' + pos
         });
     },
 
@@ -4439,9 +4439,9 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
         var before = this.strip.dom.childNodes[index],
             p = this.getTemplateArgs(group);
         if (index === 0) {
-            p.cls += ' x-tab-first';
+            p.cls += ' x3-tab-first';
         }
-        p.cls += ' x-grouptabs-main';
+        p.cls += ' x3-grouptabs-main';
         p.text = group.getMainItem().title;
 
         var el = before ? this.groupTpl.insertBefore(before, p) : this.groupTpl.append(this.strip, p),
@@ -4453,7 +4453,7 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
             this.expandGroup(el);
         }
 
-        if (Ext.isIE6 || (Ext.isIE && !Ext.isStrict)){
+        if (Ext3.isIE6 || (Ext3.isIE && !Ext3.isStrict)){
             bl.setLeft('-10px');
             bl.setBottom('-5px');
             tl.setLeft('-10px');
@@ -4481,12 +4481,12 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
                 this.activeGroup.activeTab = null;
                 var oldEl = this.getGroupEl(this.activeGroup);
                 if(oldEl){
-                    Ext.fly(oldEl).removeClass('x-grouptabs-strip-active');
+                    Ext3.fly(oldEl).removeClass('x3-grouptabs-strip-active');
                 }
             }
 
             var groupEl = this.getGroupEl(group);
-            Ext.fly(groupEl).addClass('x-grouptabs-strip-active');
+            Ext3.fly(groupEl).addClass('x3-grouptabs-strip-active');
 
             this.activeGroup = group;
             this.stack.add(group);
@@ -4502,7 +4502,7 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
 
     onGroupBeforeTabChange: function(group, newTab, oldTab){
         if(group !== this.activeGroup || newTab !== oldTab) {
-            this.strip.select('.x-grouptabs-sub > li.x-grouptabs-strip-active', true).removeClass('x-grouptabs-strip-active');
+            this.strip.select('.x3-grouptabs-sub > li.x3-grouptabs-strip-active', true).removeClass('x3-grouptabs-strip-active');
         }
         this.expandGroup(this.getGroupEl(group));
         if(group !== this.activeGroup) {
@@ -4523,17 +4523,17 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
     }
 });
 
-Ext.reg('grouptabpanel', Ext.ux.GroupTabPanel);
+Ext3.reg('grouptabpanel', Ext3.ux.GroupTabPanel);
 /*
- * Note that this control will most likely remain as an example, and not as a core Ext form
+ * Note that this control will most likely remain as an example, and not as a core Ext3 form
  * control.  However, the API will be changing in a future release and so should not yet be
  * treated as a final, stable API at this time.
  */
 
 /**
- * @class Ext.ux.form.ItemSelector
- * @extends Ext.form.Field
- * A control that allows selection of between two Ext.ux.form.MultiSelect controls.
+ * @class Ext3.ux.form.ItemSelector
+ * @extends Ext3.form.Field
+ * A control that allows selection of between two Ext3.ux.form.MultiSelect controls.
  *
  *  @history
  *    2008-06-19 bpm Original code contributed by Toby Stuart (with contributions from Robert Williams)
@@ -4543,7 +4543,7 @@ Ext.reg('grouptabpanel', Ext.ux.GroupTabPanel);
  * @param {Object} config Configuration options
  * @xtype itemselector 
  */
-Ext.ux.form.ItemSelector = Ext.extend(Ext.form.Field,  {
+Ext3.ux.form.ItemSelector = Ext3.extend(Ext3.form.Field,  {
     hideNavIcons:false,
     imagePath:"",
     iconUp:"up2.gif",
@@ -4563,12 +4563,12 @@ Ext.ux.form.ItemSelector = Ext.extend(Ext.form.Field,  {
     border:false,
     defaultAutoCreate:{tag: "div"},
     /**
-     * @cfg {Array} multiselects An array of {@link Ext.ux.form.MultiSelect} config objects, with at least all required parameters (e.g., store)
+     * @cfg {Array} multiselects An array of {@link Ext3.ux.form.MultiSelect} config objects, with at least all required parameters (e.g., store)
      */
     multiselects:null,
 
     initComponent: function(){
-        Ext.ux.form.ItemSelector.superclass.initComponent.call(this);
+        Ext3.ux.form.ItemSelector.superclass.initComponent.call(this);
         this.addEvents({
             'rowdblclick' : true,
             'change' : true
@@ -4576,7 +4576,7 @@ Ext.ux.form.ItemSelector = Ext.extend(Ext.form.Field,  {
     },
 
     onRender: function(ct, position){
-        Ext.ux.form.ItemSelector.superclass.onRender.call(this, ct, position);
+        Ext3.ux.form.ItemSelector.superclass.onRender.call(this, ct, position);
 
         // Internal default configuration for both multiselects
         var msConfig = [{
@@ -4593,13 +4593,13 @@ Ext.ux.form.ItemSelector = Ext.extend(Ext.form.Field,  {
             height: 100
         }];
 
-        this.fromMultiselect = new Ext.ux.form.MultiSelect(Ext.applyIf(this.multiselects[0], msConfig[0]));
+        this.fromMultiselect = new Ext3.ux.form.MultiSelect(Ext3.applyIf(this.multiselects[0], msConfig[0]));
         this.fromMultiselect.on('dblclick', this.onRowDblClick, this);
 
-        this.toMultiselect = new Ext.ux.form.MultiSelect(Ext.applyIf(this.multiselects[1], msConfig[1]));
+        this.toMultiselect = new Ext3.ux.form.MultiSelect(Ext3.applyIf(this.multiselects[1], msConfig[1]));
         this.toMultiselect.on('dblclick', this.onRowDblClick, this);
 
-        var p = new Ext.Panel({
+        var p = new Ext3.Panel({
             bodyStyle:this.bodyStyle,
             border:this.border,
             layout:"table",
@@ -4607,7 +4607,7 @@ Ext.ux.form.ItemSelector = Ext.extend(Ext.form.Field,  {
         });
 
         p.add(this.fromMultiselect);
-        var icons = new Ext.Panel({header:false});
+        var icons = new Ext3.Panel({header:false});
         p.add(icons);
         p.add(this.toMultiselect);
         p.render(this.el);
@@ -4664,7 +4664,7 @@ Ext.ux.form.ItemSelector = Ext.extend(Ext.form.Field,  {
     },
 
     afterRender: function(){
-        Ext.ux.form.ItemSelector.superclass.afterRender.call(this);
+        Ext3.ux.form.ItemSelector.superclass.afterRender.call(this);
 
         this.toStore = this.toMultiselect.store;
         this.toStore.on('add', this.valueChanged, this);
@@ -4766,7 +4766,7 @@ Ext.ux.form.ItemSelector = Ext.extend(Ext.form.Field,  {
             for (var i=0; i<records.length; i++) {
                 record = records[i];
                 if(this.allowDup){
-                    var x=new Ext.data.Record();
+                    var x=new Ext3.data.Record();
                     record.id=x.id;
                     delete x;
                     this.toMultiselect.view.store.add(record);
@@ -4849,19 +4849,19 @@ Ext.ux.form.ItemSelector = Ext.extend(Ext.form.Field,  {
     }
 });
 
-Ext.reg('itemselector', Ext.ux.form.ItemSelector);
+Ext3.reg('itemselector', Ext3.ux.form.ItemSelector);
 
 //backwards compat
-Ext.ux.ItemSelector = Ext.ux.form.ItemSelector;
+Ext3.ux.ItemSelector = Ext3.ux.form.ItemSelector;
 /*!
- * Ext JS Library 3.4.0
- * Copyright(c) 2006-2010 Ext JS, Inc.
+ * Ext3 JS Library 3.4.0
+ * Copyright(c) 2006-2010 Ext3 JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
-Ext.ns('Ext.ux.grid');
+Ext3.ns('Ext3.ux.grid');
 
-Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
+Ext3.ux.grid.LockingGridView = Ext3.extend(Ext3.grid.GridView, {
     lockText : 'Lock',
     unlockText : 'Unlock',
     rowBorderWidth : 1,
@@ -4878,25 +4878,25 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         var ts = this.templates || {};
 
         if (!ts.masterTpl) {
-            ts.masterTpl = new Ext.Template(
-                '<div class="x-grid3" hidefocus="true">',
-                    '<div class="x-grid3-locked">',
-                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{lstyle}">{lockedHeader}</div></div><div class="x-clear"></div></div>',
-                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{lstyle}">{lockedBody}</div><div class="x-grid3-scroll-spacer"></div></div>',
+            ts.masterTpl = new Ext3.Template(
+                '<div class="x3-grid3" hidefocus="true">',
+                    '<div class="x3-grid3-locked">',
+                        '<div class="x3-grid3-header"><div class="x3-grid3-header-inner"><div class="x3-grid3-header-offset" style="{lstyle}">{lockedHeader}</div></div><div class="x3-clear"></div></div>',
+                        '<div class="x3-grid3-scroller"><div class="x3-grid3-body" style="{lstyle}">{lockedBody}</div><div class="x3-grid3-scroll-spacer"></div></div>',
                     '</div>',
-                    '<div class="x-grid3-viewport x-grid3-unlocked">',
-                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x-clear"></div></div>',
-                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x-grid3-focus" tabIndex="-1"></a></div>',
+                    '<div class="x3-grid3-viewport x3-grid3-unlocked">',
+                        '<div class="x3-grid3-header"><div class="x3-grid3-header-inner"><div class="x3-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x3-clear"></div></div>',
+                        '<div class="x3-grid3-scroller"><div class="x3-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x3-grid3-focus" tabIndex="-1"></a></div>',
                     '</div>',
-                    '<div class="x-grid3-resize-marker">&#160;</div>',
-                    '<div class="x-grid3-resize-proxy">&#160;</div>',
+                    '<div class="x3-grid3-resize-marker">&#160;</div>',
+                    '<div class="x3-grid3-resize-proxy">&#160;</div>',
                 '</div>'
             );
         }
 
         this.templates = ts;
 
-        Ext.ux.grid.LockingGridView.superclass.initTemplates.call(this);
+        Ext3.ux.grid.LockingGridView.superclass.initTemplates.call(this);
     },
 
     getEditorParent : function(ed){
@@ -4904,13 +4904,13 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
     },
 
     initElements : function(){
-        var el             = Ext.get(this.grid.getGridEl().dom.firstChild),
-            lockedWrap     = el.child('div.x-grid3-locked'),
-            lockedHd       = lockedWrap.child('div.x-grid3-header'),
-            lockedScroller = lockedWrap.child('div.x-grid3-scroller'),
-            mainWrap       = el.child('div.x-grid3-viewport'),
-            mainHd         = mainWrap.child('div.x-grid3-header'),
-            scroller       = mainWrap.child('div.x-grid3-scroller');
+        var el             = Ext3.get(this.grid.getGridEl().dom.firstChild),
+            lockedWrap     = el.child('div.x3-grid3-locked'),
+            lockedHd       = lockedWrap.child('div.x3-grid3-header'),
+            lockedScroller = lockedWrap.child('div.x3-grid3-scroller'),
+            mainWrap       = el.child('div.x3-grid3-viewport'),
+            mainHd         = mainWrap.child('div.x3-grid3-header'),
+            scroller       = mainWrap.child('div.x3-grid3-scroller');
             
         if (this.grid.hideHeaders) {
             lockedHd.setDisplayed(false);
@@ -4921,21 +4921,21 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             scroller.setStyle('overflow-x', 'hidden');
         }
         
-        Ext.apply(this, {
+        Ext3.apply(this, {
             el      : el,
             mainWrap: mainWrap,
             mainHd  : mainHd,
             innerHd : mainHd.dom.firstChild,
             scroller: scroller,
-            mainBody: scroller.child('div.x-grid3-body'),
+            mainBody: scroller.child('div.x3-grid3-body'),
             focusEl : scroller.child('a'),
-            resizeMarker: el.child('div.x-grid3-resize-marker'),
-            resizeProxy : el.child('div.x-grid3-resize-proxy'),
+            resizeMarker: el.child('div.x3-grid3-resize-marker'),
+            resizeProxy : el.child('div.x3-grid3-resize-proxy'),
             lockedWrap: lockedWrap,
             lockedHd: lockedHd,
             lockedScroller: lockedScroller,
-            lockedBody: lockedScroller.child('div.x-grid3-body'),
-            lockedInnerHd: lockedHd.child('div.x-grid3-header-inner', true)
+            lockedBody: lockedScroller.child('div.x3-grid3-body'),
+            lockedInnerHd: lockedHd.child('div.x3-grid3-header-inner', true)
         });
         
         this.focusEl.swallowEvent('click', true);
@@ -4954,7 +4954,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         if(col < lockedLen){
             return this.getLockedRow(row).getElementsByTagName('td')[col];
         }
-        return Ext.ux.grid.LockingGridView.superclass.getCell.call(this, row, col - lockedLen);
+        return Ext3.ux.grid.LockingGridView.superclass.getCell.call(this, row, col - lockedLen);
     },
 
     getHeaderCell : function(index){
@@ -4962,7 +4962,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         if(index < lockedLen){
             return this.lockedHd.dom.getElementsByTagName('td')[index];
         }
-        return Ext.ux.grid.LockingGridView.superclass.getHeaderCell.call(this, index - lockedLen);
+        return Ext3.ux.grid.LockingGridView.superclass.getHeaderCell.call(this, index - lockedLen);
     },
 
     addRowClass : function(row, cls){
@@ -4970,7 +4970,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         if(lockedRow){
             this.fly(lockedRow).addClass(cls);
         }
-        Ext.ux.grid.LockingGridView.superclass.addRowClass.call(this, row, cls);
+        Ext3.ux.grid.LockingGridView.superclass.addRowClass.call(this, row, cls);
     },
 
     removeRowClass : function(row, cls){
@@ -4978,26 +4978,26 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         if(lockedRow){
             this.fly(lockedRow).removeClass(cls);
         }
-        Ext.ux.grid.LockingGridView.superclass.removeRowClass.call(this, row, cls);
+        Ext3.ux.grid.LockingGridView.superclass.removeRowClass.call(this, row, cls);
     },
 
     removeRow : function(row) {
-        Ext.removeNode(this.getLockedRow(row));
-        Ext.ux.grid.LockingGridView.superclass.removeRow.call(this, row);
+        Ext3.removeNode(this.getLockedRow(row));
+        Ext3.ux.grid.LockingGridView.superclass.removeRow.call(this, row);
     },
 
     removeRows : function(firstRow, lastRow){
         var lockedBody = this.lockedBody.dom,
             rowIndex = firstRow;
         for(; rowIndex <= lastRow; rowIndex++){
-            Ext.removeNode(lockedBody.childNodes[firstRow]);
+            Ext3.removeNode(lockedBody.childNodes[firstRow]);
         }
-        Ext.ux.grid.LockingGridView.superclass.removeRows.call(this, firstRow, lastRow);
+        Ext3.ux.grid.LockingGridView.superclass.removeRows.call(this, firstRow, lastRow);
     },
 
     syncScroll : function(e){
         this.lockedScroller.dom.scrollTop = this.scroller.dom.scrollTop;
-        Ext.ux.grid.LockingGridView.superclass.syncScroll.call(this, e);
+        Ext3.ux.grid.LockingGridView.superclass.syncScroll.call(this, e);
     },
 
     updateSortIcon : function(col, dir){
@@ -5119,16 +5119,16 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             for(var i = 0; i < colCount; i++){
                 c = cs[i];
                 p.id = c.id;
-                p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
+                p.css = (i === 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '')) +
                     (this.cm.config[i].cellCls ? ' ' + this.cm.config[i].cellCls : '');
                 p.attr = p.cellAttr = '';
                 p.value = c.renderer(r.data[c.name], p, r, rowIndex, i, ds);
                 p.style = c.style;
-                if(Ext.isEmpty(p.value)){
+                if(Ext3.isEmpty(p.value)){
                     p.value = '&#160;';
                 }
-                if(this.markDirty && r.dirty && Ext.isDefined(r.modified[c.name])){
-                    p.css += ' x-grid3-dirty-cell';
+                if(this.markDirty && r.dirty && Ext3.isDefined(r.modified[c.name])){
+                    p.css += ' x3-grid3-dirty-cell';
                 }
                 if(c.locked){
                     lcb[lcb.length] = ct.apply(p);
@@ -5138,10 +5138,10 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             }
             var alt = [];
             if(stripe && ((rowIndex+1) % 2 === 0)){
-                alt[0] = 'x-grid3-row-alt';
+                alt[0] = 'x3-grid3-row-alt';
             }
             if(r.dirty){
-                alt[1] = ' x-grid3-dirty-row';
+                alt[1] = ' x3-grid3-dirty-row';
             }
             rp.cols = colCount;
             if(this.getRowClass){
@@ -5175,24 +5175,24 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
                 row.className = row.className.replace(this.rowClsRe, ' ');
                 lrow.className = lrow.className.replace(this.rowClsRe, ' ');
                 if ((i + 1) % 2 === 0){
-                    row.className += ' x-grid3-row-alt';
-                    lrow.className += ' x-grid3-row-alt';
+                    row.className += ' x3-grid3-row-alt';
+                    lrow.className += ' x3-grid3-row-alt';
                 }
             }
             this.syncRowHeights(row, lrow);
         }
         if(startRow === 0){
-            Ext.fly(rows[0]).addClass(this.firstRowCls);
-            Ext.fly(lrows[0]).addClass(this.firstRowCls);
+            Ext3.fly(rows[0]).addClass(this.firstRowCls);
+            Ext3.fly(lrows[0]).addClass(this.firstRowCls);
         }
-        Ext.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
-        Ext.fly(lrows[lrows.length - 1]).addClass(this.lastRowCls);
+        Ext3.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
+        Ext3.fly(lrows[lrows.length - 1]).addClass(this.lastRowCls);
     },
     
     syncRowHeights: function(row1, row2){
         if(this.syncHeights){
-            var el1 = Ext.get(row1),
-                el2 = Ext.get(row2),
+            var el1 = Ext3.get(row1),
+                el2 = Ext3.get(row2),
                 h1 = el1.getHeight(),
                 h2 = el2.getHeight();
 
@@ -5237,8 +5237,8 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
     afterRenderUI: function(){
         var g = this.grid;
         this.initElements();
-        Ext.fly(this.innerHd).on('click', this.handleHdDown, this);
-        Ext.fly(this.lockedInnerHd).on('click', this.handleHdDown, this);
+        Ext3.fly(this.innerHd).on('click', this.handleHdDown, this);
+        Ext3.fly(this.lockedInnerHd).on('click', this.handleHdDown, this);
         this.mainHd.on({
             scope: this,
             mouseover: this.handleHdOver,
@@ -5253,18 +5253,18 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         });
         this.scroller.on('scroll', this.syncScroll,  this);
         if(g.enableColumnResize !== false){
-            this.splitZone = new Ext.grid.GridView.SplitDragZone(g, this.mainHd.dom);
-            this.splitZone.setOuterHandleElId(Ext.id(this.lockedHd.dom));
-            this.splitZone.setOuterHandleElId(Ext.id(this.mainHd.dom));
+            this.splitZone = new Ext3.grid.GridView.SplitDragZone(g, this.mainHd.dom);
+            this.splitZone.setOuterHandleElId(Ext3.id(this.lockedHd.dom));
+            this.splitZone.setOuterHandleElId(Ext3.id(this.mainHd.dom));
         }
         if(g.enableColumnMove){
-            this.columnDrag = new Ext.grid.GridView.ColumnDragZone(g, this.innerHd);
-            this.columnDrag.setOuterHandleElId(Ext.id(this.lockedInnerHd));
-            this.columnDrag.setOuterHandleElId(Ext.id(this.innerHd));
-            this.columnDrop = new Ext.grid.HeaderDropZone(g, this.mainHd.dom);
+            this.columnDrag = new Ext3.grid.GridView.ColumnDragZone(g, this.innerHd);
+            this.columnDrag.setOuterHandleElId(Ext3.id(this.lockedInnerHd));
+            this.columnDrag.setOuterHandleElId(Ext3.id(this.innerHd));
+            this.columnDrop = new Ext3.grid.HeaderDropZone(g, this.mainHd.dom);
         }
         if(g.enableHdMenu !== false){
-            this.hmenu = new Ext.menu.Menu({id: g.id + '-hctx'});
+            this.hmenu = new Ext3.menu.Menu({id: g.id + '-hctx'});
             this.hmenu.add(
                 {itemId: 'asc', text: this.sortAscText, cls: 'xg-hmenu-sort-asc'},
                 {itemId: 'desc', text: this.sortDescText, cls: 'xg-hmenu-sort-desc'}
@@ -5276,7 +5276,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
                 );
             }
             if(g.enableColumnHide !== false){
-                this.colMenu = new Ext.menu.Menu({id:g.id + '-hcols-menu'});
+                this.colMenu = new Ext3.menu.Menu({id:g.id + '-hcols-menu'});
                 this.colMenu.on({
                     scope: this,
                     beforeshow: this.beforeColMenuShow,
@@ -5287,7 +5287,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
                     hideOnClick: false,
                     text: this.columnsText,
                     menu: this.colMenu,
-                    iconCls: 'x-cols-icon'
+                    iconCls: 'x3-cols-icon'
                 });
             }
             this.hmenu.on('itemclick', this.handleHdMenuClick, this);
@@ -5306,7 +5306,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         }
 
         if(g.enableDragDrop || g.enableDrag){
-            this.dragZone = new Ext.grid.GridDragZone(g, {
+            this.dragZone = new Ext3.grid.GridDragZone(g, {
                 ddGroup : g.ddGroup || 'GridDD'
             });
         }
@@ -5328,7 +5328,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         if(g.autoHeight){
             this.scroller.dom.style.overflow = 'visible';
             this.lockedScroller.dom.style.overflow = 'visible';
-            if(Ext.isWebKit){
+            if(Ext3.isWebKit){
                 this.scroller.dom.style.position = 'static';
                 this.lockedScroller.dom.style.position = 'static';
             }
@@ -5367,7 +5367,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             p.value = cm.getColumnHeader(i) || '';
             p.style = this.getColumnStyle(i, true);
             p.tooltip = this.getColumnTooltip(i);
-            p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
+            p.css = (i === 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '')) +
                 (cm.config[i].headerCls ? ' ' + cm.config[i].headerCls : '');
             if(cm.config[i].align == 'right'){
                 p.istyle = 'padding-right:16px';
@@ -5400,15 +5400,15 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             return null;
         }
         var c = resolved.cell, r = resolved.row;
-        return c ? Ext.fly(c).getXY() : [this.scroller.getX(), Ext.fly(r).getY()];
+        return c ? Ext3.fly(c).getXY() : [this.scroller.getX(), Ext3.fly(r).getY()];
     },
 
     syncFocusEl : function(row, col, hscroll){
-        Ext.ux.grid.LockingGridView.superclass.syncFocusEl.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
+        Ext3.ux.grid.LockingGridView.superclass.syncFocusEl.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
     },
 
     ensureVisible : function(row, col, hscroll){
-        return Ext.ux.grid.LockingGridView.superclass.ensureVisible.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
+        return Ext3.ux.grid.LockingGridView.superclass.ensureVisible.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
     },
 
     insertRows : function(dm, firstRow, lastRow, isUpdate){
@@ -5425,13 +5425,13 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
                 if(firstRow === 0){
                     this.removeRowClass(0, this.firstRowCls);
                 }
-                Ext.DomHelper.insertHtml('beforeBegin', before, html[0]);
+                Ext3.DomHelper.insertHtml('beforeBegin', before, html[0]);
                 before = this.getLockedRow(firstRow);
-                Ext.DomHelper.insertHtml('beforeBegin', before, html[1]);
+                Ext3.DomHelper.insertHtml('beforeBegin', before, html[1]);
             }else{
                 this.removeRowClass(last - 1, this.lastRowCls);
-                Ext.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html[0]);
-                Ext.DomHelper.insertHtml('beforeEnd', this.lockedBody.dom, html[1]);
+                Ext3.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html[0]);
+                Ext3.DomHelper.insertHtml('beforeEnd', this.lockedBody.dom, html[1]);
             }
             if(!isUpdate){
                 this.fireEvent('rowsinserted', this, firstRow, lastRow);
@@ -5469,7 +5469,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         for(var i = 0; i < colCount; i++){
             var name = cm.getDataIndex(i);
             cs[i] = {
-                name : (!Ext.isDefined(name) ? this.ds.fields.get(i).name : name),
+                name : (!Ext3.isDefined(name) ? this.ds.fields.get(i).name : name),
                 renderer : cm.getRenderer(i),
                 scope : cm.getRendererScope(i),
                 id : cm.getColumnId(i),
@@ -5490,7 +5490,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             colCount = this.cm.getColumnCount(), 
             columns = this.getColumnData(), 
             last = colCount - 1, 
-            cls = ['x-grid3-row'], 
+            cls = ['x3-grid3-row'], 
             rowParams = {
                 tstyle: String.format("width: {0};", this.getTotalWidth())
             }, 
@@ -5508,7 +5508,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             css, 
             i;
         
-        if (Ext.isNumber(record)) {
+        if (Ext3.isNumber(record)) {
             rowIndex = record;
             record = store.getAt(rowIndex);
         } else {
@@ -5523,9 +5523,9 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             column = columns[i];
             
             if (i == 0) {
-                css = 'x-grid3-cell-first';
+                css = 'x3-grid3-cell-first';
             } else {
-                css = (i == last) ? 'x-grid3-cell-last ' : '';
+                css = (i == last) ? 'x3-grid3-cell-last ' : '';
             }
             
             meta = {
@@ -5538,12 +5538,12 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
             
             meta.value = column.renderer.call(column.scope, record.data[column.name], meta, record, rowIndex, i, store);
             
-            if (Ext.isEmpty(meta.value)) {
+            if (Ext3.isEmpty(meta.value)) {
                 meta.value = ' ';
             }
             
             if (this.markDirty && record.dirty && typeof record.modified[column.name] != 'undefined') {
-                meta.css += ' x-grid3-dirty-cell';
+                meta.css += ' x3-grid3-dirty-cell';
             }
             
             if (column.locked) {
@@ -5559,7 +5559,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         lockedRow.className = '';
         
         if (this.grid.stripeRows && ((rowIndex + 1) % 2 === 0)) {
-            cls.push('x-grid3-row-alt');
+            cls.push('x3-grid3-row-alt');
         }
         
         if (this.getRowClass) {
@@ -5605,7 +5605,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         if(this.cm){
             this.cm.un('columnlockchange', this.onColumnLock, this);
         }
-        Ext.ux.grid.LockingGridView.superclass.initData.call(this, ds, cm);
+        Ext3.ux.grid.LockingGridView.superclass.initData.call(this, ds, cm);
         if(this.cm){
             this.cm.on('columnlockchange', this.onColumnLock, this);
         }
@@ -5642,15 +5642,15 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
                 }
             break;
             default:
-                return Ext.ux.grid.LockingGridView.superclass.handleHdMenuClick.call(this, item);
+                return Ext3.ux.grid.LockingGridView.superclass.handleHdMenuClick.call(this, item);
         }
         return true;
     },
 
     handleHdDown : function(e, t){
-        Ext.ux.grid.LockingGridView.superclass.handleHdDown.call(this, e, t);
+        Ext3.ux.grid.LockingGridView.superclass.handleHdDown.call(this, e, t);
         if(this.grid.enableColLock !== false){
-            if(Ext.fly(t).hasClass('x-grid3-hd-btn')){
+            if(Ext3.fly(t).hasClass('x3-grid3-hd-btn')){
                 var hd = this.findHeaderCell(t),
                     index = this.getCellIndex(hd),
                     ms = this.hmenu.items, cm = this.cm;
@@ -5661,8 +5661,8 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
     },
 
     syncHeaderHeight: function(){
-        var hrow = Ext.fly(this.innerHd).child('tr', true),
-            lhrow = Ext.fly(this.lockedInnerHd).child('tr', true);
+        var hrow = Ext3.fly(this.innerHd).child('tr', true),
+            lhrow = Ext3.fly(this.lockedInnerHd).child('tr', true);
             
         hrow.style.height = 'auto';
         lhrow.style.height = 'auto';
@@ -5679,8 +5679,8 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
         var lw = this.cm.getTotalLockedWidth(),
             tw = this.cm.getTotalWidth() - lw,
             csize = this.grid.getGridEl().getSize(true),
-            lp = Ext.isBorderBox ? 0 : this.lockedBorderWidth,
-            rp = Ext.isBorderBox ? 0 : this.rowBorderWidth,
+            lp = Ext3.isBorderBox ? 0 : this.lockedBorderWidth,
+            rp = Ext3.isBorderBox ? 0 : this.rowBorderWidth,
             vw = Math.max(csize.width - lw - lp - rp, 0) + 'px',
             so = this.getScrollOffset();
         if(!this.grid.autoHeight){
@@ -5705,7 +5705,7 @@ Ext.ux.grid.LockingGridView = Ext.extend(Ext.grid.GridView, {
     }
 });
 
-Ext.ux.grid.LockingColumnModel = Ext.extend(Ext.grid.ColumnModel, {
+Ext3.ux.grid.LockingColumnModel = Ext3.extend(Ext3.grid.ColumnModel, {
     /**
      * Returns true if the given column index is currently locked
      * @param {Number} colIndex The column index
@@ -5778,14 +5778,14 @@ Ext.ux.grid.LockingColumnModel = Ext.extend(Ext.grid.ColumnModel, {
             this.setLocked(oldIndex, true, true);
         }
 
-        Ext.ux.grid.LockingColumnModel.superclass.moveColumn.apply(this, arguments);
+        Ext3.ux.grid.LockingColumnModel.superclass.moveColumn.apply(this, arguments);
     }
 });
-Ext.ns('Ext.ux.form');
+Ext3.ns('Ext3.ux.form');
 
 /**
- * @class Ext.ux.form.MultiSelect
- * @extends Ext.form.Field
+ * @class Ext3.ux.form.MultiSelect
+ * @extends Ext3.form.Field
  * A control that allows selection and form submission of multiple list items.
  *
  *  @history
@@ -5797,12 +5797,12 @@ Ext.ns('Ext.ux.form');
  * @param {Object} config Configuration options
  * @xtype multiselect
  */
-Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
+Ext3.ux.form.MultiSelect = Ext3.extend(Ext3.form.Field,  {
     /**
      * @cfg {String} legend Wraps the object with a fieldset and specified legend.
      */
     /**
-     * @cfg {Ext.ListView} view The {@link Ext.ListView} used to render the multiselect list.
+     * @cfg {Ext3.ListView} view The {@link Ext3.ListView} used to render the multiselect list.
      */
     /**
      * @cfg {String/Array} dragGroup The ddgroup name(s) for the MultiSelect DragZone (defaults to undefined).
@@ -5815,7 +5815,7 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
      */
     ddReorder:false,
     /**
-     * @cfg {Object/Array} tbar The top toolbar of the control. This can be a {@link Ext.Toolbar} object, a
+     * @cfg {Object/Array} tbar The top toolbar of the control. This can be a {@link Ext3.Toolbar} object, a
      * toolbar config, or an array of buttons/button configs to be added to the toolbar.
      */
     /**
@@ -5854,9 +5854,9 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
     maxSelections:Number.MAX_VALUE,
     /**
      * @cfg {String} blankText Default text displayed when the control contains no items (defaults to the same value as
-     * {@link Ext.form.TextField#blankText}.
+     * {@link Ext3.form.TextField#blankText}.
      */
-    blankText:Ext.form.TextField.prototype.blankText,
+    blankText:Ext3.form.TextField.prototype.blankText,
     /**
      * @cfg {String} minSelectionsText Validation message displayed when {@link #minSelections} is not met (defaults to 'Minimum {0}
      * item(s) required').  The {0} token will be replaced by the value of {@link #minSelections}.
@@ -5873,11 +5873,11 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
      */
     delimiter:',',
     /**
-     * @cfg {Ext.data.Store/Array} store The data source to which this MultiSelect is bound (defaults to <tt>undefined</tt>).
+     * @cfg {Ext3.data.Store/Array} store The data source to which this MultiSelect is bound (defaults to <tt>undefined</tt>).
      * Acceptable values for this property are:
      * <div class="mdetail-params"><ul>
-     * <li><b>any {@link Ext.data.Store Store} subclass</b></li>
-     * <li><b>an Array</b> : Arrays will be converted to a {@link Ext.data.ArrayStore} internally.
+     * <li><b>any {@link Ext3.data.Store Store} subclass</b></li>
+     * <li><b>an Array</b> : Arrays will be converted to a {@link Ext3.data.ArrayStore} internally.
      * <div class="mdetail-params"><ul>
      * <li><b>1-dimensional array</b> : (e.g., <tt>['Foo','Bar']</tt>)<div class="sub-desc">
      * A 1-dimensional array will automatically be expanded (each array item will be the combo
@@ -5895,17 +5895,17 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
 
     // private
     initComponent: function(){
-        Ext.ux.form.MultiSelect.superclass.initComponent.call(this);
+        Ext3.ux.form.MultiSelect.superclass.initComponent.call(this);
 
-        if(Ext.isArray(this.store)){
-            if (Ext.isArray(this.store[0])){
-                this.store = new Ext.data.ArrayStore({
+        if(Ext3.isArray(this.store)){
+            if (Ext3.isArray(this.store[0])){
+                this.store = new Ext3.data.ArrayStore({
                     fields: ['value','text'],
                     data: this.store
                 });
                 this.valueField = 'value';
             }else{
-                this.store = new Ext.data.ArrayStore({
+                this.store = new Ext3.data.ArrayStore({
                     fields: ['text'],
                     data: this.store,
                     expandData: true
@@ -5914,7 +5914,7 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
             }
             this.displayField = 'text';
         } else {
-            this.store = Ext.StoreMgr.lookup(this.store);
+            this.store = Ext3.StoreMgr.lookup(this.store);
         }
 
         this.addEvents({
@@ -5927,9 +5927,9 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
 
     // private
     onRender: function(ct, position){
-        Ext.ux.form.MultiSelect.superclass.onRender.call(this, ct, position);
+        Ext3.ux.form.MultiSelect.superclass.onRender.call(this, ct, position);
 
-        var fs = this.fs = new Ext.form.FieldSet({
+        var fs = this.fs = new Ext3.form.FieldSet({
             renderTo: this.el,
             title: this.legend,
             height: this.height,
@@ -5939,7 +5939,7 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
         });
         fs.body.addClass('ux-mselect');
 
-        this.view = new Ext.ListView({
+        this.view = new Ext3.ListView({
             selectedClass: 'ux-mselect-selected',
             multiSelect: true,
             store: this.store,
@@ -5953,7 +5953,7 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
         this.view.on('beforeclick', this.onViewBeforeClick, this);
         this.view.on('dblclick', this.onViewDblClick, this);
 
-        this.hiddenName = this.name || Ext.id();
+        this.hiddenName = this.name || Ext3.id();
         var hiddenTag = { tag: "input", type: "hidden", value: "", name: this.hiddenName };
         this.hiddenField = this.el.createChild(hiddenTag);
         this.hiddenField.dom.disabled = this.hiddenName != this.name;
@@ -5962,19 +5962,19 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
 
     // private
     afterRender: function(){
-        Ext.ux.form.MultiSelect.superclass.afterRender.call(this);
+        Ext3.ux.form.MultiSelect.superclass.afterRender.call(this);
 
         if (this.ddReorder && !this.dragGroup && !this.dropGroup){
-            this.dragGroup = this.dropGroup = 'MultiselectDD-' + Ext.id();
+            this.dragGroup = this.dropGroup = 'MultiselectDD-' + Ext3.id();
         }
 
         if (this.draggable || this.dragGroup){
-            this.dragZone = new Ext.ux.form.MultiSelect.DragZone(this, {
+            this.dragZone = new Ext3.ux.form.MultiSelect.DragZone(this, {
                 ddGroup: this.dragGroup
             });
         }
         if (this.droppable || this.dropGroup){
-            this.dropZone = new Ext.ux.form.MultiSelect.DropZone(this, {
+            this.dropZone = new Ext3.ux.form.MultiSelect.DropZone(this, {
                 ddGroup: this.dropGroup
             });
         }
@@ -6027,7 +6027,7 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
 
         if (!values || (values == '')) { return; }
 
-        if (!Ext.isArray(values)) { values = values.split(this.delimiter); }
+        if (!Ext3.isArray(values)) { values = values.split(this.delimiter); }
         for (var i=0; i<values.length; i++) {
             index = this.view.store.indexOf(this.view.store.query(this.valueField,
                 new RegExp('^' + values[i] + '$', "i")).itemAt(0));
@@ -6098,36 +6098,36 @@ Ext.ux.form.MultiSelect = Ext.extend(Ext.form.Field,  {
 
     // inherit docs
     destroy: function(){
-        Ext.destroy(this.fs, this.dragZone, this.dropZone);
-        Ext.ux.form.MultiSelect.superclass.destroy.call(this);
+        Ext3.destroy(this.fs, this.dragZone, this.dropZone);
+        Ext3.ux.form.MultiSelect.superclass.destroy.call(this);
     }
 });
 
 
-Ext.reg('multiselect', Ext.ux.form.MultiSelect);
+Ext3.reg('multiselect', Ext3.ux.form.MultiSelect);
 
 //backwards compat
-Ext.ux.Multiselect = Ext.ux.form.MultiSelect;
+Ext3.ux.Multiselect = Ext3.ux.form.MultiSelect;
 
 
-Ext.ux.form.MultiSelect.DragZone = function(ms, config){
+Ext3.ux.form.MultiSelect.DragZone = function(ms, config){
     this.ms = ms;
     this.view = ms.view;
     var ddGroup = config.ddGroup || 'MultiselectDD';
     var dd;
-    if (Ext.isArray(ddGroup)){
+    if (Ext3.isArray(ddGroup)){
         dd = ddGroup.shift();
     } else {
         dd = ddGroup;
         ddGroup = null;
     }
-    Ext.ux.form.MultiSelect.DragZone.superclass.constructor.call(this, this.ms.fs.body, { containerScroll: true, ddGroup: dd });
+    Ext3.ux.form.MultiSelect.DragZone.superclass.constructor.call(this, this.ms.fs.body, { containerScroll: true, ddGroup: dd });
     this.setDraggable(ddGroup);
 };
 
-Ext.extend(Ext.ux.form.MultiSelect.DragZone, Ext.dd.DragZone, {
+Ext3.extend(Ext3.ux.form.MultiSelect.DragZone, Ext3.dd.DragZone, {
     onInitDrag : function(x, y){
-        var el = Ext.get(this.dragData.ddel.cloneNode(true));
+        var el = Ext3.get(this.dragData.ddel.cloneNode(true));
         this.proxy.update(el.dom);
         el.setWidth(el.child('em').getWidth());
         this.onStartDrag(x, y);
@@ -6136,13 +6136,13 @@ Ext.extend(Ext.ux.form.MultiSelect.DragZone, Ext.dd.DragZone, {
 
     // private
     collectSelection: function(data) {
-        data.repairXY = Ext.fly(this.view.getSelectedNodes()[0]).getXY();
+        data.repairXY = Ext3.fly(this.view.getSelectedNodes()[0]).getXY();
         var i = 0;
         this.view.store.each(function(rec){
             if (this.view.isSelected(i)) {
                 var n = this.view.getNode(i);
                 var dragNode = n.cloneNode(true);
-                dragNode.id = Ext.id();
+                dragNode.id = Ext3.id();
                 data.ddel.appendChild(dragNode);
                 data.records.push(this.view.store.getAt(i));
                 data.viewNodes.push(n);
@@ -6153,7 +6153,7 @@ Ext.extend(Ext.ux.form.MultiSelect.DragZone, Ext.dd.DragZone, {
 
     // override
     onEndDrag: function(data, e) {
-        var d = Ext.get(this.dragData.ddel);
+        var d = Ext3.get(this.dragData.ddel);
         if (d && d.hasClass("multi-proxy")) {
             d.remove();
         }
@@ -6178,7 +6178,7 @@ Ext.extend(Ext.ux.form.MultiSelect.DragZone, Ext.dd.DragZone, {
                 var n = this.view.getNode(i);
                 dragData.viewNodes.push(dragData.ddel = n);
                 dragData.records.push(this.view.store.getAt(i));
-                dragData.repairXY = Ext.fly(n).getXY();
+                dragData.repairXY = Ext3.fly(n).getXY();
             } else {
                 dragData.ddel = document.createElement('div');
                 dragData.ddel.className = 'multi-proxy';
@@ -6197,32 +6197,32 @@ Ext.extend(Ext.ux.form.MultiSelect.DragZone, Ext.dd.DragZone, {
     // private
     setDraggable: function(ddGroup){
         if (!ddGroup) return;
-        if (Ext.isArray(ddGroup)) {
-            Ext.each(ddGroup, this.setDraggable, this);
+        if (Ext3.isArray(ddGroup)) {
+            Ext3.each(ddGroup, this.setDraggable, this);
             return;
         }
         this.addToGroup(ddGroup);
     }
 });
 
-Ext.ux.form.MultiSelect.DropZone = function(ms, config){
+Ext3.ux.form.MultiSelect.DropZone = function(ms, config){
     this.ms = ms;
     this.view = ms.view;
     var ddGroup = config.ddGroup || 'MultiselectDD';
     var dd;
-    if (Ext.isArray(ddGroup)){
+    if (Ext3.isArray(ddGroup)){
         dd = ddGroup.shift();
     } else {
         dd = ddGroup;
         ddGroup = null;
     }
-    Ext.ux.form.MultiSelect.DropZone.superclass.constructor.call(this, this.ms.fs.body, { containerScroll: true, ddGroup: dd });
+    Ext3.ux.form.MultiSelect.DropZone.superclass.constructor.call(this, this.ms.fs.body, { containerScroll: true, ddGroup: dd });
     this.setDroppable(ddGroup);
 };
 
-Ext.extend(Ext.ux.form.MultiSelect.DropZone, Ext.dd.DropZone, {
+Ext3.extend(Ext3.ux.form.MultiSelect.DropZone, Ext3.dd.DropZone, {
     /**
-     * Part of the Ext.dd.DropZone interface. If no target node is found, the
+     * Part of the Ext3.dd.DropZone interface. If no target node is found, the
      * whole Element becomes the target, and this causes the drop gesture to append.
      */
     getTargetFromEvent : function(e) {
@@ -6233,9 +6233,9 @@ Ext.extend(Ext.ux.form.MultiSelect.DropZone, Ext.dd.DropZone, {
     // private
     getDropPoint : function(e, n, dd){
         if (n == this.ms.fs.body.dom) { return "below"; }
-        var t = Ext.lib.Dom.getY(n), b = t + n.offsetHeight;
+        var t = Ext3.lib.Dom.getY(n), b = t + n.offsetHeight;
         var c = t + (b - t) / 2;
-        var y = Ext.lib.Event.getPageY(e);
+        var y = Ext3.lib.Event.getPageY(e);
         if(y <= c) {
             return "above";
         }else{
@@ -6272,21 +6272,21 @@ Ext.extend(Ext.ux.form.MultiSelect.DropZone, Ext.dd.DropZone, {
         var pt = this.getDropPoint(e, n, dd);
         if (this.isValidDropPoint(pt, n, data)) {
             if (this.ms.appendOnly) {
-                return "x-tree-drop-ok-below";
+                return "x3-tree-drop-ok-below";
             }
 
             // set the insert point style on the target node
             if (pt) {
                 var targetElClass;
                 if (pt == "above"){
-                    dragElClass = n.previousSibling ? "x-tree-drop-ok-between" : "x-tree-drop-ok-above";
-                    targetElClass = "x-view-drag-insert-above";
+                    dragElClass = n.previousSibling ? "x3-tree-drop-ok-between" : "x3-tree-drop-ok-above";
+                    targetElClass = "x3-view-drag-insert-above";
                 } else {
-                    dragElClass = n.nextSibling ? "x-tree-drop-ok-between" : "x-tree-drop-ok-below";
-                    targetElClass = "x-view-drag-insert-below";
+                    dragElClass = n.nextSibling ? "x3-tree-drop-ok-between" : "x3-tree-drop-ok-below";
+                    targetElClass = "x3-view-drag-insert-below";
                 }
                 if (this.lastInsertClass != targetElClass){
-                    Ext.fly(n).replaceClass(this.lastInsertClass, targetElClass);
+                    Ext3.fly(n).replaceClass(this.lastInsertClass, targetElClass);
                     this.lastInsertClass = targetElClass;
                 }
             }
@@ -6362,11 +6362,11 @@ Ext.extend(Ext.ux.form.MultiSelect.DropZone, Ext.dd.DropZone, {
     // private
     removeDropIndicators : function(n){
         if(n){
-            Ext.fly(n).removeClass([
-                "x-view-drag-insert-above",
-                "x-view-drag-insert-left",
-                "x-view-drag-insert-right",
-                "x-view-drag-insert-below"]);
+            Ext3.fly(n).removeClass([
+                "x3-view-drag-insert-above",
+                "x3-view-drag-insert-left",
+                "x3-view-drag-insert-right",
+                "x3-view-drag-insert-below"]);
             this.lastInsertClass = "_noclass";
         }
     },
@@ -6374,8 +6374,8 @@ Ext.extend(Ext.ux.form.MultiSelect.DropZone, Ext.dd.DropZone, {
     // private
     setDroppable: function(ddGroup){
         if (!ddGroup) return;
-        if (Ext.isArray(ddGroup)) {
-            Ext.each(ddGroup, this.setDroppable, this);
+        if (Ext3.isArray(ddGroup)) {
+            Ext3.each(ddGroup, this.setDroppable, this);
             return;
         }
         this.addToGroup(ddGroup);
@@ -6400,16 +6400,16 @@ if (!Array.prototype.map) {
     };
 }
 
-Ext.ns('Ext.ux.data');
+Ext3.ns('Ext3.ux.data');
 
 /**
- * @class Ext.ux.data.PagingMemoryProxy
- * @extends Ext.data.MemoryProxy
+ * @class Ext3.ux.data.PagingMemoryProxy
+ * @extends Ext3.data.MemoryProxy
  * <p>Paging Memory Proxy, allows to use paging grid with in memory dataset</p>
  */
-Ext.ux.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
+Ext3.ux.data.PagingMemoryProxy = Ext3.extend(Ext3.data.MemoryProxy, {
     constructor : function(data){
-        Ext.ux.data.PagingMemoryProxy.superclass.constructor.call(this);
+        Ext3.ux.data.PagingMemoryProxy.superclass.constructor.call(this);
         this.data = data;
     },
     doRequest : function(action, rs, params, reader, callback, scope, options){
@@ -6470,15 +6470,15 @@ Ext.ux.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
 });
 
 //backwards compat.
-Ext.data.PagingMemoryProxy = Ext.ux.data.PagingMemoryProxy;
-Ext.ux.PanelResizer = Ext.extend(Ext.util.Observable, {
+Ext3.data.PagingMemoryProxy = Ext3.ux.data.PagingMemoryProxy;
+Ext3.ux.PanelResizer = Ext3.extend(Ext3.util.Observable, {
     minHeight: 0,
     maxHeight:10000000,
 
     constructor: function(config){
-        Ext.apply(this, config);
+        Ext3.apply(this, config);
         this.events = {};
-        Ext.ux.PanelResizer.superclass.constructor.call(this, config);
+        Ext3.ux.PanelResizer.superclass.constructor.call(this, config);
     },
 
     init : function(p){
@@ -6491,9 +6491,9 @@ Ext.ux.PanelResizer = Ext.extend(Ext.util.Observable, {
     },
 
     onRender : function(p){
-        this.handle = p.footer.createChild({cls:'x-panel-resize'});
+        this.handle = p.footer.createChild({cls:'x3-panel-resize'});
 
-        this.tracker = new Ext.dd.DragTracker({
+        this.tracker = new Ext3.dd.DragTracker({
             onStart: this.onDragStart.createDelegate(this),
             onDrag: this.onDrag.createDelegate(this),
             onEnd: this.onDragEnd.createDelegate(this),
@@ -6523,14 +6523,14 @@ Ext.ux.PanelResizer = Ext.extend(Ext.util.Observable, {
         this.fireEvent('dragend', this, e);
     }
 });
-Ext.preg('panelresizer', Ext.ux.PanelResizer);Ext.ux.Portal = Ext.extend(Ext.Panel, {
+Ext3.preg('panelresizer', Ext3.ux.PanelResizer);Ext3.ux.Portal = Ext3.extend(Ext3.Panel, {
     layout : 'column',
     autoScroll : true,
-    cls : 'x-portal',
+    cls : 'x3-portal',
     defaultType : 'portalcolumn',
     
     initComponent : function(){
-        Ext.ux.Portal.superclass.initComponent.call(this);
+        Ext3.ux.Portal.superclass.initComponent.call(this);
         this.addEvents({
             validatedrop:true,
             beforedragover:true,
@@ -6541,26 +6541,26 @@ Ext.preg('panelresizer', Ext.ux.PanelResizer);Ext.ux.Portal = Ext.extend(Ext.Pan
     },
 
     initEvents : function(){
-        Ext.ux.Portal.superclass.initEvents.call(this);
-        this.dd = new Ext.ux.Portal.DropZone(this, this.dropConfig);
+        Ext3.ux.Portal.superclass.initEvents.call(this);
+        this.dd = new Ext3.ux.Portal.DropZone(this, this.dropConfig);
     },
     
     beforeDestroy : function() {
         if(this.dd){
             this.dd.unreg();
         }
-        Ext.ux.Portal.superclass.beforeDestroy.call(this);
+        Ext3.ux.Portal.superclass.beforeDestroy.call(this);
     }
 });
 
-Ext.reg('portal', Ext.ux.Portal);
+Ext3.reg('portal', Ext3.ux.Portal);
 
-Ext.ux.Portal.DropZone = Ext.extend(Ext.dd.DropTarget, {
+Ext3.ux.Portal.DropZone = Ext3.extend(Ext3.dd.DropTarget, {
     
     constructor : function(portal, cfg){
         this.portal = portal;
-        Ext.dd.ScrollManager.register(portal.body);
-        Ext.ux.Portal.DropZone.superclass.constructor.call(this, portal.bwrap.dom, cfg);
+        Ext3.dd.ScrollManager.register(portal.body);
+        Ext3.ux.Portal.DropZone.superclass.constructor.call(this, portal.bwrap.dom, cfg);
         portal.body.ddScrollConfig = this.ddScrollConfig;
     },
     
@@ -6717,29 +6717,29 @@ Ext.ux.Portal.DropZone = Ext.extend(Ext.dd.DropTarget, {
 
     // unregister the dropzone from ScrollManager
     unreg: function() {
-        Ext.dd.ScrollManager.unregister(this.portal.body);
-        Ext.ux.Portal.DropZone.superclass.unreg.call(this);
+        Ext3.dd.ScrollManager.unregister(this.portal.body);
+        Ext3.ux.Portal.DropZone.superclass.unreg.call(this);
     }
 });
-Ext.ux.PortalColumn = Ext.extend(Ext.Container, {
+Ext3.ux.PortalColumn = Ext3.extend(Ext3.Container, {
     layout : 'anchor',
-    //autoEl : 'div',//already defined by Ext.Component
+    //autoEl : 'div',//already defined by Ext3.Component
     defaultType : 'portlet',
-    cls : 'x-portal-column'
+    cls : 'x3-portal-column'
 });
 
-Ext.reg('portalcolumn', Ext.ux.PortalColumn);
-Ext.ux.Portlet = Ext.extend(Ext.Panel, {
+Ext3.reg('portalcolumn', Ext3.ux.PortalColumn);
+Ext3.ux.Portlet = Ext3.extend(Ext3.Panel, {
     anchor : '100%',
     frame : true,
     collapsible : true,
     draggable : true,
-    cls : 'x-portlet'
+    cls : 'x3-portlet'
 });
 
-Ext.reg('portlet', Ext.ux.Portlet);
+Ext3.reg('portlet', Ext3.ux.Portlet);
 /**
-* @class Ext.ux.ProgressBarPager
+* @class Ext3.ux.ProgressBarPager
 * @extends Object 
 * Plugin (ptype = 'tabclosemenu') for displaying a progressbar inside of a paging toolbar instead of plain text
 * 
@@ -6749,7 +6749,7 @@ Ext.reg('portlet', Ext.ux.Portlet);
 * @param {Object} config Configuration options
 * @xtype itemselector 
 */
-Ext.ux.ProgressBarPager  = Ext.extend(Object, {
+Ext3.ux.ProgressBarPager  = Ext3.extend(Object, {
 	/**
  	* @cfg {Integer} progBarWidth
  	* <p>The default progress bar width.  Default is 225.</p>
@@ -6762,7 +6762,7 @@ Ext.ux.ProgressBarPager  = Ext.extend(Object, {
 	defaultText    : 'Loading...',
     	/**
  	* @cfg {Object} defaultAnimCfg 
- 	* <p>A {@link Ext.Fx Ext.Fx} configuration object.  Default is  { duration : 1, easing : 'bounceOut' }.</p>
+ 	* <p>A {@link Ext3.Fx Ext3.Fx} configuration object.  Default is  { duration : 1, easing : 'bounceOut' }.</p>
  	*/
 	defaultAnimCfg : {
 		duration   : 1,
@@ -6770,7 +6770,7 @@ Ext.ux.ProgressBarPager  = Ext.extend(Object, {
 	},												  
 	constructor : function(config) {
 		if (config) {
-			Ext.apply(this, config);
+			Ext3.apply(this, config);
 		}
 	},
 	//public
@@ -6780,7 +6780,7 @@ Ext.ux.ProgressBarPager  = Ext.extend(Object, {
 			this.parent = parent;
 			var ind  = parent.items.indexOf(parent.displayItem);
 			parent.remove(parent.displayItem, true);
-			this.progressBar = new Ext.ProgressBar({
+			this.progressBar = new Ext3.ProgressBar({
 				text    : this.defaultText,
 				width   : this.progBarWidth,
 				animate :  this.defaultAnimCfg
@@ -6790,7 +6790,7 @@ Ext.ux.ProgressBarPager  = Ext.extend(Object, {
 			
 			parent.add(parent.displayItem);	
 			parent.doLayout();
-			Ext.apply(parent, this.parentOverrides);		
+			Ext3.apply(parent, this.parentOverrides);		
 			
 			this.progressBar.on('render', function(pb) {
                 pb.mon(pb.getEl().applyStyles('cursor:pointer'), 'click', this.handleProgressBarClick, this);
@@ -6838,26 +6838,26 @@ Ext.ux.ProgressBarPager  = Ext.extend(Object, {
 		}
 	}
 });
-Ext.preg('progressbarpager', Ext.ux.ProgressBarPager);
+Ext3.preg('progressbarpager', Ext3.ux.ProgressBarPager);
 
-Ext.ns('Ext.ux.grid');
+Ext3.ns('Ext3.ux.grid');
 
 /**
- * @class Ext.ux.grid.RowEditor
- * @extends Ext.Panel
+ * @class Ext3.ux.grid.RowEditor
+ * @extends Ext3.Panel
  * Plugin (ptype = 'roweditor') that adds the ability to rapidly edit full rows in a grid.
  * A validation mode may be enabled which uses AnchorTips to notify the user of all
  * validation errors at once.
  *
  * @ptype roweditor
  */
-Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
+Ext3.ux.grid.RowEditor = Ext3.extend(Ext3.Panel, {
     floating: true,
     shadow: false,
     layout: 'hbox',
-    cls: 'x-small-editor',
+    cls: 'x3-small-editor',
     buttonAlign: 'center',
-    baseCls: 'x-row-editor',
+    baseCls: 'x3-row-editor',
     elements: 'header,footer,body',
     frameWidth: 5,
     buttonPad: 3,
@@ -6876,20 +6876,20 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     },
 
     initComponent: function(){
-        Ext.ux.grid.RowEditor.superclass.initComponent.call(this);
+        Ext3.ux.grid.RowEditor.superclass.initComponent.call(this);
         this.addEvents(
             /**
              * @event beforeedit
              * Fired before the row editor is activated.
              * If the listener returns <tt>false</tt> the editor will not be activated.
-             * @param {Ext.ux.grid.RowEditor} roweditor This object
+             * @param {Ext3.ux.grid.RowEditor} roweditor This object
              * @param {Number} rowIndex The rowIndex of the row just edited
              */
             'beforeedit',
             /**
              * @event canceledit
              * Fired when the editor is cancelled.
-             * @param {Ext.ux.grid.RowEditor} roweditor This object
+             * @param {Ext3.ux.grid.RowEditor} roweditor This object
              * @param {Boolean} forced True if the cancel button is pressed, false is the editor was invalid.
              */
             'canceledit',
@@ -6897,9 +6897,9 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
              * @event validateedit
              * Fired after a row is edited and passes validation.
              * If the listener returns <tt>false</tt> changes to the record will not be set.
-             * @param {Ext.ux.grid.RowEditor} roweditor This object
+             * @param {Ext3.ux.grid.RowEditor} roweditor This object
              * @param {Object} changes Object with changes made to the record.
-             * @param {Ext.data.Record} r The Record that was edited.
+             * @param {Ext3.data.Record} r The Record that was edited.
              * @param {Number} rowIndex The rowIndex of the row just edited
              */
             'validateedit',
@@ -6907,9 +6907,9 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
              * @event afteredit
              * Fired after a row is edited and passes validation.  This event is fired
              * after the store's update event is fired with this edit.
-             * @param {Ext.ux.grid.RowEditor} roweditor This object
+             * @param {Ext3.ux.grid.RowEditor} roweditor This object
              * @param {Object} changes Object with changes made to the record.
-             * @param {Ext.data.Record} r The Record that was edited.
+             * @param {Ext3.data.Record} r The Record that was edited.
              * @param {Number} rowIndex The rowIndex of the row just edited
              */
             'afteredit'
@@ -6923,7 +6923,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
             grid.on('rowdblclick', this.onRowDblClick, this);
         }else{
             grid.on('rowclick', this.onRowClick, this);
-            if(Ext.isIE){
+            if(Ext3.isIE){
                 grid.on('rowdblclick', this.onRowDblClick, this);
             }
         }
@@ -6954,7 +6954,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
         this.stopMonitoring();
         this.grid.getStore().un('remove', this.onStoreRemove, this);
         this.stopEditing(false);
-        Ext.destroy(this.btns, this.tooltip);
+        Ext3.destroy(this.btns, this.tooltip);
     },
 
     refreshFields: function(){
@@ -6978,7 +6978,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
             this.showTooltip(this.commitChangesText);
             return;
         }
-        if(Ext.isObject(rowIndex)){
+        if(Ext3.isObject(rowIndex)){
             rowIndex = this.grid.getStore().indexOf(rowIndex);
         }
         if(this.fireEvent('beforeedit', this, rowIndex) !== false){
@@ -6993,7 +6993,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
             if(!this.rendered){
                 this.render(view.getEditorParent());
             }
-            var w = Ext.fly(row).getWidth();
+            var w = Ext3.fly(row).getWidth();
             this.setSize(w);
             if(!this.initialized){
                 this.initFields();
@@ -7003,13 +7003,13 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
                 val = this.preEditValue(record, cm.getDataIndex(i));
                 f = fields[i];
                 f.setValue(val);
-                this.values[f.id] = Ext.isEmpty(val) ? '' : val;
+                this.values[f.id] = Ext3.isEmpty(val) ? '' : val;
             }
             this.verifyLayout(true);
             if(!this.isVisible()){
-                this.setPagePosition(Ext.fly(row).getXY());
+                this.setPagePosition(Ext3.fly(row).getXY());
             } else{
-                this.el.setXY(Ext.fly(row).getXY(), {duration:0.15});
+                this.el.setXY(Ext3.fly(row).getXY(), {duration:0.15});
             }
             if(!this.isVisible()){
                 this.show().doLayout();
@@ -7038,7 +7038,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
         for(var i = 0, len = cm.getColumnCount(); i < len; i++){
             if(!cm.isHidden(i)){
                 var dindex = cm.getDataIndex(i);
-                if(!Ext.isEmpty(dindex)){
+                if(!Ext3.isEmpty(dindex)){
                     var oldValue = r.data[dindex],
                         value = this.postEditValue(fields[i].getValue(), oldValue, r, dindex);
                     if(String(oldValue) !== String(value)){
@@ -7050,7 +7050,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
         }
         if(hasChange && this.fireEvent('validateedit', this, changes, r, this.rowIndex) !== false){
             r.beginEdit();
-            Ext.iterate(changes, function(name, value){
+            Ext3.iterate(changes, function(name, value){
                 r.set(name, value);
             });
             r.endEdit();
@@ -7064,7 +7064,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     verifyLayout: function(force){
         if(this.el && (this.isVisible() || force === true)){
             var row = this.grid.getView().getRow(this.rowIndex);
-            this.setSize(Ext.fly(row).getWidth(), Ext.isIE ? Ext.fly(row).getHeight() + 9 : undefined);
+            this.setSize(Ext3.fly(row).getWidth(), Ext3.isIE ? Ext3.fly(row).getHeight() + 9 : undefined);
             var cm = this.grid.colModel, fields = this.items.items;
             for(var i = 0, len = cm.getColumnCount(); i < len; i++){
                 if(!cm.isHidden(i)){
@@ -7090,20 +7090,20 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     },
 
     initFields: function(){
-        var cm = this.grid.getColumnModel(), pm = Ext.layout.ContainerLayout.prototype.parseMargins;
+        var cm = this.grid.getColumnModel(), pm = Ext3.layout.ContainerLayout.prototype.parseMargins;
         this.removeAll(false);
         for(var i = 0, len = cm.getColumnCount(); i < len; i++){
             var c = cm.getColumnAt(i),
                 ed = c.getEditor();
             if(!ed){
-                ed = c.displayEditor || new Ext.form.DisplayField();
+                ed = c.displayEditor || new Ext3.form.DisplayField();
             }
             if(i == 0){
                 ed.margins = pm('0 1 2 1');
             } else if(i == len - 1){
                 ed.margins = pm('0 0 2 1');
             } else{
-                if (Ext.isIE) {
+                if (Ext3.isIE) {
                     ed.margins = pm('0 0 2 0');
                 }
                 else {
@@ -7163,11 +7163,11 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     },
 
     onRender: function(){
-        Ext.ux.grid.RowEditor.superclass.onRender.apply(this, arguments);
+        Ext3.ux.grid.RowEditor.superclass.onRender.apply(this, arguments);
         this.el.swallowEvent(['keydown', 'keyup', 'keypress']);
-        this.btns = new Ext.Panel({
-            baseCls: 'x-plain',
-            cls: 'x-btns',
+        this.btns = new Ext3.Panel({
+            baseCls: 'x3-plain',
+            cls: 'x3-btns',
             elements:'body',
             layout: 'table',
             width: (this.minButtonWidth * 2) + (this.frameWidth * 2) + (this.buttonPad * 4), // width must be specified for IE
@@ -7189,7 +7189,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     },
 
     afterRender: function(){
-        Ext.ux.grid.RowEditor.superclass.afterRender.apply(this, arguments);
+        Ext3.ux.grid.RowEditor.superclass.afterRender.apply(this, arguments);
         this.positionButtons();
         if(this.monitorValid){
             this.startMonitoring();
@@ -7200,11 +7200,11 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
         if(this.monitorValid){
             this.startMonitoring();
         }
-        Ext.ux.grid.RowEditor.superclass.onShow.apply(this, arguments);
+        Ext3.ux.grid.RowEditor.superclass.onShow.apply(this, arguments);
     },
 
     onHide: function(){
-        Ext.ux.grid.RowEditor.superclass.onHide.apply(this, arguments);
+        Ext3.ux.grid.RowEditor.superclass.onHide.apply(this, arguments);
         this.stopMonitoring();
         this.grid.getView().focusRow(this.rowIndex);
     },
@@ -7225,12 +7225,12 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     // private
     preEditValue : function(r, field){
         var value = r.data[field];
-        return this.autoEncode && typeof value === 'string' ? Ext.util.Format.htmlDecode(value) : value;
+        return this.autoEncode && typeof value === 'string' ? Ext3.util.Format.htmlDecode(value) : value;
     },
 
     // private
     postEditValue : function(value, originalValue, r, field){
-        return this.autoEncode && typeof value == 'string' ? Ext.util.Format.htmlEncode(value) : value;
+        return this.autoEncode && typeof value == 'string' ? Ext3.util.Format.htmlEncode(value) : value;
     },
 
     doFocus: function(pt){
@@ -7260,7 +7260,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
             match = false;
         for(var len = cms.length, c; c = cms[i]; i++){
             if(!c.hidden){
-                if(Ext.fly(v.getHeaderCell(i)).getRegion().right >= x){
+                if(Ext3.fly(v.getHeaderCell(i)).getRegion().right >= x){
                     match = i;
                     break;
                 }
@@ -7272,7 +7272,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     startMonitoring : function(){
         if(!this.bound && this.monitorValid){
             this.bound = true;
-            Ext.TaskMgr.start({
+            Ext3.TaskMgr.start({
                 run : this.bindHandler,
                 interval : this.monitorPoll || 200,
                 scope: this
@@ -7325,7 +7325,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     showTooltip: function(msg){
         var t = this.tooltip;
         if(!t){
-            t = this.tooltip = new Ext.ToolTip({
+            t = this.tooltip = new Ext3.ToolTip({
                 maxWidth: 600,
                 cls: 'errorTip',
                 width: 300,
@@ -7366,19 +7366,19 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
         return data;
     }
 });
-Ext.preg('roweditor', Ext.ux.grid.RowEditor);
-Ext.ns('Ext.ux.grid');
+Ext3.preg('roweditor', Ext3.ux.grid.RowEditor);
+Ext3.ns('Ext3.ux.grid');
 
 /**
- * @class Ext.ux.grid.RowExpander
- * @extends Ext.util.Observable
+ * @class Ext3.ux.grid.RowExpander
+ * @extends Ext3.util.Observable
  * Plugin (ptype = 'rowexpander') that adds the ability to have a Column in a grid which enables
  * a second row body which expands/contracts.  The expand/contract behavior is configurable to react
  * on clicking of the column, double click of the row, and/or hitting enter while a row is selected.
  *
  * @ptype rowexpander
  */
-Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
+Ext3.ux.grid.RowExpander = Ext3.extend(Ext3.util.Observable, {
     /**
      * @cfg {Boolean} expandOnEnter
      * <tt>true</tt> to toggle selected row(s) between expanded/collapsed when the enter
@@ -7404,14 +7404,14 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
     enableCaching : true,
 
     constructor: function(config){
-        Ext.apply(this, config);
+        Ext3.apply(this, config);
 
         this.addEvents({
             /**
              * @event beforeexpand
              * Fires before the row expands. Have the listener return false to prevent the row from expanding.
              * @param {Object} this RowExpander object.
-             * @param {Object} Ext.data.Record Record for the selected row.
+             * @param {Object} Ext3.data.Record Record for the selected row.
              * @param {Object} body body element for the secondary row.
              * @param {Number} rowIndex The current row index.
              */
@@ -7420,7 +7420,7 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
              * @event expand
              * Fires after the row expands.
              * @param {Object} this RowExpander object.
-             * @param {Object} Ext.data.Record Record for the selected row.
+             * @param {Object} Ext3.data.Record Record for the selected row.
              * @param {Object} body body element for the secondary row.
              * @param {Number} rowIndex The current row index.
              */
@@ -7429,7 +7429,7 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
              * @event beforecollapse
              * Fires before the row collapses. Have the listener return false to prevent the row from collapsing.
              * @param {Object} this RowExpander object.
-             * @param {Object} Ext.data.Record Record for the selected row.
+             * @param {Object} Ext3.data.Record Record for the selected row.
              * @param {Object} body body element for the secondary row.
              * @param {Number} rowIndex The current row index.
              */
@@ -7438,18 +7438,18 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
              * @event collapse
              * Fires after the row collapses.
              * @param {Object} this RowExpander object.
-             * @param {Object} Ext.data.Record Record for the selected row.
+             * @param {Object} Ext3.data.Record Record for the selected row.
              * @param {Object} body body element for the secondary row.
              * @param {Number} rowIndex The current row index.
              */
             collapse: true
         });
 
-        Ext.ux.grid.RowExpander.superclass.constructor.call(this);
+        Ext3.ux.grid.RowExpander.superclass.constructor.call(this);
 
         if(this.tpl){
             if(typeof this.tpl == 'string'){
-                this.tpl = new Ext.Template(this.tpl);
+                this.tpl = new Ext3.Template(this.tpl);
             }
             this.tpl.compile();
         }
@@ -7467,7 +7467,7 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
         if(content){
             p.body = content;
         }
-        return this.state[record.id] ? 'x-grid3-row-expanded' : 'x-grid3-row-collapsed';
+        return this.state[record.id] ? 'x3-grid3-row-expanded' : 'x3-grid3-row-collapsed';
     },
 
     init : function(grid){
@@ -7487,9 +7487,9 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
     onRender: function() {
         var grid = this.grid;
         var mainBody = grid.getView().mainBody;
-        mainBody.on('mousedown', this.onMouseDown, this, {delegate: '.x-grid3-row-expander'});
+        mainBody.on('mousedown', this.onMouseDown, this, {delegate: '.x3-grid3-row-expander'});
         if (this.expandOnEnter) {
-            this.keyNav = new Ext.KeyNav(this.grid.getGridEl(), {
+            this.keyNav = new Ext3.KeyNav(this.grid.getGridEl(), {
                 'enter' : this.onEnter,
                 scope: this
             });
@@ -7544,13 +7544,13 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
 
     onMouseDown : function(e, t){
         e.stopEvent();
-        var row = e.getTarget('.x-grid3-row');
+        var row = e.getTarget('.x3-grid3-row');
         this.toggleRow(row);
     },
 
     renderer : function(v, p, record){
         p.cellAttr = 'rowspan="2"';
-        return '<div class="x-grid3-row-expander">&#160;</div>';
+        return '<div class="x3-grid3-row-expander">&#160;</div>';
     },
 
     beforeExpand : function(record, body, rowIndex){
@@ -7568,7 +7568,7 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
         if(typeof row == 'number'){
             row = this.grid.view.getRow(row);
         }
-        this[Ext.fly(row).hasClass('x-grid3-row-collapsed') ? 'expandRow' : 'collapseRow'](row);
+        this[Ext3.fly(row).hasClass('x3-grid3-row-collapsed') ? 'expandRow' : 'collapseRow'](row);
     },
 
     expandRow : function(row){
@@ -7576,10 +7576,10 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
             row = this.grid.view.getRow(row);
         }
         var record = this.grid.store.getAt(row.rowIndex);
-        var body = Ext.DomQuery.selectNode('tr:nth(2) div.x-grid3-row-body', row);
+        var body = Ext3.DomQuery.selectNode('tr:nth(2) div.x3-grid3-row-body', row);
         if(this.beforeExpand(record, body, row.rowIndex)){
             this.state[record.id] = true;
-            Ext.fly(row).replaceClass('x-grid3-row-collapsed', 'x-grid3-row-expanded');
+            Ext3.fly(row).replaceClass('x3-grid3-row-collapsed', 'x3-grid3-row-expanded');
             this.fireEvent('expand', this, record, body, row.rowIndex);
         }
     },
@@ -7589,28 +7589,28 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
             row = this.grid.view.getRow(row);
         }
         var record = this.grid.store.getAt(row.rowIndex);
-        var body = Ext.fly(row).child('tr:nth(1) div.x-grid3-row-body', true);
+        var body = Ext3.fly(row).child('tr:nth(1) div.x3-grid3-row-body', true);
         if(this.fireEvent('beforecollapse', this, record, body, row.rowIndex) !== false){
             this.state[record.id] = false;
-            Ext.fly(row).replaceClass('x-grid3-row-expanded', 'x-grid3-row-collapsed');
+            Ext3.fly(row).replaceClass('x3-grid3-row-expanded', 'x3-grid3-row-collapsed');
             this.fireEvent('collapse', this, record, body, row.rowIndex);
         }
     }
 });
 
-Ext.preg('rowexpander', Ext.ux.grid.RowExpander);
+Ext3.preg('rowexpander', Ext3.ux.grid.RowExpander);
 
 //backwards compat
-Ext.grid.RowExpander = Ext.ux.grid.RowExpander;// We are adding these custom layouts to a namespace that does not
-// exist by default in Ext, so we have to add the namespace first:
-Ext.ns('Ext.ux.layout');
+Ext3.grid.RowExpander = Ext3.ux.grid.RowExpander;// We are adding these custom layouts to a namespace that does not
+// exist by default in Ext3, so we have to add the namespace first:
+Ext3.ns('Ext3.ux.layout');
 
 /**
- * @class Ext.ux.layout.RowLayout
- * @extends Ext.layout.ContainerLayout
+ * @class Ext3.ux.layout.RowLayout
+ * @extends Ext3.layout.ContainerLayout
  * <p>This is the layout style of choice for creating structural layouts in a multi-row format where the height of
  * each row can be specified as a percentage or fixed height.  Row widths can also be fixed, percentage or auto.
- * This class is intended to be extended or created via the layout:'ux.row' {@link Ext.Container#layout} config,
+ * This class is intended to be extended or created via the layout:'ux.row' {@link Ext3.Container#layout} config,
  * and should generally not need to be created directly via the new keyword.</p>
  * <p>RowLayout does not have any direct config options (other than inherited ones), but it does support a
  * specific config property of <b><tt>rowHeight</tt></b> that can be included in the config of any panel added to it.  The
@@ -7629,7 +7629,7 @@ Ext.ns('Ext.ux.layout');
  * layout may not render as expected.  Example usage:</p>
  * <pre><code>
 // All rows are percentages -- they must add up to 1
-var p = new Ext.Panel({
+var p = new Ext3.Panel({
     title: 'Row Layout - Percentage Only',
     layout:'ux.row',
     items: [{
@@ -7647,7 +7647,7 @@ var p = new Ext.Panel({
 // Mix of height and rowHeight -- all rowHeight values must add
 // up to 1. The first row will take up exactly 120px, and the last two
 // rows will fill the remaining container height.
-var p = new Ext.Panel({
+var p = new Ext3.Panel({
     title: 'Row Layout - Mixed',
     layout:'ux.row',
     items: [{
@@ -7666,7 +7666,7 @@ var p = new Ext.Panel({
 });
 </code></pre>
  */
-Ext.ux.layout.RowLayout = Ext.extend(Ext.layout.ContainerLayout, {
+Ext3.ux.layout.RowLayout = Ext3.extend(Ext3.layout.ContainerLayout, {
     // private
     monitorResize:true,
 
@@ -7688,7 +7688,7 @@ Ext.ux.layout.RowLayout = Ext.extend(Ext.layout.ContainerLayout, {
             // IE in strict mode will return a height of 0 on the 1st pass of getViewSize.
             // Use getStyleSize to verify the 0 height, the adjustment pass will then work properly
             // with getViewSize
-            if (Ext.isIE && Ext.isStrict && ret.height == 0){
+            if (Ext3.isIE && Ext3.isStrict && ret.height == 0){
                 ret =  target.getStyleSize();
             }
 
@@ -7702,10 +7702,10 @@ Ext.ux.layout.RowLayout = Ext.extend(Ext.layout.ContainerLayout, {
         if(!this.innerCt){
             // the innerCt prevents wrapping and shuffling while
             // the container is resizing
-            this.innerCt = target.createChild({cls:'x-column-inner'});
-            this.innerCt.createChild({cls:'x-clear'});
+            this.innerCt = target.createChild({cls:'x3-column-inner'});
+            this.innerCt.createChild({cls:'x3-clear'});
         }
-        Ext.layout.ColumnLayout.superclass.renderAll.call(this, ct, this.innerCt);
+        Ext3.layout.ColumnLayout.superclass.renderAll.call(this, ct, this.innerCt);
     },
 
     // private
@@ -7754,7 +7754,7 @@ Ext.ux.layout.RowLayout = Ext.extend(Ext.layout.ContainerLayout, {
 
         // Browsers differ as to when they account for scrollbars.  We need to re-measure to see if the scrollbar
         // spaces were accounted for properly.  If not, re-layout.
-        if (Ext.isIE) {
+        if (Ext3.isIE) {
             if (i = target.getStyle('overflow') && i != 'hidden' && !this.adjustmentPass) {
                 var ts = this.getLayoutTargetSize();
                 if (ts.width != size.width){
@@ -7772,12 +7772,12 @@ Ext.ux.layout.RowLayout = Ext.extend(Ext.layout.ContainerLayout, {
      */
 });
 
-Ext.Container.LAYOUTS['ux.row'] = Ext.ux.layout.RowLayout;
-Ext.ns('Ext.ux.form');
+Ext3.Container.LAYOUTS['ux.row'] = Ext3.ux.layout.RowLayout;
+Ext3.ns('Ext3.ux.form');
 
-Ext.ux.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
+Ext3.ux.form.SearchField = Ext3.extend(Ext3.form.TwinTriggerField, {
     initComponent : function(){
-        Ext.ux.form.SearchField.superclass.initComponent.call(this);
+        Ext3.ux.form.SearchField.superclass.initComponent.call(this);
         this.on('specialkey', function(f, e){
             if(e.getKey() == e.ENTER){
                 this.onTrigger2Click();
@@ -7787,8 +7787,8 @@ Ext.ux.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
 
     validationEvent:false,
     validateOnBlur:false,
-    trigger1Class:'x-form-clear-trigger',
-    trigger2Class:'x-form-search-trigger',
+    trigger1Class:'x3-form-clear-trigger',
+    trigger2Class:'x3-form-search-trigger',
     hideTrigger1:true,
     width:180,
     hasSearch : false,
@@ -7819,25 +7819,25 @@ Ext.ux.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
         this.hasSearch = true;
         this.triggers[0].show();
     }
-});Ext.ns('Ext.ux.form');
+});Ext3.ns('Ext3.ux.form');
 
 /**
- * @class Ext.ux.form.SelectBox
- * @extends Ext.form.ComboBox
+ * @class Ext3.ux.form.SelectBox
+ * @extends Ext3.form.ComboBox
  * <p>Makes a ComboBox more closely mimic an HTML SELECT.  Supports clicking and dragging
  * through the list, with item selection occurring when the mouse button is released.
- * When used will automatically set {@link #editable} to false and call {@link Ext.Element#unselectable}
+ * When used will automatically set {@link #editable} to false and call {@link Ext3.Element#unselectable}
  * on inner elements.  Re-enabling editable after calling this will NOT work.</p>
  * @author Corey Gilmore http://extjs.com/forum/showthread.php?t=6392
  * @history 2007-07-08 jvs
- * Slight mods for Ext 2.0
+ * Slight mods for Ext3 2.0
  * @xtype selectbox
  */
-Ext.ux.form.SelectBox = Ext.extend(Ext.form.ComboBox, {
+Ext3.ux.form.SelectBox = Ext3.extend(Ext3.form.ComboBox, {
 	constructor: function(config){
 		this.searchResetDelay = 1000;
 		config = config || {};
-		config = Ext.apply(config || {}, {
+		config = Ext3.apply(config || {}, {
 			editable: false,
 			forceSelection: true,
 			rowHeight: false,
@@ -7846,16 +7846,16 @@ Ext.ux.form.SelectBox = Ext.extend(Ext.form.ComboBox, {
 			mode: 'local'
 		});
 
-		Ext.ux.form.SelectBox.superclass.constructor.apply(this, arguments);
+		Ext3.ux.form.SelectBox.superclass.constructor.apply(this, arguments);
 
 		this.lastSelectedIndex = this.selectedIndex || 0;
 	},
 
 	initEvents : function(){
-		Ext.ux.form.SelectBox.superclass.initEvents.apply(this, arguments);
+		Ext3.ux.form.SelectBox.superclass.initEvents.apply(this, arguments);
 		// you need to use keypress to capture upper/lower case and shift+key, but it doesn't work in IE
 		this.el.on('keydown', this.keySearch, this, true);
-		this.cshTask = new Ext.util.DelayedTask(this.clearSearchHistory, this);
+		this.cshTask = new Ext3.util.DelayedTask(this.clearSearchHistory, this);
 	},
 
 	keySearch : function(e, target, options) {
@@ -7868,22 +7868,22 @@ Ext.ux.form.SelectBox = Ext.extend(Ext.form.ComboBox, {
 		}
 
 		switch(raw) {
-			case Ext.EventObject.HOME:
+			case Ext3.EventObject.HOME:
 				e.stopEvent();
 				this.selectFirst();
 				return;
 
-			case Ext.EventObject.END:
+			case Ext3.EventObject.END:
 				e.stopEvent();
 				this.selectLast();
 				return;
 
-			case Ext.EventObject.PAGEDOWN:
+			case Ext3.EventObject.PAGEDOWN:
 				this.selectNextPage();
 				e.stopEvent();
 				return;
 
-			case Ext.EventObject.PAGEUP:
+			case Ext3.EventObject.PAGEUP:
 				this.selectPrevPage();
 				e.stopEvent();
 				return;
@@ -7902,7 +7902,7 @@ Ext.ux.form.SelectBox = Ext.extend(Ext.form.ComboBox, {
 
 	onRender : function(ct, position) {
 		this.store.on('load', this.calcRowsPerPage, this);
-		Ext.ux.form.SelectBox.superclass.onRender.apply(this, arguments);
+		Ext3.ux.form.SelectBox.superclass.onRender.apply(this, arguments);
 		if( this.mode == 'local' ) {
             this.initList();
 			this.calcRowsPerPage();
@@ -7921,8 +7921,8 @@ Ext.ux.form.SelectBox = Ext.extend(Ext.form.ComboBox, {
 	},
 
 	afterRender : function() {
-		Ext.ux.form.SelectBox.superclass.afterRender.apply(this, arguments);
-		if(Ext.isWebKit) {
+		Ext3.ux.form.SelectBox.superclass.afterRender.apply(this, arguments);
+		if(Ext3.isWebKit) {
 			this.el.swallowEvent('mousedown', true);
 		}
 		this.el.unselectable();
@@ -7952,11 +7952,11 @@ Ext.ux.form.SelectBox = Ext.extend(Ext.form.ComboBox, {
 		}, this);
 
 		this.on('collapse', function(e, target, options) {
-			Ext.getDoc().un('mouseup', this.collapseIf, this);
+			Ext3.getDoc().un('mouseup', this.collapseIf, this);
 		}, this, true);
 
 		this.on('expand', function(e, target, options) {
-			Ext.getDoc().on('mouseup', this.collapseIf, this);
+			Ext3.getDoc().on('mouseup', this.collapseIf, this);
 		}, this, true);
 	},
 
@@ -7999,14 +7999,14 @@ Ext.ux.form.SelectBox = Ext.extend(Ext.form.ComboBox, {
 	},
 
 	focusAndSelect : function(record) {
-        var index = Ext.isNumber(record) ? record : this.store.indexOf(record);
+        var index = Ext3.isNumber(record) ? record : this.store.indexOf(record);
         this.select(index, this.isExpanded());
         this.onSelect(this.store.getAt(index), index, this.isExpanded());
 	},
 
 	calcRowsPerPage : function() {
 		if( this.store.getCount() ) {
-			this.rowHeight = Ext.fly(this.view.getNode(0)).getHeight();
+			this.rowHeight = Ext3.fly(this.view.getNode(0)).getHeight();
 			this.rowsPerPage = this.maxHeight / this.rowHeight;
 		} else {
 			this.rowHeight = false;
@@ -8015,24 +8015,24 @@ Ext.ux.form.SelectBox = Ext.extend(Ext.form.ComboBox, {
 
 });
 
-Ext.reg('selectbox', Ext.ux.form.SelectBox);
+Ext3.reg('selectbox', Ext3.ux.form.SelectBox);
 
 //backwards compat
-Ext.ux.SelectBox = Ext.ux.form.SelectBox;
+Ext3.ux.SelectBox = Ext3.ux.form.SelectBox;
 /**
  * Plugin for PagingToolbar which replaces the textfield input with a slider 
  */
-Ext.ux.SlidingPager = Ext.extend(Object, {
+Ext3.ux.SlidingPager = Ext3.extend(Object, {
     init : function(pbar){
         var idx = pbar.items.indexOf(pbar.inputItem);
-        Ext.each(pbar.items.getRange(idx - 2, idx + 2), function(c){
+        Ext3.each(pbar.items.getRange(idx - 2, idx + 2), function(c){
             c.hide();
         });
-        var slider = new Ext.Slider({
+        var slider = new Ext3.Slider({
             width: 114,
             minValue: 1,
             maxValue: 1,
-            plugins: new Ext.slider.Tip({
+            plugins: new Ext3.slider.Tip({
                 getText : function(thumb) {
                     return String.format('Page <b>{0}</b> of <b>{1}</b>', thumb.value, thumb.slider.maxValue);
                 }
@@ -8051,33 +8051,33 @@ Ext.ux.SlidingPager = Ext.extend(Object, {
             }
         });
     }
-});Ext.ns('Ext.ux.form');
+});Ext3.ns('Ext3.ux.form');
 
 /**
- * @class Ext.ux.form.SpinnerField
- * @extends Ext.form.NumberField
- * Creates a field utilizing Ext.ux.Spinner
+ * @class Ext3.ux.form.SpinnerField
+ * @extends Ext3.form.NumberField
+ * Creates a field utilizing Ext3.ux.Spinner
  * @xtype spinnerfield
  */
-Ext.ux.form.SpinnerField = Ext.extend(Ext.form.NumberField, {
+Ext3.ux.form.SpinnerField = Ext3.extend(Ext3.form.NumberField, {
     actionMode: 'wrap',
     deferHeight: true,
-    autoSize: Ext.emptyFn,
-    onBlur: Ext.emptyFn,
-    adjustSize: Ext.BoxComponent.prototype.adjustSize,
+    autoSize: Ext3.emptyFn,
+    onBlur: Ext3.emptyFn,
+    adjustSize: Ext3.BoxComponent.prototype.adjustSize,
 
 	constructor: function(config) {
-		var spinnerConfig = Ext.copyTo({}, config, 'incrementValue,alternateIncrementValue,accelerate,defaultValue,triggerClass,splitterClass');
+		var spinnerConfig = Ext3.copyTo({}, config, 'incrementValue,alternateIncrementValue,accelerate,defaultValue,triggerClass,splitterClass');
 
-		var spl = this.spinner = new Ext.ux.Spinner(spinnerConfig);
+		var spl = this.spinner = new Ext3.ux.Spinner(spinnerConfig);
 
 		var plugins = config.plugins
-			? (Ext.isArray(config.plugins)
+			? (Ext3.isArray(config.plugins)
 				? config.plugins.push(spl)
 				: [config.plugins, spl])
 			: spl;
 
-		Ext.ux.form.SpinnerField.superclass.constructor.call(this, Ext.apply(config, {plugins: plugins}));
+		Ext3.ux.form.SpinnerField.superclass.constructor.call(this, Ext3.apply(config, {plugins: plugins}));
 	},
 
     // private
@@ -8102,27 +8102,27 @@ Ext.ux.form.SpinnerField = Ext.extend(Ext.form.NumberField, {
     }
 });
 
-Ext.reg('spinnerfield', Ext.ux.form.SpinnerField);
+Ext3.reg('spinnerfield', Ext3.ux.form.SpinnerField);
 
 //backwards compat
-Ext.form.SpinnerField = Ext.ux.form.SpinnerField;
+Ext3.form.SpinnerField = Ext3.ux.form.SpinnerField;
 /**
- * @class Ext.ux.Spinner
- * @extends Ext.util.Observable
- * Creates a Spinner control utilized by Ext.ux.form.SpinnerField
+ * @class Ext3.ux.Spinner
+ * @extends Ext3.util.Observable
+ * Creates a Spinner control utilized by Ext3.ux.form.SpinnerField
  */
-Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
+Ext3.ux.Spinner = Ext3.extend(Ext3.util.Observable, {
     incrementValue: 1,
     alternateIncrementValue: 5,
-    triggerClass: 'x-form-spinner-trigger',
-    splitterClass: 'x-form-spinner-splitter',
-    alternateKey: Ext.EventObject.shiftKey,
+    triggerClass: 'x3-form-spinner-trigger',
+    splitterClass: 'x3-form-spinner-splitter',
+    alternateKey: Ext3.EventObject.shiftKey,
     defaultValue: 0,
     accelerate: false,
 
     constructor: function(config){
-        Ext.ux.Spinner.superclass.constructor.call(this, config);
-        Ext.apply(this, config);
+        Ext3.ux.Spinner.superclass.constructor.call(this, config);
+        Ext3.apply(this, config);
         this.mimicing = false;
     },
 
@@ -8144,17 +8144,17 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
 
         if (!f.wrap) {
             f.wrap = this.wrap = el.wrap({
-                cls: "x-form-field-wrap"
+                cls: "x3-form-field-wrap"
             });
         }
         else {
-            this.wrap = f.wrap.addClass('x-form-field-wrap');
+            this.wrap = f.wrap.addClass('x3-form-field-wrap');
         }
 
         this.trigger = this.wrap.createChild({
             tag: "img",
-            src: Ext.BLANK_IMAGE_URL,
-            cls: "x-form-trigger " + this.triggerClass
+            src: Ext3.BLANK_IMAGE_URL,
+            cls: "x3-form-trigger " + this.triggerClass
         });
 
         if (!f.width) {
@@ -8166,14 +8166,14 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
             cls: this.splitterClass,
             style: 'width:13px; height:2px;'
         });
-        this.splitter.setRight((Ext.isIE) ? 1 : 2).setTop(10).show();
+        this.splitter.setRight((Ext3.isIE) ? 1 : 2).setTop(10).show();
 
         this.proxy = this.trigger.createProxy('', this.splitter, true);
-        this.proxy.addClass("x-form-spinner-proxy");
+        this.proxy.addClass("x3-form-spinner-proxy");
         this.proxy.setStyle('left', '0px');
         this.proxy.setSize(14, 1);
         this.proxy.hide();
-        this.dd = new Ext.dd.DDProxy(this.splitter.dom.id, "SpinnerDrag", {
+        this.dd = new Ext3.dd.DDProxy(this.splitter.dom.id, "SpinnerDrag", {
             dragElId: this.proxy.id
         });
 
@@ -8183,7 +8183,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
 
     doAfterRender: function(){
         var y;
-        if (Ext.isIE && this.el.getY() != (y = this.trigger.getY())) {
+        if (Ext3.isIE && this.el.getY() != (y = this.trigger.getY())) {
             this.el.position();
             this.el.setY(y);
         }
@@ -8213,9 +8213,9 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
 
     doFocus: function(){
         if (!this.mimicing) {
-            this.wrap.addClass('x-trigger-wrap-focus');
+            this.wrap.addClass('x3-trigger-wrap-focus');
             this.mimicing = true;
-            Ext.get(Ext.isIE ? document.body : document).on("mousedown", this.mimicBlur, this, {
+            Ext3.get(Ext3.isIE ? document.body : document).on("mousedown", this.mimicBlur, this, {
                 delay: 10
             });
             this.el.on('keydown', this.checkTab, this);
@@ -8239,16 +8239,16 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
     // private
     triggerBlur: function(){
         this.mimicing = false;
-        Ext.get(Ext.isIE ? document.body : document).un("mousedown", this.mimicBlur, this);
+        Ext3.get(Ext3.isIE ? document.body : document).un("mousedown", this.mimicBlur, this);
         this.el.un("keydown", this.checkTab, this);
         this.field.beforeBlur();
-        this.wrap.removeClass('x-trigger-wrap-focus');
+        this.wrap.removeClass('x3-trigger-wrap-focus');
         this.field.onBlur.call(this.field);
     },
 
     initTrigger: function(){
-        this.trigger.addClassOnOver('x-form-trigger-over');
-        this.trigger.addClassOnClick('x-form-trigger-click');
+        this.trigger.addClassOnOver('x3-form-trigger-over');
+        this.trigger.addClassOnClick('x3-form-trigger-click');
     },
 
     initSpinner: function(){
@@ -8258,7 +8258,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
             'spindown': true
         });
 
-        this.keyNav = new Ext.KeyNav(this.el, {
+        this.keyNav = new Ext3.KeyNav(this.el, {
             "up": function(e){
                 e.preventDefault();
                 this.onSpinUp();
@@ -8282,7 +8282,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
             scope: this
         });
 
-        this.repeater = new Ext.util.ClickRepeater(this.trigger, {
+        this.repeater = new Ext3.util.ClickRepeater(this.trigger, {
             accelerate: this.accelerate
         });
         this.field.mon(this.repeater, "click", this.onTriggerClick, this, {
@@ -8313,7 +8313,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
             return;
         }
         var middle = this.getMiddle();
-        this.tmpHoverClass = (Ext.EventObject.getPageY() < middle) ? 'x-form-spinner-overup' : 'x-form-spinner-overdown';
+        this.tmpHoverClass = (Ext3.EventObject.getPageY() < middle) ? 'x3-form-spinner-overup' : 'x3-form-spinner-overdown';
         this.trigger.addClass(this.tmpHoverClass);
     },
 
@@ -8328,8 +8328,8 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
             return;
         }
         var middle = this.getMiddle();
-        if (((Ext.EventObject.getPageY() > middle) && this.tmpHoverClass == "x-form-spinner-overup") ||
-        ((Ext.EventObject.getPageY() < middle) && this.tmpHoverClass == "x-form-spinner-overdown")) {
+        if (((Ext3.EventObject.getPageY() > middle) && this.tmpHoverClass == "x3-form-spinner-overup") ||
+        ((Ext3.EventObject.getPageY() < middle) && this.tmpHoverClass == "x3-form-spinner-overdown")) {
         }
     },
 
@@ -8339,7 +8339,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
             return;
         }
         var middle = this.getMiddle();
-        this.tmpClickClass = (Ext.EventObject.getPageY() < middle) ? 'x-form-spinner-clickup' : 'x-form-spinner-clickdown';
+        this.tmpClickClass = (Ext3.EventObject.getPageY() < middle) ? 'x3-form-spinner-clickup' : 'x3-form-spinner-clickdown';
         this.trigger.addClass(this.tmpClickClass);
     },
 
@@ -8354,7 +8354,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
             return;
         }
         var middle = this.getMiddle();
-        var ud = (Ext.EventObject.getPageY() < middle) ? 'Up' : 'Down';
+        var ud = (Ext3.EventObject.getPageY() < middle) ? 'Up' : 'Down';
         this['onSpin' + ud]();
     },
 
@@ -8370,7 +8370,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
     //checks if control is allowed to spin
     isSpinnable: function(){
         if (this.disabled || this.el.dom.readOnly) {
-            Ext.EventObject.preventDefault(); //prevent scrolling when disabled/readonly
+            Ext3.EventObject.preventDefault(); //prevent scrolling when disabled/readonly
             return false;
         }
         return true;
@@ -8378,7 +8378,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
 
     handleMouseWheel: function(e){
         //disable scrolling when not focused
-        if (this.wrap.hasClass('x-trigger-wrap-focus') == false) {
+        if (this.wrap.hasClass('x3-trigger-wrap-focus') == false) {
             return;
         }
 
@@ -8397,7 +8397,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
     //private
     startDrag: function(){
         this.proxy.show();
-        this._previousY = Ext.fly(this.dd.getDragEl()).getTop();
+        this._previousY = Ext3.fly(this.dd.getDragEl()).getTop();
     },
 
     //private
@@ -8410,7 +8410,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
         if (this.disabled) {
             return;
         }
-        var y = Ext.fly(this.dd.getDragEl()).getTop();
+        var y = Ext3.fly(this.dd.getDragEl()).getTop();
         var ud = '';
 
         if (this._previousY > y) {
@@ -8431,7 +8431,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
         if (this.isSpinnable() == false) {
             return;
         }
-        if (Ext.EventObject.shiftKey == true) {
+        if (Ext3.EventObject.shiftKey == true) {
             this.onSpinUpAlternate();
             return;
         }
@@ -8447,7 +8447,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
         if (this.isSpinnable() == false) {
             return;
         }
-        if (Ext.EventObject.shiftKey == true) {
+        if (Ext3.EventObject.shiftKey == true) {
             this.onSpinDownAlternate();
             return;
         }
@@ -8536,16 +8536,16 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
             this.repeater.purgeListeners();
         }
         if (this.mimicing){
-            Ext.get(Ext.isIE ? document.body : document).un("mousedown", this.mimicBlur, this);
+            Ext3.get(Ext3.isIE ? document.body : document).un("mousedown", this.mimicBlur, this);
         }
     }
 });
 
 //backwards compat
-Ext.form.Spinner = Ext.ux.Spinner;Ext.ux.Spotlight = function(config){
-    Ext.apply(this, config);
+Ext3.form.Spinner = Ext3.ux.Spinner;Ext3.ux.Spotlight = function(config){
+    Ext3.apply(this, config);
 }
-Ext.ux.Spotlight.prototype = {
+Ext3.ux.Spotlight.prototype = {
     active : false,
     animate : true,
     duration: .25,
@@ -8555,14 +8555,14 @@ Ext.ux.Spotlight.prototype = {
     animated : false,
 
     createElements : function(){
-        var bd = Ext.getBody();
+        var bd = Ext3.getBody();
 
-        this.right = bd.createChild({cls:'x-spotlight'});
-        this.left = bd.createChild({cls:'x-spotlight'});
-        this.top = bd.createChild({cls:'x-spotlight'});
-        this.bottom = bd.createChild({cls:'x-spotlight'});
+        this.right = bd.createChild({cls:'x3-spotlight'});
+        this.left = bd.createChild({cls:'x3-spotlight'});
+        this.top = bd.createChild({cls:'x3-spotlight'});
+        this.bottom = bd.createChild({cls:'x3-spotlight'});
 
-        this.all = new Ext.CompositeElement([this.right, this.left, this.top, this.bottom]);
+        this.all = new Ext3.CompositeElement([this.right, this.left, this.top, this.bottom]);
     },
 
     show : function(el, callback, scope){
@@ -8570,7 +8570,7 @@ Ext.ux.Spotlight.prototype = {
             this.show.defer(50, this, [el, callback, scope]);
             return;
         }
-        this.el = Ext.get(el);
+        this.el = Ext3.get(el);
         if(!this.right){
             this.createElements();
         }
@@ -8578,7 +8578,7 @@ Ext.ux.Spotlight.prototype = {
             this.all.setDisplayed('');
             this.applyBounds(true, false);
             this.active = true;
-            Ext.EventManager.onWindowResize(this.syncSize, this);
+            Ext3.EventManager.onWindowResize(this.syncSize, this);
             this.applyBounds(false, this.animate, false, callback, scope);
         }else{
             this.applyBounds(false, false, false, callback, scope); // all these booleans look hideous
@@ -8590,7 +8590,7 @@ Ext.ux.Spotlight.prototype = {
             this.hide.defer(50, this, [callback, scope]);
             return;
         }
-        Ext.EventManager.removeResizeListener(this.syncSize, this);
+        Ext3.EventManager.removeResizeListener(this.syncSize, this);
         this.applyBounds(true, this.animate, true, callback, scope);
     },
 
@@ -8607,8 +8607,8 @@ Ext.ux.Spotlight.prototype = {
 
         var rg = this.el.getRegion();
 
-        var dw = Ext.lib.Dom.getViewWidth(true);
-        var dh = Ext.lib.Dom.getViewHeight(true);
+        var dw = Ext3.lib.Dom.getViewWidth(true);
+        var dh = Ext3.lib.Dom.getViewHeight(true);
 
         var c = 0, cb = false;
         if(anim){
@@ -8620,7 +8620,7 @@ Ext.ux.Spotlight.prototype = {
                         if(doHide){
                             this.doHide();
                         }
-                        Ext.callback(callback, scope, [this]);
+                        Ext3.callback(callback, scope, [this]);
                     }
                 },
                 scope: this,
@@ -8663,14 +8663,14 @@ Ext.ux.Spotlight.prototype = {
                 this.doHide();
             }
             if(callback){
-                Ext.callback(callback, scope, [this]);
+                Ext3.callback(callback, scope, [this]);
             }
         }
     },
 
     destroy : function(){
         this.doHide();
-        Ext.destroy(
+        Ext3.destroy(
             this.right,
             this.left,
             this.top,
@@ -8681,17 +8681,17 @@ Ext.ux.Spotlight.prototype = {
 };
 
 //backwards compat
-Ext.Spotlight = Ext.ux.Spotlight;/**
- * @class Ext.ux.StatusBar
- * <p>Basic status bar component that can be used as the bottom toolbar of any {@link Ext.Panel}.  In addition to
- * supporting the standard {@link Ext.Toolbar} interface for adding buttons, menus and other items, the StatusBar
+Ext3.Spotlight = Ext3.ux.Spotlight;/**
+ * @class Ext3.ux.StatusBar
+ * <p>Basic status bar component that can be used as the bottom toolbar of any {@link Ext3.Panel}.  In addition to
+ * supporting the standard {@link Ext3.Toolbar} interface for adding buttons, menus and other items, the StatusBar
  * provides a greedy status element that can be aligned to either side and has convenient methods for setting the
  * status text and icon.  You can also indicate that something is processing using the {@link #showBusy} method.</p>
  * <pre><code>
-new Ext.Panel({
+new Ext3.Panel({
     title: 'StatusBar',
     // etc.
-    bbar: new Ext.ux.StatusBar({
+    bbar: new Ext3.ux.StatusBar({
         id: 'my-status',
 
         // defaults to use when the status is cleared:
@@ -8710,7 +8710,7 @@ new Ext.Panel({
 });
 
 // Update the status bar later in code:
-var sb = Ext.getCmp('my-status');
+var sb = Ext3.getCmp('my-status');
 sb.setStatus({
     text: 'OK',
     iconCls: 'ok-icon',
@@ -8724,12 +8724,12 @@ sb.showBusy();
 
 sb.clearStatus(); // once completeed
 </code></pre>
- * @extends Ext.Toolbar
+ * @extends Ext3.Toolbar
  * @constructor
  * Creates a new StatusBar
  * @param {Object/Array} config A config object
  */
-Ext.ux.StatusBar = Ext.extend(Ext.Toolbar, {
+Ext3.ux.StatusBar = Ext3.extend(Ext3.Toolbar, {
     /**
      * @cfg {String} statusAlign
      * The alignment of the status element within the overall StatusBar layout.  When the StatusBar is rendered,
@@ -8740,10 +8740,10 @@ Ext.ux.StatusBar = Ext.extend(Ext.Toolbar, {
      * <pre><code>
 // Create a left-aligned status bar containing a button,
 // separator and text item that will be right-aligned (default):
-new Ext.Panel({
+new Ext3.Panel({
     title: 'StatusBar',
     // etc.
-    bbar: new Ext.ux.StatusBar({
+    bbar: new Ext3.ux.StatusBar({
         defaultText: 'Default status text',
         id: 'status-id',
         items: [{
@@ -8755,10 +8755,10 @@ new Ext.Panel({
 // By adding the statusAlign config, this will create the
 // exact same toolbar, except the status and toolbar item
 // layout will be reversed from the previous example:
-new Ext.Panel({
+new Ext3.Panel({
     title: 'StatusBar',
     // etc.
-    bbar: new Ext.ux.StatusBar({
+    bbar: new Ext3.ux.StatusBar({
         defaultText: 'Default status text',
         id: 'status-id',
         statusAlign: 'right',
@@ -8792,37 +8792,37 @@ new Ext.Panel({
      * expected to provide a background image (defaults to '').
      * Example usage:<pre><code>
 // Example CSS rule:
-.x-statusbar .x-status-custom {
+.x3-statusbar .x3-status-custom {
     padding-left: 25px;
     background: transparent url(images/custom-icon.gif) no-repeat 3px 2px;
 }
 
 // Setting a default icon:
-var sb = new Ext.ux.StatusBar({
-    defaultIconCls: 'x-status-custom'
+var sb = new Ext3.ux.StatusBar({
+    defaultIconCls: 'x3-status-custom'
 });
 
 // Changing the icon:
 sb.setStatus({
     text: 'New status',
-    iconCls: 'x-status-custom'
+    iconCls: 'x3-status-custom'
 });
 </code></pre>
      */
 
     /**
      * @cfg {String} cls
-     * The base class applied to the containing element for this component on render (defaults to 'x-statusbar')
+     * The base class applied to the containing element for this component on render (defaults to 'x3-statusbar')
      */
-    cls : 'x-statusbar',
+    cls : 'x3-statusbar',
     /**
      * @cfg {String} busyIconCls
      * The default <code>{@link #iconCls}</code> applied when calling
-     * <code>{@link #showBusy}</code> (defaults to <tt>'x-status-busy'</tt>).
+     * <code>{@link #showBusy}</code> (defaults to <tt>'x3-status-busy'</tt>).
      * It can be overridden at any time by passing the <code>iconCls</code>
      * argument into <code>{@link #showBusy}</code>.
      */
-    busyIconCls : 'x-status-busy',
+    busyIconCls : 'x3-status-busy',
     /**
      * @cfg {String} busyText
      * The default <code>{@link #text}</code> applied when calling
@@ -8862,19 +8862,19 @@ sb.setStatus({
     // private
     initComponent : function(){
         if(this.statusAlign=='right'){
-            this.cls += ' x-status-right';
+            this.cls += ' x3-status-right';
         }
-        Ext.ux.StatusBar.superclass.initComponent.call(this);
+        Ext3.ux.StatusBar.superclass.initComponent.call(this);
     },
 
     // private
     afterRender : function(){
-        Ext.ux.StatusBar.superclass.afterRender.call(this);
+        Ext3.ux.StatusBar.superclass.afterRender.call(this);
 
         var right = this.statusAlign == 'right';
         this.currIconCls = this.iconCls || this.defaultIconCls;
-        this.statusEl = new Ext.Toolbar.TextItem({
-            cls: 'x-status-text ' + (this.currIconCls || ''),
+        this.statusEl = new Ext3.Toolbar.TextItem({
+            cls: 'x3-status-text ' + (this.currIconCls || ''),
             text: this.text || this.defaultText || ''
         });
 
@@ -8920,14 +8920,14 @@ statusBar.setStatus('New status');
 // Set the status and icon, auto-clearing with default options:
 statusBar.setStatus({
     text: 'New status',
-    iconCls: 'x-status-custom',
+    iconCls: 'x3-status-custom',
     clear: true
 });
 
 // Auto-clear with custom options:
 statusBar.setStatus({
     text: 'New status',
-    iconCls: 'x-status-custom',
+    iconCls: 'x3-status-custom',
     clear: {
         wait: 8000,
         anim: false,
@@ -8935,7 +8935,7 @@ statusBar.setStatus({
     }
 });
 </code></pre>
-     * @return {Ext.ux.StatusBar} this
+     * @return {Ext3.ux.StatusBar} this
      */
     setStatus : function(o){
         o = o || {};
@@ -8956,7 +8956,7 @@ statusBar.setStatus({
                 defaults = {useDefaults: true, anim: true};
 
             if(typeof c == 'object'){
-                c = Ext.applyIf(c, defaults);
+                c = Ext3.applyIf(c, defaults);
                 if(c.wait){
                     wait = c.wait;
                 }
@@ -8982,7 +8982,7 @@ statusBar.setStatus({
      * <li><tt>useDefaults</tt> {Boolean} : (optional) True to reset the text and icon using {@link #defaultText} and
      * {@link #defaultIconCls} (defaults to false which sets the text to '' and removes any existing icon class).</li>
      * </ul>
-     * @return {Ext.ux.StatusBar} this
+     * @return {Ext3.ux.StatusBar} this
      */
     clearStatus : function(o){
         o = o || {};
@@ -8998,7 +8998,7 @@ statusBar.setStatus({
             iconCls = o.useDefaults ? (this.defaultIconCls ? this.defaultIconCls : '') : '';
 
         if(o.anim){
-            // animate the statusEl Ext.Element
+            // animate the statusEl Ext3.Element
             this.statusEl.el.fadeOut({
                 remove: false,
                 useDisplay: true,
@@ -9027,7 +9027,7 @@ statusBar.setStatus({
     /**
      * Convenience method for setting the status text directly.  For more flexible options see {@link #setStatus}.
      * @param {String} text (optional) The text to set (defaults to '')
-     * @return {Ext.ux.StatusBar} this
+     * @return {Ext3.ux.StatusBar} this
      */
     setText : function(text){
         this.activeThreadId++;
@@ -9050,7 +9050,7 @@ statusBar.setStatus({
      * Convenience method for setting the status icon directly.  For more flexible options see {@link #setStatus}.
      * See {@link #iconCls} for complete details about customizing the icon.
      * @param {String} iconCls (optional) The icon class to set (defaults to '', and any current icon class is removed)
-     * @return {Ext.ux.StatusBar} this
+     * @return {Ext3.ux.StatusBar} this
      */
     setIcon : function(cls){
         this.activeThreadId++;
@@ -9079,22 +9079,22 @@ statusBar.setStatus({
      * <tt>text</tt> and/or <tt>iconCls</tt> properties on the config to override the default {@link #busyText}
      * and {@link #busyIconCls} settings. If the config argument is not specified, {@link #busyText} and
      * {@link #busyIconCls} will be used in conjunction with all of the default options for {@link #setStatus}.
-     * @return {Ext.ux.StatusBar} this
+     * @return {Ext3.ux.StatusBar} this
      */
     showBusy : function(o){
         if(typeof o == 'string'){
             o = {text:o};
         }
-        o = Ext.applyIf(o || {}, {
+        o = Ext3.applyIf(o || {}, {
             text: this.busyText,
             iconCls: this.busyIconCls
         });
         return this.setStatus(o);
     }
 });
-Ext.reg('statusbar', Ext.ux.StatusBar);
+Ext3.reg('statusbar', Ext3.ux.StatusBar);
 /**
- * @class Ext.ux.TabCloseMenu
+ * @class Ext3.ux.TabCloseMenu
  * @extends Object 
  * Plugin (ptype = 'tabclosemenu') for adding a close context menu to tabs. Note that the menu respects
  * the closable configuration on the tab. As such, commands like remove others and remove all will not
@@ -9104,7 +9104,7 @@ Ext.reg('statusbar', Ext.ux.StatusBar);
  * @param {Object} config The configuration options
  * @ptype tabclosemenu
  */
-Ext.ux.TabCloseMenu = Ext.extend(Object, {
+Ext3.ux.TabCloseMenu = Ext3.extend(Object, {
     /**
      * @cfg {String} closeTabText
      * The text for closing the current tab. Defaults to <tt>'Close Tab'</tt>.
@@ -9130,7 +9130,7 @@ Ext.ux.TabCloseMenu = Ext.extend(Object, {
     closeAllTabsText: 'Close All Tabs',
     
     constructor : function(config){
-        Ext.apply(this, config || {});
+        Ext3.apply(this, config || {});
     },
 
     //public
@@ -9144,7 +9144,7 @@ Ext.ux.TabCloseMenu = Ext.extend(Object, {
     },
     
     destroy : function(){
-        Ext.destroy(this.menu);
+        Ext3.destroy(this.menu);
         delete this.menu;
         delete this.tabs;
         delete this.active;    
@@ -9202,7 +9202,7 @@ Ext.ux.TabCloseMenu = Ext.extend(Object, {
                     handler: this.onCloseAll
                 });
             }
-            this.menu = new Ext.menu.Menu({
+            this.menu = new Ext3.menu.Menu({
                 items: items
             });
         }
@@ -9230,33 +9230,33 @@ Ext.ux.TabCloseMenu = Ext.extend(Object, {
                 }    
             }
         }, this);
-        Ext.each(items, function(item){
+        Ext3.each(items, function(item){
             this.tabs.remove(item);
         }, this);
     }
 });
 
-Ext.preg('tabclosemenu', Ext.ux.TabCloseMenu);Ext.ns('Ext.ux.grid');
+Ext3.preg('tabclosemenu', Ext3.ux.TabCloseMenu);Ext3.ns('Ext3.ux.grid');
 
 /**
- * @class Ext.ux.grid.TableGrid
- * @extends Ext.grid.GridPanel
+ * @class Ext3.ux.grid.TableGrid
+ * @extends Ext3.grid.GridPanel
  * A Grid which creates itself from an existing HTML table element.
  * @history
  * 2007-03-01 Original version by Nige "Animal" White
  * 2007-03-10 jvs Slightly refactored to reuse existing classes * @constructor
- * @param {String/HTMLElement/Ext.Element} table The table element from which this grid will be created -
+ * @param {String/HTMLElement/Ext3.Element} table The table element from which this grid will be created -
  * The table MUST have some type of size defined for the grid to fill. The container will be
  * automatically set to position relative if it isn't already.
  * @param {Object} config A config object that sets properties on this grid and has two additional (optional)
  * properties: fields and columns which allow for customizing data fields and columns for this grid.
  */
-Ext.ux.grid.TableGrid = function(table, config){
+Ext3.ux.grid.TableGrid = function(table, config){
     config = config ||
     {};
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
     var cf = config.fields || [], ch = config.columns || [];
-    table = Ext.get(table);
+    table = Ext3.get(table);
     
     var ct = table.insertSibling();
     
@@ -9266,13 +9266,13 @@ Ext.ux.grid.TableGrid = function(table, config){
         var text = h.innerHTML;
         var name = 'tcol-' + i;
         
-        fields.push(Ext.applyIf(cf[i] ||
+        fields.push(Ext3.applyIf(cf[i] ||
         {}, {
             name: name,
             mapping: 'td:nth(' + (i + 1) + ')/@innerHTML'
         }));
         
-        cols.push(Ext.applyIf(ch[i] ||
+        cols.push(Ext3.applyIf(ch[i] ||
         {}, {
             'header': text,
             'dataIndex': name,
@@ -9282,15 +9282,15 @@ Ext.ux.grid.TableGrid = function(table, config){
         }));
     }
     
-    var ds = new Ext.data.Store({
-        reader: new Ext.data.XmlReader({
+    var ds = new Ext3.data.Store({
+        reader: new Ext3.data.XmlReader({
             record: 'tbody tr'
         }, fields)
     });
     
     ds.loadData(table.dom);
     
-    var cm = new Ext.grid.ColumnModel(cols);
+    var cm = new Ext3.grid.ColumnModel(cols);
     
     if (config.width || config.height) {
         ct.setSize(config.width || 'auto', config.height || 'auto');
@@ -9303,36 +9303,36 @@ Ext.ux.grid.TableGrid = function(table, config){
         table.remove();
     }
     
-    Ext.applyIf(this, {
+    Ext3.applyIf(this, {
         'ds': ds,
         'cm': cm,
-        'sm': new Ext.grid.RowSelectionModel(),
+        'sm': new Ext3.grid.RowSelectionModel(),
         autoHeight: true,
         autoWidth: false
     });
-    Ext.ux.grid.TableGrid.superclass.constructor.call(this, ct, {});
+    Ext3.ux.grid.TableGrid.superclass.constructor.call(this, ct, {});
 };
 
-Ext.extend(Ext.ux.grid.TableGrid, Ext.grid.GridPanel);
+Ext3.extend(Ext3.ux.grid.TableGrid, Ext3.grid.GridPanel);
 
 //backwards compat
-Ext.grid.TableGrid = Ext.ux.grid.TableGrid;
-Ext.ns('Ext.ux');
+Ext3.grid.TableGrid = Ext3.ux.grid.TableGrid;
+Ext3.ns('Ext3.ux');
 /**
- * @class Ext.ux.TabScrollerMenu
+ * @class Ext3.ux.TabScrollerMenu
  * @extends Object 
  * Plugin (ptype = 'tabscrollermenu') for adding a tab scroller menu to tabs.
  * @constructor 
  * @param {Object} config Configuration options
  * @ptype tabscrollermenu
  */
-Ext.ux.TabScrollerMenu =  Ext.extend(Object, {
+Ext3.ux.TabScrollerMenu =  Ext3.extend(Object, {
     /**
      * @cfg {Number} pageSize How many items to allow per submenu.
      */
 	pageSize       : 10,
     /**
-     * @cfg {Number} maxText How long should the title of each {@link Ext.menu.Item} be.
+     * @cfg {Number} maxText How long should the title of each {@link Ext3.menu.Item} be.
      */
 	maxText        : 15,
     /**
@@ -9341,11 +9341,11 @@ Ext.ux.TabScrollerMenu =  Ext.extend(Object, {
 	menuPrefixText : 'Items',
 	constructor    : function(config) {
 		config = config || {};
-		Ext.apply(this, config);
+		Ext3.apply(this, config);
 	},
     //private
 	init : function(tabPanel) {
-		Ext.apply(tabPanel, this.parentOverrides);
+		Ext3.apply(tabPanel, this.parentOverrides);
 		
 		tabPanel.tabScrollerMenu = this;
 		var thisRef = this;
@@ -9367,21 +9367,21 @@ Ext.ux.TabScrollerMenu =  Ext.extend(Object, {
 		
 		//move the right menu item to the left 18px
 		var rtScrBtn = this.header.dom.firstChild;
-		Ext.fly(rtScrBtn).applyStyles({
+		Ext3.fly(rtScrBtn).applyStyles({
 			right : '18px'
 		});
 		
-		var stripWrap = Ext.get(this.strip.dom.parentNode);
+		var stripWrap = Ext3.get(this.strip.dom.parentNode);
 		stripWrap.applyStyles({
 			 'margin-right' : '36px'
 		});
 		
 		// Add the new righthand menu
 		var scrollMenu = this.header.insertFirst({
-			cls:'x-tab-tabmenu-right'
+			cls:'x3-tab-tabmenu-right'
 		});
 		scrollMenu.setHeight(h);
-		scrollMenu.addClassOnOver('x-tab-tabmenu-over');
+		scrollMenu.addClassOnOver('x3-tab-tabmenu-over');
 		scrollMenu.on('click', this.showTabsMenu, this);	
 		
 		this.scrollLeft.show = this.scrollLeft.show.createSequence(function() {
@@ -9445,12 +9445,12 @@ Ext.ux.TabScrollerMenu =  Ext.extend(Object, {
                 this.un('destroy', this.tabsMenu.destroy, this.tabsMenu);
                 this.tabsMenu = null;
 			}
-            this.tabsMenu =  new Ext.menu.Menu();
+            this.tabsMenu =  new Ext3.menu.Menu();
             this.on('destroy', this.tabsMenu.destroy, this.tabsMenu);
 
             this.generateTabMenuItems();
 
-            var target = Ext.get(e.getTarget());
+            var target = Ext3.get(e.getTarget());
 			var xy     = target.getXY();
 //
 			//Y param + 24 pixels
@@ -9514,7 +9514,7 @@ Ext.ux.TabScrollerMenu =  Ext.extend(Object, {
 		// private
 		autoGenMenuItem : function(item) {
 			var maxText = this.tabScrollerMenu.getMaxText();
-			var text    = Ext.util.Format.ellipsis(item.title, maxText);
+			var text    = Ext3.util.Format.ellipsis(item.title, maxText);
 			
 			return {
 				text      : text,
@@ -9533,25 +9533,25 @@ Ext.ux.TabScrollerMenu =  Ext.extend(Object, {
 	}	
 });
 
-Ext.reg('tabscrollermenu', Ext.ux.TabScrollerMenu);
-Ext.ns('Ext.ux.tree');
+Ext3.reg('tabscrollermenu', Ext3.ux.TabScrollerMenu);
+Ext3.ns('Ext3.ux.tree');
 
 /**
- * @class Ext.ux.tree.XmlTreeLoader
- * @extends Ext.tree.TreeLoader
- * <p>A TreeLoader that can convert an XML document into a hierarchy of {@link Ext.tree.TreeNode}s.
+ * @class Ext3.ux.tree.XmlTreeLoader
+ * @extends Ext3.tree.TreeLoader
+ * <p>A TreeLoader that can convert an XML document into a hierarchy of {@link Ext3.tree.TreeNode}s.
  * Any text value included as a text node in the XML will be added to the parent node as an attribute
  * called <tt>innerText</tt>.  Also, the tag name of each XML node will be added to the tree node as
  * an attribute called <tt>tagName</tt>.</p>
  * <p>By default, this class expects that your source XML will provide the necessary attributes on each
- * node as expected by the {@link Ext.tree.TreePanel} to display and load properly.  However, you can
+ * node as expected by the {@link Ext3.tree.TreePanel} to display and load properly.  However, you can
  * provide your own custom processing of node attributes by overriding the {@link #processNode} method
  * and modifying the attributes as needed before they are used to create the associated TreeNode.</p>
  * @constructor
  * Creates a new XmlTreeloader.
  * @param {Object} config A config object containing config properties.
  */
-Ext.ux.tree.XmlTreeLoader = Ext.extend(Ext.tree.TreeLoader, {
+Ext3.ux.tree.XmlTreeLoader = Ext3.extend(Ext3.tree.TreeLoader, {
     /**
      * @property  XML_NODE_ELEMENT
      * XML element node (value 1, read-only)
@@ -9584,7 +9584,7 @@ Ext.ux.tree.XmlTreeLoader = Ext.extend(Ext.tree.TreeLoader, {
     // private
     parseXml : function(node) {
         var nodes = [];
-        Ext.each(node.childNodes, function(n){
+        Ext3.each(node.childNodes, function(n){
             if(n.nodeType == this.XML_NODE_ELEMENT){
                 var treeNode = this.createNode(n);
                 if(n.childNodes.length > 0){
@@ -9614,13 +9614,13 @@ Ext.ux.tree.XmlTreeLoader = Ext.extend(Ext.tree.TreeLoader, {
             tagName: node.tagName
         };
 
-        Ext.each(node.attributes, function(a){
+        Ext3.each(node.attributes, function(a){
             attr[a.nodeName] = a.nodeValue;
         });
 
         this.processAttributes(attr);
 
-        return Ext.ux.tree.XmlTreeLoader.superclass.createNode.call(this, attr);
+        return Ext3.ux.tree.XmlTreeLoader.superclass.createNode.call(this, attr);
     },
 
     /*
@@ -9629,39 +9629,39 @@ Ext.ux.tree.XmlTreeLoader = Ext.extend(Ext.tree.TreeLoader, {
      * will be passed a config object containing existing TreeNode attribute name/value
      * pairs which can be modified as needed directly (no need to return the object).
      */
-    processAttributes: Ext.emptyFn
+    processAttributes: Ext3.emptyFn
 });
 
 //backwards compat
-Ext.ux.XmlTreeLoader = Ext.ux.tree.XmlTreeLoader;
+Ext3.ux.XmlTreeLoader = Ext3.ux.tree.XmlTreeLoader;
 /**
- * @class Ext.ux.ValidationStatus
- * A {@link Ext.StatusBar} plugin that provides automatic error notification when the
+ * @class Ext3.ux.ValidationStatus
+ * A {@link Ext3.StatusBar} plugin that provides automatic error notification when the
  * associated form contains validation errors.
- * @extends Ext.Component
+ * @extends Ext3.Component
  * @constructor
  * Creates a new ValiationStatus plugin
  * @param {Object} config A config object
  */
-Ext.ux.ValidationStatus = Ext.extend(Ext.Component, {
+Ext3.ux.ValidationStatus = Ext3.extend(Ext3.Component, {
     /**
      * @cfg {String} errorIconCls
      * The {@link #iconCls} value to be applied to the status message when there is a
-     * validation error. Defaults to <tt>'x-status-error'</tt>.
+     * validation error. Defaults to <tt>'x3-status-error'</tt>.
      */
-    errorIconCls : 'x-status-error',
+    errorIconCls : 'x3-status-error',
     /**
      * @cfg {String} errorListCls
      * The css class to be used for the error list when there are validation errors.
-     * Defaults to <tt>'x-status-error-list'</tt>.
+     * Defaults to <tt>'x3-status-error-list'</tt>.
      */
-    errorListCls : 'x-status-error-list',
+    errorListCls : 'x3-status-error-list',
     /**
      * @cfg {String} validIconCls
      * The {@link #iconCls} value to be applied to the status message when the form
-     * validates. Defaults to <tt>'x-status-valid'</tt>.
+     * validates. Defaults to <tt>'x3-status-valid'</tt>.
      */
-    validIconCls : 'x-status-valid',
+    validIconCls : 'x3-status-valid',
     
     /**
      * @cfg {String} showText
@@ -9687,11 +9687,11 @@ Ext.ux.ValidationStatus = Ext.extend(Ext.Component, {
         sb.on('render', function(){
             this.statusBar = sb;
             this.monitor = true;
-            this.errors = new Ext.util.MixedCollection();
+            this.errors = new Ext3.util.MixedCollection();
             this.listAlign = (sb.statusAlign=='right' ? 'br-tr?' : 'bl-tl?');
             
             if(this.form){
-                this.form = Ext.getCmp(this.form).getForm();
+                this.form = Ext3.getCmp(this.form).getForm();
                 this.startMonitoring();
                 this.form.on('beforeaction', function(f, action){
                     if(action.type == 'submit'){
@@ -9743,7 +9743,7 @@ Ext.ux.ValidationStatus = Ext.extend(Ext.Component, {
     onDestroy : function(){
         this.stopMonitoring();
         this.statusBar.statusEl.un('click', this.onStatusClick, this);
-        Ext.ux.ValidationStatus.superclass.onDestroy.call(this);
+        Ext3.ux.ValidationStatus.superclass.onDestroy.call(this);
     },
     
     // private
@@ -9771,7 +9771,7 @@ Ext.ux.ValidationStatus = Ext.extend(Ext.Component, {
         if(this.errors.getCount() > 0){
 	        var msg = '<ul>';
 	        this.errors.each(function(err){
-	            msg += ('<li id="x-err-'+ err.field.id +'"><a href="#">' + err.msg + '</a></li>');
+	            msg += ('<li id="x3-err-'+ err.field.id +'"><a href="#">' + err.msg + '</a></li>');
 	        }, this);
 	        this.getMsgEl().update(msg+'</ul>');
         }else{
@@ -9782,14 +9782,14 @@ Ext.ux.ValidationStatus = Ext.extend(Ext.Component, {
     // private
     getMsgEl : function(){
         if(!this.msgEl){
-            this.msgEl = Ext.DomHelper.append(Ext.getBody(), {
-                cls: this.errorListCls+' x-hide-offsets'
+            this.msgEl = Ext3.DomHelper.append(Ext3.getBody(), {
+                cls: this.errorListCls+' x3-hide-offsets'
             }, true);
             
             this.msgEl.on('click', function(e){
                 var t = e.getTarget('li', 10, true);
                 if(t){
-                    Ext.getCmp(t.id.split('x-err-')[1]).focus();
+                    Ext3.getCmp(t.id.split('x3-err-')[1]).focus();
                     this.hideErrors();
                 }
             }, this, {stopEvent:true}); // prevent anchor click navigation
@@ -9824,43 +9824,43 @@ Ext.ux.ValidationStatus = Ext.extend(Ext.Component, {
         }
     }
 });(function() {
-    Ext.override(Ext.list.Column, {
+    Ext3.override(Ext3.list.Column, {
         init : function() {    
-            var types = Ext.data.Types,
+            var types = Ext3.data.Types,
                 st = this.sortType;
                     
             if(this.type){
-                if(Ext.isString(this.type)){
-                    this.type = Ext.data.Types[this.type.toUpperCase()] || types.AUTO;
+                if(Ext3.isString(this.type)){
+                    this.type = Ext3.data.Types[this.type.toUpperCase()] || types.AUTO;
                 }
             }else{
                 this.type = types.AUTO;
             }
 
             // named sortTypes are supported, here we look them up
-            if(Ext.isString(st)){
-                this.sortType = Ext.data.SortTypes[st];
-            }else if(Ext.isEmpty(st)){
+            if(Ext3.isString(st)){
+                this.sortType = Ext3.data.SortTypes[st];
+            }else if(Ext3.isEmpty(st)){
                 this.sortType = this.type.sortType;
             }
         }
     });
 
-    Ext.tree.Column = Ext.extend(Ext.list.Column, {});
-    Ext.tree.NumberColumn = Ext.extend(Ext.list.NumberColumn, {});
-    Ext.tree.DateColumn = Ext.extend(Ext.list.DateColumn, {});
-    Ext.tree.BooleanColumn = Ext.extend(Ext.list.BooleanColumn, {});
+    Ext3.tree.Column = Ext3.extend(Ext3.list.Column, {});
+    Ext3.tree.NumberColumn = Ext3.extend(Ext3.list.NumberColumn, {});
+    Ext3.tree.DateColumn = Ext3.extend(Ext3.list.DateColumn, {});
+    Ext3.tree.BooleanColumn = Ext3.extend(Ext3.list.BooleanColumn, {});
 
-    Ext.reg('tgcolumn', Ext.tree.Column);
-    Ext.reg('tgnumbercolumn', Ext.tree.NumberColumn);
-    Ext.reg('tgdatecolumn', Ext.tree.DateColumn);
-    Ext.reg('tgbooleancolumn', Ext.tree.BooleanColumn);
+    Ext3.reg('tgcolumn', Ext3.tree.Column);
+    Ext3.reg('tgnumbercolumn', Ext3.tree.NumberColumn);
+    Ext3.reg('tgdatecolumn', Ext3.tree.DateColumn);
+    Ext3.reg('tgbooleancolumn', Ext3.tree.BooleanColumn);
 })();
 /**
- * @class Ext.ux.tree.TreeGridNodeUI
- * @extends Ext.tree.TreeNodeUI
+ * @class Ext3.ux.tree.TreeGridNodeUI
+ * @extends Ext3.tree.TreeNodeUI
  */
-Ext.ux.tree.TreeGridNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
+Ext3.ux.tree.TreeGridNodeUI = Ext3.extend(Ext3.tree.TreeNodeUI, {
     isTreeGridNodeUI: true,
 
     renderElements : function(n, a, targetNode, bulkRender){
@@ -9872,13 +9872,13 @@ Ext.ux.tree.TreeGridNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
         this.indentMarkup = n.parentNode ? n.parentNode.ui.getChildIndent() : '';
 
         buf = [
-             '<tbody class="x-tree-node">',
-                '<tr ext:tree-node-id="', n.id ,'" class="x-tree-node-el x-tree-node-leaf ', a.cls, '">',
-                    '<td class="x-treegrid-col">',
-                        '<span class="x-tree-node-indent">', this.indentMarkup, "</span>",
-                        '<img src="', this.emptyIcon, '" class="x-tree-ec-icon x-tree-elbow" />',
-                        '<img src="', a.icon || this.emptyIcon, '" class="x-tree-node-icon', (a.icon ? " x-tree-node-inline-icon" : ""), (a.iconCls ? " "+a.iconCls : ""), '" unselectable="on" />',
-                        '<a hidefocus="on" class="x-tree-node-anchor" href="', a.href ? a.href : '#', '" tabIndex="1" ',
+             '<tbody class="x3-tree-node">',
+                '<tr ext:tree-node-id="', n.id ,'" class="x3-tree-node-el x3-tree-node-leaf ', a.cls, '">',
+                    '<td class="x3-treegrid-col">',
+                        '<span class="x3-tree-node-indent">', this.indentMarkup, "</span>",
+                        '<img src="', this.emptyIcon, '" class="x3-tree-ec-icon x3-tree-elbow" />',
+                        '<img src="', a.icon || this.emptyIcon, '" class="x3-tree-node-icon', (a.icon ? " x3-tree-node-inline-icon" : ""), (a.iconCls ? " "+a.iconCls : ""), '" unselectable="on" />',
+                        '<a hidefocus="on" class="x3-tree-node-anchor" href="', a.href ? a.href : '#', '" tabIndex="1" ',
                             a.hrefTarget ? ' target="'+a.hrefTarget+'"' : '', '>',
                         '<span unselectable="on">', (c.tpl ? c.tpl.apply(a) : a[c.dataIndex] || c.text), '</span></a>',
                     '</td>'
@@ -9887,8 +9887,8 @@ Ext.ux.tree.TreeGridNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
         for(i = 1, len = cols.length; i < len; i++){
             c = cols[i];
             buf.push(
-                    '<td class="x-treegrid-col ', (c.cls ? c.cls : ''), '">',
-                        '<div unselectable="on" class="x-treegrid-text"', (c.align ? ' style="text-align: ' + c.align + ';"' : ''), '>',
+                    '<td class="x3-treegrid-col ', (c.cls ? c.cls : ''), '">',
+                        '<div unselectable="on" class="x3-treegrid-text"', (c.align ? ' style="text-align: ' + c.align + ';"' : ''), '>',
                             (c.tpl ? c.tpl.apply(a) : a[c.dataIndex]),
                         '</div>',
                     '</td>'
@@ -9896,8 +9896,8 @@ Ext.ux.tree.TreeGridNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
         }
 
         buf.push(
-            '</tr><tr class="x-tree-node-ct"><td colspan="', cols.length, '">',
-            '<table class="x-treegrid-node-ct-table" cellpadding="0" cellspacing="0" style="table-layout: fixed; display: none; width: ', t.innerCt.getWidth() ,'px;"><colgroup>'
+            '</tr><tr class="x3-tree-node-ct"><td colspan="', cols.length, '">',
+            '<table class="x3-treegrid-node-ct-table" cellpadding="0" cellspacing="0" style="table-layout: fixed; display: none; width: ', t.innerCt.getWidth() ,'px;"><colgroup>'
         );
         for(i = 0, len = cols.length; i<len; i++) {
             buf.push('<col style="width: ', (cols[i].hidden ? 0 : cols[i].width) ,'px;" />');
@@ -9905,9 +9905,9 @@ Ext.ux.tree.TreeGridNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
         buf.push('</colgroup></table></td></tr></tbody>');
 
         if(bulkRender !== true && n.nextSibling && n.nextSibling.ui.getEl()){
-            this.wrap = Ext.DomHelper.insertHtml("beforeBegin", n.nextSibling.ui.getEl(), buf.join(''));
+            this.wrap = Ext3.DomHelper.insertHtml("beforeBegin", n.nextSibling.ui.getEl(), buf.join(''));
         }else{
-            this.wrap = Ext.DomHelper.insertHtml("beforeEnd", targetNode, buf.join(''));
+            this.wrap = Ext3.DomHelper.insertHtml("beforeEnd", targetNode, buf.join(''));
         }
 
         this.elNode = this.wrap.childNodes[0];
@@ -9923,11 +9923,11 @@ Ext.ux.tree.TreeGridNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
     // private
     animExpand : function(cb){
         this.ctNode.style.display = "";
-        Ext.ux.tree.TreeGridNodeUI.superclass.animExpand.call(this, cb);
+        Ext3.ux.tree.TreeGridNodeUI.superclass.animExpand.call(this, cb);
     }
 });
 
-Ext.ux.tree.TreeGridRootNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
+Ext3.ux.tree.TreeGridRootNodeUI = Ext3.extend(Ext3.tree.TreeNodeUI, {
     isTreeGridNodeUI: true,
 
     // private
@@ -9937,7 +9937,7 @@ Ext.ux.tree.TreeGridRootNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
             this.node.expanded = true;
         }
 
-        if(Ext.isWebKit) {
+        if(Ext3.isWebKit) {
             // weird table-layout: fixed issue in webkit
             var ct = this.ctNode;
             ct.style.tableLayout = null;
@@ -9949,18 +9949,18 @@ Ext.ux.tree.TreeGridRootNodeUI = Ext.extend(Ext.tree.TreeNodeUI, {
 
     destroy : function(){
         if(this.elNode){
-            Ext.dd.Registry.unregister(this.elNode.id);
+            Ext3.dd.Registry.unregister(this.elNode.id);
         }
         delete this.node;
     },
 
-    collapse : Ext.emptyFn,
-    expand : Ext.emptyFn
+    collapse : Ext3.emptyFn,
+    expand : Ext3.emptyFn
 });/**
- * @class Ext.tree.ColumnResizer
- * @extends Ext.util.Observable
+ * @class Ext3.tree.ColumnResizer
+ * @extends Ext3.util.Observable
  */
-Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
+Ext3.tree.ColumnResizer = Ext3.extend(Ext3.util.Observable, {
     /**
      * @cfg {Number} minWidth The minimum width the column can be dragged to.
      * Defaults to <tt>14</tt>.
@@ -9968,8 +9968,8 @@ Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
     minWidth: 14,
 
     constructor: function(config){
-        Ext.apply(this, config);
-        Ext.tree.ColumnResizer.superclass.constructor.call(this);
+        Ext3.apply(this, config);
+        Ext3.tree.ColumnResizer.superclass.constructor.call(this);
     },
 
     init : function(tree){
@@ -9979,7 +9979,7 @@ Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
 
     initEvents : function(tree){
         tree.mon(tree.innerHd, 'mousemove', this.handleHdMove, this);
-        this.tracker = new Ext.dd.DragTracker({
+        this.tracker = new Ext3.dd.DragTracker({
             onBeforeStart: this.onBeforeStart.createDelegate(this),
             onStart: this.onStart.createDelegate(this),
             onDrag: this.onDrag.createDelegate(this),
@@ -9994,7 +9994,7 @@ Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
     handleHdMove : function(e, t){
         var hw = 5,
             x = e.getPageX(),
-            hd = e.getTarget('.x-treegrid-hd', 3, true);
+            hd = e.getTarget('.x3-treegrid-hd', 3, true);
         
         if(hd){                                 
             var r = hd.getRegion(),
@@ -10003,21 +10003,21 @@ Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
             
             if(x - r.left <= hw && hd.dom !== pn.firstChild) {
                 var ps = hd.dom.previousSibling;
-                while(ps && Ext.fly(ps).hasClass('x-treegrid-hd-hidden')) {
+                while(ps && Ext3.fly(ps).hasClass('x3-treegrid-hd-hidden')) {
                     ps = ps.previousSibling;
                 }
                 if(ps) {                    
-                    this.activeHd = Ext.get(ps);
-    				ss.cursor = Ext.isWebKit ? 'e-resize' : 'col-resize';
+                    this.activeHd = Ext3.get(ps);
+    				ss.cursor = Ext3.isWebKit ? 'e-resize' : 'col-resize';
                 }
             } else if(r.right - x <= hw) {
                 var ns = hd.dom;
-                while(ns && Ext.fly(ns).hasClass('x-treegrid-hd-hidden')) {
+                while(ns && Ext3.fly(ns).hasClass('x3-treegrid-hd-hidden')) {
                     ns = ns.previousSibling;
                 }
                 if(ns) {
-                    this.activeHd = Ext.get(ns);
-    				ss.cursor = Ext.isWebKit ? 'w-resize' : 'col-resize';                    
+                    this.activeHd = Ext3.get(ns);
+    				ss.cursor = Ext3.isWebKit ? 'w-resize' : 'col-resize';                    
                 }
             } else{
                 delete this.activeHd;
@@ -10034,7 +10034,7 @@ Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
     onStart : function(e){
         this.dragHeadersDisabled = this.tree.headersDisabled;
         this.tree.headersDisabled = true;
-        this.proxy = this.tree.body.createChild({cls:'x-treegrid-resizer'});
+        this.proxy = this.tree.body.createChild({cls:'x3-treegrid-resizer'});
         this.proxy.setHeight(this.tree.body.getHeight());
 
         var x = this.tracker.getXY()[0];
@@ -10043,7 +10043,7 @@ Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
         this.hdIndex = this.tree.findHeaderIndex(this.dragHd);
 
         this.proxy.setX(this.hdX);
-        this.proxy.setWidth(x-this.hdX);
+        this.proxy.setWidth(x3-this.hdX);
 
         this.maxWidth = this.tree.outerCt.getWidth() - this.tree.innerBody.translatePoints(this.hdX).left;
     },
@@ -10068,16 +10068,16 @@ Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
             tree.headersDisabled = disabled;
         }, 100);
     }
-});Ext.ns('Ext.ux.tree');
+});Ext3.ns('Ext3.ux.tree');
 
 /**
- * @class Ext.ux.tree.TreeGridSorter
- * @extends Ext.tree.TreeSorter
- * Provides sorting of nodes in a {@link Ext.ux.tree.TreeGrid}.  The TreeGridSorter automatically monitors events on the
+ * @class Ext3.ux.tree.TreeGridSorter
+ * @extends Ext3.tree.TreeSorter
+ * Provides sorting of nodes in a {@link Ext3.ux.tree.TreeGrid}.  The TreeGridSorter automatically monitors events on the
  * associated TreeGrid that might affect the tree's sort order (beforechildrenrendered, append, insert and textchange).
  * Example usage:<br />
  * <pre><code>
- new Ext.ux.tree.TreeGridSorter(myTreeGrid, {
+ new Ext3.ux.tree.TreeGridSorter(myTreeGrid, {
      folderSort: true,
      dir: "desc",
      sortType: function(node) {
@@ -10090,7 +10090,7 @@ Ext.tree.ColumnResizer = Ext.extend(Ext.util.Observable, {
  * @param {TreeGrid} tree
  * @param {Object} config
  */
-Ext.ux.tree.TreeGridSorter = Ext.extend(Ext.tree.TreeSorter, {
+Ext3.ux.tree.TreeGridSorter = Ext3.extend(Ext3.tree.TreeSorter, {
     /**
      * @cfg {Array} sortClasses The CSS classes applied to a header when it is sorted. (defaults to <tt>['sort-asc', 'sort-desc']</tt>)
      */
@@ -10105,14 +10105,14 @@ Ext.ux.tree.TreeGridSorter = Ext.extend(Ext.tree.TreeSorter, {
     sortDescText : 'Sort Descending',
 
     constructor : function(tree, config) {
-        if(!Ext.isObject(config)) {
+        if(!Ext3.isObject(config)) {
             config = {
                 property: tree.columns[0].dataIndex || 'text',
                 folderSort: true
             }
         }
 
-        Ext.ux.tree.TreeGridSorter.superclass.constructor.apply(this, arguments);
+        Ext3.ux.tree.TreeGridSorter.superclass.constructor.apply(this, arguments);
 
         this.tree = tree;
         tree.on('headerclick', this.onHeaderClick, this);
@@ -10179,7 +10179,7 @@ Ext.ux.tree.TreeGridSorter = Ext.extend(Ext.tree.TreeSorter, {
             me.property = c.dataIndex;
             me.dir = c.dir = (c.dir === 'desc' ? 'asc' : 'desc');
             me.sortType = c.sortType;
-            me.caseSensitive === Ext.isBoolean(c.caseSensitive) ? c.caseSensitive : this.caseSensitive;
+            me.caseSensitive === Ext3.isBoolean(c.caseSensitive) ? c.caseSensitive : this.caseSensitive;
             me.sortFn = c.sortFn || this.defaultSortFn;
 
             this.tree.root.cascade(function(n) {
@@ -10199,28 +10199,28 @@ Ext.ux.tree.TreeGridSorter = Ext.extend(Ext.tree.TreeSorter, {
         hds.item(col).addClass(sc[dir == 'desc' ? 1 : 0]);
     }
 });/**
- * @class Ext.ux.tree.TreeGridLoader
- * @extends Ext.tree.TreeLoader
+ * @class Ext3.ux.tree.TreeGridLoader
+ * @extends Ext3.tree.TreeLoader
  */
-Ext.ux.tree.TreeGridLoader = Ext.extend(Ext.tree.TreeLoader, {
+Ext3.ux.tree.TreeGridLoader = Ext3.extend(Ext3.tree.TreeLoader, {
     createNode : function(attr) {
         if (!attr.uiProvider) {
-            attr.uiProvider = Ext.ux.tree.TreeGridNodeUI;
+            attr.uiProvider = Ext3.ux.tree.TreeGridNodeUI;
         }
-        return Ext.tree.TreeLoader.prototype.createNode.call(this, attr);
+        return Ext3.tree.TreeLoader.prototype.createNode.call(this, attr);
     }
 });/**
- * @class Ext.ux.tree.TreeGrid
- * @extends Ext.tree.TreePanel
+ * @class Ext3.ux.tree.TreeGrid
+ * @extends Ext3.tree.TreePanel
  * 
  * @xtype treegrid
  */
-Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
+Ext3.ux.tree.TreeGrid = Ext3.extend(Ext3.tree.TreePanel, {
     rootVisible : false,
     useArrows : true,
     lines : false,
-    borderWidth : Ext.isBorderBox ? 0 : 2, // the combined left/right border for each cell
-    cls : 'x-treegrid',
+    borderWidth : Ext3.isBorderBox ? 0 : 2, // the combined left/right border for each cell
+    cls : 'x3-treegrid',
 
     columnResize : true,
     enableSort : true,
@@ -10231,62 +10231,62 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
 
     initComponent : function() {
         if(!this.root) {
-            this.root = new Ext.tree.AsyncTreeNode({text: 'Root'});
+            this.root = new Ext3.tree.AsyncTreeNode({text: 'Root'});
         }
         
         // initialize the loader
         var l = this.loader;
         if(!l){
-            l = new Ext.ux.tree.TreeGridLoader({
+            l = new Ext3.ux.tree.TreeGridLoader({
                 dataUrl: this.dataUrl,
                 requestMethod: this.requestMethod,
                 store: this.store
             });
-        }else if(Ext.isObject(l) && !l.load){
-            l = new Ext.ux.tree.TreeGridLoader(l);
+        }else if(Ext3.isObject(l) && !l.load){
+            l = new Ext3.ux.tree.TreeGridLoader(l);
         }
         this.loader = l;
                             
-        Ext.ux.tree.TreeGrid.superclass.initComponent.call(this);                    
+        Ext3.ux.tree.TreeGrid.superclass.initComponent.call(this);                    
         
         this.initColumns();
         
         if(this.enableSort) {
-            this.treeGridSorter = new Ext.ux.tree.TreeGridSorter(this, this.enableSort);
+            this.treeGridSorter = new Ext3.ux.tree.TreeGridSorter(this, this.enableSort);
         }
         
         if(this.columnResize){
-            this.colResizer = new Ext.tree.ColumnResizer(this.columnResize);
+            this.colResizer = new Ext3.tree.ColumnResizer(this.columnResize);
             this.colResizer.init(this);
         }
         
         var c = this.columns;
         if(!this.internalTpl){                                
-            this.internalTpl = new Ext.XTemplate(
-                '<div class="x-grid3-header">',
-                    '<div class="x-treegrid-header-inner">',
-                        '<div class="x-grid3-header-offset">',
+            this.internalTpl = new Ext3.XTemplate(
+                '<div class="x3-grid3-header">',
+                    '<div class="x3-treegrid-header-inner">',
+                        '<div class="x3-grid3-header-offset">',
                             '<table style="table-layout: fixed;" cellspacing="0" cellpadding="0" border="0"><colgroup><tpl for="columns"><col /></tpl></colgroup>',
-                            '<thead><tr class="x-grid3-hd-row">',
+                            '<thead><tr class="x3-grid3-hd-row">',
                             '<tpl for="columns">',
-                            '<td class="x-grid3-hd x-grid3-cell x-treegrid-hd" style="text-align: {align};" id="', this.id, '-xlhd-{#}">',
-                                '<div class="x-grid3-hd-inner x-treegrid-hd-inner" unselectable="on">',
-                                     this.enableHdMenu ? '<a class="x-grid3-hd-btn" href="#"></a>' : '',
-                                     '{header}<img class="x-grid3-sort-icon" src="', Ext.BLANK_IMAGE_URL, '" />',
+                            '<td class="x3-grid3-hd x3-grid3-cell x3-treegrid-hd" style="text-align: {align};" id="', this.id, '-xlhd-{#}">',
+                                '<div class="x3-grid3-hd-inner x3-treegrid-hd-inner" unselectable="on">',
+                                     this.enableHdMenu ? '<a class="x3-grid3-hd-btn" href="#"></a>' : '',
+                                     '{header}<img class="x3-grid3-sort-icon" src="', Ext3.BLANK_IMAGE_URL, '" />',
                                  '</div>',
                             '</td></tpl>',
                             '</tr></thead>',
                         '</table>',
                     '</div></div>',
                 '</div>',
-                '<div class="x-treegrid-root-node">',
-                    '<table class="x-treegrid-root-table" cellpadding="0" cellspacing="0" style="table-layout: fixed;"></table>',
+                '<div class="x3-treegrid-root-node">',
+                    '<table class="x3-treegrid-root-table" cellpadding="0" cellspacing="0" style="table-layout: fixed;"></table>',
                 '</div>'
             );
         }
         
         if(!this.colgroupTpl) {
-            this.colgroupTpl = new Ext.XTemplate(
+            this.colgroupTpl = new Ext3.XTemplate(
                 '<colgroup><tpl for="columns"><col style="width: {width}px"/></tpl></colgroup>'
             );
         }
@@ -10302,7 +10302,7 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
             c = cs[i];
             if(!c.isColumn) {
                 c.xtype = c.xtype ? (/^tg/.test(c.xtype) ? c.xtype : 'tg' + c.xtype) : 'tgcolumn';
-                c = Ext.create(c);
+                c = Ext3.create(c);
             }
             c.init(this);
             columns.push(c);
@@ -10317,30 +10317,30 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
     },
 
     onRender : function(){
-        Ext.tree.TreePanel.superclass.onRender.apply(this, arguments);
+        Ext3.tree.TreePanel.superclass.onRender.apply(this, arguments);
 
-        this.el.addClass('x-treegrid');
+        this.el.addClass('x3-treegrid');
         
         this.outerCt = this.body.createChild({
-            cls:'x-tree-root-ct x-treegrid-ct ' + (this.useArrows ? 'x-tree-arrows' : this.lines ? 'x-tree-lines' : 'x-tree-no-lines')
+            cls:'x3-tree-root-ct x3-treegrid-ct ' + (this.useArrows ? 'x3-tree-arrows' : this.lines ? 'x3-tree-lines' : 'x3-tree-no-lines')
         });
         
         this.internalTpl.overwrite(this.outerCt, {columns: this.columns});
         
-        this.mainHd = Ext.get(this.outerCt.dom.firstChild);
-        this.innerHd = Ext.get(this.mainHd.dom.firstChild);
-        this.innerBody = Ext.get(this.outerCt.dom.lastChild);
-        this.innerCt = Ext.get(this.innerBody.dom.firstChild);
+        this.mainHd = Ext3.get(this.outerCt.dom.firstChild);
+        this.innerHd = Ext3.get(this.mainHd.dom.firstChild);
+        this.innerBody = Ext3.get(this.outerCt.dom.lastChild);
+        this.innerCt = Ext3.get(this.innerBody.dom.firstChild);
         
         this.colgroupTpl.insertFirst(this.innerCt, {columns: this.columns});
         
         if(this.hideHeaders){
-            this.el.child('.x-grid3-header').setDisplayed('none');
+            this.el.child('.x3-grid3-header').setDisplayed('none');
         }
         else if(this.enableHdMenu !== false){
-            this.hmenu = new Ext.menu.Menu({id: this.id + '-hctx'});
+            this.hmenu = new Ext3.menu.Menu({id: this.id + '-hctx'});
             if(this.enableColumnHide !== false){
-                this.colMenu = new Ext.menu.Menu({id: this.id + '-hcols-menu'});
+                this.colMenu = new Ext3.menu.Menu({id: this.id + '-hcols-menu'});
                 this.colMenu.on({
                     scope: this,
                     beforeshow: this.beforeColMenuShow,
@@ -10351,7 +10351,7 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
                     hideOnClick: false,
                     text: this.columnsText,
                     menu: this.colMenu,
-                    iconCls: 'x-cols-icon'
+                    iconCls: 'x3-cols-icon'
                 });
             }
             this.hmenu.on('itemclick', this.handleHdMenuClick, this);
@@ -10359,8 +10359,8 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
     },
 
     setRootNode : function(node){
-        node.attributes.uiProvider = Ext.ux.tree.TreeGridRootNodeUI;        
-        node = Ext.ux.tree.TreeGrid.superclass.setRootNode.call(this, node);
+        node.attributes.uiProvider = Ext3.ux.tree.TreeGridRootNodeUI;        
+        node = Ext3.ux.tree.TreeGrid.superclass.setRootNode.call(this, node);
         if(this.innerCt) {
             this.colgroupTpl.insertFirst(this.innerCt, {columns: this.columns});
         }
@@ -10368,18 +10368,18 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
     },
     
     clearInnerCt : function(){
-        if(Ext.isIE){
+        if(Ext3.isIE){
             var dom = this.innerCt.dom;
             while(dom.firstChild){
                 dom.removeChild(dom.firstChild);
             }
         }else{
-            Ext.ux.tree.TreeGrid.superclass.clearInnerCt.call(this);
+            Ext3.ux.tree.TreeGrid.superclass.clearInnerCt.call(this);
         }
     },
     
     initEvents : function() {
-        Ext.ux.tree.TreeGrid.superclass.initEvents.apply(this, arguments);
+        Ext3.ux.tree.TreeGrid.superclass.initEvents.apply(this, arguments);
 
         this.mon(this.innerBody, 'scroll', this.syncScroll, this);
         this.mon(this.innerHd, 'click', this.handleHdDown, this);
@@ -10391,7 +10391,7 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
     },
     
     onResize : function(w, h) {
-        Ext.ux.tree.TreeGrid.superclass.onResize.apply(this, arguments);
+        Ext3.ux.tree.TreeGrid.superclass.onResize.apply(this, arguments);
         
         var bd = this.innerBody.dom;
         var hd = this.innerHd.dom;
@@ -10400,12 +10400,12 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
             return;
         }
 
-        if(Ext.isNumber(h)){
+        if(Ext3.isNumber(h)){
             bd.style.height = this.body.getHeight(true) - hd.offsetHeight + 'px';
         }
 
-        if(Ext.isNumber(w)){                        
-            var sw = Ext.num(this.scrollOffset, Ext.getScrollBarWidth());
+        if(Ext3.isNumber(w)){                        
+            var sw = Ext3.num(this.scrollOffset, Ext3.getScrollBarWidth());
             if(this.reserveScrollOffset || ((bd.offsetWidth - bd.clientWidth) > 10)){
                 this.setScrollOffset(sw);
             }else{
@@ -10433,17 +10433,17 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
         }
         
         for(i = 0, groups = this.innerHd.query('td'), len = groups.length; i<len; i++) {
-            c = Ext.fly(groups[i]);
+            c = Ext3.fly(groups[i]);
             if(cols[i] && cols[i].hidden) {
-                c.addClass('x-treegrid-hd-hidden');
+                c.addClass('x3-treegrid-hd-hidden');
             }
             else {
-                c.removeClass('x-treegrid-hd-hidden');
+                c.removeClass('x3-treegrid-hd-hidden');
             }
         }
 
         var tcw = this.getTotalColumnWidth();                        
-        Ext.fly(this.innerHd.dom.firstChild).setWidth(tcw + (this.scrollOffset || 0));
+        Ext3.fly(this.innerHd.dom.firstChild).setWidth(tcw + (this.scrollOffset || 0));
         this.outerCt.select('table').setWidth(tcw);
         this.syncHeaderScroll();    
     },
@@ -10477,9 +10477,9 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
 
     // private
     handleHdDown : function(e, t){
-        var hd = e.getTarget('.x-treegrid-hd');
+        var hd = e.getTarget('.x3-treegrid-hd');
 
-        if(hd && Ext.fly(t).hasClass('x-grid3-hd-btn')){
+        if(hd && Ext3.fly(t).hasClass('x3-grid3-hd-btn')){
             var ms = this.hmenu.items,
                 cs = this.columns,
                 index = this.findHeaderIndex(hd),
@@ -10487,13 +10487,13 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
                 sort = c.sortable;
                 
             e.stopEvent();
-            Ext.fly(hd).addClass('x-grid3-hd-menu-open');
+            Ext3.fly(hd).addClass('x3-grid3-hd-menu-open');
             this.hdCtxIndex = index;
             
             this.fireEvent('headerbuttonclick', ms, c, hd, index);
             
             this.hmenu.on('hide', function(){
-                Ext.fly(hd).removeClass('x-grid3-hd-menu-open');
+                Ext3.fly(hd).removeClass('x3-grid3-hd-menu-open');
             }, this, {single:true});
             
             this.hmenu.show(t, 'tl-bl?');
@@ -10506,15 +10506,15 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
 
     // private
     handleHdOver : function(e, t){                    
-        var hd = e.getTarget('.x-treegrid-hd');                        
+        var hd = e.getTarget('.x3-treegrid-hd');                        
         if(hd && !this.headersDisabled){
             index = this.findHeaderIndex(hd);
             this.activeHdRef = t;
             this.activeHdIndex = index;
-            var el = Ext.get(hd);
+            var el = Ext3.get(hd);
             this.activeHdRegion = el.getRegion();
-            el.addClass('x-grid3-hd-over');
-            this.activeHdBtn = el.child('.x-grid3-hd-btn');
+            el.addClass('x3-grid3-hd-over');
+            this.activeHdBtn = el.child('.x3-grid3-hd-btn');
             if(this.activeHdBtn){
                 this.activeHdBtn.dom.style.height = (hd.firstChild.offsetHeight-1)+'px';
             }
@@ -10523,10 +10523,10 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
     
     // private
     handleHdOut : function(e, t){
-        var hd = e.getTarget('.x-treegrid-hd');
-        if(hd && (!Ext.isIE || !e.within(hd, true))){
+        var hd = e.getTarget('.x3-treegrid-hd');
+        if(hd && (!Ext3.isIE || !e.within(hd, true))){
             this.activeHdRef = null;
-            Ext.fly(hd).removeClass('x-grid3-hd-over');
+            Ext3.fly(hd).removeClass('x3-grid3-hd-over');
             hd.style.cursor = '';
         }
     },
@@ -10551,7 +10551,7 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
         for(i = 1; i < colCount; i++){
             c = cols[i];
             if(c.hideable !== false){
-                this.colMenu.add(new Ext.menu.CheckItem({
+                this.colMenu.add(new Ext3.menu.CheckItem({
                     itemId: 'col-' + i,
                     text: c.header,
                     checked: !c.hidden,
@@ -10605,11 +10605,11 @@ Ext.ux.tree.TreeGrid = Ext.extend(Ext.tree.TreePanel, {
     },
     
     registerNode : function(n) {
-        Ext.ux.tree.TreeGrid.superclass.registerNode.call(this, n);
+        Ext3.ux.tree.TreeGrid.superclass.registerNode.call(this, n);
         if(!n.uiProvider && !n.isRoot && !n.ui.isTreeGridNodeUI) {
-            n.ui = new Ext.ux.tree.TreeGridNodeUI(n);
+            n.ui = new Ext3.ux.tree.TreeGridNodeUI(n);
         }
     }
 });
 
-Ext.reg('treegrid', Ext.ux.tree.TreeGrid);
+Ext3.reg('treegrid', Ext3.ux.tree.TreeGrid);

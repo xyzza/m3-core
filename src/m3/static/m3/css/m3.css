@@ -37,33 +37,33 @@ q:before,q:after{content:'';}.m3-el-mask {
     filter: alpha(opacity=50);
     zoom: 1;
 }
-.ext-gecko2 .ext-mb-fix-cursor {
+.ext3-gecko2 .ext3-mb-fix-cursor {
     overflow:auto;
     
 }.m3-el-mask {
     background-color: #ccc;
 }
 
-.x-form-select-trigger {
+.x3-form-select-trigger {
 	background-image:url(../images/select-dict.gif) !important;
 }
-.x-form-edit-trigger {
+.x3-form-edit-trigger {
 	background-image:url(../images/trigger-edit-form.gif) !important;
 }
-.x-form-current-date-trigger {
+.x3-form-current-date-trigger {
 	background-image:url(../images/trigger-current-date.gif) !important;
 }
 
-.x-toolbar-ct .x-btn-focus em button{
+.x3-toolbar-ct .x3-btn-focus em button{
 	border: 1px dotted;
 }
 
-td.x-grid3-cell .x-grid3-hd-inner {
+td.x3-grid3-cell .x3-grid3-hd-inner {
     background-color:#f9f9f9;
 	background-image:url(../../vendor/extjs/resources/images/default/grid/grid3-hrow.gif);
 }
 
-td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-asc .x-grid3-hd-inner, td.x-grid3-hd-menu-open .x-grid3-hd-inner {
+td.x3-grid3-hd-over .x3-grid3-hd-inner, td.sort-desc .x3-grid3-hd-inner, td.sort-asc .x3-grid3-hd-inner, td.x3-grid3-hd-menu-open .x3-grid3-hd-inner {
     background-color:#ebf3fd;
     background-image:url(../../vendor/extjs/resources/images/default/grid/grid3-hrow-over.gif);
 
@@ -81,42 +81,42 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 }
 /*============================================================*/
 
-.x-grid-with-col-lines .x-grid3-row td.x-grid3-cell {
+.x3-grid-with-col-lines .x3-grid3-row td.x3-grid3-cell {
     border-right-color: #D0D0D0;
 }
 
-.x-form-file-icon {
+.x3-form-file-icon {
     background-image:url(../images/file_add.png) !important;
 }
 
-.x-form-file-clear-icon {
+.x3-form-file-clear-icon {
     background-image:url(../images/file_del.png) !important;
 }
 
-.x-form-file-download-icon {
+.x3-form-file-download-icon {
     background-image:url(../images/file_download.png) !important;
 }
 
-.x-form-image-icon {
+.x3-form-image-icon {
     background-image:url(../images/image_add.png) !important;
 }
 
-.x-form-image-clear-icon {
+.x3-form-image-clear-icon {
     background-image:url(../images/image_del.png) !important;
 }
 
-.x-form-image-preview-icon {
+.x3-form-image-preview-icon {
     background-image:url(../images/image_download.png) !important;
 }
 
-.x-form-file-clear {
+.x3-form-file-clear {
     position: absolute;
     
     right: 22px;
     z-index: 3;
 }
 
-.x-form-file-download {
+.x3-form-file-download {
     position: absolute;
     
     right: 44px;
@@ -124,7 +124,7 @@ td.x-grid3-hd-over .x-grid3-hd-inner, td.sort-desc .x-grid3-hd-inner, td.sort-as
 }
 
 /*Класс для MultiCombo*/
-.x-multi-combo-item img {
+.x3-multi-combo-item img {
     width:16px;
     height:16px;
     float:left;
@@ -209,26 +209,26 @@ span.CodeMirror-selected {
 
 
 /*Перегружаем стили для м3-календаря рабочих дат*/
-.x-work-date-picker .x-date-selected a{
+.x3-work-date-picker .x3-date-selected a{
     background: #fff none;
     border: none;
 }
 
-.x-work-date-picker .x-date-selected span{
+.x3-work-date-picker .x3-date-selected span{
     font-weight:normal;
 }
 
-.x-work-date-picker .x-date-left a,
-.x-work-date-picker .x-date-right a
+.x3-work-date-picker .x3-date-left a,
+.x3-work-date-picker .x3-date-right a
 {
     background-image:none;
 }
 
-.x-date-dayoff{
+.x3-date-dayoff{
     background-color: #f1c2c2
 }
 
-.x-date-holiday{
+.x3-date-holiday{
     background-color: #6b8ef1
 }
 /*CodeMirror default theme*/
@@ -268,13 +268,13 @@ span.CodeMirror-selected {
   background-color:#d6e3f2;
 }
 
-.x-tree-pagingnode:hover{
+.x3-tree-pagingnode:hover{
   background-color:#ffffff; !important
 }
-.x-tree-pagingnode{
+.x3-tree-pagingnode{
   border-color:#ccc; !important
 }
-.x-tree-pagingnode-td:hover{
+.x3-tree-pagingnode-td:hover{
   border-right: solid;
   border-width: 1px;
   border-color: #EDEDED;

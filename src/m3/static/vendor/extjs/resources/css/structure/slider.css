@@ -1,15 +1,15 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
 /* Shared styles */
-.x-slider {
+.x3-slider {
     zoom:1;
 }
 
-.x-slider-inner {
+.x3-slider-inner {
     position:relative;
     left:0;
     top:0;
@@ -17,7 +17,7 @@
     zoom:1;
 }
 
-.x-slider-focus {
+.x3-slider-focus {
 	position:absolute;
 	left:0;
 	top:0;
@@ -35,23 +35,23 @@
 }
 
 /* Horizontal styles */
-.x-slider-horz {
+.x3-slider-horz {
     padding-left:7px;
     background:transparent no-repeat 0 -22px;
 }
 
-.x-slider-horz .x-slider-end {
+.x3-slider-horz .x3-slider-end {
     padding-right:7px;
     zoom:1;
     background:transparent no-repeat right -44px;
 }
 
-.x-slider-horz .x-slider-inner {
+.x3-slider-horz .x3-slider-inner {
     background:transparent repeat-x 0 0;
     height:22px;
 }
 
-.x-slider-horz .x-slider-thumb {
+.x3-slider-horz .x3-slider-thumb {
     width:14px;
     height:15px;
     position:absolute;
@@ -60,32 +60,32 @@
     background:transparent no-repeat 0 0;
 }
 
-.x-slider-horz .x-slider-thumb-over {
+.x3-slider-horz .x3-slider-thumb-over {
     background-position: -14px -15px;
 }
 
-.x-slider-horz .x-slider-thumb-drag {
+.x3-slider-horz .x3-slider-thumb-drag {
     background-position: -28px -30px;
 }
 
 /* Vertical styles */
-.x-slider-vert {
+.x3-slider-vert {
     padding-top:7px;
     background:transparent no-repeat -44px 0;
     width:22px;
 }
 
-.x-slider-vert .x-slider-end {
+.x3-slider-vert .x3-slider-end {
     padding-bottom:7px;
     zoom:1;
     background:transparent no-repeat -22px bottom;
 }
 
-.x-slider-vert .x-slider-inner {
+.x3-slider-vert .x3-slider-inner {
     background:transparent repeat-y 0 0;
 }
 
-.x-slider-vert .x-slider-thumb {
+.x3-slider-vert .x3-slider-thumb {
     width:15px;
     height:14px;
     position:absolute;
@@ -94,10 +94,10 @@
     background:transparent no-repeat 0 0;
 }
 
-.x-slider-vert .x-slider-thumb-over {
+.x3-slider-vert .x3-slider-thumb-over {
     background-position: -15px -14px;
 }
 
-.x-slider-vert .x-slider-thumb-drag {
+.x3-slider-vert .x3-slider-thumb-drag {
     background-position: -30px -28px;
 }

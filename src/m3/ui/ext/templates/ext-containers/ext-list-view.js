@@ -1,4 +1,4 @@
-new Ext.list.ListView({
+new Ext3.list.ListView({
 	{% include 'base-ext-ui.js'%}
 	
 	{%if component.multi_select %} ,multiSelect: true {%endif%}

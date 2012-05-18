@@ -1,18 +1,18 @@
-// В данном контексте доступна переменная win, поэтому окно можно не получать конструкцией типа Ext.getCmp('bla-bla');
-var ajax = Ext.Ajax;
+// В данном контексте доступна переменная win, поэтому окно можно не получать конструкцией типа Ext3.getCmp('bla-bla');
+var ajax = Ext3.Ajax;
 
 {% if component.grid %}
 	/*========================================= Работает с гридом ============================================*/
     win.addEvents(
        /**
         * Событие до создания новой строки в гриде
-        * @param grid - дерево Ext.grid.GridPanel
+        * @param grid - дерево Ext3.grid.GridPanel
         * @param params - словарь параметров, передаваемых Ajax запросу
         */
        'beforenewrow',
 	   /**
         * Событие до редактирования строки в гриде
-        * @param grid - дерево Ext.grid.GridPanel
+        * @param grid - дерево Ext3.grid.GridPanel
         * @param params - словарь параметров, передаваемых Ajax запросу
         */
 	   'beforeeditrow'
@@ -38,23 +38,23 @@ var ajax = Ext.Ajax;
 	 *  Создание нового значения в справочнике по форме ExtDictionary
 	 */
 	function newValueGrid() {
-        var grid = Ext.getCmp('{{ component.grid.client_id}}');
-		var params = Ext.applyIf({'id': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
+        var grid = Ext3.getCmp('{{ component.grid.client_id}}');
+		var params = Ext3.applyIf({'id': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		{% if component.tree %}
-			var tree = Ext.getCmp('{{ component.tree.client_id}}');
+			var tree = Ext3.getCmp('{{ component.tree.client_id}}');
 			if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
 				return;
 			};
-			params = Ext.applyIf({ '{{ component.contextTreeIdName }}': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
+			params = Ext3.applyIf({ '{{ component.contextTreeIdName }}': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		{%endif%}
 
 		// добавим глобальный контекст окна
-		params = Ext.applyIf(params, win.actionContextJson || {});
+		params = Ext3.applyIf(params, win.actionContextJson || {});
 		
 		if (!win.fireEvent('beforenewrow', grid, params))
 		  return;
         
-        var mask = new Ext.LoadMask(win.body);			
+        var mask = new Ext3.LoadMask(win.body);			
         mask.show();
 		ajax.request({
 			url: "{{ component.url_new_grid }}"
@@ -74,19 +74,19 @@ var ajax = Ext.Ajax;
 	 * Редактирование значения в справочнике по форме ExtDictionary
 	 */
 	function editValueGrid(){
-		var grid = Ext.getCmp('{{ component.grid.client_id}}');
+		var grid = Ext3.getCmp('{{ component.grid.client_id}}');
 		if (!isGridSelected(grid, 'Редактирование', 'Элемент не выбран') ) {
 			return;
 		};
 
-		var params = Ext.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
+		var params = Ext3.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
 		// добавим глобальный контекст окна
-		params = Ext.applyIf(params, win.actionContextJson || {});
+		params = Ext3.applyIf(params, win.actionContextJson || {});
         
         if (!win.fireEvent('beforeeditrow', grid, params))
 		  return;
 		
-		var mask = new Ext.LoadMask(win.body);   
+		var mask = new Ext3.LoadMask(win.body);   
 		mask.show();
 		ajax.request({
 			url: "{{ component.url_edit_grid }}"
@@ -106,7 +106,7 @@ var ajax = Ext.Ajax;
 	 * Удаление значения в справочнике по форме ExtDictionary
 	 */
 	function deleteValueGrid(){
-		var grid = Ext.getCmp('{{ component.grid.client_id}}');
+		var grid = Ext3.getCmp('{{ component.grid.client_id}}');
 		if (!isGridSelected(grid, 'Удаление', 'Элемент не выбран') ) {
 			return;
 		};
@@ -125,17 +125,17 @@ var ajax = Ext.Ajax;
 		
 		var params = {'id': selectedId.join(',')};
 		// добавим глобальный контекст окна
-		params = Ext.applyIf(params, win.actionContextJson || {});
+		params = Ext3.applyIf(params, win.actionContextJson || {});
 				
-		Ext.Msg.show({
+		Ext3.Msg.show({
 		   title:'Подтверждение',
 		   msg: message,
-		   buttons: Ext.Msg.YESNO,
-		   icon: Ext.MessageBox.QUESTION,
+		   buttons: Ext3.Msg.YESNO,
+		   icon: Ext3.MessageBox.QUESTION,
 		   fn:function(btn,text,opt){ 
 		    	if (btn == 'yes') {
 		    	    
-		    	    var mask = new Ext.LoadMask(win.body);
+		    	    var mask = new Ext3.LoadMask(win.body);
                     mask.show();
         
 		    		ajax.request({
@@ -163,11 +163,11 @@ var ajax = Ext.Ajax;
 	 * Перезагружает хранилище данных
 	 */
 	function refreshGridStore(){
-		var bbar = Ext.getCmp("{{ component.grid.client_id }}").getBottomToolbar();
+		var bbar = Ext3.getCmp("{{ component.grid.client_id }}").getBottomToolbar();
 		if (bbar && bbar.isXType('paging')) {
 			bbar.doRefresh();
 		} else {
-			var search_field = Ext.getCmp("{{ component.search_text_grid.client_id }}");
+			var search_field = Ext3.getCmp("{{ component.search_text_grid.client_id }}");
 			if (search_field) {
 				search_field.search();
 			}
@@ -183,11 +183,11 @@ var ajax = Ext.Ajax;
 	function isGridSelected(grid, title, message){
 		res = true;
 		if (!grid.getSelectionModel().hasSelection() ) {
-			Ext.Msg.show({
+			Ext3.Msg.show({
 			   title: title,
 			   msg: message,
-			   buttons: Ext.Msg.OK,
-			   icon: Ext.MessageBox.INFO
+			   buttons: Ext3.Msg.OK,
+			   icon: Ext3.MessageBox.INFO
 			});
 			res = false;
 		};
@@ -202,14 +202,14 @@ var ajax = Ext.Ajax;
 	win.addEvents(
 	   /**
 	    * Событие до создания нового элемента дерева
-	    * @param tree - дерево Ext.tree.TreePanel
+	    * @param tree - дерево Ext3.tree.TreePanel
 	    * @param params - словарь параметров, передаваемых Ajax запросу
 	    */
 	   'beforenewnode',
 	   /**
         * Событие до редактирования элемента дерева
-        * @param tree - дерево Ext.tree.TreePanel
-        * @param node - узел Ext.data.Node
+        * @param tree - дерево Ext3.tree.TreePanel
+        * @param node - узел Ext3.data.Node
         * @param params - словарь параметров, передаваемых Ajax запросу
         */
 	   'beforeeditnode'
@@ -227,15 +227,15 @@ var ajax = Ext.Ajax;
 				// Если задан родительский узел, то перезаполнянм его дочерние
 				// элементы и раскрываем его.
 				if (parentNode) {
-					var params = Ext.applyIf({ node: parentNode.id }, {% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %});
+					var params = Ext3.applyIf({ node: parentNode.id }, {% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %});
 					// добавим глобальный контекст окна
-					params = Ext.applyIf(params, win.actionContextJson || {});
+					params = Ext3.applyIf(params, win.actionContextJson || {});
 
-					var tree = Ext.getCmp('{{ component.tree.client_id }}');			
+					var tree = Ext3.getCmp('{{ component.tree.client_id }}');			
 					ajax.request({
 						url: tree.getLoader().dataUrl,
 						success: function (response, opts) {
-								var nodes = Ext.util.JSON.decode(response.responseText);
+								var nodes = Ext3.util.JSON.decode(response.responseText);
 								var isExpanded = !parentNode.childNodes.length || parentNode.isExpanded();
 								parentNode.removeAll();
 								parentNode.appendChild(nodes);
@@ -254,14 +254,14 @@ var ajax = Ext.Ajax;
 		        // Если задан родительский узел, то перезаполнянм его дочерние
 		        // элементы и раскрываем его.
 		        if (parentNode) {
-		        	var params = Ext.applyIf({ node: parentNode.id }, {% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %});
+		        	var params = Ext3.applyIf({ node: parentNode.id }, {% if component.action_context %}{{ component.action_context.json|safe }}{% else %}{}{% endif %});
 					// добавим глобальный контекст окна
-					params = Ext.applyIf(params, win.actionContextJson || {});
-		          var tree = Ext.getCmp('{{ component.tree.client_id }}');
+					params = Ext3.applyIf(params, win.actionContextJson || {});
+		          var tree = Ext3.getCmp('{{ component.tree.client_id }}');
 		          ajax.request({
 		            url: tree.getLoader().dataUrl,
 		            success: function (response, opts) {
-		                var nodes = Ext.util.JSON.decode(response.responseText);
+		                var nodes = Ext3.util.JSON.decode(response.responseText);
 		                var isExpanded = !parentNode.childNodes.length || parentNode.isExpanded();
 		                parentNode.removeAll();
 		                parentNode.appendChild(nodes);
@@ -283,15 +283,15 @@ var ajax = Ext.Ajax;
 	 *  Создание нового значения в корне дерева
 	 */
 	function newValueTreeRoot() {
-	    var tree = Ext.getCmp('{{ component.tree.client_id}}');
-	    var params = Ext.applyIf({'{{ component.contextTreeIdName }}': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+	    var tree = Ext3.getCmp('{{ component.tree.client_id}}');
+	    var params = Ext3.applyIf({'{{ component.contextTreeIdName }}': ''},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 		// добавим глобальный контекст окна
-		params = Ext.applyIf(params, win.actionContextJson || {});
+		params = Ext3.applyIf(params, win.actionContextJson || {});
 		
 		if (!win.fireEvent('beforenewnode', tree, params))
             return;
 		
-	    var mask = new Ext.LoadMask(win.body);
+	    var mask = new Ext3.LoadMask(win.body);
 	    mask.show();
 		ajax.request({
 			url: "{{ component.url_new_tree }}"
@@ -311,19 +311,19 @@ var ajax = Ext.Ajax;
 	 *  Создание нового дочернего значения
 	 */
 	function newValueTreeChild() {
-		var tree = Ext.getCmp('{{ component.tree.client_id}}');
+		var tree = Ext3.getCmp('{{ component.tree.client_id}}');
 		if (!isTreeSelected(tree, 'Новый', 'Элемент не выбран') ) {
 			return;
 		};
 		var node = tree.getSelectionModel().getSelectedNode();
-		var params = Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+		var params = Ext3.applyIf({ '{{ component.contextTreeIdName }}': node.id },{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 		// добавим глобальный контекст окна
-		params = Ext.applyIf(params, win.actionContextJson || {});
+		params = Ext3.applyIf(params, win.actionContextJson || {});
 		
 		if (!win.fireEvent('beforenewnode', tree, params))
             return;
 		
-		var mask = new Ext.LoadMask(win.body);
+		var mask = new Ext3.LoadMask(win.body);
 		mask.show();
 		ajax.request({
 			url: "{{ component.url_new_tree }}"
@@ -343,14 +343,14 @@ var ajax = Ext.Ajax;
 	 * Редактирование значения в дереве
 	 */
 	function editValueTree(){
-		var tree = Ext.getCmp('{{ component.tree.client_id}}');
+		var tree = Ext3.getCmp('{{ component.tree.client_id}}');
 		if (!isTreeSelected(tree, 'Редактирование', 'Элемент не выбран') ) {
         	return;
 		};
 		var node = tree.getSelectionModel().getSelectedNode();
-		var params = Ext.applyIf({ '{{ component.contextTreeIdName }}': node.id}, {% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+		var params = Ext3.applyIf({ '{{ component.contextTreeIdName }}': node.id}, {% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 		// добавим глобальный контекст окна
-		params = Ext.applyIf(params, win.actionContextJson || {});
+		params = Ext3.applyIf(params, win.actionContextJson || {});
 		
         if (!win.fireEvent('beforeeditnode', tree, node, params))
             return;
@@ -369,19 +369,19 @@ var ajax = Ext.Ajax;
 	 * Удаление значения в дереве
 	 */
 	function deleteValueTree(){
-		var tree = Ext.getCmp('{{ component.tree.client_id}}');
+		var tree = Ext3.getCmp('{{ component.tree.client_id}}');
 		if (!isTreeSelected(tree, 'Удаление', 'Элемент не выбран') ) {
 			return;
 		};
-		var params = Ext.applyIf({ '{{ component.contextTreeIdName }}': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
+		var params = Ext3.applyIf({ '{{ component.contextTreeIdName }}': tree.getSelectionModel().getSelectedNode().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %})
 		// добавим глобальный контекст окна
-		params = Ext.applyIf(params, win.actionContextJson || {});
+		params = Ext3.applyIf(params, win.actionContextJson || {});
 		
-		Ext.Msg.show({
+		Ext3.Msg.show({
 		   title:'Подтверждение',
 		   msg: 'Вы действительно хотите удалить элемент?',
-		   buttons: Ext.Msg.YESNO,
-		   icon: Ext.MessageBox.QUESTION,
+		   buttons: Ext3.Msg.YESNO,
+		   icon: Ext3.MessageBox.QUESTION,
 		   fn:function(btn,text,opt){ 
 		    	if (btn == 'yes') {
 	    			ajax.request({
@@ -405,12 +405,12 @@ var ajax = Ext.Ajax;
 	 * Перезагружает хранилище данных для дерева
 	 */
 	function refreshTreeLoader(){
-		var search_field_tree = Ext.getCmp("{{ component.search_text_tree.client_id }}");
+		var search_field_tree = Ext3.getCmp("{{ component.search_text_tree.client_id }}");
 		if (search_field_tree)
 			search_field_tree.search();
 			//очищаем грид
 			{% if component.grid %}
-				var grid_store = Ext.getCmp("{{ component.grid.client_id }}").getStore();
+				var grid_store = Ext3.getCmp("{{ component.grid.client_id }}").getStore();
 				grid_store.removeAll();
 			{% endif %}
 	}
@@ -419,7 +419,7 @@ var ajax = Ext.Ajax;
 	 * Обработчик выделение узла в дереве
 	 */
 	function onClickNode(node, e){
-		var search_field_grid = Ext.getCmp("{{ component.search_text_grid.client_id }}");
+		var search_field_grid = Ext3.getCmp("{{ component.search_text_grid.client_id }}");
 		if (search_field_grid) {
 			search_field_grid.nodeId = node.id;
 			search_field_grid.search();
@@ -434,11 +434,11 @@ var ajax = Ext.Ajax;
 	function isTreeSelected(tree, title, message){
 		var res = true;
 		if (tree.getSelectionModel().isSelected()) {
-			Ext.Msg.show({
+			Ext3.Msg.show({
 			   title: title,
 			   msg: message,
-			   buttons: Ext.Msg.OK,
-			   icon: Ext.MessageBox.INFO
+			   buttons: Ext3.Msg.OK,
+			   icon: Ext3.MessageBox.INFO
 			});
 			res = false;
 		};
@@ -480,7 +480,7 @@ var ajax = Ext.Ajax;
 					'id': selModel.getSelectedNode().id,
 					'dest_id': dropObj.target.id
 				}
-				,success: Ext.emptyFn
+				,success: Ext3.emptyFn
 				,failure: function(response, opts){
 					dropObj.cancel = false;
 				    uiAjaxFailMessage(response, opts);
@@ -497,7 +497,7 @@ var ajax = Ext.Ajax;
 function selectValue(){
     var id, displayText;
     {%if component.grid %}
-        var grid = Ext.getCmp('{{ component.grid.client_id}}');
+        var grid = Ext3.getCmp('{{ component.grid.client_id}}');
         if (!isGridSelected(grid, 'Выбор элемента', 'Выберите элемент из списка') ) {
             return;
         }
@@ -505,7 +505,7 @@ function selectValue(){
         id = grid.getSelectionModel().getSelected().id;
         displayText = grid.getSelectionModel().getSelected().get("{{ component.column_name_on_select }}");
     {% else %}
-        var tree = Ext.getCmp('{{ component.tree.client_id}}');
+        var tree = Ext3.getCmp('{{ component.tree.client_id}}');
         if (!isTreeSelected(tree, 'Новый', 'Выберите элемент в дереве!') ) {
             return;
         }
@@ -515,7 +515,7 @@ function selectValue(){
     {% endif %}
     assert(id!=undefined, 'Справочник не определил id объекта. Поле выбора не будет работать');
     assert(displayText!=undefined, 'Справочник не определил displayText объекта. Возможно он не приходит с ajax ответом, в JsonStore нет соответствующего поля, в гриде нет соотв. колонки или неправильно указан column_name_on_select!');
-    var win = Ext.getCmp('{{ component.client_id}}');
+    var win = Ext3.getCmp('{{ component.client_id}}');
     win.fireEvent('closed_ok', id, displayText);
     win.close();
 };
@@ -524,10 +524,10 @@ function selectValue(){
 {% if component.mode == 2%}
 
     {% if component.grid %}
-    Ext.apply(win, {
+    Ext3.apply(win, {
 
         initMultiSelect:function(selectedItems) {
-            var grid = Ext.getCmp('{{ component.grid.client_id}}');
+            var grid = Ext3.getCmp('{{ component.grid.client_id}}');
             this.checkedItems = this.extractSelectedData(selectedItems);
             this.grid = grid;
 
@@ -567,10 +567,10 @@ function selectValue(){
         }
     });
     {% else %}
-    Ext.apply(win, {
+    Ext3.apply(win, {
 
         initMultiSelect:function(selectedItems) {
-            this.tree = Ext.getCmp('{{ component.tree.client_id}}');
+            this.tree = Ext3.getCmp('{{ component.tree.client_id}}');
             this.displayField = '{{ component.column_name_on_select }}';
             this.checkedItems = this.extractSelectedData(selectedItems);
 
@@ -618,9 +618,9 @@ function selectValue(){
 
     function multiSelectValues() {
         var records = [], win, v;
-        win = Ext.getCmp('{{ component.client_id}}');
+        win = Ext3.getCmp('{{ component.client_id}}');
         {% if component.grid %}
-        var grid = Ext.getCmp('{{ component.grid.client_id}}');
+        var grid = Ext3.getCmp('{{ component.grid.client_id}}');
         for (v in win.checkedItems) {
             if (win.checkedItems.hasOwnProperty(v) && win.checkedItems[v] !== undefined) {
                 records.push(win.checkedItems[v]);
@@ -630,14 +630,14 @@ function selectValue(){
         var newRecord, v;
         for (v in win.checkedItems) {
             if (win.checkedItems[v] != undefined) {
-                newRecord = new Ext.data.Record();
+                newRecord = new Ext3.data.Record();
                 newRecord.data['id'] = win.checkedItems[v].value;
                 newRecord.data[win.displayField] = win.checkedItems[v].display;
                 records.push( newRecord );
             }
         }
         {% endif %}
-        win = Ext.getCmp('{{ component.client_id}}');
+        win = Ext3.getCmp('{{ component.client_id}}');
 		win.fireEvent('closed_ok', records);
 		win.close();
     };

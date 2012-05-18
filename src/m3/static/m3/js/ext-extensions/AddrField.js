@@ -2,12 +2,12 @@
 /**
  * Панель редактирования адреса
  */
-Ext.m3.AddrField = Ext.extend(Ext.Container, {
+Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 	constructor: function(baseConfig, params){
 		
 		var items = params.items || [];
 		
-		var place_store = new Ext.data.JsonStore({
+		var place_store = new Ext3.data.JsonStore({
 			url: params.kladr_url,
 			idProperty: 'code',
 			root: 'rows',
@@ -23,14 +23,14 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			]
 		});
 		if (params.place_record != '' && params.place_record != undefined) {
-			var rec = Ext.util.JSON.decode(params.place_record);
+			var rec = Ext3.util.JSON.decode(params.place_record);
     		place_store.loadData({total:1, rows:[rec]});
 		}
 		if (params.read_only) 
 			var field_cls = 'm3-grey-field' 
 		else
 			var field_cls = ''
-		this.place = new Ext.form.ComboBox({
+		this.place = new Ext3.form.ComboBox({
 			name: params.place_field_name,
 			fieldLabel: params.place_label,
 			allowBlank: params.place_allow_blank,
@@ -51,7 +51,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 		});		
 		this.place.setValue(params.place_value);
 		
-        this.zipcode = new Ext.form.TextField({
+        this.zipcode = new Ext3.form.TextField({
             name: params.zipcode_field_name,
             value: params.zipcode_value,
             emptyText: 'индекс',
@@ -62,7 +62,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
         });
 		
 		if (params.level > 1) {
-			var street_store = new Ext.data.JsonStore({
+			var street_store = new Ext3.data.JsonStore({
 				url: params.street_url,
 				idProperty: 'code',
 				root: 'rows',
@@ -78,10 +78,10 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 				]
 			});
 			if (params.street_record != '' && params.street_record != undefined) {
-				var rec = Ext.util.JSON.decode(params.street_record);
+				var rec = Ext3.util.JSON.decode(params.street_record);
 				street_store.loadData({total:1, rows:[rec]});
 			}
-			this.street = new Ext.form.ComboBox({
+			this.street = new Ext3.form.ComboBox({
 				name: params.street_field_name,
 				fieldLabel: params.street_label,
 				allowBlank: params.street_allow_blank,
@@ -103,7 +103,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			this.street.setValue(params.street_value);
 			
 			if (params.level > 2) {
-				this.house = new Ext.form.TextField({
+				this.house = new Ext3.form.TextField({
 					name: params.house_field_name,
                     allowBlank: params.house_allow_blank,
                     readOnly: params.read_only,
@@ -115,7 +115,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
                     invalidClass: params.invalid_class
 				});
 				if (params.use_corps) {
-					this.corps = new Ext.form.TextField({
+					this.corps = new Ext3.form.TextField({
 						name: params.corps_field_name,
 						allowBlank: params.corps_allow_blank,
 						readOnly: params.read_only,
@@ -128,7 +128,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 					});
 				}
 				if (params.level > 3) {
-					this.flat = new Ext.form.TextField({
+					this.flat = new Ext3.form.TextField({
 						name: params.flat_field_name,
 						fieldLabel: params.flat_label,
 						value: params.flat_value,
@@ -143,7 +143,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			}
 		}
 		if (params.addr_visible) {
-			this.addr = new Ext.form.TextArea({
+			this.addr = new Ext3.form.TextArea({
 				name: params.addr_field_name,
 				anchor: '100%',
 				fieldLabel: params.addr_label,
@@ -320,7 +320,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 							, items: this.flat
 						});
 					}
-					var row = new Ext.Container({
+					var row = new Ext3.Container({
 						anchor: '100%'
 						, layout: 'column'
 						, items: row_items
@@ -334,7 +334,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			}
 		}
 						
-		var config = Ext.applyIf({
+		var config = Ext3.applyIf({
 			items: items
 			, get_addr_url: params.get_addr_url
 			, level: params.level
@@ -343,7 +343,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
 			, style: {overflow: 'hidden'}
 		}, baseConfig);
 		
-		Ext.Container.superclass.constructor.call(this, config);
+		Ext3.Container.superclass.constructor.call(this, config);
 	}
 	, beforeStreetQuery: function(qe) {
 		this.street.getStore().baseParams.place_code = this.place.value;		
@@ -359,7 +359,7 @@ Ext.m3.AddrField = Ext.extend(Ext.Container, {
     }
 
 	, initComponent: function(){
-		Ext.m3.AddrField.superclass.initComponent.call(this);		
+		Ext3.m3.AddrField.superclass.initComponent.call(this);		
 		this.mon(this.place, 'change', this.onChangePlace, this);
 		if (this.level > 1) {
 			this.mon(this.street, 'change', this.onChangeStreet, this);

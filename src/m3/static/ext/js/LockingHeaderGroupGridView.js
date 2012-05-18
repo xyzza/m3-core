@@ -1,6 +1,6 @@
-Ext.ns('Ext.ux.grid');
+Ext3.ns('Ext3.ux.grid');
 
-Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
+Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
     lockText : 'Lock',
     unlockText : 'Unlock',
     rowBorderWidth : 1,
@@ -17,29 +17,29 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         var ts = this.templates || {};
 
         if (!ts.master) {
-            ts.master = new Ext.Template(
-                '<div class="x-grid3" hidefocus="true">',
-                    '<div class="x-grid3-locked">',
-                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{lstyle}">{lockedHeader}</div></div><div class="x-clear"></div></div>',
-                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{lstyle}">{lockedBody}</div><div class="x-grid3-scroll-spacer"></div></div>',
+            ts.master = new Ext3.Template(
+                '<div class="x3-grid3" hidefocus="true">',
+                    '<div class="x3-grid3-locked">',
+                        '<div class="x3-grid3-header"><div class="x3-grid3-header-inner"><div class="x3-grid3-header-offset" style="{lstyle}">{lockedHeader}</div></div><div class="x3-clear"></div></div>',
+                        '<div class="x3-grid3-scroller"><div class="x3-grid3-body" style="{lstyle}">{lockedBody}</div><div class="x3-grid3-scroll-spacer"></div></div>',
                     '</div>',
-                    '<div class="x-grid3-viewport x-grid3-unlocked">',
-                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x-clear"></div></div>',
-                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x-grid3-focus" tabIndex="-1"></a></div>',
+                    '<div class="x3-grid3-viewport x3-grid3-unlocked">',
+                        '<div class="x3-grid3-header"><div class="x3-grid3-header-inner"><div class="x3-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x3-clear"></div></div>',
+                        '<div class="x3-grid3-scroller"><div class="x3-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x3-grid3-focus" tabIndex="-1"></a></div>',
                     '</div>',
-                    '<div class="x-grid3-resize-marker">&#160;</div>',
-                    '<div class="x-grid3-resize-proxy">&#160;</div>',
+                    '<div class="x3-grid3-resize-marker">&#160;</div>',
+                    '<div class="x3-grid3-resize-proxy">&#160;</div>',
                 '</div>'
             );
         }
         //kirov
 	    if(!ts.gcell){
-            ts.gcell = new Ext.XTemplate('<td class="x-grid3-hd x-grid3-gcell x-grid3-td-{id} ux-grid-hd-group-row-{row} {cls}" style="{style}">', '<div {tooltip} class="x-grid3-hd-inner x-grid3-hd-{id}" unselectable="on" style="{istyle}">', this.grid.enableHdMenu ? '<a class="x-grid3-hd-btn" href="#"></a>' : '', '{value}</div></td>');
+            ts.gcell = new Ext3.XTemplate('<td class="x3-grid3-hd x3-grid3-gcell x3-grid3-td-{id} ux-grid-hd-group-row-{row} {cls}" style="{style}">', '<div {tooltip} class="x3-grid3-hd-inner x3-grid3-hd-{id}" unselectable="on" style="{istyle}">', this.grid.enableHdMenu ? '<a class="x3-grid3-hd-btn" href="#"></a>' : '', '{value}</div></td>');
         }
         this.templates = ts;
         //kirov
 	    this.hrowRe = new RegExp("ux-grid-hd-group-row-(\\d+)", "");
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.initTemplates.call(this);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.initTemplates.call(this);
     },
 
     getEditorParent : function(ed){
@@ -47,7 +47,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
     },
 
     initElements : function(){
-        var E  = Ext.Element,
+        var E  = Ext3.Element,
             el = this.grid.getGridEl().dom.firstChild,
             cs = el.childNodes;
 
@@ -93,7 +93,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         if(col < llen){
             return this.getLockedRow(row).getElementsByTagName('td')[col];
         }
-        return Ext.ux.grid.LockingHeaderGroupGridView.superclass.getCell.call(this, row, col - llen);
+        return Ext3.ux.grid.LockingHeaderGroupGridView.superclass.getCell.call(this, row, col - llen);
     },
 
     getHeaderCell : function(index){
@@ -102,7 +102,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
             return this.lockedHd.dom.getElementsByTagName('td')[index];
         }
         //kirov
-        //return Ext.ux.grid.LockingHeaderGroupGridView.superclass.getHeaderCell.call(this, index - llen);
+        //return Ext3.ux.grid.LockingHeaderGroupGridView.superclass.getHeaderCell.call(this, index - llen);
         return this.mainHd.query(this.cellSelector)[index-llen];
     },
 
@@ -111,7 +111,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         if(r){
             this.fly(r).addClass(cls);
         }
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.addRowClass.call(this, row, cls);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.addRowClass.call(this, row, cls);
     },
 
     removeRowClass : function(row, cls){
@@ -119,26 +119,26 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         if(r){
             this.fly(r).removeClass(cls);
         }
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRowClass.call(this, row, cls);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.removeRowClass.call(this, row, cls);
     },
 
     removeRow : function(row) {
-        Ext.removeNode(this.getLockedRow(row));
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRow.call(this, row);
+        Ext3.removeNode(this.getLockedRow(row));
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.removeRow.call(this, row);
     },
 
     removeRows : function(firstRow, lastRow){
         var bd = this.lockedBody.dom;
         for(var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++){
-            Ext.removeNode(bd.childNodes[firstRow]);
+            Ext3.removeNode(bd.childNodes[firstRow]);
         }
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRows.call(this, firstRow, lastRow);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.removeRows.call(this, firstRow, lastRow);
     },
 
     syncScroll : function(e){
         var mb = this.scroller.dom;
         this.lockedScroller.dom.scrollTop = mb.scrollTop;
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.syncScroll.call(this, e);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.syncScroll.call(this, e);
     },
 
     updateSortIcon : function(col, dir){
@@ -194,17 +194,17 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
     },
     //kirov
     onColumnWidthUpdated: function(){
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.onColumnWidthUpdated.call(this, arguments);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.onColumnWidthUpdated.call(this, arguments);
         this.updateGroupStyles.call(this);
     },
     //kirov
     onAllColumnWidthsUpdated: function(){
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.onAllColumnWidthsUpdated.call(this, arguments);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.onAllColumnWidthsUpdated.call(this, arguments);
         this.updateGroupStyles.call(this);
     },
     //kirov
     //onColumnHiddenUpdated: function(){
-    //    Ext.ux.grid.LockingHeaderGroupGridView.superclass.onColumnHiddenUpdated.call(this, arguments);
+    //    Ext3.ux.grid.LockingHeaderGroupGridView.superclass.onColumnHiddenUpdated.call(this, arguments);
     //    this.updateGroupStyles.call(this);
     //},
 
@@ -276,16 +276,16 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
             for(var i = 0; i < colCount; i++){
                 c = cs[i];
                 p.id = c.id;
-                p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
+                p.css = (i === 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '')) +
                     (this.cm.config[i].cellCls ? ' ' + this.cm.config[i].cellCls : '');
                 p.attr = p.cellAttr = '';
                 p.value = c.renderer(r.data[c.name], p, r, rowIndex, i, ds);
                 p.style = c.style;
-                if(Ext.isEmpty(p.value)){
+                if(Ext3.isEmpty(p.value)){
                     p.value = '&#160;';
                 }
-                if(this.markDirty && r.dirty && Ext.isDefined(r.modified[c.name])){
-                    p.css += ' x-grid3-dirty-cell';
+                if(this.markDirty && r.dirty && Ext3.isDefined(r.modified[c.name])){
+                    p.css += ' x3-grid3-dirty-cell';
                 }
                 if(c.locked){
                     lcb[lcb.length] = ct.apply(p);
@@ -295,10 +295,10 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
             }
             var alt = [];
             if(stripe && ((rowIndex+1) % 2 === 0)){
-                alt[0] = 'x-grid3-row-alt';
+                alt[0] = 'x3-grid3-row-alt';
             }
             if(r.dirty){
-                alt[1] = ' x-grid3-dirty-row';
+                alt[1] = ' x3-grid3-dirty-row';
             }
             rp.cols = colCount;
             if(this.getRowClass){
@@ -332,13 +332,13 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
                 row.className = row.className.replace(this.rowClsRe, ' ');
                 lrow.className = lrow.className.replace(this.rowClsRe, ' ');
                 if ((i + 1) % 2 === 0){
-                    row.className += ' x-grid3-row-alt';
-                    lrow.className += ' x-grid3-row-alt';
+                    row.className += ' x3-grid3-row-alt';
+                    lrow.className += ' x3-grid3-row-alt';
                 }
             }
             if(this.syncHeights){
-                var el1 = Ext.get(row),
-                    el2 = Ext.get(lrow),
+                var el1 = Ext3.get(row),
+                    el2 = Ext3.get(lrow),
                     h1 = el1.getHeight(),
                     h2 = el2.getHeight();
 
@@ -350,11 +350,11 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
             }
         }
         if(startRow === 0){
-            Ext.fly(rows[0]).addClass(this.firstRowCls);
-            Ext.fly(lrows[0]).addClass(this.firstRowCls);
+            Ext3.fly(rows[0]).addClass(this.firstRowCls);
+            Ext3.fly(lrows[0]).addClass(this.firstRowCls);
         }
-        Ext.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
-        Ext.fly(lrows[lrows.length - 1]).addClass(this.lastRowCls);
+        Ext3.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
+        Ext3.fly(lrows[lrows.length - 1]).addClass(this.lastRowCls);
     },
 
     afterRender : function(){
@@ -385,8 +385,8 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         var g = this.grid;
         g.getGridEl().dom.innerHTML = html;
         this.initElements();
-        Ext.fly(this.innerHd).on('click', this.handleHdDown, this);
-        Ext.fly(this.lockedInnerHd).on('click', this.handleHdDown, this);
+        Ext3.fly(this.innerHd).on('click', this.handleHdDown, this);
+        Ext3.fly(this.lockedInnerHd).on('click', this.handleHdDown, this);
         this.mainHd.on({
             scope: this,
             mouseover: this.handleHdOver,
@@ -401,18 +401,18 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         });
         this.scroller.on('scroll', this.syncScroll,  this);
         if(g.enableColumnResize !== false){
-            this.splitZone = new Ext.grid.GridView.SplitDragZone(g, this.mainHd.dom);
-            this.splitZone.setOuterHandleElId(Ext.id(this.lockedHd.dom));
-            this.splitZone.setOuterHandleElId(Ext.id(this.mainHd.dom));
+            this.splitZone = new Ext3.grid.GridView.SplitDragZone(g, this.mainHd.dom);
+            this.splitZone.setOuterHandleElId(Ext3.id(this.lockedHd.dom));
+            this.splitZone.setOuterHandleElId(Ext3.id(this.mainHd.dom));
         }
         if(g.enableColumnMove){
-            this.columnDrag = new Ext.grid.GridView.ColumnDragZone(g, this.innerHd);
-            this.columnDrag.setOuterHandleElId(Ext.id(this.lockedInnerHd));
-            this.columnDrag.setOuterHandleElId(Ext.id(this.innerHd));
-            this.columnDrop = new Ext.grid.HeaderDropZone(g, this.mainHd.dom);
+            this.columnDrag = new Ext3.grid.GridView.ColumnDragZone(g, this.innerHd);
+            this.columnDrag.setOuterHandleElId(Ext3.id(this.lockedInnerHd));
+            this.columnDrag.setOuterHandleElId(Ext3.id(this.innerHd));
+            this.columnDrop = new Ext3.grid.HeaderDropZone(g, this.mainHd.dom);
         }
         if(g.enableHdMenu !== false){
-            this.hmenu = new Ext.menu.Menu({id: g.id + '-hctx'});
+            this.hmenu = new Ext3.menu.Menu({id: g.id + '-hctx'});
             this.hmenu.add(
                 {itemId: 'asc', text: this.sortAscText, cls: 'xg-hmenu-sort-asc'},
                 {itemId: 'desc', text: this.sortDescText, cls: 'xg-hmenu-sort-desc'}
@@ -424,7 +424,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
                 );
             }
             if(g.enableColumnHide !== false){
-                this.colMenu = new Ext.menu.Menu({id:g.id + '-hcols-menu'});
+                this.colMenu = new Ext3.menu.Menu({id:g.id + '-hcols-menu'});
                 this.colMenu.on({
                     scope: this,
                     beforeshow: this.beforeColMenuShow,
@@ -435,7 +435,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
                     hideOnClick: false,
                     text: this.columnsText,
                     menu: this.colMenu,
-                    iconCls: 'x-cols-icon'
+                    iconCls: 'x3-cols-icon'
                 });
             }
             this.hmenu.on('itemclick', this.handleHdMenuClick, this);
@@ -454,14 +454,14 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         }
 
         if(g.enableDragDrop || g.enableDrag){
-            this.dragZone = new Ext.grid.GridDragZone(g, {
+            this.dragZone = new Ext3.grid.GridDragZone(g, {
                 ddGroup : g.ddGroup || 'GridDD'
             });
         }
         this.updateHeaderSortState();
         //kirov
-        //Ext.apply(this.columnDrop, this.columnDropConfig);
-        //Ext.apply(this.splitZone, this.splitZoneConfig);
+        //Ext3.apply(this.columnDrop, this.columnDropConfig);
+        //Ext3.apply(this.splitZone, this.splitZoneConfig);
     },
     
     //kirov
@@ -473,7 +473,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
     //kirov
     columnDropConfig: {
         getTargetFromEvent: function(e){
-            var t = Ext.lib.Event.getTarget(e);
+            var t = Ext3.lib.Event.getTarget(e);
             return this.view.findHeaderCell(t);
         },
 
@@ -528,7 +528,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
     },
     //kirov
     updateGroupStyles: function(col){
-        var tables = this.lockedHd.query('.x-grid3-header-offset > table'), tw = this.getLockedWidth(), rows = this.rows;
+        var tables = this.lockedHd.query('.x3-grid3-header-offset > table'), tw = this.getLockedWidth(), rows = this.rows;
         var rowGroups = [];
         for(var row = 0; row < tables.length; row++){
             tables[row].style.width = tw;
@@ -547,7 +547,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
                 }
             }
         }
-        var tables = this.mainHd.query('.x-grid3-header-offset > table'), tw = this.getTotalWidth(), rows = this.rows;
+        var tables = this.mainHd.query('.x3-grid3-header-offset > table'), tw = this.getTotalWidth(), rows = this.rows;
         for(var row = 0; row < tables.length; row++){
             tables[row].style.width = tw;
             if(row < rows.length){
@@ -590,7 +590,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         if(g.autoHeight){
             this.scroller.dom.style.overflow = 'visible';
             this.lockedScroller.dom.style.overflow = 'visible';
-            if(Ext.isWebKit){
+            if(Ext3.isWebKit){
                 this.scroller.dom.style.position = 'static';
                 this.lockedScroller.dom.style.position = 'static';
             }
@@ -659,7 +659,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
             p.value = cm.getColumnHeader(i) || '';
             p.style = this.getColumnStyle(i, true);
             p.tooltip = this.getColumnTooltip(i);
-            p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
+            p.css = (i === 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '')) +
                 (cm.config[i].headerCls ? ' ' + cm.config[i].headerCls : '');
             if(cm.config[i].align == 'right'){
                 p.istyle = 'padding-right:16px';
@@ -685,7 +685,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
                     id: id,
                     row: row,
                     style: 'width:' + gs.width + ';' + (gs.hidden ? 'display:none;' : '') + (group.align ? 'text-align:' + group.align + ';' : ''),
-                    tooltip: group.tooltip ? (Ext.QuickTips.isEnabled() ? 'ext:qtip' : 'title') + '="' + group.tooltip + '"' : '',
+                    tooltip: group.tooltip ? (Ext3.QuickTips.isEnabled() ? 'ext:qtip' : 'title') + '="' + group.tooltip + '"' : '',
                     istyle: group.align == 'right' ? 'padding-right:16px' : '',
                     btn: this.grid.enableHdMenu && group.header,
                     value: group.header || '&nbsp;'
@@ -723,13 +723,13 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
             }
         }
         return {
-            width: (Ext.isBorderBox || (Ext.isWebKit && !Ext.isSafari2) ? width : Math.max(width - this.borderWidth, 0)) + 'px',
+            width: (Ext3.isBorderBox || (Ext3.isWebKit && !Ext3.isSafari2) ? width : Math.max(width - this.borderWidth, 0)) + 'px',
             hidden: hidden
         };
     },
     //kirov
     findHeaderCell: function(el){
-        return el ? this.fly(el).findParent('td.x-grid3-hd', this.cellSelectorDepth) : false;
+        return el ? this.fly(el).findParent('td.x3-grid3-hd', this.cellSelectorDepth) : false;
     },
     //kirov
     findHeaderIndex: function(el){
@@ -753,15 +753,15 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
             return null;
         }
         var c = resolved.cell, r = resolved.row;
-        return c ? Ext.fly(c).getXY() : [this.scroller.getX(), Ext.fly(r).getY()];
+        return c ? Ext3.fly(c).getXY() : [this.scroller.getX(), Ext3.fly(r).getY()];
     },
 
     syncFocusEl : function(row, col, hscroll){
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.syncFocusEl.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.syncFocusEl.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
     },
 
     ensureVisible : function(row, col, hscroll){
-        return Ext.ux.grid.LockingHeaderGroupGridView.superclass.ensureVisible.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
+        return Ext3.ux.grid.LockingHeaderGroupGridView.superclass.ensureVisible.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
     },
 
     insertRows : function(dm, firstRow, lastRow, isUpdate){
@@ -778,13 +778,13 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
                 if(firstRow === 0){
                     this.removeRowClass(0, this.firstRowCls);
                 }
-                Ext.DomHelper.insertHtml('beforeBegin', before, html[0]);
+                Ext3.DomHelper.insertHtml('beforeBegin', before, html[0]);
                 before = this.getLockedRow(firstRow);
-                Ext.DomHelper.insertHtml('beforeBegin', before, html[1]);
+                Ext3.DomHelper.insertHtml('beforeBegin', before, html[1]);
             }else{
                 this.removeRowClass(last - 1, this.lastRowCls);
-                Ext.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html[0]);
-                Ext.DomHelper.insertHtml('beforeEnd', this.lockedBody.dom, html[1]);
+                Ext3.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html[0]);
+                Ext3.DomHelper.insertHtml('beforeEnd', this.lockedBody.dom, html[1]);
             }
             if(!isUpdate){
                 this.fireEvent('rowsinserted', this, firstRow, lastRow);
@@ -822,7 +822,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         for(var i = 0; i < colCount; i++){
             var name = cm.getDataIndex(i);
             cs[i] = {
-                name : (!Ext.isDefined(name) ? this.ds.fields.get(i).name : name),
+                name : (!Ext3.isDefined(name) ? this.ds.fields.get(i).name : name),
                 renderer : cm.getRenderer(i),
                 id : cm.getColumnId(i),
                 style : this.getColumnStyle(i),
@@ -838,8 +838,8 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
     },
 
     refreshRow : function(record){
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.refreshRow.call(this, record);
-        var index = Ext.isNumber(record) ? record : this.ds.indexOf(record);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.refreshRow.call(this, record);
+        var index = Ext3.isNumber(record) ? record : this.ds.indexOf(record);
         this.getLockedRow(index).rowIndex = index;
     },
 
@@ -867,7 +867,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         if(this.cm){
             this.cm.un('columnlockchange', this.onColumnLock, this);
         }
-        Ext.ux.grid.LockingHeaderGroupGridView.superclass.initData.call(this, ds, cm);
+        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.initData.call(this, ds, cm);
         if(this.cm){
             this.cm.on('columnlockchange', this.onColumnLock, this);
         }
@@ -904,36 +904,36 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
                 }
             break;
             default:
-                return Ext.ux.grid.LockingHeaderGroupGridView.superclass.handleHdMenuClick.call(this, item);
+                return Ext3.ux.grid.LockingHeaderGroupGridView.superclass.handleHdMenuClick.call(this, item);
         }
         return true;
     },
 
     handleHdDown : function(e, t){
         //kirov
-        //Ext.ux.grid.LockingHeaderGroupGridView.superclass.handleHdDown.call(this, e, t);
-        var el = Ext.get(t);
-        if(el.hasClass('x-grid3-hd-btn')){
+        //Ext3.ux.grid.LockingHeaderGroupGridView.superclass.handleHdDown.call(this, e, t);
+        var el = Ext3.get(t);
+        if(el.hasClass('x3-grid3-hd-btn')){
             e.stopEvent();
             var hd = this.findHeaderCell(t);
-            Ext.fly(hd).addClass('x-grid3-hd-menu-open');
+            Ext3.fly(hd).addClass('x3-grid3-hd-menu-open');
             var index = this.getCellIndex(hd);
             this.hdCtxIndex = index;
             var ms = this.hmenu.items, cm = this.cm;
             ms.get('asc').setDisabled(!cm.isSortable(index));
             ms.get('desc').setDisabled(!cm.isSortable(index));
             this.hmenu.on('hide', function(){
-                Ext.fly(hd).removeClass('x-grid3-hd-menu-open');
+                Ext3.fly(hd).removeClass('x3-grid3-hd-menu-open');
             }, this, {
                 single: true
             });
             this.hmenu.show(t, 'tl-bl?');
-        }else if(el.hasClass('ux-grid-hd-group-cell') || Ext.fly(t).up('.ux-grid-hd-group-cell')){
+        }else if(el.hasClass('ux-grid-hd-group-cell') || Ext3.fly(t).up('.ux-grid-hd-group-cell')){
             e.stopEvent();
         }
 
         if(this.grid.enableColLock !== false){
-            if(Ext.fly(t).hasClass('x-grid3-hd-btn')){
+            if(Ext3.fly(t).hasClass('x3-grid3-hd-btn')){
                 var hd = this.findHeaderCell(t),
                     index = this.getCellIndex(hd),
                     ms = this.hmenu.items, cm = this.cm;
@@ -951,8 +951,8 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
             var fly = this.fly(hd);
             this.activeHdRegion = fly.getRegion();
             if(!(this.cm.isMenuDisabled(this.activeHdIndex) || fly.hasClass('ux-grid-hd-group-cell'))){
-                fly.addClass('x-grid3-hd-over');
-                this.activeHdBtn = fly.child('.x-grid3-hd-btn');
+                fly.addClass('x3-grid3-hd-over');
+                this.activeHdBtn = fly.child('.x3-grid3-hd-btn');
                 if(this.activeHdBtn){
                     this.activeHdBtn.dom.style.height = (hd.firstChild.offsetHeight - 1) + 'px';
                 }
@@ -962,9 +962,9 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
     //kirov
     handleHdOut: function(e, t){
         var hd = this.findHeaderCell(t);
-        if(hd && (!Ext.isIE || !e.within(hd, true))){
+        if(hd && (!Ext3.isIE || !e.within(hd, true))){
             this.activeHdRef = null;
-            this.fly(hd).removeClass('x-grid3-hd-over');
+            this.fly(hd).removeClass('x3-grid3-hd-over');
             hd.style.cursor = '';
         }
     },
@@ -983,8 +983,8 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
         var lw = this.cm.getTotalLockedWidth(),
             tw = this.cm.getTotalWidth() - lw,
             csize = this.grid.getGridEl().getSize(true),
-            lp = Ext.isBorderBox ? 0 : this.lockedBorderWidth,
-            rp = Ext.isBorderBox ? 0 : this.rowBorderWidth,
+            lp = Ext3.isBorderBox ? 0 : this.lockedBorderWidth,
+            rp = Ext3.isBorderBox ? 0 : this.rowBorderWidth,
             vw = (csize.width - lw - lp - rp) + 'px',
             so = this.getScrollOffset();
         if(!this.grid.autoHeight){
@@ -1009,7 +1009,7 @@ Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
     }
 });
 
-Ext.ux.grid.LockingGroupColumnModel = Ext.extend(Ext.grid.ColumnModel, {
+Ext3.ux.grid.LockingGroupColumnModel = Ext3.extend(Ext3.grid.ColumnModel, {
     /**
      * Returns true if the given column index is currently locked
      * @param {Number} colIndex The column index
@@ -1082,6 +1082,6 @@ Ext.ux.grid.LockingGroupColumnModel = Ext.extend(Ext.grid.ColumnModel, {
             this.setLocked(oldIndex, true, true);
         }
 
-        Ext.ux.grid.LockingGroupColumnModel.superclass.moveColumn.apply(this, arguments);
+        Ext3.ux.grid.LockingGroupColumnModel.superclass.moveColumn.apply(this, arguments);
     }
 });

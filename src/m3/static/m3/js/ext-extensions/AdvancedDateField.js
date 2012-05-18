@@ -2,18 +2,18 @@
  * Компонент поля даты. 
  * Добавлена кнопа установки текущий даты
  */
-Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
+Ext3.m3.AdvancedDataField = Ext3.extend(Ext3.form.DateField, {
 	constructor: function(baseConfig, params){
 
 		// Базовый конфиг для тригеров
 		this.baseTriggers = [
 			{
-				iconCls: 'x-form-date-trigger'
+				iconCls: 'x3-form-date-trigger'
 				,handler: null
 				,hide:null
 			},
 			{
-				iconCls: 'x-form-current-date-trigger'
+				iconCls: 'x3-form-current-date-trigger'
 				,handler: null
 				,hide:null
 			}
@@ -26,17 +26,17 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 			this.hideTriggerToday = true;
 		};
 		
-		Ext.m3.AdvancedDataField.superclass.constructor.call(this, baseConfig);
+		Ext3.m3.AdvancedDataField.superclass.constructor.call(this, baseConfig);
 	}
 	,initComponent: function(){
-		Ext.m3.AdvancedDataField.superclass.initComponent.call(this);
+		Ext3.m3.AdvancedDataField.superclass.initComponent.call(this);
 
         this.triggerConfig = {
-            tag:'span', cls:'x-form-twin-triggers', cn:[]};
+            tag:'span', cls:'x3-form-twin-triggers', cn:[]};
 
-		Ext.each(this.baseTriggers, function(item, index, all){
+		Ext3.each(this.baseTriggers, function(item, index, all){
 			this.triggerConfig.cn.push(
-				{tag: "img", src: Ext.BLANK_IMAGE_URL, cls: "x-form-trigger " + item.iconCls}
+				{tag: "img", src: Ext3.BLANK_IMAGE_URL, cls: "x3-form-trigger " + item.iconCls}
 			);
 		}, this);
 
@@ -44,7 +44,7 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 	},
 	initTrigger : function(){
 		
-        var ts = this.trigger.select('.x-form-trigger', true);
+        var ts = this.trigger.select('.x3-form-trigger', true);
         var triggerField = this;
         ts.each(function(t, all, index){
 			
@@ -67,8 +67,8 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
                 this['hidden' + triggerIndex] = true;
             }
             this.mon(t, 'click', this.baseTriggers[index].handler, this, {preventDefault:true});
-            t.addClassOnOver('x-form-trigger-over');
-            t.addClassOnClick('x-form-trigger-click');
+            t.addClassOnOver('x3-form-trigger-over');
+            t.addClassOnClick('x3-form-trigger-click');
         }, this);
 		
         this.triggers = ts.elements;
@@ -85,4 +85,4 @@ Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 
 });
 
-Ext.reg('m3-date', Ext.m3.AdvancedDataField );
+Ext3.reg('m3-date', Ext3.m3.AdvancedDataField );

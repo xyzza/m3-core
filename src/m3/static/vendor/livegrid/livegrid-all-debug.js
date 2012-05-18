@@ -1,8 +1,8 @@
 /**
- * Ext.ux.grid.livegrid.GridPanel
+ * Ext3.ux.grid.livegrid.GridPanel
  * Copyright (c) 2007-2008, http://www.siteartwork.de
  *
- * Ext.ux.grid.livegrid.GridPanel is licensed under the terms of the
+ * Ext3.ux.grid.livegrid.GridPanel is licensed under the terms of the
  *                  GNU Open Source GPL 3.0
  * license.
  *
@@ -23,27 +23,27 @@
  *
  */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * @class Ext.ux.grid.livegrid.GridPanel
- * @extends Ext.grid.GridPanel
+ * @class Ext3.ux.grid.livegrid.GridPanel
+ * @extends Ext3.grid.GridPanel
  * @constructor
  * @param {Object} config
  *
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
+Ext3.ux.grid.livegrid.GridPanel = Ext3.extend(Ext3.grid.GridPanel, {
 
     initComponent : function()
     {
         if (this.cls) {
-            this.cls += ' ext-ux-livegrid';
+            this.cls += ' ext3-ux-livegrid';
         } else {
-            this.cls = 'ext-ux-livegrid';
+            this.cls = 'ext3-ux-livegrid';
         }
 
-        Ext.ux.grid.livegrid.GridPanel.superclass.initComponent.call(this);
+        Ext3.ux.grid.livegrid.GridPanel.superclass.initComponent.call(this);
     },
 
     /**
@@ -54,7 +54,7 @@ Ext.ux.grid.livegrid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
      */
     onRender : function(ct, position)
     {
-        Ext.ux.grid.livegrid.GridPanel.superclass.onRender.call(this, ct, position);
+        Ext3.ux.grid.livegrid.GridPanel.superclass.onRender.call(this, ct, position);
 
         var ds = this.getStore();
 
@@ -76,7 +76,7 @@ Ext.ux.grid.livegrid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 
         ds.getCount = ds.getTotalCount;
 
-        var ret = Ext.ux.grid.livegrid.GridPanel.superclass.walkCells.call(this, row, col, step, fn, scope);
+        var ret = Ext3.ux.grid.livegrid.GridPanel.superclass.walkCells.call(this, row, col, step, fn, scope);
 
         ds.getCount = _oF;
 
@@ -84,10 +84,10 @@ Ext.ux.grid.livegrid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
     }
 
 });/**
- * Ext.ux.grid.livegrid.GridView
+ * Ext3.ux.grid.livegrid.GridView
  * Copyright (c) 2007-2008, http://www.siteartwork.de
  *
- * Ext.ux.grid.livegrid.GridView is licensed under the terms of the
+ * Ext3.ux.grid.livegrid.GridView is licensed under the terms of the
  *                  GNU Open Source GPL 3.0
  * license.
  *
@@ -108,31 +108,31 @@ Ext.ux.grid.livegrid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
  *
  */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * @class Ext.ux.grid.livegrid.GridView
- * @extends Ext.grid.GridView
+ * @class Ext3.ux.grid.livegrid.GridView
+ * @extends Ext3.grid.GridView
  * @constructor
  * @param {Object} config
  *
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.GridView = function(config) {
+Ext3.ux.grid.livegrid.GridView = function(config) {
 
     this.addEvents({
         /**
          * @event reset
          * Fires when the grid resets.
-         * @param {Ext.ux.grid.livegrid.GridView} this
+         * @param {Ext3.ux.grid.livegrid.GridView} this
          * @param {Boolean} forceReload
          */
         'reset' : true,
         /**
          * @event beforebuffer
          * Fires when the store is about to buffer new data.
-         * @param {Ext.ux.BufferedGridView} this
-         * @param {Ext.data.Store} store The store
+         * @param {Ext3.ux.BufferedGridView} this
+         * @param {Ext3.data.Store} store The store
          * @param {Number} rowIndex
          * @param {Number} visibleRows
          * @param {Number} totalCount
@@ -142,8 +142,8 @@ Ext.ux.grid.livegrid.GridView = function(config) {
         /**
          * @event buffer
          * Fires when the store is finsihed buffering new data.
-         * @param {Ext.ux.BufferedGridView} this
-         * @param {Ext.data.Store} store The store
+         * @param {Ext3.ux.BufferedGridView} this
+         * @param {Ext3.data.Store} store The store
          * @param {Number} rowIndex
          * @param {Number} visibleRows
          * @param {Number} totalCount
@@ -153,15 +153,15 @@ Ext.ux.grid.livegrid.GridView = function(config) {
         /**
          * @event bufferfailure
          * Fires when buffering failed.
-         * @param {Ext.ux.BufferedGridView} this
-         * @param {Ext.data.Store} store The store
+         * @param {Ext3.ux.BufferedGridView} this
+         * @param {Ext3.data.Store} store The store
          * @param {Object} options The options the buffer-request was initiated with
          */
         'bufferfailure' : true,
         /**
          * @event cursormove
          * Fires when the the user scrolls through the data.
-         * @param {Ext.ux.BufferedGridView} this
+         * @param {Ext3.ux.BufferedGridView} this
          * @param {Number} rowIndex The index of the first visible row in the
          *                          grid absolute to it's position in the model.
          * @param {Number} visibleRows The number of rows visible in the grid.
@@ -173,7 +173,7 @@ Ext.ux.grid.livegrid.GridView = function(config) {
          * Fires when the store is about to reload (this does NOT mean buffering).
          * If you are using a custom proxy in your store, you should listen to this event
          * and abort any ongoing server request established in your custom proxy.
-         * @param {Ext.data.Store} store
+         * @param {Ext3.data.Store} store
          * @param {Object} options
          */
         'abortrequest' : true
@@ -214,33 +214,33 @@ Ext.ux.grid.livegrid.GridView = function(config) {
     this.horizontalScrollOffset = 17;
 
     /**
-     * @type {Boolean} _checkEmptyBody Since Ext 3.0, &nbsp; would initially added to the mainBody
+     * @type {Boolean} _checkEmptyBody Since Ext3 3.0, &nbsp; would initially added to the mainBody
      * as the first child if there are no rows to render. This element has to be removed when
      * the first rows get added so the UI does not crash. This property is here to determine if
      * this element was already removed, so we don't have to query innerHTML all the time.
      */
     this._checkEmptyBody = true;
 
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
 
     this.templates = {};
     /**
      * The master template adds an addiiotnal scrollbar to make cursoring in the
      * data possible.
      */
-    this.templates.master = new Ext.Template(
-        '<div class="x-grid3" hidefocus="true"><div class="liveScroller"><div></div><div></div><div></div></div>',
-            '<div class="x-grid3-viewport"">',
-                '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x-clear"></div></div>',
-                '<div class="x-grid3-scroller" style="overflow-y:hidden !important;"><div class="x-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x-grid3-focus" tabIndex="-1"></a></div>',
+    this.templates.master = new Ext3.Template(
+        '<div class="x3-grid3" hidefocus="true"><div class="liveScroller"><div></div><div></div><div></div></div>',
+            '<div class="x3-grid3-viewport"">',
+                '<div class="x3-grid3-header"><div class="x3-grid3-header-inner"><div class="x3-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x3-clear"></div></div>',
+                '<div class="x3-grid3-scroller" style="overflow-y:hidden !important;"><div class="x3-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x3-grid3-focus" tabIndex="-1"></a></div>',
             "</div>",
-            '<div class="x-grid3-resize-marker">&#160;</div>',
-            '<div class="x-grid3-resize-proxy">&#160;</div>',
+            '<div class="x3-grid3-resize-marker">&#160;</div>',
+            '<div class="x3-grid3-resize-proxy">&#160;</div>',
         "</div>"
     );
 
     // shorthands for often used parent classes
-    this._gridViewSuperclass = Ext.ux.grid.livegrid.GridView.superclass;
+    this._gridViewSuperclass = Ext3.ux.grid.livegrid.GridView.superclass;
 
     this._gridViewSuperclass.constructor.call(this);
 
@@ -248,7 +248,7 @@ Ext.ux.grid.livegrid.GridView = function(config) {
 };
 
 
-Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
+Ext3.extend(Ext3.ux.grid.livegrid.GridView, Ext3.grid.GridView, {
 
 // {{{ --------------------------properties-------------------------------------
 
@@ -269,7 +269,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
     /**
      * This is the actual y-scroller that does control sending request to the server
      * based upon the position of the scrolling cursor.
-     * @param {Ext.Element}
+     * @param {Ext3.Element}
      */
     liveScroller : null,
 
@@ -344,7 +344,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
     requestQueue : -1,
 
     /**
-     * An {@Ext.LoadMask} config that will be shown when a request to data was made
+     * An {@Ext3.LoadMask} config that will be shown when a request to data was made
      * and there are no rows in the buffer left to render.
      * @param {Object}
      */
@@ -367,7 +367,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 
     /**
      * The dom node for which the node mask will be rendered.
-     * @type {Ext.Element}
+     * @type {Ext3.Element}
      * @private
      */
     _loadMaskAnchor : null,
@@ -408,7 +408,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
             this.showLoadMask(false);
 
             var _ofn = this.processRows;
-            this.processRows = Ext.emptyFn;
+            this.processRows = Ext3.emptyFn;
             this.suspendEvents();
             this.refresh(true);
             this.resumeEvents();
@@ -441,7 +441,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 // {{{ ------------adjusted methods for applying custom behavior----------------
 
     /**
-     * Overwritten so the {@link Ext.ux.grid.livegrid.DragZone} can be used
+     * Overwritten so the {@link Ext3.ux.grid.livegrid.DragZone} can be used
      * with this view implementation.
      *
      * Since detaching a previously created DragZone from a grid panel seems to
@@ -465,7 +465,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         g.enableDrag     = dEnabled;
 
         if(dEnabled){
-            this.dragZone = new Ext.ux.grid.livegrid.DragZone(g, {
+            this.dragZone = new Ext3.ux.grid.livegrid.DragZone(g, {
                 ddGroup : g.ddGroup || 'GridDD'
             });
         }
@@ -478,16 +478,16 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         this._gridViewSuperclass.afterRenderUI.call(this);
 
         if (this.loadMask) {
-            this._loadMaskAnchor = Ext.get(this.mainBody.dom.parentNode.parentNode);
-            Ext.apply(this.loadMask,{
-                msgCls : 'x-mask-loading'
+            this._loadMaskAnchor = Ext3.get(this.mainBody.dom.parentNode.parentNode);
+            Ext3.apply(this.loadMask,{
+                msgCls : 'x3-mask-loading'
             });
             this._loadMaskAnchor.mask(
                 this.loadMask.msg, this.loadMask.msgCls
             );
             var dom  = this._loadMaskAnchor.dom;
-            var data = Ext.Element.data;
-            data(dom, 'mask').addClass('ext-ux-livegrid');
+            var data = Ext3.Element.data;
+            data(dom, 'mask').addClass('ext3-ux-livegrid');
             data(dom, 'mask').setDisplayed(false);
             data(dom, 'maskMsg').setDisplayed(false);
         }
@@ -500,7 +500,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
      * of data. When the store does "buffer", all events are suspended and the
      * beforeload event will not be triggered.
      *
-     * @param {Ext.grid.GridPanel} grid The grid panel this view is attached to
+     * @param {Ext3.grid.GridPanel} grid The grid panel this view is attached to
      */
     init: function(grid)
     {
@@ -559,7 +559,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
     // private
     initElements : function()
     {
-        var E = Ext.Element;
+        var E = Ext3.Element;
 
         var el = this.grid.getGridEl().dom.firstChild;
 	    var cs = el.childNodes;
@@ -633,7 +633,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 
         if(g.autoHeight){
             this.scroller.dom.style.overflow = 'visible';
-            if(Ext.isWebKit){
+            if(Ext3.isWebKit){
                 this.scroller.dom.style.position = 'static';
             }
         }else{
@@ -675,16 +675,16 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
     },
 
     /**
-     * Overriden for Ext 2.2 to prevent call to focus Row.
+     * Overriden for Ext3 2.2 to prevent call to focus Row.
      *
      */
     removeRow : function(row)
     {
-        Ext.removeNode(this.getRow(row));
+        Ext3.removeNode(this.getRow(row));
     },
 
     /**
-     * Overriden for Ext 2.2 to prevent call to focus Row.
+     * Overriden for Ext3 2.2 to prevent call to focus Row.
      * This method i s here for dom operations only - the passed arguments are the
      * index of the nodes in the dom, not in the model.
      *
@@ -693,7 +693,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
     {
         var bd = this.mainBody.dom;
         for(var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++){
-            Ext.removeNode(bd.childNodes[firstRow]);
+            Ext3.removeNode(bd.childNodes[firstRow]);
         }
     },
 
@@ -702,7 +702,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
      * Vadim 14.11.2011.
      */
     getColumnStyle : function(colIndex, isHeader) {
-        var style = Ext.ux.grid.livegrid.GridView.superclass.getColumnStyle.call(this, colIndex, isHeader);
+        var style = Ext3.ux.grid.livegrid.GridView.superclass.getColumnStyle.call(this, colIndex, isHeader);
         if (isHeader){
             style += this.headerStyle;
         }
@@ -802,7 +802,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
     /**
      * Callback for the "bulkremove" event of the attached datastore.
      *
-     * @param {Ext.ux.grid.livegrid.Store} store
+     * @param {Ext3.ux.grid.livegrid.Store} store
      * @param {Array} removedData
      *
      */
@@ -893,12 +893,12 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
      * not guaranteed that the computed indexes equal to the indexes of the
      * underlying data model.
      *
-     * @param {Ext.ux.grid.livegrid.Store} ds The datastore that buffers records
+     * @param {Ext3.ux.grid.livegrid.Store} ds The datastore that buffers records
      *                                       from the underlying data model
      * @param {Array} records An array containing the newly added
-     *                        {@link Ext.data.Record}s
+     *                        {@link Ext3.data.Record}s
      * @param {Number} index The index of the position in the underlying
-     *                       {@link Ext.ux.grid.livegrid.Store} where the rows
+     *                       {@link Ext3.ux.grid.livegrid.Store} where the rows
      *                       were added.
      */
     // private
@@ -1019,22 +1019,22 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
      * All other load events will be suspended when the view requests buffer data.
      * See {updateLiveRows}.
      * Note:
-     * If you are using a custom proxy, such as {Ext.data.DirectProxy}, you should listen
+     * If you are using a custom proxy, such as {Ext3.data.DirectProxy}, you should listen
      * to the 'abortrequest'-event, which will tell that an ongoing "read" request should be
      * aborted, since the grid's store gets refreshed.
-     * If the store is using an instance of {Ext.data.HttpProxy}, the method will still be
+     * If the store is using an instance of {Ext3.data.HttpProxy}, the method will still be
      * fired, but the request made through this proxy will be aborted automatically.
      *
      *
-     * @param {Ext.data.Store} store The store the Grid Panel uses
+     * @param {Ext3.data.Store} store The store the Grid Panel uses
      * @param {Object} options The configuration object for the proxy that loads
      *                         data from the server
      */
     onBeforeLoad : function(store, options)
     {
         var proxy = store.proxy;
-        if (proxy.activeRequest && proxy.activeRequest[Ext.data.Api.actions.read]) {
-            proxy.getConnection().abort(proxy.activeRequest[Ext.data.Api.actions.read]);
+        if (proxy.activeRequest && proxy.activeRequest[Ext3.data.Api.actions.read]) {
+            proxy.getConnection().abort(proxy.activeRequest[Ext3.data.Api.actions.read]);
         }
         this.fireEvent('abortrequest', store, options);
 
@@ -1043,7 +1043,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 
         options.params = options.params || {};
 
-        var apply = Ext.apply;
+        var apply = Ext3.apply;
 
         apply(options, {
             scope    : this,
@@ -1156,7 +1156,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
      * Handles mousewheel event on the table's body. This is neccessary since the
      * <tt>liveScroller</tt> element is completely detached from the table's body.
      *
-     * @param {Ext.EventObject} e The event object
+     * @param {Ext3.EventObject} e The event object
      */
     handleWheel : function(e)
     {
@@ -1250,7 +1250,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
             row.rowIndex = index = cursor+idx;
             row.className = row.className.replace(this.rowClsRe, ' ');
             if (!skipStripe && (index + 1) % 2 === 0) {
-                row.className += ' x-grid3-row-alt';
+                row.className += ' x3-grid3-row-alt';
             }
 
             if (paintSelections !== false) {
@@ -1259,15 +1259,15 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
                 } else {
                     this.removeRowClass(index, this.selectedRowClass);
                 }
-                this.fly(row).removeClass("x-grid3-row-over");
+                this.fly(row).removeClass("x3-grid3-row-over");
             }
         }
 
         // add first/last-row classes
         if(cursor === 0){
-            Ext.fly(rows[0]).addClass(this.firstRowCls);
+            Ext3.fly(rows[0]).addClass(this.firstRowCls);
         } else if (cursor + rows.length == this.ds.totalLength) {
-            Ext.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
+            Ext3.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
         }
     },
 
@@ -1306,9 +1306,9 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         var before = this.getRow(viewIndexFirst);
 
         if (before) {
-            Ext.DomHelper.insertHtml('beforeBegin', before, html);
+            Ext3.DomHelper.insertHtml('beforeBegin', before, html);
         } else {
-            Ext.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html);
+            Ext3.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html);
         }
 
         // if a row is replaced, we need to set the row index for this
@@ -1378,7 +1378,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 
 		this.focusEl.setXY(xy);
 
-        if(Ext.isGecko){
+        if(Ext3.isGecko){
             this.focusEl.focus();
         }else{
             this.focusEl.focus.defer(1, this.focusEl);
@@ -1445,14 +1445,14 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 
 
         return cellEl ?
-            Ext.fly(cellEl).getXY() :
-            [c.scrollLeft+this.el.getX(), Ext.fly(rowEl).getY()];
+            Ext3.fly(cellEl).getXY() :
+            [c.scrollLeft+this.el.getX(), Ext3.fly(rowEl).getY()];
     },
 
     /**
      * Return strue if the passed record is in the visible rect of this view.
      *
-     * @param {Ext.data.Record} record
+     * @param {Ext3.data.Record} record
      *
      * @return {Boolean} true if the record is rendered in the view, otherwise false.
      */
@@ -1621,7 +1621,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 
         var params = {};
         if (this.ds.lastOptions) {
-            Ext.apply(params, this.ds.lastOptions.params);
+            Ext3.apply(params, this.ds.lastOptions.params);
         }
 
         params.start = bufferOffset;
@@ -1662,7 +1662,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         }
 
         var dom  = this._loadMaskAnchor.dom;
-        var data = Ext.Element.data;
+        var data = Ext3.Element.data;
 
         var mask    = data(dom, 'mask');
         var maskMsg = data(dom, 'maskMsg');
@@ -1672,7 +1672,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
             maskMsg.setDisplayed(true);
             maskMsg.center(this._loadMaskAnchor);
             // this lines will help IE8 to re-calculate the height of the loadmask
-            if(Ext.isIE && !(Ext.isIE7 && Ext.isStrict) && this._loadMaskAnchor.getStyle('height') == 'auto'){
+            if(Ext3.isIE && !(Ext3.isIE7 && Ext3.isStrict) && this._loadMaskAnchor.getStyle('height') == 'auto'){
 	            mask.setSize(undefined, this._loadMaskAnchor.getHeight());
 	        }
         } else {
@@ -1738,14 +1738,14 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
                         cursorBuffer+this.visibleRows-spill,
                         lpIndex
                     );
-                    Ext.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html);
+                    Ext3.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html);
 
                 }
 
             } else {
                 this.removeRows(this.visibleRows-spill, this.visibleRows-1);
                 var html = this.renderRows(cursorBuffer, cursorBuffer+spill-1);
-                Ext.DomHelper.insertHtml('beforeBegin', this.mainBody.dom.firstChild, html);
+                Ext3.DomHelper.insertHtml('beforeBegin', this.mainBody.dom.firstChild, html);
 
             }
         }
@@ -1928,10 +1928,10 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
 
 
 });/**
- * Ext.ux.grid.livegrid.JsonReader
+ * Ext3.ux.grid.livegrid.JsonReader
  * Copyright (c) 2007-2008, http://www.siteartwork.de
  *
- * Ext.ux.grid.livegrid.JsonReader is licensed under the terms of the
+ * Ext3.ux.grid.livegrid.JsonReader is licensed under the terms of the
  *                  GNU Open Source GPL 3.0
  * license.
  *
@@ -1952,23 +1952,23 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
  *
  */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * @class Ext.ux.grid.livegrid.JsonReader
- * @extends Ext.data.JsonReader
+ * @class Ext3.ux.grid.livegrid.JsonReader
+ * @extends Ext3.data.JsonReader
  * @constructor
  * @param {Object} config
  *
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.JsonReader = function(meta, recordType){
+Ext3.ux.grid.livegrid.JsonReader = function(meta, recordType){
 
-    Ext.ux.grid.livegrid.JsonReader.superclass.constructor.call(this, meta, recordType);
+    Ext3.ux.grid.livegrid.JsonReader.superclass.constructor.call(this, meta, recordType);
 };
 
 
-Ext.extend(Ext.ux.grid.livegrid.JsonReader, Ext.data.JsonReader, {
+Ext3.extend(Ext3.ux.grid.livegrid.JsonReader, Ext3.data.JsonReader, {
 
     /**
      * @cfg {String} versionProperty Name of the property from which to retrieve the
@@ -1988,22 +1988,22 @@ Ext.extend(Ext.ux.grid.livegrid.JsonReader, Ext.data.JsonReader, {
             this.getVersion = this.createAccessor(s.versionProperty);
         }
 
-        Ext.ux.grid.livegrid.JsonReader.superclass.buildExtractors.call(this);
+        Ext3.ux.grid.livegrid.JsonReader.superclass.buildExtractors.call(this);
     },
 
     /**
-     * Create a data block containing Ext.data.Records from a JSON object.
+     * Create a data block containing Ext3.data.Records from a JSON object.
      * @param {Object} o An object which contains an Array of row objects in the property specified
      * in the config as 'root, and optionally a property, specified in the config as 'totalProperty'
      * which contains the total size of the dataset.
-     * @return {Object} data A data block which is used by an Ext.data.Store object as
-     * a cache of Ext.data.Records.
+     * @return {Object} data A data block which is used by an Ext3.data.Store object as
+     * a cache of Ext3.data.Records.
      */
     readRecords : function(o)
     {
         // shorten for future calls
         if (!this.__readRecords) {
-            this.__readRecords = Ext.ux.grid.livegrid.JsonReader.superclass.readRecords;
+            this.__readRecords = Ext3.ux.grid.livegrid.JsonReader.superclass.readRecords;
         }
         var intercept = this.__readRecords.call(this, o);
 
@@ -2016,10 +2016,10 @@ Ext.extend(Ext.ux.grid.livegrid.JsonReader, Ext.data.JsonReader, {
     }
 
 });/**
- * Ext.ux.grid.livegrid.RowSelectionModel
+ * Ext3.ux.grid.livegrid.RowSelectionModel
  * Copyright (c) 2007-2008, http://www.siteartwork.de
  *
- * Ext.ux.grid.livegrid.RowSelectionModel is licensed under the terms of the
+ * Ext3.ux.grid.livegrid.RowSelectionModel is licensed under the terms of the
  *                  GNU Open Source GPL 3.0
  * license.
  *
@@ -2040,17 +2040,17 @@ Ext.extend(Ext.ux.grid.livegrid.JsonReader, Ext.data.JsonReader, {
  *
  */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * @class Ext.ux.grid.livegrid.RowSelectionModel
- * @extends Ext.grid.RowSelectionModel
+ * @class Ext3.ux.grid.livegrid.RowSelectionModel
+ * @extends Ext3.grid.RowSelectionModel
  * @constructor
  * @param {Object} config
  *
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.RowSelectionModel = function(config) {
+Ext3.ux.grid.livegrid.RowSelectionModel = function(config) {
 
 
     this.addEvents({
@@ -2063,24 +2063,24 @@ Ext.ux.grid.livegrid.RowSelectionModel = function(config) {
         'selectiondirty' : true
     });
 
-    Ext.apply(this, config);
+    Ext3.apply(this, config);
 
     this.allSelected = false;
     this.excludes    = [];
 
     this.pendingSelections = {};
 
-    Ext.ux.grid.livegrid.RowSelectionModel.superclass.constructor.call(this);
+    Ext3.ux.grid.livegrid.RowSelectionModel.superclass.constructor.call(this);
 
 };
 
-Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
+Ext3.extend(Ext3.ux.grid.livegrid.RowSelectionModel, Ext3.grid.RowSelectionModel, {
 
 
  // private
     initEvents : function()
     {
-        Ext.ux.grid.livegrid.RowSelectionModel.superclass.initEvents.call(this);
+        Ext3.ux.grid.livegrid.RowSelectionModel.superclass.initEvents.call(this);
 
         this.grid.view.on('rowsinserted',    this.onAdd,            this);
         this.grid.store.on('selectionsload', this.onSelectionsLoad, this);
@@ -2635,7 +2635,7 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
 
     /**
      * Selects all rows if the selection model
-     * {@link Ext.grid.AbstractSelectionModel#isLocked is not locked}.
+     * {@link Ext3.grid.AbstractSelectionModel#isLocked is not locked}.
      */
     selectAll : function()
     {
@@ -2662,10 +2662,10 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
 
 
 /**
- * Ext.ux.grid.livegrid.Store
+ * Ext3.ux.grid.livegrid.Store
  * Copyright (c) 2007-2008, http://www.siteartwork.de
  *
- * Ext.ux.grid.livegrid.Store is licensed under the terms of the
+ * Ext3.ux.grid.livegrid.Store is licensed under the terms of the
  *                  GNU Open Source GPL 3.0
  * license.
  *
@@ -2686,15 +2686,15 @@ Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, Ext.grid.RowSelectionModel, {
  *
  */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * @class Ext.ux.grid.livegrid.Store
- * @extends Ext.data.Store
+ * @class Ext3.ux.grid.livegrid.Store
+ * @extends Ext3.data.Store
  *
- * The BufferedGridSore is a special implementation of a Ext.data.Store. It is used
+ * The BufferedGridSore is a special implementation of a Ext3.data.Store. It is used
  * for loading chunks of data from the underlying data repository as requested
- * by the Ext.ux.BufferedGridView. It's size is limited to the config parameter
+ * by the Ext3.ux.BufferedGridView. It's size is limited to the config parameter
  * bufferSize and is thereby guaranteed to never hold more than this amount
  * of records in the store.
  *
@@ -2754,7 +2754,7 @@ Ext.namespace('Ext.ux.grid.livegrid');
  *
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.Store = function(config) {
+Ext3.ux.grid.livegrid.Store = function(config) {
 
     config = config || {};
 
@@ -2763,7 +2763,7 @@ Ext.ux.grid.livegrid.Store = function(config) {
 
     // we will intercept the autoLoad property and set it to false so we do not
     // load any contents of the store before the View has not fully initialized
-    // itself. if autoLoad was set to true, the Ext.ux.grid.livegrid.GridPanel
+    // itself. if autoLoad was set to true, the Ext3.ux.grid.livegrid.GridPanel
     // will take care of loading the store once it has been rendered
     this._autoLoad  = config.autoLoad ? true : false;
     config.autoLoad = false;
@@ -2772,7 +2772,7 @@ Ext.ux.grid.livegrid.Store = function(config) {
          /**
           * @event bulkremove
           * Fires when a bulk remove operation was finished.
-          * @param {Ext.ux.BufferedGridStore} this
+          * @param {Ext3.ux.BufferedGridStore} this
           * @param {Array} An array with the records that have been removed.
           * The values for each array index are
           * record - the record that was removed
@@ -2782,7 +2782,7 @@ Ext.ux.grid.livegrid.Store = function(config) {
          /**
           * @event versionchange
           * Fires when the version property has changed.
-          * @param {Ext.ux.BufferedGridStore} this
+          * @param {Ext3.ux.BufferedGridStore} this
           * @param {String} oldValue
           * @param {String} newValue
           */
@@ -2791,14 +2791,14 @@ Ext.ux.grid.livegrid.Store = function(config) {
           * @event beforeselectionsload
           * Fires before the store sends a request for ranges of records to
           * the server.
-          * @param {Ext.ux.BufferedGridStore} this
+          * @param {Ext3.ux.BufferedGridStore} this
           * @param {Array} ranges
           */
         'beforeselectionsload',
          /**
           * @event selectionsload
           * Fires when selections have been loaded.
-          * @param {Ext.ux.BufferedGridStore} this
+          * @param {Ext3.ux.BufferedGridStore} this
           * @param {Array} records An array containing the loaded records from
           * the server.
           * @param {Array} ranges An array containing the ranges of indexes this
@@ -2807,7 +2807,7 @@ Ext.ux.grid.livegrid.Store = function(config) {
         'selectionsload'
     );
 
-    Ext.ux.grid.livegrid.Store.superclass.constructor.call(this, config);
+    Ext3.ux.grid.livegrid.Store.superclass.constructor.call(this, config);
 
     this.totalLength = 0;
 
@@ -2825,12 +2825,12 @@ Ext.ux.grid.livegrid.Store = function(config) {
     }, this);
 
     if(this.url && !this.selectionsProxy){
-        this.selectionsProxy = new Ext.data.HttpProxy({url: this.url});
+        this.selectionsProxy = new Ext3.data.HttpProxy({url: this.url});
     }
 
 };
 
-Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
+Ext3.extend(Ext3.ux.grid.livegrid.Store, Ext3.data.Store, {
 
     /**
      * The version of the data in the store. This value is represented by the
@@ -2940,7 +2940,7 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
      * does not return a value less than 0. Though not removing the record from
      * B may not update the view of an attached BufferedGridView immediately.
      *
-     * @param {Ext.data.Record} record
+     * @param {Ext3.data.Record} record
      * @param {Boolean} suspendEvent true to suspend the "remove"-event
      *
      * @return Number the index of the record removed.
@@ -3053,13 +3053,13 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
     {
         var max_i = ranges.length;
 
-        if(max_i > 0 && !this.selectionsProxy.activeRequest[Ext.data.Api.actions.read]
+        if(max_i > 0 && !this.selectionsProxy.activeRequest[Ext3.data.Api.actions.read]
            && this.fireEvent("beforeselectionsload", this, ranges) !== false){
 
             var lParams = this.lastOptions.params;
 
             var params = {};
-            params.ranges = Ext.encode(ranges);
+            params.ranges = Ext3.encode(ranges);
 
             if (lParams) {
                 if (lParams.sort) {
@@ -3078,7 +3078,7 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
             options.ranges = params.ranges;
 
             this.selectionsProxy.doRequest(
-                Ext.data.Api.actions.read, null, options, this.reader,
+                Ext3.data.Api.actions.read, null, options, this.reader,
                 this.selectionsLoaded, this, options
             );
         }
@@ -3110,9 +3110,9 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
                 r[i].join(this);
             }
 
-            this.fireEvent("selectionsload", this, o.records, Ext.decode(options.ranges));
+            this.fireEvent("selectionsload", this, o.records, Ext3.decode(options.ranges));
         } else {
-            this.fireEvent("selectionsload", this, [], Ext.decode(options.ranges));
+            this.fireEvent("selectionsload", this, [], Ext3.decode(options.ranges));
         }
     },
 
@@ -3148,7 +3148,7 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
     findInsertIndex : function(record)
     {
         this.remoteSort = false;
-        var index = Ext.ux.grid.livegrid.Store.superclass.findInsertIndex.call(this, record);
+        var index = Ext3.ux.grid.livegrid.Store.superclass.findInsertIndex.call(this, record);
         this.remoteSort = true;
 
         // special case... index is 0 and we are at the very first record
@@ -3199,7 +3199,7 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
     onMetaChange : function(meta, rtype, o)
     {
         this.version = null;
-        Ext.ux.grid.livegrid.Store.superclass.onMetaChange.call(this, meta, rtype, o);
+        Ext3.ux.grid.livegrid.Store.superclass.onMetaChange.call(this, meta, rtype, o);
     },
 
 
@@ -3226,7 +3226,7 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
         if (options.suspendLoadEvent === true) {
             this.suspendEvents();
         }
-        Ext.ux.grid.livegrid.Store.superclass.loadRecords.call(this, o, options, success);
+        Ext3.ux.grid.livegrid.Store.superclass.loadRecords.call(this, o, options, success);
         if (options.suspendLoadEvent === true) {
             this.resumeEvents();
         }
@@ -3238,7 +3238,7 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
      * to the index of the record in the current buffer.
      *
      * @param {Number} index The index of the Record to find.
-     * @return {Ext.data.Record} The Record at the passed index. Returns undefined if not found.
+     * @return {Ext3.data.Record} The Record at the passed index. Returns undefined if not found.
      */
     getAt : function(index)
     {
@@ -3266,10 +3266,10 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
     findBy : function(){}
 
 });/**
- * Ext.ux.grid.livegrid.Toolbar
+ * Ext3.ux.grid.livegrid.Toolbar
  * Copyright (c) 2007-2008, http://www.siteartwork.de
  *
- * Ext.ux.grid.livegrid.Toolbar is licensed under the terms of the
+ * Ext3.ux.grid.livegrid.Toolbar is licensed under the terms of the
  *                  GNU Open Source GPL 3.0
  * license.
  *
@@ -3290,29 +3290,29 @@ Ext.extend(Ext.ux.grid.livegrid.Store, Ext.data.Store, {
  *
  */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * toolbar that is bound to a {@link Ext.ux.grid.livegrid.GridView}
+ * toolbar that is bound to a {@link Ext3.ux.grid.livegrid.GridView}
  * and provides information about the indexes of the requested data and the buffer
  * state.
  *
- * @class Ext.ux.grid.livegrid.Toolbar
- * @extends Ext.Toolbar
+ * @class Ext3.ux.grid.livegrid.Toolbar
+ * @extends Ext3.Toolbar
  * @constructor
  * @param {Object} config
  *
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.Toolbar = Ext.extend(Ext.Toolbar, {
+Ext3.ux.grid.livegrid.Toolbar = Ext3.extend(Ext3.Toolbar, {
 
     /**
-     * @cfg {Ext.grid.GridPanel} grid
+     * @cfg {Ext3.grid.GridPanel} grid
      * The grid the toolbar is bound to. If ommited, use the cfg property "view"
      */
 
     /**
-     * @cfg {Ext.grid.GridView} view The view the toolbar is bound to
+     * @cfg {Ext3.grid.GridView} view The view the toolbar is bound to
      * The grid the toolbar is bound to. If ommited, use the cfg property "grid"
      */
 
@@ -3342,7 +3342,7 @@ Ext.ux.grid.livegrid.Toolbar = Ext.extend(Ext.Toolbar, {
 
     initComponent : function()
     {
-        Ext.ux.grid.livegrid.Toolbar.superclass.initComponent.call(this);
+        Ext3.ux.grid.livegrid.Toolbar.superclass.initComponent.call(this);
 
         if (this.grid) {
             this.view = this.grid.getView();
@@ -3369,7 +3369,7 @@ Ext.ux.grid.livegrid.Toolbar = Ext.extend(Ext.Toolbar, {
     /**
      * Unbinds the toolbar.
      *
-     * @param {Ext.grid.GridView|Ext.gid.GridPanel} view Either The view to unbind
+     * @param {Ext3.grid.GridView|Ext3.gid.GridPanel} view Either The view to unbind
      * or the grid
      */
     unbind : function(view)
@@ -3377,10 +3377,10 @@ Ext.ux.grid.livegrid.Toolbar = Ext.extend(Ext.Toolbar, {
         var st;
         var vw;
 
-        if (view instanceof Ext.grid.GridView) {
+        if (view instanceof Ext3.grid.GridView) {
             vw = view;
         } else {
-            // assuming parameter is of type Ext.grid.GridPanel
+            // assuming parameter is of type Ext3.grid.GridPanel
             vw = view.getView();
         }
 
@@ -3400,9 +3400,9 @@ Ext.ux.grid.livegrid.Toolbar = Ext.extend(Ext.Toolbar, {
     },
 
     /**
-     * Binds the toolbar to the specified {@link Ext.ux.grid.Livegrid}
+     * Binds the toolbar to the specified {@link Ext3.ux.grid.Livegrid}
      *
-     * @param {Ext.grird.GridView} view The view to bind
+     * @param {Ext3.grird.GridView} view The view to bind
      */
     bind : function(view)
     {
@@ -3482,11 +3482,11 @@ Ext.ux.grid.livegrid.Toolbar = Ext.extend(Ext.Toolbar, {
     // private
     onRender : function(ct, position)
     {
-        Ext.PagingToolbar.superclass.onRender.call(this, ct, position);
+        Ext3.PagingToolbar.superclass.onRender.call(this, ct, position);
 
-        this.loading = new Ext.Toolbar.Button({
+        this.loading = new Ext3.Toolbar.Button({
             tooltip : this.refreshText,
-            iconCls : "x-tbar-loading",
+            iconCls : "x3-tbar-loading",
             handler : this.onClick.createDelegate(this, ["refresh"])
         });
 
@@ -3495,14 +3495,14 @@ Ext.ux.grid.livegrid.Toolbar = Ext.extend(Ext.Toolbar, {
         this.addSeparator();
 
         if(this.displayInfo){
-            this.displayEl = Ext.fly(this.el.dom).createChild({cls:'x-paging-info'});
+            this.displayEl = Ext3.fly(this.el.dom).createChild({cls:'x3-paging-info'});
         }
     }
 });/**
- * Ext.ux.grid.livegrid.DragZone
+ * Ext3.ux.grid.livegrid.DragZone
  * Copyright (c) 2007-2008, http://www.siteartwork.de
  *
- * Ext.ux.grid.livegrid.DragZone is licensed under the terms of the
+ * Ext3.ux.grid.livegrid.DragZone is licensed under the terms of the
  *                  GNU Open Source GPL 3.0
  * license.
  *
@@ -3523,22 +3523,22 @@ Ext.ux.grid.livegrid.Toolbar = Ext.extend(Ext.Toolbar, {
  *
  */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * @class Ext.ux.grid.livegrid.DragZone
- * @extends Ext.dd.DragZone
+ * @class Ext3.ux.grid.livegrid.DragZone
+ * @extends Ext3.dd.DragZone
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.DragZone = function(grid, config){
+Ext3.ux.grid.livegrid.DragZone = function(grid, config){
 
-    Ext.ux.grid.livegrid.DragZone.superclass.constructor.call(this, grid, config);
+    Ext3.ux.grid.livegrid.DragZone.superclass.constructor.call(this, grid, config);
 
     this.view.ds.on('beforeselectionsload', this._onBeforeSelectionsLoad, this);
     this.view.ds.on('selectionsload',       this._onSelectionsLoad,       this);
 };
 
-Ext.extend(Ext.ux.grid.livegrid.DragZone, Ext.grid.GridDragZone, {
+Ext3.extend(Ext3.ux.grid.livegrid.DragZone, Ext3.grid.GridDragZone, {
 
     /**
      * Tells whether a drop is valid. Used inetrnally to determine if pending
@@ -3554,7 +3554,7 @@ Ext.extend(Ext.ux.grid.livegrid.DragZone, Ext.grid.GridDragZone, {
     {
         this.view.ds.loadSelections(this.grid.selModel.getPendingSelections(true));
 
-        Ext.ux.grid.livegrid.DragZone.superclass.onInitDrag.call(this, e);
+        Ext3.ux.grid.livegrid.DragZone.superclass.onInitDrag.call(this, e);
     },
 
     /**
@@ -3566,7 +3566,7 @@ Ext.extend(Ext.ux.grid.livegrid.DragZone, Ext.grid.GridDragZone, {
     _onBeforeSelectionsLoad : function()
     {
         this.isDropValid = false;
-        Ext.fly(this.proxy.el.dom.firstChild).addClass('ext-ux-livegrid-drop-waiting');
+        Ext3.fly(this.proxy.el.dom.firstChild).addClass('ext3-ux-livegrid-drop-waiting');
     },
 
     /**
@@ -3578,13 +3578,13 @@ Ext.extend(Ext.ux.grid.livegrid.DragZone, Ext.grid.GridDragZone, {
     {
         this.isDropValid = true;
         this.ddel.innerHTML = this.grid.getDragDropText();
-        Ext.fly(this.proxy.el.dom.firstChild).removeClass('ext-ux-livegrid-drop-waiting');
+        Ext3.fly(this.proxy.el.dom.firstChild).removeClass('ext3-ux-livegrid-drop-waiting');
     }
 });/**
- * Ext.ux.grid.livegrid.EditorGridPanel
+ * Ext3.ux.grid.livegrid.EditorGridPanel
  * Copyright (c) 2007-2008, http://www.siteartwork.de
  *
- * Ext.ux.grid.livegrid.EditorGridPanel is licensed under the terms of the
+ * Ext3.ux.grid.livegrid.EditorGridPanel is licensed under the terms of the
  *                  GNU Open Source GPL 3.0
  * license.
  *
@@ -3605,17 +3605,17 @@ Ext.extend(Ext.ux.grid.livegrid.DragZone, Ext.grid.GridDragZone, {
  *
  */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * @class Ext.ux.grid.livegrid.EditorGridPanel
- * @extends Ext.grid.EditorGridPanel
+ * @class Ext3.ux.grid.livegrid.EditorGridPanel
+ * @extends Ext3.grid.EditorGridPanel
  * @constructor
  * @param {Object} config
  *
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
+Ext3.ux.grid.livegrid.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
 
     /**
      * Overriden so the panel listens to the "cursormove" event for
@@ -3625,7 +3625,7 @@ Ext.ux.grid.livegrid.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
      */
     initEvents : function()
     {
-        Ext.ux.grid.livegrid.EditorGridPanel.superclass.initEvents.call(this);
+        Ext3.ux.grid.livegrid.EditorGridPanel.superclass.initEvents.call(this);
 
         this.view.on("cursormove", this.stopEditing, this, [true]);
     },
@@ -3649,40 +3649,40 @@ Ext.ux.grid.livegrid.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
             }
         }
 
-        return Ext.ux.grid.livegrid.EditorGridPanel.superclass.startEditing.call(this, row, col);
+        return Ext3.ux.grid.livegrid.EditorGridPanel.superclass.startEditing.call(this, row, col);
     },
 
 // Since we do not have multiple inheritance, we need to override the
 // same methods in this class we have overriden for
-// Ext.ux.grid.livegrid.GridPanel
+// Ext3.ux.grid.livegrid.GridPanel
     walkCells : function(row, col, step, fn, scope)
     {
-        return Ext.ux.grid.livegrid.GridPanel.prototype.walkCells.call(this, row, col, step, fn, scope);
+        return Ext3.ux.grid.livegrid.GridPanel.prototype.walkCells.call(this, row, col, step, fn, scope);
     },
 
     onRender : function(ct, position)
     {
-        return Ext.ux.grid.livegrid.GridPanel.prototype.onRender.call(this, ct, position);
+        return Ext3.ux.grid.livegrid.GridPanel.prototype.onRender.call(this, ct, position);
     },
 
     initComponent : function()
     {
         if (this.cls) {
-            this.cls += ' ext-ux-livegrid';
+            this.cls += ' ext3-ux-livegrid';
         } else {
-            this.cls = 'ext-ux-livegrid';
+            this.cls = 'ext3-ux-livegrid';
         }
 
-        return Ext.ux.grid.livegrid.EditorGridPanel.superclass.initComponent.call(this);
+        return Ext3.ux.grid.livegrid.EditorGridPanel.superclass.initComponent.call(this);
     }
 
 });
 
 /**
-* Ext.ux.grid.livegrid.CheckboxSelectionModel
+* Ext3.ux.grid.livegrid.CheckboxSelectionModel
 * Copyright (c) 2007-2008, http://www.siteartwork.de
 *
-* Ext.ux.grid.livegrid.CheckboxSelectionModel is licensed under the terms of the
+* Ext3.ux.grid.livegrid.CheckboxSelectionModel is licensed under the terms of the
 *                  GNU Open Source GPL 3.0
     * license.
     *
@@ -3703,17 +3703,17 @@ Ext.ux.grid.livegrid.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 *
 */
 
-Ext.namespace('Ext.ux.grid.livegrid');
+Ext3.namespace('Ext3.ux.grid.livegrid');
 
 /**
- * @class Ext.ux.grid.livegrid.CheckboxSelectionModel
- * @extends Ext.ux.grid.livegrid.RowSelectionModel
+ * @class Ext3.ux.grid.livegrid.CheckboxSelectionModel
+ * @extends Ext3.ux.grid.livegrid.RowSelectionModel
  * @constructor
  * @param {Object} config
  *
  * @author Thorsten Suckow-Homberg <ts@siteartwork.de>
  */
-Ext.ux.grid.livegrid.CheckboxSelectionModel = Ext.extend(Ext.ux.grid.livegrid.RowSelectionModel, {
+Ext3.ux.grid.livegrid.CheckboxSelectionModel = Ext3.extend(Ext3.ux.grid.livegrid.RowSelectionModel, {
 
     /**
      * @cfg {Boolean} checkOnly <tt>true</tt> if rows can only be selected by clicking on the
@@ -3737,29 +3737,29 @@ Ext.ux.grid.livegrid.CheckboxSelectionModel = Ext.extend(Ext.ux.grid.livegrid.Ro
     constructor : function()
     {
         if (!this.header) {
-            this.header = Ext.grid.CheckboxSelectionModel.prototype.header;
+            this.header = Ext3.grid.CheckboxSelectionModel.prototype.header;
         }
 
         this.sortable = false;
 
-        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.constructor.call(this);
+        Ext3.ux.grid.livegrid.CheckboxSelectionModel.superclass.constructor.call(this);
     },
 
     // private
     initEvents : function()
     {
-        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.initEvents.call(this);
+        Ext3.ux.grid.livegrid.CheckboxSelectionModel.superclass.initEvents.call(this);
 
         this.grid.view.on('reset', function(gridView, forceReload) {
-            this.headerCheckbox = new Ext.Element(
+            this.headerCheckbox = new Ext3.Element(
                 gridView.getHeaderCell(this.grid.getColumnModel().getIndexById(this.id)).firstChild
             );
             if (this.markAll && forceReload === false) {
-                this.headerCheckbox.addClass('x-grid3-hd-checker-on');
+                this.headerCheckbox.addClass('x3-grid3-hd-checker-on');
             }
         }, this);
 
-        Ext.grid.CheckboxSelectionModel.prototype.initEvents.call(this);
+        Ext3.grid.CheckboxSelectionModel.prototype.initEvents.call(this);
     },
 
     /**
@@ -3771,41 +3771,41 @@ Ext.ux.grid.livegrid.CheckboxSelectionModel = Ext.extend(Ext.ux.grid.livegrid.Ro
             this.onMouseDown(e, e.getTarget());
             return false;
         } else {
-            return Ext.grid.Column.prototype.processEvent.apply(this, arguments);
+            return Ext3.grid.Column.prototype.processEvent.apply(this, arguments);
         }
     },
 
     // private
     onMouseDown : function(e, t)
     {
-        if(e.button === 0 && t.className == 'x-grid3-row-checker') {
+        if(e.button === 0 && t.className == 'x3-grid3-row-checker') {
             e.stopEvent();
-            var row = e.getTarget('.x-grid3-row');
+            var row = e.getTarget('.x3-grid3-row');
             if(row){
                 if (this.headerCheckbox) {
                     this.markAll = false;
-                    this.headerCheckbox.removeClass('x-grid3-hd-checker-on');
+                    this.headerCheckbox.removeClass('x3-grid3-hd-checker-on');
                 }
             }
         }
 
-        return Ext.grid.CheckboxSelectionModel.prototype.onMouseDown.call(this, e, t);
+        return Ext3.grid.CheckboxSelectionModel.prototype.onMouseDown.call(this, e, t);
     },
 
     // private
     onHdMouseDown : function(e, t)
     {
-        if (t.className == 'x-grid3-hd-checker' && !this.headerCheckbox) {
-            this.headerCheckbox = new Ext.Element(t.parentNode);
+        if (t.className == 'x3-grid3-hd-checker' && !this.headerCheckbox) {
+            this.headerCheckbox = new Ext3.Element(t.parentNode);
         }
 
-        return Ext.grid.CheckboxSelectionModel.prototype.onHdMouseDown.call(this, e, t);
+        return Ext3.grid.CheckboxSelectionModel.prototype.onHdMouseDown.call(this, e, t);
     },
 
     // private
     renderer : function(v, p, record)
     {
-        return Ext.grid.CheckboxSelectionModel.prototype.renderer.call(this, v, p, record);
+        return Ext3.grid.CheckboxSelectionModel.prototype.renderer.call(this, v, p, record);
     },
 
 // -------- overrides
@@ -3822,10 +3822,10 @@ Ext.ux.grid.livegrid.CheckboxSelectionModel = Ext.extend(Ext.ux.grid.livegrid.Ro
         this.markAll = false;
 
         if (this.headerCheckbox) {
-            this.headerCheckbox.removeClass('x-grid3-hd-checker-on');
+            this.headerCheckbox.removeClass('x3-grid3-hd-checker-on');
         }
 
-        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.handleMouseDown.call(this, g, rowIndex, e);
+        Ext3.ux.grid.livegrid.CheckboxSelectionModel.superclass.handleMouseDown.call(this, g, rowIndex, e);
     },
 
     /**
@@ -3840,24 +3840,24 @@ Ext.ux.grid.livegrid.CheckboxSelectionModel = Ext.extend(Ext.ux.grid.livegrid.Ro
         this.markAll = false;
 
         if (this.headerCheckbox) {
-            this.headerCheckbox.removeClass('x-grid3-hd-checker-on');
+            this.headerCheckbox.removeClass('x3-grid3-hd-checker-on');
         }
 
-        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.clearSelections.call(this, fast);
+        Ext3.ux.grid.livegrid.CheckboxSelectionModel.superclass.clearSelections.call(this, fast);
     },
 
     /**
      * Selects all rows if the selection model
-     * {@link Ext.grid.AbstractSelectionModel#isLocked is not locked}.
+     * {@link Ext3.grid.AbstractSelectionModel#isLocked is not locked}.
      */
     selectAll : function()
     {
-        Ext.ux.grid.livegrid.CheckboxSelectionModel.superclass.selectAll.call(this);
+        Ext3.ux.grid.livegrid.CheckboxSelectionModel.superclass.selectAll.call(this);
 
         this.markAll = true;
 
         if (this.headerCheckbox) {
-            this.headerCheckbox.addClass('x-grid3-hd-checker-on');
+            this.headerCheckbox.addClass('x3-grid3-hd-checker-on');
         }
     }
 

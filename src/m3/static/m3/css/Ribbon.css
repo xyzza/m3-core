@@ -1,62 +1,62 @@
-.x-btn-group.x-btn-group-ribbonstyle .x-btn-group-footer .x-panel-btns.x-panel-btns-right .x-clear {
+.x3-btn-group.x3-btn-group-ribbonstyle .x3-btn-group-footer .x3-panel-btns.x3-panel-btns-right .x3-clear {
     font:                0 sans-serif;
 }
-.x-btn-group.x-btn-group-ribbonstyle .x-btn-group-footer .x-panel-btns .x-toolbar-left {
+.x3-btn-group.x3-btn-group-ribbonstyle .x3-btn-group-footer .x3-panel-btns .x3-toolbar-left {
     text-align:            center;
 }
-.x-btn-group.x-btn-group-ribbonstyle .x-btn-group-tc {
+.x3-btn-group.x3-btn-group-ribbonstyle .x3-btn-group-tc {
     vertical-align:        top;
 }
 
-.x-btn-group-ribbonstyle .x-btn-group-bc {
+.x3-btn-group-ribbonstyle .x3-btn-group-bc {
     background-image: url(../images/ribbon-group-bt.gif);
     text-align: center;
     vertical-align: top;
     //padding: 2px 2px 4px 2px;
 }
 
-.x-btn-group-ribbonstyle .x-btn-group-header {
+.x3-btn-group-ribbonstyle .x3-btn-group-header {
     /*font-size: 10px !important;*/
     padding: 2px 2px 4px 2px;
 }
 
-.ui-ribbon .x-tab-strip-spacer {
+.ui-ribbon .x3-tab-strip-spacer {
     border: 0px;
     display: none;
 }
 
-.ui-ribbon .x-toolbar {
+.ui-ribbon .x3-toolbar {
     background-image: url(../images/ribbon-bg.gif);
 }
 
-.ui-ribbon .x-tab-strip-top .x-tab-right,
-.ui-ribbon .x-tab-strip-top .x-tab-left,
-.ui-ribbon .x-tab-strip-top .x-tab-strip-inner {
+.ui-ribbon .x3-tab-strip-top .x3-tab-right,
+.ui-ribbon .x3-tab-strip-top .x3-tab-left,
+.ui-ribbon .x3-tab-strip-top .x3-tab-strip-inner {
     background-image: url(../images/ribbon-tabs-sprite.gif);
 }
 
-.ui-ribbon .x-tab-strip-text {
+.ui-ribbon .x3-tab-strip-text {
     padding-left: 7px;
     padding-right: 7px;
     padding-top: 10px;
     font-weight: normal !important;
 }
 
-.ui-ribbon ul.x-tab-strip-top,
-.ui-ribbon .x-panel-noborder .x-panel-tbar-noborder .x-toolbar {
+.ui-ribbon ul.x3-tab-strip-top,
+.ui-ribbon .x3-panel-noborder .x3-panel-tbar-noborder .x3-toolbar {
     border-bottom-color: #a9bfd3;
 }
 
-.ui-ribbon .x-tab-strip span.x-tab-strip-text,
-.ui-ribbon .x-tab-strip-active span.x-tab-strip-text {
+.ui-ribbon .x3-tab-strip span.x3-tab-strip-text,
+.ui-ribbon .x3-tab-strip-active span.x3-tab-strip-text {
     color: #1e395b;
 }
 
-.ui-ribbon .x-toolbar-ct {
+.ui-ribbon .x3-toolbar-ct {
     padding: 0px !important;
 }
 
-.ui-ribbon .x-btn-text {
+.ui-ribbon .x3-btn-text {
     /*max-width     : 60px;
     text-overflow : ellipsis;*/
     text-align    : center;
@@ -66,12 +66,12 @@
     white-space   : normal !important;
 }
 
-.ui-ribbon .x-btn-as-arrow .x-btn-mc em {
+.ui-ribbon .x3-btn-as-arrow .x3-btn-mc em {
     /*display:block;
     background-color:transparent;*/
   /*padding-bottom: 13px;*/
 }
 
-.ui-ribbon .x-btn-group-mc {
+.ui-ribbon .x3-btn-group-mc {
     padding-bottom: 2px;
 }

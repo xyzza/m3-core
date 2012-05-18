@@ -1,4 +1,4 @@
-new Ext.data.Connection().request({
+new Ext3.data.Connection().request({
 	id: "{{ component.client_id }}"
 	,url: "{{ component.url }}"
 	{% if component.method%} ,method: "{{ component.method }}" {% endif %}
@@ -15,7 +15,7 @@ new Ext.data.Connection().request({
 	,failure: {{ component.function_failure }}
 	{% else %}
 	,failure: function(response, opts){
-	   Ext.Msg.alert('','failed');
+	   Ext3.Msg.alert('','failed');
 	}
 	{% endif %}
 })

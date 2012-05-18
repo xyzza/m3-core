@@ -1,19 +1,19 @@
 /*!
- * Ext JS Library 3.3.1
+ * Ext3 JS Library 3.3.1
  * Copyright(c) 2006-2010 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
 /**
- * @class Ext.ux.ToolbarDroppable
+ * @class Ext3.ux.ToolbarDroppable
  * @extends Object
  * Plugin which allows items to be dropped onto a toolbar and be turned into new Toolbar items.
  * To use the plugin, you just need to provide a createItem implementation that takes the drop
  * data as an argument and returns an object that can be placed onto the toolbar. Example:
  * <pre>
- * new Ext.ux.ToolbarDroppable({
+ * new Ext3.ux.ToolbarDroppable({
  *   createItem: function(data) {
- *     return new Ext.Button({text: data.text});
+ *     return new Ext3.Button({text: data.text});
  *   }
  * });
  * </pre>
@@ -21,24 +21,24 @@
  * created and inserted into the Toolbar. Use this for any logic that needs to be run after
  * the item has been created.
  */
-Ext.ux.ToolbarDroppable = Ext.extend(Object, {
+Ext3.ux.ToolbarDroppable = Ext3.extend(Object, {
     /**
      * @constructor
      */
     constructor: function(config) {
-      Ext.apply(this, config, {
+      Ext3.apply(this, config, {
           
       });
     },
     
     /**
      * Initializes the plugin and saves a reference to the toolbar
-     * @param {Ext.Toolbar} toolbar The toolbar instance
+     * @param {Ext3.Toolbar} toolbar The toolbar instance
      */
     init: function(toolbar) {
       /**
        * @property toolbar
-       * @type Ext.Toolbar
+       * @type Ext3.Toolbar
        * The toolbar instance that this plugin is tied to
        */
       this.toolbar = toolbar;
@@ -55,10 +55,10 @@ Ext.ux.ToolbarDroppable = Ext.extend(Object, {
     createDropTarget: function() {
         /**
          * @property dropTarget
-         * @type Ext.dd.DropTarget
+         * @type Ext3.dd.DropTarget
          * The drop target attached to the toolbar instance
          */
-        this.dropTarget = new Ext.dd.DropTarget(this.toolbar.getEl(), {
+        this.dropTarget = new Ext3.dd.DropTarget(this.toolbar.getEl(), {
             notifyOver: this.notifyOver.createDelegate(this),
             notifyDrop: this.notifyDrop.createDelegate(this)
         });
@@ -77,7 +77,7 @@ Ext.ux.ToolbarDroppable = Ext.extend(Object, {
     /**
      * Calculates the location on the toolbar to create the new sorter button based on the XY of the
      * drag event
-     * @param {Ext.EventObject} e The event object
+     * @param {Ext3.EventObject} e The event object
      * @return {Number} The index at which to insert the new button
      */
     calculateEntryIndex: function(e) {
@@ -157,5 +157,5 @@ Ext.ux.ToolbarDroppable = Ext.extend(Object, {
     /**
      * Called after a new button has been created and added to the toolbar. Add any required cleanup logic here
      */
-    afterLayout: Ext.emptyFn
+    afterLayout: Ext3.emptyFn
 });

@@ -1,7 +1,7 @@
-new Ext.m3.LiveStore({
+new Ext3.m3.LiveStore({
 	url: '{{ component.url }}'
 	,storeId: '{{ component.client_id }}'
-	,baseParams: Ext.applyIf({
+	,baseParams: Ext3.applyIf({
 		{% for key,value in component.base_params.items %}
 			'{{ key }}': '{{ value}}'{% if not forloop.last %},{% endif %}			
 		{% endfor %} 		
@@ -14,7 +14,7 @@ new Ext.m3.LiveStore({
 	{% if component.writer %} ,writer: {{ component.writer.render }} {% endif %}
 	{% if component.remote_sort %} ,remoteSort: true {% endif %}
 	,bufferSize: {{ component.bufferSize }}
-	, reader: new Ext.m3.LiveStoreReader({
+	, reader: new Ext3.m3.LiveStoreReader({
 		id: '{{ component.id_property }}'
 		,versionProperty: '{{ component.version_property }}'
 		{% if component.root %} ,root: '{{ component.root }}' {% endif %}

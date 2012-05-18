@@ -301,7 +301,7 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         '''
         def __init__(self, *args, **kwargs):
             super(ExtMultiGroupinGrid.LiveGridTopBar, self).__init__(*args, **kwargs)
-            self._ext_name = "Ext.ux.grid.livegrid.Toolbar"
+            self._ext_name = "Ext3.ux.grid.livegrid.Toolbar"
             self.button_new = controls.ExtButton(text = u'Добавить', 
                                     icon_cls = 'add_item', handler='topBarNew')
             self.button_edit = controls.ExtButton(text = u'Изменить', 

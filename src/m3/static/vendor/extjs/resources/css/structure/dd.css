@@ -1,10 +1,10 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-dd-drag-proxy{
+.x3-dd-drag-proxy{
 	position:absolute;
 	left:0;
     top:0;
@@ -12,7 +12,7 @@
 	z-index:15000;
 }
 
-.x-dd-drag-ghost{
+.x3-dd-drag-ghost{
 	-moz-opacity: 0.85;
     opacity:.85;
     filter: alpha(opacity=85);
@@ -22,7 +22,7 @@
 	white-space:nowrap;
 }
 
-.x-dd-drag-repair .x-dd-drag-ghost{
+.x3-dd-drag-repair .x3-dd-drag-ghost{
 	-moz-opacity: 0.4;
     opacity:.4;
     filter: alpha(opacity=40);
@@ -31,11 +31,11 @@
 	background-color:transparent;
 }
 
-.x-dd-drag-repair .x-dd-drop-icon{
+.x3-dd-drag-repair .x3-dd-drop-icon{
 	visibility:hidden;
 }
 
-.x-dd-drop-icon{
+.x3-dd-drop-icon{
     position:absolute;
 	top:3px;
 	left:3px;
@@ -48,7 +48,7 @@
 	z-index:1;
 }
 
-.x-view-selector {
+.x3-view-selector {
     position:absolute;
     left:0;
     top:0;

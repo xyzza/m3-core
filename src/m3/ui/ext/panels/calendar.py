@@ -10,7 +10,7 @@ class ExtCalendar(ExtPanel):
     """
     def __init__(self, *args, **kwargs):
         super(ExtCalendar, self).__init__(*args, **kwargs)
-        self._ext_name = 'Ext.m3.Calendar'
+        self._ext_name = 'Ext3.m3.Calendar'
         
         # Родные атрибуты календаря
         self.show_day_view = True

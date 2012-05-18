@@ -1,14 +1,14 @@
 /**
  * Содержит общие функции вызываемые из разных частей
  */
-Ext.QuickTips.init();
+Ext3.QuickTips.init();
 
 /**
  * Чтобы ie и прочие не правильные браузеры, где нет console не падали
  */
 if (typeof console == "undefined") var console = { log: function() {} };
 
-Ext.namespace('Ext.m3');
+Ext3.namespace('Ext3.m3');
 
 
 var SOFTWARE_NAME = 'Платформа М3';
@@ -36,13 +36,13 @@ function smart_eval(text){
 	}
 	if(text.substring(0,1) == '{'){
 		// это у нас json объект
-		var obj = Ext.util.JSON.decode(text);
+		var obj = Ext3.util.JSON.decode(text);
 		if(!obj){
 			return;
 		}
 		if(obj.code){
 			var eval_result = obj.code();
-			if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
+			if( eval_result &&  eval_result instanceof Ext3.Window && typeof AppDesktop != 'undefined' && AppDesktop){
 				AppDesktop.getDesktop().createWindow(eval_result);
 			}
 			return eval_result;
@@ -50,7 +50,7 @@ function smart_eval(text){
 		else
 		{
     		if(obj.message && obj.message != ''){
-    			Ext.Msg.show({title:'Внимание', msg: obj.message, buttons:Ext.Msg.OK, icon: (obj.success!=undefined && !obj.success ? Ext.Msg.WARNING : Ext.Msg.Info)});
+    			Ext3.Msg.show({title:'Внимание', msg: obj.message, buttons:Ext3.Msg.OK, icon: (obj.success!=undefined && !obj.success ? Ext3.Msg.WARNING : Ext3.Msg.Info)});
     			return;
     		}
 		}
@@ -59,32 +59,32 @@ function smart_eval(text){
 	    try{ 
 		    var eval_result = eval(text);
 		} catch (e) {
-		     Ext.Msg.show({
+		     Ext3.Msg.show({
                 title:'Внимание'
                 ,msg:'Произошла непредвиденная ошибка!'
-                ,buttons: Ext.Msg.OK
-                ,fn: Ext.emptyFn
+                ,buttons: Ext3.Msg.OK
+                ,fn: Ext3.emptyFn
                 ,animEl: 'elId'
-                ,icon: Ext.MessageBox.WARNING
+                ,icon: Ext3.MessageBox.WARNING
             });
 		    throw e;
 		}
-		if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
+		if( eval_result &&  eval_result instanceof Ext3.Window && typeof AppDesktop != 'undefined' && AppDesktop){
 			AppDesktop.getDesktop().createWindow(eval_result);
 		}
 		return eval_result;
 	}
 }
 
-Ext.ns('Ext.app.form');
+Ext3.ns('Ext3.app.form');
 /**
  * Модифицированный контрол поиска, за основу был взят контрол от ui.form.SearchField
- * @class {Ext.app.form.SearchField} Контрол поиска
- * @extends {Ext.form.TwinTriggerField} Абстрактный класс как раз для разного рода таких вещей, типа контрола поиска
+ * @class {Ext3.app.form.SearchField} Контрол поиска
+ * @extends {Ext3.form.TwinTriggerField} Абстрактный класс как раз для разного рода таких вещей, типа контрола поиска
  */
-Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
+Ext3.app.form.SearchField = Ext3.extend(Ext3.form.TwinTriggerField, {
     initComponent : function(){
-        Ext.app.form.SearchField.superclass.initComponent.call(this);
+        Ext3.app.form.SearchField.superclass.initComponent.call(this);
         this.on('specialkey', function(f, e){
             if(e.getKey() == e.ENTER){
                 this.onTrigger2Click();
@@ -94,8 +94,8 @@ Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
 
     ,validationEvent:false
     ,validateOnBlur:false
-    ,trigger1Class:'x-form-clear-trigger'
-    ,trigger2Class:'x-form-search-trigger'
+    ,trigger1Class:'x3-form-clear-trigger'
+    ,trigger2Class:'x3-form-search-trigger'
     ,hideTrigger1:true
     ,width:180
     ,hasSearch : false
@@ -107,7 +107,7 @@ Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
         if(this.hasSearch){
         	this.el.dom.value = '';
         	var cmp = this.getComponentForSearch();
-        	if (cmp instanceof Ext.grid.GridPanel) {
+        	if (cmp instanceof Ext3.grid.GridPanel) {
 	            var o = {start: 0};
 	            var store = cmp.getStore();
 	            store.baseParams = store.baseParams || {};
@@ -115,7 +115,7 @@ Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
 				store.baseParams[this.paramId] = this.nodeId || '';	
 	            store.reload({params:o});
 
-	        } else if (cmp instanceof Ext.ux.tree.TreeGrid) {
+	        } else if (cmp instanceof Ext3.ux.tree.TreeGrid) {
 	        	this.el.dom.value = '';
 	        	
 	        	var loader = cmp.getLoader();
@@ -133,14 +133,14 @@ Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
     ,onTrigger2Click : function(e, html, arg){
         var value = this.getRawValue();
         var cmp = this.getComponentForSearch();
-        if (cmp instanceof Ext.grid.GridPanel) {
+        if (cmp instanceof Ext3.grid.GridPanel) {
             var o = {start: 0};
             var store = cmp.getStore();
 	        store.baseParams = store.baseParams || {};
 	        store.baseParams[this.paramName] = value;
 	        store.baseParams[this.paramId] = this.nodeId || '';	
 	        store.reload({params:o});
-        } else if (cmp instanceof Ext.ux.tree.TreeGrid) {
+        } else if (cmp instanceof Ext3.ux.tree.TreeGrid) {
         	var loader = cmp.getLoader();
         	loader.baseParams = loader.baseParams || {};
 	        loader.baseParams[this.paramName] = value;
@@ -161,7 +161,7 @@ Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
 /**
  * В поле добавим функционал отображения того, что оно изменено.
  */
-Ext.override(Ext.form.Field, {
+Ext3.override(Ext3.form.Field, {
 	/**
 	 * Признак, что поле используется для изменения значения, 
 	 * а не для навигации - при Истине будут повешаны обработчики на изменение окна
@@ -177,9 +177,9 @@ Ext.override(Ext.form.Field, {
 	      		var newtext = text+':';
 	      		if (this.isModified) {newtext = '<span style="color:darkmagenta;">' + newtext + '</span>'; };
 		  		//if (this.isModified) {newtext = '<span">*</span>' + newtext; };
-				var lab = this.el.up('.x-form-item', 10, true);
+				var lab = this.el.up('.x3-form-item', 10, true);
 				if (lab) {
-					lab.child('.x-form-item-label').update(newtext);
+					lab.child('.x3-form-item-label').update(newtext);
 				}
 	    	}
 	    	this.fieldLabel = text;
@@ -203,17 +203,17 @@ Ext.override(Ext.form.Field, {
  * Создаётся новый компонент: Панель с возможностью включения в заголовок
  * визуальных компонентов.
  */
-Ext.app.TitlePanel = Ext.extend(Ext.Panel, {
+Ext3.app.TitlePanel = Ext3.extend(Ext3.Panel, {
    titleItems: null,
    addTitleItem: function (itemConfig) { 
-       var item = Ext.ComponentMgr.create(itemConfig);
-       var itemsDiv = Ext.DomHelper.append(this.header, {tag:"div", style:"float:right;margin-top:-4px;margin-left:3px;"}, true);
+       var item = Ext3.ComponentMgr.create(itemConfig);
+       var itemsDiv = Ext3.DomHelper.append(this.header, {tag:"div", style:"float:right;margin-top:-4px;margin-left:3px;"}, true);
        item.render(itemsDiv);
    },
    onRender: function (ct, position) {
-       Ext.app.TitlePanel.superclass.onRender.apply(this, arguments);
+       Ext3.app.TitlePanel.superclass.onRender.apply(this, arguments);
        if (this.titleItems != null) {
-           if(Ext.isArray(this.titleItems)){
+           if(Ext3.isArray(this.titleItems)){
                for (var i = this.titleItems.length-1; i >= 0 ; i--) {
                    this.addTitleItem(this.titleItems[i]);
                }
@@ -222,7 +222,7 @@ Ext.app.TitlePanel = Ext.extend(Ext.Panel, {
            }
            
            if (this.header)
-               this.header.removeClass('x-unselectable');
+               this.header.removeClass('x3-unselectable');
        };
    },
    getChildByName: function (name) {
@@ -249,13 +249,13 @@ Ext.app.TitlePanel = Ext.extend(Ext.Panel, {
  */
 function uiFailureResponseOnFormSubmit(context){
     if(context.action.failureType=='server'){
-        obj = Ext.util.JSON.decode(context.action.response.responseText);
-        Ext.Msg.show({title: context.title,
+        obj = Ext3.util.JSON.decode(context.action.response.responseText);
+        Ext3.Msg.show({title: context.title,
             msg: obj.error_msg,
-            buttons: Ext.Msg.OK,
-            icon: Ext.Msg.WARNING});
+            buttons: Ext3.Msg.OK,
+            icon: Ext3.Msg.WARNING});
     }else{
-        Ext.Msg.alert(context.title, context.message);
+        Ext3.Msg.alert(context.title, context.message);
     }
 }
 
@@ -267,8 +267,8 @@ function uiFailureResponseOnFormSubmit(context){
 function uiAjaxFailMessage (response, opt) {
 	
 	// response.status === 0 -- "communication failure"
-	if (Ext.isEmpty(response) || response.status === 0) {
-		Ext.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
+	if (Ext3.isEmpty(response) || response.status === 0) {
+		Ext3.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
 		return;
 	}
 	
@@ -282,7 +282,7 @@ function uiAjaxFailMessage (response, opt) {
             smart_eval( response.responseText );
         }
 	} else {
-    	var bodySize = Ext.getBody().getViewSize(),
+    	var bodySize = Ext3.getBody().getViewSize(),
     		width = (bodySize.width < 500) ? bodySize.width - 50 : 500,
     		height = (bodySize.height < 300) ? bodySize.height - 50 : 300,
     		win;
@@ -293,13 +293,13 @@ function uiAjaxFailMessage (response, opt) {
         }
     	var errorMsg = response.responseText;
 	
-    	var win = new Ext.Window({ modal: true, width: width, height: height, 
+    	var win = new Ext3.Window({ modal: true, width: width, height: height, 
     	    title: "Request Failure", layout: "fit", maximizable: true, 
     	    maximized: true,
     		listeners : {
     			"maximize" : {
     				fn : function (el) {
-    					var v = Ext.getBody().getViewSize();
+    					var v = Ext3.getBody().getViewSize();
     					el.setSize(v.width, v.height);
     				},
     				scope : this
@@ -307,19 +307,19 @@ function uiAjaxFailMessage (response, opt) {
     
     			"resize" : {
     				fn : function (wnd) {
-    					var editor = Ext.getCmp("__ErrorMessageEditor");
+    					var editor = Ext3.getCmp("__ErrorMessageEditor");
     					var sz = wnd.body.getViewSize();
     					editor.setSize(sz.width, sz.height - 42);
     				}
     			}
     		},
-    		items : new Ext.form.FormPanel({
-    			baseCls : "x-plain",
+    		items : new Ext3.form.FormPanel({
+    			baseCls : "x3-plain",
     			layout  : "absolute",
     			defaultType : "label",
     			items : [
     				{x: 5,y: 5,
-    					html : '<div class="x-window-dlg"><div class="ext-mb-error" style="width:32px;height:32px"></div></div>'
+    					html : '<div class="x3-window-dlg"><div class="ext3-mb-error" style="width:32px;height:32px"></div></div>'
     				},
     				{x: 42,y: 6,
     					html : "<b>Status Code: </b>"
@@ -398,9 +398,9 @@ function uiAjaxFailMessage (response, opt) {
 // Проверяет есть ли в ответе сообщение и выводит его
 // Возвращает серверный success
 function uiShowErrorMessage(response){
-	obj = Ext.util.JSON.decode(response.responseText);
+	obj = Ext3.util.JSON.decode(response.responseText);
 	if (obj.error_msg)
-		Ext.Msg.alert(SOFTWARE_NAME, obj.error_msg);
+		Ext3.Msg.alert(SOFTWARE_NAME, obj.error_msg);
 // Не понятно зачем нужен этот код.
 //	if (obj.code)
 //		alert('Пришел код на выполнение ' + obj.code);
@@ -414,9 +414,9 @@ function uiShowErrorMessage(response){
  * @param {Object} параметры запроса
  */
 function sendRequest(url, desktop, params){                     
-    var mask = new Ext.LoadMask(Ext.getBody());
+    var mask = new Ext3.LoadMask(Ext3.getBody());
     mask.show();
-    Ext.Ajax.request({
+    Ext3.Ajax.request({
     	params: params,
         url: url,
         method: 'POST',
@@ -498,15 +498,15 @@ function includeInArr(arr, obj) {
 function showMessage(msg, title, icon){
 	title = title || 'Внимание';
 	msg = msg || '';
-	icon = icon || Ext.MessageBox.INFO;
-    Ext.Msg.show({
+	icon = icon || Ext3.MessageBox.INFO;
+    Ext3.Msg.show({
         title: title,
         msg: msg,
-        buttons: Ext.Msg.OK,
+        buttons: Ext3.Msg.OK,
         icon: icon
     });
 }
 
 function showWarning(msg, title){
-	showMessage(msg, title, Ext.MessageBox.WARNING);
+	showMessage(msg, title, Ext3.MessageBox.WARNING);
 }

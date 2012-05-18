@@ -35,7 +35,7 @@ def grid_json_data(query):
 
 def mptt_json_data(query, parent_obj='parent', start = 0, limit = 25):
     '''
-    Добавляет к иерархической структуре _lft, _rgt, _level для отдачи в Ext.m3.
+    Добавляет к иерархической структуре _lft, _rgt, _level для отдачи в Ext3.m3.
     AdvancedTreeGrid
     '''
     # Список для хранения элементов дерева

@@ -1,6 +1,6 @@
-Ext.ns('Ext.ux');
+Ext3.ns('Ext3.ux');
 
-Ext.ux.Lightbox = (function(){
+Ext3.ux.Lightbox = (function(){
     var els = {},
         images = [],
         activeImage,
@@ -20,8 +20,8 @@ Ext.ux.Lightbox = (function(){
             this.overlayDuration = this.animate ? 0.2 : 0;
 
             if(!initialized) {
-                Ext.apply(this, Ext.util.Observable.prototype);
-                Ext.util.Observable.constructor.call(this);
+                Ext3.apply(this, Ext3.util.Observable.prototype);
+                Ext3.util.Observable.constructor.call(this);
                 this.addEvents('open', 'close');
                 this.initMarkup();
                 this.initEvents();
@@ -30,27 +30,27 @@ Ext.ux.Lightbox = (function(){
         },
 
         initMarkup: function() {
-            els.shim = Ext.DomHelper.append(document.body, {
+            els.shim = Ext3.DomHelper.append(document.body, {
                 tag: 'iframe',
                 id: 'ux-lightbox-shim'
             }, true);
-            els.overlay = Ext.DomHelper.append(document.body, {
+            els.overlay = Ext3.DomHelper.append(document.body, {
                 id: 'ux-lightbox-overlay'
             }, true);
             
-            var lightboxTpl = new Ext.Template(this.getTemplate());
+            var lightboxTpl = new Ext3.Template(this.getTemplate());
             els.lightbox = lightboxTpl.append(document.body, {}, true);
 
             var ids =
                 ['outerImageContainer', 'imageContainer', 'image', 'hoverNav', 'navPrev', 'navNext', 'loading', 'loadingLink',
                 'outerDataContainer', 'dataContainer', 'data', 'details', 'caption', 'imageNumber', 'bottomNav', 'navClose'];
 
-            Ext.each(ids, function(id){
-                els[id] = Ext.get('ux-lightbox-' + id);
+            Ext3.each(ids, function(id){
+                els[id] = Ext3.get('ux-lightbox-' + id);
             });
 
-            Ext.each([els.overlay, els.lightbox, els.shim], function(el){
-                el.setVisibilityMode(Ext.Element.DISPLAY)
+            Ext3.each([els.overlay, els.lightbox, els.shim], function(el){
+                el.setVisibilityMode(Ext3.Element.DISPLAY)
                 el.hide();
             });
 
@@ -124,7 +124,7 @@ Ext.ux.Lightbox = (function(){
             if(selectors.indexOf(sel) === -1) {
                 selectors.push(sel);
 
-                Ext.fly(document).on('click', function(ev){
+                Ext3.fly(document).on('click', function(ev){
                     var target = ev.getTarget(sel);
 
                     if (target) {
@@ -149,8 +149,8 @@ Ext.ux.Lightbox = (function(){
                         images.push([image.href, image.title]);
                     }
                     else {
-                        var setItems = Ext.query(sel);
-                        Ext.each(setItems, function(item) {
+                        var setItems = Ext3.query(sel);
+                        Ext3.each(setItems, function(item) {
                             if(item.href) {
                                 images.push([item.href, item.title]);
                             }
@@ -162,9 +162,9 @@ Ext.ux.Lightbox = (function(){
                     }
 
                     // calculate top and left offset for the lightbox
-                    var pageScroll = Ext.fly(document).getScroll();
+                    var pageScroll = Ext3.fly(document).getScroll();
 
-                    var lightboxTop = pageScroll.top + (Ext.lib.Dom.getViewportHeight() / 10);
+                    var lightboxTop = pageScroll.top + (Ext3.lib.Dom.getViewportHeight() / 10);
                     var lightboxLeft = pageScroll.left;
                     els.lightbox.setStyle({
                         top: lightboxTop + 'px',
@@ -300,11 +300,11 @@ Ext.ux.Lightbox = (function(){
         },
 
         enableKeyNav: function() {
-            Ext.fly(document).on('keydown', this.keyNavAction, this);
+            Ext3.fly(document).on('keydown', this.keyNavAction, this);
         },
 
         disableKeyNav: function() {
-            Ext.fly(document).un('keydown', this.keyNavAction, this);
+            Ext3.fly(document).un('keydown', this.keyNavAction, this);
         },
 
         keyNavAction: function(ev) {
@@ -352,9 +352,9 @@ Ext.ux.Lightbox = (function(){
         },
 
         getViewSize: function() {
-            return [Ext.lib.Dom.getViewWidth(), Ext.lib.Dom.getViewHeight()];
+            return [Ext3.lib.Dom.getViewWidth(), Ext3.lib.Dom.getViewHeight()];
         }
     }
 })();
 
-Ext.onReady(Ext.ux.Lightbox.init, Ext.ux.Lightbox);
+Ext3.onReady(Ext3.ux.Lightbox.init, Ext3.ux.Lightbox);

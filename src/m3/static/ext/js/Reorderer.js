@@ -1,18 +1,18 @@
 /*!
- * Ext JS Library 3.3.1
+ * Ext3 JS Library 3.3.1
  * Copyright(c) 2006-2010 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
 /**
- * @class Ext.ux.Reorderer
+ * @class Ext3.ux.Reorderer
  * @extends Object
  * Generic base class for handling reordering of items. This base class must be extended to provide the
  * actual reordering functionality - the base class just sets up events and abstract logic functions.
  * It will fire events and set defaults, deferring the actual reordering to a doReorder implementation.
- * See Ext.ux.TabReorderer for an example.
+ * See Ext3.ux.TabReorderer for an example.
  */
-Ext.ux.Reorderer = Ext.extend(Object, {
+Ext3.ux.Reorderer = Ext3.extend(Object, {
     /**
      * @property defaults
      * @type Object
@@ -49,7 +49,7 @@ Ext.ux.Reorderer = Ext.extend(Object, {
      * @param {Object} config Optional config object
      */
     constructor: function(config) {
-        Ext.apply(this, config || {}, this.defaults);
+        Ext3.apply(this, config || {}, this.defaults);
     },
     
     /**
@@ -59,7 +59,7 @@ Ext.ux.Reorderer = Ext.extend(Object, {
     init: function(target) {
         /**
          * @property target
-         * @type Ext.Component
+         * @type Ext3.Component
          * Reference to the target component which contains the reorderable items
          */
         this.target = target;
@@ -99,21 +99,21 @@ Ext.ux.Reorderer = Ext.extend(Object, {
      * @param {Object} mappings Mappings of the old item indexes to new item indexes
      */
     doReorder: function(paramName) {
-        throw new Error("doReorder must be implemented in the Ext.ux.Reorderer subclass");
+        throw new Error("doReorder must be implemented in the Ext3.ux.Reorderer subclass");
     },
     
     /**
-     * Should create and return an Ext.dd.DD for the given item. This MUST be overridden in a subclass
+     * Should create and return an Ext3.dd.DD for the given item. This MUST be overridden in a subclass
      * @param {Mixed} item The item to create a DD for. This could be a TabPanel tab, a Toolbar button, etc
-     * @return {Ext.dd.DD} The DD for the given item
+     * @return {Ext3.dd.DD} The DD for the given item
      */
     createItemDD: function(item) {
-        throw new Error("createItemDD must be implemented in the Ext.ux.Reorderer subclass");
+        throw new Error("createItemDD must be implemented in the Ext3.ux.Reorderer subclass");
     },
     
     /**
      * Sets up the given Toolbar item as a draggable
-     * @param {Mixed} button The item to make draggable (usually an Ext.Button instance)
+     * @param {Mixed} button The item to make draggable (usually an Ext3.Button instance)
      */
     createItemDD: function(button) {
         var el   = button.getEl(),
@@ -121,14 +121,14 @@ Ext.ux.Reorderer = Ext.extend(Object, {
             tbar = this.target,
             me   = this;
         
-        button.dd = new Ext.dd.DD(el, undefined, {
+        button.dd = new Ext3.dd.DD(el, undefined, {
             isTarget: false
         });
         
         button.dd.constrainTo(tbar.getEl());
         button.dd.setYConstraint(0, 0, 0);
         
-        Ext.apply(button.dd, {
+        Ext3.apply(button.dd, {
             b4StartDrag: function() {       
                 this.startPosition = el.getXY();
                 
@@ -228,7 +228,7 @@ Ext.ux.Reorderer = Ext.extend(Object, {
            * Fires before a reorder occurs. Return false to cancel
            * @param {Object} mappings Mappings of the old item indexes to new item indexes
            * @param {Mixed} component The target component
-           * @param {Ext.ux.TabReorderer} this The plugin instance
+           * @param {Ext3.ux.TabReorderer} this The plugin instance
            */
           'before-reorder',
           
@@ -237,7 +237,7 @@ Ext.ux.Reorderer = Ext.extend(Object, {
            * Fires after a reorder has occured.
            * @param {Object} mappings Mappings of the old item indexes to the new item indexes
            * @param {Mixed} component The target component
-           * @param {Ext.ux.TabReorderer} this The plugin instance
+           * @param {Ext3.ux.TabReorderer} this The plugin instance
            */
           'reorder'
         );
@@ -245,11 +245,11 @@ Ext.ux.Reorderer = Ext.extend(Object, {
 });
 
 /**
- * @class Ext.ux.HBoxReorderer
- * @extends Ext.ux.Reorderer
+ * @class Ext3.ux.HBoxReorderer
+ * @extends Ext3.ux.Reorderer
  * Description
  */
-Ext.ux.HBoxReorderer = Ext.extend(Ext.ux.Reorderer, {
+Ext3.ux.HBoxReorderer = Ext3.extend(Ext3.ux.Reorderer, {
     /**
      * Initializes the plugin, decorates the container with additional functionality
      */
@@ -269,12 +269,12 @@ Ext.ux.HBoxReorderer = Ext.extend(Ext.ux.Reorderer, {
         });
         
         //super sets a reference to the toolbar in this.target
-        Ext.ux.HBoxReorderer.superclass.init.apply(this, arguments);
+        Ext3.ux.HBoxReorderer.superclass.init.apply(this, arguments);
     },
     
     /**
      * Sets up the given Toolbar item as a draggable
-     * @param {Mixed} button The item to make draggable (usually an Ext.Button instance)
+     * @param {Mixed} button The item to make draggable (usually an Ext3.Button instance)
      */
     createItemDD: function(button) {
         if (button.dd != undefined) {
@@ -286,7 +286,7 @@ Ext.ux.HBoxReorderer = Ext.extend(Ext.ux.Reorderer, {
             me   = this,
             tbar = me.target;
         
-        button.dd = new Ext.dd.DD(el, undefined, {
+        button.dd = new Ext3.dd.DD(el, undefined, {
             isTarget: false
         });
         
@@ -299,7 +299,7 @@ Ext.ux.HBoxReorderer = Ext.extend(Ext.ux.Reorderer, {
             return false;
         };
         
-        Ext.apply(button.dd, {
+        Ext3.apply(button.dd, {
             b4StartDrag: function() {       
                 this.startPosition = el.getXY();
                 

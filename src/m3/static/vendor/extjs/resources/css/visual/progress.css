@@ -1,19 +1,19 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-progress-wrap {
+.x3-progress-wrap {
     border-color:#6593cf;
 }
 
-.x-progress-inner {
+.x3-progress-inner {
     background-color:#e0e8f3;
     background-image:url(../images/default/qtip/bg.gif);
 }
 
-.x-progress-bar {
+.x3-progress-bar {
     background-color:#9cbfee;
     background-image:url(../images/default/progress/progress-bg.gif);
     border-top-color:#d1e4fd;
@@ -21,12 +21,12 @@
     border-right-color:#7fa9e4;
 }
 
-.x-progress-text {
+.x3-progress-text {
     font-size:11px;
     font-weight:bold;
     color:#fff;
 }
 
-.x-progress-text-back {
+.x3-progress-text-back {
     color:#396095;
 }

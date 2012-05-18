@@ -17,7 +17,7 @@ class BackgroundOperationBar(ExtProgressBar):
     def __init__(self, *args, **kwargs):
         super(BackgroundOperationBar, self).__init__()
 
-        self._ext_name = 'Ext.m3.BackgroundOperationBar'
+        self._ext_name = 'Ext3.m3.BackgroundOperationBar'
 
         #промежуток опроса сервера в мс. По умолчанию 5000
         self.interval = None

@@ -1,117 +1,117 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-form-field{
+.x3-form-field{
     font:normal 12px tahoma, arial, helvetica, sans-serif;
 }
 
-.x-form-text, textarea.x-form-field{
+.x3-form-text, textarea.x3-form-field{
     background-color:#fff;
     background-image:url(../images/default/form/text-bg.gif);
     border-color:#C1C1C1;
 }
 
-.x-form-select-one {
+.x3-form-select-one {
     background-color:#fff;
     border-color:#C1C1C1;
 }
 
-.x-form-check-group-label {
+.x3-form-check-group-label {
     border-bottom: 1px solid #d0d0d0;
     color: #333;
 }
 
-.x-editor .x-form-check-wrap {
+.x3-editor .x3-form-check-wrap {
     background-color:#fff;
 }
 
-.x-form-field-wrap .x-form-trigger{
+.x3-form-field-wrap .x3-form-trigger{
     background-image:url(../images/gray/form/trigger.gif);
     border-bottom-color:#b5b8c8;
 }
 
-.x-form-field-wrap .x-form-date-trigger{
+.x3-form-field-wrap .x3-form-date-trigger{
     background-image: url(../images/gray/form/date-trigger.gif);
 }
 
-.x-form-field-wrap .x-form-clear-trigger{
+.x3-form-field-wrap .x3-form-clear-trigger{
     background-image: url(../images/gray/form/clear-trigger.gif);
 }
 
-.x-form-field-wrap .x-form-search-trigger{
+.x3-form-field-wrap .x3-form-search-trigger{
     background-image: url(../images/gray/form/search-trigger.gif);
 }
 
-.x-trigger-wrap-focus .x-form-trigger{
+.x3-trigger-wrap-focus .x3-form-trigger{
     border-bottom-color: #777777;
 }
 
-.x-item-disabled .x-form-trigger-over{
+.x3-item-disabled .x3-form-trigger-over{
     border-bottom-color:#b5b8c8;
 }
 
-.x-item-disabled .x-form-trigger-click{
+.x3-item-disabled .x3-form-trigger-click{
     border-bottom-color:#b5b8c8;
 }
 
-.x-form-focus, textarea.x-form-focus{
+.x3-form-focus, textarea.x3-form-focus{
 	border-color:#777777;
 }
 
-.x-form-invalid, textarea.x-form-invalid{
+.x3-form-invalid, textarea.x3-form-invalid{
     background-color:#fff;
 	background-image:url(../images/default/grid/invalid_line.gif);
 	border-color:#c30;
 }
 
-.ext-webkit .x-form-invalid{
+.ext3-webkit .x3-form-invalid{
 	background-color:#fee;
 	border-color:#ff7870;
 }
 
-.x-form-inner-invalid, textarea.x-form-inner-invalid{
+.x3-form-inner-invalid, textarea.x3-form-inner-invalid{
     background-color:#fff;
 	background-image:url(../images/default/grid/invalid_line.gif);
 }
 
-.x-form-grow-sizer {
+.x3-form-grow-sizer {
 	font:normal 12px tahoma, arial, helvetica, sans-serif;
 }
 
-.x-form-item {
+.x3-form-item {
     font:normal 12px tahoma, arial, helvetica, sans-serif;
 }
 
-.x-form-invalid-msg {
+.x3-form-invalid-msg {
     color:#c0272b;
     font:normal 11px tahoma, arial, helvetica, sans-serif;
     background-image:url(../images/default/shared/warning.gif);
 }
 
-.x-form-empty-field {
+.x3-form-empty-field {
     color:gray;
 }
 
-.x-small-editor .x-form-field {
+.x3-small-editor .x3-form-field {
     font:normal 11px arial, tahoma, helvetica, sans-serif;
 }
 
-.ext-webkit .x-small-editor .x-form-field {
+.ext3-webkit .x3-small-editor .x3-form-field {
     font:normal 12px arial, tahoma, helvetica, sans-serif;
 }
 
-.x-form-invalid-icon {
+.x3-form-invalid-icon {
     background-image:url(../images/default/form/exclamation.gif);
 }
 
-.x-fieldset {
+.x3-fieldset {
     border-color:#CCCCCC;
 }
 
-.x-fieldset legend {
+.x3-fieldset legend {
     font:bold 11px tahoma, arial, helvetica, sans-serif;
     color:#777777;
 }

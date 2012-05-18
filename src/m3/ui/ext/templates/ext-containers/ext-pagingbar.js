@@ -1,4 +1,4 @@
-new Ext.PagingToolbar({
+new Ext3.PagingToolbar({
     {% include 'base-ext-ui.js'%}
     
     {% if component.page_size %} ,pageSize: {{ component.page_size }} {%endif%}

@@ -15,8 +15,8 @@ class ExtEditWindow(BaseExtWindow):
         super(ExtEditWindow, self).__init__(*args, **kwargs)
         self.__form = None
         self.data_url = None # адрес для загрузки данных формы
-        self._ext_name = 'Ext.m3.EditWindow'
-        self.renderer.template = 'ext-script/ext-editwindowscript.js' 
+        self._ext_name = 'Ext3.m3.EditWindow'
+        self.renderer.template = 'ext-script/ext-editwindowscript.js'
         self.init_component(*args, **kwargs)
    
     

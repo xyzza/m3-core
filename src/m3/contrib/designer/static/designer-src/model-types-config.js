@@ -1,13 +1,13 @@
 /**
  * Crafted by ZIgi
  */
-Ext.namespace('M3Designer.model');
+Ext3.namespace('M3Designer.model');
 
 /**
  * Дополняет класс M3Designer.model.ModelTypeLibrary информацией о типах компонентов доступных в дизайнере
  * Более подрубную иформацию смотреть в документации
  */
-Ext.apply(M3Designer.model.ModelTypeLibrary, {
+Ext3.apply(M3Designer.model.ModelTypeLibrary, {
     typesConfig: {
         component: {
             properties: {
@@ -203,7 +203,7 @@ Ext.apply(M3Designer.model.ModelTypeLibrary, {
                     defaultValue: ''
                 },
                 baseCls: {
-                    defaultValue: 'x-panel'
+                    defaultValue: 'x3-panel'
                 },
                 autoLoad: {
                     defaultValue: 'undefined'

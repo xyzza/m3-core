@@ -1,5 +1,5 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
@@ -8,123 +8,123 @@
  * W3C Suggested Default style sheet for HTML 4
  * http://www.w3.org/TR/CSS21/sample.html
  *
- * Resets for Ext.Panel @cfg normal: true
+ * Resets for Ext3.Panel @cfg normal: true
  */
-.x-panel-reset .x-panel-body html,
-.x-panel-reset .x-panel-body address,
-.x-panel-reset .x-panel-body blockquote,
-.x-panel-reset .x-panel-body body,
-.x-panel-reset .x-panel-body dd,
-.x-panel-reset .x-panel-body div,
-.x-panel-reset .x-panel-body dl,
-.x-panel-reset .x-panel-body dt,
-.x-panel-reset .x-panel-body fieldset,
-.x-panel-reset .x-panel-body form,
-.x-panel-reset .x-panel-body frame, frameset,
-.x-panel-reset .x-panel-body h1,
-.x-panel-reset .x-panel-body h2,
-.x-panel-reset .x-panel-body h3,
-.x-panel-reset .x-panel-body h4,
-.x-panel-reset .x-panel-body h5,
-.x-panel-reset .x-panel-body h6,
-.x-panel-reset .x-panel-body noframes,
-.x-panel-reset .x-panel-body ol,
-.x-panel-reset .x-panel-body p,
-.x-panel-reset .x-panel-body ul,
-.x-panel-reset .x-panel-body center,
-.x-panel-reset .x-panel-body dir,
-.x-panel-reset .x-panel-body hr,
-.x-panel-reset .x-panel-body menu,
-.x-panel-reset .x-panel-body pre 			  { display: block }
-.x-panel-reset .x-panel-body li              { display: list-item }
-.x-panel-reset .x-panel-body head            { display: none }
-.x-panel-reset .x-panel-body table           { display: table }
-.x-panel-reset .x-panel-body tr              { display: table-row }
-.x-panel-reset .x-panel-body thead           { display: table-header-group }
-.x-panel-reset .x-panel-body tbody           { display: table-row-group }
-.x-panel-reset .x-panel-body tfoot           { display: table-footer-group }
-.x-panel-reset .x-panel-body col             { display: table-column }
-.x-panel-reset .x-panel-body colgroup        { display: table-column-group }
-.x-panel-reset .x-panel-body td,
-.x-panel-reset .x-panel-body th 	          { display: table-cell }
-.x-panel-reset .x-panel-body caption         { display: table-caption }
-.x-panel-reset .x-panel-body th              { font-weight: bolder; text-align: center }
-.x-panel-reset .x-panel-body caption         { text-align: center }
-.x-panel-reset .x-panel-body body            { margin: 8px }
-.x-panel-reset .x-panel-body h1              { font-size: 2em; margin: .67em 0 }
-.x-panel-reset .x-panel-body h2              { font-size: 1.5em; margin: .75em 0 }
-.x-panel-reset .x-panel-body h3              { font-size: 1.17em; margin: .83em 0 }
-.x-panel-reset .x-panel-body h4,
-.x-panel-reset .x-panel-body p,
-.x-panel-reset .x-panel-body blockquote,
-.x-panel-reset .x-panel-body ul,
-.x-panel-reset .x-panel-body fieldset,
-.x-panel-reset .x-panel-body form,
-.x-panel-reset .x-panel-body ol,
-.x-panel-reset .x-panel-body dl,
-.x-panel-reset .x-panel-body dir,
-.x-panel-reset .x-panel-body menu            { margin: 1.12em 0 }
-.x-panel-reset .x-panel-body h5              { font-size: .83em; margin: 1.5em 0 }
-.x-panel-reset .x-panel-body h6              { font-size: .75em; margin: 1.67em 0 }
-.x-panel-reset .x-panel-body h1,
-.x-panel-reset .x-panel-body h2,
-.x-panel-reset .x-panel-body h3,
-.x-panel-reset .x-panel-body h4,
-.x-panel-reset .x-panel-body h5,
-.x-panel-reset .x-panel-body h6,
-.x-panel-reset .x-panel-body b,
-.x-panel-reset .x-panel-body strong          { font-weight: bolder }
-.x-panel-reset .x-panel-body blockquote      { margin-left: 40px; margin-right: 40px }
-.x-panel-reset .x-panel-body i,
-.x-panel-reset .x-panel-body cite,
-.x-panel-reset .x-panel-body em,
-.x-panel-reset .x-panel-body var,
-.x-panel-reset .x-panel-body address    	  { font-style: italic }
-.x-panel-reset .x-panel-body pre,
-.x-panel-reset .x-panel-body tt,
-.x-panel-reset .x-panel-body code,
-.x-panel-reset .x-panel-body kbd,
-.x-panel-reset .x-panel-body samp       	  { font-family: monospace }
-.x-panel-reset .x-panel-body pre             { white-space: pre }
-.x-panel-reset .x-panel-body button,
-.x-panel-reset .x-panel-body textarea,
-.x-panel-reset .x-panel-body input,
-.x-panel-reset .x-panel-body select   		  { display: inline-block }
-.x-panel-reset .x-panel-body big             { font-size: 1.17em }
-.x-panel-reset .x-panel-body small,
-.x-panel-reset .x-panel-body sub,
-.x-panel-reset .x-panel-body sup 			  { font-size: .83em }
-.x-panel-reset .x-panel-body sub             { vertical-align: sub }
-.x-panel-reset .x-panel-body sup             { vertical-align: super }
-.x-panel-reset .x-panel-body table           { border-spacing: 2px; }
-.x-panel-reset .x-panel-body thead,
-.x-panel-reset .x-panel-body tbody,
-.x-panel-reset .x-panel-body tfoot           { vertical-align: middle }
-.x-panel-reset .x-panel-body td,
-.x-panel-reset .x-panel-body th          	  { vertical-align: inherit }
-.x-panel-reset .x-panel-body s,
-.x-panel-reset .x-panel-body strike,
-.x-panel-reset .x-panel-body del  			  { text-decoration: line-through }
-.x-panel-reset .x-panel-body hr              { border: 1px inset }
-.x-panel-reset .x-panel-body ol,
-.x-panel-reset .x-panel-body ul,
-.x-panel-reset .x-panel-body dir,
-.x-panel-reset .x-panel-body menu,
-.x-panel-reset .x-panel-body dd        	  { margin-left: 40px }
-.x-panel-reset .x-panel-body ul, .x-panel-reset .x-panel-body menu, .x-panel-reset .x-panel-body dir { list-style-type: disc;}
-.x-panel-reset .x-panel-body ol              { list-style-type: decimal }
-.x-panel-reset .x-panel-body ol ul,
-.x-panel-reset .x-panel-body ul ol,
-.x-panel-reset .x-panel-body ul ul,
-.x-panel-reset .x-panel-body ol ol    		  { margin-top: 0; margin-bottom: 0 }
-.x-panel-reset .x-panel-body u,
-.x-panel-reset .x-panel-body ins          	  { text-decoration: underline }
-.x-panel-reset .x-panel-body br:before       { content: "\A" }
-.x-panel-reset .x-panel-body :before, .x-panel-reset .x-panel-body :after { white-space: pre-line }
-.x-panel-reset .x-panel-body center          { text-align: center }
-.x-panel-reset .x-panel-body :link, .x-panel-reset .x-panel-body :visited { text-decoration: underline }
-.x-panel-reset .x-panel-body :focus          { outline: invert dotted thin }
+.x3-panel-reset .x3-panel-body html,
+.x3-panel-reset .x3-panel-body address,
+.x3-panel-reset .x3-panel-body blockquote,
+.x3-panel-reset .x3-panel-body body,
+.x3-panel-reset .x3-panel-body dd,
+.x3-panel-reset .x3-panel-body div,
+.x3-panel-reset .x3-panel-body dl,
+.x3-panel-reset .x3-panel-body dt,
+.x3-panel-reset .x3-panel-body fieldset,
+.x3-panel-reset .x3-panel-body form,
+.x3-panel-reset .x3-panel-body frame, frameset,
+.x3-panel-reset .x3-panel-body h1,
+.x3-panel-reset .x3-panel-body h2,
+.x3-panel-reset .x3-panel-body h3,
+.x3-panel-reset .x3-panel-body h4,
+.x3-panel-reset .x3-panel-body h5,
+.x3-panel-reset .x3-panel-body h6,
+.x3-panel-reset .x3-panel-body noframes,
+.x3-panel-reset .x3-panel-body ol,
+.x3-panel-reset .x3-panel-body p,
+.x3-panel-reset .x3-panel-body ul,
+.x3-panel-reset .x3-panel-body center,
+.x3-panel-reset .x3-panel-body dir,
+.x3-panel-reset .x3-panel-body hr,
+.x3-panel-reset .x3-panel-body menu,
+.x3-panel-reset .x3-panel-body pre 			  { display: block }
+.x3-panel-reset .x3-panel-body li              { display: list-item }
+.x3-panel-reset .x3-panel-body head            { display: none }
+.x3-panel-reset .x3-panel-body table           { display: table }
+.x3-panel-reset .x3-panel-body tr              { display: table-row }
+.x3-panel-reset .x3-panel-body thead           { display: table-header-group }
+.x3-panel-reset .x3-panel-body tbody           { display: table-row-group }
+.x3-panel-reset .x3-panel-body tfoot           { display: table-footer-group }
+.x3-panel-reset .x3-panel-body col             { display: table-column }
+.x3-panel-reset .x3-panel-body colgroup        { display: table-column-group }
+.x3-panel-reset .x3-panel-body td,
+.x3-panel-reset .x3-panel-body th 	          { display: table-cell }
+.x3-panel-reset .x3-panel-body caption         { display: table-caption }
+.x3-panel-reset .x3-panel-body th              { font-weight: bolder; text-align: center }
+.x3-panel-reset .x3-panel-body caption         { text-align: center }
+.x3-panel-reset .x3-panel-body body            { margin: 8px }
+.x3-panel-reset .x3-panel-body h1              { font-size: 2em; margin: .67em 0 }
+.x3-panel-reset .x3-panel-body h2              { font-size: 1.5em; margin: .75em 0 }
+.x3-panel-reset .x3-panel-body h3              { font-size: 1.17em; margin: .83em 0 }
+.x3-panel-reset .x3-panel-body h4,
+.x3-panel-reset .x3-panel-body p,
+.x3-panel-reset .x3-panel-body blockquote,
+.x3-panel-reset .x3-panel-body ul,
+.x3-panel-reset .x3-panel-body fieldset,
+.x3-panel-reset .x3-panel-body form,
+.x3-panel-reset .x3-panel-body ol,
+.x3-panel-reset .x3-panel-body dl,
+.x3-panel-reset .x3-panel-body dir,
+.x3-panel-reset .x3-panel-body menu            { margin: 1.12em 0 }
+.x3-panel-reset .x3-panel-body h5              { font-size: .83em; margin: 1.5em 0 }
+.x3-panel-reset .x3-panel-body h6              { font-size: .75em; margin: 1.67em 0 }
+.x3-panel-reset .x3-panel-body h1,
+.x3-panel-reset .x3-panel-body h2,
+.x3-panel-reset .x3-panel-body h3,
+.x3-panel-reset .x3-panel-body h4,
+.x3-panel-reset .x3-panel-body h5,
+.x3-panel-reset .x3-panel-body h6,
+.x3-panel-reset .x3-panel-body b,
+.x3-panel-reset .x3-panel-body strong          { font-weight: bolder }
+.x3-panel-reset .x3-panel-body blockquote      { margin-left: 40px; margin-right: 40px }
+.x3-panel-reset .x3-panel-body i,
+.x3-panel-reset .x3-panel-body cite,
+.x3-panel-reset .x3-panel-body em,
+.x3-panel-reset .x3-panel-body var,
+.x3-panel-reset .x3-panel-body address    	  { font-style: italic }
+.x3-panel-reset .x3-panel-body pre,
+.x3-panel-reset .x3-panel-body tt,
+.x3-panel-reset .x3-panel-body code,
+.x3-panel-reset .x3-panel-body kbd,
+.x3-panel-reset .x3-panel-body samp       	  { font-family: monospace }
+.x3-panel-reset .x3-panel-body pre             { white-space: pre }
+.x3-panel-reset .x3-panel-body button,
+.x3-panel-reset .x3-panel-body textarea,
+.x3-panel-reset .x3-panel-body input,
+.x3-panel-reset .x3-panel-body select   		  { display: inline-block }
+.x3-panel-reset .x3-panel-body big             { font-size: 1.17em }
+.x3-panel-reset .x3-panel-body small,
+.x3-panel-reset .x3-panel-body sub,
+.x3-panel-reset .x3-panel-body sup 			  { font-size: .83em }
+.x3-panel-reset .x3-panel-body sub             { vertical-align: sub }
+.x3-panel-reset .x3-panel-body sup             { vertical-align: super }
+.x3-panel-reset .x3-panel-body table           { border-spacing: 2px; }
+.x3-panel-reset .x3-panel-body thead,
+.x3-panel-reset .x3-panel-body tbody,
+.x3-panel-reset .x3-panel-body tfoot           { vertical-align: middle }
+.x3-panel-reset .x3-panel-body td,
+.x3-panel-reset .x3-panel-body th          	  { vertical-align: inherit }
+.x3-panel-reset .x3-panel-body s,
+.x3-panel-reset .x3-panel-body strike,
+.x3-panel-reset .x3-panel-body del  			  { text-decoration: line-through }
+.x3-panel-reset .x3-panel-body hr              { border: 1px inset }
+.x3-panel-reset .x3-panel-body ol,
+.x3-panel-reset .x3-panel-body ul,
+.x3-panel-reset .x3-panel-body dir,
+.x3-panel-reset .x3-panel-body menu,
+.x3-panel-reset .x3-panel-body dd        	  { margin-left: 40px }
+.x3-panel-reset .x3-panel-body ul, .x3-panel-reset .x3-panel-body menu, .x3-panel-reset .x3-panel-body dir { list-style-type: disc;}
+.x3-panel-reset .x3-panel-body ol              { list-style-type: decimal }
+.x3-panel-reset .x3-panel-body ol ul,
+.x3-panel-reset .x3-panel-body ul ol,
+.x3-panel-reset .x3-panel-body ul ul,
+.x3-panel-reset .x3-panel-body ol ol    		  { margin-top: 0; margin-bottom: 0 }
+.x3-panel-reset .x3-panel-body u,
+.x3-panel-reset .x3-panel-body ins          	  { text-decoration: underline }
+.x3-panel-reset .x3-panel-body br:before       { content: "\A" }
+.x3-panel-reset .x3-panel-body :before, .x3-panel-reset .x3-panel-body :after { white-space: pre-line }
+.x3-panel-reset .x3-panel-body center          { text-align: center }
+.x3-panel-reset .x3-panel-body :link, .x3-panel-reset .x3-panel-body :visited { text-decoration: underline }
+.x3-panel-reset .x3-panel-body :focus          { outline: invert dotted thin }
 
 /* Begin bidirectionality settings (do not change) */
-.x-panel-reset .x-panel-body BDO[DIR="ltr"]  { direction: ltr; unicode-bidi: bidi-override }
-.x-panel-reset .x-panel-body BDO[DIR="rtl"]  { direction: rtl; unicode-bidi: bidi-override }
+.x3-panel-reset .x3-panel-body BDO[DIR="ltr"]  { direction: ltr; unicode-bidi: bidi-override }
+.x3-panel-reset .x3-panel-body BDO[DIR="rtl"]  { direction: rtl; unicode-bidi: bidi-override }

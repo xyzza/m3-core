@@ -125,7 +125,7 @@ class BaseExtField(ExtUIComponent):
         self._put_config_value('invalidText', self.invalid_text)
         self._put_config_value('plugins', (lambda: '[%s]' % ','.join(self.plugins)), self.plugins)
 
-        # дополнительно вешаем DOM-атрибуты через Ext.Field.autoCreate
+        # дополнительно вешаем DOM-атрибуты через Ext3.Field.autoCreate
         if self.max_length:
             self.auto_create.update({"maxlength": self.max_length})
             self._put_config_value('autoCreate', self.auto_create)

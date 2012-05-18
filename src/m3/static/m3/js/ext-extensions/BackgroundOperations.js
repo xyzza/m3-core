@@ -2,10 +2,10 @@
  * Crafted by ZIgi
  */
 
-Ext.ns('Ext.m3');
+Ext3.ns('Ext3.m3');
 
 /**
- * @class Ext.m3.BackgroundOperationProxy Класс обеспечивающий интерфейс для
+ * @class Ext3.m3.BackgroundOperationProxy Класс обеспечивающий интерфейс для
  * опроса сервера с заданным интервалом. При получении данных срабатывает событие update, в качестве
  * аргумента к событию передается объект следуеющего вида
  * {
@@ -14,7 +14,7 @@ Ext.ns('Ext.m3');
  *     text:'' // строка сообщение с сервера
  * }
  */
-Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
+Ext3.m3.BackgroundOperationProxy = Ext3.extend(Ext3.util.Observable, {
     /**
      * @cfg {String} адрес сервера для комуникации
      */
@@ -41,11 +41,11 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
     boundaryParam:'boundary',
 
     constructor:function(cfg) {
-        Ext.apply(this, cfg);
-        Ext.m3.BackgroundOperationProxy.superclass.constructor.call(this);
+        Ext3.apply(this, cfg);
+        Ext3.m3.BackgroundOperationProxy.superclass.constructor.call(this);
 
         //таск раннер - класс выполняющий некую функцию в бескончено цикле с заданным интервалом
-        this.taskRunner = new Ext.util.TaskRunner();
+        this.taskRunner = new Ext3.util.TaskRunner();
         this.task = {
             run:this.wait,
             interval:this.interval,
@@ -137,10 +137,10 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
         request_params[this.commandParam] = command;
         request_params[this.boundaryParam] = this.boundary;
         if(params != undefined){
-            Ext.applyIf(request_params, params);
+            Ext3.applyIf(request_params, params);
         }
 
-        Ext.Ajax.request({
+        Ext3.Ajax.request({
             url:this.url,
             success:successCallback,
             failure:this.requestError,
@@ -170,16 +170,16 @@ Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
      * @private Преобразование ответа сервера
      */
     parseResponse:function(response) {
-        return Ext.util.JSON.decode(response.responseText);
+        return Ext3.util.JSON.decode(response.responseText);
     }
 });
 
 /**
- * @class Ext.m3.BackgroundOperationBar
+ * @class Ext3.m3.BackgroundOperationBar
  * Экстовый прогресс бар, с привязаным к нему прокси. Интерфейс комуникации с сервером:
  * start(), stop(), ping()
  */
-Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
+Ext3.m3.BackgroundOperationBar = Ext3.extend(Ext3.ProgressBar, {
 
     /**
      * @cfg {String} Урл
@@ -192,8 +192,8 @@ Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
     interval:1000,
 
     initComponent:function() {
-        Ext.m3.BackgroundOperationBar.superclass.initComponent.call(this);
-        this.serverProxy = new Ext.m3.BackgroundOperationProxy({
+        Ext3.m3.BackgroundOperationBar.superclass.initComponent.call(this);
+        this.serverProxy = new Ext3.m3.BackgroundOperationProxy({
             url:this.url,
             interval:this.interval,
             boundary:this.boundary

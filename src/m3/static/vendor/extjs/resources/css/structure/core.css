@@ -1,10 +1,10 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.ext-el-mask {
+.ext3-el-mask {
     z-index: 100;
     position: absolute;
     top:0;
@@ -17,7 +17,7 @@
     zoom: 1;
 }
 
-.ext-el-mask-msg {
+.ext3-el-mask-msg {
     z-index: 20001;
     position: absolute;
     top: 0;
@@ -27,13 +27,13 @@
     padding:2px;
 }
 
-.ext-el-mask-msg div {
+.ext3-el-mask-msg div {
     padding:5px 10px 5px 10px;
     border:1px solid;
     cursor:wait;
 }
 
-.ext-shim {
+.ext3-shim {
     position:absolute;
     visibility:hidden;
     left:0;
@@ -41,35 +41,35 @@
     overflow:hidden;
 }
 
-.ext-ie .ext-shim {
+.ext3-ie .ext3-shim {
     filter: alpha(opacity=0);
 }
 
-.ext-ie6 .ext-shim {
+.ext3-ie6 .ext3-shim {
     margin-left: 5px;
     margin-top: 3px;
 }
 
-.x-mask-loading div {
+.x3-mask-loading div {
     padding:5px 10px 5px 25px;
     background:no-repeat 5px 5px;
     line-height:16px;
 }
 
 /* class for hiding elements without using display:none */
-.x-hidden, .x-hide-offsets {
+.x3-hidden, .x3-hide-offsets {
     position:absolute !important;
     left:-10000px;
     top:-10000px;
     visibility:hidden;
 }
 
-.x-hide-display {
+.x3-hide-display {
     display:none !important;
 }
 
-.x-hide-nosize,
-.x-hide-nosize *    /* Emulate display:none for children */
+.x3-hide-nosize,
+.x3-hide-nosize *    /* Emulate display:none for children */
  {
    height:0px!important;
    width:0px!important;
@@ -78,54 +78,54 @@
    zoom:1;
 }
 
-.x-hide-visibility {
+.x3-hide-visibility {
     visibility:hidden !important;
 }
 
-.x-masked {
+.x3-masked {
     overflow: hidden !important;
 }
-.x-masked-relative {
+.x3-masked-relative {
     position: relative !important;
 }
 
-.x-masked select, .x-masked object, .x-masked embed {
+.x3-masked select, .x3-masked object, .x3-masked embed {
     visibility: hidden;
 }
 
-.x-layer {
+.x3-layer {
     visibility: hidden;
 }
 
-.x-unselectable, .x-unselectable * {
+.x3-unselectable, .x3-unselectable * {
     -moz-user-select: none;
     -khtml-user-select: none;
     -webkit-user-select:ignore;
 }
 
-.x-repaint {
+.x3-repaint {
     zoom: 1;
     background-color: transparent;
     -moz-outline: none;
     outline: none;
 }
 
-.x-item-disabled {
+.x3-item-disabled {
     cursor: default;
     opacity: .6;
     -moz-opacity: .6;
     filter: alpha(opacity=60);
 }
 
-.x-item-disabled * {
+.x3-item-disabled * {
     cursor: default !important;
 }
 
-.x-form-radio-group .x-item-disabled {
+.x3-form-radio-group .x3-item-disabled {
     filter: none;
 }
 
-.x-splitbar-proxy {
+.x3-splitbar-proxy {
     position: absolute;
     visibility: hidden;
     z-index: 20001;
@@ -135,23 +135,23 @@
     overflow: hidden;
 }
 
-.x-splitbar-h, .x-splitbar-proxy-h {
+.x3-splitbar-h, .x3-splitbar-proxy-h {
     cursor: e-resize;
     cursor: col-resize;
 }
 
-.x-splitbar-v, .x-splitbar-proxy-v {
+.x3-splitbar-v, .x3-splitbar-proxy-v {
     cursor: s-resize;
     cursor: row-resize;
 }
 
-.x-color-palette {
+.x3-color-palette {
     width: 150px;
     height: 92px;
     cursor: pointer;
 }
 
-.x-color-palette a {
+.x3-color-palette a {
     border: 1px solid;
     float: left;
     padding: 2px;
@@ -161,16 +161,16 @@
     cursor: pointer;
 }
 
-.x-color-palette a:hover, .x-color-palette a.x-color-palette-sel {
+.x3-color-palette a:hover, .x3-color-palette a.x3-color-palette-sel {
     border: 1px solid;
 }
 
-.x-color-palette em {
+.x3-color-palette em {
     display: block;
     border: 1px solid;
 }
 
-.x-color-palette em span {
+.x3-color-palette em span {
     cursor: pointer;
     display: block;
     height: 10px;
@@ -178,7 +178,7 @@
     width: 10px;
 }
 
-.x-ie-shadow {
+.x3-ie-shadow {
     display: none;
     position: absolute;
     overflow: hidden;
@@ -187,7 +187,7 @@
     zoom:1;
 }
 
-.x-shadow {
+.x3-shadow {
     display: none;
     position: absolute;
     overflow: hidden;
@@ -195,11 +195,11 @@
     top:0;
 }
 
-.x-shadow * {
+.x3-shadow * {
     overflow: hidden;
 }
 
-.x-shadow * {
+.x3-shadow * {
     padding: 0;
     border: 0;
     margin: 0;
@@ -208,70 +208,70 @@
 }
 
 /* top  bottom */
-.x-shadow .xstc, .x-shadow .xsbc {
+.x3-shadow .xstc, .x3-shadow .xsbc {
     height: 6px;
     float: left;
 }
 
 /* corners */
-.x-shadow .xstl, .x-shadow .xstr, .x-shadow .xsbl, .x-shadow .xsbr {
+.x3-shadow .xstl, .x3-shadow .xstr, .x3-shadow .xsbl, .x3-shadow .xsbr {
     width: 6px;
     height: 6px;
     float: left;
 }
 
 /* sides */
-.x-shadow .xsc {
+.x3-shadow .xsc {
     width: 100%;
 }
 
-.x-shadow .xsml, .x-shadow .xsmr {
+.x3-shadow .xsml, .x3-shadow .xsmr {
     width: 6px;
     float: left;
     height: 100%;
 }
 
-.x-shadow .xsmc {
+.x3-shadow .xsmc {
     float: left;
     height: 100%;
     background-color: transparent;
 }
 
-.x-shadow .xst, .x-shadow .xsb {
+.x3-shadow .xst, .x3-shadow .xsb {
     height: 6px;
     overflow: hidden;
     width: 100%;
 }
 
-.x-shadow .xsml {
+.x3-shadow .xsml {
     background: transparent repeat-y 0 0;
 }
 
-.x-shadow .xsmr {
+.x3-shadow .xsmr {
     background: transparent repeat-y -6px 0;
 }
 
-.x-shadow .xstl {
+.x3-shadow .xstl {
     background: transparent no-repeat 0 0;
 }
 
-.x-shadow .xstc {
+.x3-shadow .xstc {
     background: transparent repeat-x 0 -30px;
 }
 
-.x-shadow .xstr {
+.x3-shadow .xstr {
     background: transparent repeat-x 0 -18px;
 }
 
-.x-shadow .xsbl {
+.x3-shadow .xsbl {
     background: transparent no-repeat 0 -12px;
 }
 
-.x-shadow .xsbc {
+.x3-shadow .xsbc {
     background: transparent repeat-x 0 -36px;
 }
 
-.x-shadow .xsbr {
+.x3-shadow .xsbr {
     background: transparent repeat-x 0 -6px;
 }
 
@@ -282,7 +282,7 @@
     margin: 3px;
 }
 
-.x-text-resize {
+.x3-text-resize {
     position: absolute;
     left: -1000px;
     top: -1000px;
@@ -290,7 +290,7 @@
     zoom: 1;
 }
 
-.x-drag-overlay {
+.x3-drag-overlay {
     width: 100%;
     height: 100%;
     display: none;
@@ -301,7 +301,7 @@
     z-index: 20000;
 }
 
-.x-clear {
+.x3-clear {
     clear:both;
     height:0;
     overflow:hidden;
@@ -309,7 +309,7 @@
     font-size:0;
 }
 
-.x-spotlight {
+.x3-spotlight {
     z-index: 8999;
     position: absolute;
     top:0;
@@ -322,7 +322,7 @@
     zoom: 1;
 }
 
-#x-history-frame {
+#x3-history-frame {
     position:absolute;
     top:-1px;
     left:0;
@@ -331,7 +331,7 @@
     visibility:hidden;
 }
 
-#x-history-field {
+#x3-history-field {
     position:absolute;
     top:0;
     left:-1px;

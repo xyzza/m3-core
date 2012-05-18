@@ -2,8 +2,8 @@
  * Календарь на базе Sencha Calendar
  */
 
-Ext.m3.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
+Ext3.m3.Calendar = Ext3.extend(Ext3.calendar.CalendarPanel, {
     constructor: function(baseConfig, params){
-        Ext.m3.Calendar.superclass.constructor.call(this, baseConfig);
+        Ext3.m3.Calendar.superclass.constructor.call(this, baseConfig);
     }
 })

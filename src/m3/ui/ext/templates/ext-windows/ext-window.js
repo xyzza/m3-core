@@ -1,5 +1,5 @@
 (function(){
-    var win = new Ext.Window({
+    var win = new Ext3.Window({
         {% include 'base-ext-ui.js'%}
 	    
 	    {% if component.title %} ,title: '{{ component.title }}' {% endif %}

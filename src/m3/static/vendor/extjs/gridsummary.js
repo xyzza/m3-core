@@ -1,18 +1,18 @@
-Ext.ns('Ext.ux.grid');
+Ext3.ns('Ext3.ux.grid');
 
-Ext.ux.grid.GridSummary = function(config) {
-    Ext.apply(this, config);
+Ext3.ux.grid.GridSummary = function(config) {
+    Ext3.apply(this, config);
 };
 
-Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
-    // configurable scrollbar width (used only in the event the Ext.getScrollBarWidth() method is not available)
+Ext3.extend(Ext3.ux.grid.GridSummary, Ext3.util.Observable, {
+    // configurable scrollbar width (used only in the event the Ext3.getScrollBarWidth() method is not available)
     scrollBarWidth : 17,
 
     // private
     init : function(grid) {
         var v = grid.getView();
 
-        Ext.apply(this, {
+        Ext3.apply(this, {
             grid    : grid,
             view    : v
         });
@@ -21,9 +21,9 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
         v.onLayout = this.onLayout;
 
         // IE6/7 disappearing vertical scrollbar workaround
-        if (Ext.isIE6 || Ext.isIE7) {
+        if (Ext3.isIE6 || Ext3.isIE7) {
             if (!grid.events['viewready']) {
-                // check for "viewready" event on GridPanel -- this event is only available in Ext 3.x,
+                // check for "viewready" event on GridPanel -- this event is only available in Ext3 3.x,
                 // so the plugin hotwires it in if it doesn't exist
                 v.afterMethod('afterRender', function() {
                     this.grid.fireEvent('viewready', this.grid);
@@ -45,7 +45,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
         v.afterMethod('onAllColumnWidthsUpdated', this.doAllWidths, this);
         v.afterMethod('onColumnHiddenUpdated', this.doHidden, this);
 
-        if (Ext.isGecko || Ext.isOpera) {
+        if (Ext3.isGecko || Ext3.isOpera) {
             // restore gridview's horizontal scroll position when store data is changed
             //
             // TODO -- when sorting a column in Opera, the summary row's horizontal scroll position is
@@ -69,9 +69,9 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
         });
 
         if (!this.rowTpl) {
-            this.rowTpl = new Ext.Template(
-                '<div class="x-grid3-summary-row x-grid3-gridsummary-row-offset">',
-                    '<table class="x-grid3-summary-table" border="0" cellspacing="0" cellpadding="0" style="{tstyle}">',
+            this.rowTpl = new Ext3.Template(
+                '<div class="x3-grid3-summary-row x3-grid3-gridsummary-row-offset">',
+                    '<table class="x3-grid3-summary-table" border="0" cellspacing="0" cellpadding="0" style="{tstyle}">',
                         '<tbody><tr>{cells}</tr></tbody>',
                     '</table>',
                 '</div>'
@@ -81,9 +81,9 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
         this.rowTpl.compile();
 
         if (!this.cellTpl) {
-            this.cellTpl = new Ext.Template(
-                '<td class="x-grid3-col x-grid3-cell x-grid3-td-{id} {css}" style="{style}">',
-                    '<div class="x-grid3-cell-inner x-grid3-col-{id}" unselectable="on" {attr}>{value}</div>',
+            this.cellTpl = new Ext3.Template(
+                '<td class="x3-grid3-col x3-grid3-cell x3-grid3-td-{id} {css}" style="{style}">',
+                    '<div class="x3-grid3-cell-inner x3-grid3-col-{id}" unselectable="on" {attr}>{value}</div>',
                 "</td>"
             );
             this.cellTpl.disableFormats = true;
@@ -108,7 +108,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
             if (cf.summaryType) {
                 for (j = 0, jlen = rs.length; j < jlen; j++) {
                     r = rs[j]; // get a single Record
-                    data[cname] = Ext.ux.grid.GridSummary.Calculations[cf.summaryType](r.get(cname), r, cname, data, j);
+                    data[cname] = Ext3.ux.grid.GridSummary.Calculations[cf.summaryType](r.get(cname), r, cname, data, j);
                 }
             }
         }
@@ -122,7 +122,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
             return;
         }
 
-        if (!this.grid.getGridEl().hasClass('x-grid3-hide-gridsummary')) {
+        if (!this.grid.getGridEl().hasClass('x3-grid3-hide-gridsummary')) {
             // readjust gridview's height only if grid summary row is visible
             this.scroller.setHeight(vh - this.summaryWrap.getHeight());
         }
@@ -152,8 +152,8 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
             // workaround for Gecko's horizontal-scroll reset bug
             // (see unresolved mozilla bug: https://bugzilla.mozilla.org/show_bug.cgi?id=386444
             // "using vertical scrollbar changes horizontal scroll position with overflow-x:hidden and overflow-y:scroll")
-            Ext.isGecko     &&          // 1) <div>s with overflow-x:hidden have their DOM.scrollLeft property set to 0 when scrolling vertically
-            currX === 0     &&          // 2) current x-ordinate is now zero
+            Ext3.isGecko     &&          // 1) <div>s with overflow-x:hidden have their DOM.scrollLeft property set to 0 when scrolling vertically
+            currX === 0     &&          // 2) current x3-ordinate is now zero
             this.oldX > 0   &&          // 3) gridview is not at x=0 ordinate
             (y !== currY || y === 0)    // 4) vertical scroll detected / vertical scrollbar is moved rapidly all the way to the top
         ) {
@@ -165,7 +165,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
 
     // private
     restoreGridHScroll : function() {
-        // restore gridview's original x-ordinate
+        // restore gridview's original x3-ordinate
         // (note: this causes an unvoidable flicker in the gridview)
         this.view.scroller.dom.scrollLeft = this.oldX || 0;
     },
@@ -220,7 +220,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
     // private
     getGridHeader : function() {
         if (!this.gridHeader) {
-            this.gridHeader = this.view.mainHd.child('.x-grid3-header-offset');
+            this.gridHeader = this.view.mainHd.child('.x3-grid3-header-offset');
         }
 
         return this.gridHeader;
@@ -235,16 +235,16 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
     		this.getSummaryNode().setWidth(this.view.getTotalWidth()); //kirov
     	}
     	// kirov
-    	if (Ext.isIE) {
+    	if (Ext3.isIE) {
 	    	var elWidth = this.grid.getGridEl().getSize().width;
 	    	if (this.grid.getColumnModel().getTotalWidth()+this.view.getScrollOffset() > elWidth){
 	    		//console.log('scroll');
 	    		//debugger;
 	    		this.view.summaryWrap.dom.style['overflow-y'] = 'hidden';
-	    		this.view.summaryWrap.setHeight(((Ext.getScrollBarWidth ? Ext.getScrollBarWidth() : this.scrollBarWidth) + 18 /* 18 = row-expander height */));
+	    		this.view.summaryWrap.setHeight(((Ext3.getScrollBarWidth ? Ext3.getScrollBarWidth() : this.scrollBarWidth) + 18 /* 18 = row-expander height */));
 	    	} else {
 	    		this.view.summaryWrap.dom.style['overflow-y'] = 'visible';
-	    		this.view.summaryWrap.setHeight((Ext.getScrollBarWidth ? Ext.getScrollBarWidth() : this.scrollBarWidth));
+	    		this.view.summaryWrap.setHeight((Ext3.getScrollBarWidth ? Ext3.getScrollBarWidth() : this.scrollBarWidth));
 	    	}
     	}
     },
@@ -265,7 +265,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
 
             p.id = c.id;
             p.style = c.style;
-            p.css = i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '');
+            p.css = i === 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '');
 
             if (cf.summaryType || cf.summaryRenderer) {
                 p.value = (cf.summaryRenderer || c.renderer)(o.data[c.name], p, o);
@@ -295,14 +295,14 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
             buf     = this.renderSummary({data: data}, cs, cm);
 
         if (!this.view.summaryWrap) {
-            this.view.summaryWrap = Ext.DomHelper.insertAfter(this.view.scroller, {
+            this.view.summaryWrap = Ext3.DomHelper.insertAfter(this.view.scroller, {
                 // IE6/7/8 style hacks:
                 // - width:100% required for horizontal scroll to appear (all the time for IE6/7, only in GroupingView for IE8)
                 // - explicit height required for summary row to appear (only for IE6/7, no effect in IE8)
                 // - overflow-y:hidden required to hide vertical scrollbar in summary row (only for IE6/7, no effect in IE8)
-                style   : 'overflow:auto;' + (Ext.isIE ? 'width:100%;overflow-y:hidden;height:' + ((Ext.getScrollBarWidth ? Ext.getScrollBarWidth() : this.scrollBarWidth) + 18 /* 18 = row-expander height */) + 'px;' : ''),
+                style   : 'overflow:auto;' + (Ext3.isIE ? 'width:100%;overflow-y:hidden;height:' + ((Ext3.getScrollBarWidth ? Ext3.getScrollBarWidth() : this.scrollBarWidth) + 18 /* 18 = row-expander height */) + 'px;' : ''),
                 tag     : 'div',
-                cls     : 'x-grid3-gridsummary-row-inner'
+                cls     : 'x3-grid3-gridsummary-row-inner'
             }, true);
 
             // synchronise GridView's and GridSummary's horizontal scroll
@@ -326,7 +326,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
             //вертикальный надо оставить для прокрутки в гриде по записям
             this.view.scroller.dom.style.overflowX = "hidden";
     	}
-        this.view.scroller[allowHScroll === undefined ? 'toggleClass' : allowHScroll ? 'removeClass' : 'addClass']('x-grid3-gridsummary-hide-hscroll');
+        this.view.scroller[allowHScroll === undefined ? 'toggleClass' : allowHScroll ? 'removeClass' : 'addClass']('x3-grid3-gridsummary-hide-hscroll');
     },
 
     // show/hide summary row
@@ -335,7 +335,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
             v = this.view;
 
         if (el) {
-            el[visible === undefined ? 'toggleClass' : visible ? 'removeClass' : 'addClass']('x-grid3-hide-gridsummary');
+            el[visible === undefined ? 'toggleClass' : visible ? 'removeClass' : 'addClass']('x3-grid3-hide-gridsummary');
 
             // toggle gridview's horizontal scrollbar
             this.toggleGridHScroll();
@@ -360,7 +360,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
 
     // private
     beforeDestroy : function() {
-        Ext.destroy(
+        Ext3.destroy(
             this.view.summary,
             this.view.summaryWrap
         );
@@ -372,7 +372,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
         delete this.oldY;
     }
 });
-Ext.reg('gridsummary', Ext.ux.grid.GridSummary);
+Ext3.reg('gridsummary', Ext3.ux.grid.GridSummary);
 
 /*
  * all Calculation methods are called on each Record in the Store
@@ -384,9 +384,9 @@ Ext.reg('gridsummary', Ext.ux.grid.GridSummary);
  * data - the cumulative data for the current column + summaryType up to the current Record
  * rowIdx - current row index
  */
-Ext.ux.grid.GridSummary.Calculations = {
+Ext3.ux.grid.GridSummary.Calculations = {
     sum : function(v, record, colName, data, rowIdx) {
-        return data[colName] + Ext.num(v, 0);
+        return data[colName] + Ext3.num(v, 0);
     },
 
     count : function(v, record, colName, data, rowIdx) {
@@ -394,15 +394,15 @@ Ext.ux.grid.GridSummary.Calculations = {
     },
 
     max : function(v, record, colName, data, rowIdx) {
-        return Math.max(Ext.num(v, 0), data[colName]);
+        return Math.max(Ext3.num(v, 0), data[colName]);
     },
 
     min : function(v, record, colName, data, rowIdx) {
-        return Math.min(Ext.num(v, 0), data[colName]);
+        return Math.min(Ext3.num(v, 0), data[colName]);
     },
 
     average : function(v, record, colName, data, rowIdx) {
-        var t = data[colName] + Ext.num(v, 0),
+        var t = data[colName] + Ext3.num(v, 0),
             count = record.store.getCount();
 
         return rowIdx == count - 1 ? (t / count) : t;

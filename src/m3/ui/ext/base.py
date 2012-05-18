@@ -104,7 +104,7 @@ class BaseExtComponent(object):
         # Если True, то рендерится как функция, без префикса new
         self._is_function_render = False
         
-        # Имя компонента в нотации ExtJs (Например Ext.form.Panel)
+        # Имя компонента в нотации ExtJs (Например Ext3.form.Panel)
         self._ext_name = None
         
         # квалифицирующее имя контрола (в пределах некоторого базового компонента)

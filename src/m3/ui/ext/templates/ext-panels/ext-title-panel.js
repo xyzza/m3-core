@@ -1,4 +1,4 @@
-new Ext.app.TitlePanel({
+new Ext3.app.TitlePanel({
 	{% include 'base-ext-ui.js'%}
 	{% if component.title %} ,title: '{{ component.title }}' {% endif %}
 	{% if component.header %} ,header: true {% endif %}

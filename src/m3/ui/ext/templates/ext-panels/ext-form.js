@@ -1,6 +1,6 @@
 
 (function(){
-    var form_panel = new Ext.FormPanel({
+    var form_panel = new Ext3.FormPanel({
     	{% include 'base-ext-ui.js'%}
     	
     	// Атрибуты form layout
@@ -32,13 +32,13 @@
         
     	{% if component.buttom_bar %} ,bbar: {{ component.t_render_buttom_bar|safe }} {% endif %}
     	{% if component.footer_bar %} ,fbar: {{ component.t_render_footer_bar|safe }} {% endif %}
-     	{% if component.base_cls %} ,baseCls: '{{ component.base_cls }}' {% else %} ,baseCls:'x-plain' {% endif %}
+     	{% if component.base_cls %} ,baseCls: '{{ component.base_cls }}' {% else %} ,baseCls:'x3-plain' {% endif %}
         
         ,items: {{ component.t_render_items|safe }}
     });
     {% if component.focused_field %}
 	  form_panel.on('afterrender', function(){
-		    Ext.getCmp('{{ component.focused_field.client_id}}').focus(false, 100);
+		    Ext3.getCmp('{{ component.focused_field.client_id}}').focus(false, 100);
 	  });
 	  {% endif %}
     return form_panel;

@@ -1,43 +1,43 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-combo-list {
+.x3-combo-list {
     border:2px solid #232732;
     background-color:#555566;
     font:normal 15px tahoma, arial, helvetica, sans-serif;
 }
 
-.x-combo-list-inner {
+.x3-combo-list-inner {
     background-color:#414551;
 }
 
-.x-combo-list-hd {
+.x3-combo-list-hd {
     font:bold 14px tahoma, arial, helvetica, sans-serif;
     color:#fff;
     background-image: url(../images/default/layout/panel-title-light-bg.gif);
     border-bottom-color:#98c0f4;
 }
 
-.x-resizable-pinned .x-combo-list-inner {
+.x3-resizable-pinned .x3-combo-list-inner {
     border-bottom-color:#98c0f4;
 }
 
-.x-combo-list-item {
+.x3-combo-list-item {
     border-color:#556;
 }
 
-.x-combo-list .x-combo-selected {
+.x3-combo-list .x3-combo-selected {
 	border-color:#e5872c !important;
     background-color:#e5872c;
 }
 
-.x-combo-list .x-toolbar {
+.x3-combo-list .x3-toolbar {
     border-top-color:#98c0f4;
 }
 
-.x-combo-list-small {
+.x3-combo-list-small {
     font:normal 14px tahoma, arial, helvetica, sans-serif;
 }

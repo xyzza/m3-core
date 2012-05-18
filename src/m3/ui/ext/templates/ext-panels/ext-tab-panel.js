@@ -1,4 +1,4 @@
-new Ext.TabPanel({
+new Ext3.TabPanel({
 	{% include 'base-ext-ui.js'%}
 	
 	{% if component.icon_cls %} ,iconCls: '{{ component.icon_cls }}' {% endif %}

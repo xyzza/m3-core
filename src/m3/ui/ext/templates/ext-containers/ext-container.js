@@ -1,4 +1,4 @@
-new Ext.Container({
+new Ext3.Container({
 	{% include 'base-ext-ui.js'%}
 	
 	{% if component.layout %} ,layout: '{{ component.layout }}' {% endif %}

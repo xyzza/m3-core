@@ -1,15 +1,15 @@
 /*!
- * Ext JS Library 3.4.0
+ * Ext3 JS Library 3.4.0
  * Copyright(c) 2006-2011 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
-.x-panel {
+.x3-panel {
     border-style: solid;
     border-width:0;
 }
 
-.x-panel-header {
+.x3-panel-header {
     overflow:hidden;
     zoom:1;
     padding:5px 3px 4px 5px;
@@ -18,48 +18,48 @@
     background: transparent repeat-x 0 -1px;
 }
 
-.x-panel-body {
+.x3-panel-body {
     border:1px solid;
     border-top:0 none;
     overflow:hidden;
     position: relative; /* added for item scroll positioning */
 }
 
-.x-panel-bbar .x-toolbar, .x-panel-tbar .x-toolbar {
+.x3-panel-bbar .x3-toolbar, .x3-panel-tbar .x3-toolbar {
     border:1px solid;
     border-top:0 none;
     overflow:hidden;
     padding:2px;
 }
 
-.x-panel-tbar-noheader .x-toolbar, .x-panel-mc .x-panel-tbar .x-toolbar {
+.x3-panel-tbar-noheader .x3-toolbar, .x3-panel-mc .x3-panel-tbar .x3-toolbar {
     border-top:1px solid;
     border-bottom: 0 none;
 }
 
-.x-panel-body-noheader, .x-panel-mc .x-panel-body {
+.x3-panel-body-noheader, .x3-panel-mc .x3-panel-body {
     border-top:1px solid;
 }
 
-.x-panel-header {
+.x3-panel-header {
     overflow:hidden;
     zoom:1;
 }
 
-.x-panel-tl .x-panel-header {
+.x3-panel-tl .x3-panel-header {
     padding:5px 0 4px 0;
     border:0 none;
     background:transparent no-repeat;
 }
 
-.x-panel-tl .x-panel-icon, .x-window-tl .x-panel-icon {
+.x3-panel-tl .x3-panel-icon, .x3-window-tl .x3-panel-icon {
     padding-left:20px !important;
     background-repeat:no-repeat;
     background-position:0 4px;
     zoom:1;
 }
 
-.x-panel-inline-icon {
+.x3-panel-inline-icon {
     width:16px;
 	height:16px;
     background-repeat:no-repeat;
@@ -70,129 +70,129 @@
 	margin-bottom:-1px;
 }
 
-.x-panel-tc {
+.x3-panel-tc {
 	background: transparent repeat-x 0 0;
 	overflow:hidden;
 }
 
 /* fix ie7 strict mode bug */
-.ext-strict .ext-ie7 .x-panel-tc {
+.ext3-strict .ext3-ie7 .x3-panel-tc {
     overflow: visible;
 }
 
-.x-panel-tl {
+.x3-panel-tl {
 	background: transparent no-repeat 0 0;
 	padding-left:6px;
     zoom:1;
     border-bottom:1px solid;
 }
 
-.x-panel-tr {
+.x3-panel-tr {
 	background: transparent no-repeat right 0;
 	zoom:1;
     padding-right:6px;
 }
 
-.x-panel-bc {
+.x3-panel-bc {
 	background: transparent repeat-x 0 bottom;
     zoom:1;
 }
 
-.x-panel-bc .x-panel-footer {
+.x3-panel-bc .x3-panel-footer {
     zoom:1;
 }
 
-.x-panel-bl {
+.x3-panel-bl {
 	background: transparent no-repeat 0 bottom;
 	padding-left:6px;
     zoom:1;
 }
 
-.x-panel-br {
+.x3-panel-br {
 	background: transparent no-repeat right bottom;
 	padding-right:6px;
     zoom:1;
 }
 
-.x-panel-mc {
+.x3-panel-mc {
     border:0 none;
     padding:0;
     margin:0;
     padding-top:6px;
 }
 
-.x-panel-mc .x-panel-body {
+.x3-panel-mc .x3-panel-body {
     background-color:transparent;
     border: 0 none;
 }
 
-.x-panel-ml {
+.x3-panel-ml {
 	background: repeat-y 0 0;
 	padding-left:6px;
     zoom:1;
 }
 
-.x-panel-mr {
+.x3-panel-mr {
 	background: transparent repeat-y right 0;
 	padding-right:6px;
     zoom:1;
 }
 
-.x-panel-bc .x-panel-footer {
+.x3-panel-bc .x3-panel-footer {
     padding-bottom:6px;
 }
 
-.x-panel-nofooter .x-panel-bc, .x-panel-nofooter .x-window-bc {
+.x3-panel-nofooter .x3-panel-bc, .x3-panel-nofooter .x3-window-bc {
 	height:6px;
     font-size:0;
     line-height:0;
 }
 
-.x-panel-bwrap {
+.x3-panel-bwrap {
     overflow:hidden;
     zoom:1;
     left:0;
     top:0;
 }
-.x-panel-body {
+.x3-panel-body {
     overflow:hidden;
     zoom:1;
 }
 
-.x-panel-collapsed .x-resizable-handle{
+.x3-panel-collapsed .x3-resizable-handle{
     display:none;
 }
 
-.ext-gecko .x-panel-animated div {
+.ext3-gecko .x3-panel-animated div {
     overflow:hidden !important;
 }
 
 /* Plain */
-.x-plain-body {
+.x3-plain-body {
     overflow:hidden;
 }
 
-.x-plain-bbar .x-toolbar {
-    overflow:hidden;
-    padding:2px;
-}
-
-.x-plain-tbar .x-toolbar {
+.x3-plain-bbar .x3-toolbar {
     overflow:hidden;
     padding:2px;
 }
 
-.x-plain-bwrap {
+.x3-plain-tbar .x3-toolbar {
+    overflow:hidden;
+    padding:2px;
+}
+
+.x3-plain-bwrap {
     overflow:hidden;
     zoom:1;
 }
 
-.x-plain {
+.x3-plain {
     overflow:hidden;
 }
 
 /* Tools */
-.x-tool {
+.x3-tool {
     overflow:hidden;
     width:15px;
     height:15px;
@@ -203,217 +203,217 @@
 }
 
 /* expand / collapse tools */
-.x-tool-toggle {
+.x3-tool-toggle {
     background-position:0 -60px;
 }
 
-.x-tool-toggle-over {
+.x3-tool-toggle-over {
     background-position:-15px -60px;
 }
 
-.x-panel-collapsed .x-tool-toggle {
+.x3-panel-collapsed .x3-tool-toggle {
     background-position:0 -75px;
 }
 
-.x-panel-collapsed .x-tool-toggle-over {
+.x3-panel-collapsed .x3-tool-toggle-over {
     background-position:-15px -75px;
 }
 
 
-.x-tool-close {
+.x3-tool-close {
     background-position:0 -0;
 }
 
-.x-tool-close-over {
+.x3-tool-close-over {
     background-position:-15px 0;
 }
 
-.x-tool-minimize {
+.x3-tool-minimize {
     background-position:0 -15px;
 }
 
-.x-tool-minimize-over {
+.x3-tool-minimize-over {
     background-position:-15px -15px;
 }
 
-.x-tool-maximize {
+.x3-tool-maximize {
     background-position:0 -30px;
 }
 
-.x-tool-maximize-over {
+.x3-tool-maximize-over {
     background-position:-15px -30px;
 }
 
-.x-tool-restore {
+.x3-tool-restore {
     background-position:0 -45px;
 }
 
-.x-tool-restore-over {
+.x3-tool-restore-over {
     background-position:-15px -45px;
 }
 
-.x-tool-gear {
+.x3-tool-gear {
     background-position:0 -90px;
 }
 
-.x-tool-gear-over {
+.x3-tool-gear-over {
     background-position:-15px -90px;
 }
 
-.x-tool-prev {
+.x3-tool-prev {
     background-position:0 -105px;
 }
 
-.x-tool-prev-over {
+.x3-tool-prev-over {
     background-position:-15px -105px;
 }
 
-.x-tool-next {
+.x3-tool-next {
     background-position:0 -120px;
 }
 
-.x-tool-next-over {
+.x3-tool-next-over {
     background-position:-15px -120px;
 }
 
-.x-tool-pin {
+.x3-tool-pin {
     background-position:0 -135px;
 }
 
-.x-tool-pin-over {
+.x3-tool-pin-over {
     background-position:-15px -135px;
 }
 
-.x-tool-unpin {
+.x3-tool-unpin {
     background-position:0 -150px;
 }
 
-.x-tool-unpin-over {
+.x3-tool-unpin-over {
     background-position:-15px -150px;
 }
 
-.x-tool-right {
+.x3-tool-right {
     background-position:0 -165px;
 }
 
-.x-tool-right-over {
+.x3-tool-right-over {
     background-position:-15px -165px;
 }
 
-.x-tool-left {
+.x3-tool-left {
     background-position:0 -180px;
 }
 
-.x-tool-left-over {
+.x3-tool-left-over {
     background-position:-15px -180px;
 }
 
-.x-tool-down {
+.x3-tool-down {
     background-position:0 -195px;
 }
 
-.x-tool-down-over {
+.x3-tool-down-over {
     background-position:-15px -195px;
 }
 
-.x-tool-up {
+.x3-tool-up {
     background-position:0 -210px;
 }
 
-.x-tool-up-over {
+.x3-tool-up-over {
     background-position:-15px -210px;
 }
 
-.x-tool-refresh {
+.x3-tool-refresh {
     background-position:0 -225px;
 }
 
-.x-tool-refresh-over {
+.x3-tool-refresh-over {
     background-position:-15px -225px;
 }
 
-.x-tool-plus {
+.x3-tool-plus {
     background-position:0 -240px;
 }
 
-.x-tool-plus-over {
+.x3-tool-plus-over {
     background-position:-15px -240px;
 }
 
-.x-tool-minus {
+.x3-tool-minus {
     background-position:0 -255px;
 }
 
-.x-tool-minus-over {
+.x3-tool-minus-over {
     background-position:-15px -255px;
 }
 
-.x-tool-search {
+.x3-tool-search {
     background-position:0 -270px;
 }
 
-.x-tool-search-over {
+.x3-tool-search-over {
     background-position:-15px -270px;
 }
 
-.x-tool-save {
+.x3-tool-save {
     background-position:0 -285px;
 }
 
-.x-tool-save-over {
+.x3-tool-save-over {
     background-position:-15px -285px;
 }
 
-.x-tool-help {
+.x3-tool-help {
     background-position:0 -300px;
 }
 
-.x-tool-help-over {
+.x3-tool-help-over {
     background-position:-15px -300px;
 }
 
-.x-tool-print {
+.x3-tool-print {
     background-position:0 -315px;
 }
 
-.x-tool-print-over {
+.x3-tool-print-over {
     background-position:-15px -315px;
 }
 
-.x-tool-expand {
+.x3-tool-expand {
     background-position:0 -330px;
 }
 
-.x-tool-expand-over {
+.x3-tool-expand-over {
     background-position:-15px -330px;
 }
 
-.x-tool-collapse {
+.x3-tool-collapse {
     background-position:0 -345px;
 }
 
-.x-tool-collapse-over {
+.x3-tool-collapse-over {
     background-position:-15px -345px;
 }
 
-.x-tool-resize {
+.x3-tool-resize {
     background-position:0 -360px;
 }
 
-.x-tool-resize-over {
+.x3-tool-resize-over {
     background-position:-15px -360px;
 }
 
-.x-tool-move {
+.x3-tool-move {
     background-position:0 -375px;
 }
 
-.x-tool-move-over {
+.x3-tool-move-over {
     background-position:-15px -375px;
 }
 
 /* Ghosting */
-.x-panel-ghost {
+.x3-panel-ghost {
     z-index:12000;
     overflow:hidden;
     position:absolute;
@@ -423,7 +423,7 @@
     filter:alpha(opacity=65);
 }
 
-.x-panel-ghost ul {
+.x3-panel-ghost ul {
     margin:0;
     padding:0;
     overflow:hidden;
@@ -434,60 +434,60 @@
     display:block;
 }
 
-.x-panel-ghost * {
+.x3-panel-ghost * {
     cursor:move !important;
 }
 
-.x-panel-dd-spacer {
+.x3-panel-dd-spacer {
     border:2px dashed;
 }
 
 /* Buttons */
-.x-panel-btns {
+.x3-panel-btns {
     padding:5px;
     overflow:hidden;
 }
 
-.x-panel-btns td.x-toolbar-cell{
+.x3-panel-btns td.x3-toolbar-cell{
 	padding:3px;
 }
 
-.x-panel-btns .x-btn-focus .x-btn-left{
+.x3-panel-btns .x3-btn-focus .x3-btn-left{
 	background-position:0 -147px;
 }
 
-.x-panel-btns .x-btn-focus .x-btn-right{
+.x3-panel-btns .x3-btn-focus .x3-btn-right{
 	background-position:0 -168px;
 }
 
-.x-panel-btns .x-btn-focus .x-btn-center{
+.x3-panel-btns .x3-btn-focus .x3-btn-center{
 	background-position:0 -189px;
 }
 
-.x-panel-btns .x-btn-over .x-btn-left{
+.x3-panel-btns .x3-btn-over .x3-btn-left{
 	background-position:0 -63px;
 }
 
-.x-panel-btns .x-btn-over .x-btn-right{
+.x3-panel-btns .x3-btn-over .x3-btn-right{
 	background-position:0 -84px;
 }
 
-.x-panel-btns .x-btn-over .x-btn-center{
+.x3-panel-btns .x3-btn-over .x3-btn-center{
 	background-position:0 -105px;
 }
 
-.x-panel-btns .x-btn-click .x-btn-center{
+.x3-panel-btns .x3-btn-click .x3-btn-center{
 	background-position:0 -126px;
 }
 
-.x-panel-btns .x-btn-click  .x-btn-right{
+.x3-panel-btns .x3-btn-click  .x3-btn-right{
 	background-position:0 -84px;
 }
 
-.x-panel-btns .x-btn-click .x-btn-left{
+.x3-panel-btns .x3-btn-click .x3-btn-left{
 	background-position:0 -63px;
 }
 
-.x-panel-fbar td,.x-panel-fbar span,.x-panel-fbar input,.x-panel-fbar div,.x-panel-fbar select,.x-panel-fbar label{
+.x3-panel-fbar td,.x3-panel-fbar span,.x3-panel-fbar input,.x3-panel-fbar div,.x3-panel-fbar select,.x3-panel-fbar label{
 	white-space: nowrap;
 }

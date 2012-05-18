@@ -1,13 +1,13 @@
-Ext.namespace("Ext.ux.grid");
+Ext3.namespace("Ext3.ux.grid");
 
 /**
- * @class Ext.ux.grid.GridHeaderFilters
- * @extends Ext.util.Observable
+ * @class Ext3.ux.grid.GridHeaderFilters
+ * @extends Ext3.util.Observable
  * 
  * Plugin that enables filters in columns headers.
  * 
  * To add a grid header filter, put the "filter" attribute in column configuration of the grid column model.
- * This attribute is the configuration of the Ext.form.Field to use as filter in the header or an array of fields configurations.<br>
+ * This attribute is the configuration of the Ext3.form.Field to use as filter in the header or an array of fields configurations.<br>
  * <br>
  * The filter configuration object can include some special attributes to manage filter configuration:
  * <ul>
@@ -22,7 +22,7 @@ Ext.namespace("Ext.ux.grid");
  * <li><code>applyFilterEvent</code></li>: a string that specifies the event that starts filter application for this filter field. If not specified, the "applyMode" is used. (since 1.0.10)</li>
  *	</ul>
  * <br>
- * Filter fields are rendered in the header cells within an <code>Ext.Panel</code> with <code>layout='form'</code>.<br>
+ * Filter fields are rendered in the header cells within an <code>Ext3.Panel</code> with <code>layout='form'</code>.<br>
  * For each filter you can specify <code>fieldLabel</code> or other values supported by this layout type.<br>
  * You can also override panel configuration using <code>containerConfig</code> attribute.<br>
  * <br>
@@ -40,9 +40,9 @@ Ext.namespace("Ext.ux.grid");
  * @author Damiano Zucconi - http://www.isipc.it
  * @version 2.0.6 - 03/03/2011
  */
-Ext.ux.grid.GridHeaderFilters = function(cfg){if(cfg) Ext.apply(this, cfg);};
+Ext3.ux.grid.GridHeaderFilters = function(cfg){if(cfg) Ext3.apply(this, cfg);};
 	
-Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable, 
+Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable, 
 {
 	/**
 	 * @cfg {Number} fieldHeight
@@ -77,7 +77,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	
 	/**
 	 * @cfg {Boolean} stateful
-	 * Enable or disable filters save and restore through enabled Ext.state.Provider
+	 * Enable or disable filters save and restore through enabled Ext3.state.Provider
 	 */
 	stateful: true,
 	
@@ -87,7 +87,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	 * If set to "enter" the filters are applied only when user push "ENTER" on filter field.<br> 
 	 * See also <code>applyFilterEvent</code> in columnmodel filter configuration: if this option is specified in
 	 * filter configuration, <code>applyMode</code> value will be ignored and filter will be applied on specified event.
-	 * @since Ext.ux.grid.GridHeaderFilters 1.0.6
+	 * @since Ext3.ux.grid.GridHeaderFilters 1.0.6
 	 */
 	applyMode: "auto",
 	
@@ -97,7 +97,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	 * its attributes values overrides the corresponding filter values loaded from grid status or <code>value</code> specified in column model filter configuration.<br>
 	 * Values specified into column model configuration (filter <code>value</code> attribute) are ignored if this object is specified.<br>
 	 * See <code>filtersInitMode</code> to understand how these values are mixed with values loaded from grid status.
-	 * @since Ext.ux.grid.GridHeaderFilters 1.0.9
+	 * @since Ext3.ux.grid.GridHeaderFilters 1.0.9
 	 */
 	filters: null,
 	
@@ -123,7 +123,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	
 	/**
 	 * @cfg {Object} containerConfig
-	 * Base configuration for filters container of each column. With this attribute you can override filters <code>Ext.Container</code> configuration.
+	 * Base configuration for filters container of each column. With this attribute you can override filters <code>Ext3.Container</code> configuration.
 	 */
 	containerConfig: null,
 	
@@ -139,7 +139,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	
 	filterContainers: null,
 	
-	filterContainerCls: 'x-ghf-filter-container',
+	filterContainerCls: 'x3-ghf-filter-container',
 	
 	//kirov - признак того что идет изменение размеров колонок
 	inResizeProcess: false,
@@ -179,7 +179,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
       * <b>Event enabled on the GridPanel</b>: fired when a filter is updated
       * @param {String} name Filter name
       * @param {Object} value Filter value
-      * @param {Ext.form.Field} el Filter field
+      * @param {Ext3.form.Field} el Filter field
       */	
 		'filterupdate');
 		
@@ -187,30 +187,30 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 			/**
 	      * @event render
 	      * Fired when filters render on grid header is completed
-	      * @param {Ext.ux.grid.GridHeaderFilters} this
+	      * @param {Ext3.ux.grid.GridHeaderFilters} this
 	      */	
 			{'render': true}
 		);
 		
 		//Must ignore filter config value ?
-		this.cfgFilterInit = Ext.isDefined(this.filters) && this.filters !== null;
+		this.cfgFilterInit = Ext3.isDefined(this.filters) && this.filters !== null;
 		if(!this.filters)
 			this.filters = {};
 		
 		//Configuring filters
 		this.configure(this.grid.getColumnModel());
 			
-		Ext.ux.grid.GridHeaderFilters.superclass.constructor.call(this);
+		Ext3.ux.grid.GridHeaderFilters.superclass.constructor.call(this);
 		
 		if(this.stateful)
 		{
-			if(!Ext.isArray(this.grid.stateEvents))
+			if(!Ext3.isArray(this.grid.stateEvents))
 				this.grid.stateEvents = [];
 			this.grid.stateEvents.push('filterupdate');
 		}
 		
 		//Enable new grid methods
-		Ext.apply(this.grid, {
+		Ext3.apply(this.grid, {
 			headerFilters: this,
 			getHeaderFilter: function(sName){
 				if(!this.headerFilters)
@@ -264,7 +264,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 				for(var fn in this.headerFilters.filterFields)
 				{
 					var el = this.headerFilters.filterFields[fn];
-					if(Ext.isFunction(el.clearValue)) 
+					if(Ext3.isFunction(el.clearValue)) 
 					{
 						el.clearValue();
 					} 
@@ -290,13 +290,13 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	/**
 	 * @private
 	 * Configures filters and containers starting from grid ColumnModel
-	 * @param {Ext.grid.ColumnModel} cm The column model to use
+	 * @param {Ext3.grid.ColumnModel} cm The column model to use
 	 */
 	configure: function(cm)
 	{
 		/*Filters config*/
 		var filteredColumns = cm.getColumnsBy(function(cc){
-			if(Ext.isObject(cc.filter) || Ext.isArray(cc.filter))
+			if(Ext3.isObject(cc.filter) || Ext3.isArray(cc.filter))
 				return true;
 			else
 				return false;
@@ -308,24 +308,24 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		{
 			var co = filteredColumns[i];
 			var fca = co.filter;
-			if(!Ext.isArray(fca))
+			if(!Ext3.isArray(fca))
 				fca = [fca];
 			for(var ci = 0; ci < fca.length; ci++)
 			{
-				var fc = Ext.apply({
+				var fc = Ext3.apply({
 					filterName: ci > 0 ? co.dataIndex+ci : co.dataIndex
 				},fca[ci]);
-				Ext.apply(fc, {
+				Ext3.apply(fc, {
 					columnId: co.id,
 					dataIndex: co.dataIndex,
-					//hideLabel: Ext.isEmpty(fc.fieldLabel),
+					//hideLabel: Ext3.isEmpty(fc.fieldLabel),
 					hideLabel: true,
 					anchor: '100%'
 				});
 				
-				if(!this.cfgFilterInit && !Ext.isEmpty(fc.value))
+				if(!this.cfgFilterInit && !Ext3.isEmpty(fc.value))
 				{
-					this.filters[fc.filterName] = Ext.isFunction(fc.filterEncoder) ? fc.filterEncoder.call(this, fc.value) : fc.value;
+					this.filters[fc.filterName] = Ext3.isFunction(fc.filterEncoder) ? fc.filterEncoder.call(this, fc.value) : fc.value;
 				}
 				delete fc.value;
 				
@@ -342,7 +342,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 				else
 				{
 					//applyMode: auto o enter
-					if(this.applyMode === 'auto' || this.applyMode === 'change' || Ext.isEmpty(this.applyMode))
+					if(this.applyMode === 'auto' || this.applyMode === 'change' || Ext3.isEmpty(this.applyMode))
 					{
 						//Legacy mode and deprecated. Use applyMode = "enter" or applyFilterEvent
 						// kirov - через листенеры удобно новые объекты делать, иначе через события
@@ -444,7 +444,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 						items: []
 					};
 					if(this.containerConfig)
-						Ext.apply(containerCfg, this.containerConfig);
+						Ext3.apply(containerCfg, this.containerConfig);
 					this.fcc[fc.columnId] = containerCfg;
 				}
 				// kirov - для hbox лучше использовать еще один контейнер
@@ -472,14 +472,14 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		var ci = this.grid.getColumnModel().getIndexById(columnId);
 		//Header TD
 		var td = this.grid.getView().getHeaderCell(ci);
-		td = Ext.get(td);
+		td = Ext3.get(td);
 		//Patch for field text selection on Mozilla
-		if(Ext.isGecko)
+		if(Ext3.isGecko)
 			td.dom.style.MozUserSelect = "text";
 		td.dom.style.verticalAlign = 'top';
 		//Render filter container
 		fcc.width = td.getWidth() - 3;
-		var fc = new Ext.Container(fcc);
+		var fc = new Ext3.Container(fcc);
 		fc.render(td);
 		//Container cache
 		this.filterContainers[columnId] = fc;
@@ -487,15 +487,15 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		var height = 0;
 		if(!this.filterFields)
 			this.filterFields = {};
-		var fields = fc.findBy(function(cmp){return !Ext.isEmpty(cmp.filterName);});
-		if(!Ext.isEmpty(fields))
+		var fields = fc.findBy(function(cmp){return !Ext3.isEmpty(cmp.filterName);});
+		if(!Ext3.isEmpty(fields))
 		{
 			for(var i=0;i<fields.length;i++)
 			{
 				var filterName = fields[i].filterName;
 				/*if(this.filterFields[filterName])
 				{
-					//Ext.destroy(this.filterFields[filterName])
+					//Ext3.destroy(this.filterFields[filterName])
 					delete this.filterFields[filterName];
 				}*/
 				this.filterFields[filterName] = fields[i];
@@ -557,7 +557,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 			{
 				var field = this.filterFields[fn];
 				var value = this.filters[field.filterName];
-				if(Ext.isEmpty(value))
+				if(Ext3.isEmpty(value))
 				{
 					if(clear)
 						this.setFieldValue(field, '');
@@ -602,7 +602,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		var n = this.grid.getColumnModel().getColumnCount();
 		for(var i=0; i<n; i++) {
 			var td = this.grid.getView().getHeaderCell(i);
-			td = Ext.get(td);
+			td = Ext3.get(td);
 			this.onColResize(i, td.getWidth());
 		}
 		this.inResizeProcess = false; // kirov
@@ -641,7 +641,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 			if(this.cfgFilterInit)
 			{					
 				if(this.filtersInitMode === 'merge')
-					Ext.apply(vals,this.filters);
+					Ext3.apply(vals,this.filters);
 			}
 			else
 				this.filters = vals;
@@ -652,7 +652,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	{
 		for(var k in this.filters)
 		{
-			if(/*this.filterFields && this.filterFields[k] && */!Ext.isEmpty(this.filters[k]))
+			if(/*this.filterFields && this.filterFields[k] && */!Ext3.isEmpty(this.filters[k]))
 				return true;
 		}
 		return false;
@@ -667,8 +667,8 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		if(!this.grid.getView().mainHd)
 			return;
 			
-		// var tr = this.grid.getView().mainHd.child('.x-grid3-hd-row');
-		// if(!Ext.isEmpty(this.highlightCls))
+		// var tr = this.grid.getView().mainHd.child('.x3-grid3-hd-row');
+		// if(!Ext3.isEmpty(this.highlightCls))
 		// {
 			// if(enable)
 				// tr.addClass(this.highlightCls);
@@ -681,8 +681,8 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		// }
 		// for(var i=0; i < this.grid.getColumnModel().getColumnCount(); i++) 
 		// {
-			// var hc = Ext.get(this.grid.getView().getHeaderCell(i));
-			// if(!Ext.isEmpty(this.highlightCls))
+			// var hc = Ext3.get(this.grid.getView().getHeaderCell(i));
+			// if(!Ext3.isEmpty(this.highlightCls))
 			// {
 				// if(enable)
 					// hc.addClass(this.highlightCls);
@@ -700,7 +700,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 			var fc = this.filterContainers[fn];
 			if(fc.rendered)
 			{
-				if(!Ext.isEmpty(this.highlightCls))
+				if(!Ext3.isEmpty(this.highlightCls))
 				{
 					if(enable)
 						fc.getEl().addClass(this.highlightCls);
@@ -715,7 +715,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	
 	getFieldValue: function(eField)
 	{
-		if(Ext.isFunction(eField.filterEncoder))
+		if(Ext3.isFunction(eField.filterEncoder))
 			return eField.filterEncoder.call(eField, eField.getValue());
 		else
 			return eField.getValue();
@@ -723,7 +723,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 	
 	setFieldValue: function(eField, value)
 	{
-		if(Ext.isFunction(eField.filterDecoder))
+		if(Ext3.isFunction(eField.filterDecoder))
 			value = eField.filterDecoder.call(eField, value);
 		eField.setValue(value);
 	},
@@ -738,12 +738,12 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		if(!el.isValid())
 			return;
 			
-		if(el.disabled && !Ext.isDefined(this.grid.store.baseParams[el.filterName]))
+		if(el.disabled && !Ext3.isDefined(this.grid.store.baseParams[el.filterName]))
 			return;
 		
 		var sValue = this.getFieldValue(el);
 		
-		if(el.disabled || Ext.isEmpty(sValue))
+		if(el.disabled || Ext3.isEmpty(sValue))
 		{
 			delete this.grid.store.baseParams[el.filterName];
 			delete this.filters[el.filterName];
@@ -804,7 +804,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		{
 			for(var ff in this.filterFields)
 			{
-				Ext.destroy(this.filterFields[ff]);
+				Ext3.destroy(this.filterFields[ff]);
 				delete this.filterFields[ff];
 			}
 		}
@@ -813,7 +813,7 @@ Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable,
 		{
 			for(var ff in this.filterContainers)
 			{
-				Ext.destroy(this.filterContainers[ff]);
+				Ext3.destroy(this.filterContainers[ff]);
 				delete this.filterContainers[ff];
 			}
 		}

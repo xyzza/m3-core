@@ -2,7 +2,7 @@
  * Окно показа контекстной помощи
  */
 
-Ext.m3.HelpWindow = Ext.extend(Ext.Window, {
+Ext3.m3.HelpWindow = Ext3.extend(Ext3.Window, {
     constructor: function(baseConfig, params){
         this.title = 'Справочная информация';
         this.maximized = true;
@@ -11,7 +11,7 @@ Ext.m3.HelpWindow = Ext.extend(Ext.Window, {
         this.width=800;
         this.height=550;
 
-    Ext.m3.HelpWindow.superclass.constructor.call(this, baseConfig);
+    Ext3.m3.HelpWindow.superclass.constructor.call(this, baseConfig);
   }
 });
 

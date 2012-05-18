@@ -115,7 +115,7 @@ class XMLResult(ActionResult):
 class ExtAdvancedTreeGridDataQueryResult(ActionResult):
     '''
     Результат выполнения операции в формате, удобным для отображения в 
-    Ext.m3.AdvancedTreeGrid
+    Ext3.m3.AdvancedTreeGrid
     '''
     def __init__(self, data=None, start = -1, limit = -1):
         super(ExtAdvancedTreeGridDataQueryResult, self).__init__(data)
