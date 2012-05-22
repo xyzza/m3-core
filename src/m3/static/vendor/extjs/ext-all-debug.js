@@ -5756,7 +5756,7 @@ Ext3.apply(Ext3, function(){
 
         
         BLANK_IMAGE_URL : Ext3.isIE6 || Ext3.isIE7 || Ext3.isAir ?
-                            'http:/' + '/www.extjs.com/s.gif' :
+                            'resources/images/defaut/s.gif' :
                             'data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
 
         extendX : function(supr, fn){
@@ -37219,7 +37219,7 @@ var swfobject = function() {
         OBJECT = "object",
         SHOCKWAVE_FLASH = "Shockwave Flash",
         SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash",
-        FLASH_MIME_TYPE = "application/x3-shockwave-flash",
+        FLASH_MIME_TYPE = "application/x-shockwave-flash",
         EXPRESS_INSTALL_ID = "SWFObjectExprInst",
         ON_READY_STATE_CHANGE = "onreadystatechange",
         
