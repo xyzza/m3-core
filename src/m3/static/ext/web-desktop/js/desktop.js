@@ -810,7 +810,6 @@ Ext3.Desktop = function(app){
         renderTo: 'x3-desktop'
     });
 
-    var windows = new Ext3.WindowGroup();
     var activeWindow;
 
     var toptoolbarEl = Ext3.get('ux-toptoolbar');
@@ -931,8 +930,10 @@ Ext3.Desktop = function(app){
         //win.cmenu = new Ext3.menu.Menu({
         //    items: []
         //});
-
-        win.animateTarget = win.taskButton.el;
+	win.manager = Ext3.WindowMgr;
+	// для ExtJS4 надо регистрировать
+        win.manager.register(win);
+        win.animateTarget = win.taskButton;
 
         win.on({
             'activate': {
@@ -957,11 +958,11 @@ Ext3.Desktop = function(app){
     };
 
     this.getManager = function(){
-        return windows;
+        return Ext3.WindowMgr;
     };
 
     this.getWindow = function(id){
-        return windows.get(id);
+        return Ext3.WindowMgr.get(id);
     }
 
     this.getWinWidth = function(){
