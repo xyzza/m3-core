@@ -380,10 +380,15 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
 
         # Стиль заголовка колонки. Применяется ко всем колонкам. Например: 'text-align: center;'
         self.header_style = ''
+
+        # Url для пака
+        self.url_data = None
         
         self.init_component()
 
     def render(self):
+        self.store.url = self.store.url or         self.store.url = self.store.url or self.url_data
+
         assert self.store.url or self.action_data, 'Action data is not defined'                
         # тонкая настройка self.store
         if not self.store.url and self.action_data:
