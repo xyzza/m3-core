@@ -37,30 +37,43 @@ def apply_sort_order(query, columns, sort_order):
     return query
 
 def create_search_filter(filter_text, fields):
-    '''
-    Фильтрация производится по полям списку полей fields и введеному пользователем тексту filter_text.
-    Пример:
-        fields = ['name', 'family']
-        filter_text = u'Вася Пупкин'
-    Получится условие WHERE:
-        (name like 'Вася' AND name like 'Пупкин') OR (family like 'Вася' AND family like 'Пупкин') OR
-        ((name like 'Вася' and family like 'Пупкин') OR (name like 'Пупкин' and family like 'Вася'))
+    """
+    Фильтрация производится по списку полей fields и введеному пользователем тексту filter_text.
+    Возможны два варианта работы.
+    1) Если количество слов в запросе <= WORDS_LIMIT, то работаем по следующей схеме
+        Пример:
+            fields = ['name', 'family']
+            filter_text = u'Вася Пупкин'
+        Получится условие WHERE:
+            (name like 'Вася' AND name like 'Пупкин') OR (family like 'Вася' AND family like 'Пупкин') OR
+            ((name like 'Вася' and family like 'Пупкин') OR (name like 'Пупкин' and family like 'Вася'))
+    2) Если количество слов в запросе > WORDS_LIMIT, то работаем по следующей схеме
+        Пример:
+            fields = ['name', 'family']
+            filter_text = u'Вася Пупкин Иванович Васильевич Третий'
+        Получится условие WHERE:
+            ((name like 'Вася Пупкин Иванович Васильевич Третий') OR (family like
+                'Вася Пупкин Иванович Васильевич Третий'))
     В случае если нет полей для поиска и выражение Q не сформировалось возвращает None
-    '''
+    """
+
+    # Максимальное количество слов в запросе для работы по сценарию 1(полный перебор)
+    WORDS_LIMIT = 3
+
     def create_filter(words,fields):
         #TODO: нужна оптимизация для исключения повторяющихся условий - сейчас условия повторяются
         filter = None
         if not words or not fields:
             return filter
-        
+
         if len(words) == 0 or len(fields) == 0:
             return filter
-        
+
         if len(words) == 1 and len(fields) == 1:
             filter = Q(**{fields.pop() + '__icontains': words.pop()})
             #filter = '('+fields.pop()+'='+words.pop()+')'
             return filter
-        
+
         if len(words) > 0 and len(fields) == 1:
             field = fields.pop()
             for word in words:
@@ -69,7 +82,7 @@ def create_search_filter(filter_text, fields):
                 #fltr = '('+field+'='+word+')'
                 #filter = filter+' and '+fltr if filter else fltr
             return filter
-        
+
         for word in words:
             filtr = None
             for field in fields:
@@ -86,23 +99,34 @@ def create_search_filter(filter_text, fields):
             #filter = '('+filter+' or '+filtr+')' if filter else filtr
         return filter
 
+    condition = None
+
     if filter_text:
-        words = filter_text.strip().split(' ')
+        words = [filter_text]
+        # Если в запросе на поиск <= WORDS_LIMIT слов, то работаем по сценарию 1.
+        # Разбиваем текст запроса на слова и осуществляем перебор.
+        if len(filter_text.strip().split(' ')) <= WORDS_LIMIT:
+            words = filter_text.strip().split(' ')
+
         condition = None
+
+        # Перебираем все поля.
         for field_name in fields:
             field_condition = None
+            # И все слова.
             for word in words:
                 q = Q(**{field_name + '__icontains': word})
-                field_condition = field_condition & q if field_condition else q            
+                field_condition = field_condition & q if field_condition else q
+
             condition = condition | field_condition if condition else field_condition
-        
-        # дополнительное условие, если встречаются объединение слов
-        cond = create_filter(set(words),set(fields))
-        if cond:
-            condition = condition | cond if condition else cond
-        return condition
-    else:
-        return None
+
+        if len(words) <= WORDS_LIMIT:
+            # дополнительное условие, если встречаются объединение слов
+            cond = create_filter(set(words), set(fields))
+            if cond:
+                condition = condition | cond if condition else cond
+
+    return condition
 
 def apply_search_filter(query, filter, fields):
     '''
