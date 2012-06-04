@@ -382,7 +382,7 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
         self.header_style = ''
 
         # Url для пака
-        self.url_data = None
+        self.url_data = self.url_new = self.url_edit = self.url_delete = None
         
         self.init_component()
 
@@ -406,18 +406,23 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
 
     def render_params(self):
         super(ExtMultiGroupinGrid, self).render_params()
-        data_url = get_url(self.action_data) if self.action_data else None
-        new_url = get_url(self.action_new) if self.action_new else None
-        if not self.action_new:
+
+        data_url = self.url_data or (get_url(self.action_data) if self.action_data else None)
+
+        new_url = self.url_new or get_url(self.action_new) if self.action_new else None
+        if not new_url:
             self._top_bar.items.remove(self._top_bar.button_new)
-        edit_url = get_url(self.action_edit) if self.action_edit else None
-        if not self.action_edit:
+
+        edit_url = self.url_edit or (get_url(self.action_edit) if self.action_edit else None)
+        if not edit_url:
             self._top_bar.items.remove(self._top_bar.button_edit)
         else:
             self.handler_dblclick = self.dblclick_handler
-        delete_url = get_url(self.action_delete) if self.action_delete else None
-        if not self.action_delete:
+
+        delete_url = self.url_delete or (get_url(self.action_delete) if self.action_delete else None)
+        if not delete_url:
             self._top_bar.items.remove(self._top_bar.button_delete)
+
         export_url = get_url(self.action_export) if self.action_export else None
         if not self.action_export:
             self._top_bar.items.remove(self._top_bar.button_export)
