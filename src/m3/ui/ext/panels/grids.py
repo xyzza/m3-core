@@ -409,7 +409,7 @@ class ExtMultiGroupinGrid(containers.ExtGrid):
 
         data_url = self.url_data or (get_url(self.action_data) if self.action_data else None)
 
-        new_url = self.url_new or get_url(self.action_new) if self.action_new else None
+        new_url = self.url_new or (get_url(self.action_new) if self.action_new else None)
         if not new_url:
             self._top_bar.items.remove(self._top_bar.button_new)
 
