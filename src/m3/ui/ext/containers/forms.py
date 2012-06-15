@@ -433,7 +433,8 @@ class ExtForm(BaseExtPanel):
             elif isinstance(item, ExtDateField):
                 #TODO уточнить формат дат
                 if val and val.strip():
-                    val = datetime.datetime.strptime(val, '%d.%m.%Y')
+                    d = datetime.datetime.strptime(val, '%d.%m.%Y')
+                    val = d.date()
                 else:
                     val = None
             elif isinstance(item, ExtTimeField):
