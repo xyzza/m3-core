@@ -9,6 +9,8 @@ Created on 27.02.2010
 from django.conf import settings
 from datetime import datetime, date
 
+from helpers import date2str
+
 from base import BaseExtField, BaseExtTriggerField
 
 #===============================================================================        
@@ -103,7 +105,7 @@ class ExtDateField(BaseExtField):
             try:
                 value = self.value.strftime(settings.DATE_FORMAT)
             except:
-                value = self.value.safe_strftime('%d.%m.%Y')
+                value = date2str(self.value)
         else:
             value = self.value
         
