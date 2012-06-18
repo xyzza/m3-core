@@ -103,7 +103,7 @@ class ExtDateField(BaseExtField):
             try:
                 value = self.value.strftime(settings.DATE_FORMAT)
             except:
-                value = self.value.strftime('%d.%m.%Y')
+                value = self.value.safe_strftime('%d.%m.%Y')
         else:
             value = self.value
         
