@@ -9,7 +9,7 @@ Created on 27.02.2010
 from django.conf import settings
 from datetime import datetime, date
 
-from helpers import date2str
+from m3.helpers import date2str
 
 from base import BaseExtField, BaseExtTriggerField
 
