@@ -102,12 +102,7 @@ class ExtDateField(BaseExtField):
     
     def render_base_config(self):
         if isinstance(self.value, datetime) or isinstance(self.value, date):
-            try:
-                value = date2str(self.value, settings.DATE_FORMAT)
-            except:
-                # Здесь мы обрабатываем ошибку, которая может возникнуть, если выше был передан
-                # неверный формат даты. Вызываем функцию с форматом даты по-умолчанию.
-                value = date2str(self.value)
+            value = date2str(self.value, settings.DATE_FORMAT or '%d.%m.%Y')
         else:
             value = self.value
         
