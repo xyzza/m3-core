@@ -232,7 +232,7 @@ class BaseExtComponent(object):
             res = item
         
         elif isinstance(item, datetime.date):
-            res = date2str(item, settings.DATE_FORMAT or '%d.%m.%Y')
+            res = "'%s'" % date2str(item, settings.DATE_FORMAT or '%d.%m.%Y')
         
         elif isinstance(item, dict):
             # рекурсивный обход вложенных свойств
