@@ -17,7 +17,7 @@ from django import template as django_template
 from django.conf import settings
 
 from m3.ui.ext import render_template, render_component
-from m3.helpers import js, generate_client_id, normalize
+from m3.helpers import js, generate_client_id, normalize, date2str
 
 class ExtComponentException(Exception):
     """
@@ -231,11 +231,8 @@ class BaseExtComponent(object):
         elif isinstance(item, (int, float, decimal.Decimal, long)):
             res = item
         
-        elif isinstance(item, datetime.date):    
-            try:
-                res = "'%s'" % item.strftime(settings.DATE_FORMAT)
-            except:
-                res = "'%s'" % item.strftime('%d.%m.%Y')
+        elif isinstance(item, datetime.date):
+            res = date2str(item, settings.DATE_FORMAT or '%d.%m.%Y')
         
         elif isinstance(item, dict):
             # рекурсивный обход вложенных свойств
