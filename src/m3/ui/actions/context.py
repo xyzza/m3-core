@@ -11,7 +11,7 @@ import sys
 
 from django.utils.encoding import force_unicode
 
-from m3.helpers import logger
+from m3.helpers import logger, date2str
 
 
 #==================================== ИСКЛЮЧЕНИЯ ===========================================
@@ -208,10 +208,10 @@ class ActionContext(object):
         '''
         def encoder_extender(obj):
             if isinstance(obj, datetime.datetime):
-                result = obj.strftime('%d.%m.%Y')
+                result = date2str(obj)
             # WTF? А где время в верхней строке?
             if isinstance(obj, datetime.date):
-                result = obj.strftime('%d.%m.%Y')
+                result = date2str(obj)
             elif isinstance(obj, datetime.time):
                 result = obj.strftime('%H:%M')
             else:
