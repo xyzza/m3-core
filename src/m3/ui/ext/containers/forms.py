@@ -18,13 +18,13 @@ from m3.ui.ext.fields.base import BaseExtField
 from m3.ui.ext.fields import (ExtNumberField, 
                               ExtStringField, 
                               ExtDateField,
-                              ExtCheckBox, ExtComboBox, ExtTimeField,
+                              ExtCheckBox, ExtComboBox, ExtTimeField, ExtRadio,
                               ExtHiddenField,
-                              ExtFileUploadField,ExtImageUploadField)
+                              ExtFileUploadField,ExtImageUploadField,
+                              ExtDictSelectField, ExtMultiSelectField)
 
 from base import BaseExtPanel
 from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
-from m3.ui.ext.fields.complex import ExtDictSelectField, ExtMultiSelectField
 from m3.helpers import get_img_size, logger
 from m3.helpers.datastructures import TypedList
 from m3.ui.actions.interfaces import ISelectablePack, IMultiSelectablePack
@@ -144,6 +144,8 @@ class ExtForm(BaseExtPanel):
 
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
+            elif isinstance(item, ExtRadio):
+                item.checked = (new_val == item.value)
             elif isinstance(item, ExtMultiSelectField):
                 # У поля выбора может быть сзязанный с ним пак
                 bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
