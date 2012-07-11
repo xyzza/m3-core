@@ -149,7 +149,7 @@ class ExtForm(BaseExtPanel):
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
             elif isinstance(item, ExtRadio):
-                item.checked = (new_val == item.value)
+                item.checked = (value == item.value)
             elif isinstance(item, ExtMultiSelectField):
                 # У поля выбора может быть сзязанный с ним пак
                 bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
