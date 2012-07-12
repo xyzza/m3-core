@@ -591,8 +591,8 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
             if (!this.hideTriggerDropDown){
                 this.getTrigger(1).show();
             }
-            this.el.setWidth(width-this.getTriggerWidth());
-            if (this.wrap) this.wrap.setWidth(width);
+
+            this.onResize(width);
         }
     }
 });
