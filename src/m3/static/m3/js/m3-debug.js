@@ -7540,8 +7540,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             if (!this.hideTriggerDropDown){
                 this.getTrigger(1).show();
             }
-            this.el.setWidth(width-this.getTriggerWidth());
-            if (this.wrap) this.wrap.setWidth(width);
+
+            this.onResize(width);
         }
     }
 });
@@ -8250,7 +8250,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 			}
 					
 			sender.isModified = false;
-		};
+		}
 		
 		window.updateTitle();
 		sender.updateLabel();
@@ -8299,7 +8299,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
                         window.onChangeFieldValue(scope, newValue, oldValue, window);
                     });
                 }
-			};
+			}
 			if (item.items) {
 				if (!(item.items instanceof Array)) {	
 					item.items.each(function(it){					
@@ -8308,16 +8308,16 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 				} else {
 					for (var i = 0; i < item.items.length; i++) {
 						window.setFieldOnChange(item.items[i], window);
-					};
+					}
 				}
-			};
-			// оказывается есть еще и заголовочные элементы редактирования
+			}
+			//оказывается есть еще и заголовочные элементы редактирования
 			if (item.titleItems) {
 				for (var i = 0; i < item.titleItems.length; i++) {
 					window.setFieldOnChange(item.titleItems[i], window);
-				};
-			};
-		};
+				}
+			}
+		}
 	}
 	
 	/**
@@ -8327,7 +8327,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 		// сохраним оригинальное значение заголовка
 		if (this.title !== this.originalTitle && this.originalTitle === null) {
 			this.originalTitle = this.title;
-		};
+		}
 
 		if (this.changesCount !== 0) {
 			this.setTitle('*'+this.originalTitle);
@@ -8373,7 +8373,7 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	}
     ,disableToolbars: function(disabled){
         var toolbars = [this.getTopToolbar(), this.getFooterToolbar(), 
-                       this.getBottomToolbar()]
+                       this.getBottomToolbar()];
         for (var i=0; i<toolbars.length; i++){
             if (toolbars[i]){
                 toolbars[i].setDisabled(disabled);
