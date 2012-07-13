@@ -609,17 +609,8 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             this.el.setWidth(width);
             if (this.wrap) this.wrap.setWidth(width);
         } else {
-            // покажем нужные триггеры
-            if (this.getValue()) {
-                this.showClearBtn();
-                this.showEditBtn();
-            }
-            if (!this.hideTriggerDictSelect){
-                this.getTrigger(2).show();
-            }
-            if (!this.hideTriggerDropDown){
-                this.getTrigger(1).show();
-            }
+
+            this.showTriggers(!readOnly);
 
             this.onResize(width);
         }
