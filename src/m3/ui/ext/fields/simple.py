@@ -46,7 +46,9 @@ class ExtStringField(BaseExtField):
 
         # Экранирование значений с обратным слешем
         # Кавычки, апострафы, символы переноса строки и т.д. отрежутся функцией normalize в helpers/__init__.py
-        self.value = self.value.replace('\\','\\\\')
+        # TODO нужно разобраться почему иногда по-умолчанию приходит None, вместо пустой строки.
+        if self.value:
+            self.value = self.value.replace('\\','\\\\')
 
         super(ExtStringField, self).render_base_config()
         self._put_config_value('inputType', self.input_type)
