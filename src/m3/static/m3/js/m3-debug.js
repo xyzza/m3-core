@@ -7511,13 +7511,42 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
     },
 
     /**
+     * Отображение(скрытие) основных триггеров: Очистки, редактирования, выбора из справочника и выпадающего списка.
+     * Поведение зависит от выбранного флага show
+     */
+    showTriggers: function(show){
+
+        if (show){
+            if (this.getValue()) {
+                this.showClearBtn();
+                this.showEditBtn();
+            }
+            if (!this.hideTriggerDictSelect){
+                this.getTrigger(2).show();
+            }
+            if (!this.hideTriggerDropDown){
+                this.getTrigger(1).show();
+            }
+        }else{
+            this.hideClearBtn();
+            this.hideEditBtn();
+            this.getTrigger(2).hide();
+            this.getTrigger(1).hide();
+        }
+    },
+
+    /**
      * При изменении доступности поля, нужно также поменять доступность всех его кнопок
      */
     setDisabled: function(disabled){
+
         this.disableTriggers(disabled);
         Ext3.m3.AdvancedComboBox.superclass.setDisabled.call(this, disabled);
-    },
 
+        // Отображаем триггеры при disabled=false, т.е. поле вновь активно.
+        this.showTriggers(!disabled);
+     },
+     
     /**
      * При изменении доступности поля, нужно также поменять доступность всех его кнопок
      */
@@ -7529,17 +7558,8 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
             this.el.setWidth(width);
             if (this.wrap) this.wrap.setWidth(width);
         } else {
-            // покажем нужные триггеры
-            if (this.getValue()) {
-                this.showClearBtn();
-                this.showEditBtn();
-            }
-            if (!this.hideTriggerDictSelect){
-                this.getTrigger(2).show();
-            }
-            if (!this.hideTriggerDropDown){
-                this.getTrigger(1).show();
-            }
+
+            this.showTriggers(!readOnly);
 
             this.onResize(width);
         }
