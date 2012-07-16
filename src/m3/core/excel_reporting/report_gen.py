@@ -106,7 +106,7 @@ def make_report_from_json_string(json_str):
     '''
     # При передаче данных через стандартные потоки ввода/вывода
     # важно кодировать/декодировать в кодировку консоли
-    if getattr(sys.stdout, 'encoding', None):
+    if hasattr(sys.stdout, 'encoding'):
         encoding_name = sys.stdout.encoding
     else:
         # Под нормальным сервером перекодировка не нужна
