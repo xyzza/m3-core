@@ -1473,6 +1473,20 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
             if (index + this.ds.bufferSize >= this.ds.totalLength) {
                 return this.ds.totalLength - this.ds.bufferSize;
             }
+
+            // Для того, чтобы запрос на обновление грида не зацикливался, необходимо чтобы
+            // размер буфера как минимум в два раза превосходил количество строк отображенных в гриде.
+            // Если этого не произошло сообщаем об этом.
+            if (Math.round(this.ds.bufferSize/2) < this.visibleRows){
+                Ext.Msg.show({
+                    title: 'Внимание',
+                    msg: 'Для корректной работы необходимо изменить размер буфера',
+                    buttons: Ext.Msg.OK
+                });
+
+                throw new Error('Увеличьте размер буфера');
+            }
+
             // we need at last to render the index + the visible Rows
             return Math.max(0, (index + this.visibleRows) - Math.round(this.ds.bufferSize/2));
         }
