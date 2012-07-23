@@ -1509,10 +1509,10 @@ Ext3.extend(Ext3.ux.grid.livegrid.GridView, Ext3.grid.GridView, {
             // размер буфера как минимум в два раза превосходил количество строк отображенных в гриде.
             // Если этого не произошло сообщаем об этом.
             if (Math.round(this.ds.bufferSize/2) < this.visibleRows){
-                Ext.Msg.show({
+                Ext3.Msg.show({
                     title: 'Внимание',
                     msg: 'Для корректной работы необходимо изменить размер буфера',
-                    buttons: Ext.Msg.OK
+                    buttons: Ext3.Msg.OK
                 });
 
                 throw new Error('Увеличьте размер буфера');
