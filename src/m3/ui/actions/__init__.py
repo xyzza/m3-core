@@ -467,7 +467,15 @@ class ActionController(object):
         '''
         # проверим что права на выполнение есть
         if not action.has_permission(request.user, request):
-            return OperationResult.by_message(u'У вас нет прав на выполнение этого действия!')
+
+            # Стандартное сообщение об отсутствии прав
+            msg = u'У вас нет прав на выполнение этого действия!'
+
+            # Если разработчик указал verbose_name у action-а, то добавляем название действия
+            if action.verbose_name:
+                msg = ' '.join([msg, u'Действие:', action.verbose_name])
+
+            return OperationResult.by_message(msg)
         
         # Заполняем контект
         rules = action.context_declaration()
