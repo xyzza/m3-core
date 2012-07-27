@@ -1,4 +1,4 @@
-LiveMessages = {};
+Ext.namespace('Ext.ux');
 
 /**
  * Notification окна оповещения, создает цепочку окон оповещения с автоскрытием
@@ -7,11 +7,11 @@ LiveMessages = {};
  *  html - содержание,
  *  iconCls - иконка
  */
-LiveMessages.NotificationMgr = {
+Ext.ux.NotificationMgr = {
     notifications: [],
     originalBodyOverflowY: null
 };
-LiveMessages.Notification = Ext.extend(Ext.Window, {
+Ext.ux.Notification = Ext.extend(Ext.Window, {
     initComponent: function () {
         // TODO: Параметры не перекрываются если наследоваться от этого объекта.
         Ext.apply(this, {
@@ -30,17 +30,17 @@ LiveMessages.Notification = Ext.extend(Ext.Window, {
         } else {
             this.closable = true;
         }
-        LiveMessages.Notification.superclass.initComponent.apply(this);
+        Ext.ux.Notification.superclass.initComponent.apply(this);
     },
     setMessage: function (msg) {
         this.body.update(msg);
     },
     setTitle: function (title, iconCls) {
-        LiveMessages.Notification.superclass.setTitle.call(this, title, iconCls || this.iconCls);
+        Ext.ux.Notification.superclass.setTitle.call(this, title, iconCls || this.iconCls);
     },
     onDestroy: function () {
-        LiveMessages.NotificationMgr.notifications.remove(this);
-        LiveMessages.Notification.superclass.onDestroy.call(this);
+        Ext.ux.NotificationMgr.notifications.remove(this);
+        Ext.ux.Notification.superclass.onDestroy.call(this);
     },
     cancelHiding: function () {
         this.addClass('fixed');
@@ -49,7 +49,7 @@ LiveMessages.Notification = Ext.extend(Ext.Window, {
         }
     },
     afterShow: function () {
-        LiveMessages.Notification.superclass.afterShow.call(this);
+        Ext.ux.Notification.superclass.afterShow.call(this);
         Ext.fly(this.body.dom).on('click', this.cancelHiding, this);
         if (this.autoDestroy) {
             this.task.delay(this.hideDelay ? this.hideDelay * 1000 : 3 * 1000);
@@ -58,11 +58,11 @@ LiveMessages.Notification = Ext.extend(Ext.Window, {
     animShow: function () {
         var pos = 40,
             i = 0,
-            notifyLength = LiveMessages.NotificationMgr.notifications.length;
+            notifyLength = Ext.ux.NotificationMgr.notifications.length;
 
         // save original body overflowY
-        if (LiveMessages.NotificationMgr.originalBodyOverflowY == null) {
-            LiveMessages.NotificationMgr.originalBodyOverflowY = document.body.style.overflowY;
+        if (Ext.ux.NotificationMgr.originalBodyOverflowY == null) {
+            Ext.ux.NotificationMgr.originalBodyOverflowY = document.body.style.overflowY;
         }
 
         // if the body haven't horizontal scrollbar it should not appear
@@ -74,10 +74,10 @@ LiveMessages.Notification = Ext.extend(Ext.Window, {
 
 
         for (null; i < notifyLength; i += 1) {
-            pos += LiveMessages.NotificationMgr.notifications[i].getSize().height + 10;
+            pos += Ext.ux.NotificationMgr.notifications[i].getSize().height + 10;
         }
 
-        LiveMessages.NotificationMgr.notifications.push(this);
+        Ext.ux.NotificationMgr.notifications.push(this);
 
         this.el.alignTo(document.body, "br-br", [ -10, -pos ]);
 
@@ -92,10 +92,10 @@ LiveMessages.Notification = Ext.extend(Ext.Window, {
             duration: 0.8,
             remove: false,
             callback : function () {
-                LiveMessages.NotificationMgr.notifications.remove(this);
+                Ext.ux.NotificationMgr.notifications.remove(this);
 
-                if (LiveMessages.NotificationMgr.notifications.length == 0) {
-                    document.body.style.overflowY = LiveMessages.NotificationMgr.originalBodyOverflowY;
+                if (Ext.ux.NotificationMgr.notifications.length == 0) {
+                    document.body.style.overflowY = Ext.ux.NotificationMgr.originalBodyOverflowY;
                 }
 
                 this.destroy();
@@ -108,25 +108,64 @@ LiveMessages.Notification = Ext.extend(Ext.Window, {
 /**
  * Заместитель объекта LiveMessages.Notification, который выводит уведомление о полученных сообщениях от пользователей.
  */
-LiveMessages.messageNotify = function (title, msg, icon) {
-    new LiveMessages.Notification({
-        title: title ||'Внимание',
-        html: msg ||'Новое сообщение',
+Ext.ux.MessageNotify = function () {
+    this.handler = null;
+    this.handlerContext = null;
+};
+
+Ext.ux.MessageNotify.prototype.setClickHandler = function (handler, context) {
+    this.handler = handler;
+    this.handlerContext = context || window;
+};
+
+Ext.ux.MessageNotify.prototype.showNotify = function (username, message) {
+    var self = this, date = '12.03.2012', time = '18:30:31', id = 12211, icon, notifyWindow;
+    notifyWindow = new Ext.ux.Notification({
+        title: username || 'Внимание',
+        html: ('<div class="notify">' +
+            '<div class="message">' + message + '</div>' +
+            '<div class="date">' + date + '</div>' +
+            '<div class="time">' + time + '</div>' +
+            '</div>')
+            || 'Новое сообщение.',
         iconCls: icon,
         width: 250,
         padding: 5
     }).show(document);
-};
 
+    notifyWindow.on({
+        'click': function () {
+            console.log('Выводит Бокс');
+            self.handler.apply(self.handlerContext, id);
+        }
+    });
+};
 /**
  * Заместитель объекта LiveMessages.Notification, который выводит уведомление о выполненных задачах.
  */
-LiveMessages.taskNotify = function (title, msg, icon) {
-    new LiveMessages.Notification({
-        title: title || 'Внимание',
-        html: msg || 'Действие выполнено.',
-        iconCls: icon,
-        width: 250,
-        padding: 5
-    }).show(document);
-};
+Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
+    initComponent: function () {
+        Ext.ux.TaskNotify.superclass.initComponent.apply(this);
+    },
+    showNotify: function (username, message) {
+        var self = this, date = '12.03.2012', time = '18:30:31', id = 12211, icon;
+        new Ext.ux.Notification({
+            title: username || 'Внимание',
+            html: ('<div class="notify">' +
+                '<div class="message">' + message + '</div>' +
+                '<div class="date">' + date + '</div>' +
+                '<div class="time">' + time + '</div>' +
+                '</div>')
+                || 'Действие выполнено.',
+            iconCls: icon,
+            width: 250,
+            padding: 5,
+            listeners: {
+                click: function () {
+                    self.handler.apply(self.handlerContext, id);
+                },
+                element: 'body'
+            }
+        }).show(document);
+    }
+});
