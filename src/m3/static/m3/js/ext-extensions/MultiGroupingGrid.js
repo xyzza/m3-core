@@ -1178,20 +1178,25 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
         if (this.localEdit){
             // на самом деле нам пришла строка грида
             var obj = Ext3.util.JSON.decode(data);
-            var record = new Ext3.data.Record(obj.data, obj.data.id);
-            record.json = obj.data;
             var store = this.getStore();
+            var record = new store.recordType(obj.data, obj.data.id);
+            record.json = obj.data;
+
             // и надо ее заменить в сторе
             // найдем запись в сторе, вдруг она уже есть!
             var recordPosition = store.findExact('id', obj.data.id);
             if (recordPosition >= 0) {
+                var absoluteRecordPosition = recordPosition + store.bufferRange[0];
+
                 // если нашли, то зменим
-                store.remove(store.getAt(recordPosition));
+                store.remove(store.getAt(absoluteRecordPosition));
             } else {
-                recordPosition = 0;
+                // поставим первым видимым элементом
+                recordPosition = this.getView().rowIndex - store.bufferRange[0];
+                var absoluteRecordPosition = recordPosition + store.bufferRange[0];
             }
             store.insert(recordPosition, record);
-            this.getSelectionModel().selectRow(recordPosition);
+            this.getSelectionModel().selectRow(absoluteRecordPosition);
         } else {
             return this.refreshStore();
         }
