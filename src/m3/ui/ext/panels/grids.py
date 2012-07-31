@@ -229,8 +229,8 @@ class ExtObjectGrid(containers.ExtGrid):
         #assert self.store.url, 'Url for store or action_data is not define'
         
         if self.allow_paging:
-            self.store.start = 0
-            self.store.limit = 25
+            # Значение self.store.start и так будет равно 0
+            self.store.limit = self.store.limit if self.store.limit > 0 else 25 #
             self.bottom_bar = self.paging_bar
                 
         self.render_base_config()
