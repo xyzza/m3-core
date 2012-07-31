@@ -137,7 +137,10 @@ class ExtObjectGrid(containers.ExtGrid):
         
         # Признак редактирования на клиенте - особенным образом обрабатываются данные при редактировании
         self.local_edit = False
-        
+
+        # Атрибут store из store baseParams вынесен для одновременного изменения с атрибутом page_size paging_bar-а
+        self._limit = self.store.limit
+
         self.init_component()
 
 
@@ -271,6 +274,20 @@ class ExtObjectGrid(containers.ExtGrid):
     
     def t_render_params(self):
         return self._get_params_str()
+
+    @property
+    def limit(self):
+        return self._limit
+
+    @limit.setter
+    def limit(self, limit):
+
+        self._limit = limit
+        self.store.limit = limit
+
+        # Размер страниц устанавливаем только, если позволена постраничная навигация.
+        if self.allow_paging:
+            self.paging_bar.page_size = limit
 
 class ExtMultiGroupinGrid(containers.ExtGrid):
     '''
