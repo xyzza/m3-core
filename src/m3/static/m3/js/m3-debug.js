@@ -4193,7 +4193,8 @@ Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         var bbar = this.getBottomToolbar();
         if (bbar && bbar instanceof Ext.PagingToolbar){
           var store = this.getStore();
-          store.setBaseParam('start',0);
+          // Оставлено, так как разработчик может поменять pageSize и новое значение
+          // может быть не равно limit-у.
           store.setBaseParam('limit',bbar.pageSize);
           bbar.bind(store);
         }
