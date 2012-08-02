@@ -8874,23 +8874,20 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
         Ext.ux.Notification.superclass.afterShow.call(this);
         Ext.fly(this.body.dom).on('click', this.cancelHiding, this);
         if (this.autoDestroy) {
-            this.task.delay(this.hideDelay ? this.hideDelay * 1000 : 3 * 1000);
+            this.task.delay(this.hideDelay ? this.hideDelay * 1000 : 6 * 1000);
         }
     },
     animShow: function () {
         var pos = 40,
             i = 0,
             notifyLength = Ext.ux.NotificationMgr.notifications.length;
-
         // save original body overflowY
         if (Ext.ux.NotificationMgr.originalBodyOverflowY == null) {
             Ext.ux.NotificationMgr.originalBodyOverflowY = document.body.style.overflowY;
         }
 
-        // if the body haven't horizontal scrollbar it should not appear
-        if (document.body.clientHeight == document.body.scrollHeight) {
-            document.body.style.overflowY = 'hidden';
-        }
+
+        document.body.style.overflow = 'hidden';
 
         this.setSize(this.width, 100);
 
@@ -8904,21 +8901,19 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
         this.el.alignTo(document.body, "br-br", [ -10, -pos ]);
 
         this.el.slideIn("b", {
-            duration: 0.8,
+            duration: 1.2,
             callback: this.afterShow,
             scope: this
         });
     },
     animHide: function () {
         this.el.ghost("t", {
-            duration: 0.8,
+            duration: 1.2,
             remove: false,
             callback : function () {
                 Ext.ux.NotificationMgr.notifications.remove(this);
 
-                if (Ext.ux.NotificationMgr.notifications.length == 0) {
-                    document.body.style.overflowY = Ext.ux.NotificationMgr.originalBodyOverflowY;
-                }
+                document.body.style.overflow = 'auto';
 
                 this.destroy();
             }.createDelegate(this)
@@ -8940,25 +8935,24 @@ Ext.ux.MessageNotify.prototype.setClickHandler = function (handler, context) {
     this.handlerContext = context || window;
 };
 
-Ext.ux.MessageNotify.prototype.showNotify = function (json) {
-    var self = this, date = '12.03.2012', time = '18:30:31', id = 12211, icon, notifyWindow;
+Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, text) {
+    var self = this, icon, notifyWindow;
     notifyWindow = new Ext.ux.Notification({
-        title: json.user_name || 'Внимание',
-        html: ('<div class="notify">' +
-            '<div class="message">' + json.message + '</div>' +
-            '<div class="date">' + date + '</div>' +
-            '<div class="time">' + time + '</div>' +
-            '</div>')
-            || 'Новое сообщение.',
+        title: user_name || 'Внимание',
+        html: '<div class="notify">' +
+                '<div class="message"><b>' + subject + '</b></br>' + text + '</div>' +
+              '</div>',
         iconCls: icon,
         width: 250,
         padding: 5
     });
 
     notifyWindow.on({
-        'click': function () {
-            self.handler.apply(self.handlerContext, id);
-        }
+        'click': (function (_id) {
+            return function () {
+                self.handler.apply(self.handlerContext, _id);
+            }
+        })(id)
     });
 
     notifyWindow.show(document);
@@ -8970,25 +8964,24 @@ Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
     initComponent: function () {
         Ext.ux.TaskNotify.superclass.initComponent.apply(this);
     },
-    showNotify: function (username, message) {
-        var self = this, date = '12.03.2012', time = '18:30:31', id = 12211, icon, notifyWindow;
+    showNotify: function (id, status, description) {
+        var self = this, icon, notifyWindow;
         notifyWindow = new Ext.ux.Notification({
-            title: username || 'Внимание',
-            html: ('<div class="notify">' +
-                '<div class="message">' + message + '</div>' +
-                '<div class="date">' + date + '</div>' +
-                '<div class="time">' + time + '</div>' +
-                '</div>')
-                || 'Действие выполнено.',
+            title: status || 'Внимание',
+            html: '<div class="notify">' +
+                        '<div class="task-description">' + description + '</div>' +
+                  '</div>',
             iconCls: icon,
             width: 250,
             padding: 5
         });
 
         notifyWindow.on({
-            'click': function () {
-                self.handler.apply(self.handlerContext, id);
-            }
+            'click': (function (_id) {
+                return function () {
+                    self.handler.apply(self.handlerContext, _id);
+                }
+            })(id)
         });
 
         notifyWindow.show(document);
