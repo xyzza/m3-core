@@ -8940,12 +8940,12 @@ Ext.ux.MessageNotify.prototype.setClickHandler = function (handler, context) {
     this.handlerContext = context || window;
 };
 
-Ext.ux.MessageNotify.prototype.showNotify = function (username, message) {
+Ext.ux.MessageNotify.prototype.showNotify = function (json) {
     var self = this, date = '12.03.2012', time = '18:30:31', id = 12211, icon, notifyWindow;
     notifyWindow = new Ext.ux.Notification({
-        title: username || 'Внимание',
+        title: json.user_name || 'Внимание',
         html: ('<div class="notify">' +
-            '<div class="message">' + message + '</div>' +
+            '<div class="message">' + json.message + '</div>' +
             '<div class="date">' + date + '</div>' +
             '<div class="time">' + time + '</div>' +
             '</div>')
@@ -8953,14 +8953,15 @@ Ext.ux.MessageNotify.prototype.showNotify = function (username, message) {
         iconCls: icon,
         width: 250,
         padding: 5
-    }).show(document);
+    });
 
     notifyWindow.on({
         'click': function () {
-            console.log('Выводит Бокс');
             self.handler.apply(self.handlerContext, id);
         }
     });
+
+    notifyWindow.show(document);
 };
 /**
  * Заместитель объекта LiveMessages.Notification, который выводит уведомление о выполненных задачах.
@@ -8970,8 +8971,8 @@ Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
         Ext.ux.TaskNotify.superclass.initComponent.apply(this);
     },
     showNotify: function (username, message) {
-        var self = this, date = '12.03.2012', time = '18:30:31', id = 12211, icon;
-        new Ext.ux.Notification({
+        var self = this, date = '12.03.2012', time = '18:30:31', id = 12211, icon, notifyWindow;
+        notifyWindow = new Ext.ux.Notification({
             title: username || 'Внимание',
             html: ('<div class="notify">' +
                 '<div class="message">' + message + '</div>' +
@@ -8981,14 +8982,16 @@ Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
                 || 'Действие выполнено.',
             iconCls: icon,
             width: 250,
-            padding: 5,
-            listeners: {
-                click: function () {
-                    self.handler.apply(self.handlerContext, id);
-                },
-                element: 'body'
+            padding: 5
+        });
+
+        notifyWindow.on({
+            'click': function () {
+                self.handler.apply(self.handlerContext, id);
             }
-        }).show(document);
+        });
+
+        notifyWindow.show(document);
     }
 });
 /**
