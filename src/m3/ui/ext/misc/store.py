@@ -5,12 +5,14 @@ Created on 3.3.2010
 @author: prefer
 '''
 import json
+import abc
+import datetime
+
 from decimal import Decimal
 
 from m3.helpers import normalize
 
 from m3.ui.ext.base import BaseExtComponent
-import datetime
 
 from base_store import BaseExtStore
 
@@ -23,72 +25,76 @@ class ExtDataStore(BaseExtStore):
     '''
     def __init__(self, data = None, *args, **kwargs):
         super(ExtDataStore, self).__init__(*args, **kwargs)
-        
+
         # По умолчанию первым параметром передаются данные на заполнение store
-        if data:            
-            self.data = data 
+        if data:
+            self.data = data
         else:
             self.data = []
-            
-        self.id_property = 'id'
-        
-        self.template = 'ext-misc/ext-data-store.js' # TODO: Отрефакторить под внутриклассовый рендеринг
-        
+
+        self.reader = ExtArrayReader()
+
+        self._id_property = 'id'
+
+        self._root = None
+
+        self._total_property = None
+
         # Для заполнения полей в шаблоне
-        self.__columns = [] 
+        self.__columns = []
+
         self.init_component(*args, **kwargs)
-        
+
+    @property
+    def id_property(self):
+        return self.reader.id_property
+
+    @id_property.setter
+    def id_property(self, value):
+        self.reader.id_property = value
+
+    @property
+    def root(self):
+        return self.reader.root
+
+    @root.setter
+    def root(self, value):
+        self.reader.root = value
+
+    @property
+    def total_property(self):
+        return self.reader.total_property
+
+    @total_property.setter
+    def total_property(self, value):
+        self.reader.total_property = value
+
+    def render_base_config(self):
+
+        super(ExtDataStore, self).render_base_config()
+
+        self._put_config_value('reader', self.reader.render)
+
+        self._put_config_value('data', self.render_data)
+
     def load_data(self, data):
         self.data = data
-        
+
     def render(self, columns):
-        self.__columns = columns
-        #self.__columns.insert(0, 'id') # Для того, чтобы submit работал корректно
-        return super(ExtDataStore, self).render()
-    
-    def t_render_fields(self):
-        '''Прописывается в шаблоне и заполняется при рендеринге'''
-        res = ['{name: "%s", mapping: %d}' % (self.id_property, 0)] # ID
-        # чтобы правильно выставить mapping надо определить, есть ли в списке колонок поле с таким же именем
-        # если такая колонка встречается, то пропускаем её
-        ind = 1
-        for i, col in enumerate(self.__columns):
-            if isinstance(col, basestring):
-                if col != self.id_property:
-                    res.append('{name: "%s", mapping: %d}' % (col, ind+i))
-                else:
-                    ind = 0
-            else:
-                if col.data_index != self.id_property:
-                    d = {'name': col.data_index, 'mapping': ind+i} # 1-ое поле - ID
-                    if hasattr(col, 'format'): # ExtDateField
-                        d['type'] = 'date'
-                        d['dateFormat'] = col.format
-                    res.append(json.dumps(d))
-                else:
-                    ind = 0
-        return ','.join(res) 
-    
-    def t_render_data(self):
-        '''Прописывается в шаблоне и заполняется при рендеринге'''
-        res = []
-        for item in self.data:    
-            res_tmp = []
-            for subitem in item:
-                if subitem is None:
-                    res_tmp.append('""')
-                elif isinstance(subitem, bool):
-                    res_tmp.append( str(subitem).lower() )
-                elif isinstance(subitem, int) or isinstance(subitem, Decimal) \
-                    or isinstance(subitem, float):
-                    res_tmp.append( str(subitem) )
-                elif isinstance(subitem, datetime.date):
-                    res_tmp.append('new Date("%s")' % subitem.ctime())
-                else:
-                    res_tmp.append('"%s"' % normalize(subitem) )
-                    
-            res.append( '[%s]' % ','.join(res_tmp) )
-        return ','.join(res)
+
+        self.reader._fields = columns
+
+        try:
+            self.render_base_config()
+        except UnicodeDecodeError as msg:
+            raise Exception(msg)
+
+        base_config = self._get_config_str()
+
+        return 'new Ext.data.Store({%s})' % base_config
+
+    def render_data(self):
+        return self.reader._render_data(self.data)
             
 #===============================================================================    
 class ExtJsonStore(BaseExtStore):
@@ -203,40 +209,194 @@ new Ext3.data.JsonWriter({
         return result
 
 #===============================================================================
-class ExtJsonReader(BaseExtComponent):
-    '''
-    Ридер для данных
-    '''
+class ExtDataReader(BaseExtComponent):
+    """
+    Получает ответ от сервера и декодирует его в  массив Record-ов
+    """
+
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, *args, **kwargs):
-        super(ExtJsonReader, self).__init__(*args, **kwargs)
-        self.template = 'ext-misc/ext-json-reader.js' # TODO: Отрефакторить под внутриклассовый рендеринг
-        
+        super(ExtDataReader, self).__init__(*args, **kwargs)
+
         # Поле, откуда будет браться идентификатор
         self.id_property = 'id'
-        
-        # Название вершины в json массиве, откуда будут браться записи
-        # Например root = 'rows'
-        # Тогда предполагаемый json массив должен выглядеть примерно так:
-        # {rows: [id:1, name:'name', age:45]}
+
         self.root = None
-        
-        #
+
         self.total_property = None
-        
+
         # Массив данных
-        self.__fields = []
-        
+        self._fields = []
+
         self.init_component(*args, **kwargs)
-        
-    def t_render_fields(self): 
-        return ','.join(['{name: "%s"}' % field for field in self.__fields])
-    
-    def set_fields(self, *args):
-        for field in args:
-            self.__fields.append(field)
-            
+
     def get_fields(self):
-        return self.__fields         
+        return self._fields
+
+    def convert_value(self, value):
+        """
+        Конвертирует данные в JS строку
+        """
+
+        if value is None:
+            res_value = '""'
+        elif isinstance(value, bool):
+            res_value = str(value).lower()
+        elif isinstance(value, int) or isinstance(value, Decimal) or isinstance(value, float):
+            res_value = str(value)
+        elif isinstance(value, datetime.date):
+            res_value = 'new Date("%s")' % value.ctime()
+        else:
+            res_value = '"%s"' % normalize(value)
+
+        return res_value
+
+    def render_base_config(self):
+
+        super(ExtDataReader, self).render_base_config()
+
+    @abc.abstractmethod
+    def _render_data(self, data):
+        """
+        """
+
+    @abc.abstractmethod
+    def _render_fields(self):
+        """
+        """
+
+    def render(self):
+
+        try:
+            self.render_base_config()
+        except UnicodeDecodeError as msg:
+            raise Exception(msg)
+
+
+class ExtJsonReader(ExtDataReader):
+    """
+    Reader для данных типа JSON
+    """
+
+    def render_base_config(self):
+
+        super(ExtJsonReader, self).render_base_config()
+
+        self._put_config_value('idProperty', self.id_property)
+        self._put_config_value('root', self.root)
+        self._put_config_value('totalProperty', self.total_property)
+
+    def _render_data(self, data):
+        """
+        """
+
+        res = []
+        for item in data:
+
+            res_tmp = []
+
+            for key, value in item.items():
+
+                res_value = self.convert_value(value)
+
+                res_tmp.append('%s: %s' % (key, res_value))
+
+            res_tmp = ','.join(res_tmp)
+
+            res_tmp = '{%s}' % res_tmp
+
+            res.append(res_tmp)
+
+        return '[%s]' % ','.join(res)
+
+    def _render_fields(self):
+
+        res = ['{name: "%s", mapping: "%s"}' % (self.id_property, self.id_property)]
+        for col in self.get_fields():
+            if isinstance(col, basestring):
+                if col != self.id_property:
+                    res.append('{name: "%s", mapping: "%s"}' % (col, col))
+            else:
+                if col.data_index != self.id_property:
+                    d = {'name': col.data_index}
+                    if hasattr(col, 'format'): # ExtDateField
+                        d['type'] = 'date'
+                        d['dateFormat'] = col.format
+                    if hasattr(col, 'mapping'):
+                        d['mapping'] = col.mapping
+                    else:
+                        d['mapping'] = col.data_index
+
+                    res.append(json.dumps(d))
+        return 'Ext.data.Record.create([%s])' % ','.join(res)
+
+    def render(self):
+        super(ExtJsonReader, self).render()
+
+        return 'new Ext.data.JsonReader({%s}, %s)' % (self._get_config_str(), self._render_fields())
+
+
+class ExtArrayReader(ExtDataReader):
+    """
+    Reader для данных в виде обычного массива
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        self.id_index = 0
+        super(ExtArrayReader, self).__init__(*args, **kwargs)
+
+    def _render_data(self, data):
+        """
+        """
+
+        res = []
+        for item in data:
+            res_tmp = []
+            for subitem in item:
+
+                res_value = self.convert_value(subitem)
+
+                res_tmp.append(res_value)
+
+            res.append( '[%s]' % ','.join(res_tmp) )
+
+        return '[%s]' % ','.join(res)
+
+    def _render_fields(self):
+
+        '''Прописывается в шаблоне и заполняется при рендеринге'''
+        res = ['{name: "%s", mapping: %d}' % (self.id_property, 0)] # ID
+        # чтобы правильно выставить mapping надо определить, есть ли в списке колонок поле с таким же именем
+        # если такая колонка встречается, то пропускаем её
+        ind = 1
+        for i, col in enumerate(self.get_fields()):
+            if isinstance(col, basestring):
+                if col != self.id_property:
+                    res.append('{name: "%s", mapping: %d}' % (col, ind+i))
+                else:
+                    ind = 0
+            else:
+                if col.data_index != self.id_property:
+                    d = {'name': col.data_index, 'mapping': ind+i} # 1-ое поле - ID
+                    if hasattr(col, 'format'): # ExtDateField
+                        d['type'] = 'date'
+                        d['dateFormat'] = col.format
+                    res.append(json.dumps(d))
+                else:
+                    ind = 0
+        return 'Ext.data.Record.create([%s])' % ','.join(res)
+
+    def render_base_config(self):
+
+        super(ExtArrayReader, self).render_base_config()
+        self._put_config_value('idIndex', self.id_index)
+
+    def render(self):
+        super(ExtArrayReader, self).render()
+
+        return 'new Ext.data.ArrayReader({%s}, %s)' % (self._get_config_str(), self._render_fields())
 
 #===============================================================================
 class ExtGroupingStore(ExtJsonStore):
