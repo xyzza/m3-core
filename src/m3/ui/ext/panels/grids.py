@@ -139,7 +139,7 @@ class ExtObjectGrid(containers.ExtGrid):
         self.local_edit = False
 
         # Атрибут store из store baseParams вынесен для одновременного изменения с атрибутом page_size paging_bar-а
-        self._limit = self.store.limit
+        self._limit = self.store.limit if hasattr(self.store, 'limit') else -1
 
         self.init_component()
 
@@ -234,7 +234,10 @@ class ExtObjectGrid(containers.ExtGrid):
         
         if self.allow_paging:
             # Значение self.store.start и так будет равно 0
-            self.store.limit = self.store.limit if self.store.limit > 0 else 25 #
+
+            # Если store не экземпляр ExtJsonStore, то у него нет атрибута limit
+            if hasattr(self.store, 'limit'):
+                self.store.limit = self.store.limit if self.store.limit > 0 else 25 #
             self.bottom_bar = self.paging_bar
                 
         self.render_base_config()
@@ -283,7 +286,9 @@ class ExtObjectGrid(containers.ExtGrid):
     def limit(self, limit):
 
         self._limit = limit
-        self.store.limit = limit
+        # Если не экземпляр ExtJSONStore, то у него нет атрибута limit.
+        if hasattr(self.store, 'limit'):
+            self.store.limit = limit
 
         # Размер страниц устанавливаем только, если позволена постраничная навигация.
         if self.allow_paging:
