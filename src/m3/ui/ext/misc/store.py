@@ -91,7 +91,7 @@ class ExtDataStore(BaseExtStore):
 
         base_config = self._get_config_str()
 
-        return 'new Ext.data.Store({%s})' % base_config
+        return 'new Ext3.data.Store({%s})' % base_config
 
     def render_data(self):
         return self.reader._render_data(self.data)
@@ -329,12 +329,12 @@ class ExtJsonReader(ExtDataReader):
                         d['mapping'] = col.data_index
 
                     res.append(json.dumps(d))
-        return 'Ext.data.Record.create([%s])' % ','.join(res)
+        return 'Ext3.data.Record.create([%s])' % ','.join(res)
 
     def render(self):
         super(ExtJsonReader, self).render()
 
-        return 'new Ext.data.JsonReader({%s}, %s)' % (self._get_config_str(), self._render_fields())
+        return 'new Ext3.data.JsonReader({%s}, %s)' % (self._get_config_str(), self._render_fields())
 
 
 class ExtArrayReader(ExtDataReader):
@@ -386,7 +386,7 @@ class ExtArrayReader(ExtDataReader):
                     res.append(json.dumps(d))
                 else:
                     ind = 0
-        return 'Ext.data.Record.create([%s])' % ','.join(res)
+        return 'Ext3.data.Record.create([%s])' % ','.join(res)
 
     def render_base_config(self):
 
@@ -396,7 +396,7 @@ class ExtArrayReader(ExtDataReader):
     def render(self):
         super(ExtArrayReader, self).render()
 
-        return 'new Ext.data.ArrayReader({%s}, %s)' % (self._get_config_str(), self._render_fields())
+        return 'new Ext3.data.ArrayReader({%s}, %s)' % (self._get_config_str(), self._render_fields())
 
 #===============================================================================
 class ExtGroupingStore(ExtJsonStore):
