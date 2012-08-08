@@ -987,10 +987,10 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
                 try{
 
                     // Если выполнилось, то пришел обьект - сообщение об ошибке.
-                    Ext.util.JSON.decode(res.responseText);
+                    Ext3.util.JSON.decode(res.responseText);
 
                     // Выводим пользователю сообщение об отсутствие прав на выполнение действия
-                    Ext.Msg.show({
+                    Ext3.Msg.show({
                         title: 'Внимание'
                         ,msg: 'У вас нет прав на выполнение этого действия!'
                         ,buttons: Ext.Msg.OK
