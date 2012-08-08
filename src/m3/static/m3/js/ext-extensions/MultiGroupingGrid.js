@@ -975,14 +975,31 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
         params = Ext3.applyIf(params, this.getStore().baseParams);
         // тип экспорта
         params.exportType = exportType;
-        
+
         this.view.showLoadMask(true);
         Ext3.Ajax.request({
             url : this.exportUrl,
             timeout: 9999999,
             success : function(res, opt){
+
             	this.view.showLoadMask(false);
-                location.href = res.responseText;
+
+                try{
+
+                    // Если выполнилось, то пришел обьект - сообщение об ошибке.
+                    Ext3.util.JSON.decode(res.responseText);
+
+                    // Выводим пользователю сообщение об отсутствие прав на выполнение действия
+                    Ext3.Msg.show({
+                        title: 'Внимание'
+                        ,msg: 'У вас нет прав на выполнение этого действия!'
+                        ,buttons: Ext.Msg.OK
+                    })
+
+                }catch(e){
+                    // Если пришел не JSON, то открываем окно для скачивания
+                    window.open(res = res.responseText);
+                }
             },
             failure : function(){
             	this.view.showLoadMask(false);
