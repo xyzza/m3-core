@@ -234,6 +234,11 @@ class ExtDataReader(BaseExtComponent):
     def get_fields(self):
         return self._fields
 
+    def set_fields(self, *args):
+
+        for field in args:
+            self._fields.append(field)
+
     def convert_value(self, value):
         """
         Конвертирует данные в JS строку
