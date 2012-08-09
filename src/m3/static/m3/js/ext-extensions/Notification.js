@@ -56,7 +56,7 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
         }
     },
     animShow: function () {
-        var pos = 40,
+        var pos = 120,
             i = 0,
             notifyLength = Ext3.ux.NotificationMgr.notifications.length;
         // save original body overflowY
@@ -118,6 +118,7 @@ Ext3.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, t
     notifyWindow = new Ext3.ux.Notification({
         title: user_name || 'Внимание',
         html: '<div class="notify">' +
+                '<div class="notify-icon-info"></div>' +
                 '<div class="message"><b>' + subject + '</b></br>' + text + '</div>' +
               '</div>',
         iconCls: icon,
