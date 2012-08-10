@@ -34,6 +34,7 @@
    vendor.rst
    workflow.rst
    report_generator/index.rst
+   m3_designer/index.rst
 
 Изменения в m3
 ==============
