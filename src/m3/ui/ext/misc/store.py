@@ -257,10 +257,6 @@ class ExtDataReader(BaseExtComponent):
 
         return res_value
 
-    def render_base_config(self):
-
-        super(ExtDataReader, self).render_base_config()
-
     @abc.abstractmethod
     def _render_data(self, data):
         """
@@ -285,8 +281,6 @@ class ExtJsonReader(ExtDataReader):
     """
 
     def render_base_config(self):
-
-        super(ExtJsonReader, self).render_base_config()
 
         self._put_config_value('idProperty', self.id_property)
         self._put_config_value('root', self.root)
@@ -395,7 +389,6 @@ class ExtArrayReader(ExtDataReader):
 
     def render_base_config(self):
 
-        super(ExtArrayReader, self).render_base_config()
         self._put_config_value('idIndex', self.id_index)
 
     def render(self):
