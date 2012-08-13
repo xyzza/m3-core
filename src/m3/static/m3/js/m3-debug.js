@@ -8873,9 +8873,10 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
     afterShow: function () {
         Ext.ux.Notification.superclass.afterShow.call(this);
         Ext.fly(this.body.dom).on('click', this.cancelHiding, this);
-        if (this.autoDestroy) {
-            this.task.delay(this.hideDelay ? this.hideDelay * 1000 : 6 * 1000);
-        }
+        // Отключаем механизм скрытия уведомления.
+        //if (this.autoDestroy) {
+        //    this.task.delay(this.hideDelay ? this.hideDelay * 1000 : 6 * 1000);
+        //}
     },
     animShow: function () {
         var pos = 120,
@@ -8963,15 +8964,21 @@ Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, te
  */
 Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
     initComponent: function () {
+        this.progressBar = null;
         Ext.ux.TaskNotify.superclass.initComponent.apply(this);
     },
     showNotify: function (id, status, description) {
         var self = this, icon, notifyWindow;
+
+        this.progressBar = new Ext.ProgressBar({
+            id: 'task-progress',
+            width: 220,
+            text: description
+        });
+
         notifyWindow = new Ext.ux.Notification({
             title: status || 'Внимание',
-            html: '<div class="notify">' +
-                        '<div class="task-description">' + description + '</div>' +
-                  '</div>',
+            items: this.progressBar,
             iconCls: icon,
             width: 250,
             padding: 5
@@ -8986,6 +8993,10 @@ Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
         });
 
         notifyWindow.show(document);
+    },
+
+    updateProgress: function (value, description) {
+        this.progressBar.updateProgress(value, description, true);
     }
 });
 /**
