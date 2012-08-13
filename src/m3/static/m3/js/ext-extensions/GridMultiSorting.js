@@ -11,6 +11,7 @@ Ext3.ux.grid.MultiSorting = Ext3.extend(Ext3.util.Observable,{
             this.grid.on('headerclick', this.onHeaderClick, this);
             this.grid.on('afterrender', this.onAfterRender, this);
             this.grid.getStore().multiSort = Ext3.createDelegate(this.realMultiSort, this.grid.getStore(), this, true);
+            this.grid.getStore().on('beforeload', this.beforeLoad, this);
         }
     }
     ,onAfterRender: function(grid){
@@ -18,6 +19,8 @@ Ext3.ux.grid.MultiSorting = Ext3.extend(Ext3.util.Observable,{
         this.grid.un('headerclick', this.grid.getView().onHeaderClick, this.grid.getView());
         this.grid.getView().updateHeaderSortState = Ext3.createDelegate(this.realUpdateHeaderSortState, this.grid.getView());
         this.grid.getView().updateSortIcon = Ext3.createDelegate(this.realUpdateSortIcon, this.grid.getView());
+        // специально для livegrid
+        this.grid.getView().on('beforebuffer', this.beforeBuffer, this);
     }
     ,onHeaderClick: function(grid, index, event){
         var cm = grid.getColumnModel();
@@ -66,6 +69,16 @@ Ext3.ux.grid.MultiSorting = Ext3.extend(Ext3.util.Observable,{
         // отправка параметров множественной сортировки
         if (store.hasMultiSort) {
             options.params['multisort'] = Ext3.util.JSON.encode(store.multiSortInfo.sorters);
+        } else {
+            options.params['multisort'] = undefined;
+        }
+    }
+    ,beforeBuffer: function(view, store, rowIndex, visibleRows, totalCount, options){
+        // отправка параметров множественной сортировки
+        if (store.hasMultiSort) {
+            options.params['multisort'] = Ext3.util.JSON.encode(store.multiSortInfo.sorters);
+        } else {
+            options.params['multisort'] = undefined;
         }
     }
     ,realMultiSort: function(sorters, multisortplugin) {
@@ -84,11 +97,7 @@ Ext3.ux.grid.MultiSorting = Ext3.extend(Ext3.util.Observable,{
 
         if (this.remoteSort) {
             //this.singleSort(sorters[0].field, sorters[0].direction);
-            // подготовить параметры для отправки на сервер
-            this.on('beforeload', multisortplugin.beforeLoad, this, {'single': true});
-            if (!this.load(this.lastOptions)) {
-
-            }
+            this.load(this.lastOptions);
         } else {
             this.applySort();
             this.fireEvent('datachanged', this);
