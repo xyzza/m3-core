@@ -20,6 +20,8 @@
 
  :doc:`tutorial`
 
+ :doc:`dict_example`
+
 .. toctree::
    :maxdepth: 2
 
