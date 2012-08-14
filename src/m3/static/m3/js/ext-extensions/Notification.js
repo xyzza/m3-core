@@ -25,6 +25,7 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
             header: false,
             shadow: false
         });
+        this.closedCallback = function () {};
         if (this.autoDestroy) {
             this.task = new Ext.util.DelayedTask(this.hide, this);
         } else {
@@ -38,9 +39,13 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
     setTitle: function (title, iconCls) {
         Ext.ux.Notification.superclass.setTitle.call(this, title, iconCls || this.iconCls);
     },
+    registerCallbackOnClosed: function (callback) {
+        this.closedCallback = callback;
+    },
     onDestroy: function () {
         Ext.ux.NotificationMgr.notifications.remove(this);
         Ext.ux.Notification.superclass.onDestroy.call(this);
+        this.closedCallback();
     },
     cancelHiding: function () {
         this.addClass('fixed');
@@ -51,10 +56,6 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
     afterShow: function () {
         Ext.ux.Notification.superclass.afterShow.call(this);
         Ext.fly(this.body.dom).on('click', this.cancelHiding, this);
-        // Отключаем механизм скрытия уведомления.
-        //if (this.autoDestroy) {
-        //    this.task.delay(this.hideDelay ? this.hideDelay * 1000 : 6 * 1000);
-        //}
     },
     animShow: function () {
         var pos = 120,
@@ -114,6 +115,10 @@ Ext.ux.MessageNotify.prototype.setClickHandler = function (handler, context) {
     this.handlerContext = context || window;
 };
 
+Ext.ux.MessageNotify.prototype.change = function (id, data) {
+    this.showNotify(id, data['from_user'], data['subject'], data['text']);
+};
+
 Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, text) {
     var self = this, icon, notifyWindow;
     notifyWindow = new Ext.ux.Notification({
@@ -126,6 +131,8 @@ Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, te
         width: 250,
         padding: 5
     });
+
+    notifyWindow.task.delay(6 * 1000); // Скрывает плавно уведомление через 6 сек.
 
     notifyWindow.on({
         'click': (function (_id) {
@@ -142,38 +149,64 @@ Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, te
  */
 Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
     initComponent: function () {
-        this.progressBar = null;
-        Ext.ux.TaskNotify.superclass.initComponent.apply(this);
+        this.drawRecords = {};
     },
-    showNotify: function (id, status, description) {
-        var self = this, icon, notifyWindow;
 
-        this.progressBar = new Ext.ProgressBar({
+    change: function (id, data) {
+        var record;
+
+        if (record = this.drawRecords['task_' + id]) {
+            if (record['active']) {
+                this.updateProgress(record['progressBar'], data['progress'], data['state']);
+            } else {
+                this.showNotify(id, data['state'], data['name']);
+            }
+        } else {
+            this.drawRecords['task_' + id] = {
+                id: id
+            };
+            this.showNotify(id, data['state'], data['name']);
+        }
+    },
+
+    showNotify: function (id, status, description) {
+        var self = this, icon, notifyWindow, progressBar;
+
+        progressBar = new Ext.ProgressBar({
             id: 'task-progress',
             width: 220,
             text: description
         });
 
+        this.drawRecords['task_' + id]['progressBar'] = progressBar;
+        this.drawRecords['task_' + id]['active'] = true;
+
         notifyWindow = new Ext.ux.Notification({
             title: status || 'Внимание',
-            items: this.progressBar,
+            items: progressBar,
             iconCls: icon,
             width: 250,
             padding: 5
         });
 
+        notifyWindow.registerCallbackOnClosed((function (_id) {
+            return function () {
+                self.drawRecords['task_' + _id]['active'] = false;
+            }
+        })(id));
+
         notifyWindow.on({
             'click': (function (_id) {
                 return function () {
                     self.handler.apply(self.handlerContext, _id);
-                }
+                };
             })(id)
         });
 
         notifyWindow.show(document);
     },
 
-    updateProgress: function (value, description) {
-        this.progressBar.updateProgress(value, description, true);
+    updateProgress: function (progressBar, value, status) {
+        progressBar.updateProgress(value, status, true);
     }
 });
