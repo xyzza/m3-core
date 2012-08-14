@@ -22,6 +22,8 @@
 
  :doc:`dict_example`
 
+ :doc:`actions_example`
+
 .. toctree::
    :maxdepth: 2
 
