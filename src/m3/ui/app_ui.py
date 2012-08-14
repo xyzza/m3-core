@@ -317,22 +317,23 @@ class DesktopLoader(object):
             elif place == cls.TOPTOOLBAR:
                 join_list(desktop.toptoolbar, items)
 
+
+    @classmethod
+    def sort_desktop(cls, desktop_list, sorting=SORTING):
+        '''
+        Сортирует все контейнеры десктопа в зависимости от индекса (index)
+        '''
+
+        desktop_list.sort(key=sorting)
+        for item in desktop_list:
+            if isinstance(item, DesktopLaunchGroup):
+                cls.sort_desktop(item.subitems)
+
     @classmethod
     def populate(cls, user, desktop, sorting=SORTING):
         '''
         Метод, который выполняет всю работу по настройке десктопа во вьюшке
         '''
-
-        def sort_desktop(desktop_list):
-            '''
-            Сортирует все контейнеры десктопа в зависимости от индекса (index)
-            '''
-
-            desktop_list.sort(key=sorting)
-            for item in desktop_list:
-                if isinstance(item, DesktopLaunchGroup):
-                    sort_desktop(item.subitems)
-
 
         assert isinstance(desktop, DesktopModel)
         assert isinstance(user, (User, AnonymousUser))
@@ -348,10 +349,10 @@ class DesktopLoader(object):
         for role in assign_roles:
             cls.add_el_to_desktop(desktop, role)
 
-        sort_desktop(desktop.desktop)
-        sort_desktop(desktop.start_menu)
-        sort_desktop(desktop.toolbox)
-        sort_desktop(desktop.toptoolbar)
+        cls.sort_desktop(desktop.desktop, sorting=sorting)
+        cls.sort_desktop(desktop.start_menu, sorting=sorting)
+        cls.sort_desktop(desktop.toolbox, sorting=sorting)
+        cls.sort_desktop(desktop.toptoolbar, sorting=sorting)
 
 
     @classmethod
