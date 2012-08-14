@@ -330,7 +330,7 @@ class DesktopLoader(object):
                 cls.sort_desktop(item.subitems)
 
     @classmethod
-    def populate(cls, user, desktop):
+    def populate(cls, user, desktop, sorting=SORTING):
         '''
         Метод, который выполняет всю работу по настройке десктопа во вьюшке
         '''
@@ -349,10 +349,10 @@ class DesktopLoader(object):
         for role in assign_roles:
             cls.add_el_to_desktop(desktop, role)
 
-        cls.sort_desktop(desktop.desktop)
-        cls.sort_desktop(desktop.start_menu)
-        cls.sort_desktop(desktop.toolbox)
-        cls.sort_desktop(desktop.toptoolbar)
+        cls.sort_desktop(desktop.desktop, sorting=sorting)
+        cls.sort_desktop(desktop.start_menu, sorting=sorting)
+        cls.sort_desktop(desktop.toolbox, sorting=sorting)
+        cls.sort_desktop(desktop.toptoolbar, sorting=sorting)
 
 
     @classmethod
