@@ -106,17 +106,32 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
  * Заместитель объекта LiveMessages.Notification, который выводит уведомление о полученных сообщениях от пользователей.
  */
 Ext.ux.MessageNotify = function () {
-    this.handler = null;
-    this.handlerContext = null;
+    this.eventHandler = {};
+    this.handlerMapper = {
+        socket: this.showMessage
+    };
 };
 
-Ext.ux.MessageNotify.prototype.setClickHandler = function (handler, context) {
-    this.handler = handler;
-    this.handlerContext = context || window;
+Ext.ux.MessageNotify.prototype.on = function (event, handler) {
+    var eventName;
+    if (typeof event === 'string') {
+        this.eventHandler[event] = handler;
+    } else {
+        for (eventName in event) {
+            this.eventHandler[eventName] = event[eventName];
+        }
+    }
 };
 
-Ext.ux.MessageNotify.prototype.change = function (id, data) {
-    this.showNotify(id, data['from_user'], data['subject'], data['text']);
+Ext.ux.MessageNotify.prototype.handler = function (eventName, data) {
+    var eventHandler = this.handlerMapper[eventName];
+    if (eventHandler) {
+        eventHandler.call(this, data);
+    }
+};
+
+Ext.ux.MessageNotify.prototype.showMessage = function (data) {
+    this.showNotify(data['id'], data['from_user'], data['subject'], data['text']);
 };
 
 Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, text) {
@@ -133,14 +148,6 @@ Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, te
     });
 
     notifyWindow.task.delay(6 * 1000); // Скрывает плавно уведомление через 6 сек.
-
-    notifyWindow.on({
-        'click': (function (_id) {
-            return function () {
-                self.handler.apply(self.handlerContext, _id);
-            }
-        })(id)
-    });
 
     notifyWindow.show(document);
 };
@@ -194,14 +201,6 @@ Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
                 self.drawRecords['task_' + _id]['active'] = false;
             }
         })(id));
-
-        notifyWindow.on({
-            'click': (function (_id) {
-                return function () {
-                    self.handler.apply(self.handlerContext, _id);
-                };
-            })(id)
-        });
 
         notifyWindow.show(document);
     },
