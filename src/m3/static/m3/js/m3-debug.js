@@ -1,18 +1,18 @@
 /*!
- * Ext3 JS Library 3.3.1
+ * Ext JS Library 3.3.1
  * Copyright(c) 2006-2010 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
 /**
- * @class Ext3.ux.Reorderer
+ * @class Ext.ux.Reorderer
  * @extends Object
  * Generic base class for handling reordering of items. This base class must be extended to provide the
  * actual reordering functionality - the base class just sets up events and abstract logic functions.
  * It will fire events and set defaults, deferring the actual reordering to a doReorder implementation.
- * See Ext3.ux.TabReorderer for an example.
+ * See Ext.ux.TabReorderer for an example.
  */
-Ext3.ux.Reorderer = Ext3.extend(Object, {
+Ext.ux.Reorderer = Ext.extend(Object, {
     /**
      * @property defaults
      * @type Object
@@ -49,7 +49,7 @@ Ext3.ux.Reorderer = Ext3.extend(Object, {
      * @param {Object} config Optional config object
      */
     constructor: function(config) {
-        Ext3.apply(this, config || {}, this.defaults);
+        Ext.apply(this, config || {}, this.defaults);
     },
     
     /**
@@ -59,7 +59,7 @@ Ext3.ux.Reorderer = Ext3.extend(Object, {
     init: function(target) {
         /**
          * @property target
-         * @type Ext3.Component
+         * @type Ext.Component
          * Reference to the target component which contains the reorderable items
          */
         this.target = target;
@@ -99,21 +99,21 @@ Ext3.ux.Reorderer = Ext3.extend(Object, {
      * @param {Object} mappings Mappings of the old item indexes to new item indexes
      */
     doReorder: function(paramName) {
-        throw new Error("doReorder must be implemented in the Ext3.ux.Reorderer subclass");
+        throw new Error("doReorder must be implemented in the Ext.ux.Reorderer subclass");
     },
     
     /**
-     * Should create and return an Ext3.dd.DD for the given item. This MUST be overridden in a subclass
+     * Should create and return an Ext.dd.DD for the given item. This MUST be overridden in a subclass
      * @param {Mixed} item The item to create a DD for. This could be a TabPanel tab, a Toolbar button, etc
-     * @return {Ext3.dd.DD} The DD for the given item
+     * @return {Ext.dd.DD} The DD for the given item
      */
     createItemDD: function(item) {
-        throw new Error("createItemDD must be implemented in the Ext3.ux.Reorderer subclass");
+        throw new Error("createItemDD must be implemented in the Ext.ux.Reorderer subclass");
     },
     
     /**
      * Sets up the given Toolbar item as a draggable
-     * @param {Mixed} button The item to make draggable (usually an Ext3.Button instance)
+     * @param {Mixed} button The item to make draggable (usually an Ext.Button instance)
      */
     createItemDD: function(button) {
         var el   = button.getEl(),
@@ -121,14 +121,14 @@ Ext3.ux.Reorderer = Ext3.extend(Object, {
             tbar = this.target,
             me   = this;
         
-        button.dd = new Ext3.dd.DD(el, undefined, {
+        button.dd = new Ext.dd.DD(el, undefined, {
             isTarget: false
         });
         
         button.dd.constrainTo(tbar.getEl());
         button.dd.setYConstraint(0, 0, 0);
         
-        Ext3.apply(button.dd, {
+        Ext.apply(button.dd, {
             b4StartDrag: function() {       
                 this.startPosition = el.getXY();
                 
@@ -228,7 +228,7 @@ Ext3.ux.Reorderer = Ext3.extend(Object, {
            * Fires before a reorder occurs. Return false to cancel
            * @param {Object} mappings Mappings of the old item indexes to new item indexes
            * @param {Mixed} component The target component
-           * @param {Ext3.ux.TabReorderer} this The plugin instance
+           * @param {Ext.ux.TabReorderer} this The plugin instance
            */
           'before-reorder',
           
@@ -237,7 +237,7 @@ Ext3.ux.Reorderer = Ext3.extend(Object, {
            * Fires after a reorder has occured.
            * @param {Object} mappings Mappings of the old item indexes to the new item indexes
            * @param {Mixed} component The target component
-           * @param {Ext3.ux.TabReorderer} this The plugin instance
+           * @param {Ext.ux.TabReorderer} this The plugin instance
            */
           'reorder'
         );
@@ -245,11 +245,11 @@ Ext3.ux.Reorderer = Ext3.extend(Object, {
 });
 
 /**
- * @class Ext3.ux.HBoxReorderer
- * @extends Ext3.ux.Reorderer
+ * @class Ext.ux.HBoxReorderer
+ * @extends Ext.ux.Reorderer
  * Description
  */
-Ext3.ux.HBoxReorderer = Ext3.extend(Ext3.ux.Reorderer, {
+Ext.ux.HBoxReorderer = Ext.extend(Ext.ux.Reorderer, {
     /**
      * Initializes the plugin, decorates the container with additional functionality
      */
@@ -269,12 +269,12 @@ Ext3.ux.HBoxReorderer = Ext3.extend(Ext3.ux.Reorderer, {
         });
         
         //super sets a reference to the toolbar in this.target
-        Ext3.ux.HBoxReorderer.superclass.init.apply(this, arguments);
+        Ext.ux.HBoxReorderer.superclass.init.apply(this, arguments);
     },
     
     /**
      * Sets up the given Toolbar item as a draggable
-     * @param {Mixed} button The item to make draggable (usually an Ext3.Button instance)
+     * @param {Mixed} button The item to make draggable (usually an Ext.Button instance)
      */
     createItemDD: function(button) {
         if (button.dd != undefined) {
@@ -286,7 +286,7 @@ Ext3.ux.HBoxReorderer = Ext3.extend(Ext3.ux.Reorderer, {
             me   = this,
             tbar = me.target;
         
-        button.dd = new Ext3.dd.DD(el, undefined, {
+        button.dd = new Ext.dd.DD(el, undefined, {
             isTarget: false
         });
         
@@ -299,7 +299,7 @@ Ext3.ux.HBoxReorderer = Ext3.extend(Ext3.ux.Reorderer, {
             return false;
         };
         
-        Ext3.apply(button.dd, {
+        Ext.apply(button.dd, {
             b4StartDrag: function() {       
                 this.startPosition = el.getXY();
                 
@@ -424,10 +424,10 @@ Ext3.ux.HBoxReorderer = Ext3.extend(Ext3.ux.Reorderer, {
     }
 });
 // Create the namespace
-Ext3.ns('Ext3.ux.plugins.grid');
+Ext.ns('Ext.ux.plugins.grid');
 
 /**
- * Ext3.ux.plugins.grid.CellToolTips plugin for Ext3.grid.GridPanel
+ * Ext.ux.plugins.grid.CellToolTips plugin for Ext.grid.GridPanel
  *
  * A GridPanel plugin that enables the creation of record based,
  * per-column tooltips that can also be dynamically loaded via Ajax
@@ -451,7 +451,7 @@ Ext3.ns('Ext3.ux.plugins.grid');
  *
  * An example configuration:
  * <pre><code>
-	var tts = new Ext3.ux.plugins.grid.CellToolTips([
+	var tts = new Ext.ux.plugins.grid.CellToolTips([
 		{
 			// 'Standard' CellToolTip, the current row record is applied
 			// to the template.
@@ -465,7 +465,7 @@ Ext3.ns('Ext3.ux.plugins.grid');
 			field: 'price', 
 			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%<br />{ADDITIONAL}', 
 			url: 'json_ajaxtip1.php',
-			afterFn: function(data) { return Ext3.apply({ ADDITIONAL: 'Test' }, data; }
+			afterFn: function(data) { return Ext.apply({ ADDITIONAL: 'Test' }, data; }
 		},
 		{
 			// Advanced Ajax CellToolTip, the current row record is passed to the
@@ -475,13 +475,13 @@ Ext3.ns('Ext3.ux.plugins.grid');
 			tpl: '<b>Company: {company}</b><br /><hr />Description: {description}<br /><hr />Price: {price} $<br />Change: {pctChange}%', 
 			fn: function(parms) {
 				parms.price = parms.price * 100;
-				return Ext3.apply({},parms);
+				return Ext.apply({},parms);
 			},
 			url: '/json_ajaxtip2.php'
 		}
 	]);
 	
-	var grid = new Ext3.grid.GridPanel({
+	var grid = new Ext.grid.GridPanel({
 		... normal config ...
 		,plugins:	[ tts ]
 		// Optional: filter which rows should have a tooltip:
@@ -500,18 +500,18 @@ Ext3.ns('Ext3.ux.plugins.grid');
  * @date    July 08, 2009
  * @version 1.3
  *
- * @class Ext3.ux.plugins.grid.CellToolTips
- * @extends Ext3.util.Observable
+ * @class Ext.ux.plugins.grid.CellToolTips
+ * @extends Ext.util.Observable
  */
-Ext3.ux.plugins.grid.CellToolTips = function(config) {
+Ext.ux.plugins.grid.CellToolTips = function(config) {
     var cfgTips;
-    if( Ext3.isArray(config) ) {
+    if( Ext.isArray(config) ) {
         cfgTips = config;
         config = {};
     } else {
     	cfgTips = config.ajaxTips;
     }
-    Ext3.ux.plugins.grid.CellToolTips.superclass.constructor.call(this, config);
+    Ext.ux.plugins.grid.CellToolTips.superclass.constructor.call(this, config);
     if( config.tipConfig ) {
     	this.tipConfig = config.tipConfig;
     }
@@ -519,7 +519,7 @@ Ext3.ux.plugins.grid.CellToolTips = function(config) {
 } // End of constructor
 
 // plugin code
-Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
+Ext.extend( Ext.ux.plugins.grid.CellToolTips, Ext.util.Observable, {
     version: 1.3,
     /**
      * Temp storage from the config object
@@ -566,7 +566,7 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
     /**
      * Plugin initialization routine
      *
-     * @param {Ext3.grid.GridPanel} grid
+     * @param {Ext.grid.GridPanel} grid
      */
     init: function(grid) {
         if( ! this.ajaxTips ) {
@@ -577,8 +577,8 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
       	this.tipAfterFns = {};
         this.tipUrls = {};
         // Generate tooltip templates
-        Ext3.each( this.ajaxTips, function(tip) {
-        	this.tipTpls[tip.field] = new Ext3.XTemplate( tip.tpl );
+        Ext.each( this.ajaxTips, function(tip) {
+        	this.tipTpls[tip.field] = new Ext.XTemplate( tip.tpl );
         	if( tip.url ) {
         		this.tipUrls[tip.field] = tip.url;
         	}
@@ -599,17 +599,17 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
      * Set/Add a template for a column
      *
      * @param {String} fld
-     * @param {String | Ext3.XTemplate} tpl
+     * @param {String | Ext.XTemplate} tpl
      */
     ,setFieldTpl: function(fld, tpl) {
-        this.tipTpls[fld] = Ext3.isObject(tpl) ? tpl : new Ext3.XTemplate(tpl);
+        this.tipTpls[fld] = Ext.isObject(tpl) ? tpl : new Ext.XTemplate(tpl);
     } // End of function setFieldTpl
 
     /**
      * Set up the tooltip when the grid is rendered
      *
      * @private
-     * @param {Ext3.grid.GridPanel} grid
+     * @param {Ext.grid.GridPanel} grid
      */
     ,onGridRender: function(grid) 
     {
@@ -617,13 +617,13 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
             return;
         }
         // Create one new tooltip for the whole grid
-        Ext3.apply(this.tipConfig, {
+        Ext.apply(this.tipConfig, {
             target:      grid.getView().mainBody,
-            delegate:    '.x3-grid3-cell-inner',
+            delegate:    '.x-grid3-cell-inner',
             renderTo:    document.body,
             finished:	 false
         });
-        Ext3.applyIf(this.tipConfig, {
+        Ext.applyIf(this.tipConfig, {
             
             //prefer M: В ie с запятой не будет работать. 
             // monkey pathcing mode true
@@ -631,7 +631,7 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
             trackMouse:  true
     	});
 
-        this.tip = new Ext3.ToolTip( this.tipConfig );
+        this.tip = new Ext.ToolTip( this.tipConfig );
         this.tip.ctt = this;
         // Hook onto the beforeshow event to update the tooltip content
         this.tip.on('beforeshow', this.beforeTipShow.createDelegate(this.tip, [this, grid], true));
@@ -642,9 +642,9 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
      * Replace the tooltip body by applying current row data to the template
      *
      * @private
-     * @param {Ext3.ToolTip} tip
-     * @param {Ext3.ux.plugins.grid.CellToolTips} ctt
-     * @param {Ext3.grid.GridPanel} grid
+     * @param {Ext.ToolTip} tip
+     * @param {Ext.ux.plugins.grid.CellToolTips} ctt
+     * @param {Ext.grid.GridPanel} grid
      */
     ,beforeTipShow: function(tip, ctt, grid) {
 	// Get column id and check if a tip is defined for it
@@ -678,7 +678,7 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
      * Fired when the tooltip is hidden, resets the finished handler.
      *
      * @private
-     * @param {Ext3.ToolTip} tip
+     * @param {Ext.ToolTip} tip
      */
     ,hideTip: function(tip) {
     	tip.finished = false;
@@ -689,19 +689,19 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
      *
      * @private
      * @param {object} data Parameters for the Ajax request
-     * @param {Ext3.ToolTip} tip The tooltip object
-     * @param {Ext3.grid.GridPanel} grid The grid
-     * @param {Ext3.ux.plugins.grid.CellToolTips} ctt The CellToolTips object
+     * @param {Ext.ToolTip} tip The tooltip object
+     * @param {Ext.grid.GridPanel} grid The grid
+     * @param {Ext.ux.plugins.grid.CellToolTips} ctt The CellToolTips object
      * @param {String} tipid Id of the tooltip (= field name)
      */
     ,loadDetails: function(data, tip, grid, ctt, tipid) {
-    	Ext3.Ajax.request({
+    	Ext.Ajax.request({
     		url:	ctt.tipUrls[tipid],
     		params:	data,
     		method: 'POST',
     		success:	function(resp, opt) {
     			tip.finished = true;
-    			tip.tipdata  = Ext3.decode(resp.responseText);
+    			tip.tipdata  = Ext.decode(resp.responseText);
     			if( ctt.tipAfterFns[tipid] ) {
     				tip.tipdata = ctt.tipAfterFns[tipid](tip.tipdata);
     			}
@@ -712,16 +712,16 @@ Ext3.extend( Ext3.ux.plugins.grid.CellToolTips, Ext3.util.Observable, {
 
 }); // End of extend
 
-Ext3.namespace("Ext3.ux.grid");
+Ext.namespace("Ext.ux.grid");
 
 /**
- * @class Ext3.ux.grid.GridHeaderFilters
- * @extends Ext3.util.Observable
+ * @class Ext.ux.grid.GridHeaderFilters
+ * @extends Ext.util.Observable
  * 
  * Plugin that enables filters in columns headers.
  * 
  * To add a grid header filter, put the "filter" attribute in column configuration of the grid column model.
- * This attribute is the configuration of the Ext3.form.Field to use as filter in the header or an array of fields configurations.<br>
+ * This attribute is the configuration of the Ext.form.Field to use as filter in the header or an array of fields configurations.<br>
  * <br>
  * The filter configuration object can include some special attributes to manage filter configuration:
  * <ul>
@@ -736,7 +736,7 @@ Ext3.namespace("Ext3.ux.grid");
  * <li><code>applyFilterEvent</code></li>: a string that specifies the event that starts filter application for this filter field. If not specified, the "applyMode" is used. (since 1.0.10)</li>
  *	</ul>
  * <br>
- * Filter fields are rendered in the header cells within an <code>Ext3.Panel</code> with <code>layout='form'</code>.<br>
+ * Filter fields are rendered in the header cells within an <code>Ext.Panel</code> with <code>layout='form'</code>.<br>
  * For each filter you can specify <code>fieldLabel</code> or other values supported by this layout type.<br>
  * You can also override panel configuration using <code>containerConfig</code> attribute.<br>
  * <br>
@@ -754,9 +754,9 @@ Ext3.namespace("Ext3.ux.grid");
  * @author Damiano Zucconi - http://www.isipc.it
  * @version 2.0.6 - 03/03/2011
  */
-Ext3.ux.grid.GridHeaderFilters = function(cfg){if(cfg) Ext3.apply(this, cfg);};
+Ext.ux.grid.GridHeaderFilters = function(cfg){if(cfg) Ext.apply(this, cfg);};
 	
-Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable, 
+Ext.extend(Ext.ux.grid.GridHeaderFilters, Ext.util.Observable, 
 {
 	/**
 	 * @cfg {Number} fieldHeight
@@ -791,7 +791,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	
 	/**
 	 * @cfg {Boolean} stateful
-	 * Enable or disable filters save and restore through enabled Ext3.state.Provider
+	 * Enable or disable filters save and restore through enabled Ext.state.Provider
 	 */
 	stateful: true,
 	
@@ -801,7 +801,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	 * If set to "enter" the filters are applied only when user push "ENTER" on filter field.<br> 
 	 * See also <code>applyFilterEvent</code> in columnmodel filter configuration: if this option is specified in
 	 * filter configuration, <code>applyMode</code> value will be ignored and filter will be applied on specified event.
-	 * @since Ext3.ux.grid.GridHeaderFilters 1.0.6
+	 * @since Ext.ux.grid.GridHeaderFilters 1.0.6
 	 */
 	applyMode: "auto",
 	
@@ -811,7 +811,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	 * its attributes values overrides the corresponding filter values loaded from grid status or <code>value</code> specified in column model filter configuration.<br>
 	 * Values specified into column model configuration (filter <code>value</code> attribute) are ignored if this object is specified.<br>
 	 * See <code>filtersInitMode</code> to understand how these values are mixed with values loaded from grid status.
-	 * @since Ext3.ux.grid.GridHeaderFilters 1.0.9
+	 * @since Ext.ux.grid.GridHeaderFilters 1.0.9
 	 */
 	filters: null,
 	
@@ -837,7 +837,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	
 	/**
 	 * @cfg {Object} containerConfig
-	 * Base configuration for filters container of each column. With this attribute you can override filters <code>Ext3.Container</code> configuration.
+	 * Base configuration for filters container of each column. With this attribute you can override filters <code>Ext.Container</code> configuration.
 	 */
 	containerConfig: null,
 	
@@ -853,7 +853,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	
 	filterContainers: null,
 	
-	filterContainerCls: 'x3-ghf-filter-container',
+	filterContainerCls: 'x-ghf-filter-container',
 	
 	//kirov - признак того что идет изменение размеров колонок
 	inResizeProcess: false,
@@ -893,7 +893,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
       * <b>Event enabled on the GridPanel</b>: fired when a filter is updated
       * @param {String} name Filter name
       * @param {Object} value Filter value
-      * @param {Ext3.form.Field} el Filter field
+      * @param {Ext.form.Field} el Filter field
       */	
 		'filterupdate');
 		
@@ -901,30 +901,30 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 			/**
 	      * @event render
 	      * Fired when filters render on grid header is completed
-	      * @param {Ext3.ux.grid.GridHeaderFilters} this
+	      * @param {Ext.ux.grid.GridHeaderFilters} this
 	      */	
 			{'render': true}
 		);
 		
 		//Must ignore filter config value ?
-		this.cfgFilterInit = Ext3.isDefined(this.filters) && this.filters !== null;
+		this.cfgFilterInit = Ext.isDefined(this.filters) && this.filters !== null;
 		if(!this.filters)
 			this.filters = {};
 		
 		//Configuring filters
 		this.configure(this.grid.getColumnModel());
 			
-		Ext3.ux.grid.GridHeaderFilters.superclass.constructor.call(this);
+		Ext.ux.grid.GridHeaderFilters.superclass.constructor.call(this);
 		
 		if(this.stateful)
 		{
-			if(!Ext3.isArray(this.grid.stateEvents))
+			if(!Ext.isArray(this.grid.stateEvents))
 				this.grid.stateEvents = [];
 			this.grid.stateEvents.push('filterupdate');
 		}
 		
 		//Enable new grid methods
-		Ext3.apply(this.grid, {
+		Ext.apply(this.grid, {
 			headerFilters: this,
 			getHeaderFilter: function(sName){
 				if(!this.headerFilters)
@@ -978,7 +978,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 				for(var fn in this.headerFilters.filterFields)
 				{
 					var el = this.headerFilters.filterFields[fn];
-					if(Ext3.isFunction(el.clearValue)) 
+					if(Ext.isFunction(el.clearValue)) 
 					{
 						el.clearValue();
 					} 
@@ -1004,13 +1004,13 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	/**
 	 * @private
 	 * Configures filters and containers starting from grid ColumnModel
-	 * @param {Ext3.grid.ColumnModel} cm The column model to use
+	 * @param {Ext.grid.ColumnModel} cm The column model to use
 	 */
 	configure: function(cm)
 	{
 		/*Filters config*/
 		var filteredColumns = cm.getColumnsBy(function(cc){
-			if(Ext3.isObject(cc.filter) || Ext3.isArray(cc.filter))
+			if(Ext.isObject(cc.filter) || Ext.isArray(cc.filter))
 				return true;
 			else
 				return false;
@@ -1022,24 +1022,24 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		{
 			var co = filteredColumns[i];
 			var fca = co.filter;
-			if(!Ext3.isArray(fca))
+			if(!Ext.isArray(fca))
 				fca = [fca];
 			for(var ci = 0; ci < fca.length; ci++)
 			{
-				var fc = Ext3.apply({
+				var fc = Ext.apply({
 					filterName: ci > 0 ? co.dataIndex+ci : co.dataIndex
 				},fca[ci]);
-				Ext3.apply(fc, {
+				Ext.apply(fc, {
 					columnId: co.id,
 					dataIndex: co.dataIndex,
-					//hideLabel: Ext3.isEmpty(fc.fieldLabel),
+					//hideLabel: Ext.isEmpty(fc.fieldLabel),
 					hideLabel: true,
 					anchor: '100%'
 				});
 				
-				if(!this.cfgFilterInit && !Ext3.isEmpty(fc.value))
+				if(!this.cfgFilterInit && !Ext.isEmpty(fc.value))
 				{
-					this.filters[fc.filterName] = Ext3.isFunction(fc.filterEncoder) ? fc.filterEncoder.call(this, fc.value) : fc.value;
+					this.filters[fc.filterName] = Ext.isFunction(fc.filterEncoder) ? fc.filterEncoder.call(this, fc.value) : fc.value;
 				}
 				delete fc.value;
 				
@@ -1056,7 +1056,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 				else
 				{
 					//applyMode: auto o enter
-					if(this.applyMode === 'auto' || this.applyMode === 'change' || Ext3.isEmpty(this.applyMode))
+					if(this.applyMode === 'auto' || this.applyMode === 'change' || Ext.isEmpty(this.applyMode))
 					{
 						//Legacy mode and deprecated. Use applyMode = "enter" or applyFilterEvent
 						// kirov - через листенеры удобно новые объекты делать, иначе через события
@@ -1158,7 +1158,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 						items: []
 					};
 					if(this.containerConfig)
-						Ext3.apply(containerCfg, this.containerConfig);
+						Ext.apply(containerCfg, this.containerConfig);
 					this.fcc[fc.columnId] = containerCfg;
 				}
 				// kirov - для hbox лучше использовать еще один контейнер
@@ -1186,14 +1186,14 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		var ci = this.grid.getColumnModel().getIndexById(columnId);
 		//Header TD
 		var td = this.grid.getView().getHeaderCell(ci);
-		td = Ext3.get(td);
+		td = Ext.get(td);
 		//Patch for field text selection on Mozilla
-		if(Ext3.isGecko)
+		if(Ext.isGecko)
 			td.dom.style.MozUserSelect = "text";
 		td.dom.style.verticalAlign = 'top';
 		//Render filter container
 		fcc.width = td.getWidth() - 3;
-		var fc = new Ext3.Container(fcc);
+		var fc = new Ext.Container(fcc);
 		fc.render(td);
 		//Container cache
 		this.filterContainers[columnId] = fc;
@@ -1201,15 +1201,15 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		var height = 0;
 		if(!this.filterFields)
 			this.filterFields = {};
-		var fields = fc.findBy(function(cmp){return !Ext3.isEmpty(cmp.filterName);});
-		if(!Ext3.isEmpty(fields))
+		var fields = fc.findBy(function(cmp){return !Ext.isEmpty(cmp.filterName);});
+		if(!Ext.isEmpty(fields))
 		{
 			for(var i=0;i<fields.length;i++)
 			{
 				var filterName = fields[i].filterName;
 				/*if(this.filterFields[filterName])
 				{
-					//Ext3.destroy(this.filterFields[filterName])
+					//Ext.destroy(this.filterFields[filterName])
 					delete this.filterFields[filterName];
 				}*/
 				this.filterFields[filterName] = fields[i];
@@ -1271,7 +1271,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 			{
 				var field = this.filterFields[fn];
 				var value = this.filters[field.filterName];
-				if(Ext3.isEmpty(value))
+				if(Ext.isEmpty(value))
 				{
 					if(clear)
 						this.setFieldValue(field, '');
@@ -1316,7 +1316,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		var n = this.grid.getColumnModel().getColumnCount();
 		for(var i=0; i<n; i++) {
 			var td = this.grid.getView().getHeaderCell(i);
-			td = Ext3.get(td);
+			td = Ext.get(td);
 			this.onColResize(i, td.getWidth());
 		}
 		this.inResizeProcess = false; // kirov
@@ -1355,7 +1355,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 			if(this.cfgFilterInit)
 			{					
 				if(this.filtersInitMode === 'merge')
-					Ext3.apply(vals,this.filters);
+					Ext.apply(vals,this.filters);
 			}
 			else
 				this.filters = vals;
@@ -1366,7 +1366,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	{
 		for(var k in this.filters)
 		{
-			if(/*this.filterFields && this.filterFields[k] && */!Ext3.isEmpty(this.filters[k]))
+			if(/*this.filterFields && this.filterFields[k] && */!Ext.isEmpty(this.filters[k]))
 				return true;
 		}
 		return false;
@@ -1381,8 +1381,8 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		if(!this.grid.getView().mainHd)
 			return;
 			
-		// var tr = this.grid.getView().mainHd.child('.x3-grid3-hd-row');
-		// if(!Ext3.isEmpty(this.highlightCls))
+		// var tr = this.grid.getView().mainHd.child('.x-grid3-hd-row');
+		// if(!Ext.isEmpty(this.highlightCls))
 		// {
 			// if(enable)
 				// tr.addClass(this.highlightCls);
@@ -1395,8 +1395,8 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		// }
 		// for(var i=0; i < this.grid.getColumnModel().getColumnCount(); i++) 
 		// {
-			// var hc = Ext3.get(this.grid.getView().getHeaderCell(i));
-			// if(!Ext3.isEmpty(this.highlightCls))
+			// var hc = Ext.get(this.grid.getView().getHeaderCell(i));
+			// if(!Ext.isEmpty(this.highlightCls))
 			// {
 				// if(enable)
 					// hc.addClass(this.highlightCls);
@@ -1414,7 +1414,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 			var fc = this.filterContainers[fn];
 			if(fc.rendered)
 			{
-				if(!Ext3.isEmpty(this.highlightCls))
+				if(!Ext.isEmpty(this.highlightCls))
 				{
 					if(enable)
 						fc.getEl().addClass(this.highlightCls);
@@ -1429,7 +1429,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	
 	getFieldValue: function(eField)
 	{
-		if(Ext3.isFunction(eField.filterEncoder))
+		if(Ext.isFunction(eField.filterEncoder))
 			return eField.filterEncoder.call(eField, eField.getValue());
 		else
 			return eField.getValue();
@@ -1437,7 +1437,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 	
 	setFieldValue: function(eField, value)
 	{
-		if(Ext3.isFunction(eField.filterDecoder))
+		if(Ext.isFunction(eField.filterDecoder))
 			value = eField.filterDecoder.call(eField, value);
 		eField.setValue(value);
 	},
@@ -1452,12 +1452,12 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		if(!el.isValid())
 			return;
 			
-		if(el.disabled && !Ext3.isDefined(this.grid.store.baseParams[el.filterName]))
+		if(el.disabled && !Ext.isDefined(this.grid.store.baseParams[el.filterName]))
 			return;
 		
 		var sValue = this.getFieldValue(el);
 		
-		if(el.disabled || Ext3.isEmpty(sValue))
+		if(el.disabled || Ext.isEmpty(sValue))
 		{
 			delete this.grid.store.baseParams[el.filterName];
 			delete this.filters[el.filterName];
@@ -1518,7 +1518,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		{
 			for(var ff in this.filterFields)
 			{
-				Ext3.destroy(this.filterFields[ff]);
+				Ext.destroy(this.filterFields[ff]);
 				delete this.filterFields[ff];
 			}
 		}
@@ -1527,16 +1527,16 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		{
 			for(var ff in this.filterContainers)
 			{
-				Ext3.destroy(this.filterContainers[ff]);
+				Ext.destroy(this.filterContainers[ff]);
 				delete this.filterContainers[ff];
 			}
 		}
 		
 	}
 });
-Ext3.ns('Ext3.ux.grid');
+Ext.ns('Ext.ux.grid');
 
-Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
+Ext.ux.grid.LockingHeaderGroupGridView = Ext.extend(Ext.grid.GridView, {
     lockText : 'Lock',
     unlockText : 'Unlock',
     rowBorderWidth : 1,
@@ -1553,29 +1553,29 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         var ts = this.templates || {};
 
         if (!ts.master) {
-            ts.master = new Ext3.Template(
-                '<div class="x3-grid3" hidefocus="true">',
-                    '<div class="x3-grid3-locked">',
-                        '<div class="x3-grid3-header"><div class="x3-grid3-header-inner"><div class="x3-grid3-header-offset" style="{lstyle}">{lockedHeader}</div></div><div class="x3-clear"></div></div>',
-                        '<div class="x3-grid3-scroller"><div class="x3-grid3-body" style="{lstyle}">{lockedBody}</div><div class="x3-grid3-scroll-spacer"></div></div>',
+            ts.master = new Ext.Template(
+                '<div class="x-grid3" hidefocus="true">',
+                    '<div class="x-grid3-locked">',
+                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{lstyle}">{lockedHeader}</div></div><div class="x-clear"></div></div>',
+                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{lstyle}">{lockedBody}</div><div class="x-grid3-scroll-spacer"></div></div>',
                     '</div>',
-                    '<div class="x3-grid3-viewport x3-grid3-unlocked">',
-                        '<div class="x3-grid3-header"><div class="x3-grid3-header-inner"><div class="x3-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x3-clear"></div></div>',
-                        '<div class="x3-grid3-scroller"><div class="x3-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x3-grid3-focus" tabIndex="-1"></a></div>',
+                    '<div class="x-grid3-viewport x-grid3-unlocked">',
+                        '<div class="x-grid3-header"><div class="x-grid3-header-inner"><div class="x-grid3-header-offset" style="{ostyle}">{header}</div></div><div class="x-clear"></div></div>',
+                        '<div class="x-grid3-scroller"><div class="x-grid3-body" style="{bstyle}">{body}</div><a href="#" class="x-grid3-focus" tabIndex="-1"></a></div>',
                     '</div>',
-                    '<div class="x3-grid3-resize-marker">&#160;</div>',
-                    '<div class="x3-grid3-resize-proxy">&#160;</div>',
+                    '<div class="x-grid3-resize-marker">&#160;</div>',
+                    '<div class="x-grid3-resize-proxy">&#160;</div>',
                 '</div>'
             );
         }
         //kirov
 	    if(!ts.gcell){
-            ts.gcell = new Ext3.XTemplate('<td class="x3-grid3-hd x3-grid3-gcell x3-grid3-td-{id} ux-grid-hd-group-row-{row} {cls}" style="{style}">', '<div {tooltip} class="x3-grid3-hd-inner x3-grid3-hd-{id}" unselectable="on" style="{istyle}">', this.grid.enableHdMenu ? '<a class="x3-grid3-hd-btn" href="#"></a>' : '', '{value}</div></td>');
+            ts.gcell = new Ext.XTemplate('<td class="x-grid3-hd x-grid3-gcell x-grid3-td-{id} ux-grid-hd-group-row-{row} {cls}" style="{style}">', '<div {tooltip} class="x-grid3-hd-inner x-grid3-hd-{id}" unselectable="on" style="{istyle}">', this.grid.enableHdMenu ? '<a class="x-grid3-hd-btn" href="#"></a>' : '', '{value}</div></td>');
         }
         this.templates = ts;
         //kirov
 	    this.hrowRe = new RegExp("ux-grid-hd-group-row-(\\d+)", "");
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.initTemplates.call(this);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.initTemplates.call(this);
     },
 
     getEditorParent : function(ed){
@@ -1583,7 +1583,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
     },
 
     initElements : function(){
-        var E  = Ext3.Element,
+        var E  = Ext.Element,
             el = this.grid.getGridEl().dom.firstChild,
             cs = el.childNodes;
 
@@ -1629,7 +1629,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         if(col < llen){
             return this.getLockedRow(row).getElementsByTagName('td')[col];
         }
-        return Ext3.ux.grid.LockingHeaderGroupGridView.superclass.getCell.call(this, row, col - llen);
+        return Ext.ux.grid.LockingHeaderGroupGridView.superclass.getCell.call(this, row, col - llen);
     },
 
     getHeaderCell : function(index){
@@ -1638,7 +1638,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
             return this.lockedHd.dom.getElementsByTagName('td')[index];
         }
         //kirov
-        //return Ext3.ux.grid.LockingHeaderGroupGridView.superclass.getHeaderCell.call(this, index - llen);
+        //return Ext.ux.grid.LockingHeaderGroupGridView.superclass.getHeaderCell.call(this, index - llen);
         return this.mainHd.query(this.cellSelector)[index-llen];
     },
 
@@ -1647,7 +1647,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         if(r){
             this.fly(r).addClass(cls);
         }
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.addRowClass.call(this, row, cls);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.addRowClass.call(this, row, cls);
     },
 
     removeRowClass : function(row, cls){
@@ -1655,26 +1655,26 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         if(r){
             this.fly(r).removeClass(cls);
         }
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.removeRowClass.call(this, row, cls);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRowClass.call(this, row, cls);
     },
 
     removeRow : function(row) {
-        Ext3.removeNode(this.getLockedRow(row));
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.removeRow.call(this, row);
+        Ext.removeNode(this.getLockedRow(row));
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRow.call(this, row);
     },
 
     removeRows : function(firstRow, lastRow){
         var bd = this.lockedBody.dom;
         for(var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++){
-            Ext3.removeNode(bd.childNodes[firstRow]);
+            Ext.removeNode(bd.childNodes[firstRow]);
         }
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.removeRows.call(this, firstRow, lastRow);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.removeRows.call(this, firstRow, lastRow);
     },
 
     syncScroll : function(e){
         var mb = this.scroller.dom;
         this.lockedScroller.dom.scrollTop = mb.scrollTop;
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.syncScroll.call(this, e);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.syncScroll.call(this, e);
     },
 
     updateSortIcon : function(col, dir){
@@ -1730,17 +1730,17 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
     },
     //kirov
     onColumnWidthUpdated: function(){
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.onColumnWidthUpdated.call(this, arguments);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.onColumnWidthUpdated.call(this, arguments);
         this.updateGroupStyles.call(this);
     },
     //kirov
     onAllColumnWidthsUpdated: function(){
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.onAllColumnWidthsUpdated.call(this, arguments);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.onAllColumnWidthsUpdated.call(this, arguments);
         this.updateGroupStyles.call(this);
     },
     //kirov
     //onColumnHiddenUpdated: function(){
-    //    Ext3.ux.grid.LockingHeaderGroupGridView.superclass.onColumnHiddenUpdated.call(this, arguments);
+    //    Ext.ux.grid.LockingHeaderGroupGridView.superclass.onColumnHiddenUpdated.call(this, arguments);
     //    this.updateGroupStyles.call(this);
     //},
 
@@ -1812,16 +1812,16 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
             for(var i = 0; i < colCount; i++){
                 c = cs[i];
                 p.id = c.id;
-                p.css = (i === 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '')) +
+                p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
                     (this.cm.config[i].cellCls ? ' ' + this.cm.config[i].cellCls : '');
                 p.attr = p.cellAttr = '';
                 p.value = c.renderer(r.data[c.name], p, r, rowIndex, i, ds);
                 p.style = c.style;
-                if(Ext3.isEmpty(p.value)){
+                if(Ext.isEmpty(p.value)){
                     p.value = '&#160;';
                 }
-                if(this.markDirty && r.dirty && Ext3.isDefined(r.modified[c.name])){
-                    p.css += ' x3-grid3-dirty-cell';
+                if(this.markDirty && r.dirty && Ext.isDefined(r.modified[c.name])){
+                    p.css += ' x-grid3-dirty-cell';
                 }
                 if(c.locked){
                     lcb[lcb.length] = ct.apply(p);
@@ -1831,10 +1831,10 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
             }
             var alt = [];
             if(stripe && ((rowIndex+1) % 2 === 0)){
-                alt[0] = 'x3-grid3-row-alt';
+                alt[0] = 'x-grid3-row-alt';
             }
             if(r.dirty){
-                alt[1] = ' x3-grid3-dirty-row';
+                alt[1] = ' x-grid3-dirty-row';
             }
             rp.cols = colCount;
             if(this.getRowClass){
@@ -1868,13 +1868,13 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
                 row.className = row.className.replace(this.rowClsRe, ' ');
                 lrow.className = lrow.className.replace(this.rowClsRe, ' ');
                 if ((i + 1) % 2 === 0){
-                    row.className += ' x3-grid3-row-alt';
-                    lrow.className += ' x3-grid3-row-alt';
+                    row.className += ' x-grid3-row-alt';
+                    lrow.className += ' x-grid3-row-alt';
                 }
             }
             if(this.syncHeights){
-                var el1 = Ext3.get(row),
-                    el2 = Ext3.get(lrow),
+                var el1 = Ext.get(row),
+                    el2 = Ext.get(lrow),
                     h1 = el1.getHeight(),
                     h2 = el2.getHeight();
 
@@ -1886,11 +1886,11 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
             }
         }
         if(startRow === 0){
-            Ext3.fly(rows[0]).addClass(this.firstRowCls);
-            Ext3.fly(lrows[0]).addClass(this.firstRowCls);
+            Ext.fly(rows[0]).addClass(this.firstRowCls);
+            Ext.fly(lrows[0]).addClass(this.firstRowCls);
         }
-        Ext3.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
-        Ext3.fly(lrows[lrows.length - 1]).addClass(this.lastRowCls);
+        Ext.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
+        Ext.fly(lrows[lrows.length - 1]).addClass(this.lastRowCls);
     },
 
     afterRender : function(){
@@ -1921,8 +1921,8 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         var g = this.grid;
         g.getGridEl().dom.innerHTML = html;
         this.initElements();
-        Ext3.fly(this.innerHd).on('click', this.handleHdDown, this);
-        Ext3.fly(this.lockedInnerHd).on('click', this.handleHdDown, this);
+        Ext.fly(this.innerHd).on('click', this.handleHdDown, this);
+        Ext.fly(this.lockedInnerHd).on('click', this.handleHdDown, this);
         this.mainHd.on({
             scope: this,
             mouseover: this.handleHdOver,
@@ -1937,18 +1937,18 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         });
         this.scroller.on('scroll', this.syncScroll,  this);
         if(g.enableColumnResize !== false){
-            this.splitZone = new Ext3.grid.GridView.SplitDragZone(g, this.mainHd.dom);
-            this.splitZone.setOuterHandleElId(Ext3.id(this.lockedHd.dom));
-            this.splitZone.setOuterHandleElId(Ext3.id(this.mainHd.dom));
+            this.splitZone = new Ext.grid.GridView.SplitDragZone(g, this.mainHd.dom);
+            this.splitZone.setOuterHandleElId(Ext.id(this.lockedHd.dom));
+            this.splitZone.setOuterHandleElId(Ext.id(this.mainHd.dom));
         }
         if(g.enableColumnMove){
-            this.columnDrag = new Ext3.grid.GridView.ColumnDragZone(g, this.innerHd);
-            this.columnDrag.setOuterHandleElId(Ext3.id(this.lockedInnerHd));
-            this.columnDrag.setOuterHandleElId(Ext3.id(this.innerHd));
-            this.columnDrop = new Ext3.grid.HeaderDropZone(g, this.mainHd.dom);
+            this.columnDrag = new Ext.grid.GridView.ColumnDragZone(g, this.innerHd);
+            this.columnDrag.setOuterHandleElId(Ext.id(this.lockedInnerHd));
+            this.columnDrag.setOuterHandleElId(Ext.id(this.innerHd));
+            this.columnDrop = new Ext.grid.HeaderDropZone(g, this.mainHd.dom);
         }
         if(g.enableHdMenu !== false){
-            this.hmenu = new Ext3.menu.Menu({id: g.id + '-hctx'});
+            this.hmenu = new Ext.menu.Menu({id: g.id + '-hctx'});
             this.hmenu.add(
                 {itemId: 'asc', text: this.sortAscText, cls: 'xg-hmenu-sort-asc'},
                 {itemId: 'desc', text: this.sortDescText, cls: 'xg-hmenu-sort-desc'}
@@ -1960,7 +1960,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
                 );
             }
             if(g.enableColumnHide !== false){
-                this.colMenu = new Ext3.menu.Menu({id:g.id + '-hcols-menu'});
+                this.colMenu = new Ext.menu.Menu({id:g.id + '-hcols-menu'});
                 this.colMenu.on({
                     scope: this,
                     beforeshow: this.beforeColMenuShow,
@@ -1971,7 +1971,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
                     hideOnClick: false,
                     text: this.columnsText,
                     menu: this.colMenu,
-                    iconCls: 'x3-cols-icon'
+                    iconCls: 'x-cols-icon'
                 });
             }
             this.hmenu.on('itemclick', this.handleHdMenuClick, this);
@@ -1990,14 +1990,14 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         }
 
         if(g.enableDragDrop || g.enableDrag){
-            this.dragZone = new Ext3.grid.GridDragZone(g, {
+            this.dragZone = new Ext.grid.GridDragZone(g, {
                 ddGroup : g.ddGroup || 'GridDD'
             });
         }
         this.updateHeaderSortState();
         //kirov
-        //Ext3.apply(this.columnDrop, this.columnDropConfig);
-        //Ext3.apply(this.splitZone, this.splitZoneConfig);
+        //Ext.apply(this.columnDrop, this.columnDropConfig);
+        //Ext.apply(this.splitZone, this.splitZoneConfig);
     },
     
     //kirov
@@ -2009,7 +2009,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
     //kirov
     columnDropConfig: {
         getTargetFromEvent: function(e){
-            var t = Ext3.lib.Event.getTarget(e);
+            var t = Ext.lib.Event.getTarget(e);
             return this.view.findHeaderCell(t);
         },
 
@@ -2064,7 +2064,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
     },
     //kirov
     updateGroupStyles: function(col){
-        var tables = this.lockedHd.query('.x3-grid3-header-offset > table'), tw = this.getLockedWidth(), rows = this.rows;
+        var tables = this.lockedHd.query('.x-grid3-header-offset > table'), tw = this.getLockedWidth(), rows = this.rows;
         var rowGroups = [];
         for(var row = 0; row < tables.length; row++){
             tables[row].style.width = tw;
@@ -2083,7 +2083,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
                 }
             }
         }
-        var tables = this.mainHd.query('.x3-grid3-header-offset > table'), tw = this.getTotalWidth(), rows = this.rows;
+        var tables = this.mainHd.query('.x-grid3-header-offset > table'), tw = this.getTotalWidth(), rows = this.rows;
         for(var row = 0; row < tables.length; row++){
             tables[row].style.width = tw;
             if(row < rows.length){
@@ -2126,7 +2126,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         if(g.autoHeight){
             this.scroller.dom.style.overflow = 'visible';
             this.lockedScroller.dom.style.overflow = 'visible';
-            if(Ext3.isWebKit){
+            if(Ext.isWebKit){
                 this.scroller.dom.style.position = 'static';
                 this.lockedScroller.dom.style.position = 'static';
             }
@@ -2195,7 +2195,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
             p.value = cm.getColumnHeader(i) || '';
             p.style = this.getColumnStyle(i, true);
             p.tooltip = this.getColumnTooltip(i);
-            p.css = (i === 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '')) +
+            p.css = (i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '')) +
                 (cm.config[i].headerCls ? ' ' + cm.config[i].headerCls : '');
             if(cm.config[i].align == 'right'){
                 p.istyle = 'padding-right:16px';
@@ -2221,7 +2221,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
                     id: id,
                     row: row,
                     style: 'width:' + gs.width + ';' + (gs.hidden ? 'display:none;' : '') + (group.align ? 'text-align:' + group.align + ';' : ''),
-                    tooltip: group.tooltip ? (Ext3.QuickTips.isEnabled() ? 'ext:qtip' : 'title') + '="' + group.tooltip + '"' : '',
+                    tooltip: group.tooltip ? (Ext.QuickTips.isEnabled() ? 'ext:qtip' : 'title') + '="' + group.tooltip + '"' : '',
                     istyle: group.align == 'right' ? 'padding-right:16px' : '',
                     btn: this.grid.enableHdMenu && group.header,
                     value: group.header || '&nbsp;'
@@ -2259,13 +2259,13 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
             }
         }
         return {
-            width: (Ext3.isBorderBox || (Ext3.isWebKit && !Ext3.isSafari2) ? width : Math.max(width - this.borderWidth, 0)) + 'px',
+            width: (Ext.isBorderBox || (Ext.isWebKit && !Ext.isSafari2) ? width : Math.max(width - this.borderWidth, 0)) + 'px',
             hidden: hidden
         };
     },
     //kirov
     findHeaderCell: function(el){
-        return el ? this.fly(el).findParent('td.x3-grid3-hd', this.cellSelectorDepth) : false;
+        return el ? this.fly(el).findParent('td.x-grid3-hd', this.cellSelectorDepth) : false;
     },
     //kirov
     findHeaderIndex: function(el){
@@ -2289,15 +2289,15 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
             return null;
         }
         var c = resolved.cell, r = resolved.row;
-        return c ? Ext3.fly(c).getXY() : [this.scroller.getX(), Ext3.fly(r).getY()];
+        return c ? Ext.fly(c).getXY() : [this.scroller.getX(), Ext.fly(r).getY()];
     },
 
     syncFocusEl : function(row, col, hscroll){
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.syncFocusEl.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.syncFocusEl.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
     },
 
     ensureVisible : function(row, col, hscroll){
-        return Ext3.ux.grid.LockingHeaderGroupGridView.superclass.ensureVisible.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
+        return Ext.ux.grid.LockingHeaderGroupGridView.superclass.ensureVisible.call(this, row, col, col < this.cm.getLockedCount() ? false : hscroll);
     },
 
     insertRows : function(dm, firstRow, lastRow, isUpdate){
@@ -2314,13 +2314,13 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
                 if(firstRow === 0){
                     this.removeRowClass(0, this.firstRowCls);
                 }
-                Ext3.DomHelper.insertHtml('beforeBegin', before, html[0]);
+                Ext.DomHelper.insertHtml('beforeBegin', before, html[0]);
                 before = this.getLockedRow(firstRow);
-                Ext3.DomHelper.insertHtml('beforeBegin', before, html[1]);
+                Ext.DomHelper.insertHtml('beforeBegin', before, html[1]);
             }else{
                 this.removeRowClass(last - 1, this.lastRowCls);
-                Ext3.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html[0]);
-                Ext3.DomHelper.insertHtml('beforeEnd', this.lockedBody.dom, html[1]);
+                Ext.DomHelper.insertHtml('beforeEnd', this.mainBody.dom, html[0]);
+                Ext.DomHelper.insertHtml('beforeEnd', this.lockedBody.dom, html[1]);
             }
             if(!isUpdate){
                 this.fireEvent('rowsinserted', this, firstRow, lastRow);
@@ -2358,7 +2358,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         for(var i = 0; i < colCount; i++){
             var name = cm.getDataIndex(i);
             cs[i] = {
-                name : (!Ext3.isDefined(name) ? this.ds.fields.get(i).name : name),
+                name : (!Ext.isDefined(name) ? this.ds.fields.get(i).name : name),
                 renderer : cm.getRenderer(i),
                 id : cm.getColumnId(i),
                 style : this.getColumnStyle(i),
@@ -2374,8 +2374,8 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
     },
 
     refreshRow : function(record){
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.refreshRow.call(this, record);
-        var index = Ext3.isNumber(record) ? record : this.ds.indexOf(record);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.refreshRow.call(this, record);
+        var index = Ext.isNumber(record) ? record : this.ds.indexOf(record);
         this.getLockedRow(index).rowIndex = index;
     },
 
@@ -2403,7 +2403,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         if(this.cm){
             this.cm.un('columnlockchange', this.onColumnLock, this);
         }
-        Ext3.ux.grid.LockingHeaderGroupGridView.superclass.initData.call(this, ds, cm);
+        Ext.ux.grid.LockingHeaderGroupGridView.superclass.initData.call(this, ds, cm);
         if(this.cm){
             this.cm.on('columnlockchange', this.onColumnLock, this);
         }
@@ -2440,36 +2440,36 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
                 }
             break;
             default:
-                return Ext3.ux.grid.LockingHeaderGroupGridView.superclass.handleHdMenuClick.call(this, item);
+                return Ext.ux.grid.LockingHeaderGroupGridView.superclass.handleHdMenuClick.call(this, item);
         }
         return true;
     },
 
     handleHdDown : function(e, t){
         //kirov
-        //Ext3.ux.grid.LockingHeaderGroupGridView.superclass.handleHdDown.call(this, e, t);
-        var el = Ext3.get(t);
-        if(el.hasClass('x3-grid3-hd-btn')){
+        //Ext.ux.grid.LockingHeaderGroupGridView.superclass.handleHdDown.call(this, e, t);
+        var el = Ext.get(t);
+        if(el.hasClass('x-grid3-hd-btn')){
             e.stopEvent();
             var hd = this.findHeaderCell(t);
-            Ext3.fly(hd).addClass('x3-grid3-hd-menu-open');
+            Ext.fly(hd).addClass('x-grid3-hd-menu-open');
             var index = this.getCellIndex(hd);
             this.hdCtxIndex = index;
             var ms = this.hmenu.items, cm = this.cm;
             ms.get('asc').setDisabled(!cm.isSortable(index));
             ms.get('desc').setDisabled(!cm.isSortable(index));
             this.hmenu.on('hide', function(){
-                Ext3.fly(hd).removeClass('x3-grid3-hd-menu-open');
+                Ext.fly(hd).removeClass('x-grid3-hd-menu-open');
             }, this, {
                 single: true
             });
             this.hmenu.show(t, 'tl-bl?');
-        }else if(el.hasClass('ux-grid-hd-group-cell') || Ext3.fly(t).up('.ux-grid-hd-group-cell')){
+        }else if(el.hasClass('ux-grid-hd-group-cell') || Ext.fly(t).up('.ux-grid-hd-group-cell')){
             e.stopEvent();
         }
 
         if(this.grid.enableColLock !== false){
-            if(Ext3.fly(t).hasClass('x3-grid3-hd-btn')){
+            if(Ext.fly(t).hasClass('x-grid3-hd-btn')){
                 var hd = this.findHeaderCell(t),
                     index = this.getCellIndex(hd),
                     ms = this.hmenu.items, cm = this.cm;
@@ -2487,8 +2487,8 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
             var fly = this.fly(hd);
             this.activeHdRegion = fly.getRegion();
             if(!(this.cm.isMenuDisabled(this.activeHdIndex) || fly.hasClass('ux-grid-hd-group-cell'))){
-                fly.addClass('x3-grid3-hd-over');
-                this.activeHdBtn = fly.child('.x3-grid3-hd-btn');
+                fly.addClass('x-grid3-hd-over');
+                this.activeHdBtn = fly.child('.x-grid3-hd-btn');
                 if(this.activeHdBtn){
                     this.activeHdBtn.dom.style.height = (hd.firstChild.offsetHeight - 1) + 'px';
                 }
@@ -2498,9 +2498,9 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
     //kirov
     handleHdOut: function(e, t){
         var hd = this.findHeaderCell(t);
-        if(hd && (!Ext3.isIE || !e.within(hd, true))){
+        if(hd && (!Ext.isIE || !e.within(hd, true))){
             this.activeHdRef = null;
-            this.fly(hd).removeClass('x3-grid3-hd-over');
+            this.fly(hd).removeClass('x-grid3-hd-over');
             hd.style.cursor = '';
         }
     },
@@ -2519,8 +2519,8 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
         var lw = this.cm.getTotalLockedWidth(),
             tw = this.cm.getTotalWidth() - lw,
             csize = this.grid.getGridEl().getSize(true),
-            lp = Ext3.isBorderBox ? 0 : this.lockedBorderWidth,
-            rp = Ext3.isBorderBox ? 0 : this.rowBorderWidth,
+            lp = Ext.isBorderBox ? 0 : this.lockedBorderWidth,
+            rp = Ext.isBorderBox ? 0 : this.rowBorderWidth,
             vw = (csize.width - lw - lp - rp) + 'px',
             so = this.getScrollOffset();
         if(!this.grid.autoHeight){
@@ -2545,7 +2545,7 @@ Ext3.ux.grid.LockingHeaderGroupGridView = Ext3.extend(Ext3.grid.GridView, {
     }
 });
 
-Ext3.ux.grid.LockingGroupColumnModel = Ext3.extend(Ext3.grid.ColumnModel, {
+Ext.ux.grid.LockingGroupColumnModel = Ext.extend(Ext.grid.ColumnModel, {
     /**
      * Returns true if the given column index is currently locked
      * @param {Number} colIndex The column index
@@ -2618,23 +2618,23 @@ Ext3.ux.grid.LockingGroupColumnModel = Ext3.extend(Ext3.grid.ColumnModel, {
             this.setLocked(oldIndex, true, true);
         }
 
-        Ext3.ux.grid.LockingGroupColumnModel.superclass.moveColumn.apply(this, arguments);
+        Ext.ux.grid.LockingGroupColumnModel.superclass.moveColumn.apply(this, arguments);
     }
 });
 
-Ext3.namespace('Ext3.ux.Ribbon');
+Ext.namespace('Ext.ux.Ribbon');
 
-Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
+Ext.ux.Ribbon = Ext.extend(Ext.TabPanel, {
 
     titleId: null,
 
     constructor: function(config){
         this.titleId = new Array();
 
-        Ext3.apply(config, {
-            baseCls: "x3-plain ui-ribbon",
+        Ext.apply(config, {
+            baseCls: "x-plain ui-ribbon",
             margins: "0 0 0 0",
-            // plugins: new Ext3.ux.TabScrollerMenu({
+            // plugins: new Ext.ux.TabScrollerMenu({
             //     maxText: 15,
             //     pageSize: 5
             // }),
@@ -2657,7 +2657,7 @@ Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
                         //this.doLayout();
                         if (this.titleId.length > 0){
                             for (var key = 0; key < this.titleId.length; key++){
-                                r = Ext3.get(this.titleId[key].id);
+                                r = Ext.get(this.titleId[key].id);
                                 if (r)
                                 r.on('click', this.titleId[key].fn);
                             }
@@ -2667,14 +2667,14 @@ Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
             }
         });
 
-        Ext3.apply(this, Ext3.apply(this.initialConfig, config));
+        Ext.apply(this, Ext.apply(this.initialConfig, config));
 
         if (config.items){
             for (var i = 0; i < config.items.length; i++)
             this.initRibbon(config.items[i], i);
         }
 
-        Ext3.ux.Ribbon.superclass.constructor.apply(this, arguments);
+        Ext.ux.Ribbon.superclass.constructor.apply(this, arguments);
         
     },
 
@@ -2688,7 +2688,7 @@ Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
             //                         }
             c = {
                 xtype: "buttongroup",
-                cls: "x3-btn-group-ribbonstyle",
+                cls: "x-btn-group-ribbonstyle",
                 defaults: {
                     scale: "small",
                     iconAlign: "left",
@@ -2702,7 +2702,7 @@ Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
             onTitleClick = item.ribbon[j].onTitleClick || false;
 
             if (onTitleClick){
-                titleId = 'ux-ribbon-' + Ext3.id();
+                titleId = 'ux-ribbon-' + Ext.id();
                 title = '<span id="' + titleId + '" style="cursor:pointer;">' + title + '</span>';
                 this.titleId.push({
                     id: titleId,
@@ -2711,15 +2711,15 @@ Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
             }
             if (title !== ''){
                 if (!topTitle){
-                    Ext3.apply(c, {
+                    Ext.apply(c, {
                         footerCfg: {
-                            cls: "x3-btn-group-header x3-unselectable",
+                            cls: "x-btn-group-header x-unselectable",
                             tag: "span",
                             html: title
                         }
                     });
                 } else{
-                    Ext3.apply(c, {
+                    Ext.apply(c, {
                         title: title
                     });
                 }
@@ -2728,36 +2728,36 @@ Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
             cfg = item.ribbon[j].cfg || null;
 
             if (cfg){
-                Ext3.applyIf(c, item.ribbon[j].cfg);
+                Ext.applyIf(c, item.ribbon[j].cfg);
                 if (cfg.defaults)
-                Ext3.apply(c.defaults, cfg.defaults);
+                Ext.apply(c.defaults, cfg.defaults);
             }
 
             tbarr.push(c);
         }
 
-        Ext3.apply(item, {
-            baseCls: "x3-plain",
+        Ext.apply(item, {
+            baseCls: "x-plain",
             tbar: tbarr
         });
     }
 });
 /*!
- * Ext3 JS Library 3.3.1
+ * Ext JS Library 3.3.1
  * Copyright(c) 2006-2010 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
 /**
- * @class Ext3.ux.ToolbarDroppable
+ * @class Ext.ux.ToolbarDroppable
  * @extends Object
  * Plugin which allows items to be dropped onto a toolbar and be turned into new Toolbar items.
  * To use the plugin, you just need to provide a createItem implementation that takes the drop
  * data as an argument and returns an object that can be placed onto the toolbar. Example:
  * <pre>
- * new Ext3.ux.ToolbarDroppable({
+ * new Ext.ux.ToolbarDroppable({
  *   createItem: function(data) {
- *     return new Ext3.Button({text: data.text});
+ *     return new Ext.Button({text: data.text});
  *   }
  * });
  * </pre>
@@ -2765,24 +2765,24 @@ Ext3.ux.Ribbon = Ext3.extend(Ext3.TabPanel, {
  * created and inserted into the Toolbar. Use this for any logic that needs to be run after
  * the item has been created.
  */
-Ext3.ux.ToolbarDroppable = Ext3.extend(Object, {
+Ext.ux.ToolbarDroppable = Ext.extend(Object, {
     /**
      * @constructor
      */
     constructor: function(config) {
-      Ext3.apply(this, config, {
+      Ext.apply(this, config, {
           
       });
     },
     
     /**
      * Initializes the plugin and saves a reference to the toolbar
-     * @param {Ext3.Toolbar} toolbar The toolbar instance
+     * @param {Ext.Toolbar} toolbar The toolbar instance
      */
     init: function(toolbar) {
       /**
        * @property toolbar
-       * @type Ext3.Toolbar
+       * @type Ext.Toolbar
        * The toolbar instance that this plugin is tied to
        */
       this.toolbar = toolbar;
@@ -2799,10 +2799,10 @@ Ext3.ux.ToolbarDroppable = Ext3.extend(Object, {
     createDropTarget: function() {
         /**
          * @property dropTarget
-         * @type Ext3.dd.DropTarget
+         * @type Ext.dd.DropTarget
          * The drop target attached to the toolbar instance
          */
-        this.dropTarget = new Ext3.dd.DropTarget(this.toolbar.getEl(), {
+        this.dropTarget = new Ext.dd.DropTarget(this.toolbar.getEl(), {
             notifyOver: this.notifyOver.createDelegate(this),
             notifyDrop: this.notifyDrop.createDelegate(this)
         });
@@ -2821,7 +2821,7 @@ Ext3.ux.ToolbarDroppable = Ext3.extend(Object, {
     /**
      * Calculates the location on the toolbar to create the new sorter button based on the XY of the
      * drag event
-     * @param {Ext3.EventObject} e The event object
+     * @param {Ext.EventObject} e The event object
      * @return {Number} The index at which to insert the new button
      */
     calculateEntryIndex: function(e) {
@@ -2901,23 +2901,23 @@ Ext3.ux.ToolbarDroppable = Ext3.extend(Object, {
     /**
      * Called after a new button has been created and added to the toolbar. Add any required cleanup logic here
      */
-    afterLayout: Ext3.emptyFn
+    afterLayout: Ext.emptyFn
 });
 /*!
- * Ext3 JS Library 3.3.1
+ * Ext JS Library 3.3.1
  * Copyright(c) 2006-2010 Sencha Inc.
  * licensing@sencha.com
  * http://www.sencha.com/license
  */
 /**
- * @class Ext3.ux.ToolbarReorderer
- * @extends Ext3.ux.Reorderer
- * Plugin which can be attached to any Ext3.Toolbar instance. Provides ability to reorder toolbar items
+ * @class Ext.ux.ToolbarReorderer
+ * @extends Ext.ux.Reorderer
+ * Plugin which can be attached to any Ext.Toolbar instance. Provides ability to reorder toolbar items
  * with drag and drop. Example:
  * <pre>
- * new Ext3.Toolbar({
+ * new Ext.Toolbar({
  *     plugins: [
- *         new Ext3.ux.ToolbarReorderer({
+ *         new Ext.ux.ToolbarReorderer({
  *             defaultReorderable: true
  *         })
  *     ],
@@ -2931,7 +2931,7 @@ Ext3.ux.ToolbarDroppable = Ext3.extend(Object, {
  * In the example above, buttons 2 and 3 will be reorderable via drag and drop. An event named 'reordered'
  * is added to the Toolbar, and is fired whenever a reorder has been completed.
  */
-Ext3.ux.ToolbarReorderer = Ext3.extend(Ext3.ux.Reorderer, {
+Ext.ux.ToolbarReorderer = Ext.extend(Ext.ux.Reorderer, {
     /**
      * Initializes the plugin, decorates the toolbar with additional functionality
      */
@@ -2951,12 +2951,12 @@ Ext3.ux.ToolbarReorderer = Ext3.extend(Ext3.ux.Reorderer, {
         });
         
         //super sets a reference to the toolbar in this.target
-        Ext3.ux.ToolbarReorderer.superclass.init.apply(this, arguments);
+        Ext.ux.ToolbarReorderer.superclass.init.apply(this, arguments);
     },
         
     /**
      * Sets up the given Toolbar item as a draggable
-     * @param {Mixed} button The item to make draggable (usually an Ext3.Button instance)
+     * @param {Mixed} button The item to make draggable (usually an Ext.Button instance)
      */
     createItemDD: function(button) {
         if (button.dd != undefined) {
@@ -2968,7 +2968,7 @@ Ext3.ux.ToolbarReorderer = Ext3.extend(Ext3.ux.Reorderer, {
             tbar = this.target,
             me   = this;
         
-        button.dd = new Ext3.dd.DD(el, undefined, {
+        button.dd = new Ext.dd.DD(el, undefined, {
             isTarget: false
         });
         
@@ -2977,7 +2977,7 @@ Ext3.ux.ToolbarReorderer = Ext3.extend(Ext3.ux.Reorderer, {
             return false;
         };
         
-        Ext3.apply(button.dd, {
+        Ext.apply(button.dd, {
             b4StartDrag: function() {       
                 this.startPosition = el.getXY();
                 
@@ -3096,16 +3096,16 @@ Ext3.ux.ToolbarReorderer = Ext3.extend(Ext3.ux.Reorderer, {
         }, this);
     }
 });
-Ext3.ux.Mask = function(mask) {
+Ext.ux.Mask = function(mask) {
     var config = {
         mask: mask
     };
-    Ext3.apply(this, config);
+    Ext.apply(this, config);
 };
-Ext3.extend(Ext3.ux.Mask, Object, {
+Ext.extend(Ext.ux.Mask, Object, {
     init: function(c) {
         this.LetrasL = 'abcdefghijklmnopqrstuvwxyz';
-        this.LetrasU = Ext3.util.Format.uppercase(this.LetrasL);
+        this.LetrasU = Ext.util.Format.uppercase(this.LetrasL);
         this.Letras  = this.LetrasL + this.LetrasU;
         this.Numeros = '0123456789';
         this.Fixos  = '().-:/ '; 
@@ -3129,7 +3129,7 @@ Ext3.extend(Ext3.ux.Mask, Object, {
             if(key < 32 || evt.isNavKeyPress() || key == evt.BACKSPACE){
                 return true;
             }
-            if(Ext3.isGecko || Ext3.isGecko2 || Ext3.isGecko3)
+            if(Ext.isGecko || Ext.isGecko2 || Ext.isGecko3)
                 if((evt.charCode == 0 && evt.keyCode == 46) || evt.isSpecialKey()) return true; // DELETE (conflict with dot(.))
             var tamanho = value.length;
             if(tamanho >= mask.length){
@@ -3162,9 +3162,9 @@ Ext3.extend(Ext3.ux.Mask, Object, {
         return false;
     }
 });
-Ext3.ns('Ext3.ux');
+Ext.ns('Ext.ux');
 
-Ext3.ux.Lightbox = (function(){
+Ext.ux.Lightbox = (function(){
     var els = {},
         images = [],
         activeImage,
@@ -3184,8 +3184,8 @@ Ext3.ux.Lightbox = (function(){
             this.overlayDuration = this.animate ? 0.2 : 0;
 
             if(!initialized) {
-                Ext3.apply(this, Ext3.util.Observable.prototype);
-                Ext3.util.Observable.constructor.call(this);
+                Ext.apply(this, Ext.util.Observable.prototype);
+                Ext.util.Observable.constructor.call(this);
                 this.addEvents('open', 'close');
                 this.initMarkup();
                 this.initEvents();
@@ -3194,27 +3194,27 @@ Ext3.ux.Lightbox = (function(){
         },
 
         initMarkup: function() {
-            els.shim = Ext3.DomHelper.append(document.body, {
+            els.shim = Ext.DomHelper.append(document.body, {
                 tag: 'iframe',
                 id: 'ux-lightbox-shim'
             }, true);
-            els.overlay = Ext3.DomHelper.append(document.body, {
+            els.overlay = Ext.DomHelper.append(document.body, {
                 id: 'ux-lightbox-overlay'
             }, true);
             
-            var lightboxTpl = new Ext3.Template(this.getTemplate());
+            var lightboxTpl = new Ext.Template(this.getTemplate());
             els.lightbox = lightboxTpl.append(document.body, {}, true);
 
             var ids =
                 ['outerImageContainer', 'imageContainer', 'image', 'hoverNav', 'navPrev', 'navNext', 'loading', 'loadingLink',
                 'outerDataContainer', 'dataContainer', 'data', 'details', 'caption', 'imageNumber', 'bottomNav', 'navClose'];
 
-            Ext3.each(ids, function(id){
-                els[id] = Ext3.get('ux-lightbox-' + id);
+            Ext.each(ids, function(id){
+                els[id] = Ext.get('ux-lightbox-' + id);
             });
 
-            Ext3.each([els.overlay, els.lightbox, els.shim], function(el){
-                el.setVisibilityMode(Ext3.Element.DISPLAY)
+            Ext.each([els.overlay, els.lightbox, els.shim], function(el){
+                el.setVisibilityMode(Ext.Element.DISPLAY)
                 el.hide();
             });
 
@@ -3288,7 +3288,7 @@ Ext3.ux.Lightbox = (function(){
             if(selectors.indexOf(sel) === -1) {
                 selectors.push(sel);
 
-                Ext3.fly(document).on('click', function(ev){
+                Ext.fly(document).on('click', function(ev){
                     var target = ev.getTarget(sel);
 
                     if (target) {
@@ -3313,8 +3313,8 @@ Ext3.ux.Lightbox = (function(){
                         images.push([image.href, image.title]);
                     }
                     else {
-                        var setItems = Ext3.query(sel);
-                        Ext3.each(setItems, function(item) {
+                        var setItems = Ext.query(sel);
+                        Ext.each(setItems, function(item) {
                             if(item.href) {
                                 images.push([item.href, item.title]);
                             }
@@ -3326,9 +3326,9 @@ Ext3.ux.Lightbox = (function(){
                     }
 
                     // calculate top and left offset for the lightbox
-                    var pageScroll = Ext3.fly(document).getScroll();
+                    var pageScroll = Ext.fly(document).getScroll();
 
-                    var lightboxTop = pageScroll.top + (Ext3.lib.Dom.getViewportHeight() / 10);
+                    var lightboxTop = pageScroll.top + (Ext.lib.Dom.getViewportHeight() / 10);
                     var lightboxLeft = pageScroll.left;
                     els.lightbox.setStyle({
                         top: lightboxTop + 'px',
@@ -3464,11 +3464,11 @@ Ext3.ux.Lightbox = (function(){
         },
 
         enableKeyNav: function() {
-            Ext3.fly(document).on('keydown', this.keyNavAction, this);
+            Ext.fly(document).on('keydown', this.keyNavAction, this);
         },
 
         disableKeyNav: function() {
-            Ext3.fly(document).un('keydown', this.keyNavAction, this);
+            Ext.fly(document).un('keydown', this.keyNavAction, this);
         },
 
         keyNavAction: function(ev) {
@@ -3516,23 +3516,23 @@ Ext3.ux.Lightbox = (function(){
         },
 
         getViewSize: function() {
-            return [Ext3.lib.Dom.getViewWidth(), Ext3.lib.Dom.getViewHeight()];
+            return [Ext.lib.Dom.getViewWidth(), Ext.lib.Dom.getViewHeight()];
         }
     }
 })();
 
-Ext3.onReady(Ext3.ux.Lightbox.init, Ext3.ux.Lightbox);
+Ext.onReady(Ext.ux.Lightbox.init, Ext.ux.Lightbox);
 /**
  * Содержит общие функции вызываемые из разных частей
  */
-Ext3.QuickTips.init();
+Ext.QuickTips.init();
 
 /**
  * Чтобы ie и прочие не правильные браузеры, где нет console не падали
  */
 if (typeof console == "undefined") var console = { log: function() {} };
 
-Ext3.namespace('Ext3.m3');
+Ext.namespace('Ext.m3');
 
 
 var SOFTWARE_NAME = 'Платформа М3';
@@ -3560,13 +3560,13 @@ function smart_eval(text){
 	}
 	if(text.substring(0,1) == '{'){
 		// это у нас json объект
-		var obj = Ext3.util.JSON.decode(text);
+		var obj = Ext.util.JSON.decode(text);
 		if(!obj){
 			return;
 		}
 		if(obj.code){
 			var eval_result = obj.code();
-			if( eval_result &&  eval_result instanceof Ext3.Window && typeof AppDesktop != 'undefined' && AppDesktop){
+			if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
 				AppDesktop.getDesktop().createWindow(eval_result);
 			}
 			return eval_result;
@@ -3574,7 +3574,7 @@ function smart_eval(text){
 		else
 		{
     		if(obj.message && obj.message != ''){
-    			Ext3.Msg.show({title:'Внимание', msg: obj.message, buttons:Ext3.Msg.OK, icon: (obj.success!=undefined && !obj.success ? Ext3.Msg.WARNING : Ext3.Msg.Info)});
+    			Ext.Msg.show({title:'Внимание', msg: obj.message, buttons:Ext.Msg.OK, icon: (obj.success!=undefined && !obj.success ? Ext.Msg.WARNING : Ext.Msg.Info)});
     			return;
     		}
 		}
@@ -3583,32 +3583,32 @@ function smart_eval(text){
 	    try{ 
 		    var eval_result = eval(text);
 		} catch (e) {
-		     Ext3.Msg.show({
+		     Ext.Msg.show({
                 title:'Внимание'
                 ,msg:'Произошла непредвиденная ошибка!'
-                ,buttons: Ext3.Msg.OK
-                ,fn: Ext3.emptyFn
+                ,buttons: Ext.Msg.OK
+                ,fn: Ext.emptyFn
                 ,animEl: 'elId'
-                ,icon: Ext3.MessageBox.WARNING
+                ,icon: Ext.MessageBox.WARNING
             });
 		    throw e;
 		}
-		if( eval_result &&  eval_result instanceof Ext3.Window && typeof AppDesktop != 'undefined' && AppDesktop){
+		if( eval_result &&  eval_result instanceof Ext.Window && typeof AppDesktop != 'undefined' && AppDesktop){
 			AppDesktop.getDesktop().createWindow(eval_result);
 		}
 		return eval_result;
 	}
 }
 
-Ext3.ns('Ext3.app.form');
+Ext.ns('Ext.app.form');
 /**
  * Модифицированный контрол поиска, за основу был взят контрол от ui.form.SearchField
- * @class {Ext3.app.form.SearchField} Контрол поиска
- * @extends {Ext3.form.TwinTriggerField} Абстрактный класс как раз для разного рода таких вещей, типа контрола поиска
+ * @class {Ext.app.form.SearchField} Контрол поиска
+ * @extends {Ext.form.TwinTriggerField} Абстрактный класс как раз для разного рода таких вещей, типа контрола поиска
  */
-Ext3.app.form.SearchField = Ext3.extend(Ext3.form.TwinTriggerField, {
+Ext.app.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
     initComponent : function(){
-        Ext3.app.form.SearchField.superclass.initComponent.call(this);
+        Ext.app.form.SearchField.superclass.initComponent.call(this);
         this.on('specialkey', function(f, e){
             if(e.getKey() == e.ENTER){
                 this.onTrigger2Click();
@@ -3618,8 +3618,8 @@ Ext3.app.form.SearchField = Ext3.extend(Ext3.form.TwinTriggerField, {
 
     ,validationEvent:false
     ,validateOnBlur:false
-    ,trigger1Class:'x3-form-clear-trigger'
-    ,trigger2Class:'x3-form-search-trigger'
+    ,trigger1Class:'x-form-clear-trigger'
+    ,trigger2Class:'x-form-search-trigger'
     ,hideTrigger1:true
     ,width:180
     ,hasSearch : false
@@ -3631,7 +3631,7 @@ Ext3.app.form.SearchField = Ext3.extend(Ext3.form.TwinTriggerField, {
         if(this.hasSearch){
         	this.el.dom.value = '';
         	var cmp = this.getComponentForSearch();
-        	if (cmp instanceof Ext3.grid.GridPanel) {
+        	if (cmp instanceof Ext.grid.GridPanel) {
 	            var o = {start: 0};
 	            var store = cmp.getStore();
 	            store.baseParams = store.baseParams || {};
@@ -3639,7 +3639,7 @@ Ext3.app.form.SearchField = Ext3.extend(Ext3.form.TwinTriggerField, {
 				store.baseParams[this.paramId] = this.nodeId || '';	
 	            store.reload({params:o});
 
-	        } else if (cmp instanceof Ext3.ux.tree.TreeGrid) {
+	        } else if (cmp instanceof Ext.ux.tree.TreeGrid) {
 	        	this.el.dom.value = '';
 	        	
 	        	var loader = cmp.getLoader();
@@ -3657,14 +3657,14 @@ Ext3.app.form.SearchField = Ext3.extend(Ext3.form.TwinTriggerField, {
     ,onTrigger2Click : function(e, html, arg){
         var value = this.getRawValue();
         var cmp = this.getComponentForSearch();
-        if (cmp instanceof Ext3.grid.GridPanel) {
+        if (cmp instanceof Ext.grid.GridPanel) {
             var o = {start: 0};
             var store = cmp.getStore();
 	        store.baseParams = store.baseParams || {};
 	        store.baseParams[this.paramName] = value;
 	        store.baseParams[this.paramId] = this.nodeId || '';	
 	        store.reload({params:o});
-        } else if (cmp instanceof Ext3.ux.tree.TreeGrid) {
+        } else if (cmp instanceof Ext.ux.tree.TreeGrid) {
         	var loader = cmp.getLoader();
         	loader.baseParams = loader.baseParams || {};
 	        loader.baseParams[this.paramName] = value;
@@ -3685,7 +3685,7 @@ Ext3.app.form.SearchField = Ext3.extend(Ext3.form.TwinTriggerField, {
 /**
  * В поле добавим функционал отображения того, что оно изменено.
  */
-Ext3.override(Ext3.form.Field, {
+Ext.override(Ext.form.Field, {
 	/**
 	 * Признак, что поле используется для изменения значения, 
 	 * а не для навигации - при Истине будут повешаны обработчики на изменение окна
@@ -3701,9 +3701,9 @@ Ext3.override(Ext3.form.Field, {
 	      		var newtext = text+':';
 	      		if (this.isModified) {newtext = '<span style="color:darkmagenta;">' + newtext + '</span>'; };
 		  		//if (this.isModified) {newtext = '<span">*</span>' + newtext; };
-				var lab = this.el.up('.x3-form-item', 10, true);
+				var lab = this.el.up('.x-form-item', 10, true);
 				if (lab) {
-					lab.child('.x3-form-item-label').update(newtext);
+					lab.child('.x-form-item-label').update(newtext);
 				}
 	    	}
 	    	this.fieldLabel = text;
@@ -3727,17 +3727,17 @@ Ext3.override(Ext3.form.Field, {
  * Создаётся новый компонент: Панель с возможностью включения в заголовок
  * визуальных компонентов.
  */
-Ext3.app.TitlePanel = Ext3.extend(Ext3.Panel, {
+Ext.app.TitlePanel = Ext.extend(Ext.Panel, {
    titleItems: null,
    addTitleItem: function (itemConfig) { 
-       var item = Ext3.ComponentMgr.create(itemConfig);
-       var itemsDiv = Ext3.DomHelper.append(this.header, {tag:"div", style:"float:right;margin-top:-4px;margin-left:3px;"}, true);
+       var item = Ext.ComponentMgr.create(itemConfig);
+       var itemsDiv = Ext.DomHelper.append(this.header, {tag:"div", style:"float:right;margin-top:-4px;margin-left:3px;"}, true);
        item.render(itemsDiv);
    },
    onRender: function (ct, position) {
-       Ext3.app.TitlePanel.superclass.onRender.apply(this, arguments);
+       Ext.app.TitlePanel.superclass.onRender.apply(this, arguments);
        if (this.titleItems != null) {
-           if(Ext3.isArray(this.titleItems)){
+           if(Ext.isArray(this.titleItems)){
                for (var i = this.titleItems.length-1; i >= 0 ; i--) {
                    this.addTitleItem(this.titleItems[i]);
                }
@@ -3746,7 +3746,7 @@ Ext3.app.TitlePanel = Ext3.extend(Ext3.Panel, {
            }
            
            if (this.header)
-               this.header.removeClass('x3-unselectable');
+               this.header.removeClass('x-unselectable');
        };
    },
    getChildByName: function (name) {
@@ -3773,13 +3773,13 @@ Ext3.app.TitlePanel = Ext3.extend(Ext3.Panel, {
  */
 function uiFailureResponseOnFormSubmit(context){
     if(context.action.failureType=='server'){
-        obj = Ext3.util.JSON.decode(context.action.response.responseText);
-        Ext3.Msg.show({title: context.title,
+        obj = Ext.util.JSON.decode(context.action.response.responseText);
+        Ext.Msg.show({title: context.title,
             msg: obj.error_msg,
-            buttons: Ext3.Msg.OK,
-            icon: Ext3.Msg.WARNING});
+            buttons: Ext.Msg.OK,
+            icon: Ext.Msg.WARNING});
     }else{
-        Ext3.Msg.alert(context.title, context.message);
+        Ext.Msg.alert(context.title, context.message);
     }
 }
 
@@ -3791,8 +3791,8 @@ function uiFailureResponseOnFormSubmit(context){
 function uiAjaxFailMessage (response, opt) {
 	
 	// response.status === 0 -- "communication failure"
-	if (Ext3.isEmpty(response) || response.status === 0) {
-		Ext3.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
+	if (Ext.isEmpty(response) || response.status === 0) {
+		Ext.Msg.alert(SOFTWARE_NAME, 'Извините, сервер временно не доступен.');
 		return;
 	}
 	
@@ -3806,7 +3806,7 @@ function uiAjaxFailMessage (response, opt) {
             smart_eval( response.responseText );
         }
 	} else {
-    	var bodySize = Ext3.getBody().getViewSize(),
+    	var bodySize = Ext.getBody().getViewSize(),
     		width = (bodySize.width < 500) ? bodySize.width - 50 : 500,
     		height = (bodySize.height < 300) ? bodySize.height - 50 : 300,
     		win;
@@ -3817,13 +3817,13 @@ function uiAjaxFailMessage (response, opt) {
         }
     	var errorMsg = response.responseText;
 	
-    	var win = new Ext3.Window({ modal: true, width: width, height: height, 
+    	var win = new Ext.Window({ modal: true, width: width, height: height, 
     	    title: "Request Failure", layout: "fit", maximizable: true, 
     	    maximized: true,
     		listeners : {
     			"maximize" : {
     				fn : function (el) {
-    					var v = Ext3.getBody().getViewSize();
+    					var v = Ext.getBody().getViewSize();
     					el.setSize(v.width, v.height);
     				},
     				scope : this
@@ -3831,19 +3831,19 @@ function uiAjaxFailMessage (response, opt) {
     
     			"resize" : {
     				fn : function (wnd) {
-    					var editor = Ext3.getCmp("__ErrorMessageEditor");
+    					var editor = Ext.getCmp("__ErrorMessageEditor");
     					var sz = wnd.body.getViewSize();
     					editor.setSize(sz.width, sz.height - 42);
     				}
     			}
     		},
-    		items : new Ext3.form.FormPanel({
-    			baseCls : "x3-plain",
+    		items : new Ext.form.FormPanel({
+    			baseCls : "x-plain",
     			layout  : "absolute",
     			defaultType : "label",
     			items : [
     				{x: 5,y: 5,
-    					html : '<div class="x3-window-dlg"><div class="ext3-mb-error" style="width:32px;height:32px"></div></div>'
+    					html : '<div class="x-window-dlg"><div class="ext-mb-error" style="width:32px;height:32px"></div></div>'
     				},
     				{x: 42,y: 6,
     					html : "<b>Status Code: </b>"
@@ -3922,9 +3922,9 @@ function uiAjaxFailMessage (response, opt) {
 // Проверяет есть ли в ответе сообщение и выводит его
 // Возвращает серверный success
 function uiShowErrorMessage(response){
-	obj = Ext3.util.JSON.decode(response.responseText);
+	obj = Ext.util.JSON.decode(response.responseText);
 	if (obj.error_msg)
-		Ext3.Msg.alert(SOFTWARE_NAME, obj.error_msg);
+		Ext.Msg.alert(SOFTWARE_NAME, obj.error_msg);
 // Не понятно зачем нужен этот код.
 //	if (obj.code)
 //		alert('Пришел код на выполнение ' + obj.code);
@@ -3938,9 +3938,9 @@ function uiShowErrorMessage(response){
  * @param {Object} параметры запроса
  */
 function sendRequest(url, desktop, params){                     
-    var mask = new Ext3.LoadMask(Ext3.getBody());
+    var mask = new Ext.LoadMask(Ext.getBody());
     mask.show();
-    Ext3.Ajax.request({
+    Ext.Ajax.request({
     	params: params,
         url: url,
         method: 'POST',
@@ -4022,24 +4022,24 @@ function includeInArr(arr, obj) {
 function showMessage(msg, title, icon){
 	title = title || 'Внимание';
 	msg = msg || '';
-	icon = icon || Ext3.MessageBox.INFO;
-    Ext3.Msg.show({
+	icon = icon || Ext.MessageBox.INFO;
+    Ext.Msg.show({
         title: title,
         msg: msg,
-        buttons: Ext3.Msg.OK,
+        buttons: Ext.Msg.OK,
         icon: icon
     });
 }
 
 function showWarning(msg, title){
-	showMessage(msg, title, Ext3.MessageBox.WARNING);
+	showMessage(msg, title, Ext.MessageBox.WARNING);
 }
 
 /**
  * Расширенный функционал комбобокса
  */
 
-Ext3.m3.ComboBox =  Ext3.extend(Ext3.form.ComboBox,{
+Ext.m3.ComboBox =  Ext.extend(Ext.form.ComboBox,{
 	/**
 	 * Возвращает текстовое представление комбобокса
 	 */
@@ -4048,10 +4048,10 @@ Ext3.m3.ComboBox =  Ext3.extend(Ext3.form.ComboBox,{
 	}
 })
 /**
- * Расширенный грид на базе Ext3.grid.GridPanel
+ * Расширенный грид на базе Ext.grid.GridPanel
  * @param {Object} config
  */
-Ext3.m3.GridPanel = Ext3.extend(Ext3.grid.GridPanel, {
+Ext.m3.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	constructor: function(baseConfig, params){
 //		console.log(baseConfig);
 //		console.log(params);
@@ -4059,26 +4059,26 @@ Ext3.m3.GridPanel = Ext3.extend(Ext3.grid.GridPanel, {
 		// Добавлене selection model если нужно
 		var selModel = params.selModel;
 		var gridColumns = params.colModel || [];
-		if (selModel && selModel instanceof Ext3.grid.CheckboxSelectionModel) {
+		if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
 			gridColumns.columns.unshift(selModel);
 		}
 		
 		// Навешивание обработчиков на контекстное меню если нужно 
 		var funcContMenu;
 		if (params.menus.contextMenu && 
-			params.menus.contextMenu instanceof Ext3.menu.Menu) {
+			params.menus.contextMenu instanceof Ext.menu.Menu) {
 			
 			funcContMenu = function(e){
 				e.stopEvent();
 	            params.menus.contextMenu.showAt(e.getXY())
 			}
 		} else {
-			funcContMenu = Ext3.emptyFn;
+			funcContMenu = Ext.emptyFn;
 		}
 		
 		var funcRowContMenu;
 		if (params.menus.rowContextMenu && 
-			params.menus.rowContextMenu instanceof Ext3.menu.Menu) {
+			params.menus.rowContextMenu instanceof Ext.menu.Menu) {
 			
 			funcRowContMenu = function(grid, index, e){
 				e.stopEvent();
@@ -4088,7 +4088,7 @@ Ext3.m3.GridPanel = Ext3.extend(Ext3.grid.GridPanel, {
                 params.menus.rowContextMenu.showAt(e.getXY())
 			}
 		} else {
-			funcRowContMenu = Ext3.emptyFn;
+			funcRowContMenu = Ext.emptyFn;
 		}
 		
 		var plugins = params.plugins || [];
@@ -4097,19 +4097,19 @@ Ext3.m3.GridPanel = Ext3.extend(Ext3.grid.GridPanel, {
 			bundedColumns.length > 0) {
 
 			plugins.push( 
-				new Ext3.ux.grid.ColumnHeaderGroup({
+				new Ext.ux.grid.ColumnHeaderGroup({
 					rows: bundedColumns
 				})
 			);
 		}
 		
 		// объединение обработчиков
-		baseConfig.listeners = Ext3.applyIf({
+		baseConfig.listeners = Ext.applyIf({
 			contextmenu: funcContMenu
 			,rowcontextmenu: funcRowContMenu
 			,beforerender: function(){
 				var bbar = this.getBottomToolbar();
-				if (bbar && bbar instanceof Ext3.PagingToolbar){
+				if (bbar && bbar instanceof Ext.PagingToolbar){
 					var store = this.getStore();
 					store.setBaseParam('start',0);
 					store.setBaseParam('limit',bbar.pageSize);
@@ -4119,16 +4119,16 @@ Ext3.m3.GridPanel = Ext3.extend(Ext3.grid.GridPanel, {
 		}
 		,baseConfig.listeners || {});
 
-		var config = Ext3.applyIf({
+		var config = Ext.applyIf({
 			sm: selModel
 			,colModel: gridColumns
 			,plugins: plugins
 		}, baseConfig);
 		
-		Ext3.m3.GridPanel.superclass.constructor.call(this, config);
+		Ext.m3.GridPanel.superclass.constructor.call(this, config);
 	}
 	,initComponent: function(){
-		Ext3.m3.GridPanel.superclass.initComponent.call(this);
+		Ext.m3.GridPanel.superclass.initComponent.call(this);
 		var store = this.getStore();
 		store.on('exception', this.storeException, this);
 	}
@@ -4141,7 +4141,7 @@ Ext3.m3.GridPanel = Ext3.extend(Ext3.grid.GridPanel, {
 	}
 });
 
-Ext3.m3.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
+Ext.m3.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
   constructor: function(baseConfig, params){
 //    console.log(baseConfig);
 //    console.log(params);
@@ -4149,26 +4149,26 @@ Ext3.m3.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
     // Добавлене selection model если нужно
     var selModel = params.selModel;
     var gridColumns = params.colModel || [];
-    if (selModel && selModel instanceof Ext3.grid.CheckboxSelectionModel) {
+    if (selModel && selModel instanceof Ext.grid.CheckboxSelectionModel) {
       gridColumns.columns.unshift(selModel);
     }
     
     // Навешивание обработчиков на контекстное меню если нужно 
     var funcContMenu;
     if (params.menus.contextMenu && 
-      params.menus.contextMenu instanceof Ext3.menu.Menu) {
+      params.menus.contextMenu instanceof Ext.menu.Menu) {
       
       funcContMenu = function(e){
         e.stopEvent();
               params.menus.contextMenu.showAt(e.getXY())
       }
     } else {
-      funcContMenu = Ext3.emptyFn;
+      funcContMenu = Ext.emptyFn;
     }
     
     var funcRowContMenu;
     if (params.menus.rowContextMenu && 
-      params.menus.contextMenu instanceof Ext3.menu.Menu) {
+      params.menus.contextMenu instanceof Ext.menu.Menu) {
       
       funcRowContMenu = function(grid, index, e){
         e.stopEvent();
@@ -4176,7 +4176,7 @@ Ext3.m3.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
                 params.menus.rowContextMenu.showAt(e.getXY())
       }
     } else {
-      funcRowContMenu = Ext3.emptyFn;
+      funcRowContMenu = Ext.emptyFn;
     }
     
     var plugins = params.plugins || [];
@@ -4185,19 +4185,19 @@ Ext3.m3.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
       bundedColumns.length > 0) {
 
       plugins.push( 
-        new Ext3.ux.grid.ColumnHeaderGroup({
+        new Ext.ux.grid.ColumnHeaderGroup({
           rows: bundedColumns
         })
       );
     }
     
     // объединение обработчиков
-    baseConfig.listeners = Ext3.applyIf({
+    baseConfig.listeners = Ext.applyIf({
       contextmenu: funcContMenu
       ,rowcontextmenu: funcRowContMenu
       ,beforerender: function(){
         var bbar = this.getBottomToolbar();
-        if (bbar && bbar instanceof Ext3.PagingToolbar){
+        if (bbar && bbar instanceof Ext.PagingToolbar){
           var store = this.getStore();
           // Оставлено, так как разработчик может поменять pageSize и новое значение
           // может быть не равно limit-у.
@@ -4208,16 +4208,16 @@ Ext3.m3.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
     }
     ,baseConfig.listeners || {});
 
-    var config = Ext3.applyIf({
+    var config = Ext.applyIf({
       sm: selModel
       ,colModel: gridColumns
       ,plugins: plugins
     }, baseConfig);
     
-    Ext3.m3.EditorGridPanel.superclass.constructor.call(this, config);
+    Ext.m3.EditorGridPanel.superclass.constructor.call(this, config);
   }
 	,initComponent: function(){
-		Ext3.m3.EditorGridPanel.superclass.initComponent.call(this);
+		Ext.m3.EditorGridPanel.superclass.initComponent.call(this);
 		var store = this.getStore();
 		store.on('exception', this.storeException, this);
 	}
@@ -4226,13 +4226,13 @@ Ext3.m3.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
 	 */
 	,storeException: function (proxy, type, action, options, response, arg){
 		//console.log(proxy, type, action, options, response, arg);
-		if (type == 'remote' && action != Ext3.data.Api.actions.read) {
+		if (type == 'remote' && action != Ext.data.Api.actions.read) {
 		  if (response.raw.message) {
-  		  Ext3.Msg.show({
+  		  Ext.Msg.show({
   		    title: 'Внимание!',
   		    msg: response.raw.message,
-  		    buttons: Ext3.Msg.CANCEL,
-  		    icon: Ext3.Msg.WARNING
+  		    buttons: Ext.Msg.CANCEL,
+  		    icon: Ext.Msg.WARNING
   		  });
   		};
 		} else {
@@ -4240,8 +4240,8 @@ Ext3.m3.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, {
 		};
 	}
 });
-if (Ext3.version == '3.0') {
-    Ext3.override(Ext3.grid.GridView, {
+if (Ext.version == '3.0') {
+    Ext.override(Ext.grid.GridView, {
         ensureVisible : function(row, col, hscroll) {
         
             var resolved = this.resolveCell(row, col, hscroll);
@@ -4292,14 +4292,14 @@ if (Ext3.version == '3.0') {
     });
 }
 
-Ext3.namespace('Ext3.ux.maximgb.tg');
+Ext.namespace('Ext.ux.maximgb.tg');
 
 /**
  * This class shouldn't be created directly use NestedSetStore or AdjacencyListStore instead.
  *
  * @abstract
  */
-Ext3.ux.maximgb.tg.AbstractTreeStore = Ext3.extend(Ext3.data.Store,
+Ext.ux.maximgb.tg.AbstractTreeStore = Ext.extend(Ext.data.Store,
 {
     /**
      * @cfg {String} is_leaf_field_name Record leaf flag field name.
@@ -4325,7 +4325,7 @@ Ext3.ux.maximgb.tg.AbstractTreeStore = Ext3.extend(Ext3.data.Store,
      */
     constructor : function(config)
     {
-        Ext3.ux.maximgb.tg.AbstractTreeStore.superclass.constructor.call(this, config);
+        Ext.ux.maximgb.tg.AbstractTreeStore.superclass.constructor.call(this, config);
         
         if (!this.paramNames.active_node) {
             this.paramNames.active_node = 'anode';
@@ -4403,7 +4403,7 @@ Ext3.ux.maximgb.tg.AbstractTreeStore = Ext3.extend(Ext3.data.Store,
         }
         this.removeNodeDescendants(record);
         // ----- End of modification        
-        Ext3.ux.maximgb.tg.AbstractTreeStore.superclass.remove.call(this, record);
+        Ext.ux.maximgb.tg.AbstractTreeStore.superclass.remove.call(this, record);
     },
     
     /**
@@ -4444,7 +4444,7 @@ Ext3.ux.maximgb.tg.AbstractTreeStore = Ext3.extend(Ext3.data.Store,
             options.add = true;
         }
 
-        return Ext3.ux.maximgb.tg.AbstractTreeStore.superclass.load.call(this, options); 
+        return Ext.ux.maximgb.tg.AbstractTreeStore.superclass.load.call(this, options); 
     },
     
     /**
@@ -4534,7 +4534,7 @@ Ext3.ux.maximgb.tg.AbstractTreeStore = Ext3.extend(Ext3.data.Store,
             for (i = 0, len = r.length; i < len; i++) {
                 record = r[i];
                 if (updated[record.id] == true) {
-                    this.fireEvent('update',  this, record, Ext3.data.Record.COMMIT);
+                    this.fireEvent('update',  this, record, Ext.data.Record.COMMIT);
                 }
                 else {
                     this.fireEvent("add", this, [record], this.data.indexOf(record));
@@ -4564,7 +4564,7 @@ Ext3.ux.maximgb.tg.AbstractTreeStore = Ext3.extend(Ext3.data.Store,
             }
         }
 
-        return Ext3.ux.maximgb.tg.AbstractTreeStore.superclass.sort.call(this, fieldName, dir);         
+        return Ext.ux.maximgb.tg.AbstractTreeStore.superclass.sort.call(this, fieldName, dir);         
     },    
 
     /**
@@ -5181,7 +5181,7 @@ Ext3.ux.maximgb.tg.AbstractTreeStore = Ext3.extend(Ext3.data.Store,
 /**
  * Tree store for adjacency list tree representation.
  */
-Ext3.ux.maximgb.tg.AdjacencyListStore = Ext3.extend(Ext3.ux.maximgb.tg.AbstractTreeStore,
+Ext.ux.maximgb.tg.AdjacencyListStore = Ext.extend(Ext.ux.maximgb.tg.AbstractTreeStore,
 {
     /**
      * @cfg {String} parent_id_field_name Record parent id field name.
@@ -5242,12 +5242,12 @@ Ext3.ux.maximgb.tg.AdjacencyListStore = Ext3.extend(Ext3.ux.maximgb.tg.AbstractT
     }
 });
 
-Ext3.reg('Ext3.ux.maximgb.tg.AdjacencyListStore', Ext3.ux.maximgb.tg.AdjacencyListStore);
+Ext.reg('Ext.ux.maximgb.tg.AdjacencyListStore', Ext.ux.maximgb.tg.AdjacencyListStore);
 
 /**
  * Tree store for nested set tree representation.
  */
-Ext3.ux.maximgb.tg.NestedSetStore = Ext3.extend(Ext3.ux.maximgb.tg.AbstractTreeStore,
+Ext.ux.maximgb.tg.NestedSetStore = Ext.extend(Ext.ux.maximgb.tg.AbstractTreeStore,
 {
     /**
      * @cfg {String} left_field_name Record NS-left bound field name.
@@ -5355,7 +5355,7 @@ Ext3.ux.maximgb.tg.NestedSetStore = Ext3.extend(Ext3.ux.maximgb.tg.AbstractTreeS
     }
 });
 
-Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView, 
+Ext.ux.maximgb.tg.GridView = Ext.extend(Ext.grid.GridView, 
 {   
     expanded_icon_class : 'ux-maximgb-tg-elbow-minus',
     last_expanded_icon_class : 'ux-maximgb-tg-elbow-end-minus',
@@ -5369,16 +5369,16 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
         var ts = this.templates || {};
         
         if (!ts.row) {
-            ts.row = new Ext3.Template(
-                '<div class="x3-grid3-row ux-maximgb-tg-level-{level} {alt}" style="{tstyle} {display_style}">',
-                    '<table class="x3-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="{tstyle}">',
+            ts.row = new Ext.Template(
+                '<div class="x-grid3-row ux-maximgb-tg-level-{level} {alt}" style="{tstyle} {display_style}">',
+                    '<table class="x-grid3-row-table" border="0" cellspacing="0" cellpadding="0" style="{tstyle}">',
                         '<tbody>',
                             '<tr>{cells}</tr>',
                             (
                             this.enableRowBody ? 
-                            '<tr class="x3-grid3-row-body-tr" style="{bodyStyle}">' +
-                                '<td colspan="{cols}" class="x3-grid3-body-cell" tabIndex="0" hidefocus="on">'+
-                                    '<div class="x3-grid3-row-body">{body}</div>'+
+                            '<tr class="x-grid3-row-body-tr" style="{bodyStyle}">' +
+                                '<td colspan="{cols}" class="x-grid3-body-cell" tabIndex="0" hidefocus="on">'+
+                                    '<div class="x-grid3-row-body">{body}</div>'+
                                 '</td>'+
                             '</tr>' 
                                 : 
@@ -5391,18 +5391,18 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
         }
         
         if (!ts.mastercell) {
-            ts.mastercell = new Ext3.Template(
-                '<td class="x3-grid3-col x3-grid3-cell x3-grid3-td-{id} {css}" style="{style}" tabIndex="0" {cellAttr}>',
+            ts.mastercell = new Ext.Template(
+                '<td class="x-grid3-col x-grid3-cell x-grid3-td-{id} {css}" style="{style}" tabIndex="0" {cellAttr}>',
                     '<div class="ux-maximgb-tg-mastercell-wrap">', // This is for editor to place itself right
                         '{treeui}',
-                        '<div class="x3-grid3-cell-inner x3-grid3-col-{id}" unselectable="on" {attr}>{value}</div>',
+                        '<div class="x-grid3-cell-inner x-grid3-col-{id}" unselectable="on" {attr}>{value}</div>',
                     '</div>',
                 '</td>'
             );
         }
         
         if (!ts.treeui) {
-            ts.treeui = new Ext3.Template(
+            ts.treeui = new Ext.Template(
                 '<div class="ux-maximgb-tg-uiwrap" style="width: {wrap_width}px">',
                     '{elbow_line}',
                     '<div style="left: {left}px" class="{cls}">&#160;</div>',
@@ -5411,13 +5411,13 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
         }
         
         if (!ts.elbow_line) {
-            ts.elbow_line = new Ext3.Template(
+            ts.elbow_line = new Ext.Template(
                 '<div style="left: {left}px" class="{cls}">&#160;</div>'
             );
         }
         
         this.templates = ts;
-        Ext3.ux.maximgb.tg.GridView.superclass.initTemplates.call(this);
+        Ext.ux.maximgb.tg.GridView.superclass.initTemplates.call(this);
     },
     
     // Private - Overriden
@@ -5437,15 +5437,15 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
                 for (var i = 0; i < colCount; i++) {
                     c = cs[i];
                     p.id = c.id;
-                    p.css = i == 0 ? 'x3-grid3-cell-first ' : (i == last ? 'x3-grid3-cell-last ' : '');
+                    p.css = i == 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '');
                     p.attr = p.cellAttr = "";
                     p.value = c.renderer.call(c.scope, r.data[c.name], p, r, rowIndex, i, ds);                              
                     p.style = c.style;
-                    if(Ext3.isEmpty(p.value)){
+                    if(Ext.isEmpty(p.value)){
                         p.value = "&#160;";
                     }
                     if(this.markDirty && r.dirty && typeof r.modified[c.name] !== 'undefined'){
-                        p.css += ' x3-grid3-dirty-cell';
+                        p.css += ' x-grid3-dirty-cell';
                     }
                     // ----- Modification start
                     if (c.id == this.grid.master_column_id) {
@@ -5465,10 +5465,10 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
             
             var alt = [];
             if (stripe && ((rowIndex+1) % 2 == 0)) {
-                alt[0] = "x3-grid3-row-alt";
+                alt[0] = "x-grid3-row-alt";
             }
             if (r.dirty) {
-                alt[1] = " x3-grid3-dirty-row";
+                alt[1] = " x-grid3-dirty-row";
             }
             rp.cols = colCount;
             if(this.getRowClass){
@@ -5574,7 +5574,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
     // private - overriden
     afterRender : function()
     {
-        Ext3.ux.maximgb.tg.GridView.superclass.afterRender.call(this);
+        Ext.ux.maximgb.tg.GridView.superclass.afterRender.call(this);
         this.updateAllColumnWidths();
     },
     
@@ -5606,7 +5606,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
                 row.firstChild.style.width = tw;
                 trow = row.firstChild.rows[0];
                 for (var j = 0; j < clen && j < trow.childNodes.length; j++) {
-                    if (!Ext3.fly(trow.childNodes[j]).hasClass(this.skip_width_update_class)) {
+                    if (!Ext.fly(trow.childNodes[j]).hasClass(this.skip_width_update_class)) {
                         trow.childNodes[j].style.width = ws[j];
                     }
                 }
@@ -5635,7 +5635,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
             if(row.firstChild){
                 row.firstChild.style.width = tw;
                 if (col < row.firstChild.rows[0].childNodes.length) {
-                    if (!Ext3.fly(row.firstChild.rows[0].childNodes[col]).hasClass(this.skip_width_update_class)) {
+                    if (!Ext.fly(row.firstChild.rows[0].childNodes[col]).hasClass(this.skip_width_update_class)) {
                         row.firstChild.rows[0].childNodes[col].style.width = w;
                     }
                 }
@@ -5665,7 +5665,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
             if(row.firstChild){
                 row.firstChild.style.width = tw;
                 if (col < row.firstChild.rows[0].childNodes.length) {
-                    if (!Ext3.fly(row.firstChild.rows[0].childNodes[col]).hasClass(this.skip_width_update_class)) {
+                    if (!Ext.fly(row.firstChild.rows[0].childNodes[col]).hasClass(this.skip_width_update_class)) {
                         row.firstChild.rows[0].childNodes[col].style.display = display;
                     }
                 }
@@ -5690,19 +5690,19 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
         var rows = this.getRows();
         var processed_cnt = 0;
         
-        Ext3.each(rows, function(row, idx){
+        Ext.each(rows, function(row, idx){
             row.rowIndex = idx;
             row.className = row.className.replace(this.rowClsRe, ' ');
             if (row.style.display != 'none') {
                 if (!skipStripe && ((processed_cnt + 1) % 2 === 0)) {
-                    row.className += ' x3-grid3-row-alt';
+                    row.className += ' x-grid3-row-alt';
                 }
                 processed_cnt++;
             }
         }, this);
         
-        Ext3.fly(rows[0]).addClass(this.firstRowCls);
-        Ext3.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
+        Ext.fly(rows[0]).addClass(this.firstRowCls);
+        Ext.fly(rows[rows.length - 1]).addClass(this.lastRowCls);
     },
     
     ensureVisible : function(row, col, hscroll)
@@ -5719,7 +5719,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
             }
         }
         
-        return Ext3.ux.maximgb.tg.GridView.superclass.ensureVisible.call(this, row, col, hscroll);
+        return Ext.ux.maximgb.tg.GridView.superclass.ensureVisible.call(this, row, col, hscroll);
     },
     
     // Private
@@ -5739,7 +5739,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
         skip_process = skip_process || false;
         
         row = this.getRow(index);
-        pmel = Ext3.fly(row).child('.ux-maximgb-tg-elbow-active');
+        pmel = Ext.fly(row).child('.ux-maximgb-tg-elbow-active');
         if (pmel) {
             if (ds.hasNextSiblingNode(record)) {
                 pmel.removeClass(this.collapsed_icon_class);
@@ -5785,7 +5785,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
         skip_process = skip_process || false;
         
         row = this.getRow(index);
-        pmel = Ext3.fly(row).child('.ux-maximgb-tg-elbow-active');
+        pmel = Ext.fly(row).child('.ux-maximgb-tg-elbow-active');
         if (pmel) {
             if (ds.hasNextSiblingNode(record)) {
                 pmel.removeClass(this.expanded_icon_class);
@@ -5818,7 +5818,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
      */
     initData : function(ds, cm)
     {
-        Ext3.ux.maximgb.tg.GridView.superclass.initData.call(this, ds, cm);
+        Ext.ux.maximgb.tg.GridView.superclass.initData.call(this, ds, cm);
         if (this.ds) {
             this.ds.un('expandnode', this.onStoreExpandNode, this);
             this.ds.un('collapsenode', this.onStoreCollapseNode, this);
@@ -5841,13 +5841,13 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
                 store.indexOfId(options.params[store.paramNames.active_node]) == -1
             )
         ) {
-            Ext3.ux.maximgb.tg.GridView.superclass.onLoad.call(this, store, records, options);
+            Ext.ux.maximgb.tg.GridView.superclass.onLoad.call(this, store, records, options);
         }
     },
     
     onAdd : function(ds, records, index)
     {
-        Ext3.ux.maximgb.tg.GridView.superclass.onAdd.call(this, ds, records, index);
+        Ext.ux.maximgb.tg.GridView.superclass.onAdd.call(this, ds, records, index);
         if (this.mainWrap) {
            //this.updateAllColumnWidths();
            this.processRows(0);
@@ -5856,7 +5856,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
     
     onRemove : function(ds, record, index, isUpdate)
     {
-        Ext3.ux.maximgb.tg.GridView.superclass.onRemove.call(this, ds, record, index, isUpdate);
+        Ext.ux.maximgb.tg.GridView.superclass.onRemove.call(this, ds, record, index, isUpdate);
         if(isUpdate !== true){
             if (this.mainWrap) {
                 //this.updateAllColumnWidths();
@@ -5867,7 +5867,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
     
     onUpdate : function(ds, record)
     {
-        Ext3.ux.maximgb.tg.GridView.superclass.onUpdate.call(this, ds, record);
+        Ext.ux.maximgb.tg.GridView.superclass.onUpdate.call(this, ds, record);
         if (this.mainWrap) {
             //this.updateAllColumnWidths();
             this.processRows(0);
@@ -5885,7 +5885,7 @@ Ext3.ux.maximgb.tg.GridView = Ext3.extend(Ext3.grid.GridView,
     }
 });
 
-Ext3.ux.maximgb.tg.GridPanel = Ext3.extend(Ext3.m3.GridPanel, 
+Ext.ux.maximgb.tg.GridPanel = Ext.extend(Ext.m3.GridPanel, 
 {
     /**
      * @cfg {String|Integer} master_column_id Master column id. Master column cells are nested.
@@ -5902,19 +5902,19 @@ Ext3.ux.maximgb.tg.GridPanel = Ext3.extend(Ext3.m3.GridPanel,
     initComponent : function()
     {
         this.initComponentPreOverride();
-        Ext3.ux.maximgb.tg.GridPanel.superclass.initComponent.call(this);
+        Ext.ux.maximgb.tg.GridPanel.superclass.initComponent.call(this);
         this.getSelectionModel().on('selectionchange', this.onTreeGridSelectionChange, this);
         this.initComponentPostOverride();
     },
     
-    initComponentPreOverride : Ext3.emptyFn,
+    initComponentPreOverride : Ext.emptyFn,
     
-    initComponentPostOverride : Ext3.emptyFn,
+    initComponentPostOverride : Ext.emptyFn,
     
     // Private
     onRender : function(ct, position)
     {
-        Ext3.ux.maximgb.tg.GridPanel.superclass.onRender.call(this, ct, position);
+        Ext.ux.maximgb.tg.GridPanel.superclass.onRender.call(this, ct, position);
         this.el.addClass(this.tg_cls);
     },
 
@@ -5927,7 +5927,7 @@ Ext3.ux.maximgb.tg.GridPanel = Ext3.extend(Ext3.m3.GridPanel,
     getView : function()
     {
         if (!this.view) {
-            this.view = new Ext3.ux.maximgb.tg.GridView(this.viewConfig);
+            this.view = new Ext.ux.maximgb.tg.GridView(this.viewConfig);
         }
         return this.view;
     },
@@ -5946,7 +5946,7 @@ Ext3.ux.maximgb.tg.GridPanel = Ext3.extend(Ext3.m3.GridPanel,
         
         // Row click
         if (row !== false) {
-            if (Ext3.fly(target).hasClass('ux-maximgb-tg-elbow-active')) {
+            if (Ext.fly(target).hasClass('ux-maximgb-tg-elbow-active')) {
                 record = store.getAt(row);
                 if (store.isExpandedNode(record)) {
                     store.collapseNode(record);
@@ -5959,7 +5959,7 @@ Ext3.ux.maximgb.tg.GridPanel = Ext3.extend(Ext3.m3.GridPanel,
         }
 
         if (do_default) {
-            Ext3.ux.maximgb.tg.GridPanel.superclass.onClick.call(this, e);
+            Ext.ux.maximgb.tg.GridPanel.superclass.onClick.call(this, e);
         }
     },
 
@@ -5970,8 +5970,8 @@ Ext3.ux.maximgb.tg.GridPanel = Ext3.extend(Ext3.m3.GridPanel,
     {
         var target = e.getTarget();
 
-        if (!Ext3.fly(target).hasClass('ux-maximgb-tg-elbow-active')) {
-            Ext3.ux.maximgb.tg.GridPanel.superclass.onMouseDown.call(this, e);
+        if (!Ext.fly(target).hasClass('ux-maximgb-tg-elbow-active')) {
+            Ext.ux.maximgb.tg.GridPanel.superclass.onMouseDown.call(this, e);
         }
     },
     
@@ -6004,7 +6004,7 @@ Ext3.ux.maximgb.tg.GridPanel = Ext3.extend(Ext3.m3.GridPanel,
     }
 });
 
-Ext3.ux.maximgb.tg.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel, 
+Ext.ux.maximgb.tg.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, 
 {
     /**
      * @cfg {String|Integer} master_column_id Master column id. Master column cells are nested.
@@ -6017,7 +6017,7 @@ Ext3.ux.maximgb.tg.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel,
     {
         this.initComponentPreOverride();
     
-        Ext3.ux.maximgb.tg.EditorGridPanel.superclass.initComponent.call(this);
+        Ext.ux.maximgb.tg.EditorGridPanel.superclass.initComponent.call(this);
         
         this.getSelectionModel().on(
             'selectionchange',
@@ -6028,14 +6028,14 @@ Ext3.ux.maximgb.tg.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel,
         this.initComponentPostOverride();
     },
     
-    initComponentPreOverride : Ext3.emptyFn,
+    initComponentPreOverride : Ext.emptyFn,
     
-    initComponentPostOverride : Ext3.emptyFn,
+    initComponentPostOverride : Ext.emptyFn,
     
     // Private
     onRender : function(ct, position)
     {
-        Ext3.ux.maximgb.tg.EditorGridPanel.superclass.onRender.call(this, ct, position);
+        Ext.ux.maximgb.tg.EditorGridPanel.superclass.onRender.call(this, ct, position);
         this.el.addClass('ux-maximgb-tg-panel');
     },
 
@@ -6048,7 +6048,7 @@ Ext3.ux.maximgb.tg.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel,
     getView : function()
     {
         if (!this.view) {
-            this.view = new Ext3.ux.maximgb.tg.GridView(this.viewConfig);
+            this.view = new Ext.ux.maximgb.tg.GridView(this.viewConfig);
         }
         return this.view;
     },
@@ -6067,7 +6067,7 @@ Ext3.ux.maximgb.tg.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel,
         
         // Row click
         if (row !== false) {
-            if (Ext3.fly(target).hasClass('ux-maximgb-tg-elbow-active')) {
+            if (Ext.fly(target).hasClass('ux-maximgb-tg-elbow-active')) {
                 record = store.getAt(row);
                 if (store.isExpandedNode(record)) {
                     store.collapseNode(record);
@@ -6080,7 +6080,7 @@ Ext3.ux.maximgb.tg.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel,
         }
 
         if (do_default) {
-            Ext3.ux.maximgb.tg.EditorGridPanel.superclass.onClick.call(this, e);
+            Ext.ux.maximgb.tg.EditorGridPanel.superclass.onClick.call(this, e);
         }
     },
 
@@ -6091,8 +6091,8 @@ Ext3.ux.maximgb.tg.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel,
     {
         var target = e.getTarget();
 
-        if (!Ext3.fly(target).hasClass('ux-maximgb-tg-elbow-active')) {
-            Ext3.ux.maximgb.tg.EditorGridPanel.superclass.onMouseDown.call(this, e);
+        if (!Ext.fly(target).hasClass('ux-maximgb-tg-elbow-active')) {
+            Ext.ux.maximgb.tg.EditorGridPanel.superclass.onMouseDown.call(this, e);
         }
     },
     
@@ -6128,11 +6128,11 @@ Ext3.ux.maximgb.tg.EditorGridPanel = Ext3.extend(Ext3.grid.EditorGridPanel,
 /**
  * Paging toolbar for work this AbstractTreeStore.
  */
-Ext3.ux.maximgb.tg.PagingToolbar = Ext3.extend(Ext3.PagingToolbar,
+Ext.ux.maximgb.tg.PagingToolbar = Ext.extend(Ext.PagingToolbar,
 {
     onRender : function(ct, position)
     {
-        Ext3.ux.maximgb.tg.PagingToolbar.superclass.onRender.call(this, ct, position);
+        Ext.ux.maximgb.tg.PagingToolbar.superclass.onRender.call(this, ct, position);
         this.updateUI();
     },
 
@@ -6193,14 +6193,14 @@ Ext3.ux.maximgb.tg.PagingToolbar = Ext3.extend(Ext3.PagingToolbar,
         if (store) {
             store.on('activenodechange', this.onStoreActiveNodeChange, this);
         }
-        Ext3.ux.maximgb.tg.PagingToolbar.superclass.bindStore.call(this, store, initial);
+        Ext.ux.maximgb.tg.PagingToolbar.superclass.bindStore.call(this, store, initial);
     },
     
     beforeLoad : function(store, options)
     {
         var paramNames = this.getParams();
         
-        Ext3.ux.maximgb.tg.PagingToolbar.superclass.beforeLoad.call(this, store, options);
+        Ext.ux.maximgb.tg.PagingToolbar.superclass.beforeLoad.call(this, store, options);
         
         if (options && options.params) {
             if(options.params[paramNames.start] === undefined) {
@@ -6263,16 +6263,16 @@ Ext3.ux.maximgb.tg.PagingToolbar = Ext3.extend(Ext3.PagingToolbar,
     }
 });
 
-Ext3.reg('Ext3.ux.maximgb.tg.GridPanel', Ext3.ux.maximgb.tg.GridPanel);
-Ext3.reg('Ext3.ux.maximgb.tg.EditorGridPanel', Ext3.ux.maximgb.tg.EditorGridPanel);
-Ext3.reg('Ext3.ux.maximgb.tg.PagingToolbar', Ext3.ux.maximgb.tg.PagingToolbar);
+Ext.reg('Ext.ux.maximgb.tg.GridPanel', Ext.ux.maximgb.tg.GridPanel);
+Ext.reg('Ext.ux.maximgb.tg.EditorGridPanel', Ext.ux.maximgb.tg.EditorGridPanel);
+Ext.reg('Ext.ux.maximgb.tg.PagingToolbar', Ext.ux.maximgb.tg.PagingToolbar);
 
 
 /**
- * Окно на базе Ext3.Window
+ * Окно на базе Ext.Window
  */
 
-Ext3.m3.Window = Ext3.extend(Ext3.Window, {
+Ext.m3.Window = Ext.extend(Ext.Window, {
 	constructor: function(baseConfig, params){
 
 		// Ссылка на родительское окно
@@ -6282,7 +6282,7 @@ Ext3.m3.Window = Ext3.extend(Ext3.Window, {
 		this.actionContextJson = null;
 		
 		if (params && params.parentWindowID) {
-			this.parentWindow = Ext3.getCmp(params.parentWindowID);
+			this.parentWindow = Ext.getCmp(params.parentWindowID);
 		}
 		
         if (params && params.helpTopic) {
@@ -6296,26 +6296,26 @@ Ext3.m3.Window = Ext3.extend(Ext3.Window, {
         // на F1 что-то нормально не вешается обработчик..
         //this.keys = {key: 112, fn: function(k,e){e.stopEvent();console.log('f1 pressed');}}
     
-		Ext3.m3.Window.superclass.constructor.call(this, baseConfig);
+		Ext.m3.Window.superclass.constructor.call(this, baseConfig);
 	},
     initTools: function(){
         if (this.m3HelpTopic){
             var m3HelpTopic = this.m3HelpTopic;
             this.addTool({id: 'help', handler:function(){ showHelpWindow(m3HelpTopic);}});
         }
-        Ext3.m3.Window.superclass.initTools.call(this);
+        Ext.m3.Window.superclass.initTools.call(this);
     }
 })
 
 
 
 /**
- * Расширенное дерево на базе Ext3.ux.maximgb.tg.GridPanel
- * http://www.sencha.com/forum/showthread.php?76331-TreeGrid-%28Ext.ux.maximgb.tg%29-a-tree-grid-component-based-on-Ext3-s-native-grid.
+ * Расширенное дерево на базе Ext.ux.maximgb.tg.GridPanel
+ * http://www.sencha.com/forum/showthread.php?76331-TreeGrid-%28Ext.ux.maximgb.tg%29-a-tree-grid-component-based-on-Ext-s-native-grid.
  * http://max-bazhenov.com/dev/ux.maximgb.tg/index.php
  * @param {Object} config
  */
-Ext3.m3.AdvancedTreeGrid = Ext3.extend(Ext3.ux.maximgb.tg.GridPanel, {
+Ext.m3.AdvancedTreeGrid = Ext.extend(Ext.ux.maximgb.tg.GridPanel, {
 	constructor: function(baseConfig, params){
 
 		// Проверки значений
@@ -6333,34 +6333,34 @@ Ext3.m3.AdvancedTreeGrid = Ext3.extend(Ext3.ux.maximgb.tg.GridPanel, {
 			,{name: '_parent', type: 'int'}
 		);
 		
-		var store = new Ext3.ux.maximgb.tg.AdjacencyListStore({
+		var store = new Ext.ux.maximgb.tg.AdjacencyListStore({
 			autoLoad : true,
 			url: params.storeParams.url,
-			reader: new Ext3.data.JsonReader({
+			reader: new Ext.data.JsonReader({
 					id: '_id',
 					root: params.storeParams.root,
 					totalProperty: 'total',
 					successProperty: 'success'
 				}, 
-				Ext3.data.Record.create(columnsToRecord)
+				Ext.data.Record.create(columnsToRecord)
 			)
 		});
 		
 		var botom_bar;
 		if (params.bbar) {
-			botom_bar = new Ext3.ux.maximgb.tg.PagingToolbar({
+			botom_bar = new Ext.ux.maximgb.tg.PagingToolbar({
 				store: store
 				,displayInfo:true
 				,pageSize: params.bbar.pageSize
 			});
 		}
 		
-		var config = Ext3.applyIf({
+		var config = Ext.applyIf({
 			store: store 
 			,bbar: botom_bar
 		}, baseConfig);
 		
-		Ext3.m3.AdvancedTreeGrid.superclass.constructor.call(this, config, params);
+		Ext.m3.AdvancedTreeGrid.superclass.constructor.call(this, config, params);
 	}
 });
 
@@ -6368,12 +6368,12 @@ Ext3.m3.AdvancedTreeGrid = Ext3.extend(Ext3.ux.maximgb.tg.GridPanel, {
 /**
  * Панель редактирования адреса
  */
-Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
+Ext.m3.AddrField = Ext.extend(Ext.Container, {
 	constructor: function(baseConfig, params){
 		
 		var items = params.items || [];
 		
-		var place_store = new Ext3.data.JsonStore({
+		var place_store = new Ext.data.JsonStore({
 			url: params.kladr_url,
 			idProperty: 'code',
 			root: 'rows',
@@ -6389,14 +6389,14 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 			]
 		});
 		if (params.place_record != '' && params.place_record != undefined) {
-			var rec = Ext3.util.JSON.decode(params.place_record);
+			var rec = Ext.util.JSON.decode(params.place_record);
     		place_store.loadData({total:1, rows:[rec]});
 		}
 		if (params.read_only) 
 			var field_cls = 'm3-grey-field' 
 		else
 			var field_cls = ''
-		this.place = new Ext3.form.ComboBox({
+		this.place = new Ext.form.ComboBox({
 			name: params.place_field_name,
 			fieldLabel: params.place_label,
 			allowBlank: params.place_allow_blank,
@@ -6417,7 +6417,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 		});		
 		this.place.setValue(params.place_value);
 		
-        this.zipcode = new Ext3.form.TextField({
+        this.zipcode = new Ext.form.TextField({
             name: params.zipcode_field_name,
             value: params.zipcode_value,
             emptyText: 'индекс',
@@ -6428,7 +6428,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
         });
 		
 		if (params.level > 1) {
-			var street_store = new Ext3.data.JsonStore({
+			var street_store = new Ext.data.JsonStore({
 				url: params.street_url,
 				idProperty: 'code',
 				root: 'rows',
@@ -6444,10 +6444,10 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 				]
 			});
 			if (params.street_record != '' && params.street_record != undefined) {
-				var rec = Ext3.util.JSON.decode(params.street_record);
+				var rec = Ext.util.JSON.decode(params.street_record);
 				street_store.loadData({total:1, rows:[rec]});
 			}
-			this.street = new Ext3.form.ComboBox({
+			this.street = new Ext.form.ComboBox({
 				name: params.street_field_name,
 				fieldLabel: params.street_label,
 				allowBlank: params.street_allow_blank,
@@ -6469,7 +6469,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 			this.street.setValue(params.street_value);
 			
 			if (params.level > 2) {
-				this.house = new Ext3.form.TextField({
+				this.house = new Ext.form.TextField({
 					name: params.house_field_name,
                     allowBlank: params.house_allow_blank,
                     readOnly: params.read_only,
@@ -6481,7 +6481,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
                     invalidClass: params.invalid_class
 				});
 				if (params.use_corps) {
-					this.corps = new Ext3.form.TextField({
+					this.corps = new Ext.form.TextField({
 						name: params.corps_field_name,
 						allowBlank: params.corps_allow_blank,
 						readOnly: params.read_only,
@@ -6494,7 +6494,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 					});
 				}
 				if (params.level > 3) {
-					this.flat = new Ext3.form.TextField({
+					this.flat = new Ext.form.TextField({
 						name: params.flat_field_name,
 						fieldLabel: params.flat_label,
 						value: params.flat_value,
@@ -6509,7 +6509,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 			}
 		}
 		if (params.addr_visible) {
-			this.addr = new Ext3.form.TextArea({
+			this.addr = new Ext.form.TextArea({
 				name: params.addr_field_name,
 				anchor: '100%',
 				fieldLabel: params.addr_label,
@@ -6686,7 +6686,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 							, items: this.flat
 						});
 					}
-					var row = new Ext3.Container({
+					var row = new Ext.Container({
 						anchor: '100%'
 						, layout: 'column'
 						, items: row_items
@@ -6700,7 +6700,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 			}
 		}
 						
-		var config = Ext3.applyIf({
+		var config = Ext.applyIf({
 			items: items
 			, get_addr_url: params.get_addr_url
 			, level: params.level
@@ -6709,7 +6709,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
 			, style: {overflow: 'hidden'}
 		}, baseConfig);
 		
-		Ext3.Container.superclass.constructor.call(this, config);
+		Ext.Container.superclass.constructor.call(this, config);
 	}
 	, beforeStreetQuery: function(qe) {
 		this.street.getStore().baseParams.place_code = this.place.value;		
@@ -6725,7 +6725,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
     }
 
 	, initComponent: function(){
-		Ext3.m3.AddrField.superclass.initComponent.call(this);		
+		Ext.m3.AddrField.superclass.initComponent.call(this);		
 		this.mon(this.place, 'change', this.onChangePlace, this);
 		if (this.level > 1) {
 			this.mon(this.street, 'change', this.onChangeStreet, this);
@@ -6955,7 +6955,7 @@ Ext3.m3.AddrField = Ext3.extend(Ext3.Container, {
  * @param {Object} params
  */
 
-Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
+Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 	constructor: function(baseConfig, params){
 
 		/**
@@ -6995,9 +6995,9 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 		this.defaultLimit = '50';
 		
 		// css классы для иконок на триггеры 
-		this.triggerClearClass = 'x3-form-clear-trigger';
-		this.triggerSelectClass = 'x3-form-select-trigger';
-		this.triggerEditClass = 'x3-form-edit-trigger';
+		this.triggerClearClass = 'x-form-clear-trigger';
+		this.triggerSelectClass = 'x-form-select-trigger';
+		this.triggerEditClass = 'x-form-edit-trigger';
 
 
 
@@ -7023,10 +7023,10 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 
 		this.defaultValue = params.defaultValue;
 		this.defaultText = params.defaultText;
-        this.defaultRecord = Ext3.decode(params.recordValue);
+        this.defaultRecord = Ext.decode(params.recordValue);
 
 		this.baseTriggers = [{
-				iconCls: 'x3-form-clear-trigger',
+				iconCls: 'x-form-clear-trigger',
 				handler: null,
 				hide: null
 			},{
@@ -7034,38 +7034,38 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 				handler: null,
 				hide: null
 			},{
-				iconCls:'x3-form-select-trigger', 
+				iconCls:'x-form-select-trigger', 
 				handler: null,
 				hide: null
 			},{
-				iconCls:'x3-form-edit-trigger', 
+				iconCls:'x-form-edit-trigger', 
 				handler: null,
 				hide: true
 			}
 		];
 		this.allTriggers = [].concat(this.baseTriggers);
 		if (params.customTriggers) {
-			Ext3.each(params.customTriggers, function(item, index, all){
+			Ext.each(params.customTriggers, function(item, index, all){
 				this.allTriggers.push(item);
 			}, this);
 		
 		}
 
-		Ext3.m3.AdvancedComboBox.superclass.constructor.call(this, baseConfig);
+		Ext.m3.AdvancedComboBox.superclass.constructor.call(this, baseConfig);
 	},
 	/**
 	 * Конфигурация компонента 
 	 */
 	initComponent: function () {
-		Ext3.m3.AdvancedComboBox.superclass.initComponent.call(this);
+		Ext.m3.AdvancedComboBox.superclass.initComponent.call(this);
 		
 		// см. TwinTriggerField
         this.triggerConfig = {
-            tag:'span', cls:'x3-form-twin-triggers', cn:[]};
+            tag:'span', cls:'x-form-twin-triggers', cn:[]};
 
-		Ext3.each(this.allTriggers, function(item, index, all){
+		Ext.each(this.allTriggers, function(item, index, all){
 			this.triggerConfig.cn.push(
-				{tag: "img", src: Ext3.BLANK_IMAGE_URL, cls: "x3-form-trigger " + item.iconCls}
+				{tag: "img", src: Ext.BLANK_IMAGE_URL, cls: "x-form-trigger " + item.iconCls}
 			);
 		}, this);
 
@@ -7083,7 +7083,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 
 		// Значения по-умолчанию
         if (this.defaultRecord){
-            var record = new Ext3.data.Record(this.defaultRecord);
+            var record = new Ext.data.Record(this.defaultRecord);
             this.setRecord(record);
         } else {
             if (this.defaultValue && this.defaultText) {
@@ -7131,7 +7131,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 			'changed'
 		);
 		
-		this.getStore().baseParams = Ext3.applyIf({start:0, limit: this.defaultLimit }, this.getStore().baseParams );
+		this.getStore().baseParams = Ext.applyIf({start:0, limit: this.defaultLimit }, this.getStore().baseParams );
         this.triggerAction = 'all';
 	},
 	// см. TwinTriggerField
@@ -7140,7 +7140,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
     },
 	// см. TwinTriggerField
     initTrigger : function(){
-        var ts = this.trigger.select('.x3-form-trigger', true),
+        var ts = this.trigger.select('.x-form-trigger', true),
             triggerField = this;
         ts.each(function(t, all, index){
 			
@@ -7171,7 +7171,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 
     getWidth: function() {
         // неверно пересчитывался размер поля
-        //Ext3.m3.AdvancedComboBox.superclass.getWidth.call(this);
+        //Ext.m3.AdvancedComboBox.superclass.getWidth.call(this);
         return(this.el.getWidth() + this.getTriggerWidth());
     },
     /**
@@ -7180,16 +7180,16 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
      */
     disableTriggers: function(disabled){
         if (this.trigger) {
-            var ts = this.trigger.select('.x3-form-trigger', true);
+            var ts = this.trigger.select('.x-form-trigger', true);
             ts.each(function(t, all, index){
                 var handler = this.allTriggers[index].handler,
-                    events = Ext3.elCache[t.id].events;
+                    events = Ext.elCache[t.id].events;
                 if (!disabled) {
                     // Чтобы не добавлять событие несколько раз, нужно проверить есть ли оно уже
                     if (!events.click || events.click.length === 0){
                         t.on('click', handler, this, {preventDefault:true});
-                        t.addClassOnOver('x3-form-trigger-over');
-                        t.addClassOnClick('x3-form-trigger-click');
+                        t.addClassOnOver('x-form-trigger-over');
+                        t.addClassOnClick('x-form-trigger-click');
                     }
                 } else {
                     t.un('click', handler, this, {preventDefault:true});
@@ -7226,7 +7226,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 	// см. TwinTriggerField
     getTriggerWidth: function(){
         var tw = 0;
-        Ext3.each(this.triggers, function(t, index){
+        Ext.each(this.triggers, function(t, index){
             var triggerIndex = 'Trigger' + (index + 1),
                 w = t.getWidth();
 
@@ -7242,10 +7242,10 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 	// см. TwinTriggerField
     // private
     onDestroy : function() {
-        Ext3.destroy(this.triggers);
-		Ext3.destroy(this.allTriggers);
-		Ext3.destroy(this.baseTriggers);
-        Ext3.m3.AdvancedComboBox.superclass.onDestroy.call(this);
+        Ext.destroy(this.triggers);
+		Ext.destroy(this.allTriggers);
+		Ext.destroy(this.baseTriggers);
+        Ext.m3.AdvancedComboBox.superclass.onDestroy.call(this);
     },
 
 	/**
@@ -7275,11 +7275,11 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 	onTriggerClearClick: function() {
 		if (this.askBeforeDeleting) {
 			var scope = this;
-			Ext3.Msg.show({
+			Ext.Msg.show({
 	            title: 'Подтверждение',
 	            msg: 'Вы действительно хотите очистить выбранное значение?',
-	            icon: Ext3.Msg.QUESTION,
-	            buttons: Ext3.Msg.YESNO,
+	            icon: Ext.Msg.QUESTION,
+	            buttons: Ext.Msg.YESNO,
 	            fn: function(btn,text,opt){
 	                if (btn === 'yes') {
 	                    scope.clearValue(); 
@@ -7303,7 +7303,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 	 */
 	onSelect: function(record, index){
 		if (this.fireEvent('afterselect', this, record.data[this.valueField], record.data[this.displayField] )) {
-			Ext3.m3.AdvancedComboBox.superclass.onSelect.call(this, record, index);
+			Ext.m3.AdvancedComboBox.superclass.onSelect.call(this, record, index);
             this.showClearBtn();
             this.showEditBtn();
 			this.fireEvent('change', this, record.data[this.valueField || this.displayField]);
@@ -7356,7 +7356,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 	 */
 	clearValue: function(){
 		var oldValue = this.getValue();
-		Ext3.m3.AdvancedComboBox.superclass.clearValue.call(this);
+		Ext.m3.AdvancedComboBox.superclass.clearValue.call(this);
 		this.hideClearBtn();
 		this.hideEditBtn();
 		
@@ -7368,7 +7368,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 	 * кнопку очистки
 	 */
 	setValue: function(value){
-		Ext3.m3.AdvancedComboBox.superclass.setValue.call(this, value);
+		Ext.m3.AdvancedComboBox.superclass.setValue.call(this, value);
 		if (value) {
 			this.showClearBtn();
 			this.showEditBtn();
@@ -7383,7 +7383,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 		
 		if(this.fireEvent('beforerequest', this)) { 
 			var scope = this;
-			Ext3.Ajax.request({
+			Ext.Ajax.request({
 				url: this.actionSelectUrl,
 				method: 'POST',
 				params: this.actionContextJson,
@@ -7410,7 +7410,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 	 * @param {Object} value Отображаемое значение
 	 */
 	addRecordToStore: function(id, value){
-        var record = new Ext3.data.Record(),
+        var record = new Ext.data.Record(),
             oldValue = this.getValue();
         record.id = id;
         record[this.displayField] = value;
@@ -7425,7 +7425,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
     },
     /**
      * Установка значения как готовой записи
-     * @param {Ext3.data.Record} record Запись-значение
+     * @param {Ext.data.Record} record Запись-значение
      */
     setRecord: function(record){
         if (record){
@@ -7449,7 +7449,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
     },
     /**
      * Получение значения как записи из store
-     * @return {Ext3.data.Record} Запись-значение
+     * @return {Ext.data.Record} Запись-значение
      */
     getRecord: function(){
         var store = this.getStore(),
@@ -7474,10 +7474,10 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 		var value_id = this.getValue();
 		assert( value_id, 'Value not selected but edit window called' );
 		
-		Ext3.Ajax.request({
+		Ext.Ajax.request({
 			url: this.actionEditUrl,
 			method: 'POST',
-			params: Ext3.applyIf({id: value_id}, this.actionContextJson),
+			params: Ext.applyIf({id: value_id}, this.actionContextJson),
 			success: function(response, opts){
 			    smart_eval(response.responseText);
 			},
@@ -7542,7 +7542,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
     setDisabled: function(disabled){
 
         this.disableTriggers(disabled);
-        Ext3.m3.AdvancedComboBox.superclass.setDisabled.call(this, disabled);
+        Ext.m3.AdvancedComboBox.superclass.setDisabled.call(this, disabled);
 
         // Отображаем триггеры при disabled=false, т.е. поле вновь активно.
         this.showTriggers(!disabled);
@@ -7554,7 +7554,7 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
     setReadOnly: function(readOnly){
         var width = this.getWidth();
         this.disableTriggers(readOnly);
-        Ext3.m3.AdvancedComboBox.superclass.setReadOnly.call(this, readOnly);
+        Ext.m3.AdvancedComboBox.superclass.setReadOnly.call(this, readOnly);
         if (readOnly){
             this.el.setWidth(width);
             if (this.wrap) this.wrap.setWidth(width);
@@ -7567,24 +7567,24 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
     }
 });
 
-Ext3.reg('m3-select', Ext3.m3.AdvancedComboBox);
+Ext.reg('m3-select', Ext.m3.AdvancedComboBox);
 
 /**
  * Компонент поля даты. 
  * Добавлена кнопа установки текущий даты
  */
-Ext3.m3.AdvancedDataField = Ext3.extend(Ext3.form.DateField, {
+Ext.m3.AdvancedDataField = Ext.extend(Ext.form.DateField, {
 	constructor: function(baseConfig, params){
 
 		// Базовый конфиг для тригеров
 		this.baseTriggers = [
 			{
-				iconCls: 'x3-form-date-trigger'
+				iconCls: 'x-form-date-trigger'
 				,handler: null
 				,hide:null
 			},
 			{
-				iconCls: 'x3-form-current-date-trigger'
+				iconCls: 'x-form-current-date-trigger'
 				,handler: null
 				,hide:null
 			}
@@ -7597,17 +7597,17 @@ Ext3.m3.AdvancedDataField = Ext3.extend(Ext3.form.DateField, {
 			this.hideTriggerToday = true;
 		};
 		
-		Ext3.m3.AdvancedDataField.superclass.constructor.call(this, baseConfig);
+		Ext.m3.AdvancedDataField.superclass.constructor.call(this, baseConfig);
 	}
 	,initComponent: function(){
-		Ext3.m3.AdvancedDataField.superclass.initComponent.call(this);
+		Ext.m3.AdvancedDataField.superclass.initComponent.call(this);
 
         this.triggerConfig = {
-            tag:'span', cls:'x3-form-twin-triggers', cn:[]};
+            tag:'span', cls:'x-form-twin-triggers', cn:[]};
 
-		Ext3.each(this.baseTriggers, function(item, index, all){
+		Ext.each(this.baseTriggers, function(item, index, all){
 			this.triggerConfig.cn.push(
-				{tag: "img", src: Ext3.BLANK_IMAGE_URL, cls: "x3-form-trigger " + item.iconCls}
+				{tag: "img", src: Ext.BLANK_IMAGE_URL, cls: "x-form-trigger " + item.iconCls}
 			);
 		}, this);
 
@@ -7615,7 +7615,7 @@ Ext3.m3.AdvancedDataField = Ext3.extend(Ext3.form.DateField, {
 	},
 	initTrigger : function(){
 		
-        var ts = this.trigger.select('.x3-form-trigger', true);
+        var ts = this.trigger.select('.x-form-trigger', true);
         var triggerField = this;
         ts.each(function(t, all, index){
 			
@@ -7638,8 +7638,8 @@ Ext3.m3.AdvancedDataField = Ext3.extend(Ext3.form.DateField, {
                 this['hidden' + triggerIndex] = true;
             }
             this.mon(t, 'click', this.baseTriggers[index].handler, this, {preventDefault:true});
-            t.addClassOnOver('x3-form-trigger-over');
-            t.addClassOnClick('x3-form-trigger-click');
+            t.addClassOnOver('x-form-trigger-over');
+            t.addClassOnClick('x-form-trigger-click');
         }, this);
 		
         this.triggers = ts.elements;
@@ -7656,15 +7656,15 @@ Ext3.m3.AdvancedDataField = Ext3.extend(Ext3.form.DateField, {
 
 });
 
-Ext3.reg('m3-date', Ext3.m3.AdvancedDataField );
+Ext.reg('m3-date', Ext.m3.AdvancedDataField );
 /**
  * Crafted by ZIgi
  */
 
-Ext3.ns('Ext3.m3');
+Ext.ns('Ext.m3');
 
 /**
- * @class Ext3.m3.BackgroundOperationProxy Класс обеспечивающий интерфейс для
+ * @class Ext.m3.BackgroundOperationProxy Класс обеспечивающий интерфейс для
  * опроса сервера с заданным интервалом. При получении данных срабатывает событие update, в качестве
  * аргумента к событию передается объект следуеющего вида
  * {
@@ -7673,7 +7673,7 @@ Ext3.ns('Ext3.m3');
  *     text:'' // строка сообщение с сервера
  * }
  */
-Ext3.m3.BackgroundOperationProxy = Ext3.extend(Ext3.util.Observable, {
+Ext.m3.BackgroundOperationProxy = Ext.extend(Ext.util.Observable, {
     /**
      * @cfg {String} адрес сервера для комуникации
      */
@@ -7700,11 +7700,11 @@ Ext3.m3.BackgroundOperationProxy = Ext3.extend(Ext3.util.Observable, {
     boundaryParam:'boundary',
 
     constructor:function(cfg) {
-        Ext3.apply(this, cfg);
-        Ext3.m3.BackgroundOperationProxy.superclass.constructor.call(this);
+        Ext.apply(this, cfg);
+        Ext.m3.BackgroundOperationProxy.superclass.constructor.call(this);
 
         //таск раннер - класс выполняющий некую функцию в бескончено цикле с заданным интервалом
-        this.taskRunner = new Ext3.util.TaskRunner();
+        this.taskRunner = new Ext.util.TaskRunner();
         this.task = {
             run:this.wait,
             interval:this.interval,
@@ -7796,10 +7796,10 @@ Ext3.m3.BackgroundOperationProxy = Ext3.extend(Ext3.util.Observable, {
         request_params[this.commandParam] = command;
         request_params[this.boundaryParam] = this.boundary;
         if(params != undefined){
-            Ext3.applyIf(request_params, params);
+            Ext.applyIf(request_params, params);
         }
 
-        Ext3.Ajax.request({
+        Ext.Ajax.request({
             url:this.url,
             success:successCallback,
             failure:this.requestError,
@@ -7829,16 +7829,16 @@ Ext3.m3.BackgroundOperationProxy = Ext3.extend(Ext3.util.Observable, {
      * @private Преобразование ответа сервера
      */
     parseResponse:function(response) {
-        return Ext3.util.JSON.decode(response.responseText);
+        return Ext.util.JSON.decode(response.responseText);
     }
 });
 
 /**
- * @class Ext3.m3.BackgroundOperationBar
+ * @class Ext.m3.BackgroundOperationBar
  * Экстовый прогресс бар, с привязаным к нему прокси. Интерфейс комуникации с сервером:
  * start(), stop(), ping()
  */
-Ext3.m3.BackgroundOperationBar = Ext3.extend(Ext3.ProgressBar, {
+Ext.m3.BackgroundOperationBar = Ext.extend(Ext.ProgressBar, {
 
     /**
      * @cfg {String} Урл
@@ -7851,8 +7851,8 @@ Ext3.m3.BackgroundOperationBar = Ext3.extend(Ext3.ProgressBar, {
     interval:1000,
 
     initComponent:function() {
-        Ext3.m3.BackgroundOperationBar.superclass.initComponent.call(this);
-        this.serverProxy = new Ext3.m3.BackgroundOperationProxy({
+        Ext.m3.BackgroundOperationBar.superclass.initComponent.call(this);
+        this.serverProxy = new Ext.m3.BackgroundOperationProxy({
             url:this.url,
             interval:this.interval,
             boundary:this.boundary
@@ -7884,8 +7884,8 @@ Ext3.m3.BackgroundOperationBar = Ext3.extend(Ext3.ProgressBar, {
     }
 });
 /**
- * @class Ext3.m3.CodeEditor
- * @extends Ext3.Panel
+ * @class Ext.m3.CodeEditor
+ * @extends Ext.Panel
  * Converts a panel into a code mirror editor with toolbar
  * @constructor
  *
@@ -7894,31 +7894,31 @@ Ext3.m3.BackgroundOperationBar = Ext3.extend(Ext3.ProgressBar, {
 
  // Define a set of code type configurations
 
-Ext3.ns('Ext3.m3.CodeEditorConfig');
-Ext3.apply(Ext3.m3.CodeEditorConfig, {
+Ext.ns('Ext.m3.CodeEditorConfig');
+Ext.apply(Ext.m3.CodeEditorConfig, {
     parser: {
         python: { mode: {name: "python", version: 2, singleLineStringErrors: false}},
         css: {mode: "css"},
         html: {mode: "text/html", tabMode: "indent"},
         javascript:{ mode:{ name: "javascript", json: true}},
-        sql: {lineNumbers: true, matchBrackets: true, indentUnit: 4, mode: "text/x3-plsql"}
+        sql: {lineNumbers: true, matchBrackets: true, indentUnit: 4, mode: "text/x-plsql"}
     }
 });
 
-//Ext3.ns('Ext3.m3');
-Ext3.m3.CodeEditor = Ext3.extend(Ext3.Panel, {
+//Ext.ns('Ext.m3');
+Ext.m3.CodeEditor = Ext.extend(Ext.Panel, {
     sourceCode: '/*Default code*/ ',
     readOnly: false,
     theme:'default',
     constructor: function(baseConfig){
-        Ext3.m3.CodeEditor.superclass.constructor.call(this, baseConfig);
+        Ext.m3.CodeEditor.superclass.constructor.call(this, baseConfig);
     },
 
     initComponent: function() {
         // this property is used to determine if the source content changes
         this.contentChanged = false;
 
-        Ext3.apply(this, {
+        Ext.apply(this, {
             items: [{
                 xtype: 'textarea',
                 readOnly: this.readOnly,
@@ -7930,12 +7930,12 @@ Ext3.m3.CodeEditor = Ext3.extend(Ext3.Panel, {
 
         this.addEvents('editorkeyevent','editorfocus');
 
-        Ext3.m3.CodeEditor.superclass.initComponent.apply(this, arguments);
+        Ext.m3.CodeEditor.superclass.initComponent.apply(this, arguments);
     },
 
 
     onRender: function() {
-        Ext3.m3.CodeEditor.superclass.onRender.apply(this, arguments);
+        Ext.m3.CodeEditor.superclass.onRender.apply(this, arguments);
 
         this.oldSourceCode = this.sourceCode;
         // trigger editor on afterlayout
@@ -7967,7 +7967,7 @@ Ext3.m3.CodeEditor = Ext3.extend(Ext3.Panel, {
     triggerCodeEditor: function() {
         var oThis = this;
         var oCmp = this.getTextArea();
-        var editorConfig = Ext3.applyIf(this.codeMirrorEditor || {}, {
+        var editorConfig = Ext.applyIf(this.codeMirrorEditor || {}, {
             height: "100%",
             width: "100%",
             theme: this.theme,
@@ -7988,9 +7988,9 @@ Ext3.m3.CodeEditor = Ext3.extend(Ext3.Panel, {
        });
 
         var sParserType = oThis.parser || 'python';
-        editorConfig = Ext3.applyIf(editorConfig, Ext3.m3.CodeEditorConfig.parser[sParserType]);
+        editorConfig = Ext.applyIf(editorConfig, Ext.m3.CodeEditorConfig.parser[sParserType]);
 
-        this.codeMirrorEditor = new CodeMirror.fromTextArea(Ext3.getDom(oCmp.id), editorConfig);
+        this.codeMirrorEditor = new CodeMirror.fromTextArea(Ext.getDom(oCmp.id), editorConfig);
     },
 
     setTitleClass: function(){
@@ -8002,10 +8002,10 @@ Ext3.m3.CodeEditor = Ext3.extend(Ext3.Panel, {
     }
 });
 
-Ext3.reg('uxCodeEditor', Ext3.m3.CodeEditor);
+Ext.reg('uxCodeEditor', Ext.m3.CodeEditor);
 
 /**
- * Окно на базе Ext3.m3.Window, которое включает такие вещи, как:
+ * Окно на базе Ext.m3.Window, которое включает такие вещи, как:
  * 1) Submit формы, если она есть;
  * 2) Навешивание функции на изменение поля, в связи с чем обновляется заголовок 
  * окна;
@@ -8013,7 +8013,7 @@ Ext3.reg('uxCodeEditor', Ext3.m3.CodeEditor);
  * действительно хотите отказаться от внесенных измений";
  */
 
-Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
+Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
 	/**
 	 * Инициализация первонального фунционала
 	 * @param {Object} baseConfig Базовый конфиг компонента
@@ -8061,13 +8061,13 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
 			}
 		}
 
-		Ext3.m3.EditWindow.superclass.constructor.call(this, baseConfig, params);
+		Ext.m3.EditWindow.superclass.constructor.call(this, baseConfig, params);
 	}
 	/**
 	 * Инициализация дополнительного функционала
 	 */
 	,initComponent: function(){
-		Ext3.m3.EditWindow.superclass.initComponent.call(this);
+		Ext.m3.EditWindow.superclass.initComponent.call(this);
 
 		// Устанавливает функции на изменение значения
 		this.items.each(function(item){
@@ -8130,7 +8130,7 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
 	,getForm: function() {
 		assert(this.formId, 'Не задан formId для формы');
 
-		return Ext3.getCmp(this.formId).getForm();
+		return Ext.getCmp(this.formId).getForm();
 	}
 	/**
 	 * Проверяет форму на наличие некорректных полей, отдает список label'ов этих полей
@@ -8150,11 +8150,11 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
 	 * @param {list} invalidNames
 	 */
     ,showInvalidFields: function(invalidNames){
-        Ext3.Msg.show({
+        Ext.Msg.show({
           title: 'Проверка формы',
           msg: 'На форме имеются некорректно заполненные поля:' + invalidNames.toString() + '.',
-          buttons: Ext3.Msg.OK,
-          icon: Ext3.Msg.WARNING
+          buttons: Ext.Msg.OK,
+          icon: Ext.Msg.WARNING
         });
     } 
 	/**
@@ -8166,7 +8166,7 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
 	,submitForm: function(btn, e, baseParams){
 		assert(this.formUrl, 'Не задан url для формы');
 
-		var form = Ext3.getCmp(this.formId).getForm();
+		var form = Ext.getCmp(this.formId).getForm();
 		if (form){
             var invalidNames = this.getInvalidNames(form);
             if (invalidNames.length){
@@ -8176,8 +8176,8 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
 		}
 				
         var scope = this;
-		var mask = new Ext3.LoadMask(this.body, {msg:'Сохранение...'});
-		var params = Ext3.applyIf(baseParams || {}, this.actionContextJson || {});
+		var mask = new Ext.LoadMask(this.body, {msg:'Сохранение...'});
+		var params = Ext.applyIf(baseParams || {}, this.actionContextJson || {});
 
         // На форме могут находиться компоненты, которые не являются полями, но их можно сабмитить
         // Находим такие компоненты по наличию атрибутов name и localEdit
@@ -8187,7 +8187,7 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
                 var control = items.get(i);
                 if (control.name && control.localEdit){
                     result.push(control);
-                } else if (control instanceof Ext3.Container && control.items != undefined) {
+                } else if (control instanceof Ext.Container && control.items != undefined) {
                     var cc = getControls(control.items);
                     result = result.concat(cc);
                 }
@@ -8206,13 +8206,13 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
             for (var k = 0; k < cStore.data.items.length; k++){
                 cStoreData.push(cStore.data.items[k].data);
             }
-            params[cControl.name] = Ext3.util.JSON.encode(cStoreData);
+            params[cControl.name] = Ext.util.JSON.encode(cStoreData);
         }
 
         // вытащим из формы все поля и исключим их из наших параметров, иначе они будут повторяться в submite
-        var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext3.getDom(form.el.dom)).elements;
+        var fElements = form.el.dom.elements || (document.forms[form.el.dom] || Ext.getDom(form.el.dom)).elements;
         var name;
-        Ext3.each(fElements, function(element){
+        Ext.each(fElements, function(element){
             name = element.name;
             if (!element.disabled && name) {
                 delete params[name];
@@ -8284,19 +8284,19 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
      */
     clearModificationFlag: function(container){
         var cont = container || this;
-        assert(cont instanceof Ext3.Container, 'Должен быть контейнер');
+        assert(cont instanceof Ext.Container, 'Должен быть контейнер');
 
         this.changesCount = 0;
         this.updateTitle();
 
         cont.items.each(function(item){
-            if (item instanceof Ext3.form.Field && item.isEdit){
+            if (item instanceof Ext.form.Field && item.isEdit){
                 item.originalValue = item.getValue();
                 item.startValue = item.getValue();
                 // Это не стандартные атрибуты. Они объявлены в m3.js
                 item.isModified = false;
                 item.updateLabel();
-            } else if (item instanceof Ext3.Container){
+            } else if (item instanceof Ext.Container){
                 this.clearModificationFlag(item);
             }
         }, this);
@@ -8308,8 +8308,8 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
 	 */
 	,setFieldOnChange: function (item, window){
 		if (item) {
-			if (item instanceof Ext3.form.Field && item.isEdit) {
-                if (item instanceof Ext3.form.Checkbox){
+			if (item instanceof Ext.form.Field && item.isEdit) {
+                if (item instanceof Ext.form.Checkbox){
                     // Комбобокс, в отличие от остальных полей, вызывает change только после blur, а
                     // в случае клика не работает совсем. Поэтому доверять можно только эвенту check.
                     item.on('check', function(scope, checked){
@@ -8366,10 +8366,10 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
 	,close: function (forceClose) {
         if (this.changesCount !== 0 && !forceClose ) {
             if(this.fireEvent('beforeclose', this) !== false){
-                Ext3.Msg.show({
+                Ext.Msg.show({
                     title: "Внимание",
                     msg: "Данные были изменены! Cохранить изменения?",
-                    buttons: Ext3.Msg.YESNOCANCEL,
+                    buttons: Ext.Msg.YESNOCANCEL,
                     fn: function(buttonId, text, opt){
                         if (buttonId === 'yes') {
                             this.submitForm();
@@ -8384,12 +8384,12 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
                         }
                     },
                     animEl: 'elId',
-                    icon: Ext3.MessageBox.QUESTION,
+                    icon: Ext.MessageBox.QUESTION,
                     scope: this
                 });
             }
         } else {
-            Ext3.m3.EditWindow.superclass.close.call(this);
+            Ext.m3.EditWindow.superclass.close.call(this);
         }
 	}
     ,disableToolbars: function(disabled){
@@ -8407,14 +8407,14 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
     ,loadForm: function() {        
         this.disableToolbars(true);
    
-        var mask = new Ext3.LoadMask(this.body, {msg:'Чтение данных...'});
+        var mask = new Ext.LoadMask(this.body, {msg:'Чтение данных...'});
         mask.show();
         if (this.fireEvent('beforeloaddata', this)) {
         	
         	assert(this.dataUrl, 'Не задан dataUrl для формы');
         	this.getForm().doAction('load', {
                 url: this.dataUrl
-                ,params: Ext3.applyIf({isGetData: true}, this.actionContextJson || {})
+                ,params: Ext.applyIf({isGetData: true}, this.actionContextJson || {})
                 ,success: this.onSuccessLoadForm.createDelegate(this, [mask], true)
                 ,failure: this.onFailureLoadForm.createDelegate(this, [mask], true)
                ,scope: this
@@ -8437,13 +8437,13 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
             
         for (var fieldName in complexData){
             field = form.findField(fieldName);
-            assert(field instanceof Ext3.form.TriggerField,
+            assert(field instanceof Ext.form.TriggerField,
                 String.format('Поле {0} не предназначено для загрузки данных', fieldName));
             
             id = complexData[fieldName].id;
             
             // Создаем запись и добавляем в стор
-            record = new Ext3.data.Record();                    
+            record = new Ext.data.Record();                    
             record.set('id', id);
             record.set(field.displayField, complexData[fieldName].value);
             
@@ -8472,16 +8472,16 @@ Ext3.m3.EditWindow = Ext3.extend(Ext3.m3.Window, {
    }
 })
 
-Ext3.ns('Ext3.ux.grid');
+Ext.ns('Ext.ux.grid');
 
-Ext3.ux.grid.Exporter = Ext3.extend(Ext3.util.Observable,{
+Ext.ux.grid.Exporter = Ext.extend(Ext.util.Observable,{
     title:'',
     sendDatFromStore: true,
     constructor: function(config){
-        Ext3.ux.grid.Exporter.superclass.constructor.call(this);
+        Ext.ux.grid.Exporter.superclass.constructor.call(this);
     },
     init: function(grid){
-        if (grid instanceof Ext3.grid.GridPanel){
+        if (grid instanceof Ext.grid.GridPanel){
             this.grid = grid;
             this.grid.on('afterrender', this.onRender, this);
         }
@@ -8491,13 +8491,13 @@ Ext3.ux.grid.Exporter = Ext3.extend(Ext3.util.Observable,{
         //создадим top bar, если его нет
         if (!this.grid.tbar){
             this.grid.elements += ',tbar';
-            tbar = new Ext3.Toolbar();
+            tbar = new Ext.Toolbar();
             this.grid.tbar = tbar;
             this.grid.add(tbar);
             this.grid.doLayout();
     }
         //добавим кнопку
-        this.grid.tbar.insert(0, new Ext3.Button({
+        this.grid.tbar.insert(0, new Ext.Button({
             text:'Экспорт',
             iconCls:'icon-application-go',
             listeners:{
@@ -8508,7 +8508,7 @@ Ext3.ux.grid.Exporter = Ext3.extend(Ext3.util.Observable,{
     },
     exportData:function(){
         columns = []
-        Ext3.each(this.grid.colModel.config,function(column,index){
+        Ext.each(this.grid.colModel.config,function(column,index){
             columns.push({
                 data_index:column.dataIndex,
                 header:column.header,
@@ -8521,14 +8521,14 @@ Ext3.ux.grid.Exporter = Ext3.extend(Ext3.util.Observable,{
         data = []
 
         if (this.sendDatFromStore){
-            Ext3.each(this.grid.store.data.items,function(item,index){ data.push(item.data) });
+            Ext.each(this.grid.store.data.items,function(item,index){ data.push(item.data) });
         }
         params = {
-            columns: Ext3.encode(columns),
+            columns: Ext.encode(columns),
             title: this.title || this.grid.title || this.grid.id,
-            data: Ext3.encode(data)
+            data: Ext.encode(data)
         }
-        Ext3.Ajax.request({
+        Ext.Ajax.request({
             url : '/ui/exportgrid-export',
             success : function(res,opt){                
                 location.href=res.responseText;
@@ -8539,180 +8539,11 @@ Ext3.ux.grid.Exporter = Ext3.extend(Ext3.util.Observable,{
         });
     }
 });
-Ext3.ns('Ext3.ux.grid');
-
-Ext3.ux.grid.MultiSorting = Ext3.extend(Ext3.util.Observable,{
-    constructor: function(config){
-        if (config) Ext3.apply(this, config);
-        Ext3.ux.grid.MultiSorting.superclass.constructor.call(this);
-    }
-    ,init: function(grid){
-        if (grid instanceof Ext3.grid.GridPanel){
-            this.grid = grid;
-            this.grid.on('headerclick', this.onHeaderClick, this);
-            this.grid.on('afterrender', this.onAfterRender, this);
-            this.grid.getStore().multiSort = Ext3.createDelegate(this.realMultiSort, this.grid.getStore(), this, true);
-            this.grid.getStore().on('beforeload', this.beforeLoad, this);
-        }
-    }
-    ,onAfterRender: function(grid){
-        // отключим старый обработчик
-        this.grid.un('headerclick', this.grid.getView().onHeaderClick, this.grid.getView());
-        this.grid.getView().updateHeaderSortState = Ext3.createDelegate(this.realUpdateHeaderSortState, this.grid.getView());
-        this.grid.getView().updateSortIcon = Ext3.createDelegate(this.realUpdateSortIcon, this.grid.getView());
-        // специально для livegrid
-        this.grid.getView().on('beforebuffer', this.beforeBuffer, this);
-    }
-    ,onHeaderClick: function(grid, index, event){
-        var cm = grid.getColumnModel();
-        if (grid.getView().headersDisabled || !cm.isSortable(index)) {
-            return;
-        }
-        grid.stopEditing(true);
-        var store = grid.getStore();
-        if (event.ctrlKey) {
-            // множественная сортировка
-            // получим текущую сортировку
-            var field = cm.getDataIndex(index);
-            if (store.hasMultiSort) {
-                // если уже мульти
-                var sortInfo = store.multiSortInfo;
-                var found = false;
-                for (var i=0, j = sortInfo.sorters.length; i < j; i++) {
-                    // если текущее поле уже есть в сортировке
-                    if (sortInfo.sorters[i].field == field) {
-                        // меняем направление
-                        sortInfo.sorters[i].direction = sortInfo.sorters[i].direction.toggle("ASC", "DESC");
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    sortInfo.sorters.push({direction: "ASC", field: field});
-                }
-                store.multiSort(sortInfo.sorters);
-            } else {
-                // если еще не мульти
-                // если текущее поле уже есть в сортировке
-                if (!store.sortInfo || store.sortInfo.field == field) {
-                    store.sort(cm.getDataIndex(index));
-                } else {
-                    var sorters = [{direction: store.sortInfo.direction, field: store.sortInfo.field}, {direction: "ASC", field: field}];
-                    store.multiSort(sorters);
-                }
-            }
-        } else {
-            // обычная сортировка
-            store.sort(cm.getDataIndex(index));
-        }
-    }
-    ,beforeLoad: function(store, options){
-        // отправка параметров множественной сортировки
-        if (store.hasMultiSort) {
-            options.params['multisort'] = Ext3.util.JSON.encode(store.multiSortInfo.sorters);
-        } else {
-            options.params['multisort'] = undefined;
-        }
-    }
-    ,beforeBuffer: function(view, store, rowIndex, visibleRows, totalCount, options){
-        // отправка параметров множественной сортировки
-        if (store.hasMultiSort) {
-            options.params['multisort'] = Ext3.util.JSON.encode(store.multiSortInfo.sorters);
-        } else {
-            options.params['multisort'] = undefined;
-        }
-    }
-    ,realMultiSort: function(sorters, multisortplugin) {
-        this.hasMultiSort = true;
-        var direction = "ASC";
-
-        /**
-         * Object containing overall sort direction and an ordered array of sorter configs used when sorting on multiple fields
-         * @property multiSortInfo
-         * @type Object
-         */
-        this.multiSortInfo = {
-            sorters  : sorters,
-            direction: direction
-        };
-
-        if (this.remoteSort) {
-            //this.singleSort(sorters[0].field, sorters[0].direction);
-            this.load(this.lastOptions);
-        } else {
-            this.applySort();
-            this.fireEvent('datachanged', this);
-        }
-    }
-    ,realUpdateHeaderSortState : function() {
-        var state = this.ds.hasMultiSort ? this.ds.multiSortInfo : this.ds.sortInfo;
-        if (!state) {
-            return;
-        }
-
-        // если обновилась сортировка
-        if ((!this.hasMultiSort && this.ds.hasMultiSort)||(this.hasMultiSort && !this.ds.hasMultiSort)) {
-            this.grid.fireEvent('sortchange', this.grid, state);
-        } else if (this.ds.hasMultiSort ) {
-            var changed = false, founded = 0;
-            for (var i=0, j = state.sorters.length; i < j; i++) {
-                for (var k=0, l = this.sortState.sorters.length; k < l; k++) {
-                    if (this.sortState.sorters[k].field == state.sorters[i].field) {
-                        founded = founded+1;
-                        if (this.sortState.sorters[k].direction != state.sorters[i].direction) {
-                            changed = true;
-                        }
-                        break;
-                    }
-                }
-                if (changed) {
-                    break;
-                }
-            }
-            // если нашли изменения, или не совпало количество
-            if (changed || this.sortState.length != founded) {
-                this.grid.fireEvent('sortchange', this.grid, state);
-            }
-        } else if (!this.sortState || (this.sortState.field != state.field || this.sortState.direction != state.direction)) {
-            this.grid.fireEvent('sortchange', this.grid, state);
-        }
-
-        this.sortState = state;
-        this.hasMultiSort = this.ds.hasMultiSort;
-
-
-        if (this.hasMultiSort) {
-            this.mainHd.select(this.cellSelector || 'td').removeClass(this.sortClasses);
-            for (var i=0, j = this.sortState.sorters.length; i < j; i++) {
-                var sortColumn = this.cm.findColumnIndex(this.sortState.sorters[i].field);
-                if (sortColumn != -1) {
-                    var sortDir = this.sortState.sorters[i].direction;
-                    this.updateSortIcon(sortColumn, sortDir);
-                }
-            }
-        } else {
-            var sortColumn = this.cm.findColumnIndex(state.field);
-            if (sortColumn != -1) {
-                var sortDir = state.direction;
-                this.mainHd.select(this.cellSelector || 'td').removeClass(this.sortClasses);
-                this.updateSortIcon(sortColumn, sortDir);
-            }
-        }
-    }
-    ,realUpdateSortIcon: function(col, dir) {
-        var sortClasses = this.sortClasses,
-            sortClass   = sortClasses[dir == "DESC" ? 1 : 0],
-            //headers     = this.mainHd.select('td').removeClass(sortClasses);
-            headers     = this.mainHd.select(this.cellSelector || 'td');
-
-        headers.item(col).addClass(sortClass);
-    }
-});
 /**
  * Окно показа контекстной помощи
  */
 
-Ext3.m3.HelpWindow = Ext3.extend(Ext3.Window, {
+Ext.m3.HelpWindow = Ext.extend(Ext.Window, {
     constructor: function(baseConfig, params){
         this.title = 'Справочная информация';
         this.maximized = true;
@@ -8721,7 +8552,7 @@ Ext3.m3.HelpWindow = Ext3.extend(Ext3.Window, {
         this.width=800;
         this.height=550;
 
-    Ext3.m3.HelpWindow.superclass.constructor.call(this, baseConfig);
+    Ext.m3.HelpWindow.superclass.constructor.call(this, baseConfig);
   }
 });
 
@@ -8730,18 +8561,18 @@ function showHelpWindow(url){
     window.open(url);
 }
 
-Ext3.ns('Ext3.m3');
+Ext.ns('Ext.m3');
 
 /**
- * @class Ext3.ux.form.MultiSelectField
- * @extends Ext3.m3.AdvancedComboBox
+ * @class Ext.ux.form.MultiSelectField
+ * @extends Ext.m3.AdvancedComboBox
  *
  * Контрол для выбора множества значений. Может быть использован как локальное комбо,
  * с галочками в выпадающем списке. Или же так же как выбор из справочника, с установкой пака
  * Отличается от выбора из спровочника переопределенным шаблоном для отображения выпадающего списка
  * с галочками. Реальные значения храняться как массив рекордов в свойстве checkedItems
  */
-Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
+Ext.m3.MultiSelectField = Ext.extend(Ext.m3.AdvancedComboBox, {
 
     /**
      * @cfg {String} delimeter Разделитель для отображение текста в поле
@@ -8756,17 +8587,17 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
         this.editable = false;
 
         if (!this.tpl) {
-             this.tpl = '<tpl for="."><div class="x3-combo-list-item x3-multi-combo-item">' +
-            '<img src="' + Ext3.BLANK_IMAGE_URL + '" class="{[this.getImgClass(values)]}" />' +
+             this.tpl = '<tpl for="."><div class="x-combo-list-item x-multi-combo-item">' +
+            '<img src="' + Ext.BLANK_IMAGE_URL + '" class="{[this.getImgClass(values)]}" />' +
             '<div>{' + this.displayField + '}</div></div></tpl>';
             
-            this.tpl = new Ext3.XTemplate(this.tpl, {
+            this.tpl = new Ext.XTemplate(this.tpl, {
                 getImgClass: this.getCheckboxCls.createDelegate(this)
             })
 
         }
 
-       Ext3.m3.MultiSelectField.superclass.initComponent.apply(this);
+       Ext.m3.MultiSelectField.superclass.initComponent.apply(this);
     },
 
     setValue:function(v) {
@@ -8793,10 +8624,10 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
 
     getValue : function () {
         var value = [];
-		Ext3.each(this.checkedItems, function (record) {
+		Ext.each(this.checkedItems, function (record) {
 			value.push(record.get(this.valueField));
 		}, this);
-		return Ext3.util.JSON.encode(value);
+		return Ext.util.JSON.encode(value);
 	},
 
     initValue:function() {
@@ -8805,9 +8636,9 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
         if (this.store && this.value && this.mode === 'local') {
             //Случай, если контрол используется как локальный комбобокс
             //со множественным выбором
-            values = Ext3.util.JSON.decode(this.value);
+            values = Ext.util.JSON.decode(this.value);
             this.store.each(function (r) {
-			    Ext3.each(values, function (value) {
+			    Ext.each(values, function (value) {
 			        if (r.get(this.valueField) == value) {
 			            this.checkedItems.push(r);
 			            return false;
@@ -8818,7 +8649,7 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
         else if (this.value) {
             //Попробуем создать значения из того что нам прислали с сервера
             //ожидаем что там будут некие объекты с полями значения и отображения
-            values = Ext3.util.JSON.decode(this.value);
+            values = Ext.util.JSON.decode(this.value);
 
             for (;i < values.length; i++) {
                 val = values[i];
@@ -8828,7 +8659,7 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
                     continue;
                 }
                 
-                record = new Ext3.data.Record();
+                record = new Ext.data.Record();
                 record.data[this.valueField] = val[this.valueField];
                 record.data[this.displayField] = val[this.displayField];
 
@@ -8836,12 +8667,12 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
             }
         }
 
-       Ext3.m3.MultiSelectField.superclass.initValue.call(this);
+       Ext.m3.MultiSelectField.superclass.initValue.call(this);
     },
 
     getText : function () {
 		var value = [];
-		Ext3.each(this.checkedItems, function (record) {
+		Ext.each(this.checkedItems, function (record) {
 			value.push(record.get(this.displayField));
 		}, this);
 		if (value.length > 1 && this.multipleDisplayValue){
@@ -8855,11 +8686,11 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
         var i = 0;
         for (; i < this.checkedItems.length; i++) {
             if ( record[this.valueField] == this.checkedItems[i].data[this.valueField] ) {
-                return 'x3-grid3-check-col-on';
+                return 'x-grid3-check-col-on';
             }
         }
 
-        return 'x3-grid3-check-col';
+        return 'x-grid3-check-col';
     },
 
     getCheckedRecords:function() {
@@ -8888,7 +8719,7 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
 
     /**
      * Чтобы сохранить совместимость c концепцией изменения полей ExtJS
-     * приходится имитировать поведение Ext3.form.Field.onBlur().
+     * приходится имитировать поведение Ext.form.Field.onBlur().
      * иначе событие 'change' у нашего поля никогда не вызывается.
      */
     fireChangeEventOnDemand: function(){
@@ -8907,7 +8738,7 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
 
     onSelectInDictionary: function(){
 		if(this.fireEvent('beforerequest', this)) {
-			Ext3.Ajax.request({
+			Ext.Ajax.request({
 				url: this.actionSelectUrl
 				,method: 'POST'
 				,params: this.actionContextJson
@@ -8947,7 +8778,7 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
     	var i = 0, newRecords = [], record;
 
         for (; i< records.length;i++) {
-            record = new Ext3.data.Record();
+            record = new Ext.data.Record();
             record.data[this.valueField] = records[i].data[this.valueField];
             record.data[this.displayField] = records[i].data[this.displayField];
             newRecords.push( record );
@@ -8987,9 +8818,9 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
 
 });
 
-Ext3.reg('m3-multiselect', Ext3.m3.MultiSelectField );
+Ext.reg('m3-multiselect', Ext.m3.MultiSelectField );
 
-Ext3.namespace('Ext3.ux');
+Ext.namespace('Ext.ux');
 
 /**
  * Notification окна оповещения, создает цепочку окон оповещения с автоскрытием
@@ -8998,14 +8829,14 @@ Ext3.namespace('Ext3.ux');
  *  html - содержание,
  *  iconCls - иконка
  */
-Ext3.ux.NotificationMgr = {
+Ext.ux.NotificationMgr = {
     notifications: [],
     originalBodyOverflowY: null
 };
-Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
+Ext.ux.Notification = Ext.extend(Ext.Window, {
     initComponent: function () {
         // TODO: Параметры не перекрываются если наследоваться от этого объекта.
-        Ext3.apply(this, {
+        Ext.apply(this, {
             iconCls: this.iconCls || 'icon-accept',
             cls: 'x-notification',
             autoHeight: true,
@@ -9016,22 +8847,27 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
             header: false,
             shadow: false
         });
+        this.closedCallback = function () {};
         if (this.autoDestroy) {
-            this.task = new Ext3.util.DelayedTask(this.hide, this);
+            this.task = new Ext.util.DelayedTask(this.hide, this);
         } else {
             this.closable = true;
         }
-        Ext3.ux.Notification.superclass.initComponent.apply(this);
+        Ext.ux.Notification.superclass.initComponent.apply(this);
     },
     setMessage: function (msg) {
         this.body.update(msg);
     },
     setTitle: function (title, iconCls) {
-        Ext3.ux.Notification.superclass.setTitle.call(this, title, iconCls || this.iconCls);
+        Ext.ux.Notification.superclass.setTitle.call(this, title, iconCls || this.iconCls);
+    },
+    registerCallbackOnClosed: function (callback) {
+        this.closedCallback = callback;
     },
     onDestroy: function () {
-        Ext3.ux.NotificationMgr.notifications.remove(this);
-        Ext3.ux.Notification.superclass.onDestroy.call(this);
+        Ext.ux.NotificationMgr.notifications.remove(this);
+        Ext.ux.Notification.superclass.onDestroy.call(this);
+        this.closedCallback();
     },
     cancelHiding: function () {
         this.addClass('fixed');
@@ -9040,19 +8876,16 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
         }
     },
     afterShow: function () {
-        Ext3.ux.Notification.superclass.afterShow.call(this);
-        Ext3.fly(this.body.dom).on('click', this.cancelHiding, this);
-        if (this.autoDestroy) {
-            this.task.delay(this.hideDelay ? this.hideDelay * 1000 : 6 * 1000);
-        }
+        Ext.ux.Notification.superclass.afterShow.call(this);
+        Ext.fly(this.body.dom).on('click', this.cancelHiding, this);
     },
     animShow: function () {
         var pos = 120,
             i = 0,
-            notifyLength = Ext3.ux.NotificationMgr.notifications.length;
+            notifyLength = Ext.ux.NotificationMgr.notifications.length;
         // save original body overflowY
-        if (Ext3.ux.NotificationMgr.originalBodyOverflowY == null) {
-            Ext3.ux.NotificationMgr.originalBodyOverflowY = document.body.style.overflowY;
+        if (Ext.ux.NotificationMgr.originalBodyOverflowY == null) {
+            Ext.ux.NotificationMgr.originalBodyOverflowY = document.body.style.overflowY;
         }
 
 
@@ -9062,10 +8895,10 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
 
 
         for (null; i < notifyLength; i += 1) {
-            pos += Ext3.ux.NotificationMgr.notifications[i].getSize().height + 10;
+            pos += Ext.ux.NotificationMgr.notifications[i].getSize().height + 10;
         }
 
-        Ext3.ux.NotificationMgr.notifications.push(this);
+        Ext.ux.NotificationMgr.notifications.push(this);
 
         this.el.alignTo(document.body, "br-br", [ -10, -pos ]);
 
@@ -9080,7 +8913,7 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
             duration: 1.2,
             remove: false,
             callback : function () {
-                Ext3.ux.NotificationMgr.notifications.remove(this);
+                Ext.ux.NotificationMgr.notifications.remove(this);
 
                 document.body.style.overflow = 'auto';
 
@@ -9088,25 +8921,44 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
             }.createDelegate(this)
         });
     },
-    focus: Ext3.emptyFn
+    focus: Ext.emptyFn
 });
 
 /**
  * Заместитель объекта LiveMessages.Notification, который выводит уведомление о полученных сообщениях от пользователей.
  */
-Ext3.ux.MessageNotify = function () {
-    this.handler = null;
-    this.handlerContext = null;
+Ext.ux.MessageNotify = function () {
+    this.eventHandler = {};
+    this.handlerMapper = {
+        socket: this.showMessage
+    };
 };
 
-Ext3.ux.MessageNotify.prototype.setClickHandler = function (handler, context) {
-    this.handler = handler;
-    this.handlerContext = context || window;
+Ext.ux.MessageNotify.prototype.on = function (event, handler) {
+    var eventName;
+    if (typeof event === 'string') {
+        this.eventHandler[event] = handler;
+    } else {
+        for (eventName in event) {
+            this.eventHandler[eventName] = event[eventName];
+        }
+    }
 };
 
-Ext3.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, text) {
+Ext.ux.MessageNotify.prototype.handler = function (eventName, data) {
+    var eventHandler = this.handlerMapper[eventName];
+    if (eventHandler) {
+        eventHandler.call(this, data);
+    }
+};
+
+Ext.ux.MessageNotify.prototype.showMessage = function (data) {
+    this.showNotify(data['id'], data['from_user'], data['subject'], data['text']);
+};
+
+Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, text) {
     var self = this, icon, notifyWindow;
-    notifyWindow = new Ext3.ux.Notification({
+    notifyWindow = new Ext.ux.Notification({
         title: user_name || 'Внимание',
         html: '<div class="notify">' +
                 '<div class="notify-icon-info"></div>' +
@@ -9117,51 +8969,73 @@ Ext3.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, t
         padding: 5
     });
 
-    notifyWindow.on({
-        'click': (function (_id) {
-            return function () {
-                self.handler.apply(self.handlerContext, _id);
-            }
-        })(id)
-    });
+    notifyWindow.task.delay(6 * 1000); // Скрывает плавно уведомление через 6 сек.
 
     notifyWindow.show(document);
 };
 /**
  * Заместитель объекта LiveMessages.Notification, который выводит уведомление о выполненных задачах.
  */
-Ext3.ux.TaskNotify = Ext3.extend(Ext3.ux.MessageNotify, {
+Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
     initComponent: function () {
-        Ext3.ux.TaskNotify.superclass.initComponent.apply(this);
+        this.drawRecords = {};
     },
+
+    change: function (id, data) {
+        var record;
+
+        if (record = this.drawRecords['task_' + id]) {
+            if (record['active']) {
+                this.updateProgress(record['progressBar'], data['progress'], data['state']);
+            } else {
+                this.showNotify(id, data['state'], data['name']);
+            }
+        } else {
+            this.drawRecords['task_' + id] = {
+                id: id
+            };
+            this.showNotify(id, data['state'], data['name']);
+        }
+    },
+
     showNotify: function (id, status, description) {
-        var self = this, icon, notifyWindow;
-        notifyWindow = new Ext3.ux.Notification({
+        var self = this, icon, notifyWindow, progressBar;
+
+        progressBar = new Ext.ProgressBar({
+            id: 'task-progress',
+            width: 220,
+            text: description
+        });
+
+        this.drawRecords['task_' + id]['progressBar'] = progressBar;
+        this.drawRecords['task_' + id]['active'] = true;
+
+        notifyWindow = new Ext.ux.Notification({
             title: status || 'Внимание',
-            html: '<div class="notify">' +
-                        '<div class="task-description">' + description + '</div>' +
-                  '</div>',
+            items: progressBar,
             iconCls: icon,
             width: 250,
             padding: 5
         });
 
-        notifyWindow.on({
-            'click': (function (_id) {
-                return function () {
-                    self.handler.apply(self.handlerContext, _id);
-                }
-            })(id)
-        });
+        notifyWindow.registerCallbackOnClosed((function (_id) {
+            return function () {
+                self.drawRecords['task_' + _id]['active'] = false;
+            }
+        })(id));
 
         notifyWindow.show(document);
+    },
+
+    updateProgress: function (progressBar, value, status) {
+        progressBar.updateProgress(value, status, true);
     }
 });
 /**
  * Объектный грид, включает в себя тулбар с кнопками добавить, редактировать и удалить
  * @param {Object} config
  */
-Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
+Ext.m3.ObjectGrid = Ext.extend(Ext.m3.GridPanel, {
 	constructor: function(baseConfig, params){
 		
 		assert(params.allowPaging !== undefined,'allowPaging is undefined');
@@ -9182,13 +9056,13 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
         // имя для сабмита в режиме клиентского редактирования
         this.name = params.name;
 		
-		Ext3.m3.ObjectGrid.superclass.constructor.call(this, baseConfig, params);
+		Ext.m3.ObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
 	
 	,initComponent: function(){
-		Ext3.m3.ObjectGrid.superclass.initComponent.call(this);
+		Ext.m3.ObjectGrid.superclass.initComponent.call(this);
 		var store = this.getStore();
-		store.baseParams = Ext3.applyIf(store.baseParams || {}, this.actionContextJson || {});
+		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});
 		
 		
 		this.addEvents(
@@ -9257,7 +9131,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 	 */
 	,onNewRecord: function (){
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
-		var mask = new Ext3.LoadMask(this.body),
+		var mask = new Ext.LoadMask(this.body),
 		    params = this.getMainContext();
 		params[this.rowIdName] = '';
 
@@ -9290,7 +9164,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 
 			this.disableToolbars(true);
 			mask.show();
-			Ext3.Ajax.request(req);
+			Ext.Ajax.request(req);
 		}
 		
 	}
@@ -9304,7 +9178,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 	    if (this.getSelectionModel().hasSelection()) {
 	    	// при локальном редактировании запросим также текущую строку
 			var baseConf = this.getSelectionContext(this.localEdit);
-			var mask = new Ext3.LoadMask(this.body);
+			var mask = new Ext.LoadMask(this.body);
 			var req = {
 				url: this.actionEditUrl,
 				params: baseConf,
@@ -9332,14 +9206,14 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 				var scope = this;
 				this.disableToolbars(true);
 				mask.show();
-				Ext3.Ajax.request(req);
+				Ext.Ajax.request(req);
 			}
 	    } else {
-		Ext3.Msg.show({
+		Ext.Msg.show({
 			title: 'Редактирование',
 			msg: 'Элемент не выбран',
-			buttons: Ext3.Msg.OK,
-			icon: Ext3.MessageBox.INFO
+			buttons: Ext.Msg.OK,
+			icon: Ext.MessageBox.INFO
 		    });
 	    }
 	}
@@ -9352,15 +9226,15 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 		
 		var scope = this;
 		if (scope.getSelectionModel().hasSelection()) {
-		    Ext3.Msg.show({
+		    Ext.Msg.show({
 		        title: 'Удаление записи',
 			    msg: 'Вы действительно хотите удалить выбранную запись?',
-			    icon: Ext3.Msg.QUESTION,
-		        buttons: Ext3.Msg.YESNO,
+			    icon: Ext.Msg.QUESTION,
+		        buttons: Ext.Msg.YESNO,
 		        fn:function(btn, text, opt){ 
 		            if (btn == 'yes') {
 						var baseConf = scope.getSelectionContext(scope.localEdit);
-						var mask = new Ext3.LoadMask(scope.body);
+						var mask = new Ext.LoadMask(scope.body);
 						var req = {
 		                   url: scope.actionDeleteUrl,
 		                   params: baseConf,
@@ -9386,17 +9260,17 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 						if (scope.fireEvent('beforedeleterequest', scope, req)) {
 						    scope.disableToolbars(true);
 						    mask.show();
-							Ext3.Ajax.request(req);
+							Ext.Ajax.request(req);
 						}
 	                }
 	            }
 	        });
 		} else {
-                    Ext3.Msg.show({
+                    Ext.Msg.show({
                             title: 'Удаление',
                             msg: 'Элемент не выбран',
-                            buttons: Ext3.Msg.OK,
-                            icon: Ext3.MessageBox.INFO
+                            buttons: Ext.Msg.OK,
+                            icon: Ext.MessageBox.INFO
                         });
                 }
 	}
@@ -9415,8 +9289,8 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
                     // если локальное редактирование
                     if (scope.localEdit){
                         // то на самом деле нам пришла строка грида
-                        var obj = Ext3.util.JSON.decode(data);
-                        var record = new Ext3.data.Record(obj.data);
+                        var obj = Ext.util.JSON.decode(data);
+                        var record = new Ext.data.Record(obj.data);
                         record.json = obj.data;
                         var store = scope.getStore();
                         // и надо ее добавить в стор
@@ -9439,8 +9313,8 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
                     // если локальное редактирование
                     if (scope.localEdit){
                         // то на самом деле нам пришла строка грида
-                        var obj = Ext3.util.JSON.decode(data);
-                        var record = new Ext3.data.Record(obj.data);
+                        var obj = Ext.util.JSON.decode(data);
+                        var record = new Ext.data.Record(obj.data);
                         record.json = obj.data;
                         var store = scope.getStore();
                         // и надо ее заменить в сторе
@@ -9448,7 +9322,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
                         if (sm.hasSelection()) {
                             var baseConf = {};
                             // пока только для режима выделения строк
-                            if (sm instanceof Ext3.grid.RowSelectionModel) {
+                            if (sm instanceof Ext.grid.RowSelectionModel) {
                                 var rec = sm.getSelected();
                                 var index = store.indexOf(rec);
                                 store.remove(rec);
@@ -9476,7 +9350,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
             // если локальное редактирование
             if (this.localEdit){
                 // проверка на ошибки уровня приложения
-                var res = Ext3.util.JSON.decode(response.responseText);
+                var res = Ext.util.JSON.decode(response.responseText);
                 if(!res.success){
                     smart_eval(response.responseText);
                     return;
@@ -9486,7 +9360,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
                 var sm = this.getSelectionModel();
                 if (sm.hasSelection()) {
                     // только для режима выделения строк
-                    if (sm instanceof Ext3.grid.RowSelectionModel) {
+                    if (sm instanceof Ext.grid.RowSelectionModel) {
                         var rec = sm.getSelections();
                         store.remove(rec);
                     }
@@ -9500,7 +9374,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 	,refreshStore: function (){
 		if (this.allowPaging) {
 			var pagingBar = this.getBottomToolbar(); 
-			if(pagingBar &&  pagingBar instanceof Ext3.PagingToolbar){
+			if(pagingBar &&  pagingBar instanceof Ext.PagingToolbar){
 			    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
 		        pagingBar.changePage(active_page);
 			}
@@ -9523,7 +9397,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return Ext3.applyIf({}, this.actionContextJson);
+    	return Ext.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек
@@ -9535,7 +9409,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 		var sm = this.getSelectionModel();
 		var record;
 		// для режима выделения строк
-		if (sm instanceof Ext3.grid.RowSelectionModel) {
+		if (sm instanceof Ext.grid.RowSelectionModel) {
 			if (sm.singleSelect) {
 				record = sm.getSelected();
 				baseConf[this.rowIdName] = record.id;
@@ -9552,7 +9426,7 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 			}
 		}
 		// для режима выделения ячейки
-		else if (sm instanceof Ext3.grid.CellSelectionModel) {
+		else if (sm instanceof Ext.grid.CellSelectionModel) {
 			assert(this.columnParamName, 'columnParamName is not define');
 			
 			var cell = sm.getSelectedCell();
@@ -9565,18 +9439,18 @@ Ext3.m3.ObjectGrid = Ext3.extend(Ext3.m3.GridPanel, {
 		// если просят выделенную строку
         if (withRow){
         	// то нужно добавить в параметры текущую строку грида
-        	if (Ext3.isArray(record)){
+        	if (Ext.isArray(record)){
         		// пока х.з. что делать - возьмем первую
-        		baseConf = Ext3.applyIf(baseConf, record[0].json);
+        		baseConf = Ext.applyIf(baseConf, record[0].json);
         	} else {
-        		baseConf = Ext3.applyIf(baseConf, record.json);
+        		baseConf = Ext.applyIf(baseConf, record.json);
         	}
         }
 		return baseConf;
     }
 });
 
-Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
+Ext.m3.EditorObjectGrid = Ext.extend(Ext.m3.EditorGridPanel, {
 	constructor: function(baseConfig, params){
 //		console.log(baseConfig);
 //		console.log(params);
@@ -9600,13 +9474,13 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
         // имя для сабмита в режиме клиентского редактирования
         this.name = params.name;
 		
-		Ext3.m3.EditorObjectGrid.superclass.constructor.call(this, baseConfig, params);
+		Ext.m3.EditorObjectGrid.superclass.constructor.call(this, baseConfig, params);
 	}
 	
 	,initComponent: function(){
-		Ext3.m3.EditorObjectGrid.superclass.initComponent.call(this);
+		Ext.m3.EditorObjectGrid.superclass.initComponent.call(this);
 		var store = this.getStore();
-		store.baseParams = Ext3.applyIf(store.baseParams || {}, this.actionContextJson || {});
+		store.baseParams = Ext.applyIf(store.baseParams || {}, this.actionContextJson || {});
 		
 		
 		this.addEvents(
@@ -9669,12 +9543,12 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 					return scope.childWindowOpenHandler(res, opt);
 				}
 			},
-			failure: Ext3.emptyFn
+			failure: Ext.emptyFn
 		};
 		
 		if (this.fireEvent('beforenewrequest', this, req)) {
 			var scope = this;
-			Ext3.Ajax.request(req);
+			Ext.Ajax.request(req);
 		}
 		
 	}
@@ -9695,19 +9569,19 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 						return scope.childWindowOpenHandler(res, opt);
 					}
 				},
-				failure: Ext3.emptyFn
+				failure: Ext.emptyFn
 			};
 			
 			if (this.fireEvent('beforeeditrequest', this, req)) {
 				var scope = this;
-				Ext3.Ajax.request(req);
+				Ext.Ajax.request(req);
 			}
 	    } else {
-		Ext3.Msg.show({
+		Ext.Msg.show({
 			title: 'Редактирование',
 			msg: 'Элемент не выбран',
-			buttons: Ext3.Msg.OK,
-			icon: Ext3.MessageBox.INFO
+			buttons: Ext.Msg.OK,
+			icon: Ext.MessageBox.INFO
 		    });
 	    }
 	}
@@ -9720,11 +9594,11 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 		
 		var scope = this;
 		if (scope.getSelectionModel().hasSelection()) {
-		    Ext3.Msg.show({
+		    Ext.Msg.show({
 		        title: 'Удаление записи',
 			    msg: 'Вы действительно хотите удалить выбранную запись?',
-			    icon: Ext3.Msg.QUESTION,
-		        buttons: Ext3.Msg.YESNO,
+			    icon: Ext.Msg.QUESTION,
+		        buttons: Ext.Msg.YESNO,
 		        fn:function(btn, text, opt){ 
 		            if (btn == 'yes') {
 						var baseConf = scope.getSelectionContext(scope.localEdit);
@@ -9736,20 +9610,20 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 		                		   return scope.deleteOkHandler(res, opt);
 		                	   }
 						   },
-		                   failure: Ext3.emptyFn
+		                   failure: Ext.emptyFn
 		                };
 						if (scope.fireEvent('beforedeleterequest', scope, req)) {
-							Ext3.Ajax.request(req);
+							Ext.Ajax.request(req);
 						}
 	                }
 	            }
 	        });
 		} else {
-                    Ext3.Msg.show({
+                    Ext.Msg.show({
                             title: 'Удаление',
                             msg: 'Элемент не выбран',
-                            buttons: Ext3.Msg.OK,
-                            icon: Ext3.MessageBox.INFO
+                            buttons: Ext.Msg.OK,
+                            icon: Ext.MessageBox.INFO
                         });
                 }
 	}
@@ -9781,7 +9655,7 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 	,refreshStore: function (){
 		if (this.allowPaging) {
 			var pagingBar = this.getBottomToolbar(); 
-			if(pagingBar &&  pagingBar instanceof Ext3.PagingToolbar){
+			if(pagingBar &&  pagingBar instanceof Ext.PagingToolbar){
 			    var active_page = Math.ceil((pagingBar.cursor + pagingBar.pageSize) / pagingBar.pageSize);
 		        pagingBar.changePage(active_page);
 			}
@@ -9795,7 +9669,7 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return Ext3.applyIf({}, this.actionContextJson);
+    	return Ext.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек
@@ -9807,7 +9681,7 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 		var sm = this.getSelectionModel();
 		var record;
 		// для режима выделения строк
-		if (sm instanceof Ext3.grid.RowSelectionModel) {
+		if (sm instanceof Ext.grid.RowSelectionModel) {
 			if (sm.singleSelect) {
 				record = sm.getSelected();
 				baseConf[this.rowIdName] = record.id;
@@ -9824,7 +9698,7 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 			}
 		}
 		// для режима выделения ячейки
-		else if (sm instanceof Ext3.grid.CellSelectionModel) {
+		else if (sm instanceof Ext.grid.CellSelectionModel) {
 			assert(this.columnParamName, 'columnParamName is not define');
 			
 			var cell = sm.getSelectedCell();
@@ -9837,11 +9711,11 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
 		// если просят выделенную строку
         if (withRow){
         	// то нужно добавить в параметры текущую строку грида
-        	if (Ext3.isArray(record)){
+        	if (Ext.isArray(record)){
         		// пока х.з. что делать - возьмем первую
-        		baseConf = Ext3.applyIf(baseConf, record[0].json);
+        		baseConf = Ext.applyIf(baseConf, record[0].json);
         	} else {
-        		baseConf = Ext3.applyIf(baseConf, record.json);
+        		baseConf = Ext.applyIf(baseConf, record.json);
         	}
         }
 		return baseConf;
@@ -9851,7 +9725,7 @@ Ext3.m3.EditorObjectGrid = Ext3.extend(Ext3.m3.EditorGridPanel, {
  * Объектное дерево, включает в себя тулбар с кнопками добавить (в корень и дочерний элемент), редактировать и удалить
  * @param {Object} config
  */
-Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
+Ext.m3.ObjectTree = Ext.extend(Ext.ux.tree.TreeGrid, {
 	constructor: function(baseConfig, params){
 		assert(params.rowIdName !== undefined,'rowIdName is undefined');
 		assert(params.actions !== undefined,'actions is undefined');
@@ -9866,7 +9740,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 		this.parentIdName = params.parentIdName;
         this.incrementalUpdate = params.incrementalUpdate;
 		if (params.customLoad) {
-			var ajax = Ext3.Ajax;
+			var ajax = Ext.Ajax;
 			this.on('expandnode',function (node){
 				var nodeList = new Array();
 				if (node.hasChildNodes()){
@@ -9881,12 +9755,12 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 						url: params.actions.dataUrl
 						,params: {'list_nodes': nodeList.join(',')}
 						,success: function(response, opts){
-							var res = Ext3.util.JSON.decode(response.responseText);
+							var res = Ext.util.JSON.decode(response.responseText);
 							if (res) {
 								for (var i=0; i < res.length; i++){
 									var curr_node = node.childNodes[i];
 									for (var j=0; j < res[i].children.length; j++){
-										var newNode = new Ext3.tree.AsyncTreeNode(res[i].children[j]);
+										var newNode = new Ext.tree.AsyncTreeNode(res[i].children[j]);
 										curr_node.appendChild(newNode);
 										curr_node.loaded = true;
 									}
@@ -9894,7 +9768,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 							} 
 						}
 						,failure: function(response, opts){
-						   Ext3.Msg.alert('','failed');
+						   Ext.Msg.alert('','failed');
 						}
 					});
 				}
@@ -9908,16 +9782,16 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 		if (params.folderSort != undefined) {
 			baseConfig.folderSort = params.folderSort; 
 		}
-		Ext3.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
+		Ext.m3.ObjectTree.superclass.constructor.call(this, baseConfig, params);
 	},
 
 	initComponent: function(){
 		var loader = this.getLoader(); 
 		loader.baseParams = this.getMainContext();
 		
-		Ext3.m3.ObjectTree.superclass.initComponent.call(this);
+		Ext.m3.ObjectTree.superclass.initComponent.call(this);
 		// Созадем свой сортировщик с переданными параметрами
-		var sorter = new Ext3.ux.tree.TreeGridSorter(this, {folderSort: this.folderSort, property: this.columns[0].dataIndex || 'text'});        
+		var sorter = new Ext.ux.tree.TreeGridSorter(this, {folderSort: this.folderSort, property: this.columns[0].dataIndex || 'text'});        
         // Повесим отображение маски при загрузке дерева
         loader.on('beforeload', this.onBeforeLoad, this);
         loader.on('load', this.onLoad, this);
@@ -9953,7 +9827,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 	showMask: function(visible) {
 		var loader = this.getLoader();
 		if (this.treeLoadingMask == undefined) {
-			this.treeLoadingMask = new Ext3.LoadMask(this.el, {msg:"Загрузка..."});
+			this.treeLoadingMask = new Ext.LoadMask(this.el, {msg:"Загрузка..."});
 		}
 		if (visible) {
 			this.treeLoadingMask.show();
@@ -9991,7 +9865,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
     	};
 
         if (this.fireEvent('beforenewrequest', this, req, false)) {
-			Ext3.Ajax.request(req);
+			Ext.Ajax.request(req);
 		}
 	},
 
@@ -9999,11 +9873,11 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		
 		if (!this.getSelectionModel().getSelectedNode()) {
-			Ext3.Msg.show({
+			Ext.Msg.show({
 			   title: 'Новый',
 			   msg: 'Элемент не выбран',
-			   buttons: Ext3.Msg.OK,
-			   icon: Ext3.MessageBox.INFO
+			   buttons: Ext.Msg.OK,
+			   icon: Ext.MessageBox.INFO
 			});
 			return;
 		}
@@ -10026,7 +9900,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
     	};
 
         if (this.fireEvent('beforenewrequest', this, req, true)) {
-			Ext3.Ajax.request(req);
+			Ext.Ajax.request(req);
 		}
 	},
 
@@ -10051,7 +9925,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 		    };
 
             if (this.fireEvent('beforeeditrequest', this, req)) {
-			    Ext3.Ajax.request(req);
+			    Ext.Ajax.request(req);
 		    }
     	}
 	},
@@ -10062,12 +9936,12 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
         var node = this.getSelectionModel().getSelectedNode()
         if (node) {
         
-            Ext3.Msg.show({
+            Ext.Msg.show({
                title: 'Удаление записи',
                scope: this,
                msg: 'Вы действительно хотите удалить выбранную запись?',
-               icon: Ext3.Msg.QUESTION,
-               buttons: Ext3.Msg.YESNO,
+               icon: Ext.Msg.QUESTION,
+               buttons: Ext.Msg.YESNO,
                fn: function(btn, text, opt){
                    if (btn != 'yes')
                     return;
@@ -10088,17 +9962,17 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
                         };
     
                         if (this.fireEvent('beforedeleterequest', this, req)) {
-                            Ext3.Ajax.request(req);
+                            Ext.Ajax.request(req);
                         }
                     }
                 }
            });
         } else {
-            Ext3.Msg.show({
+            Ext.Msg.show({
                 title: 'Удаление',
                 msg: 'Элемент не выбран',
-                buttons: Ext3.Msg.OK,
-                icon: Ext3.MessageBox.INFO
+                buttons: Ext.Msg.OK,
+                icon: Ext.MessageBox.INFO
             });
         }
     },
@@ -10110,7 +9984,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
             window.on('closed_ok', function(data){
                 if (this.incrementalUpdate){
                     // нам пришел узел дерева
-                    var obj = Ext3.util.JSON.decode(data);
+                    var obj = Ext.util.JSON.decode(data);
                     var selectedNode = this.getSelectionModel().getSelectedNode();
                     var newSelectNode = this.getLoader().createNode(obj.data);
                     switch (operation){
@@ -10176,7 +10050,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 	,deleteOkHandler: function (response, opts){
         if (this.incrementalUpdate){
             // проверка на ошибки уровня приложения
-            var res = Ext3.util.JSON.decode(response.responseText);
+            var res = Ext.util.JSON.decode(response.responseText);
             if(!res.success){
                 smart_eval(response.responseText);
                 return;
@@ -10200,7 +10074,7 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
      * Используется при ajax запросах
      */
     ,getMainContext: function(){
-    	return Ext3.applyIf({}, this.actionContextJson);
+    	return Ext.applyIf({}, this.actionContextJson);
     }
     /**
      * Получение контекста выделения строк/ячеек
@@ -10217,9 +10091,9 @@ Ext3.m3.ObjectTree = Ext3.extend(Ext3.ux.tree.TreeGrid, {
 });
 
 
-Ext3.namespace('Ext3.ux');
+Ext.namespace('Ext.ux');
 
-Ext3.ux.OnDemandLoad = function(){
+Ext.ux.OnDemandLoad = function(){
 
     loadComponent = function(component, callback){
         var fileType = component.substring(component.lastIndexOf('.'));
@@ -10255,7 +10129,7 @@ Ext3.ux.OnDemandLoad = function(){
         }
     };
 }();
-Ext3.ux.PagingTreeNodeUI = Ext3.extend(Ext3.ux.tree.TreeGridNodeUI,
+Ext.ux.PagingTreeNodeUI = Ext.extend(Ext.ux.tree.TreeGridNodeUI,
   {
     renderElements : function(n, a, targetNode, bulkRender){
         this.indentMarkup = n.parentNode ? n.parentNode.ui.getChildIndent() : '';
@@ -10275,13 +10149,13 @@ Ext3.ux.PagingTreeNodeUI = Ext3.extend(Ext3.ux.tree.TreeGridNodeUI,
             stringStack.push(' ' + addlClass);
           stringStack.push('"><div gs:page="');
           stringStack.push(pageNum);
-          stringStack.push('" class="x3-tree-col-text">');
+          stringStack.push('" class="x-tree-col-text">');
           stringStack.push(text);
           stringStack.push('</div></div>');
         }
 
          var buf = [
-             '<li class="gs_tree_pagingbar" style="list-style:none;"><div ext:tree-node-id="',n.id,'" class="x3-tree-node-el ', a.cls,'">',
+             '<li class="gs_tree_pagingbar" style="list-style:none;"><div ext:tree-node-id="',n.id,'" class="x-tree-node-el ', a.cls,'">',
              '<span unselectable="on" style="float:left;">Лист ',currentBlock+1, " из ", blockCount, '</span></a>'];
 
         var i;
@@ -10304,13 +10178,13 @@ Ext3.ux.PagingTreeNodeUI = Ext3.extend(Ext3.ux.tree.TreeGridNodeUI,
           var to = Math.min(blockCount-1, currentBlock+3);
 
           if(from>1)
-            buf.push('<div class="x3-tree-col"><div class="x3-tree-col-text">...</div></div>');
+            buf.push('<div class="x-tree-col"><div class="x-tree-col-text">...</div></div>');
 
           for(i=from; i<to; i++)
             renderBtn(buf, i, i+1, currentBlock==i?'gs_tree_pgbtn_sel':null);
 
           if(to<blockCount-1)
-            buf.push('<div class="x3-tree-col"><div class="x3-tree-col-text">...</div></div>');
+            buf.push('<div class="x-tree-col"><div class="x-tree-col-text">...</div></div>');
 
           renderBtn(buf, blockCount-1, blockCount, currentBlock==blockCount-1?'gs_tree_pgbtn_sel':null);
         }
@@ -10318,21 +10192,21 @@ Ext3.ux.PagingTreeNodeUI = Ext3.extend(Ext3.ux.tree.TreeGridNodeUI,
           renderBtn(buf, currentBlock+1, '>');
 
 
-        var post= ['<div class="x3-tree-col"><div id="last" class="x3-tree-col-text">Показаны строки от ',currentBlock*blockSize+1, ' до ', Math.min((currentBlock+1)*blockSize, fullCount), " из ", fullCount, '</div></div>',
-            '<div class="x3-clear"></div></div>',
-            '<ul class="x3-tree-node-ct" style="display:none;"></ul>',
+        var post= ['<div class="x-tree-col"><div id="last" class="x-tree-col-text">Показаны строки от ',currentBlock*blockSize+1, ' до ', Math.min((currentBlock+1)*blockSize, fullCount), " из ", fullCount, '</div></div>',
+            '<div class="x-clear"></div></div>',
+            '<ul class="x-tree-node-ct" style="display:none;"></ul>',
             "</li></div></td>"];
 
         var nodeStr = buf.join('')+post.join('');
         buf =  [
-             '<tbody class="x3-tree-node">',
-                '<tr ext:tree-node-id="', n.id ,'" class="x3-tree-node-el x3-tree-node-leaf x3-tree-pagingnode', a.cls, '">',
-            '<td colspan="',cols.length,'" class="x3-treegrid-col x3-tree-pagingnode-td">',
-            '<span class="x3-tree-node-indent" style="float:left;">', this.indentMarkup, "</span>",
-                        '<img src="', this.emptyIcon, '" class="x3-tree-elbow" style="float:left;"/>',
-                        '<img src="', a.icon || this.emptyIcon, '" class="', (a.icon ? " x3-tree-node-inline-icon" : ""), (a.iconCls ? " "+a.iconCls : ""), '" unselectable="on" style="float:left;"/>',
-                        '<a hidefocus="on" class="x3-tree-node-anchor" href="', a.href ? a.href : '#', '" tabIndex="1" ',
-                        '<a hidefocus="on" class="x3-tree-node-anchor" href="', a.href ? a.href : '#', '" tabIndex="1" ',
+             '<tbody class="x-tree-node">',
+                '<tr ext:tree-node-id="', n.id ,'" class="x-tree-node-el x-tree-node-leaf x-tree-pagingnode', a.cls, '">',
+            '<td colspan="',cols.length,'" class="x-treegrid-col x-tree-pagingnode-td">',
+            '<span class="x-tree-node-indent" style="float:left;">', this.indentMarkup, "</span>",
+                        '<img src="', this.emptyIcon, '" class="x-tree-elbow" style="float:left;"/>',
+                        '<img src="', a.icon || this.emptyIcon, '" class="', (a.icon ? " x-tree-node-inline-icon" : ""), (a.iconCls ? " "+a.iconCls : ""), '" unselectable="on" style="float:left;"/>',
+                        '<a hidefocus="on" class="x-tree-node-anchor" href="', a.href ? a.href : '#', '" tabIndex="1" ',
+                        '<a hidefocus="on" class="x-tree-node-anchor" href="', a.href ? a.href : '#', '" tabIndex="1" ',
                             a.hrefTarget ? ' target="'+a.hrefTarget+'"' : '', '>',
             nodeStr,
                     '</td>'
@@ -10341,11 +10215,11 @@ Ext3.ux.PagingTreeNodeUI = Ext3.extend(Ext3.ux.tree.TreeGridNodeUI,
         nodeStr = buf.join('');
 
         if(bulkRender !== true && n.nextSibling && n.nextSibling.ui.getEl()){
-            this.wrap = Ext3.DomHelper.insertHtml("beforeBegin",
+            this.wrap = Ext.DomHelper.insertHtml("beforeBegin",
                                 n.nextSibling.ui.getEl(), nodeStr);
         }
         else{
-            this.wrap = Ext3.DomHelper.insertHtml("beforeEnd", targetNode, nodeStr);
+            this.wrap = Ext.DomHelper.insertHtml("beforeEnd", targetNode, nodeStr);
         }
         n.on("click",
           function(node, evt)
@@ -10385,7 +10259,7 @@ Ext3.ux.PagingTreeNodeUI = Ext3.extend(Ext3.ux.tree.TreeGridNodeUI,
     }
 });
 /**
- * Ext3.ux.DateTimePicker & Ext3.ux.form.DateTimeField
+ * Ext.ux.DateTimePicker & Ext.ux.form.DateTimeField
  * http://www.sencha.com/forum/showthread.php?98292-DateTime-field-again-and-again-)
  * Copyright(c) 2011, Andrew Pleshkov andrew.pleshkov@gmail.com
  * *** DATATEX CHANGES IN ORDER TO ADD A NEW SLIDER FOR SECONDS. 
@@ -10407,13 +10281,13 @@ Ext3.ux.PagingTreeNodeUI = Ext3.extend(Ext3.ux.tree.TreeGridNodeUI,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-Ext3.namespace('Ext3.ux');
+Ext.namespace('Ext.ux');
 
 (function () {
 
-    var UX = Ext3.ux;
+    var UX = Ext.ux;
 
-    UX.BaseTimePicker = Ext3.extend(Ext3.Panel, {
+    UX.BaseTimePicker = Ext.extend(Ext.Panel, {
 
         timeFormat: 'H:i:s',
 
@@ -10446,7 +10320,7 @@ Ext3.namespace('Ext3.ux');
         initComponent: function () {
             this.addEvents('select');
 
-            this.hourSlider = new Ext3.slider.SingleSlider({
+            this.hourSlider = new Ext.slider.SingleSlider({
                 increment: this.hourIncrement,
                 minValue: 0,
                 maxValue: 23,
@@ -10455,10 +10329,10 @@ Ext3.namespace('Ext3.ux');
                     change: this._updateTimeValue,
                     scope: this
                 },
-                plugins: new Ext3.slider.Tip()
+                plugins: new Ext.slider.Tip()
             });
 
-            this.minSlider = new Ext3.slider.SingleSlider({
+            this.minSlider = new Ext.slider.SingleSlider({
                 increment: this.minIncrement,
                 minValue: 0,
                 maxValue: 59,
@@ -10467,10 +10341,10 @@ Ext3.namespace('Ext3.ux');
                     change: this._updateTimeValue,
                     scope: this
                 },
-                plugins: new Ext3.slider.Tip()
+                plugins: new Ext.slider.Tip()
             });
 
-            this.secSlider = new Ext3.slider.SingleSlider({
+            this.secSlider = new Ext.slider.SingleSlider({
                 increment: this.secIncrement,
                 minValue: 0,
                 maxValue: 59,
@@ -10479,7 +10353,7 @@ Ext3.namespace('Ext3.ux');
                     change: this._updateTimeValue,
                     scope: this
                 },
-                plugins: new Ext3.slider.Tip()
+                plugins: new Ext.slider.Tip()
             });
 
             this.setCurrentTime(false);
@@ -10561,18 +10435,18 @@ Ext3.namespace('Ext3.ux');
 
     });
 
-    Ext3.reg('basetimepicker', UX.BaseTimePicker);
+    Ext.reg('basetimepicker', UX.BaseTimePicker);
 
 })();
-Ext3.namespace('Ext3.ux');
+Ext.namespace('Ext.ux');
 
 (function () {
 
-    var UX = Ext3.ux;
+    var UX = Ext.ux;
 
     var CLS = 'ux-date-time-picker';
 
-    UX.DateTimePicker = Ext3.extend(Ext3.BoxComponent, {
+    UX.DateTimePicker = Ext.extend(Ext.BoxComponent, {
 
         timeLabel: 'Time',
 
@@ -10587,7 +10461,7 @@ Ext3.namespace('Ext3.ux');
 
             this.addEvents('select');
 
-            this.timePickerButton = new Ext3.Button({
+            this.timePickerButton = new Ext.Button({
                 text: this.changeTimeText,
                 handler: this._showTimePicker,
                 scope: this
@@ -10608,10 +10482,10 @@ Ext3.namespace('Ext3.ux');
                 var menuConfig = this.initialConfig.timeMenu;
 
                 if (menuConfig && menuConfig.xtype) {
-                    this.timeMenu = Ext3.create(menuConfig);
+                    this.timeMenu = Ext.create(menuConfig);
                 } else {                          
-                    var picker = Ext3.create(
-                            Ext3.applyIf(this.initialConfig.timePicker || {}, {
+                    var picker = Ext.create(
+                            Ext.applyIf(this.initialConfig.timePicker || {}, {
                                 timeFormat: this.timeFormat
                             }),
                             'basetimepicker'
@@ -10619,7 +10493,7 @@ Ext3.namespace('Ext3.ux');
                     this.timeMenu = new Menu(picker, menuConfig || {});
                 }
 
-                if (!Ext3.isFunction(this.timeMenu.getPicker)) {
+                if (!Ext.isFunction(this.timeMenu.getPicker)) {
                     throw 'Your time menu must provide the getPicker() method';
                 }
 
@@ -10632,11 +10506,11 @@ Ext3.namespace('Ext3.ux');
 
             config.internalRender = this.initialConfig.internalRender;
 
-            Ext3.applyIf(config, {
-                format: this.dateFormat || Ext3.DatePicker.prototype.format
+            Ext.applyIf(config, {
+                format: this.dateFormat || Ext.DatePicker.prototype.format
             });
 
-            var picker = this.datePicker = Ext3.create(config, 'datepicker');
+            var picker = this.datePicker = Ext.create(config, 'datepicker');
 
             picker.update = picker.update.createSequence(function () {
                 if (this.el != null && this.datePicker.rendered) {
@@ -10651,7 +10525,7 @@ Ext3.namespace('Ext3.ux');
 
             picker.render(ct);
 
-            var bottomEl = picker.getEl().child('.x3-date-bottom');
+            var bottomEl = picker.getEl().child('.x-date-bottom');
 
             var size = bottomEl.getSize(true);
             var style = [
@@ -10665,7 +10539,7 @@ Ext3.namespace('Ext3.ux');
 
             var div = ct.createChild({
                 tag: 'div',
-                cls: 'x3-date-bottom',
+                cls: 'x-date-bottom',
                 style: style,
                 children: [
                     {
@@ -10693,13 +10567,13 @@ Ext3.namespace('Ext3.ux');
 
             if (picker.showToday) {
                 var todayConfig = {};
-                Ext3.each(['text', 'tooltip', 'handler', 'scope'], function (key) {
+                Ext.each(['text', 'tooltip', 'handler', 'scope'], function (key) {
                     todayConfig[key] = picker.todayBtn.initialConfig[key];
                 });
-                this.todayBtn = new Ext3.Button(todayConfig).render(div.child('td:first'));
+                this.todayBtn = new Ext.Button(todayConfig).render(div.child('td:first'));
             }
 
-            this.doneBtn = new Ext3.Button({
+            this.doneBtn = new Ext.Button({
                 text: this.doneText,
                 handler: this.onDone,
                 scope: this
@@ -10713,13 +10587,13 @@ Ext3.namespace('Ext3.ux');
         _renderValueField: function (ct) {
             var cls = CLS + '-value-ct';
 
-            var timeLabel = !Ext3.isEmpty(this.timeLabel)
+            var timeLabel = !Ext.isEmpty(this.timeLabel)
                     ? '<span class="' + cls + '-value-label">' + this.timeLabel + ':</span>&nbsp;'
                     : '';
 
             var div = ct.insertFirst({
                 tag: 'div',
-                cls: [cls, 'x3-date-bottom'].join(' ')
+                cls: [cls, 'x-date-bottom'].join(' ')
             });
 
             var table = div.createChild({
@@ -10818,7 +10692,7 @@ Ext3.namespace('Ext3.ux');
         },
 
         destroy: function () {
-            Ext3.destroy(this.timePickerButton);
+            Ext.destroy(this.timePickerButton);
             this.timePickerButton = null;
 
             if (this.timeValueEl) {
@@ -10826,21 +10700,21 @@ Ext3.namespace('Ext3.ux');
                 this.timeValueEl = null;
             }
 
-            Ext3.destroy(this.datePicker);
+            Ext.destroy(this.datePicker);
             this.datePicker = null;
 
             if (this.timeMenu) {
-                Ext3.destroy(this.timeMenu);
+                Ext.destroy(this.timeMenu);
                 this.timeMenu = null;
             }
 
             if (this.todayBtn) {
-                Ext3.destroy(this.todayBtn);
+                Ext.destroy(this.todayBtn);
                 this.todayBtn = null;
             }
 
             if (this.doneBtn) {
-                Ext3.destroy(this.doneBtn);
+                Ext.destroy(this.doneBtn);
                 this.doneBtn = null;
             }
 
@@ -10851,11 +10725,11 @@ Ext3.namespace('Ext3.ux');
 
     });
 
-    Ext3.reg('datetimepicker', UX.DateTimePicker);
+    Ext.reg('datetimepicker', UX.DateTimePicker);
 
     //
 
-    var Menu = UX.DateTimePicker.Menu = Ext3.extend(Ext3.menu.Menu, {
+    var Menu = UX.DateTimePicker.Menu = Ext.extend(Ext.menu.Menu, {
 
         enableScrolling : false,
 
@@ -10872,9 +10746,9 @@ Ext3.namespace('Ext3.ux');
                 delete config.picker;
             }
 
-            this.picker = Ext3.create(picker);
+            this.picker = Ext.create(picker);
 
-            Menu.superclass.constructor.call(this, Ext3.applyIf({
+            Menu.superclass.constructor.call(this, Ext.applyIf({
                 items: this.picker
             }, config));
 
@@ -10902,15 +10776,15 @@ Ext3.namespace('Ext3.ux');
 
     });
 
-})();Ext3.namespace('Ext3.ux.form');
+})();Ext.namespace('Ext.ux.form');
 
 (function () {
 
-    var F = Ext3.ux.form;
+    var F = Ext.ux.form;
 
-    var STRICT = Ext3.isIE7 && Ext3.isStrict;
+    var STRICT = Ext.isIE7 && Ext.isStrict;
 
-    var Menu = Ext3.extend(Ext3.menu.Menu, {
+    var Menu = Ext.extend(Ext.menu.Menu, {
 
         enableScrolling : false,
 
@@ -10922,10 +10796,10 @@ Ext3.namespace('Ext3.ux');
 
         pickerId : null,
 
-        cls : 'x3-date-menu x3-date-time-menu',
+        cls : 'x-date-menu x-date-time-menu',
 
         constructor: function (picker, config) {
-            Menu.superclass.constructor.call(this, Ext3.applyIf({
+            Menu.superclass.constructor.call(this, Ext.applyIf({
                 items: picker
             }, config || {}));
 
@@ -10982,8 +10856,8 @@ Ext3.namespace('Ext3.ux');
     //
 
     //kirov
-    F.DateTimeField = Ext3.extend(Ext3.m3.AdvancedDataField, {
-    //F.DateTimeField = Ext3.extend(Ext3.form.DateField, {
+    F.DateTimeField = Ext.extend(Ext.m3.AdvancedDataField, {
+    //F.DateTimeField = Ext.extend(Ext.form.DateField, {
 
         timeFormat: 'H:i:s',
 
@@ -11011,17 +10885,17 @@ Ext3.namespace('Ext3.ux');
         _createPicker: function () {
             var config = this.initialConfig.picker || {};
 
-            Ext3.apply(config, {
-                ctCls: 'x3-menu-date-item',
-                internalRender: STRICT || !Ext3.isIE
+            Ext.apply(config, {
+                ctCls: 'x-menu-date-item',
+                internalRender: STRICT || !Ext.isIE
             });
 
-            Ext3.applyIf(config, {
+            Ext.applyIf(config, {
                 dateFormat: this.dateFormat,
                 timeFormat: this.timeFormat
             });
 
-            return Ext3.create(config, 'datetimepicker');
+            return Ext.create(config, 'datetimepicker');
         },
 
         onTriggerClick: function () {
@@ -11032,34 +10906,34 @@ Ext3.namespace('Ext3.ux');
 
     });
 
-    Ext3.reg('datetimefield', F.DateTimeField);
+    Ext.reg('datetimefield', F.DateTimeField);
 })();
 
 // <kirov
 // локализация
-if(Ext3.ux.DateTimePicker){
-    Ext3.ux.DateTimePicker.prototype.timeLabel = "Время";
-    Ext3.ux.DateTimePicker.prototype.changeTimeText = "Изменить...";
-    Ext3.ux.DateTimePicker.prototype.doneText = "ОК";
+if(Ext.ux.DateTimePicker){
+    Ext.ux.DateTimePicker.prototype.timeLabel = "Время";
+    Ext.ux.DateTimePicker.prototype.changeTimeText = "Изменить...";
+    Ext.ux.DateTimePicker.prototype.doneText = "ОК";
 }
 
-if(Ext3.ux.BaseTimePicker){
-    Ext3.ux.BaseTimePicker.prototype.nowText = "Текущее";
-    Ext3.ux.BaseTimePicker.prototype.doneText = "ОК";
-    Ext3.ux.BaseTimePicker.prototype.hoursLabel = 'Часы';
-    Ext3.ux.BaseTimePicker.prototype.minsLabel = 'Минуты';
-    Ext3.ux.BaseTimePicker.prototype.secsLabel = 'Секунды';
+if(Ext.ux.BaseTimePicker){
+    Ext.ux.BaseTimePicker.prototype.nowText = "Текущее";
+    Ext.ux.BaseTimePicker.prototype.doneText = "ОК";
+    Ext.ux.BaseTimePicker.prototype.hoursLabel = 'Часы';
+    Ext.ux.BaseTimePicker.prototype.minsLabel = 'Минуты';
+    Ext.ux.BaseTimePicker.prototype.secsLabel = 'Секунды';
 }
 // kirov>
 
 // <kirov
 (function () {
 
-    var F = Ext3.ux.form;
+    var F = Ext.ux.form;
 
-    var STRICT = Ext3.isIE7 && Ext3.isStrict;
+    var STRICT = Ext.isIE7 && Ext.isStrict;
 
-    var Menu = Ext3.extend(Ext3.menu.Menu, {
+    var Menu = Ext.extend(Ext.menu.Menu, {
 
         enableScrolling : false,
 
@@ -11076,9 +10950,9 @@ if(Ext3.ux.BaseTimePicker){
                 delete config.picker;
             }
 
-            this.picker = Ext3.create(picker);
+            this.picker = Ext.create(picker);
 
-            Menu.superclass.constructor.call(this, Ext3.applyIf({
+            Menu.superclass.constructor.call(this, Ext.applyIf({
                 items: this.picker
             }, config));
 
@@ -11107,7 +10981,7 @@ if(Ext3.ux.BaseTimePicker){
     });
 
     //kirov
-    F.AdvTimeField = Ext3.extend(Ext3.m3.AdvancedDataField, {
+    F.AdvTimeField = Ext.extend(Ext.m3.AdvancedDataField, {
 
         timeFormat: 'H:i:s',
 
@@ -11137,16 +11011,16 @@ if(Ext3.ux.BaseTimePicker){
         _createPicker: function () {
             var config = this.initialConfig.picker || {};
 
-            Ext3.apply(config, {
-                ctCls: 'x3-menu-date-item',
-                internalRender: STRICT || !Ext3.isIE
+            Ext.apply(config, {
+                ctCls: 'x-menu-date-item',
+                internalRender: STRICT || !Ext.isIE
             });
 
-            Ext3.applyIf(config, {
+            Ext.applyIf(config, {
                 timeFormat: this.timeFormat
             });
 
-            return Ext3.create(config, 'basetimepicker');
+            return Ext.create(config, 'basetimepicker');
         },
 
         onTriggerClick: function () {
@@ -11173,15 +11047,15 @@ if(Ext3.ux.BaseTimePicker){
 
     });
 
-    Ext3.reg('advtimefield', F.AdvTimeField);
+    Ext.reg('advtimefield', F.AdvTimeField);
 })();
 //kirov >
-Ext3.ns('Ext3.ux.form');
+Ext.ns('Ext.ux.form');
 
-Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
+Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
 
     /**
-     * @cfg {Object} buttonCfg A standard {@link Ext3.Button} config object.
+     * @cfg {Object} buttonCfg A standard {@link Ext.Button} config object.
      */
 
     // private
@@ -11191,22 +11065,22 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
      * @hide
      * @method autoSize
      */
-    ,autoSize: Ext3.emptyFn
+    ,autoSize: Ext.emptyFn
 
      /**
      * Класс иконки для выбора файла
      */
-    ,iconClsSelectFile: 'x3-form-file-icon'
+    ,iconClsSelectFile: 'x-form-file-icon'
 
     /**
      * Класс иконки для очистки файла
      */
-    ,iconClsClearFile: 'x3-form-file-clear-icon'
+    ,iconClsClearFile: 'x-form-file-clear-icon'
 
     /**
      * Класс иконки для скачивания файла
      */
-    ,iconClsDownloadFile: 'x3-form-file-download-icon'
+    ,iconClsDownloadFile: 'x-form-file-download-icon'
 
     ,constructor: function(baseConfig, params){
         if (params) {
@@ -11224,19 +11098,19 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
             }
         }
 
-        Ext3.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
+        Ext.ux.form.FileUploadField.superclass.constructor.call(this, baseConfig, params);
     }
 
     // private
     ,initComponent: function(){
-        Ext3.ux.form.FileUploadField.superclass.initComponent.call(this);
+        Ext.ux.form.FileUploadField.superclass.initComponent.call(this);
 
         this.addEvents(
             /**
              * @event fileselected
              * Fires when the underlying file input field's value has changed from the user
              * selecting a new file from the system file selection dialog.
-             * @param {Ext3.ux.form.FileUploadField} this
+             * @param {Ext.ux.form.FileUploadField} this
              * @param {String} value The file value returned by the underlying file input field
              */
             'fileselected',
@@ -11256,34 +11130,34 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
 
     // private
     ,onRender : function(ct, position){
-        Ext3.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
+        Ext.ux.form.FileUploadField.superclass.onRender.call(this, ct, position);
 
         // Используем название файла
         this.value = this.getFileName();
 
-        this.wrap = this.el.wrap({cls:'x3-form-field-wrap x3-form-file-wrap'});
-        this.el.addClass('x3-form-file-text');
+        this.wrap = this.el.wrap({cls:'x-form-field-wrap x-form-file-wrap'});
+        this.el.addClass('x-form-file-text');
         //this.el.dom.removeAttribute('name');
 
         this.createFileInput();
 
-        var btnCfg = Ext3.applyIf(this.buttonCfg || {}, {
+        var btnCfg = Ext.applyIf(this.buttonCfg || {}, {
             iconCls: this.iconClsSelectFile
         });
-        this.buttonFile = new Ext3.Button(Ext3.apply(btnCfg, {
+        this.buttonFile = new Ext.Button(Ext.apply(btnCfg, {
             renderTo: this.wrap
             ,width: 16
-            ,cls: 'x3-form-file-btn' + (btnCfg.iconCls ? ' x3-btn-icon' : '')
+            ,cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
             ,tooltip: {
                 text:'Выбрать файл'
                 ,width: 150
             }
         }));
 
-        this.buttonClear = new Ext3.Button({
+        this.buttonClear = new Ext.Button({
             renderTo: this.wrap
             ,width: 16
-            ,cls: 'x3-form-file-clear'
+            ,cls: 'x-form-file-clear'
             ,iconCls: this.iconClsClearFile
             ,handler: this.clickClearField
             ,scope: this
@@ -11311,10 +11185,10 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
 
     }
     ,renderHelperBtn: function() {
-        this.buttonDownload = new Ext3.Button({
+        this.buttonDownload = new Ext.Button({
             renderTo: this.wrap
             ,width: 16
-            ,cls: 'x3-form-file-download'
+            ,cls: 'x-form-file-download'
             ,iconCls: this.iconClsDownloadFile
             ,handler: this.clickDownload
             ,scope: this
@@ -11332,26 +11206,26 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
         this.fileInput.on({
             scope: this,
             mouseenter: function() {
-                this.buttonFile.addClass(['x3-btn-over','x3-btn-focus'])
+                this.buttonFile.addClass(['x-btn-over','x-btn-focus'])
             },
             mouseleave: function(){
-                this.buttonFile.removeClass(['x3-btn-over','x3-btn-focus','x3-btn-click'])
+                this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
             },
             mousedown: function(){
-                this.buttonFile.addClass('x3-btn-click')
+                this.buttonFile.addClass('x-btn-click')
             },
             mouseup: function(){
-                this.buttonFile.removeClass(['x3-btn-over','x3-btn-focus','x3-btn-click'])
+                this.buttonFile.removeClass(['x-btn-over','x-btn-focus','x-btn-click'])
             },
              change: function(){
                  if (!this.isFileExtensionOK()){
-                     Ext3.Msg.show({
+                     Ext.Msg.show({
                        title:'Внимание'
                        ,msg: 'Неверное расширение файла'
-                       ,buttons: Ext3.Msg.OK
-                       ,fn: Ext3.emptyFn
+                       ,buttons: Ext.Msg.OK
+                       ,fn: Ext.emptyFn
                        ,animEl: 'elId'
-                       ,icon: Ext3.MessageBox.WARNING
+                       ,icon: Ext.MessageBox.WARNING
                     });
                      this.reset();
                      return;
@@ -11380,15 +11254,15 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
         this.fileInput = this.wrap.createChild({
             id: this.getFileInputId(),
             name: (this.prefixUploadField || '') + this.name,
-            cls: 'x3-form-file',
+            cls: 'x-form-file',
             tag: 'input',
             type: 'file',
             size: 1,
             width: 20
         });
 
-        Ext3.QuickTips.unregister(this.fileInput);
-        Ext3.QuickTips.register({
+        Ext.QuickTips.unregister(this.fileInput);
+        Ext.QuickTips.register({
             target: this.fileInput,
             text: 'Выбрать файл',
             width: 86,
@@ -11400,7 +11274,7 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
         this.fileInput.remove();
         this.createFileInput();
         this.bindListeners();
-        Ext3.ux.form.FileUploadField.superclass.reset.call(this);
+        Ext.ux.form.FileUploadField.superclass.reset.call(this);
     }
 
     // private
@@ -11410,7 +11284,7 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
 
     // private
     ,onResize : function(w, h) {
-        Ext3.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
+        Ext.ux.form.FileUploadField.superclass.onResize.call(this, w, h);
 
         this.wrap.setWidth(w);
 
@@ -11424,7 +11298,7 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
             w -= btnDonwloadWidth;
         }
 
-        if (Ext3.isWebKit) {
+        if (Ext.isWebKit) {
             // Юлядть
             // Некорректная верстка в вебкитовских движках
             this.el.setWidth(w + 5);
@@ -11436,19 +11310,19 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
 
     // private
     ,onDestroy: function(){
-        Ext3.ux.form.FileUploadField.superclass.onDestroy.call(this);
-        Ext3.QuickTips.unregister(this.fileInput);
-        Ext3.destroy(this.fileInput, this.buttonFile, this.buttonClear,
+        Ext.ux.form.FileUploadField.superclass.onDestroy.call(this);
+        Ext.QuickTips.unregister(this.fileInput);
+        Ext.destroy(this.fileInput, this.buttonFile, this.buttonClear,
             this.getHelperBtn(), this.wrap);
     }
 
     ,onDisable: function(){
-        Ext3.ux.form.FileUploadField.superclass.onDisable.call(this);
+        Ext.ux.form.FileUploadField.superclass.onDisable.call(this);
         this.doDisable(true);
     }
 
     ,onEnable: function(){
-        Ext3.ux.form.FileUploadField.superclass.onEnable.call(this);
+        Ext.ux.form.FileUploadField.superclass.onEnable.call(this);
         this.doDisable(false);
 
     }
@@ -11464,7 +11338,7 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
     }
 
     // private
-    ,preFocus : Ext3.emptyFn
+    ,preFocus : Ext.emptyFn
 
     // private
     ,alignErrorIcon : function(){
@@ -11514,33 +11388,33 @@ Ext3.ux.form.FileUploadField = Ext3.extend(Ext3.form.TextField,  {
     }
     //override
     ,setReadOnly: function(readOnly){
-         Ext3.ux.form.FileUploadField.superclass.setReadOnly.call(this, readOnly);
+         Ext.ux.form.FileUploadField.superclass.setReadOnly.call(this, readOnly);
     }
 });
 
-Ext3.reg('fileuploadfield', Ext3.ux.form.FileUploadField);
+Ext.reg('fileuploadfield', Ext.ux.form.FileUploadField);
 
 // backwards compat
-Ext3.form.FileUploadField = Ext3.ux.form.FileUploadField;
+Ext.form.FileUploadField = Ext.ux.form.FileUploadField;
 
-Ext3.ns('Ext3.ux.form');
+Ext.ns('Ext.ux.form');
 
-Ext3.ux.form.ImageUploadField = Ext3.extend(Ext3.form.FileUploadField,  {
+Ext.ux.form.ImageUploadField = Ext.extend(Ext.form.FileUploadField,  {
 
      /**
      * Класс иконки для выбора файла
      */
-     iconClsSelectFile: 'x3-form-image-icon'
+     iconClsSelectFile: 'x-form-image-icon'
     
     /**
      * Класс иконки для очистки файла 
      */
-    ,iconClsClearFile: 'x3-form-image-clear-icon'
+    ,iconClsClearFile: 'x-form-image-clear-icon'
 
     /**
      * Класс иконки для предпросмотра файла
      */
-    ,iconClsPreviewImage: 'x3-form-image-preview-icon'
+    ,iconClsPreviewImage: 'x-form-image-preview-icon'
     
     ,constructor: function(baseConfig, params){
         
@@ -11565,9 +11439,9 @@ Ext3.ux.form.ImageUploadField = Ext3.extend(Ext3.form.FileUploadField,  {
             var prefix = this.prefixThumbnailImg || '';
             var url = String.format('{0}/{1}{2}', dir.join('/'), prefix, file_name);
             
-            this.previewTip = new Ext3.QuickTip({
+            this.previewTip = new Ext.QuickTip({
                 id: 'preview_tip_window',  
-                html: String.format('<a href="{0}" rel="lightbox"><image src="{1}" WIDTH={2} HEIGHT={3} OnClick=Ext3.getCmp("preview_tip_window").hide()></a>', 
+                html: String.format('<a href="{0}" rel="lightbox"><image src="{1}" WIDTH={2} HEIGHT={3} OnClick=Ext.getCmp("preview_tip_window").hide()></a>', 
                         params.fileUrl,
                         this.getFileUrl(url),
                         this.thumbnailWidth,
@@ -11579,14 +11453,14 @@ Ext3.ux.form.ImageUploadField = Ext3.extend(Ext3.form.FileUploadField,  {
         }
         }        
         
-        Ext3.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
+        Ext.ux.form.ImageUploadField.superclass.constructor.call(this, baseConfig, params);
     }     
     ,renderHelperBtn: function(){
         if (this.thumbnail) {
-            this.buttonPreview = new Ext3.Button({
+            this.buttonPreview = new Ext.Button({
                 renderTo: this.wrap
                 ,width: 16
-                ,cls: 'x3-form-file-download'
+                ,cls: 'x-form-file-download'
                 ,iconCls: this.iconClsPreviewImage
                 ,handler: this.clickHelperBtn
                 ,scope: this
@@ -11610,15 +11484,15 @@ Ext3.ux.form.ImageUploadField = Ext3.extend(Ext3.form.FileUploadField,  {
         this.fileInput = this.wrap.createChild({
             id: this.getFileInputId(),
             name: (this.prefixUploadField || '') + this.name,
-            cls: 'x3-form-file',
+            cls: 'x-form-file',
             tag: 'input',
             type: 'file',
             size: 1,
             width: 20
         });
         
-        Ext3.QuickTips.unregister(this.fileInput);
-        Ext3.QuickTips.register({
+        Ext.QuickTips.unregister(this.fileInput);
+        Ext.QuickTips.register({
             target: this.fileInput,
             text: 'Выбрать изображение',
             width: 130,
@@ -11626,13 +11500,13 @@ Ext3.ux.form.ImageUploadField = Ext3.extend(Ext3.form.FileUploadField,  {
         });
     }
     ,onDestroy: function(){
-        Ext3.ux.form.ImageUploadField.superclass.onDestroy.call(this);
-        Ext3.destroy(this.previewTip);
+        Ext.ux.form.ImageUploadField.superclass.onDestroy.call(this);
+        Ext.destroy(this.previewTip);
     }
 });
 // Регистрация lightbox
-Ext3.ux.Lightbox.register('a[rel^=lightbox]');
-Ext3.reg('imageuploadfield', Ext3.ux.form.ImageUploadField);
+Ext.ux.Lightbox.register('a[rel^=lightbox]');
+Ext.reg('imageuploadfield', Ext.ux.form.ImageUploadField);
 
 /**
  * Функции рендера компонентов-контейнеров
@@ -11644,7 +11518,7 @@ Ext3.reg('imageuploadfield', Ext3.ux.form.ImageUploadField);
  * @param {Object} params Дрополнительные параметра для правильной конф-ии
  */
 function createAdvancedTreeGrid(baseConfig, params){
-	return new Ext3.m3.AdvancedTreeGrid(baseConfig, params);
+	return new Ext.m3.AdvancedTreeGrid(baseConfig, params);
 }
 
 /**
@@ -11654,10 +11528,10 @@ function createAdvancedTreeGrid(baseConfig, params){
  */
 function createGridPanel(baseConfig, params){
   if (baseConfig.editor) {
-    return new Ext3.m3.EditorGridPanel(baseConfig, params);
+    return new Ext.m3.EditorGridPanel(baseConfig, params);
   }
   else {
-	  return new Ext3.m3.GridPanel(baseConfig, params);
+	  return new Ext.m3.GridPanel(baseConfig, params);
 	}
 }
 
@@ -11668,10 +11542,10 @@ function createGridPanel(baseConfig, params){
  */
 function createObjectGrid(baseConfig, params){
   if (baseConfig.editor) {
-    return new Ext3.m3.EditorObjectGrid(baseConfig, params);
+    return new Ext.m3.EditorObjectGrid(baseConfig, params);
   }
   else {
-	  return new Ext3.m3.ObjectGrid(baseConfig, params);
+	  return new Ext.m3.ObjectGrid(baseConfig, params);
 	}
 }
 
@@ -11681,7 +11555,7 @@ function createObjectGrid(baseConfig, params){
  * @param {Object} params
  */
 function createObjectTree(baseConfig, params){
-	return new Ext3.m3.ObjectTree(baseConfig, params);
+	return new Ext.m3.ObjectTree(baseConfig, params);
 }
 
 /**
@@ -11690,7 +11564,7 @@ function createObjectTree(baseConfig, params){
  * @param {Object} params
  */
 function createAdvancedComboBox(baseConfig, params){
-	var adv_combo = new Ext3.m3.AdvancedComboBox(baseConfig, params);
+	var adv_combo = new Ext.m3.AdvancedComboBox(baseConfig, params);
 //	adv_combo.on('beforeselect',function(){
 //		console.log('beforeselect');
 //	});
@@ -11724,7 +11598,7 @@ function createAdvancedComboBox(baseConfig, params){
  * @param {Object} baseConfig
  */
 function createAdvancedDataField(baseConfig, params){
-	return new Ext3.m3.AdvancedDataField(baseConfig, params);
+	return new Ext.m3.AdvancedDataField(baseConfig, params);
 }
 /**
  * Здесь нужно перегружать объекты и дополнять функционал.
@@ -11734,8 +11608,8 @@ function createAdvancedDataField(baseConfig, params){
 /**
  * Нужно для правильной работы окна 
  */
-Ext3.onReady(function(){
-	Ext3.override(Ext3.Window, {
+Ext.onReady(function(){
+	Ext.override(Ext.Window, {
 	
 	  /*
 	   *  Если установлена модальность и есть родительское окно, то
@@ -11743,11 +11617,11 @@ Ext3.onReady(function(){
 	   *  this.modal = false;
 	   */
 	  tmpModal: false 
-	  ,manager: new Ext3.WindowGroup()
+	  ,manager: new Ext.WindowGroup()
 	  // 2011.01.14 kirov
 	  // убрал, т.к. совместно с desktop.js это представляет собой гремучую смесь
-	  // кому нужно - пусть прописывает Ext3.getBody() в своем "десктопе" на onReady или когда хочет
-	  //,renderTo: Ext3.getBody().id
+	  // кому нужно - пусть прописывает Ext.getBody() в своем "десктопе" на onReady или когда хочет
+	  //,renderTo: Ext.getBody().id
 	  ,constrain: true
 	  /**
 	   * Выводит окно на передний план
@@ -11760,7 +11634,7 @@ Ext3.onReady(function(){
 	  ,listeners: {
 	
 	    'beforeshow': function (){
-                var renderTo = Ext3.get(this.renderTo); 
+                var renderTo = Ext.get(this.renderTo); 
                 if ( renderTo ) {
                     if (renderTo.getHeight() < this.getHeight() ) 
                         this.setHeight( renderTo.getHeight() );
@@ -11786,7 +11660,7 @@ Ext3.onReady(function(){
 					 * Такое поведение нам не подходит и другого решения найдено не было.
 					 * Кроме как удалять данный класс
 					 * */
-					this.parentWindow.el.removeClass('x3-masked-relative');
+					this.parentWindow.el.removeClass('x-masked-relative');
 	
 					this.parentWindow.on('activate', this.activateChildWindow, this);
 					
@@ -11801,11 +11675,11 @@ Ext3.onReady(function(){
 					}
 				}
 				if (this.modal){
-					var taskbar = Ext3.get('ux-taskbar');
+					var taskbar = Ext.get('ux-taskbar');
 					if (taskbar) {
 	 					taskbar.mask();
 					}
-						var toptoolbar = Ext3.get('ux-toptoolbar');
+						var toptoolbar = Ext.get('ux-toptoolbar');
 					if (toptoolbar) {
 		 				toptoolbar.mask();
 					}
@@ -11826,11 +11700,11 @@ Ext3.onReady(function(){
 				}
 	
 				if (this.modal){
-	 				var taskbar = Ext3.get('ux-taskbar');
+	 				var taskbar = Ext.get('ux-taskbar');
 					if (taskbar) {
 	 					taskbar.unmask();
 					}
-						var toptoolbar = Ext3.get('ux-toptoolbar');
+						var toptoolbar = Ext.get('ux-toptoolbar');
 					if (toptoolbar) {
 		 				toptoolbar.unmask();
 					}
@@ -11839,11 +11713,11 @@ Ext3.onReady(function(){
 			,'hide': function (){
 				if (this.modal){
 					if (!this.parentWindow) {
-		 				var taskbar = Ext3.get('ux-taskbar');
+		 				var taskbar = Ext.get('ux-taskbar');
 						if (taskbar) {
 		 					taskbar.unmask();
 						}
-	 					var toptoolbar = Ext3.get('ux-toptoolbar');
+	 					var toptoolbar = Ext.get('ux-toptoolbar');
 						if (toptoolbar) {
 			 				toptoolbar.unmask();
 						}
@@ -11856,11 +11730,11 @@ Ext3.onReady(function(){
 /**
  * Обновим TreeGrid чтобы колонки занимали всю ширину дерева
  */
-Ext3.override(Ext3.ux.tree.TreeGrid, {
+Ext.override(Ext.ux.tree.TreeGrid, {
 	
 	// добавлено
 	fitColumns: function() {
-        var nNewTotalWidth = this.getInnerWidth() - Ext3.num(this.scrollOffset, Ext3.getScrollBarWidth());
+        var nNewTotalWidth = this.getInnerWidth() - Ext.num(this.scrollOffset, Ext.getScrollBarWidth());
         var nOldTotalWidth = this.getTotalColumnWidth();
         var cs = this.getVisibleColumns();
         var n, nUsed = 0;
@@ -11878,7 +11752,7 @@ Ext3.override(Ext3.ux.tree.TreeGrid, {
     },
 	// <--
 	onResize : function(w, h) {
-        Ext3.ux.tree.TreeGrid.superclass.onResize.apply(this, arguments);
+        Ext.ux.tree.TreeGrid.superclass.onResize.apply(this, arguments);
         
         var bd = this.innerBody.dom;
         var hd = this.innerHd.dom;
@@ -11887,12 +11761,12 @@ Ext3.override(Ext3.ux.tree.TreeGrid, {
             return;
         }
 
-        if(Ext3.isNumber(h)){
+        if(Ext.isNumber(h)){
             bd.style.height = this.body.getHeight(true) - hd.offsetHeight + 'px';
         }
 
-        if(Ext3.isNumber(w)){                        
-            var sw = Ext3.num(this.scrollOffset, Ext3.getScrollBarWidth());
+        if(Ext.isNumber(w)){                        
+            var sw = Ext.num(this.scrollOffset, Ext.getScrollBarWidth());
             if(this.reserveScrollOffset || ((bd.offsetWidth - bd.clientWidth) > 10)){
                 this.setScrollOffset(sw);
             }else{
@@ -11906,7 +11780,7 @@ Ext3.override(Ext3.ux.tree.TreeGrid, {
     }
 }); 
 
-Ext3.override(Ext3.tree.ColumnResizer, {
+Ext.override(Ext.tree.ColumnResizer, {
 
     onEnd : function(e){
         var nw = this.proxy.getWidth(),
@@ -11928,7 +11802,7 @@ Ext3.override(Ext3.tree.ColumnResizer, {
 /**
  * Обновим ячейку дерева чтобы при двойном клике не открывались/сворачивались дочерние узлы
  */
-Ext3.override(Ext3.tree.TreeNodeUI, {
+Ext.override(Ext.tree.TreeNodeUI, {
 	onDblClick : function(e){
         e.preventDefault();
         if(this.disabled){
@@ -11949,7 +11823,7 @@ Ext3.override(Ext3.tree.TreeNodeUI, {
 /**
  * Исправим ошибку, когда значения emptyText в композитном поле передаются на сервер, даже если установлен признак "не передавать"
  */
-Ext3.override(Ext3.form.Action.Submit, {
+Ext.override(Ext.form.Action.Submit, {
 	run : function(){
         var o = this.options,
             method = this.getMethod(),
@@ -11966,7 +11840,7 @@ Ext3.override(Ext3.form.Action.Submit, {
                     }
 					// Добавилось
                     // вот тут сделаем добавку
-                    if (f instanceof Ext3.form.CompositeField) {
+                    if (f instanceof Ext.form.CompositeField) {
                         f.items.each(function(cf) {
                             if (cf.el.getValue() == cf.emptyText) {
                                 emptyFields.push(cf);
@@ -11977,7 +11851,7 @@ Ext3.override(Ext3.form.Action.Submit, {
 					// <--
                 });
             }
-            Ext3.Ajax.request(Ext3.apply(this.createCallback(o), {
+            Ext.Ajax.request(Ext.apply(this.createCallback(o), {
                 form:this.form.el.dom,
                 url:this.getUrl(isGet),
                 method: method,
@@ -11986,14 +11860,14 @@ Ext3.override(Ext3.form.Action.Submit, {
                 isUpload: this.form.fileUpload
             }));
             if (o.submitEmptyText === false) {
-                Ext3.each(emptyFields, function(f) {
+                Ext.each(emptyFields, function(f) {
                     if (f.applyEmptyText) {
                         f.applyEmptyText();
                     }
                 });
             }
         }else if (o.clientValidation !== false){ // client validation failed
-            this.failureType = Ext3.form.Action.CLIENT_INVALID;
+            this.failureType = Ext.form.Action.CLIENT_INVALID;
             this.form.afterAction(this, false);
         }
     }
@@ -12004,7 +11878,7 @@ Ext3.override(Ext3.form.Action.Submit, {
  * атрибута readOnly, тк в стандартном поведении браузеры обрабаытвают этот атрибут только
  * у текстоввых полей
  */
-Ext3.override(Ext3.form.Checkbox, {
+Ext.override(Ext.form.Checkbox, {
     onClick : function(e){
         if (this.readOnly) {
             e.stopEvent();
@@ -12022,8 +11896,8 @@ Ext3.override(Ext3.form.Checkbox, {
  * Событие PagingBlur наступает раньше pagingChange, и обновлялась текущая 
  * страница, т.к. PagingBlur обновляет индекс.
  */
-Ext3.override(Ext3.PagingToolbar, {
-    onPagingBlur: Ext3.emptyFn
+Ext.override(Ext.PagingToolbar, {
+    onPagingBlur: Ext.emptyFn
 });
 
 /*
@@ -12031,8 +11905,8 @@ Ext3.override(Ext3.PagingToolbar, {
  * (Скролятся только хидеры)
  */
 
-if  (Ext3.isIE7 || Ext3.isIE6) {
-    Ext3.Panel.override({
+if  (Ext.isIE7 || Ext.isIE6) {
+    Ext.Panel.override({
         setAutoScroll: function() {
         if (this.rendered && this.autoScroll) {
             var el = this.body || this.el;
@@ -12050,11 +11924,11 @@ if  (Ext3.isIE7 || Ext3.isIE6) {
  * добавим поддержку чекбоксов по аналогии с TreePanel
  * чек боксы включаются просто передачей checked в сторе 
  */
-Ext3.override(Ext3.ux.tree.TreeGridNodeUI, {
+Ext.override(Ext.ux.tree.TreeGridNodeUI, {
     renderElements : function(n, a, targetNode, bulkRender){
         var t = n.getOwnerTree(),
-            cb = Ext3.isBoolean(a.checked),
-            cb = Ext3.isBoolean(a.checked),
+            cb = Ext.isBoolean(a.checked),
+            cb = Ext.isBoolean(a.checked),
             cols = t.columns,
             c = cols[0],
             i, buf, len;
@@ -12062,14 +11936,14 @@ Ext3.override(Ext3.ux.tree.TreeGridNodeUI, {
         this.indentMarkup = n.parentNode ? n.parentNode.ui.getChildIndent() : '';
 
         buf = [
-             '<tbody class="x3-tree-node">',
-                '<tr ext:tree-node-id="', n.id ,'" class="x3-tree-node-el x3-tree-node-leaf x3-unselectable ', a.cls, '">',
-                    '<td class="x3-treegrid-col">',
-                        '<span class="x3-tree-node-indent">', this.indentMarkup, "</span>",
-                        '<img src="', this.emptyIcon, '" class="x3-tree-ec-icon x3-tree-elbow" />',
-                        '<img src="', a.icon || this.emptyIcon, '" class="x3-tree-node-icon', (a.icon ? " x3-tree-node-inline-icon" : ""), (a.iconCls ? " "+a.iconCls : ""), '" unselectable="on" />',
-                        cb ? ('<input class="x3-tree-node-cb" type="checkbox" ' + (a.checked ? 'checked="checked" />' : '/>')) : '',
-                        '<a hidefocus="on" class="x3-tree-node-anchor" href="', a.href ? a.href : '#', '" tabIndex="1" ',
+             '<tbody class="x-tree-node">',
+                '<tr ext:tree-node-id="', n.id ,'" class="x-tree-node-el x-tree-node-leaf x-unselectable ', a.cls, '">',
+                    '<td class="x-treegrid-col">',
+                        '<span class="x-tree-node-indent">', this.indentMarkup, "</span>",
+                        '<img src="', this.emptyIcon, '" class="x-tree-ec-icon x-tree-elbow" />',
+                        '<img src="', a.icon || this.emptyIcon, '" class="x-tree-node-icon', (a.icon ? " x-tree-node-inline-icon" : ""), (a.iconCls ? " "+a.iconCls : ""), '" unselectable="on" />',
+                        cb ? ('<input class="x-tree-node-cb" type="checkbox" ' + (a.checked ? 'checked="checked" />' : '/>')) : '',
+                        '<a hidefocus="on" class="x-tree-node-anchor" href="', a.href ? a.href : '#', '" tabIndex="1" ',
                             a.hrefTarget ? ' target="'+a.hrefTarget+'"' : '', '>',
                         '<span unselectable="on">', (c.tpl ? c.tpl.apply(a) : a[c.dataIndex] || c.text), '</span></a>',
                     '</td>'
@@ -12078,8 +11952,8 @@ Ext3.override(Ext3.ux.tree.TreeGridNodeUI, {
         for(i = 1, len = cols.length; i < len; i++){
             c = cols[i];
             buf.push(
-                    '<td class="x3-treegrid-col ', (c.cls ? c.cls : ''), '">',
-                        '<div unselectable="on" class="x3-treegrid-text"', (c.align ? ' style="text-align: ' + c.align + ';"' : ''), '>',
+                    '<td class="x-treegrid-col ', (c.cls ? c.cls : ''), '">',
+                        '<div unselectable="on" class="x-treegrid-text"', (c.align ? ' style="text-align: ' + c.align + ';"' : ''), '>',
                             (c.tpl ? c.tpl.apply(a) : a[c.dataIndex]),
                         '</div>',
                     '</td>'
@@ -12087,8 +11961,8 @@ Ext3.override(Ext3.ux.tree.TreeGridNodeUI, {
         }
 
         buf.push(
-            '</tr><tr class="x3-tree-node-ct"><td colspan="', cols.length, '">',
-            '<table class="x3-treegrid-node-ct-table" cellpadding="0" cellspacing="0" style="table-layout: fixed; display: none; width: ', t.innerCt.getWidth() ,'px;"><colgroup>'
+            '</tr><tr class="x-tree-node-ct"><td colspan="', cols.length, '">',
+            '<table class="x-treegrid-node-ct-table" cellpadding="0" cellspacing="0" style="table-layout: fixed; display: none; width: ', t.innerCt.getWidth() ,'px;"><colgroup>'
         );
         for(i = 0, len = cols.length; i<len; i++) {
             buf.push('<col style="width: ', (cols[i].hidden ? 0 : cols[i].width) ,'px;" />');
@@ -12096,9 +11970,9 @@ Ext3.override(Ext3.ux.tree.TreeGridNodeUI, {
         buf.push('</colgroup></table></td></tr></tbody>');
 
         if(bulkRender !== true && n.nextSibling && n.nextSibling.ui.getEl()){
-            this.wrap = Ext3.DomHelper.insertHtml("beforeBegin", n.nextSibling.ui.getEl(), buf.join(''));
+            this.wrap = Ext.DomHelper.insertHtml("beforeBegin", n.nextSibling.ui.getEl(), buf.join(''));
         }else{
-            this.wrap = Ext3.DomHelper.insertHtml("beforeEnd", targetNode, buf.join(''));
+            this.wrap = Ext.DomHelper.insertHtml("beforeEnd", targetNode, buf.join(''));
         }
 
         this.elNode = this.wrap.childNodes[0];
@@ -12123,7 +11997,7 @@ Ext3.override(Ext3.ux.tree.TreeGridNodeUI, {
  * добавим поддержку чекбоксов по аналогии с TreePanel
  * чек боксы включаются просто передачей checked в сторе 
  */
-Ext3.override(Ext3.ux.tree.TreeGrid, {
+Ext.override(Ext.ux.tree.TreeGrid, {
 
     /**
      * Retrieve an array of checked nodes, or an array of a specific attribute of checked nodes (e.g. 'id')
@@ -12148,9 +12022,9 @@ Ext3.override(Ext3.ux.tree.TreeGrid, {
  * По-умолчанию ExtJS отправляет за картинкой на 'http://www.extjs.com/s.gif'
  * Тут укажем что они не правы
  */
-Ext3.apply(Ext3, function(){
+Ext.apply(Ext, function(){
     return {
-        BLANK_IMAGE_URL : Ext3.isIE6 || Ext3.isIE7 || Ext3.isAir ?
+        BLANK_IMAGE_URL : Ext.isIE6 || Ext.isIE7 || Ext.isAir ?
             '/m3static/vendor/extjs/resources/images/default/s.gif' :
             'data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
     };
@@ -12158,11 +12032,11 @@ Ext3.apply(Ext3, function(){
 
 
 /**
- * Исправление поведения Ext3.ComboBox, когда значения списка с value '' и 0
+ * Исправление поведения Ext.ComboBox, когда значения списка с value '' и 0
  * считаются идентичными: теперь сравнение происходит с приведением к строке.
  * Описание ошибки и патч отсюда: http://www.sencha.com/forum/showthread.php?79285
  */
-Ext3.override(Ext3.form.ComboBox, {
+Ext.override(Ext.form.ComboBox, {
     findRecord : function(prop, value){
         var record;
         if(this.store.getCount() > 0){
@@ -12179,10 +12053,10 @@ Ext3.override(Ext3.form.ComboBox, {
 
 /**
  * Добавление/удаление пользовательского класса m3-grey-field после использования
- * setReadOnly для Ext3.form.Field и Ext3.form.TriggerField
+ * setReadOnly для Ext.form.Field и Ext.form.TriggerField
  * см m3.css - стр. 137 .m3-grey-field
  */
-var setReadOnlyField = Ext3.form.Field.prototype.setReadOnly;
+var setReadOnlyField = Ext.form.Field.prototype.setReadOnly;
 var restoreClass = function(readOnly){
     if(readOnly) {         
         this.addClass('m3-grey-field');
@@ -12190,14 +12064,14 @@ var restoreClass = function(readOnly){
         this.removeClass('m3-grey-field');
     }
 }
-Ext3.override(Ext3.form.Field, {
+Ext.override(Ext.form.Field, {
     setReadOnly : function(readOnly){
         setReadOnlyField.call(this, readOnly);
         restoreClass.call(this, readOnly);
     }
 });
-var setReadOnlyTriggerField = Ext3.form.TriggerField.prototype.setReadOnly;
-Ext3.override(Ext3.form.TriggerField, {
+var setReadOnlyTriggerField = Ext.form.TriggerField.prototype.setReadOnly;
+Ext.override(Ext.form.TriggerField, {
     setReadOnly : function(readOnly){
         setReadOnlyTriggerField.call(this, readOnly);
         restoreClass.call(this, readOnly);
