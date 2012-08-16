@@ -1,6 +1,6 @@
 #coding: utf-8
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from calendar import calendar
 
 from django.db import models
@@ -86,9 +86,46 @@ class InvalidIntervalError(Exception):
     '''
     pass
 
+class InfoModelMeta(models.base.ModelBase):
+    """
+    Магия! Если у модели есть атрибут no_time = True,
+    то управляющие поля меняют свой тип с DateTimeField на DateField
+    """
+    def __new__(cls, name, bases, attrs):
+        new_class = super(InfoModelBase, cls).__new__(cls, name, bases, attrs)
+        no_time = attrs.get('no_time', False)
+        if no_time:
+            # найдем наши базовые классы
+            base = None
+            for b in bases:
+                if issubclass(b, BaseInfoModel) or issubclass(b, BaseIntervalInfoModel):
+                    base = b
+                    break
+            if base:
+                for field in list(new_class._meta.local_fields):
+                    # найдем наши поля
+                    if (issubclass(base, BaseInfoModel) and field.name in ('info_date', 'info_date_prev', 'info_date_next')) or \
+                       (issubclass(base, BaseIntervalInfoModel) and field.name in ('info_date_begin', 'info_date_end', 'info_date_prev', 'info_date_next')):
+                        # заменим поля на новые
+                        new_field = models.DateField(db_index = True, default = date.min)
+                        new_class.replace_field(field, new_field)
+        return new_class
+
+    def replace_field(new_class, old_field, new_field):
+        """
+        Замена полей в классе
+        """
+        new_class.add_to_class(old_field.name, new_field)
+        index = new_class._meta.local_fields.index(old_field)
+        new_class._meta.local_fields.remove(old_field)
+        new_index = new_class._meta.local_fields.index(new_field)
+        new_class._meta.local_fields.insert(index, new_class._meta.local_fields.pop(new_index))
 
 class BaseInfoModel(models.Model):
+    __metaclass__ = InfoModelMeta
 
+    # тип управляющих полей по умолчанию остается DateTimeField
+    # но может быть изменен на DateField - см. InfoModelMeta
     info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
     info_date_next = models.DateTimeField(db_index = True, default = datetime.max)
     info_date = models.DateTimeField(db_index = True, blank = True)
@@ -308,7 +345,10 @@ def RebuildInfoModel(cls):
         last_rec._save()
 
 class BaseIntervalInfoModel(models.Model):
+    __metaclass__ = InfoModelMeta
 
+    # тип управляющих полей по умолчанию остается DateTimeField
+    # но может быть изменен на DateField - см. InfoModelMeta
     info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
     info_date_next = models.DateTimeField(db_index = True, default = datetime.max)
     info_date_begin = models.DateTimeField(db_index = True, blank = True)
