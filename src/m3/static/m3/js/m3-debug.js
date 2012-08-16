@@ -8840,12 +8840,13 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
             iconCls: this.iconCls || 'icon-accept',
             cls: 'x-notification',
             autoHeight: true,
-            plain: false,
+            plain: true,
             draggable: false,
             bodyStyle: 'text-align:center',
             padding: 5,
             header: false,
-            shadow: false
+            shadow: false,
+            float: true
         });
         this.closedCallback = function () {};
         if (this.autoDestroy) {
@@ -8976,61 +8977,69 @@ Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, te
 /**
  * Заместитель объекта LiveMessages.Notification, который выводит уведомление о выполненных задачах.
  */
-Ext.ux.TaskNotify = Ext.extend(Ext.ux.MessageNotify, {
-    initComponent: function () {
-        this.drawRecords = {};
-    },
+Ext.ux.TaskNotify = function () {
+    this.drawRecords = {};
+    this.eventHandler = {};
+    this.handlerMapper = {
+        socket: this.change
+    };
+};
 
-    change: function (id, data) {
-        var record;
+Ext.ux.TaskNotify.prototype = Ext.ux.MessageNotify.prototype;
 
-        if (record = this.drawRecords['task_' + id]) {
-            if (record['active']) {
-                this.updateProgress(record['progressBar'], data['progress'], data['state']);
-            } else {
+Ext.ux.TaskNotify.prototype.change = function (data) {
+    var record, id = data['id'];
+
+    if (record = this.drawRecords['task_' + id]) {
+        if (record['active']) {
+            this.updateProgress(record['progressBar'], data['progress'], data['state']);
+        } else {
+            if (data['complete']) {
                 this.showNotify(id, data['state'], data['name']);
             }
-        } else {
-            this.drawRecords['task_' + id] = {
-                id: id
-            };
-            this.showNotify(id, data['state'], data['name']);
         }
-    },
-
-    showNotify: function (id, status, description) {
-        var self = this, icon, notifyWindow, progressBar;
-
-        progressBar = new Ext.ProgressBar({
-            id: 'task-progress',
-            width: 220,
-            text: description
-        });
-
-        this.drawRecords['task_' + id]['progressBar'] = progressBar;
-        this.drawRecords['task_' + id]['active'] = true;
-
-        notifyWindow = new Ext.ux.Notification({
-            title: status || 'Внимание',
-            items: progressBar,
-            iconCls: icon,
-            width: 250,
-            padding: 5
-        });
-
-        notifyWindow.registerCallbackOnClosed((function (_id) {
-            return function () {
-                self.drawRecords['task_' + _id]['active'] = false;
-            }
-        })(id));
-
-        notifyWindow.show(document);
-    },
-
-    updateProgress: function (progressBar, value, status) {
-        progressBar.updateProgress(value, status, true);
+    } else {
+        this.drawRecords['task_' + id] = {
+            id: id
+        };
+        this.showNotify(id, data['state'], data['name']);
     }
-});
+};
+
+Ext.ux.TaskNotify.prototype.showNotify = function (id, status, description) {
+    var self = this, icon, notifyWindow, progressBar;
+
+    progressBar = new Ext.ProgressBar({
+        id: 'task-progress',
+        width: 225,
+        text: status
+    });
+
+    this.drawRecords['task_' + id]['progressBar'] = progressBar;
+    this.drawRecords['task_' + id]['active'] = true;
+
+    notifyWindow = new Ext.ux.Notification({
+        title: description || 'Внимание',
+        items: [
+            progressBar
+        ],
+        iconCls: icon,
+        width: 250,
+        padding: 5
+    });
+
+    notifyWindow.registerCallbackOnClosed((function (_id) {
+        return function () {
+            self.drawRecords['task_' + _id]['active'] = false;
+        }
+    })(id));
+
+    notifyWindow.show(document);
+};
+
+Ext.ux.TaskNotify.prototype.updateProgress = function (progressBar, value, status) {
+    progressBar.updateProgress(value / 100, status, true);
+};
 /**
  * Объектный грид, включает в себя тулбар с кнопками добавить, редактировать и удалить
  * @param {Object} config
