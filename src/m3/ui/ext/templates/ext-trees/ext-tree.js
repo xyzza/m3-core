@@ -26,6 +26,10 @@ function(){
 	    ,collapsible: {{ component.collapsible|lower }}
 	    {% if component.collapse_mode %} ,collapseMode: '{{ component.collapse_mode }}' {% endif %}
 
+        {% if component.plugins %}
+        ,plugins: {{ component.plugins|safe }}
+        {% endif %}
+	    
 		{% if component.drag_drop and not component.read_only%} 
 			,enableDD: true
 			,dropConfig: {
