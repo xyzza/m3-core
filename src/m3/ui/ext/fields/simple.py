@@ -139,6 +139,7 @@ class ExtNumberField(BaseExtField):
     
     def __init__(self, *args, **kwargs):
         super(ExtNumberField, self).__init__(*args, **kwargs)
+        
         # Свойства валидации специфичные для чисел
         # Разделитель целой и дробной части
         self.decimal_separator = None
