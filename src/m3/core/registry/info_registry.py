@@ -92,7 +92,7 @@ class InfoModelMeta(models.base.ModelBase):
     то управляющие поля меняют свой тип с DateTimeField на DateField
     """
     def __new__(cls, name, bases, attrs):
-        new_class = super(InfoModelBase, cls).__new__(cls, name, bases, attrs)
+        new_class = super(InfoModelMeta, cls).__new__(cls, name, bases, attrs)
         no_time = attrs.get('no_time', False)
         if no_time:
             # найдем наши базовые классы
