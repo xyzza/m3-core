@@ -23,6 +23,10 @@ function(){
 	    ,autoScroll: false
 	    ,animate: true
 
+        {% if component.plugins %}
+        ,plugins: {{ component.plugins|safe }}
+        {% endif %}
+	    
 		{% if component.drag_drop and not component.read_only%} 
 			,enableDD: true
 			,dropConfig: {
