@@ -9009,12 +9009,13 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
             iconCls: this.iconCls || 'icon-accept',
             cls: 'x-notification',
             autoHeight: true,
-            plain: false,
+            plain: true,
             draggable: false,
             bodyStyle: 'text-align:center',
             padding: 5,
             header: false,
-            shadow: false
+            shadow: false,
+            'float': true
         });
         this.closedCallback = function () {};
         if (this.autoDestroy) {
@@ -9036,6 +9037,7 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
     onDestroy: function () {
         Ext3.ux.NotificationMgr.notifications.remove(this);
         Ext3.ux.Notification.superclass.onDestroy.call(this);
+        this.closedCallback();
     },
     cancelHiding: function () {
         this.addClass('fixed');
@@ -9144,61 +9146,74 @@ Ext3.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, t
 /**
  * Заместитель объекта LiveMessages.Notification, который выводит уведомление о выполненных задачах.
  */
-Ext3.ux.TaskNotify = Ext3.extend(Ext3.ux.MessageNotify, {
-    initComponent: function () {
-        this.drawRecords = {};
-    },
+Ext3.ux.TaskNotify = function () {
+    this.drawRecords = {};
+    this.eventHandler = {};
+    this.handlerMapper = {
+        socket: this.change
+    };
+};
 
-    change: function (id, data) {
-        var record;
+var Child = function () {};
+Child.prototype = Ext3.ux.MessageNotify.prototype;
+Ext3.ux.TaskNotify.prototype = new Child();
 
-        if (record = this.drawRecords['task_' + id]) {
-            if (record['active']) {
-                this.updateProgress(record['progressBar'], data['progress'], data['state']);
-            } else {
-                this.showNotify(id, data['state'], data['name']);
-            }
+Ext3.ux.TaskNotify.prototype.change = function (data) {
+    var record, id = data['id'];
+
+    if (record = this.drawRecords['task_' + id]) {
+        if (record.active) {
+            this.updateProgress(record['progressBar'], data['progress'], data['state']);
         } else {
-            this.drawRecords['task_' + id] = {
-                id: id
-            };
-            this.showNotify(id, data['state'], data['name']);
-        }
-    },
-
-    showNotify: function (id, status, description) {
-        var self = this, icon, notifyWindow, progressBar;
-
-        progressBar = new Ext3.ProgressBar({
-            id: 'task-progress',
-            width: 220,
-            text: description
-        });
-
-        this.drawRecords['task_' + id]['progressBar'] = progressBar;
-        this.drawRecords['task_' + id]['active'] = true;
-
-        notifyWindow = new Ext3.ux.Notification({
-            title: status || 'Внимание',
-            items: progressBar,
-            iconCls: icon,
-            width: 250,
-            padding: 5
-        });
-
-        notifyWindow.registerCallbackOnClosed((function (_id) {
-            return function () {
-                self.drawRecords['task_' + _id]['active'] = false;
+            if (data['completed']) {
+                this.showNotify(id, data['state'], data['name'], data['progress']);
             }
-        })(id));
-
-        notifyWindow.show(document);
-    },
-
-    updateProgress: function (progressBar, value, status) {
-        progressBar.updateProgress(value, status, true);
+        }
+    } else {
+        this.drawRecords['task_' + id] = {
+            id: id
+        };
+        this.showNotify(id, data['state'], data['name'], data['progress']);
     }
-});
+};
+
+Ext3.ux.TaskNotify.prototype.showNotify = function (id, status, description, progress) {
+    var self = this,
+        icon,
+        notifyWindow,
+        progressBar,
+        record = this.drawRecords['task_' + id];
+
+    progressBar = new Ext3.ProgressBar({
+        id: 'task-progress',
+        width: 225,
+        text: status
+    });
+    this.updateProgress(progressBar, progress, status);
+
+    record['progressBar'] = progressBar;
+    record['active'] = true;
+
+    notifyWindow = new Ext3.ux.Notification({
+        title: description || 'Внимание',
+        items: [
+            progressBar
+        ],
+        iconCls: icon,
+        width: 250,
+        padding: 5
+    });
+
+    notifyWindow.registerCallbackOnClosed(function () {
+        record.active = false;
+    });
+
+    notifyWindow.show(document);
+};
+
+Ext3.ux.TaskNotify.prototype.updateProgress = function (progressBar, value, status) {
+    progressBar.updateProgress(value / 100, status, true);
+};
 /**
  * Объектный грид, включает в себя тулбар с кнопками добавить, редактировать и удалить
  * @param {Object} config
