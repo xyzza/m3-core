@@ -31,14 +31,8 @@
 
    contrib.rst   
    core.rst
-   data.rst
-   db.rst
-   helpers.rst
-   static.rst
    actions.rst
    ui.rst
-   vendor.rst
-   workflow.rst
    report_generator/index.rst
    m3_designer/index.rst
 
