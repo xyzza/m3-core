@@ -24,7 +24,7 @@ Ext3.ux.Notification = Ext3.extend(Ext3.Window, {
             padding: 5,
             header: false,
             shadow: false,
-            float: true
+            'float': true
         });
         this.closedCallback = function () {};
         if (this.autoDestroy) {
