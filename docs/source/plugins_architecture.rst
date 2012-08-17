@@ -1,11 +1,5 @@
 .. _plugins_overview:
 
-Що таке плагіни?
-================
-
-Бла-бла-бла
-
-
 
 .. _plugins_extension_points::
 

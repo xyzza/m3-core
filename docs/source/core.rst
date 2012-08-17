@@ -1,6 +1,6 @@
 .. _core:
 
-core
+Ядро
 ============
 
 .. toctree::
@@ -9,16 +9,3 @@ core
    plugins_architecture.rst
    core/registry.rst
    simple_report.rst
-
-history
----------------
-
-json
----------------
-
-notifications
----------------
-
-
-replication
----------------
