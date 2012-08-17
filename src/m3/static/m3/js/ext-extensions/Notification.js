@@ -24,7 +24,7 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
             padding: 5,
             header: false,
             shadow: false,
-            float: true
+            'float': true
         });
         this.closedCallback = function () {};
         if (this.autoDestroy) {
