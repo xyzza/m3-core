@@ -24,7 +24,7 @@
 
  :doc:`actions_example`
 
- :doc:`uiexample`
+ :doc:`uiexample/uiexample`
 
 .. toctree::
    :maxdepth: 2
