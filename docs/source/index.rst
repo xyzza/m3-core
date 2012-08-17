@@ -18,7 +18,7 @@
 
  :doc:`m3_work_concept`
 
- :doc:`tutorial`
+ :doc:`project_blank`
 
  :doc:`dict_example`
 
