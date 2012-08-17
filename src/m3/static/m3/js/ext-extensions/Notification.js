@@ -163,38 +163,45 @@ Ext.ux.TaskNotify = function () {
     };
 };
 
-Ext.ux.TaskNotify.prototype = Ext.ux.MessageNotify.prototype;
+var Child = function () {};
+Child.prototype = Ext.ux.MessageNotify.prototype;
+Ext.ux.TaskNotify.prototype = new Child();
 
 Ext.ux.TaskNotify.prototype.change = function (data) {
     var record, id = data['id'];
 
     if (record = this.drawRecords['task_' + id]) {
-        if (record['active']) {
+        if (record.active) {
             this.updateProgress(record['progressBar'], data['progress'], data['state']);
         } else {
-            if (data['complete']) {
-                this.showNotify(id, data['state'], data['name']);
+            if (data['completed']) {
+                this.showNotify(id, data['state'], data['name'], data['progress']);
             }
         }
     } else {
         this.drawRecords['task_' + id] = {
             id: id
         };
-        this.showNotify(id, data['state'], data['name']);
+        this.showNotify(id, data['state'], data['name'], data['progress']);
     }
 };
 
-Ext.ux.TaskNotify.prototype.showNotify = function (id, status, description) {
-    var self = this, icon, notifyWindow, progressBar;
+Ext.ux.TaskNotify.prototype.showNotify = function (id, status, description, progress) {
+    var self = this,
+        icon,
+        notifyWindow,
+        progressBar,
+        record = this.drawRecords['task_' + id];
 
     progressBar = new Ext.ProgressBar({
         id: 'task-progress',
         width: 225,
         text: status
     });
+    this.updateProgress(progressBar, progress, status);
 
-    this.drawRecords['task_' + id]['progressBar'] = progressBar;
-    this.drawRecords['task_' + id]['active'] = true;
+    record['progressBar'] = progressBar;
+    record['active'] = true;
 
     notifyWindow = new Ext.ux.Notification({
         title: description || 'Внимание',
@@ -206,11 +213,9 @@ Ext.ux.TaskNotify.prototype.showNotify = function (id, status, description) {
         padding: 5
     });
 
-    notifyWindow.registerCallbackOnClosed((function (_id) {
-        return function () {
-            self.drawRecords['task_' + _id]['active'] = false;
-        }
-    })(id));
+    notifyWindow.registerCallbackOnClosed(function () {
+        record.active = false;
+    });
 
     notifyWindow.show(document);
 };
