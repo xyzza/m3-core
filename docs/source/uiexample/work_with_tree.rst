@@ -39,14 +39,14 @@
 
 Иллюстрация ``ExtTree``:
 
-    .. image:: /images/ui-example/extTree.png
+    .. image:: /images/ui-example/ext_tree.png
 
 2) ExtObjectTree
 ----------------
 
     .. autoclass:: m3.ui.ext.panels.trees.ExtObjectTree
 
-    .. image:: /images/ui-example/objecttreeexample.png
+    .. image:: /images/ui-example/object_tree.png
 
 Является наследником ``ExtTree``.
 
@@ -54,7 +54,7 @@
 **Новый в корне**  и **Новый дочерний**. Для того, чтобы активировать контролы на ``ExtToolBar``-е необходимо
 задать атрибуты ``action_edit``, ``action_delete``, ``action_data`` и ``action_new`` соответственно.
 
-    .. image:: /images/ui-example/treetopbar_new.png
+    .. image:: /images/ui-example/tree_top_bar.png
 
 Существует возможность редактирования и удаления элемента, использую контекстное меню дерева( полная аналогия с гридом).
 
