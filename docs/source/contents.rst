@@ -1,30 +1,7 @@
 
 
-Введение в Django.
-==============================
-
-.. toctree::
-   :maxdepth: 1
-
-   django/description.rst
-   django/create_project.rst
-   django/runserver.rst
-   django/create_app.rst
-   django/app_example.rst
-   django/request_handle.rst
-
 Документация по платформе m3
 ==============================
-
- :doc:`m3_work_concept`
-
- :doc:`project_blank`
-
- :doc:`dict_example`
-
- :doc:`actions_example`
-
- :doc:`uiexample/uiexample`
 
 .. toctree::
    :maxdepth: 2
