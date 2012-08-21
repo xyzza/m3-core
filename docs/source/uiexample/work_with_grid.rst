@@ -1,8 +1,8 @@
 Работа с таблицами (гридами)
 ============================
 
-1) ExtGrid
-----------
+ExtGrid
+-------
 
     .. autoclass:: m3.ui.ext.containers.grids.ExtGrid
 
@@ -155,8 +155,8 @@
 
     .. image:: /images/ui-example/groupinview_new.png
 
-2) ObjectGrid
--------------
+ObjectGrid
+----------
 
     .. autoclass:: m3.ui.ext.panels.grids.ExtObjectGrid
 
@@ -210,8 +210,8 @@
 Свойство ``limit`` указывает на количество записей, которые будут выводиться на страницу при постраничной
 навигации.
 
-3) ExtMultiGroupinGrid
-----------------------
+ExtMultiGroupinGrid
+-------------------
 
     .. autoclass:: m3.ui.ext.panels.grids.ExtMultiGroupinGrid
 

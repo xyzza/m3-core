@@ -1,8 +1,8 @@
 Работа с деревьями
 ==================
 
-1) ExtTree
-----------
+ExtTree
+-------
 
     .. autoclass:: m3.ui.ext.containers.trees.ExtTree
 
@@ -41,8 +41,8 @@
 
     .. image:: /images/ui-example/ext_tree.png
 
-2) ExtObjectTree
-----------------
+ExtObjectTree
+-------------
 
     .. autoclass:: m3.ui.ext.panels.trees.ExtObjectTree
 
