@@ -998,7 +998,16 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
 
                 }catch(e){
                     // Если пришел не JSON, то открываем окно для скачивания
-                    window.open(res = res.responseText);
+                    var iframe;
+                    iframe = document.getElementById("hiddenDownloader");
+                    if (iframe === null)
+                    {
+                        iframe = document.createElement('iframe');
+                        iframe.id = "hiddenDownloader";
+                        iframe.style.visibility = 'hidden';
+                        document.body.appendChild(iframe);
+                    }
+                    iframe.src = res.responseText;
                 }
             },
             failure : function(){
