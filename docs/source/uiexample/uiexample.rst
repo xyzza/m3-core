@@ -5,7 +5,7 @@
 =========================
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 4
 
     work_with_grid.rst
     work_with_tree.rst
