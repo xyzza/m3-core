@@ -52,7 +52,7 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
     },
 
     // private
-    onRender : function(ct, position){
+    onRender : function (ct, position) {
         Ext.ux.StartMenu.superclass.onRender.call(this, ct, position);
         var el = this.el.addClass('ux-start-menu');
 
@@ -172,7 +172,7 @@ Ext.ux.StartMenu = Ext.extend(Ext.menu.Menu, {
      * the element (defaults to this.defaultAlign)
      * @param {Ext.ux.StartMenu} parentMenu (optional) This menu's parent menu, if applicable (defaults to undefined)
      */
-    show : function(el, pos, parentMenu){
+    show : function (el, pos, parentMenu) {
         this.parentMenu = parentMenu;
         if(!this.el){
             this.render();
@@ -905,7 +905,11 @@ Ext.Desktop = function(app){
     }
 
     function layout(){
-        desktopEl.setHeight(Ext.lib.Dom.getViewHeight()-taskbarEl.getHeight()-toptoolbarEl.getHeight());
+        var viewHeight = Ext.lib.Dom.getViewHeight(),
+            taskbarHeight = taskbarEl.getHeight(),
+            toptoolbarHeight = toptoolbarEl.getHeight();
+
+        desktopEl.setHeight(viewHeight - taskbarHeight - toptoolbarHeight);
     }
     Ext.EventManager.onWindowResize(layout);
 
