@@ -3748,11 +3748,24 @@ Ext3.ux.grid.livegrid.CheckboxSelectionModel = Ext3.extend(Ext3.ux.grid.livegrid
     headerCheckbox : null,
     markAll : false,
 
-    constructor : function()
+    constructor : function(cfg)
     {
         if (!this.header) {
             this.header = Ext3.grid.CheckboxSelectionModel.prototype.header;
         }
+
+        // vahotin A 22.08.12 >
+        // Передаваемые в конструктор параметры checkOnly и singleSelect не приминялись
+        // Добавил обьект cfg в параметры конструктора
+        // Добавил два нижележащих if-а
+        if (cfg.checkOnly){
+            this.handleMouseDown = Ext.emptyFn;
+        }
+
+        if (cfg.singleSelect){
+            this.singleSelect = true;
+        }
+        // <
 
         this.sortable = false;
 
