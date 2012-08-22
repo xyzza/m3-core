@@ -11,3 +11,5 @@
     work_with_tree.rst
     work_with_fields.rst
     work_with_windows.rst
+
+    different_example.rst
