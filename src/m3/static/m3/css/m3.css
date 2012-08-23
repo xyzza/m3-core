@@ -281,9 +281,9 @@ span.CodeMirror-selected {
 }
 /*-------------------------*/
 
-.x-grid-group-hd div.x-grid-group-title {
+.x3-grid-group-hd div.x3-grid-group-title {
     min-height: 15px;
 }
-.ext-ie6 .x-grid-group-hd div.x-grid-group-title {
+.ext3-ie6 .x3-grid-group-hd div.x3-grid-group-title {
     height: 15px;
 }
