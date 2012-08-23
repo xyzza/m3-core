@@ -77,6 +77,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         self._components_edit_grid = None
         self._components_delete_grid = None
         self._components_refresh_grid = None
+        self._components_copy_grid = None
 
         # Компоненты для различных действий для дерева
         self._components_new_tree = None
@@ -90,6 +91,7 @@ class ExtDictionaryWindow(BaseExtWindow):
         self._url_edit_grid = None
         self._url_delete_grid = None
         self._url_drag_grid = None
+        self._url_copy_grid = None
 
         # Вызываемые url для дерева
         self._url_new_tree = None
@@ -298,6 +300,19 @@ class ExtDictionaryWindow(BaseExtWindow):
             self._clear_handler(self._components_delete_grid)
         self._url_delete_grid = value
 
+    @property
+    def url_copy_grid(self):
+        return self._url_copy_grid
+
+    @url_copy_grid.setter
+    def url_copy_grid(self, value):
+        self.init_grid_components()
+        if value:
+            self._set_handler(self._components_copy_grid, 'copyValueGrid')
+        else:
+            self._clear_handler(self._components_copy_grid)
+        self._url_copy_grid = value
+
     #Урлы для дерева
     @property
     def url_new_tree(self):
@@ -375,7 +390,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             component.handler = None
             component.disabled = True
 
-    def init_grid_components(self):
+    def init_grid_components(self, allow_copy=False):
         '''
         Идентификация грида
         '''
@@ -395,6 +410,8 @@ class ExtDictionaryWindow(BaseExtWindow):
             # Добавляются пункты в меню грида и на тулбар грида 
             self._components_new_grid = self._add_menu_item_grid(text=u'Добавить', icon_cls='add_item', disabled=True)
             self._components_edit_grid = self._add_menu_item_grid(to_grid_menu=False, text=u'Изменить', icon_cls='edit_item', disabled=True)
+            if allow_copy:
+                self._components_copy_grid = self._add_menu_item_grid(text=u'Копировать', icon_cls='icon-page-copy')
             self._components_delete_grid = self._add_menu_item_grid(to_grid_menu=False, text=u'Удалить', icon_cls='delete_item', disabled=True)
             self._add_separator_grid()
             self._components_refresh_grid = self._add_menu_item_grid(text=u'Обновить', icon_cls='table_refresh', handler='refreshGridStore')
