@@ -107,7 +107,7 @@ class InfoModelMeta(models.base.ModelBase):
                     if (issubclass(base, BaseInfoModel) and field.name in ('info_date', 'info_date_prev', 'info_date_next')) or \
                        (issubclass(base, BaseIntervalInfoModel) and field.name in ('info_date_begin', 'info_date_end', 'info_date_prev', 'info_date_next')):
                         # заменим поля на новые
-                        new_field = models.DateField(db_index = True, default = date.min)
+                        new_field = models.DateField(db_index = field.db_index, default = field.default)
                         new_class.replace_field(field, new_field)
         return new_class
 
