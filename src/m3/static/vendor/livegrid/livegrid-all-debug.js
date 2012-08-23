@@ -3759,7 +3759,7 @@ Ext3.ux.grid.livegrid.CheckboxSelectionModel = Ext3.extend(Ext3.ux.grid.livegrid
         // Добавил обьект cfg в параметры конструктора
         // Добавил два нижележащих if-а
         if (cfg.checkOnly){
-            this.handleMouseDown = Ext.emptyFn;
+            this.handleMouseDown = Ext3.emptyFn;
         }
 
         if (cfg.singleSelect){
