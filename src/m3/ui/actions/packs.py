@@ -43,8 +43,9 @@ class DictListWindowAction(Action):
         win = base.list_form(mode=mode, title=base.title)
         win.height, win.width = base.height, base.width
         win.min_height, win.min_width = base.height, base.width
-        
-        win.init_grid_components()
+
+        allow_copy = hasattr(base, 'allow_copy') and base.allow_copy
+        win.init_grid_components(allow_copy)
         if base.list_paging:
             win.grid.bottom_bar = ExtPagingBar(page_size = 25)
         return win
@@ -76,6 +77,10 @@ class DictListWindowAction(Action):
             win.url_new_grid    = base.edit_window_action.get_absolute_url()
             win.url_edit_grid   = base.edit_window_action.get_absolute_url()
             win.url_delete_grid = base.delete_action.get_absolute_url()
+
+            # Если разрешено копирование, то доступно ещё одно событие.
+            if base.allow_copy:
+                win.url_copy_grid = base.copy_action.get_absolute_url()
     
     def run(self, request, context):
         win = self.create_window(request, context, mode=0)
@@ -281,6 +286,39 @@ class ListDeleteRowAction(Action):
                 AuditManager().write('dict-changes', user=request.user, model_object=obj, type='delete')
         return result
 
+class DictCopyAction(Action):
+    """
+    Копирование записи из справочника
+    """
+
+    url = '/copy$'
+
+    def context_declaration(self):
+        return [ACD(name='id', type=int, required=True, verbose_name=u'id элемент справочника')]
+
+    def run(self, request, context):
+        """
+        """
+        base = self.parent
+
+        win = utils.bind_object_from_request_to_form(request, base.get_row, base.edit_window, exclusion=['id'])
+
+        if not win.title:
+            win.title = base.title
+
+        win.form.url = base.save_action.get_absolute_url()
+        # укажем адрес для чтения данных
+        win.data_url = base.edit_window_action.get_absolute_url()
+        win.orig_request = request
+        win.orig_context = context
+
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
+        if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
+            win.configure_for_dictpack(action=self, pack=self.parent,
+                request=request, context=context)
+
+        return ExtUIScriptResult(base.get_edit_window(win))
+
 class BaseDictionaryActions(ActionPack, ISelectablePack):
     '''
     Пакет с действиями, специфичными для работы со справочниками
@@ -311,6 +349,9 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
     # Значение колонки по-умолчанию, которое будет подбираться 
     # при выборе значения из справочника
     column_name_on_select = 'name'
+
+    # Добавлена ли возможность копирования
+    allow_copy = False
     
     # права доступа для базовых справочников
     PERM_EDIT = 'edit'
@@ -328,10 +369,11 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
         self.row_action           = ListGetRowAction()
         self.save_action          = DictSaveAction()
         self.delete_action        = ListDeleteRowAction()
+        self.copy_action = DictCopyAction()
         # Но привязать их все равно нужно
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
-                        self.delete_action]
+                        self.delete_action, self.copy_action]
         
         # Исключение перехватываемое в экшенах, если объект не найден 
         self._nofound_exception = ObjectNotFound
