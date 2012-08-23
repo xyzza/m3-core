@@ -6991,10 +6991,3 @@ body.x3-body-masked .x3-window-plain .x3-window-mc {
 .x3-window-dlg .ext3-mb-error {
     background-image:url(../images/default/window/icon-error.gif);
 }
-
-.x-grid-group-hd div.x-grid-group-title {
-    min-height: 15px;
-}
-.ext-ie6 .x-grid-group-hd div.x-grid-group-title {
-    height: 15px;
-}

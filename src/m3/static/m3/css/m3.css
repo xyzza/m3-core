@@ -280,3 +280,10 @@ span.CodeMirror-selected {
   border-color: #EDEDED;
 }
 /*-------------------------*/
+
+.x3-grid-group-hd div.x3-grid-group-title {
+    min-height: 15px;
+}
+.ext3-ie6 .x3-grid-group-hd div.x3-grid-group-title {
+    height: 15px;
+}
