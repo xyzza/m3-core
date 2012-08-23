@@ -29,12 +29,13 @@ class DictListWindowAction(Action):
     def create_window(self, request, context, mode):
         ''' Создаем и настраиваем окно '''
         base = self.parent
+        allow_copy = hasattr(base, 'allow_copy') and base.allow_copy
         win = base.list_form(mode=mode, title=base.title_plural if base.title_plural else base.title)
+        win.allow_copy = allow_copy
         win.height, win.width = base.height, base.width
         win.min_height, win.min_width = base.height, base.width
 
-        allow_copy = hasattr(base, 'allow_copy') and base.allow_copy
-        win.init_grid_components(allow_copy)
+        win.init_grid_components()
         if base.list_paging:
             win.grid.bottom_bar = ExtPagingBar(page_size=25)
         return win

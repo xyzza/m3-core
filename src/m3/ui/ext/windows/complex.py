@@ -111,6 +111,8 @@ class ExtDictionaryWindow(BaseExtWindow):
         # id родительского узла
         self.contextTreeIdName = 'id'
 
+        self.allow_copy = False
+
         self.init_component(*args, **kwargs)
 
     @property
@@ -390,7 +392,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             component.handler = None
             component.disabled = True
 
-    def init_grid_components(self, allow_copy=False):
+    def init_grid_components(self):
         '''
         Идентификация грида
         '''
@@ -410,7 +412,7 @@ class ExtDictionaryWindow(BaseExtWindow):
             # Добавляются пункты в меню грида и на тулбар грида 
             self._components_new_grid = self._add_menu_item_grid(text=u'Добавить', icon_cls='add_item', disabled=True)
             self._components_edit_grid = self._add_menu_item_grid(to_grid_menu=False, text=u'Изменить', icon_cls='edit_item', disabled=True)
-            if allow_copy:
+            if self.allow_copy:
                 self._components_copy_grid = self._add_menu_item_grid(text=u'Копировать', icon_cls='icon-page-copy')
             self._components_delete_grid = self._add_menu_item_grid(to_grid_menu=False, text=u'Удалить', icon_cls='delete_item', disabled=True)
             self._add_separator_grid()
