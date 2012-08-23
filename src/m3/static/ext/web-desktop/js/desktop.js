@@ -904,7 +904,11 @@ Ext3.Desktop = function(app){
     }
 
     function layout(){
-        desktopEl.setHeight(Ext3.lib.Dom.getViewHeight()-taskbarEl.getHeight()-toptoolbarEl.getHeight());
+        var viewHeight = Ext3.lib.Dom.getViewHeight(),
+            taskbarHeight = taskbarEl.getHeight(),
+            toptoolbarHeight = toptoolbarEl.getHeight();
+
+        desktopEl.setHeight(viewHeight - taskbarHeight - toptoolbarHeight);
     }
     Ext3.EventManager.onWindowResize(layout);
 
