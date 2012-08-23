@@ -69,38 +69,55 @@ var ajax = Ext3.Ajax;
 			}
 		});
 	}
-	
-	/**
-	 * Редактирование значения в справочнике по форме ExtDictionary
-	 */
-	function editValueGrid(){
-		var grid = Ext3.getCmp('{{ component.grid.client_id}}');
-		if (!isGridSelected(grid, 'Редактирование', 'Элемент не выбран') ) {
-			return;
-		};
 
-		var params = Ext3.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
-		// добавим глобальный контекст окна
-		params = Ext3.applyIf(params, win.actionContextJson || {});
-        
-        if (!win.fireEvent('beforeeditrow', grid, params))
-		  return;
-		
-		var mask = new Ext3.LoadMask(win.body);   
-		mask.show();
-		ajax.request({
-			url: "{{ component.url_edit_grid }}"
-			,params: params
-			,success: function(){                
+    /**
+     * Параметризованный обработчик (для копирования и редактирования)
+     * url - адрес экшена.
+     * noSelectMessage - сообщение о том, что запись не выбрана.
+     */
+    function copyAndEditHandler(url, noSelectMessage){
+        var grid = Ext3.getCmp('{{ component.grid.client_id}}');
+        if (!isGridSelected(grid, noSelectMessage, 'Элемент не выбран') ) {
+            return;
+        }
+
+        var params = Ext3.applyIf({ 'id': grid.getSelectionModel().getSelected().id},{% if component.action_context %}{{component.action_context.json|safe}}{% else %}{}{% endif %});
+        // добавим глобальный контекст окна
+        params = Ext3.applyIf(params, win.actionContextJson || {});
+
+        if (!win.fireEvent('beforeeditrow', grid, params)){
+            return;
+        }
+
+        var mask = new Ext3.LoadMask(win.body);
+        mask.show();
+        ajax.request({
+            url: url
+            ,params: params
+            ,success: function(){
                 renderWindowGrid.apply(this, arguments);
                 mask.hide();
-            }            
-            ,failure: function(){ 
+            }
+            ,failure: function(){
                 uiAjaxFailMessage.apply(win, arguments);
                 mask.hide();
             }
-		});
-	}
+        });
+    }
+
+    /**
+     * Редактирование значения в справочнике по форме ExtDictionary
+     */
+    function editValueGrid(){
+        copyAndEditHandler("{{ component.url_edit_grid }}", "Редактирование");
+    }
+
+    /**
+     * Копирует запись в гриде
+     */
+    function copyValueGrid(){
+        copyAndEditHandler("{{ component.url_copy_grid }}", "Создание [копии]");
+    }
 	
 	/**
 	 * Удаление значения в справочнике по форме ExtDictionary
