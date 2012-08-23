@@ -252,3 +252,10 @@ span.CodeMirror-selected {
 .cm-s-default span.cm-attribute {color: #00c;}
 
 .cm-s-default { background: white;}
+
+.x-grid-group-hd div.x-grid-group-title {
+    min-height: 15px;
+}
+.ext-ie6 .x-grid-group-hd div.x-grid-group-title {
+    height: 15px;
+}
