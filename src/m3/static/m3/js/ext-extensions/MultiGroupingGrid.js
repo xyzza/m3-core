@@ -993,7 +993,7 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
                     Ext3.Msg.show({
                         title: 'Внимание'
                         ,msg: 'У вас нет прав на выполнение этого действия!'
-                        ,buttons: Ext.Msg.OK
+                        ,buttons: Ext3.Msg.OK
                     })
 
                 }catch(e){
