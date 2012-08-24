@@ -62,10 +62,6 @@ html, body {
     zoom:1;
 }
 
-#ux-toptoolbar{
-    height: 0px;
-}
-
 #ux-taskbar .x-btn {
 	margin: 1px 0 0 1px;
 }
