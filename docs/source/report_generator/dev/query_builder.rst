@@ -207,7 +207,7 @@
 
 Разберем возможности более подробно:
 
-.. module:: m3.contrib.m3_query_builder.entity
+.. module:: m3_query_builder.entity
 
 * Класс ``Data``:
 
@@ -219,8 +219,10 @@
    модель. Так же есть возможность использовать ``Entity``:
 	  
    .. autoclass:: Model
+      :noindex:
    
    .. autoclass:: Entity
+      :noindex:
    
 * Атрибут ``name``:
   Название сущности
@@ -248,10 +250,12 @@
   где ``Relation``:
   
   .. autoclass:: Relation
+     :noindex:
   
   и где ``Field``:
   
   .. autoclass:: Field
+     :noindex:
 
 * Атрибут ``group_by``:
   Список полей для сортировки
@@ -268,14 +272,17 @@
   ``Grouping``:
   
   .. autoclass:: Grouping
+     :noindex:
   
   ``Aggregate``:
   
   .. autoclass:: Aggregate
-  
+     :noindex:
+
   ``Field``:
   
   .. autoclass:: Field
+     :noindex:
 
 * Атрибут ``order_by``:
   Список полей для сортировки
@@ -288,7 +295,7 @@
   ``SortOrder``:
 	
   .. autoclass:: SortOrder
-	
+	 :noindex:
 	
 * Атрибут ``select``:
   Список результирующих полей, которые будут отображаться в готовом отчете
@@ -347,6 +354,7 @@
   ``Where``:
   
   .. autoclass:: Where
+     :noindex:
   
   Предопределенные типы параметров (для подстановки в редактор отчетов)::
   
@@ -359,6 +367,7 @@
   ``Param``:
   
   .. autoclass:: Param
+     :noindex:
 
 * Атрибут ``distinct``:
   ``True`` или ``False`` - Добавляет ключевое слово ``DISTINCT`` в запрос.

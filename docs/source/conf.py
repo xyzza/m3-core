@@ -24,7 +24,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 sys.path.extend([ 
     os.path.join(ROOT_DIRNAME, 'src'),
-    os.path.join(ROOT_DIRNAME, 'src', 'm3', 'vendor'),    
+    os.path.join(ROOT_DIRNAME, 'src', 'env')
 ])
 
 # -- General configuration -----------------------------------------------------

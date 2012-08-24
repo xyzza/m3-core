@@ -119,7 +119,7 @@ def read_simple_xml_file(filename, fields={}):
     '''
     Чтение данных из файла формата xml.
     fields: ключ - атрибут в узле, соответствуюший полю в таблице
-            значение - поле в таблице
+    значение - поле в таблице
     '''
     assert isinstance(filename, basestring), u"filename must be basestring type"
 
