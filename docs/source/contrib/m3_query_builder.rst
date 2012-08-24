@@ -1,7 +1,7 @@
 .. m3_query_builder:
 
 Редактор запросов и отчетов (m3_query_builder)
-===========================
+==============================================
 
 Данное приложение предназначено для создания произвольных отчетов, которое может
 отображать произвольный набор данных. Поддержка группировок, сортировок и условий,
@@ -235,7 +235,8 @@ $sudo pip install sqlparse
 
 .. module:: m3.contrib.m3_query_builder.entity
 
-* Класс ``Data``: 
+* Класс ``Data``:
+
  * Нужен для более легкого доступа к сущностям модели, то есть чтобы 
    везде не писать ``Model('m3_audit.AuthAuditModel')``, можно использовать 
    ``Data.AUDIT``
@@ -269,6 +270,7 @@ $sudo pip install sqlparse
         Relation( Field(Data.USER_ROLE, 'id'), Field(Data.ASSIGNED_ROLE, 'role') ),
         Relation( Field(Data.ASSIGNED_ROLE, 'user'), Field(Data.USER, 'id') ),
     ]
+
   где ``Relation``:
   
   .. autoclass:: Relation
@@ -386,11 +388,13 @@ $sudo pip install sqlparse
 
 * Атрибут ``distinct``:
   ``True`` или ``False`` - Добавляет ключевое слово ``DISTINCT`` в запрос.
-  Пример::
+  Пример: ::
+
     self.distinct = False
   
 * Атрибут ``limit``:
-  Добавляет количество отобранных записей. Пример::
+  Добавляет количество отобранных записей. Пример: ::
+
     self.limit = 100 # Будут возвращены 100 записей
     
     
