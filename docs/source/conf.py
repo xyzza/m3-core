@@ -24,7 +24,13 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 sys.path.extend([ 
     os.path.join(ROOT_DIRNAME, 'src'),
-    os.path.join(ROOT_DIRNAME, 'src', 'env')
+    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'dbfpy', 'src'),
+    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'm3_audit', 'src'),
+    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'm3_contragents', 'src'),
+    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'm3_query_builder', 'src'),
+    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'sqlalchemy', 'src'),
+    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'm3_replica', 'src'),
+    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'mptt', 'src'),
 ])
 
 # -- General configuration -----------------------------------------------------
