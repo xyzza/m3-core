@@ -62,18 +62,26 @@ Release 0.91
 * В класс ``m3.ui.actions.packs.BaseDictionaryActions`` добавлен метод ``get_record``:
     .. autoclass:: m3.ui.actions.packs.BaseDictionaryActions
         :members: get_record
-    Данный метод переопределен в классе ``m3.ui.actions.packs.BaseEnumerateDictionary``.
+        :noindex:
+
+    Данный метод переопределен в классе ``m3.ui.actions.packs.BaseEnumerateDictionary``
 * В класс ``m3.ui.actions.tree_packs.BaseTreeDictionaryActions`` добавлен метод ``get_record``:
     .. autoclass:: m3.ui.actions.tree_packs.BaseTreeDictionaryActions
         :members: get_record
+        :noindex:
+
     Данный метод переопределен в классе ``m3.ui.actions.tree_packs.BaseTreeDictionaryModelActions``.
 * В класс ``m3.ui.actions.dicts.simple.BaseDictionaryActions`` добавлен метод ``get_record``:
     .. autoclass:: m3.ui.actions.dicts.simple.BaseDictionaryActions
         :members: get_record
+        :noindex:
+
     Данный метод переопределен в классах ``m3.ui.actions.dicts.simple.BaseEnumerateDictionary`` и ``m3.ui.actions.dicts.simple.BaseDictionaryModelActions``.
 * В класс ``m3.ui.actions.dicts.tree.BaseTreeDictionaryActions`` добавлен метод ``get_record``:
     .. autoclass:: m3.ui.actions.dicts.tree.BaseTreeDictionaryActions
         :members: get_record
+        :noindex:
+
     Данный метод переопределен в классе ``m3.ui.actions.dicts.tree.BaseTreeDictionaryModelActions``.
 * В класс ``m3.ui.ext.fields.base.BaseExtTriggerField`` добавлены атрибуты:
     ``fields`` - иные имена полей (кроме id и display_field), которые будут попадать в store
@@ -112,15 +120,23 @@ Release 0.9 (19.08.2011)
   .. autoclass::  m3.helpers.datagrouping_alchemy.GroupingRecordSQLAlchemyProvider    
     
 * Новые приложения:
+
  * Интеграционная шина:
+
   * m3.misc.ibus (В разработке);
+
   * m3.contrib.m3_ibus_client (В разработке).
+
  * :doc:`contrib/m3_query_builder`;
- * :doc:`report_generation` на базе OpenOffice;
+
+ * :doc:`report_generator/index` на базе OpenOffice;
 
 * Дизайнер форм:
+
  * При редактировании файла добавлен автокомплит кода;
+
  * Добавлен выбор разных тем;
+
  * Исправления ``ExtAddrComponent`` для корректного создания компонента из дизайнера.
  
 * Добавлен билдинг в `m3.misc` компонента `livegrid` (``ExtMultiGroupinGrid``) через файл `misc/build_livegrid.py`
@@ -141,6 +157,7 @@ Release 0.9 (19.08.2011)
    .. autoclass:: m3.ui.ext.misc.background_operation.ExtProgressBar
    
 * Добавлен ExtJs класс ``Ext.m3.MultiSelectField`` - Контрол для выбора множества значений из справочника
+
  И серверная обертка:
    .. autoclass:: m3.ui.ext.fields.complex.ExtMultiSelectField
 
@@ -178,12 +195,13 @@ Release 0.8 (18.05.2011)
 
 	.. autoclass:: m3.ui.actions.ActionController
 		:members: find_action
+		:noindex:
 	
 	А так же в класс ``ControllerCache`` добавился метод класса ``find_action``:
 	
 	.. autoclass:: m3.ui.actions.ControllerCache
 		:members: find_action
-		
+		:noindex:
 	
 * В классе ``ActionContextDeclaration`` обязательно передовать в конструктор параметр ``type``. Добавился ``assert`` на проверку этого параметра. А также переписан метод ``json`` с использованием ``json.dumps``
 

@@ -10,9 +10,9 @@ from m3.ui.ext.base import ExtUIComponent
 from m3.ui.ext.misc import ExtDataStore
 
 class BaseExtField(ExtUIComponent):
-    '''
+    """
     Базовый класс для полей
-    '''
+    """
     def __init__(self, *args, **kwargs):
         super(BaseExtField, self).__init__(*args, **kwargs)
         # Нужно выставлять пустое значение для того, чтобы обязательные поля,
@@ -131,11 +131,11 @@ class BaseExtField(ExtUIComponent):
             self._put_config_value('autoCreate', self.auto_create)
 
 class BaseExtTriggerField(BaseExtField):
-    '''
+    """
     Базовый класс для комбобокса, поля выбора справочника
     FIXME: Необходимо создать свойство trigger_action_all
            Внутри него изменять атрибут trigger_action     
-    '''
+    """
     
     ALL = 'all'
     QUERY = 'query'
