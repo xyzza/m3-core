@@ -33,7 +33,7 @@
 ``m3_replica.engine.BaseDataSource``, который определяет 
 интерфейс объекта, управляющего доставкой данных в систему.
 
-.. autoclass:: m3.contrib.m3_replica.engine.BaseDataSource
+.. autoclass:: m3_replica.engine.BaseDataSource
   :members:
   
 Методы ``open_session()`` и ``close_session`` вызываются, соответственно, 
@@ -106,7 +106,7 @@
 после получения из источника данных. Такой класс должен быть унаследован от
 класса ``m3_replica.engine.BaseDataTarget``.
 
-.. autoclass:: m3.contrib.m3_replica.engine.BaseDataTarget
+.. autoclass:: m3_replica.engine.BaseDataTarget
   :members:
   
 Методы ``open_session`` и ``close_session`` вызываются, соответственно, 

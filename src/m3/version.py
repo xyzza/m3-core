@@ -10,4 +10,8 @@ __require__ = {
     'sqlalchemy': '0.7.1',
     'dbfpy': '2.2.5',
     'xlwt': '0.7.2',
+    'm3_query_builder': '1.1',
+    'm3_audit': '1.1',
+    'm3_replica': '1.0',
+    'm3_contragents': '1.1'
 }

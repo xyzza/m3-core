@@ -113,7 +113,6 @@ Release 0.9 (19.08.2011)
   
    .. autoclass:: m3.db.alchemy_wrapper.SQLAlchemyWrapper
    .. autoclass:: m3.db.alchemy_wrapper.ModelCollection
-   .. autoclass:: m3.db.alchemy_wrapper.AlchemyM3StorageFactory     
   
   Реализация провайдера данных для группировок с использованием alchemy, их классы:
   
@@ -150,6 +149,7 @@ Release 0.9 (19.08.2011)
   
   В связи с чем добавлен ``IBackgroundWorker`` в `m3/ui/actions/async.py`:
    .. autoclass:: m3.ui.actions.async.IBackgroundWorker
+       :noindex:
   
   
   И ``BackgroundOperationBar`` и ``ExtProgressBar`` из `ui/ext/misc/background_operation.py`:
