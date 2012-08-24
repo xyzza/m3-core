@@ -233,7 +233,7 @@ $sudo pip install sqlparse
 
 Разберем возможности более подробно:
 
-.. module:: m3.contrib.m3_query_builder.entity
+.. module:: m3_query_builder.entity
 
 * Класс ``Data``:
 

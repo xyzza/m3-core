@@ -33,14 +33,14 @@ class SingletonMeta(type):
 
 
 class SQLAlchemyWrapper(object):
-    """ 
+    """
     Класс обёртка, предназначенный для подключения БД SqlAlchemy
-    используя настройки Django:   
-        wrapper = SQLAlchemyWrapper(settings.DATABASES)
+    используя настройки Django:
+    wrapper = SQLAlchemyWrapper(settings.DATABASES)
     Содержит атрибуты необходимые для управлений БД и выполнения запросов:
-        engine - подключение к БД
-        metadata - коллекция из таблиц и колонок БД
-        session - сессия для запросов
+    engine - подключение к БД
+    metadata - коллекция из таблиц и колонок БД
+    session - сессия для запросов
     """
     __metaclass__ = SingletonMeta
 
