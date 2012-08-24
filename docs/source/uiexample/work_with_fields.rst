@@ -1,4 +1,3 @@
-.. _work_with_fields::
 
 Работа с полями
 ===============
@@ -52,7 +51,7 @@ BaseExtField
 
 
 ExtStringField
---------------
+---------------
 
     .. autoclass:: m3.ui.ext.fields.simple.ExtStringField
 
@@ -70,10 +69,10 @@ ExtStringField
 
 
 ExtDateField
-------------
+-------------
 
 
-    .. autoclass:: m3.ui.ext.field.simple.ExtDateField
+    .. autoclass:: m3.ui.ext.fields.simple.ExtDateField
 
     .. image:: /images/ui-example/datefield.png
 

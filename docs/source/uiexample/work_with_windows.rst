@@ -1,4 +1,3 @@
-.. _work_with_windows::
 
 Работа с окнами
 ================
@@ -6,7 +5,7 @@
 BaseExtWindow
 -------------
 
-    .. auotclass:: m3.ui.ext.windows.base.BaseExtWindow
+    .. autoclass:: m3.ui.ext.windows.base.BaseExtWindow
 
     .. image:: /images/ui-example/baseExtWindow.png
 

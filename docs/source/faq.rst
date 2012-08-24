@@ -1,6 +1,6 @@
-.. _faq::
 
-FAQ
-====
 
-    :doc:`faq/repo_settings`
+.. toctree::
+   :maxdepth: 2
+
+   faq/repo_settings
