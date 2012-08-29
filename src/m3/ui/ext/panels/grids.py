@@ -47,7 +47,7 @@ class ExtObjectGrid(containers.ExtGrid):
             self.button_delete = controls.ExtButton(text = u'Удалить', 
                                     icon_cls = 'delete_item', handler='topBarDelete')
             self.button_refresh = controls.ExtButton(text = u'Обновить', 
-                                    icon_cls = 'x-tbar-loading', handler='topBarRefresh')
+                                    icon_cls = 'x3-tbar-loading', handler='topBarRefresh')
             
             self.items.extend([
                 self.button_new,
