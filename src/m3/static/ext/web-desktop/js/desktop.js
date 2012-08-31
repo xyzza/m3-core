@@ -807,45 +807,44 @@ Ext3.Desktop = function(app){
     // и из-за этого ярлыки на рабочем столе выстраиваются в одну линию
     // метод rebuildShortcuts предотвращает этот недостаток.
     this.rebuildShortcuts = function () {
-        var _box,
-            _shortcuts,
-            _widthBox, // ширина видимого пространства
-            _widthShortcut,
-            _lineSize,
-            _i,
-            _j,
-            _colSize,
-            _tr,
-            _curIndex;
+        var box,
+            shortcutsElements,
+            widthBox, // ширина видимого пространства
+            widthShortcut,
+            lineSize,
+            i,
+            j,
+            colSize,
+            tr,
+            curIndex;
 
         if (Ext3.isIE7) {
-            _box = Ext3.select('#x-shortcuts tbody');
-            _shortcuts = Ext3.select('#x-shortcuts td');
-            _widthBox = Ext3.select('.desktop-shortcuts').first().getWidth();
-            _widthShortcut = _shortcuts.first().getWidth();
-            _lineSize = Math.floor(_widthBox / _widthShortcut);
-            _j = 0;
-            _colSize = Math.ceil(_shortcuts.elements.length / _lineSize);
+            box = Ext3.select('#x-shortcuts tbody');
+            shortcutsElements = Ext3.select('#x-shortcuts td');
+            widthBox = Ext3.select('.desktop-shortcuts').first().getWidth();
+            widthShortcut = shortcutsElements.first().getWidth();
+            lineSize = Math.floor(widthBox / widthShortcut);
+            j = 0;
+            colSize = Math.ceil(shortcutsElements.elements.length / lineSize);
 
-            if (1 < _colSize) {
-                while (_j < _colSize) {
-                    _i = 0;
-                    _tr = document.createElement('tr');
-                    while (_i < _lineSize) {
-                        _curIndex = (_j * _lineSize) + _i;
-                        if (_curIndex < _shortcuts.elements.length) {
-                            _tr.appendChild(_shortcuts.elements[_curIndex]);
+            if (1 < colSize) {
+                while (j < colSize) {
+                    i = 0;
+                    tr = document.createElement('tr');
+                    while (i < lineSize) {
+                        curIndex = (j * lineSize) + i;
+                        if (curIndex < shortcutsElements.elements.length) {
+                            tr.appendChild(shortcutsElements.elements[curIndex]);
                         }
-                        _i++;
+                        i++;
                     }
-                    _box.appendChild(_tr);
-                    _j++;
+                    box.appendChild(tr);
+                    j++;
                 }
             }
         }
     };
-
-    Ext3.EventManager.onWindowResize(this.rebuildShortcuts, this);
+    this.rebuildShortcuts();
     globalEvents.on('newsRefreshed', this.rebuildShortcuts);
 
 
