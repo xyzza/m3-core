@@ -38,12 +38,8 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
     },
 
     setValue:function(v) {
-        if (!v) {
-            this.hideClearBtn();
-            return;
-        }
-
-        if (v === '[]'){
+        
+        if (!v || v === '[]'){
             this.hideClearBtn();
         }
         else {
@@ -64,7 +60,20 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
 		Ext3.each(this.checkedItems, function (record) {
 			value.push(record.get(this.valueField));
 		}, this);
-		return Ext3.util.JSON.encode(value);
+
+        // vahotin 31.08.12
+        // Если поле не содержит значение, то возвращаем пустую строку.
+        // Это необходимо для того, чтобы в базовом классе AdvancedComboBox
+        // корректно проходила проверка в методе initBaseTrigger
+        var res;
+        if (value.length){
+            res = Ext3.util.JSON.encode(value);
+        } else {
+            res = "";
+        }
+
+		return res;
+        //
 	},
 
     initValue:function() {
@@ -239,19 +248,7 @@ Ext3.m3.MultiSelectField = Ext3.extend(Ext3.m3.AdvancedComboBox, {
         }
 
         return index;
-    },
-
-    showClearBtn: function(){
-		if (!this.hideTriggerClear) {
-			this.el.parent().setOverflow('hidden');
-			this.getTrigger(0).show();
-		}
-	},
-
-	hideClearBtn: function(){
-		this.el.parent().setOverflow('auto');
-		this.getTrigger(0).hide();
-	}
+    }
 
 });
 

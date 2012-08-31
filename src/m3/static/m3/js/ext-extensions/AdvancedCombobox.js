@@ -196,13 +196,13 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
 			
             var triggerIndex = 'Trigger'+(index+1);
             t.hide = function(){
-                var w = triggerField.wrap.getWidth();
+                var w = triggerField.getWidth();
                 this.dom.style.display = 'none';
                 triggerField.el.setWidth(w-triggerField.trigger.getWidth());
                 this['hidden' + triggerIndex] = true;
             };
             t.show = function(){
-                var w = triggerField.wrap.getWidth();
+                var w = triggerField.getWidth();
                 this.dom.style.display = '';
                 triggerField.el.setWidth(w-triggerField.trigger.getWidth());
                 this['hidden' + triggerIndex] = false;
@@ -280,12 +280,11 @@ Ext3.m3.AdvancedComboBox = Ext3.extend(Ext3.m3.ComboBox, {
             var triggerIndex = 'Trigger' + (index + 1),
                 w = t.getWidth();
 
-            //if(w === 0 && !this['hidden' + triggerIndex]){
-            //    tw += this.defaultTriggerWidth;
-            //}else{
-            //    tw += w;
-            //}
-            tw += w;
+            if(w === 0 && !this['hidden' + triggerIndex]){
+                tw += this.defaultTriggerWidth;
+            }else{
+                tw += w;
+            }
         }, this);
         return tw;
     },
