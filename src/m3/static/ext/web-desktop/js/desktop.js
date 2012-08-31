@@ -1048,8 +1048,8 @@ Ext3.Desktop = function(app){
         });
     }
 
-    if (Ext.isIE7) {
-        Ext.EventManager.fireResize();
+    if (Ext3.isIE7) {
+        Ext3.EventManager.fireResize();
     }
 };
 
