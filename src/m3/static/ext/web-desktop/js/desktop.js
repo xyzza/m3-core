@@ -794,13 +794,12 @@ Ext3.reg('ux_clock', Ext3.ux.Clock);
  * http://www.extjs.com/license
  */
 Ext3.Desktop = function(app){
-    var taskbar = this.taskbar,
+    var taskbar,
         desktopEl = Ext3.get('x-desktop'),
         taskbarEl = Ext3.get('ux-taskbar'),
-        shortcuts = Ext3.get('x-shortcuts'),
-        rebuildShortcuts;
+        shortcuts = Ext3.get('x-shortcuts');
 
-    this.taskbar = new Ext.ux.TaskBar(app);
+    this.taskbar = taskbar = new Ext3.ux.TaskBar(app);
     this.xTickSize = this.yTickSize = 1;
 
     // В ИЕ7 не поддерживается display: inline-block
