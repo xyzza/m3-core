@@ -571,7 +571,7 @@ td.ux-taskButtons-edge {
 
 #x3-shortcuts td {
     float:left;
-    margin:15px 0 0 15px;
+    padding:15px 0 0 15px;
    
     width:70px;
     font:normal 10px tahoma,arial,verdana,sans-serif;

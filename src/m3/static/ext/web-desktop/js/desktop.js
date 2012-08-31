@@ -794,13 +794,59 @@ Ext3.reg('ux_clock', Ext3.ux.Clock);
  * http://www.extjs.com/license
  */
 Ext3.Desktop = function(app){
-    this.taskbar = new Ext3.ux.TaskBar(app);
-    this.xTickSize = this.yTickSize = 1;
-    var taskbar = this.taskbar;
+    var taskbar = this.taskbar,
+        desktopEl = Ext3.get('x-desktop'),
+        taskbarEl = Ext3.get('ux-taskbar'),
+        shortcuts = Ext3.get('x-shortcuts'),
+        rebuildShortcuts;
 
-    var desktopEl = Ext3.get('x3-desktop');
-    var taskbarEl = Ext3.get('ux-taskbar');
-    var shortcuts = Ext3.get('x3-shortcuts');
+    this.taskbar = new Ext.ux.TaskBar(app);
+    this.xTickSize = this.yTickSize = 1;
+
+    // В ИЕ7 не поддерживается display: inline-block
+    // и из-за этого ярлыки на рабочем столе выстраиваются в одну линию
+    // метод rebuildShortcuts предотвращает этот недостаток.
+    this.rebuildShortcuts = function () {
+        var _box,
+            _shortcuts,
+            _widthBox, // ширина видимого пространства
+            _widthShortcut,
+            _lineSize,
+            _i,
+            _j,
+            _colSize,
+            _tr,
+            _curIndex;
+
+        if (Ext3.isIE7) {
+            _box = Ext3.select('#x-shortcuts tbody');
+            _shortcuts = Ext3.select('#x-shortcuts td');
+            _widthBox = Ext3.select('.desktop-shortcuts').first().getWidth();
+            _widthShortcut = _shortcuts.first().getWidth();
+            _lineSize = Math.floor(_widthBox / _widthShortcut);
+            _j = 0;
+            _colSize = Math.ceil(_shortcuts.elements.length / _lineSize);
+
+            if (1 < _colSize) {
+                while (_j < _colSize) {
+                    _i = 0;
+                    _tr = document.createElement('tr');
+                    while (_i < _lineSize) {
+                        _curIndex = (_j * _lineSize) + _i;
+                        if (_curIndex < _shortcuts.elements.length) {
+                            _tr.appendChild(_shortcuts.elements[_curIndex]);
+                        }
+                        _i++;
+                    }
+                    _box.appendChild(_tr);
+                    _j++;
+                }
+            }
+        }
+    };
+
+    Ext3.EventManager.onWindowResize(this.rebuildShortcuts, this);
+    globalEvents.on('newsRefreshed', this.rebuildShortcuts);
 
 
     //ZIgi 16.12 дабы окна рендерились только внутри десктопа
