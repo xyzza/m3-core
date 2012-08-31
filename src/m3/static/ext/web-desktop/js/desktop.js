@@ -804,8 +804,8 @@ Ext3.Desktop = function(app){
 
     // В ИЕ7 не поддерживается display: inline-block
     // и из-за этого ярлыки на рабочем столе выстраиваются в одну линию
-    // метод rebuildShortcuts предотвращает этот недостаток.
-    this.rebuildShortcuts = function () {
+    // Этот недостаток предотвращается навешиванием на ресайз обработчика:
+    Ext3.EventManager.onWindowResize(function () {
         var box,
             shortcutsElements,
             widthBox, // ширина видимого пространства
@@ -817,34 +817,30 @@ Ext3.Desktop = function(app){
             tr,
             curIndex;
 
-        if (Ext3.isIE7) {
-            box = Ext3.select('#x-shortcuts tbody');
-            shortcutsElements = Ext3.select('#x-shortcuts td');
-            widthBox = Ext3.select('.desktop-shortcuts').first().getWidth();
-            widthShortcut = shortcutsElements.first().getWidth();
-            lineSize = Math.floor(widthBox / widthShortcut);
-            j = 0;
-            colSize = Math.ceil(shortcutsElements.elements.length / lineSize);
+        box = Ext3.select('#x-shortcuts tbody');
+        shortcutsElements = Ext3.select('#x-shortcuts td');
+        widthBox = Ext3.select('.desktop-shortcuts').first().getWidth();
+        widthShortcut = shortcutsElements.first().getWidth();
+        lineSize = Math.floor(widthBox / widthShortcut);
+        j = 0;
+        colSize = Math.ceil(shortcutsElements.elements.length / lineSize);
 
-            if (1 < colSize) {
-                while (j < colSize) {
-                    i = 0;
-                    tr = document.createElement('tr');
-                    while (i < lineSize) {
-                        curIndex = (j * lineSize) + i;
-                        if (curIndex < shortcutsElements.elements.length) {
-                            tr.appendChild(shortcutsElements.elements[curIndex]);
-                        }
-                        i++;
+        if (1 < colSize) {
+            while (j < colSize) {
+                i = 0;
+                tr = document.createElement('tr');
+                while (i < lineSize) {
+                    curIndex = (j * lineSize) + i;
+                    if (curIndex < shortcutsElements.elements.length) {
+                        tr.appendChild(shortcutsElements.elements[curIndex]);
                     }
-                    box.appendChild(tr);
-                    j++;
+                    i++;
                 }
+                box.appendChild(tr);
+                j++;
             }
         }
-    };
-    this.rebuildShortcuts();
-    globalEvents.on('newsRefreshed', this.rebuildShortcuts);
+    });
 
 
     //ZIgi 16.12 дабы окна рендерились только внутри десктопа
@@ -1050,6 +1046,10 @@ Ext3.Desktop = function(app){
                 }
             }
         });
+    }
+
+    if (Ext.isIE7) {
+        Ext.EventManager.fireResize();
     }
 };
 
