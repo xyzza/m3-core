@@ -795,13 +795,12 @@ Ext.reg('ux_clock', Ext.ux.Clock);
  * http://www.extjs.com/license
  */
 Ext.Desktop = function(app){
-    var taskbar = this.taskbar,
+    var taskbar,
         desktopEl = Ext.get('x-desktop'),
         taskbarEl = Ext.get('ux-taskbar'),
-        shortcuts = Ext.get('x-shortcuts'),
-        rebuildShortcuts;
+        shortcuts = Ext.get('x-shortcuts');
 
-    this.taskbar = new Ext.ux.TaskBar(app);
+    this.taskbar = taskbar = new Ext.ux.TaskBar(app);
     this.xTickSize = this.yTickSize = 1;
 
     // В ИЕ7 не поддерживается display: inline-block
