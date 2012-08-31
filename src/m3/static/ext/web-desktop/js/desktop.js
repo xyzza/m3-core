@@ -394,6 +394,7 @@ Ext.ux.TaskButtonsPanel = Ext.extend(Ext.BoxComponent, {
     initComponent : function() {
         Ext.ux.TaskButtonsPanel.superclass.initComponent.call(this);
         this.on('resize', this.delegateUpdates);
+
         this.items = [];
 
         this.stripWrap = Ext.get(this.el).createChild({
@@ -794,13 +795,59 @@ Ext.reg('ux_clock', Ext.ux.Clock);
  * http://www.extjs.com/license
  */
 Ext.Desktop = function(app){
+    var taskbar = this.taskbar,
+        desktopEl = Ext.get('x-desktop'),
+        taskbarEl = Ext.get('ux-taskbar'),
+        shortcuts = Ext.get('x-shortcuts'),
+        rebuildShortcuts;
+
     this.taskbar = new Ext.ux.TaskBar(app);
     this.xTickSize = this.yTickSize = 1;
-    var taskbar = this.taskbar;
 
-    var desktopEl = Ext.get('x-desktop');
-    var taskbarEl = Ext.get('ux-taskbar');
-    var shortcuts = Ext.get('x-shortcuts');
+    // В ИЕ7 не поддерживается display: inline-block
+    // и из-за этого ярлыки на рабочем столе выстраиваются в одну линию
+    // метод rebuildShortcuts предотвращает этот недостаток.
+    this.rebuildShortcuts = function () {
+        var _box,
+            _shortcuts,
+            _widthBox, // ширина видимого пространства
+            _widthShortcut,
+            _lineSize,
+            _i,
+            _j,
+            _colSize,
+            _tr,
+            _curIndex;
+
+        if (Ext.isIE7) {
+            _box = Ext.select('#x-shortcuts tbody');
+            _shortcuts = Ext.select('#x-shortcuts td');
+            _widthBox = Ext.select('.desktop-shortcuts').first().getWidth();
+            _widthShortcut = _shortcuts.first().getWidth();
+            _lineSize = Math.floor(_widthBox / _widthShortcut);
+            _j = 0;
+            _colSize = Math.ceil(_shortcuts.elements.length / _lineSize);
+
+            if (1 < _colSize) {
+                while (_j < _colSize) {
+                    _i = 0;
+                    _tr = document.createElement('tr');
+                    while (_i < _lineSize) {
+                        _curIndex = (_j * _lineSize) + _i;
+                        if (_curIndex < _shortcuts.elements.length) {
+                            _tr.appendChild(_shortcuts.elements[_curIndex]);
+                        }
+                        _i++;
+                    }
+                    _box.appendChild(_tr);
+                    _j++;
+                }
+            }
+        }
+    };
+
+    Ext.EventManager.onWindowResize(this.rebuildShortcuts, this);
+    globalEvents.on('newsRefreshed', this.rebuildShortcuts);
 
 
     //ZIgi 16.12 дабы окна рендерились только внутри десктопа
