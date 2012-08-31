@@ -7230,12 +7230,11 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
             var triggerIndex = 'Trigger' + (index + 1),
                 w = t.getWidth();
 
-            //if(w === 0 && !this['hidden' + triggerIndex]){
-            //    tw += this.defaultTriggerWidth;
-            //}else{
-            //    tw += w;
-            //}
-            tw += w;
+            if(w === 0 && !this['hidden' + triggerIndex]){
+                tw += this.defaultTriggerWidth;
+            }else{
+                tw += w;
+            }
         }, this);
         return tw;
     },
