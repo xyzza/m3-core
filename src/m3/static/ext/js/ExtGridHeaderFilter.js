@@ -342,7 +342,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 				else
 				{
 					//applyMode: auto o enter
-					if(this.applyMode === 'auto' || this.applyMode === 'blur' || Ext.isEmpty(this.applyMode))
+					if(this.applyMode === 'auto' || this.applyMode === 'blur' || Ext3.isEmpty(this.applyMode))
 					{
 						//Legacy mode and deprecated. Use applyMode = "enter" or applyFilterEvent
 						// kirov - через листенеры удобно новые объекты делать, иначе через события
