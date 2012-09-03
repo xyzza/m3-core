@@ -1056,20 +1056,28 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 				else
 				{
 					//applyMode: auto o enter
-					if(this.applyMode === 'auto' || this.applyMode === 'change' || Ext3.isEmpty(this.applyMode))
+					if(this.applyMode === 'auto' || this.applyMode === 'blur' || Ext.isEmpty(this.applyMode))
 					{
 						//Legacy mode and deprecated. Use applyMode = "enter" or applyFilterEvent
 						// kirov - через листенеры удобно новые объекты делать, иначе через события
 						if (fc.hasListener != undefined) {
-							if (!fc.hasListener('change')) {
-								fc.on('change',function(field)
+							if (!fc.hasListener('blur')) {
+								fc.on('blur', function(field)
 									{
-										var t = field.getXType();
-										if(t=='combo' || t=='datefield'){ //avoid refresh twice for combo select 
-										return;
-										}else{
-											this.applyFilter(field);
-										}
+                                        var v = field.getValue(),
+                                            t;
+
+                                        if (String(field.startValue) !== String(v)) {
+                                            t = field.getXType();
+                                            if(t=='combo' || t=='datefield'){
+                                                return;
+                                            }else{
+                                                this.applyFilter(field);
+                                            }
+                                        } else if (field.beforeValue && String(field.beforeValue) !== String(v)) {
+                                            this.applyFilter(field);
+                                        } // Zakirov Ramil: Пришлось добавить условие проверки изменения значения поля.
+
 									}, this);
 							}
 							if (!fc.hasListener('specialkey')) {
@@ -1091,15 +1099,22 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 						} else {
 							fc.listeners = 
 							{
-								change: function(field)
-								{
-									var t = field.getXType();
-									if(t=='combo' || t=='datefield'){ //avoid refresh twice for combo select 
-										return;
-									}else{
-										this.applyFilter(field);
-									}
-								},
+								blur: function(field)
+                                {
+                                    var v = field.getValue(),
+                                        t;
+
+                                    if (String(field.startValue) !== String(v)) {
+                                        t = field.getXType();
+                                        if(t=='combo' || t=='datefield'){
+                                            return;
+                                        }else{
+                                            this.applyFilter(field);
+                                        }
+                                    } else if (field.beforeValue && String(field.beforeValue) !== String(v)) {
+                                        this.applyFilter(field);
+                                    }
+                                },
 								specialkey: function(el,ev)
 								{
 									ev.stopPropagation();
@@ -1480,6 +1495,10 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		this.highlightFilters(this.isFiltered());
 		
 		this.grid.fireEvent("filterupdate",el.filterName,sValue,el);
+
+        el.beforeValue = sValue;
+        // Zakirov Ramil: beforeValue хранит значение после обновления фильтра,
+        // для того чтобы не происходила повторная фильтрация при onBlur.
 		
 		if(bLoad)
 			this.storeReload();
