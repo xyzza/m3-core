@@ -422,16 +422,16 @@ class BaseIntervalInfoModel(models.Model):
         old_prev_rec = None
         old_next_rec = None
         if self.pk:
-            q = self.__class__.query_dimentions(self).filter(info_date_end = self.info_date_prev)
+            q = self.__class__.query_dimentions(self).filter(info_date_end = self.info_date_prev).exclude(pk = self.pk)
             old_prev_rec = q.get() if len(q) == 1 else None
-            q = self.__class__.query_dimentions(self).filter(info_date_begin = self.info_date_next)
+            q = self.__class__.query_dimentions(self).filter(info_date_begin = self.info_date_next).exclude(pk = self.pk)
             old_next_rec = q.get() if len(q) == 1 else None
 
         # вычислим ближайщую запись, которая заканчивается "левее" текущей
-        q = self.__class__.query_dimentions(self).filter(info_date_end__lte = self.info_date_begin, info_date_next__gte = self.info_date_begin)
+        q = self.__class__.query_dimentions(self).filter(info_date_end__lte = self.info_date_begin, info_date_next__gte = self.info_date_begin).exclude(pk = self.pk)
         new_prev_rec = q.get() if len(q) == 1 else None
         # вычислим ближайшую запись, которая начинается "правее" текущей
-        q = self.__class__.query_dimentions(self).filter(info_date_begin__gte = self.info_date_end, info_date_prev__lte = self.info_date_end)
+        q = self.__class__.query_dimentions(self).filter(info_date_begin__gte = self.info_date_end, info_date_prev__lte = self.info_date_end).exclude(pk = self.pk)
         new_next_rec = q.get() if len(q) == 1 else None
         # изменим даты исходя из соседей
         if new_prev_rec:
@@ -469,9 +469,9 @@ class BaseIntervalInfoModel(models.Model):
     def delete(self, *args, **kwargs):
         # если объект уже хранится, то найдем записи для изменения
         if self.pk:
-            q = self.__class__.query_dimentions(self).filter(info_date_end = self.info_date_prev)
+            q = self.__class__.query_dimentions(self).filter(info_date_end = self.info_date_prev).exclude(pk = self.pk)
             old_prev_rec = q.get() if len(q) == 1 else None
-            q = self.__class__.query_dimentions(self).filter(info_date_begin = self.info_date_next)
+            q = self.__class__.query_dimentions(self).filter(info_date_begin = self.info_date_next).exclude(pk = self.pk)
             old_next_rec = q.get() if len(q) == 1 else None
         else:
             old_prev_rec = None
