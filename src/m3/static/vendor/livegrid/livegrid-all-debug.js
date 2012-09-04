@@ -1511,7 +1511,7 @@ Ext3.extend(Ext3.ux.grid.livegrid.GridView, Ext3.grid.GridView, {
             if (Math.round(this.ds.bufferSize/2) < this.visibleRows){
                 Ext3.Msg.show({
                     title: 'Внимание',
-                    msg: 'Для корректной работы необходимо изменить размер буфера',
+                    msg: 'Произошла непредвиденная ошибка при отображении данных.',
                     buttons: Ext3.Msg.OK
                 });
 
