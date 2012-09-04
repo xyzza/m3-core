@@ -9,6 +9,7 @@ Created on Nov 18, 2010
 '''
 import threading
 import copy
+import inspect
 from uuid import uuid4
 
 from m3_users import GENERIC_USER, SUPER_ADMIN
@@ -32,16 +33,18 @@ SEPARATOR = '-'
 TIMEBLOCK = 'TIMEBLOCK'
 FILLBLOCK = 'FILLBLOCK'
 
+
 class DesktopException(Exception):
     """
     Возникает при ошибках сборки рабочего стола, ярлыков, пунктов меню и т.п.
     """
     pass
 
+
 class DesktopModel(object):
     '''
-        Класс, агрегирующий в себе список модулей (start_menu и toolbox) в меню пуск
-        и список модулей на Рабочем Столе (desktop)
+    Класс, агрегирующий в себе список модулей (start_menu и toolbox) в меню пуск
+    и список модулей на Рабочем Столе (desktop)
     '''
 
     def __init__(self):
@@ -59,12 +62,12 @@ class DesktopModel(object):
 
 class BaseDesktopElement(object):
     '''
-        Базовый класс для объекта модулей и объекта подменю
+    Базовый класс для объекта модулей и объекта подменю
     '''
     def __init__(self, *args, **kwargs):
         '''
-            @param name: Название модуля или подменю
-            @param icon: Класс CSS, отвечающий за отрисовку иконки
+        @param name: Название модуля или подменю
+        @param icon: Класс CSS, отвечающий за отрисовку иконки
         '''
         self.name = ''
         self.icon = ''
@@ -74,21 +77,29 @@ class BaseDesktopElement(object):
     def _init_component(self, *args, **kwargs):
         '''Заполняет атрибуты экземпляра значениями из kwargs'''
         for k, v in kwargs.items():
-            assert self.__dict__.has_key(k), 'Instance attribute "%s" should be defined in class "%s"!' % (k, self.__class__.__name__)
+            assert self.__dict__.has_key(k), (
+                'Instance attribute "%s" should be defined in class "%s"!' %
+                    (k, self.__class__.__name__)
+            )
             self.__setattr__(k, v)
 
     def render(self):
-        ''' Должен быть переопределен в классе-наследнике'''
+        '''
+        Должен быть переопределен в классе-наследнике
+        '''
         raise NotImplementedError()
 
     def __cmp__(self, obj):
-        res = self.id == obj.id if isinstance(obj, BaseDesktopElement) else False
+        res = (self.id == obj.id
+            if isinstance(obj, BaseDesktopElement) else False)
         return not res
 
 
 
 class DesktopLaunchGroup(BaseDesktopElement):
-    '''Класс для работы подменю по нажатию на кнопку Пуск'''
+    '''
+    Класс для работы подменю по нажатию на кнопку Пуск
+    '''
     def __init__(self, *args, **kwargs):
         '''
         subitem: Хранит список модулей и список подменю
@@ -100,17 +111,22 @@ class DesktopLaunchGroup(BaseDesktopElement):
         self._init_component(*args, **kwargs)
 
     def t_is_subitems(self):
-        ''' Для удобства понимания что рендерить. Используется в шаблонах.'''
+        '''
+        Для удобства понимания что рендерить. Используется в шаблонах.
+        '''
         return True
 
     def render(self):
-        ''' Рендерит имеющийся объект. Вызывается из функции render. '''
+        '''
+        Рендерит имеющийся объект. Вызывается из функции render.
+        '''
         if self.subitems:
-            res = 'text: "%s"' % self.name.replace('"', "&quot;")
-            res += ',iconCls: "%s"' % self.icon
-            res += ',handler: function(){return false;}'
-            res += ',menu: %s' % self.render_items()
-            return '{%s}' % res
+            return '{%s}' % ','.join([
+                'text: "%s"' % self.name.replace('"', "&quot;"),
+                'iconCls: "%s"' % self.icon,
+                'handler: function(){return false;}',
+                'menu: %s' % self.render_items(),
+            ])
         else:
             return None
 
@@ -121,11 +137,13 @@ class DesktopLaunchGroup(BaseDesktopElement):
         clone.index = self.index
         clone.id = self.id
         for subitem in self.subitems:
-            clone.subitems.append(copy.deepcopy(subitem))
+            clone.subitems.append( copy.deepcopy(subitem) )
         return clone
 
     def render_items(self):
-        ''' Рендерит имеющийся список объектов. Вызывается из шаблона.'''
+        '''
+        Рендерит имеющийся список объектов. Вызывается из шаблона.
+        '''
         res = []
         for item in self.subitems:
             rendered = item.render()
@@ -159,19 +177,26 @@ class DesktopLauncher(BaseDesktopElement):
             % (self.url, self.t_render_context())
 
     def t_is_subitems(self):
-        ''' Для удобства понимания что рендерить. Используется в шаблонах.'''
+        '''
+        Для удобства понимания что рендерить. Используется в шаблонах.
+        '''
         return False
 
     def t_render_context(self):
         return M3JSONEncoder().encode(self.context)
 
     def render(self):
-        '''Рендерит текущий объект. Вызывается из метода render_items класса DesktopLaunchGroup'''
-        res = 'text:"%s"' % self.name.replace('"', "&quot;")
-        res += ',iconCls:"%s"' % self.icon
-        res += ',handler: %s' % self.handler
-        res += ',scope: this'
-        return '{%s}' % res
+        '''
+        Рендерит текущий объект.
+        Вызывается из метода render_items класса DesktopLaunchGroup
+        '''
+        return '{%s}' % ','.join([
+            'text:"%s"' % self.name.replace('"', "&quot;"),
+            'iconCls:"%s"' % self.icon,
+            'handler: function(){return sendRequest("%s", AppDesktop.getDesktop(), %s);}' % (
+                self.url, self.t_render_context()),
+            'scope: this',
+        ])
 
     def __str__(self):
         return u'Ярлык: "%s" at %s' % (self.name, id(self))
@@ -192,11 +217,7 @@ class DesktopShortcut(DesktopLauncher):
             self.url = pack.get_absolute_url()
             pack.title = getattr(pack.parent, 'title', '???')
         else:
-            try:
-                is_action_class = issubclass(pack, Action)
-            except TypeError:
-                is_action_class = False
-            if is_action_class:
+            if inspect.isclass(pack) and issubclass(pack, Action):
                 self.url = pack.absolute_url()
                 pack.title = pack.__name__
             else:
@@ -418,8 +439,8 @@ class DesktopLoader(object):
 # Разные полезные шорткаты
 #===============================================================================
 
-def add_desktop_launcher(name='', url='', icon='',
-                         path=None, metaroles=None, places=None):
+def add_desktop_launcher(
+        name='', url='', icon='', path=None, metaroles=None, places=None):
     '''
     Шорткат для добавления ланчеров в элементы рабочего стола.
 
@@ -435,16 +456,16 @@ def add_desktop_launcher(name='', url='', icon='',
     if not metaroles or not places:
         return
 
-    launcher = DesktopLauncher(url=url,
-                               name=name,
-                               icon=icon)
-    # "чистый" список металорей, для которых выполняется регистрация метаролей
-    # 
+    launcher = DesktopLauncher(url=url, name=name, icon=icon)
+    # "чистый" список метаролей, для которых выполняется регистрация метаролей
+
     cleaned_metaroles = []
     cleaned_places = []
 
-    cleaned_metaroles.extend(metaroles if isinstance(metaroles, list) else [metaroles, ])
-    cleaned_places.extend(places if isinstance(places, list) else [places, ])
+    cleaned_metaroles.extend(
+        metaroles if isinstance(metaroles, list) else [metaroles])
+    cleaned_places.extend(
+        places if isinstance(places, list) else [places])
 
     root = None
     parent_group = None
