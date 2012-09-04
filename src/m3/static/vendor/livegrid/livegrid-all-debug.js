@@ -1511,7 +1511,7 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
             if (Math.round(this.ds.bufferSize/2) < this.visibleRows){
                 Ext.Msg.show({
                     title: 'Внимание',
-                    msg: 'Для корректной работы необходимо изменить размер буфера',
+                    msg: 'Произошла непредвиденная ошибка при отображении данных.',
                     buttons: Ext.Msg.OK
                 });
 
