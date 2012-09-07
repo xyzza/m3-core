@@ -131,7 +131,8 @@ Ext.ux.MessageNotify.prototype.handler = function (eventName, data) {
     }
 };
 
-Ext.ux.MessageNotify.prototype.showMessage = function (data) {
+Ext.ux.MessageNotify.prototype.showMessage = function (json) {
+    var data = json[0];
     this.showNotify(data['id'], data['from_user'], data['subject'], data['text']);
 };
 
@@ -167,8 +168,10 @@ var Child = function () {};
 Child.prototype = Ext.ux.MessageNotify.prototype;
 Ext.ux.TaskNotify.prototype = new Child();
 
-Ext.ux.TaskNotify.prototype.change = function (data) {
-    var record, id = data['id'];
+Ext.ux.TaskNotify.prototype.change = function (json) {
+    var record,
+        data = json[0];
+        id = data['id'];
 
     if (record = this.drawRecords['task_' + id]) {
         if (record.active) {
