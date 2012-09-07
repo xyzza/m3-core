@@ -131,7 +131,8 @@ Ext3.ux.MessageNotify.prototype.handler = function (eventName, data) {
     }
 };
 
-Ext3.ux.MessageNotify.prototype.showMessage = function (data) {
+Ext3.ux.MessageNotify.prototype.showMessage = function (json) {
+    var data = json[0];
     this.showNotify(data['id'], data['from_user'], data['subject'], data['text']);
 };
 
@@ -167,8 +168,10 @@ var Child = function () {};
 Child.prototype = Ext3.ux.MessageNotify.prototype;
 Ext3.ux.TaskNotify.prototype = new Child();
 
-Ext3.ux.TaskNotify.prototype.change = function (data) {
-    var record, id = data['id'];
+Ext3.ux.TaskNotify.prototype.change = function (json) {
+    var record,
+        data = json[0];
+        id = data['id'];
 
     if (record = this.drawRecords['task_' + id]) {
         if (record.active) {
