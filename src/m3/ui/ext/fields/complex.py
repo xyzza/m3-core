@@ -73,6 +73,8 @@ class ExtDictSelectField(BaseExtTriggerField):
         
         self._triggers = TypedList(ExtDictSelectField.ExtTrigger)
         
+        self._pack = None
+
         self.init_component(*args, **kwargs)
         
         # внутренние переменные
