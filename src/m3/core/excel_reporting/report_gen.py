@@ -17,7 +17,7 @@ __all__ = ['BaseReport', 'ReportGeneratorError', 'ReportGeneratorNotResponse']
 def __get_template_path():
     ''' Ищем корневую папку проекта '''
     mod = importlib.import_module(settings.SETTINGS_MODULE)
-    settings_abs_path = os.path.dirname(mod.__file__)
+    settings_abs_path = os.path.abspath(os.path.dirname(mod.__file__))
     return settings_abs_path
     
 JAR_FULL_PATH = os.path.join(os.path.dirname(__file__), 'report.jar')
