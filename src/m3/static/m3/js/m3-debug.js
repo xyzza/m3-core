@@ -1056,13 +1056,13 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 				else
 				{
 					//applyMode: auto o enter
-					if(this.applyMode === 'auto' || this.applyMode === 'blur' || Ext3.isEmpty(this.applyMode))
+					if(this.applyMode === 'auto' || this.applyMode === 'change' || Ext.isEmpty(this.applyMode))
 					{
 						//Legacy mode and deprecated. Use applyMode = "enter" or applyFilterEvent
 						// kirov - через листенеры удобно новые объекты делать, иначе через события
 						if (fc.hasListener != undefined) {
-							if (!fc.hasListener('blur')) {
-								fc.on('blur', function(field)
+							if (!fc.hasListener('change')) {
+								fc.on('change', function(field)
 									{
                                         var v = field.getValue(),
                                             t;
@@ -1074,9 +1074,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
                                             }else{
                                                 this.applyFilter(field);
                                             }
-                                        } else if (field.beforeValue && String(field.beforeValue) !== String(v)) {
-                                            this.applyFilter(field);
-                                        } // Zakirov Ramil: Пришлось добавить условие проверки изменения значения поля.
+                                        }
 
 									}, this);
 							}
@@ -1099,7 +1097,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 						} else {
 							fc.listeners = 
 							{
-								blur: function(field)
+								change: function(field)
                                 {
                                     var v = field.getValue(),
                                         t;
@@ -1111,8 +1109,6 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
                                         }else{
                                             this.applyFilter(field);
                                         }
-                                    } else if (field.beforeValue && String(field.beforeValue) !== String(v)) {
-                                        this.applyFilter(field);
                                     }
                                 },
 								specialkey: function(el,ev)
@@ -1496,7 +1492,7 @@ Ext3.extend(Ext3.ux.grid.GridHeaderFilters, Ext3.util.Observable,
 		
 		this.grid.fireEvent("filterupdate",el.filterName,sValue,el);
 
-        el.beforeValue = sValue;
+        el.startValue = sValue;
         // Zakirov Ramil: beforeValue хранит значение после обновления фильтра,
         // для того чтобы не происходила повторная фильтрация при onBlur.
 		
@@ -9137,7 +9133,8 @@ Ext3.ux.MessageNotify.prototype.handler = function (eventName, data) {
     }
 };
 
-Ext3.ux.MessageNotify.prototype.showMessage = function (data) {
+Ext3.ux.MessageNotify.prototype.showMessage = function (json) {
+    var data = json[0];
     this.showNotify(data['id'], data['from_user'], data['subject'], data['text']);
 };
 
@@ -9173,8 +9170,10 @@ var Child = function () {};
 Child.prototype = Ext3.ux.MessageNotify.prototype;
 Ext3.ux.TaskNotify.prototype = new Child();
 
-Ext3.ux.TaskNotify.prototype.change = function (data) {
-    var record, id = data['id'];
+Ext3.ux.TaskNotify.prototype.change = function (json) {
+    var record,
+        data = json[0];
+        id = data['id'];
 
     if (record = this.drawRecords['task_' + id]) {
         if (record.active) {
