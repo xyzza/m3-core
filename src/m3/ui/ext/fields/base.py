@@ -16,14 +16,14 @@ class BaseExtField(ExtUIComponent):
     def __init__(self, *args, **kwargs):
         super(BaseExtField, self).__init__(*args, **kwargs)
         # Нужно выставлять пустое значение для того, чтобы обязательные поля,
-        # те, которые allow_blank=False подсвечивались автоматически после 
-        # рендеринга 
+        # те, которые allow_blank=False подсвечивались автоматически после
+        # рендеринга
         self.value = ""
 
         # Признак нередактируемости поля
         self.read_only = False
 
-        # Признак, что поле используется для изменения значения, 
+        # Признак, что поле используется для изменения значения,
         # а не для навигации - при Истине будут повешаны обработчики на изменение окна
         # см. m3.js
         self.is_edit = True
@@ -50,7 +50,7 @@ class BaseExtField(ExtUIComponent):
         self.tab_index = None
 
         # Свой CSS класс валидации для некорректно заполненного поля
-        # TODO: Вынести в атрибут класса, а не атрибут экземпляра 
+        # TODO: Вынести в атрибут класса, а не атрибут экземпляра
         self.invalid_class = 'm3-form-invalid'
 
         # Текст, который будет отображаться, если поле заполненно некорректно
@@ -63,7 +63,7 @@ class BaseExtField(ExtUIComponent):
         self.auto_create = {"tag": "input", "type": "text", "size": "20", "autocomplete": "off"}
 
     def t_render_label_style(self):
-        if isinstance(self.label_style, dict):        
+        if isinstance(self.label_style, dict):
             return ';'.join(['%s:%s' % (k, v) for k, v in self.label_style.items()])
         else:
             return self.label_style
@@ -133,13 +133,11 @@ class BaseExtField(ExtUIComponent):
 class BaseExtTriggerField(BaseExtField):
     '''
     Базовый класс для комбобокса, поля выбора справочника
-    FIXME: Необходимо создать свойство trigger_action_all
-           Внутри него изменять атрибут trigger_action     
     '''
-    
+
     ALL = 'all'
     QUERY = 'query'
-    
+
     def __init__(self, *args, **kwargs):
         super(BaseExtTriggerField, self).__init__(*args, **kwargs)
 
@@ -155,7 +153,7 @@ class BaseExtTriggerField(BaseExtField):
         # Скрыть триггера выподающего списка
         self.hide_trigger = False
 
-        # 
+        #
         self.type_ahead = False
 
         #
@@ -179,16 +177,17 @@ class BaseExtTriggerField(BaseExtField):
         # Признак возможности редактирования
         self.editable = True
 
-        # Признак, что отображаться при выборе будут все записи (QUERY),
-        # Иначе те, которые подходят введенному тексту (ALL)
-        self.trigger_action = BaseExtTriggerField.QUERY
+        # если True, то для выбора будут доступны все элементы,
+        # в противном случае будут доступны только элементы, начинающиеся с
+        # введенной строки
+        self.trigger_action_all = False
 
         #
         self.force_selection = False
 
         # Текст, если записей в сторе нет
         self.not_found_text = None
-        
+
         # Текст, отображаемый при загрузке данных
         self.loading_text = u'Загрузка...'
 
@@ -198,27 +197,12 @@ class BaseExtTriggerField(BaseExtField):
 
     def get_store(self):
         return self.__store
-    
+
     store = property(get_store, set_store)
 
     def t_render_store(self):
         assert self.__store, 'Store is not define'
         return self.__store.render([self.display_field, ])
-
-    @property
-    def trigger_action_all(self):
-        '''
-        Для обратной совместимости
-        '''
-        return self.trigger_action == BaseExtTriggerField.ALL
-
-    @trigger_action_all.setter
-    def trigger_action_all(self, value):
-        '''
-        Для обратной совместимости
-        '''        
-        self.trigger_action = BaseExtTriggerField.ALL if value else \
-            BaseExtTriggerField.QUERY
 
     @property
     def name(self):
@@ -273,11 +257,14 @@ class BaseExtTriggerField(BaseExtField):
         self._put_config_value('pageSize', self.page_size)
         self._put_config_value('maxHeight', self.max_heigth_dropdown_list)
         self._put_config_value('minChars', self.min_chars)
-        self._put_config_value('mode', self.mode)        
-        self._put_config_value('triggerAction', self.trigger_action)
+        self._put_config_value('mode', self.mode)
+        # значение атрибута trigger_action_all приводится к булевому типу
+        # и в конфиг попадает соответствующая константа
+        self._put_config_value('triggerAction',
+            self.ALL if self.trigger_action_all else self.QUERY
+        )
         self._put_config_value('editable', self.editable)
         self._put_config_value('forceSelection', self.force_selection)
         self._put_config_value('valueNotFoundText', self.not_found_text)
         self._put_config_value('loadingText', self.loading_text)
         self._put_config_value('store', self.t_render_store, self.get_store())
-
