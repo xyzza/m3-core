@@ -74,12 +74,12 @@
         """
 
         AUTO_TYPE = (
-            (1, u'Седан'),
-            (2, u'Хэтчбек'),
-            (3, u'Универсал'),
-            (4, u'Паркетник'),
-            (5, u'Внедорожник'),
-            (6, u'Микро')
+            (0, u'Седан'),
+            (1, u'Хэтчбек'),
+            (2, u'Универсал'),
+            (3, u'Паркетник'),
+            (4, u'Внедорожник'),
+            (5, u'Микро')
         )
 
         # Код автомобиля
@@ -96,8 +96,7 @@
 
         @json_encode
         def verbose_type(self):
-            # Убогая реализация. Необходимо было AUTO_TYPE, реализовать в виде словаря.
-            return self.AUTO_TYPE[self.type - 1][1]
+            return self.AUTO_TYPE[self.type][1]
 
 Описание некоторых ui-компонент
 ================================
@@ -185,7 +184,8 @@
                 self.field_code,
                 self.field_name,
                 self.field_type,
-                ExtHiddenField(name='parent_id')
+                ExtHiddenField(name='parent_id'),
+                ExtHiddenField(name='id')
             ])
 
 Здесь все тоже самое. Просто создаем поля и добавляем их на форму.
@@ -283,12 +283,15 @@ pack-у на это необходимо написать следующую с�
 
 И отобразим значок в меня "ПУСК" для запуска приложения: ::
 
-    main_group = app_ui.DesktopLaunchGroup(name=u'Справочники')
+    def register_desktop_menu():
 
-    main_group.subitems.extend([
-        app_ui.DesktopShortcut(name=u'Справочник авто', pack=actions.CarsDictionaryActions)
-    ])
+        main_group = app_ui.DesktopLaunchGroup(name=u'Справочники')
 
-    app_ui.DesktopLoader.add(get_metarole(metaroles.ADMIN), app_ui.DesktopLoader.START_MENU, main_group)
+        main_group.subitems.extend([
+            app_ui.DesktopShortcut(name=u'Справочник авто', pack=actions.CarsDictionaryActions)
+        ])
+
+        app_ui.DesktopLoader.add(get_metarole(metaroles.ADMIN), app_ui.DesktopLoader.START_MENU, main_group)
 
 Приложение готово к работе.
+Полный код доступен по `ссылке <car_dict.tar.gz>`_
