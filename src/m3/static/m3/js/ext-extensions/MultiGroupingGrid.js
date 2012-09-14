@@ -1179,7 +1179,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
         if(window){
             window.on('closed_ok', function(data){
                 if (this.fireEvent('rowadded', this, data)) {
-                    this.createOrReplaceRecord(data);
+                    this.createOrReplaceRecord(data, true);
                 }
             }, this);
         }
@@ -1189,7 +1189,7 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
         if(window){
             window.on('closed_ok', function(data){
                 if (this.fireEvent('rowedited', this, data)) {
-                    this.createOrReplaceRecord(data);
+                    this.createOrReplaceRecord(data, false);
                 }
             }, this);
         }
@@ -1198,8 +1198,9 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
      * Общий метод создания новой записи в store
      * Используется при локальном редактировании (инкрементальном обновлении)
      * @param {Object} data json-данные, полученные с сервера при локальном редактировании
+     * @param {boolean} isCreate признак создания или редактирования записи
      */
-    ,createOrReplaceRecord: function(data){
+    ,createOrReplaceRecord: function(data, isCreate){
         // если локальное редактирование
         if (this.localEdit){
             // на самом деле нам пришла строка грида
@@ -1207,17 +1208,45 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
             var record = new Ext.data.Record(obj.data, obj.data.id);
             record.json = obj.data;
             var store = this.getStore();
-            // и надо ее заменить в сторе
-            // найдем запись в сторе, вдруг она уже есть!
-            var recordPosition = store.findExact('id', obj.data.id);
-            if (recordPosition >= 0) {
-                // если нашли, то зменим
-                store.remove(store.getAt(recordPosition));
+            var recordPosition = 0;
+            if (record.get(store.idProperty) != undefined) {
+                // и надо ее заменить в сторе
+                // найдем запись в сторе, вдруг она уже есть!
+                recordPosition = store.findExact(store.idProperty, record.get(store.idProperty));
+                if (recordPosition >= 0) {
+                    // если нашли, то зменим
+                    store.remove(store.getAt(absoluteRecordPosition));
+                } else {
+                    // поставим первым видимым элементом
+                    recordPosition = this.getView().rowIndex - store.bufferRange[0];
+                }
             } else {
-                recordPosition = 0;
+                // если это было создание, то добавим не задумываясь
+                if (isCreate) {
+                    // поставим первым видимым элементом
+                    recordPosition = this.getView().rowIndex - store.bufferRange[0];
+                } else {
+                    // иначе заменим данные в текущей записи
+                    // надо ее заменить в сторе
+                    var sm = this.getSelectionModel();
+                    if (sm.hasSelection()) {
+                        // только для режима выделения строк
+                        if (sm instanceof Ext.grid.RowSelectionModel) {
+                            if (sm.singleSelect) {
+                                var rec = sm.getSelected();
+                                recordPosition = store.indexOf(rec);
+                                store.remove(rec);
+                                if (recordPosition < 0) {
+                                    recordPosition = 0;
+                                }
+                            }
+                        }
+                    }
+                }
             }
+            var absoluteRecordPosition = recordPosition + store.bufferRange[0];
             store.insert(recordPosition, record);
-            this.getSelectionModel().selectRow(recordPosition);
+            this.getSelectionModel().selectRow(absoluteRecordPosition);
         } else {
             return this.refreshStore();
         }
