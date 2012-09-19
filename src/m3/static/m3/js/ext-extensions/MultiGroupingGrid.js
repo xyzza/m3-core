@@ -1215,7 +1215,7 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
                 recordPosition = store.findExact(store.idProperty, record.get(store.idProperty));
                 if (recordPosition >= 0) {
                     // если нашли, то зменим
-                    store.remove(store.getAt(absoluteRecordPosition));
+                    store.remove(store.getAt(recordPosition));
                 } else {
                     // поставим первым видимым элементом
                     recordPosition = this.getView().rowIndex - store.bufferRange[0];
