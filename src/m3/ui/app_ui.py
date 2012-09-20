@@ -215,12 +215,13 @@ class DesktopShortcut(DesktopLauncher):
         # Если это экшен, то получаем его адрес
         if isinstance(pack, Action):
             self.url = pack.get_absolute_url()
-            pack.title = getattr(pack, 'title',
-                getattr(pack.parent, 'title', '???'))
+            if not getattr(pack, 'title', None):
+                pack.title = getattr(pack.parent, 'title', '???')
         else:
             if inspect.isclass(pack) and issubclass(pack, Action):
                 self.url = pack.absolute_url()
-                pack.title = getattr(pack, 'title', pack.__name__)
+                if not getattr(pack, 'title', None):
+                    pack.title = pack.__name__
             else:
                 if not isinstance(pack, ActionPack):
                     # Пробуем найти как пак
