@@ -934,7 +934,7 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
     ,onLoad: function (store) {
         var sm = this.getSelectionModel();
         if (sm.hasSelection()) {
-            if (sm instanceof Ext.grid.RowSelectionModel && sm.singleSelect) {
+            if (sm instanceof Ext3.grid.RowSelectionModel && sm.singleSelect) {
                 var record = sm.getSelected();
                 var recordPosition = store.findExact(store.idProperty, record.get(store.idProperty));
                 if (recordPosition >= 0) {
