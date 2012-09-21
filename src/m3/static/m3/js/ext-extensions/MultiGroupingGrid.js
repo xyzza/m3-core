@@ -865,6 +865,7 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
 		Ext3.m3.MultiGroupingGridPanel.superclass.initComponent.call(this);
 		var store = this.getStore();
 		store.on('exception', this.storeException, this);
+		store.on('load', this.onLoad, this);
 		
 		store.baseParams = Ext3.applyIf(store.baseParams || {}, this.actionContextJson || {});
 		this.addEvents(
@@ -927,6 +928,25 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
             'rowdeleted'
 			);
 	}
+    /**
+     * При перезагрузке данных снимем выделение, если запись исчезла
+     */
+    ,onLoad: function (store) {
+        var sm = this.getSelectionModel();
+        if (sm.hasSelection()) {
+            if (sm instanceof Ext.grid.RowSelectionModel && sm.singleSelect) {
+                var record = sm.getSelected();
+                var recordPosition = store.findExact(store.idProperty, record.get(store.idProperty));
+                if (recordPosition >= 0) {
+                    sm.selectRow(recordPosition);
+                } else {
+                    sm.clearSelections();
+                }
+            } else {
+                sm.clearSelections();
+            }
+        }
+    }
 	/**
 	 * Обработчик исключений хранилица
 	 */
