@@ -135,10 +135,13 @@ class ExtForm(BaseExtPanel):
                     item.value = value
 
             elif isinstance(item, ExtDateField):
-                #item.value = value.strftime('%d.%m.%Y') \
-                # для дат, до 1900 года метод выше не работает
-                item.value = '%02d.%02d.%04d' % (value.day,value.month,value.year) \
-                    if not is_secret_token(value) else unicode(value)   
+                if isinstance(value, (datetime.date, datetime.datetime)):
+                    #item.value = value.strftime('%d.%m.%Y') \
+                    # для дат, до 1900 года метод выше не работает
+                    item.value = '%02d.%02d.%04d' % (value.day,value.month,value.year) \
+                        if not is_secret_token(value) else unicode(value)   
+                else:
+                    item.value = value
                       
             elif isinstance(item, ExtTimeField):
                 #item.value = value.strftime('%H:%M') \
