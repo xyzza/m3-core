@@ -79,3 +79,11 @@
 
                 open(url + "?" + params.join("&"));
             }
+
+
+Для запуска сервера OpenOffice необходимо в файл ``manage.py`` прикладного проекта добавить строки: ::
+
+    from oo_report_generator.oo_admin import start_server
+    start_server(port=8100, headless_mode=True)
+
+Номер порта, переданного в функцию ``start_server`` должен совпадать с указанным в настройках КЗиО.
