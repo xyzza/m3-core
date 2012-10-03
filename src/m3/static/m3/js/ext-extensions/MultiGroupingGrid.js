@@ -942,8 +942,6 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
                 } else {
                     sm.clearSelections();
                 }
-            } else {
-                sm.clearSelections();
             }
         }
     }
