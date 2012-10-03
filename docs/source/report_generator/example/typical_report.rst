@@ -36,7 +36,7 @@
 
 Добавляем поле "Цена авто". Далее привязываем к нему функцию агрегации:
 
-.. image:: ../images/example/second_query_select_fields
+.. image:: ../images/example/second_query_select_fields.png
 .. image:: ../images/example/second_query_group.png
 
 Важно отметить, что как и в главном запросе поле "Код марки" отсортировано. Это
