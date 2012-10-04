@@ -20,6 +20,7 @@
    ui.rst
    report_generator/index.rst
    m3_designer/index.rst
+   livemessages/index.rst
 
 
 Примеры
