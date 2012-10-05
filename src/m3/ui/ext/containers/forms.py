@@ -164,7 +164,7 @@ class ExtForm(BaseExtPanel):
                 # TODO после окончательного удаления метода configure_by_dictpack в ExtDictSelectField
                 # нужно удалить проверку на 'bind_pack'
                 bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
-                if bind_pack:
+                if bind_pack and value:
                     assert isinstance(bind_pack, ISelectablePack), 'Pack %s must provide ISelectablePack interface' % bind_pack
                     if hasattr(bind_pack, 'get_record'):
                         item.set_value_from_model(bind_pack.get_record(value))
@@ -183,7 +183,7 @@ class ExtForm(BaseExtPanel):
 #                            item.default_text = default_text()
 #                        else:
 #                            item.default_text = default_text
-                item.value = value if value is not None else ''
+                item.value = value
             elif isinstance(item, ExtComboBox) and hasattr(item, 'bind_rule_reverse'):
                 # Комбобокс как правило передает id выбранного значения. 
                 #Его не так просто  преобразовать в тип объекта, 
