@@ -164,7 +164,7 @@ class ExtForm(BaseExtPanel):
                 # TODO после окончательного удаления метода configure_by_dictpack в ExtDictSelectField
                 # нужно удалить проверку на 'bind_pack'
                 bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
-                if bind_pack and value:
+                if bind_pack:
                     assert isinstance(bind_pack, ISelectablePack), 'Pack %s must provide ISelectablePack interface' % bind_pack
                     if hasattr(bind_pack, 'get_record'):
                         item.set_value_from_model(bind_pack.get_record(value))
@@ -196,8 +196,6 @@ class ExtForm(BaseExtPanel):
                 else:
                     raise ValueError('Invalid attribute type bind_rule_reverse. \
                         Must be a function or a dict.')
-            elif isinstance(item, ExtComboBox):
-                item.value = value if value is not None else ''
                     
             elif isinstance(item, ExtFileUploadField) or \
                 isinstance(item, ExtImageUploadField):
@@ -263,6 +261,7 @@ class ExtForm(BaseExtPanel):
                 names = field.name.split('.')                
                 new_val, has_attr = get_value(object, names)
                 if has_attr:
+                    new_val = new_val if new_val is not None else ''
                     _assign_value(new_val, field)
         
 
