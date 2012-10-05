@@ -196,6 +196,8 @@ class ExtForm(BaseExtPanel):
                 else:
                     raise ValueError('Invalid attribute type bind_rule_reverse. \
                         Must be a function or a dict.')
+            elif isinstance(item, ExtComboBox):
+                item.value = value if value is not None else ''
                     
             elif isinstance(item, ExtFileUploadField) or \
                 isinstance(item, ExtImageUploadField):
