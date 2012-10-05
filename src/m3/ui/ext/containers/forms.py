@@ -237,14 +237,14 @@ class ExtForm(BaseExtPanel):
             if has_attr:
                 if len(names) == 1:
                     if isinstance(obj, dict):
-                        return obj[names[0]]
+                        return obj[names[0]], True
                     else:
                         value = getattr(obj, names[0])
-                        return value() if callable(value) else value
+                        return value() if callable(value) else value, True
                 else:
                     nested = getattr(obj, names[0]) if not isinstance(obj, dict) else obj[names[0]]
                     return get_value(nested, names[1:])
-            return None
+            return None, False
 
         all_fields = self._get_all_fields(self)
         for field in all_fields:
@@ -259,8 +259,8 @@ class ExtForm(BaseExtPanel):
             if not field.name in exclusion:
                 
                 names = field.name.split('.')                
-                new_val = get_value(object, names)
-                if new_val != None:
+                new_val, has_attr = get_value(object, names)
+                if has_attr:
                     _assign_value(new_val, field)
         
 
