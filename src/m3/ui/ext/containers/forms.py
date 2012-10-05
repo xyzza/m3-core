@@ -183,7 +183,7 @@ class ExtForm(BaseExtPanel):
 #                            item.default_text = default_text()
 #                        else:
 #                            item.default_text = default_text
-                item.value = value
+                item.value = value if value is not None else ''
             elif isinstance(item, ExtComboBox) and hasattr(item, 'bind_rule_reverse'):
                 # Комбобокс как правило передает id выбранного значения. 
                 #Его не так просто  преобразовать в тип объекта, 
