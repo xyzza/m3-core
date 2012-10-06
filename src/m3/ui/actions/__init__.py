@@ -126,7 +126,12 @@ class Action(object):
         '''
         Возвращает код действия, для контроля прав доступа
         '''
-        return self.get_absolute_url()
+        code = self.get_absolute_url()
+        # уберем из кода префикс системы, т.к. код права должен быть относительным
+        if hasattr(settings, 'ROOT_URL') and code.startswith(settings.ROOT_URL):
+            return code[len(settings.ROOT_URL):]
+        else:
+            return code
     
     def has_permission(self, user_obj, request = None):
         '''
@@ -284,7 +289,12 @@ class ActionPack(object):
         '''
         Возвращает код, для контроля прав доступа
         '''
-        return self.absolute_url()
+        code = self.absolute_url()
+        # уберем из кода префикс системы, т.к. код права должен быть относительным
+        if hasattr(settings, 'ROOT_URL') and code.startswith(settings.ROOT_URL):
+            return code[len(settings.ROOT_URL):]
+        else:
+            return code
     
     def get_sub_permission_code(self, sub_code):
         '''
