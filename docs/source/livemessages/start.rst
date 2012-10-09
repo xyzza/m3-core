@@ -30,7 +30,7 @@
 Конфигурации для приложения находяться в файле **livemessages/js/init.js**
 
 .. note::
-    На клиенте точкой входа является **LiveMessages.Controller**, он подписывает передаваемые ему контроллеры на получение данных от сервера.
+    На клиенте точкой входа является **LiveMessages.Init**, он подписывает передаваемые ему контроллеры модулей на получение данных от сервера.
 
 Пример из файла **init.js**::
 
@@ -60,7 +60,7 @@
         buttonTask         = Ext.select('.bottom-toolbar .tray .tasks'),
         allTaskProgress    = Ext.select('.bottom-toolbar .tray .tasks .all-tasks-progress');
 
-    live = new LiveMessages.Controller({
+    live = new LiveMessages.Init({
         messages: new LiveMessages.MessagesController({
             view: [
                 new LiveMessages.MessagesUI({
