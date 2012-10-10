@@ -262,6 +262,7 @@ def check_snils(base_snils):
     list_of_snils_digits = base_snils[:-3].split('-')
     COEF = int(base_snils[-2:])
     snils_str =  ''.join(list_of_snils_digits)
+    if len(snils_str) != 9: return False
     snils = checksum(snils_str, range(len(snils_str),0, -1))
     if snils < 100:
         check_number = snils
