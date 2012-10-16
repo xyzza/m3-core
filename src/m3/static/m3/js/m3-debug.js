@@ -11815,7 +11815,8 @@ Ext3.onReady(function(){
 	   */
 	  tmpModal: false
 
-      ,manager: new Ext3.WindowGroup()
+      //rrzakirov: Чтобы в одном рабочем столе, окна от ExtJS3 и ExtJS4 могли работать вместе.
+	  ,manager: new Ext3.DesktopWindowGroup()
 
 	  // 2011.01.14 kirov
 	  // убрал, т.к. совместно с desktop.js это представляет собой гремучую смесь
