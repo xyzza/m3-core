@@ -14,8 +14,11 @@ Ext3.onReady(function(){
 	   *  флаг модальности помещается во временную переменную tmpModal, и 
 	   *  this.modal = false;
 	   */
-	  tmpModal: false 
-	  ,manager: new Ext3.WindowGroup()
+	  tmpModal: false
+
+      //rrzakirov: Чтобы в одном рабочем столе, окна от ExtJS3 и ExtJS4 могли работать вместе.
+	  ,manager: new Ext3.DesktopWindowGroup()
+
 	  // 2011.01.14 kirov
 	  // убрал, т.к. совместно с desktop.js это представляет собой гремучую смесь
 	  // кому нужно - пусть прописывает Ext3.getBody() в своем "десктопе" на onReady или когда хочет
