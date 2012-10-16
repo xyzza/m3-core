@@ -28,8 +28,8 @@ Ext3.m3.Window = Ext3.extend(Ext3.Window, {
     
 		Ext3.m3.Window.superclass.constructor.call(this, baseConfig);
 	},
-    initTools: function(){
-        if (this.m3HelpTopic){
+    initTools: function() {
+        if (this.m3HelpTopic) {
             var m3HelpTopic = this.m3HelpTopic;
             this.addTool({id: 'help', handler:function(){ showHelpWindow(m3HelpTopic);}});
         }

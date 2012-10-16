@@ -1,7 +1,7 @@
 /* Для совместимости с ExtJS 4.1 */
 
 // Этот класс нужно использовать для совместной работы окон ExtJS3 и ExtJS4 на одном рабочем столе.
-Ext3.DesktopWindowGroup = Ext.extend(Ext.WindowGroup, {
+Ext.DesktopWindowGroup = Ext.extend(Ext.WindowGroup, {
     getNextZSeed: function() {
         return Ext.ZIndexManager.zBase;
     },
@@ -31,6 +31,8 @@ Ext3.DesktopWindowGroup = Ext.extend(Ext.WindowGroup, {
         return result;
     }
 });
+
+Ext.WindowManager = Ext.WindowMgr = Ext3.WindowMgr = new Ext.DesktopWindowGroup();
 
 function setZIndex (index){
     if(this.modal){
