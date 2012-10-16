@@ -6313,8 +6313,8 @@ Ext3.m3.Window = Ext3.extend(Ext3.Window, {
     
 		Ext3.m3.Window.superclass.constructor.call(this, baseConfig);
 	},
-    initTools: function(){
-        if (this.m3HelpTopic){
+    initTools: function() {
+        if (this.m3HelpTopic) {
             var m3HelpTopic = this.m3HelpTopic;
             this.addTool({id: 'help', handler:function(){ showHelpWindow(m3HelpTopic);}});
         }
@@ -11806,6 +11806,7 @@ function createAdvancedDataField(baseConfig, params){
  * Нужно для правильной работы окна 
  */
 Ext3.onReady(function(){
+
 	Ext3.override(Ext3.Window, {
 	
 	  /*
@@ -11816,7 +11817,7 @@ Ext3.onReady(function(){
 	  tmpModal: false
 
       //rrzakirov: Чтобы в одном рабочем столе, окна от ExtJS3 и ExtJS4 могли работать вместе.
-	  ,manager: new Ext3.DesktopWindowGroup()
+	  ,manager: Ext3.WindowMgr
 
 	  // 2011.01.14 kirov
 	  // убрал, т.к. совместно с desktop.js это представляет собой гремучую смесь
