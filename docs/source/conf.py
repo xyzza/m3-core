@@ -22,16 +22,18 @@ ROOT_DIRNAME = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
-sys.path.extend([ 
-    os.path.join(ROOT_DIRNAME, 'src'),
-    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'dbfpy', 'src'),
-    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'm3_audit', 'src'),
-    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'm3_contragents', 'src'),
-    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'm3_query_builder', 'src'),
-    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'sqlalchemy', 'src'),
-    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'm3_replica', 'src'),
-    os.path.join(ROOT_DIRNAME, 'docs', 'repos', 'mptt', 'src'),
-])
+modules = ['dbfpy', 'mptt', 'm3_audit', 'm3_contragents', 'm3_query_builder', 'sqlalchemy', 'm3_replica']
+# Добавляем сам m3
+sys.path.append(os.path.join(ROOT_DIRNAME, 'src'))
+# А теперь и другие модули
+for module in modules:
+    target_path = os.path.join(ROOT_DIRNAME, 'docs', 'repos', module, 'src')
+    if os.path.exists(target_path):
+        sys.path.append(target_path)
+    else:
+        # Если модуль отсутствует, то сообщаем и выходим
+        print u'Модуль %s отсутствует' % module
+        sys.exit()
 
 # -- General configuration -----------------------------------------------------
 
