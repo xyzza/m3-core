@@ -99,6 +99,9 @@ class ExtDateField(BaseExtField):
             self.format = settings.DATE_FORMAT.replace('%', '')
         except:
             self.format = 'd.m.Y'
+
+        # Признак возможности редактирования
+        self.editable = True
             
         self.init_component(*args, **kwargs)
     
@@ -115,6 +118,7 @@ class ExtDateField(BaseExtField):
         self._put_config_value('startDay', self.start_day)
         self._put_config_value('maxValue', self.max_value)
         self._put_config_value('minValue', self.min_value)
+        self._put_config_value('editable', self.editable)
 
     def render_params(self):
         super(ExtDateField, self).render_params()
