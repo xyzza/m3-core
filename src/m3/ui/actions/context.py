@@ -226,9 +226,10 @@ class ActionContext(object):
         Объединение контекстов друг с другом
         Дополнение собственного контекста! Существующие значания не заменяются!
         Выдается новый контекст!!!
-        Пример: ac = ActionContext(a=1, b=2).combine(ActionContext(c=3,a=2))
-                ac.json()
-                {"a": 1, "c": 3, "b": 2}
+        Пример:
+        ac = ActionContext(a=1, b=2).combine(ActionContext(c=3,a=2))
+        ac.json()
+        {"a": 1, "c": 3, "b": 2}
         """
         result = ActionContext()
         if context:
