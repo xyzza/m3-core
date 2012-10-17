@@ -154,12 +154,14 @@ Release 0.9 (19.08.2011)
   
   И ``BackgroundOperationBar`` и ``ExtProgressBar`` из `ui/ext/misc/background_operation.py`:
    .. autoclass:: m3.ui.ext.misc.background_operation.BackgroundOperationBar
+       :noindex:
    .. autoclass:: m3.ui.ext.misc.background_operation.ExtProgressBar
    
 * Добавлен ExtJs класс ``Ext.m3.MultiSelectField`` - Контрол для выбора множества значений из справочника
 
  И серверная обертка:
    .. autoclass:: m3.ui.ext.fields.complex.ExtMultiSelectField
+       :noindex:
 
 * Множественные исправления, которые можно увидеть выполнив, например, визуальное сравнение веток через TortoiseHG.
 
