@@ -105,7 +105,7 @@ class InfoModelMeta(models.base.ModelBase):
                 for field in list(new_class._meta.local_fields):
                     # найдем наши поля
                     if (issubclass(base, BaseInfoModel) and field.name in ('info_date', 'info_date_prev', 'info_date_next')) or \
-                       (issubclass(base, BaseIntervalInfoModel) and field.name in ('info_date_begin', 'info_date_end', 'info_date_prev', 'info_date_next')):
+                       (issubclass(base, BaseIntervalInfoModel) and field.name in (new_class.begin_src, new_class.end_src, 'info_date_begin', 'info_date_end', 'info_date_prev', 'info_date_next')):
                         # заменим поля на новые
                         if field.default == datetime.min:
                             default = date.min
@@ -115,6 +115,19 @@ class InfoModelMeta(models.base.ModelBase):
                             default = field.default
                         new_field = models.DateField(db_index = field.db_index, default = default)
                         new_class.replace_field(field, new_field)
+        # Если в модели определены специальные источники для полей, содержащих дату:
+        if hasattr(new_class, 'begin_src') and hasattr(new_class, 'end_src'):
+
+            def _get_fld(name):
+                # Возвращает поле из _meta по его name
+                return filter(lambda x:x.name == name, list(new_class._meta.local_fields))[0]
+
+            if new_class.begin_src != new_class.DEFAULT_BEGIN:
+                # Если в модели переопеределно поле даты начала, info_date_begin нам не нужен. убираем его:
+                new_class._meta.local_fields.remove(_get_fld(new_class.DEFAULT_BEGIN))
+            if new_class.end_src != new_class.DEFAULT_END:
+                # Если в модели переопеределно поле даты конца, info_date_end нам не нужен. убираем его:
+                new_class._meta.local_fields.remove(_get_fld(new_class.DEFAULT_END))
         return new_class
 
     def replace_field(new_class, old_field, new_field):
@@ -352,6 +365,9 @@ def RebuildInfoModel(cls):
 
 class BaseIntervalInfoModel(models.Model):
     __metaclass__ = InfoModelMeta
+    # Константы по умолчанию для источника даты начала и конца:
+    DEFAULT_BEGIN = 'info_date_begin'
+    DEFAULT_END = 'info_date_end'
 
     # тип управляющих полей по умолчанию остается DateTimeField
     # но может быть изменен на DateField - см. InfoModelMeta
@@ -362,6 +378,46 @@ class BaseIntervalInfoModel(models.Model):
     
     dimentions = [] # перечень реквизитов-измерений
     period = PERIOD_DAY # тип периодичности
+
+    # тут мы можем переопределить,
+    # какое поле нам использовать для хранения даты начала.
+    # по умолчанию используется info_date_begin
+    begin_src = DEFAULT_BEGIN
+    # тут мы можем переопределить,
+    # какое поле нам использовать для хранения даты конца.
+    # по умолчанию используется info_date_end
+    end_src = DEFAULT_END
+    # Если мы переопередяем какие поля нам использовать,
+    # мы сами берем на себя отвественность
+    # за настройку полей(тип, индексы, default, allow_blank и т.д.)
+
+    def _get_safe_value(self, fld_name):
+        u"""
+            Возвращает значение для поля.
+            Если значение None,
+            то пытается найти значение по умолчанию в мета описании поля.
+            Если и в поле не указано значение по умолчанию, то возвращает None
+        """
+        val = getattr(self, fld_name)
+        if val is not None:
+            return val
+        # Если значение пустое, надо попытаться найти значение по умолчанию:
+        fld = filter(lambda x:x.name == fld_name, self._meta.fields)[0]
+        return None if fld.default is models.NOT_PROVIDED else fld.default
+
+    @property
+    def _begin(self):
+        return self._get_safe_value(self.begin_src)
+    @_begin.setter
+    def _begin(self, val):
+        setattr(self, self.begin_src, val)
+
+    @property
+    def _end(self):
+        return self._get_safe_value(self.end_src)
+    @_end.setter
+    def _end(self, val):
+        setattr(self, self.end_src, val)
 
     # сформируем запрос по ключу
     @classmethod
@@ -390,6 +446,27 @@ class BaseIntervalInfoModel(models.Model):
             if dim_val:
                 query = query.filter(**{dim_attr: dim_val})
         return query
+
+    @classmethod
+    def _gen_Q(cls, src, add, val):
+        """
+            Возвращает Q выражение
+            для динамически состовляемых фильтров по дате начала\конца
+                src - указывает дату наачла или конца
+                add - постфикс(gte, lte, ...) если просто равенство, то пустая строка
+                val значение с которым будем сравнивать
+        """
+        # шаблон фильтра принимает вид:
+        # либо имяполя__постфикс(info_date_end__gte например)
+        # или имяполя, если нет постфикса(info_date_end)
+        _tmpl = '%s__%s' if add else '%s%s'
+        # Возвращаем Q выражение для даты начала
+        if src == 'bgn':
+            return Q(**{_tmpl % (cls.begin_src, add): val})
+        # Возвращаем Q выражение для даты конца
+        elif src == 'end':
+            return Q(**{_tmpl % (cls.end_src, add): val})
+        raise RuntimeError('invalid arg <<src>> for _gen_Q method!')
     
     # сформируем запрос на интервал дат
     @classmethod 
@@ -406,11 +483,11 @@ class BaseIntervalInfoModel(models.Model):
         if cls.period != PERIOD_INFTY:
             date_begin = normdate(cls.period, date_begin, True)
             date_end = normdate(cls.period, date_end, False)
-            filter = Q(info_date_begin__gte = date_begin) & Q(info_date_end__lte = date_end) # попадание в интервал полностью
+            filter = cls._gen_Q('bgn', 'gte', date_begin) & cls._gen_Q('end', 'lte', date_end) # попадание в интервал полностью
             if include_begin:
-                filter = filter | (Q(info_date_begin__lte = date_begin) & Q(info_date_end__gt = date_begin)) # попадание начала интервала в границы записи
+                filter = filter | (cls._gen_Q('bgn', 'lte', date_begin) & cls._gen_Q('end', 'gt', date_begin)) # попадание начала интервала в границы записи
                 if include_end:
-                    filter = filter | (Q(info_date_begin__lt = date_end) & Q(info_date_end__gte = date_end)) # попадание конца интервала в границы записи
+                    filter = filter | (cls._gen_Q('bgn', 'lt', date_end) & cls._gen_Q('end', 'gte', date_end)) # попадание конца интервала в границы записи
         query = query.filter(filter)
         return query
     
@@ -432,11 +509,11 @@ class BaseIntervalInfoModel(models.Model):
             q_date_begin = normdate(cls.period, date, True)
             q_date_end = normdate(cls.period, date, False)
             if next:
-                filter = Q(info_date_prev__lte = q_date_begin, info_date_begin__gt = q_date_end) # дата попадает в интервал перед записью
+                filter = Q(info_date_prev__lte = q_date_begin) & cls._gen_Q('bgn', 'gt', q_date_end) # дата попадает в интервал перед записью
             else:
-                filter = Q(info_date_next__gt = q_date_end, info_date_end__lte = q_date_begin) # дата попадает в интервал после записи
+                filter = Q(info_date_next__gt = q_date_end) & cls._gen_Q('end', 'lte', q_date_begin) # дата попадает в интервал после записи
             if active:
-                filter = filter | Q(info_date_begin__lte = q_date_begin, info_date_end__gte = q_date_end) # дата попадает в интервал записи
+                filter = filter | (cls._gen_Q('bgn', 'lte', q_date_begin) & cls._gen_Q('end', 'gte', q_date_end)) # дата попадает в интервал записи
             query = query.filter(filter)
         return query
     
@@ -447,18 +524,18 @@ class BaseIntervalInfoModel(models.Model):
     # переопределим запись объекта, чтобы изменять соседние записи
     def save(self, *args, **kwargs):
         # если не указана дата записи, то
-        if self.period != PERIOD_INFTY and (not self.info_date_begin or not self.info_date_end):
+        if self.period != PERIOD_INFTY and (not self._begin or not self._end):
             raise Exception('Attribute info_date is not set!')
         # нормализуем переданные дату и время 
-        self.info_date_begin = normdate(self.period,self.info_date_begin, True)
-        self.info_date_end = normdate(self.period,self.info_date_end, False)
-        
-        if self.period != PERIOD_INFTY and (self.info_date_begin > self.info_date_end):
-            raise InvalidIntervalError("info_date_begin > info_date_end")
+        self._begin = normdate(self.period,self._begin, True)
+        self._end = normdate(self.period,self._end, False)
+
+        if self.period != PERIOD_INFTY and (self._begin > self._end):
+            raise InvalidIntervalError("%s > %s"%(self.__class__.begin_src, self.__class__.end_src))
         
         # проверим на уникальность записи
         if self.period != PERIOD_INFTY:
-            q = self.__class__.query_interval(self, self.info_date_begin, self.info_date_end)
+            q = self.__class__.query_interval(self, self._begin, self._end)
             if self.pk:
                 q = q.exclude(pk = self.pk)
             if q.count() > 0:
@@ -468,24 +545,24 @@ class BaseIntervalInfoModel(models.Model):
         old_prev_rec = None
         old_next_rec = None
         if self.pk:
-            q = self.__class__.query_dimentions(self).filter(info_date_end = self.info_date_prev).exclude(pk = self.pk)
+            q = self.__class__.query_dimentions(self).filter(self.__class__._gen_Q('end','',self.info_date_prev)).exclude(pk = self.pk)
             old_prev_rec = q.get() if len(q) == 1 else None
-            q = self.__class__.query_dimentions(self).filter(info_date_begin = self.info_date_next).exclude(pk = self.pk)
+            q = self.__class__.query_dimentions(self).filter(self.__class__._gen_Q('bgn','',self.info_date_next)).exclude(pk = self.pk)
             old_next_rec = q.get() if len(q) == 1 else None
 
         # вычислим ближайщую запись, которая заканчивается "левее" текущей
-        q = self.__class__.query_dimentions(self).filter(info_date_end__lte = self.info_date_begin, info_date_next__gte = self.info_date_begin).exclude(pk = self.pk)
+        q = self.__class__.query_dimentions(self).filter(self.__class__._gen_Q('end','lte',self._begin) & Q(info_date_next__gte = self._begin)).exclude(pk = self.pk)
         new_prev_rec = q.get() if len(q) == 1 else None
         # вычислим ближайшую запись, которая начинается "правее" текущей
-        q = self.__class__.query_dimentions(self).filter(info_date_begin__gte = self.info_date_end, info_date_prev__lte = self.info_date_end).exclude(pk = self.pk)
+        q = self.__class__.query_dimentions(self).filter(self.__class__._gen_Q('bgn','gte',self._end) & Q(info_date_prev__lte = self._end)).exclude(pk = self.pk)
         new_next_rec = q.get() if len(q) == 1 else None
         # изменим даты исходя из соседей
         if new_prev_rec:
-            self.info_date_prev = new_prev_rec.info_date_end
+            self.info_date_prev = new_prev_rec._end
         else:
             self.info_date_prev = normdate(self.period, datetime.min, False)
         if new_next_rec:
-            self.info_date_next = new_next_rec.info_date_begin
+            self.info_date_next = new_next_rec._begin
         else:
             self.info_date_next = normdate(self.period, datetime.max, True)
         # сохраним запись
@@ -499,12 +576,12 @@ class BaseIntervalInfoModel(models.Model):
             if old_next_rec != new_next_rec:
                 old_next_rec.save()
         if new_prev_rec:
-            if new_prev_rec.info_date_next != self.info_date_begin:
-                new_prev_rec.info_date_next = self.info_date_begin
+            if new_prev_rec.info_date_next != self._begin:
+                new_prev_rec.info_date_next = self._begin
                 new_prev_rec._save()
         if new_next_rec:
-            if new_next_rec.info_date_prev != self.info_date_end:
-                new_next_rec.info_date_prev = self.info_date_end
+            if new_next_rec.info_date_prev != self._end:
+                new_next_rec.info_date_prev = self._end
                 new_next_rec._save()
 
     # прямое удаление, без обработки
@@ -515,9 +592,9 @@ class BaseIntervalInfoModel(models.Model):
     def delete(self, *args, **kwargs):
         # если объект уже хранится, то найдем записи для изменения
         if self.pk:
-            q = self.__class__.query_dimentions(self).filter(info_date_end = self.info_date_prev).exclude(pk = self.pk)
+            q = self.__class__.query_dimentions(self).filter(self.__class__._gen_Q('end','',self.info_date_prev)).exclude(pk = self.pk)
             old_prev_rec = q.get() if len(q) == 1 else None
-            q = self.__class__.query_dimentions(self).filter(info_date_begin = self.info_date_next).exclude(pk = self.pk)
+            q = self.__class__.query_dimentions(self).filter(self.__class__._gen_Q('bgn', '', self.info_date_next)).exclude(pk = self.pk)
             old_next_rec = q.get() if len(q) == 1 else None
         else:
             old_prev_rec = None
@@ -576,7 +653,7 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
             dim_attr = dim_field.name
         order.append(dim_attr)
         dims.append(dim_attr)
-    order.append('info_date_begin')
+    order.append(cls.begin_src)
     for field_name in order:
         query = query.order_by(field_name)
     # начальное значение ключа = пусто
@@ -597,11 +674,11 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
         # если ключ совпал, то будем менять связи, и проверим перекрытие интервала
         else:
             # попадает ли текущая запись в интервал предыдущей
-            if rec.info_date_begin < last_rec.info_date_end:
+            if rec._begin < last_rec._end:
                 # мы попали...
                 # изменим пред. запись
                 if on_overlap_error == 1:
-                    last_rec.info_date_end = normdate(period, shift_date(period, rec.info_date_begin, -1), False)
+                    last_rec._end = normdate(period, shift_date(period, rec._begin, -1), False)
                 else:
                     # если ведем лог ошибочных записей, то продолжим
                     if on_overlap_error == 2:
@@ -610,9 +687,9 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
                     else:
                         raise OverlapError()
             
-            last_rec.info_date_next = rec.info_date_begin
+            last_rec.info_date_next = rec._begin
             last_rec._save()
-            rec.info_date_prev = last_rec.info_date_end
+            rec.info_date_prev = last_rec._end
         last_rec = rec
         last_key = rec_key
     # сохраним оставшуюся запись
