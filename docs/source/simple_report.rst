@@ -132,6 +132,12 @@
 10. Сохранение ширины столбцов.
 	Если в одном столбце было выведено несколько ячеек с разными значениями ширины,   в результате ширина столбца будет соответствовать значению ширины в первой выведенной в столбце ячейке.
 
+11. Перенос формул.
+    Если в секции присутствует формула, то при каждом последующем выводе она будет видоизменяться в зависимости от места её
+    вывода.
+
+12. Вывод иерархических секций (обьединение ячеек).
+
 
 Примеры использования
 +++++++++++++++++++++
@@ -203,3 +209,57 @@
 Результат:
 
 .. image:: images/report_generation/excel_complex_result.png
+
+3) Шаблон:
+
+.. image:: images/report_generation/with_merge.png
+
+Сначало выводится секция s1, далее неизвестное заранее количество раз секция s2. Необходимо, чтобы
+в результате ячейки в которых были выведены значения секции s1 были обьеденены.
+Это невозможно сделать использую шаблон, т.к. заранее неизвестен диапазон ячеек, которые необходимо обьединить.
+
+Код программы::
+
+    with Merge(s1, {'p1': 1}, from_new_row=False):
+
+        with Merge(s2, {'p2': 1}, oriented=ISpreadsheetSection.HORIZONTAL, from_new_row=False):
+            s3.flush({'p3': 1}, oriented=ISpreadsheetSection.HORIZONTAL)
+
+            for i in range(2, 4):
+                s1.flush({'p1': ''}, oriented=ISpreadsheetSection.VERTICAL)
+                s2.flush({'p2': ''}, oriented=ISpreadsheetSection.HORIZONTAL)
+                s3.flush({'p3':  i}, oriented=ISpreadsheetSection.HORIZONTAL)
+
+        s1.flush({'p1': ''}, oriented=ISpreadsheetSection.VERTICAL)
+
+        with Merge(s2, {'p2': 2}, oriented=ISpreadsheetSection.HORIZONTAL, from_new_row=False):
+            s3.flush({'p3': 1}, oriented=ISpreadsheetSection.HORIZONTAL)
+
+            for i in range(2, 4):
+                s1.flush({'p1': ''}, oriented=ISpreadsheetSection.VERTICAL)
+                s2.flush({'p2': ''}, oriented=ISpreadsheetSection.HORIZONTAL)
+                s3.flush({'p3':  i}, oriented=ISpreadsheetSection.HORIZONTAL)
+
+    with Merge(s1, {'p1': 2}, oriented=ISpreadsheetSection.LEFT_DOWN, from_new_row=True):
+
+        with Merge(s2, {'p2': 1}, oriented=ISpreadsheetSection.HORIZONTAL, from_new_row=False):
+            s3.flush({'p3': 1}, oriented=ISpreadsheetSection.HORIZONTAL)
+
+            for i in range(2, 4):
+                s1.flush({'p1': ''}, oriented=ISpreadsheetSection.VERTICAL)
+                s2.flush({'p2': ''}, oriented=ISpreadsheetSection.HORIZONTAL)
+                s3.flush({'p3':  i}, oriented=ISpreadsheetSection.HORIZONTAL)
+
+        s1.flush({'p1': ''}, oriented=ISpreadsheetSection.VERTICAL)
+
+        with Merge(s2, {'p2': 2}, oriented=ISpreadsheetSection.HORIZONTAL, from_new_row=False):
+            s3.flush({'p3': 1}, oriented=ISpreadsheetSection.HORIZONTAL)
+
+            for i in range(2, 4):
+                s1.flush({'p1': ''}, oriented=ISpreadsheetSection.VERTICAL)
+                s2.flush({'p2': ''}, oriented=ISpreadsheetSection.HORIZONTAL)
+                s3.flush({'p3':  i}, oriented=ISpreadsheetSection.HORIZONTAL)
+
+.. image:: images/report_generation/example3_res.png
+
+
