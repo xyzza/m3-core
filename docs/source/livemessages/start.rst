@@ -100,55 +100,75 @@ HAProxy не работает с win решениями.
 Разворачивание клиента
 ======================
 
-Так как приложение ориентировалось под разные библиотеки, модель в клиенте Живых сообщений не была реализована.
-Если необходима реализация модели, можно использовать любую MVC библиотеку.
+Так как приложение ориентировалось под разные библиотеки, уровень модели в клиенте Живых сообщений отсутствует.
 
-Статика подключается как в django 1.4, `документация по подключению статики <https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/>`_
-Чтобы использовать готовое приложение Живых сообщений в своем прикладном проекте, можно подключить модули::
+Статика подключается как в django 1.4, `документация по подключению статики. <https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/>`_
 
-    <script type="text/javascript" src="{% static 'livemessages/js/live-messages-utils.js' %}"></script>
-    <script type='text/javascript' src="{% static 'livemessages/js/store.js' %}"></script>
-    <script type='text/javascript' src="{% static 'livemessages/js/abstract-controller.js' %}"></script>
-    <script type='text/javascript' src="{% static 'livemessages/js/extjs-box.js' %}"></script>
-    <script type='text/javascript' src="{% static 'livemessages/js/messages/extjs-ui.js' %}"></script>
-    <script type='text/javascript' src="{% static 'livemessages/js/tasks/extjs-ui.js' %}"></script>
-    <script type='text/javascript' src="{% static 'livemessages/js/messages/controller.js' %}"></script>
-    <script type='text/javascript' src="{% static 'livemessages/js/tasks/controller.js' %}"></script>
-    <script type='text/javascript' src="{% static 'socket-io-client/socket.io.js' %}"></script>
-    <script type='text/javascript' src="{% static 'livemessages/js/init.js' %}"></script>
-    <link rel='stylesheet' type='text/css' href="{% static 'livemessages/css/live-messages.css' %}"/>
+Чтобы использовать готовое приложение Живых сообщений в прикладном проекте, необходимо подключить модули::
 
-Конфигурации для приложения находяться в файле *livemessages/js/init.js*
+    <!-- Подключается библиотека для работы с socket соединением -->
+    <script type='text/javascript' src="{% static 'vendor/socket-io-client/socket.io.js' %}"></script>
 
-.. note::
-    На клиенте точкой входа является *LiveMessages.Init*, он подписывает передаваемые ему контроллеры клиентов на получение данных от сервера.
+    <!-- Подключается модуль живых сообщений -->
+    <script type="text/javascript" src="{% static 'js/livemessages-opt.js' %}"></script>
 
-Пример из файла *init.js*::
+    <!-- Подключается таблица стилей для живых сообщений -->
+    <link rel='stylesheet' type='text/css' href="{% static 'css/live-messages.css' %}"/>
+
+Из коробки LiveMessages предоставляет контроллеры::
+
+    // контроллер сообщений
+    LiveMessages.MessagesController
+
+    // контроллер задач
+    LiveMessages.TaskController
+
+    // Оба контроллера являются наследниками абстрактного класса
+    LiveMessages.AbstractController.
+
+Подробнее о контроллерах
+:ref:`client`
+
+и вьюшки::
+
+    // Мини окно Сообщений
+    LiveMessages.MessagesUI
+
+    // Мини окно Задач
+    LiveMessages.TasksUI
+
+    // Всплывающее уведомление Сообщений
+    LiveMessages.MessageNotify
+
+    // Всплывающее уведомление Задач
+    LiveMessages.TaskNotify
+
+Запуск всех скриптов начинаается в *LiveMessages.Init*, он подписывает передаваемые ему контроллеры на соединение с сервером через WebSocket.
+Контроллеры имеют обработчики которые подвешены на события транспорта WebSocket и Ajax запросов, при срабатывании события данные передаются соответствующему обрабтчику.
+По умолчанию WebSocket дергает обработчик подвешенный на событие socket.
+
+Пример инициализации системы живых сообщений::
+
+    // В прикладном проекте после подключения необходимых библиотек,
+    // в любом месте можем вызвать LiveMessages.Init и тем самым запустить в процесс клиентскую систему Живых сообщений.
 
     new LiveMessages.Init({
-    // Инициализируется контроллер сообщений
+
+        // Инициализируется контроллер, автоматически подвешивается на постоянное соединение с сервером.
+
         messages: new LiveMessages.MessagesController({
             view: [
-                // Инициализируется вьюшка для сообщений
+
+                // Инициализируется вьюшка, автоматически слушает события контроллера.
+
                 new LiveMessages.MessagesUI({
-                    'container'  : container,
-                    'width'      : message_box_width,
-                    'height'     : message_box_height,
-                    'class'      : 'messages',
-                    'title_color': '#A2A2A2',
-                    'left'       : message_left,
-                    'top'        : message_top,
-                    'title'      : 'Полученные сообщения',
-                    'hiddenX'    : message_hiddenX,
-                    'hiddenY'    : message_hiddenY,
-                    'button'     : buttonMessage,
-                    'countBox'   : countBox
+                    'title'      : 'Полученные сообщения'
                 }),
-                // Инициализируется вьюшка уведомлении о полученном сообщений
-                new Ext.ux.MessageNotify()
+                new LiveMessages.MessageNotify()
             ],
 
-            // конфиг урла для запросов на сервер.
+            // скармливаем контроллер УРЛами для возможности ajax запросов.
+
             urlMapper: {
                 'delete'      : "/roles/messages/delete",
                 'query'       : "/roles/messages/all",
@@ -160,20 +180,9 @@ HAProxy не работает с win решениями.
         tasks: new LiveMessages.TaskController({
             view: [
                 new LiveMessages.TasksUI({
-                    'container'  : container,
-                    'width'      : task_box_width,
-                    'height'     : task_box_height,
-                    'class'      : 'tasks',
-                    'title_color': '#A2A2A2',
-                    'left'       : task_left,
-                    'top'        : task_top,
-                    'title'      : 'Задачи',
-                    'hiddenX'    : task_hiddenX,
-                    'hiddenY'    : task_hiddenY,
-                    'button'     : buttonTask,
-                    'progress'   : allTaskProgress
+                    'title'      : 'Задачи'
                 }),
-                new Ext.ux.TaskNotify()
+                new LiveMessages.TaskNotify()
             ],
             urlMapper: {
                 'delete'  : "/roles/tasks/delete",
@@ -184,4 +193,5 @@ HAProxy не работает с win решениями.
     });
 
 .. note::
-    Каждый контроллер должен иметь метод *handler* который будет принимать данные получаемые от сервера.
+    Каждый контроллер должен подвесить обработчик на событие socket на который будет передан ответ от сервера.
+    Данные будут в json формате.
