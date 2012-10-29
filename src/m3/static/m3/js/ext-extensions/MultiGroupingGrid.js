@@ -1043,6 +1043,7 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
 		assert(this.actionNewUrl, 'actionNewUrl is not define');
 		var mask = new Ext3.LoadMask(this.body);
         var baseConf = this.getMainContext();
+        var disableState = this.getToolbarsState();
 
         // Если контекст замусорен и уже содержит чей-то id, то вместо создания элемента
         // может открыться редактирование, поэтому удаляем его от греха подальше.
@@ -1057,17 +1058,17 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
 				        var child_win = scope.onNewRecordWindowOpenHandler(res, opt);
 				    } finally { 
     				    mask.hide();
-    				    scope.disableToolbars(false);
+    				    scope.setToolbarsState(disableState);
 				    }
 					return child_win;
 				}
 				mask.hide();
-				scope.disableToolbars(false);
+				scope.setToolbarsState(disableState);
 			}
            ,failure: function(){ 
                uiAjaxFailMessage.apply(this, arguments);
                mask.hide();
-               scope.disableToolbars(false);
+               scope.setToolbarsState(disableState);
                
            }
 		};
@@ -1091,6 +1092,7 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
 	    if (this.getSelectionModel().hasSelection()) {
 			var baseConf = this.getSelectionContext(this.localEdit);
 			var mask = new Ext3.LoadMask(this.body);
+                        var disableState = this.getToolbarsState();
 			var req = {
 				url: this.actionEditUrl,
 				params: baseConf,
@@ -1100,17 +1102,17 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
 						    var child_win = scope.onEditRecordWindowOpenHandler(res, opt);
 						} finally { 
     						mask.hide();
-    						scope.disableToolbars(false);
+    						scope.setToolbarsState(disableState);
 						}
 						return child_win;
 					}
 					mask.hide();
-                    scope.disableToolbars(false);
+                    scope.setToolbarsState(disableState);
 				}
                ,failure: function(){ 
                    uiAjaxFailMessage.apply(this, arguments);
                    mask.hide();
-                   scope.disableToolbars(false);
+                   scope.setToolbarsState(disableState);
                }
 			};
 			
@@ -1137,6 +1139,7 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
         assert(this.rowIdName, 'rowIdName is not define');
         
         var scope = this;
+        var disableState = this.getToolbarsState();
         if (scope.getSelectionModel().hasSelection()) {
             Ext3.Msg.show({
                 title: 'Удаление записи',
@@ -1156,17 +1159,17 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
                                        var child_win =  scope.deleteOkHandler(res, opt);
                                    } finally { 
                                        mask.hide();
-                                       scope.disableToolbars(false);
+                                       scope.setToolbarsState(disableState);
                                    }
                                    return child_win;
                                }
                                mask.hide();
-                               scope.disableToolbars(false);
+                               scope.setToolbarsState(disableState);
                            }
                            ,failure: function(){ 
                                uiAjaxFailMessage.apply(this, arguments);
                                mask.hide();
-                               scope.disableToolbars(false);
+                               scope.setToolbarsState(disableState);
                            }
                         };
                         if (scope.fireEvent('beforedeleterequest', scope, req)) {
@@ -1325,6 +1328,40 @@ Ext3.m3.MultiGroupingGridPanel = Ext3.extend(Ext3.ux.grid.livegrid.GridPanel, {
         for (var i=0; i<toolbars.length; i++){
             if (toolbars[i]){
                 toolbars[i].setDisabled(disabled);
+            }
+        }
+    }
+    /**
+     * Получение текущего состояния тулбаров
+     */
+    ,getToolbarsState: function(){
+        var toolbars = [this.getTopToolbar(), this.getFooterToolbar(),
+            this.getBottomToolbar()],
+            state = [];
+        for (var i=0; i<toolbars.length; i++){
+            if (toolbars[i]){
+                var itemState = [];
+                for (var j=0; j<toolbars[i].items.length; j++){
+                    itemState.push(toolbars[i].items.items[j].disabled);
+                }
+                state.push(itemState);
+            }
+        }
+        return state;
+    }
+    /**
+     * Установка состояния тулбаров
+     */
+    ,setToolbarsState: function(state){
+        var toolbars = [this.getTopToolbar(), this.getFooterToolbar(),
+                    this.getBottomToolbar()];
+        for (var i=0; i<toolbars.length; i++){
+            if (toolbars[i]){
+                var itemState = state.pop();
+                for (var j=0; j<toolbars[i].items.length; j++){
+                    var disabled = itemState.pop();
+                    toolbars[i].items.items[j].setDisabled(disabled);
+                }
             }
         }
     }
