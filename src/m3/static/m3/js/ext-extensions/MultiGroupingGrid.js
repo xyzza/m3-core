@@ -1354,9 +1354,9 @@ Ext.m3.MultiGroupingGridPanel = Ext.extend(Ext.ux.grid.livegrid.GridPanel, {
                     this.getBottomToolbar()];
         for (var i=0; i<toolbars.length; i++){
             if (toolbars[i]){
-                var itemState = state.pop();
+                var itemState = state.shift();
                 for (var j=0; j<toolbars[i].items.length; j++){
-                    var disabled = itemState.pop();
+                    var disabled = itemState.shift();
                     toolbars[i].items.items[j].setDisabled(disabled);
                 }
             }
