@@ -115,7 +115,8 @@ HAProxy не работает с win решениями.
     <!-- Подключается таблица стилей для живых сообщений -->
     <link rel='stylesheet' type='text/css' href="{% static 'css/live-messages.css' %}"/>
 
-Из коробки LiveMessages предоставляет контроллеры::
+Из коробки.
+LiveMessages предоставляет контроллеры::
 
     // контроллер сообщений
     LiveMessages.MessagesController
@@ -126,8 +127,7 @@ HAProxy не работает с win решениями.
     // Оба контроллера являются наследниками абстрактного класса
     LiveMessages.AbstractController.
 
-Подробнее о контроллерах
-:ref:`client`
+Подробнее о контроллерах смотри в :ref:`client`
 
 и вьюшки::
 
