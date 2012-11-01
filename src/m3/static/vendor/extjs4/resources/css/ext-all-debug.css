@@ -220,70 +220,9 @@ Build date: 2012-07-04 21:11:01 (65ff594cd80b9bad45df640c22cc0adb52c95a7b)
  * be true.
  */
 /* line 77, ../themes/stylesheets/ext4/default/core/_reset.scss */
-html, body, div, dl, dt, dd, ul, ol, li, h1, h2, h3,
-h4, h5, h6, pre, code, form, fieldset, legend,
-input, textarea, p, blockquote, th, td {
-  margin: 0;
-  padding: 0; }
-
-/* line 82, ../themes/stylesheets/ext4/default/core/_reset.scss */
-table {
-  border-collapse: collapse;
-  border-spacing: 0; }
-
-/* line 87, ../themes/stylesheets/ext4/default/core/_reset.scss */
-fieldset, img {
-  border: 0; }
-
-/* line 92, ../themes/stylesheets/ext4/default/core/_reset.scss */
-address, caption, cite, code,
-dfn, em, strong, th, var {
-  font-style: normal;
-  font-weight: normal; }
-
-/* line 97, ../themes/stylesheets/ext4/default/core/_reset.scss */
-li {
-  list-style: none; }
-
-/* line 101, ../themes/stylesheets/ext4/default/core/_reset.scss */
-caption, th {
-  text-align: left; }
-
-/* line 105, ../themes/stylesheets/ext4/default/core/_reset.scss */
-h1, h2, h3, h4, h5, h6 {
-  font-size: 100%; }
-
-/* line 110, ../themes/stylesheets/ext4/default/core/_reset.scss */
-q:before,
-q:after {
-  content: ""; }
-
-/* line 114, ../themes/stylesheets/ext4/default/core/_reset.scss */
-abbr, acronym {
-  border: 0;
-  font-variant: normal; }
-
-/* line 119, ../themes/stylesheets/ext4/default/core/_reset.scss */
-sup {
-  vertical-align: text-top; }
-
-/* line 123, ../themes/stylesheets/ext4/default/core/_reset.scss */
-sub {
-  vertical-align: text-bottom; }
-
-/* line 127, ../themes/stylesheets/ext4/default/core/_reset.scss */
-input, textarea, select {
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit; }
-
-/* line 133, ../themes/stylesheets/ext4/default/core/_reset.scss */
-*:focus {
-  outline: none; }
 
 /* line 138, ../themes/stylesheets/ext4/default/core/_reset.scss */
-.x-border-box,
-.x-border-box * {
+.x-css-shadow, .x-css-shadow *, .x-window, .x-window * {
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -ms-box-sizing: border-box;
