@@ -4,6 +4,8 @@ Created on 29.03.2010
 
 @author: prefer
 '''
+import copy
+
 class TypedList(list):
     '''
         Вспомогательный класс, перекрывает три метода - добавление (append, insert, extend), изменение и расширение списка
@@ -36,6 +38,19 @@ class TypedList(list):
             on_after_deletion = self.on_after_deletion
         )
         result.extend(self[:])
+        return result
+
+    def __deepcopy__(self):
+        """ Глубокое клонирование TypedList, которое copy не может сделать автоматически """
+        result = TypedList(
+            type = self._type, 
+            exceptions = self._exceptions,
+            on_before_addition = self.on_before_addition,
+            on_after_addition = self.on_after_addition,
+            on_before_deletion = self.on_before_deletion,
+            on_after_deletion = self.on_after_deletion
+        )
+        result.extend(copy.deepcopy(self[:]))
         return result
 
     def __setitem__(self, key, value):
