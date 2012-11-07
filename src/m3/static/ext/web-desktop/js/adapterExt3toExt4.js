@@ -55,7 +55,8 @@ Ext3.override(Ext3.Window, {
 });
 
 Ext.override(Ext.Window, {
-    setZIndex: setZIndex
+    setZIndex: setZIndex,
+    manager: Ext.WindowManager
 });
 
 Ext3.override(Ext3.Element, {
