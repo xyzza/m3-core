@@ -40,7 +40,7 @@ class TypedList(list):
         result.extend(self[:])
         return result
 
-    def __deepcopy__(self):
+    def __deepcopy__(self, memo):
         """ Глубокое клонирование TypedList, которое copy не может сделать автоматически """
         result = TypedList(
             type = self._type, 
