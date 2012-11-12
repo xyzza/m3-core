@@ -9,6 +9,6 @@
 	{%if component.align %} ,align: '{{ component.align }}' {%endif%}
 	{%if component.editor %} ,editor: {{ component.render_editor }} {%endif%}
 	,fixed: {{ component.fixed|lower }}
-	{%if component.hidden %} ,hidden: true {%endif%}
+    ,hidden: {{ component.hidden|lower }}
 	{%if component.column_renderer %} ,renderer: {{ component.column_renderer }}{%endif%}
 }
