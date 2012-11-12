@@ -10,7 +10,7 @@
 	{%if component.editor %} ,editor: {{ component.render_editor|safe }} {%endif%}
 	,fixed: {{ component.fixed|lower }}
 	{% if component.format %}, format: '{{ component.format|safe }}' {%endif%}
-	{%if component.hidden %} ,hidden: true {%endif%}
+    ,hidden: {{ component.hidden|lower }}
 	{%if component.column_renderer %} ,renderer: {{ component.column_renderer }}{%endif%}
 	{%if component.tooltip %} ,tooltip: '{{ component.tooltip|safe}}'{%endif%}
 	{%if component.extra %} ,{{component.t_render_extra|safe}} {%endif%}
