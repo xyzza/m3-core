@@ -13,6 +13,6 @@
 	{%if component.text_true %} ,trueText: '{{ component.text_true }}' {%endif%}
 	{%if component.text_undefined %} ,undefinedText: '{{ component.text_undefined }}' {%endif%}
 	,fixed: {{ component.fixed|lower }}
-	{%if component.hidden %} ,hidden: true {%endif%}
+    ,hidden: {{ component.hidden|lower }}
 	{%if component.column_renderer %} ,renderer: {{ component.column_renderer }}{%endif%}
 }
