@@ -22,3 +22,4 @@ glob:.pydevproject
 syntax: regexp
 .form-backup
 relre:^src/env
+\.DS_Store$
