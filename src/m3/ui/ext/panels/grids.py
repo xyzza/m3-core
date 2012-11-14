@@ -161,7 +161,9 @@ class ExtObjectGrid(containers.ExtGrid):
             for item in self.top_bar.items:
                 if hasattr(item, 'make_read_only') and callable(item.make_read_only):
                     item.make_read_only(access_off, exclude_list, *args, **kwargs)
-        
+
+        #убираем редактирование записи по даблклику
+        self.dblclick_handler = 'Ext.emptyFn'
         
     @property
     def handler_beforenew(self):
