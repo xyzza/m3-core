@@ -146,8 +146,11 @@ class ExtForm(BaseExtPanel):
             elif isinstance(item, ExtTimeField):
                 #item.value = value.strftime('%H:%M') \
                 # для дат, до 1900 года метод выше не работает
-                item.value = '%02d:%02d' % (value.hour,value.minute) \
-                    if not is_secret_token(value) else unicode(value)
+                if isinstance(value, (datetime.time, datetime.datetime)):
+                    item.value = '%02d:%02d' % (value.hour,value.minute) \
+                        if not is_secret_token(value) else unicode(value)
+                else:
+                    item.value = value
 
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
