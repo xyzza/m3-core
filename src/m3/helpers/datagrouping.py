@@ -196,12 +196,16 @@ class GroupingRecordProvider(object):
         #необходимо узнавать индекс элемента с кодом exp['id'] в текущем уровне, при текущей сортировке и располагать элементы соответственно
         if not level.has_key('items'):
             level['items'] = self.indexer(grouped, level_index, keys + [level['id']] if level['id'] != -1 else [], level['expandedItems'], aggregates, sorting)
+            removeExpandedItems = []
             for exp in level['expandedItems']:
                 if exp['id'] in level['items']:
                     exp['index'] = level['items'].index(exp['id'])
                 else:
                     # развернутый элемент отсутствует в уровне (видимо фильтр сработал, или что-то еще) - что делать?!
-                    level['expandedItems'].remove(exp)
+                    removeExpandedItems.append(exp)
+
+            for exp in removeExpandedItems:
+                level['expandedItems'].remove(exp)
 
             #теперь выстроим в порядке индексов
             exp_sort = sorted(level['expandedItems'], key=lambda x: x['index'])
@@ -216,7 +220,7 @@ class GroupingRecordProvider(object):
             if exp['count'] == -1:
                 exp['count'] = self.counter(grouped, level_index + 1, (keys + [level['id']] if level['id'] != -1 else []) + [exp['id']], exp['expandedItems'])
 
-            if all_out:
+            if all_out or not exp['count']:
                 i = i + 1
                 continue
 
