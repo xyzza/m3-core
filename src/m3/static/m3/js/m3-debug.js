@@ -7161,13 +7161,13 @@ Ext.m3.AdvancedComboBox = Ext.extend(Ext.m3.ComboBox, {
 			
             var triggerIndex = 'Trigger'+(index+1);
             t.hide = function(){
-                var w = triggerField.getWidth();
+                var w = triggerField.wrap.getWidth();
                 this.dom.style.display = 'none';
                 triggerField.el.setWidth(w-triggerField.trigger.getWidth());
                 this['hidden' + triggerIndex] = true;
             };
             t.show = function(){
-                var w = triggerField.getWidth();
+                var w = triggerField.wrap.getWidth();
                 this.dom.style.display = '';
                 triggerField.el.setWidth(w-triggerField.trigger.getWidth());
                 this['hidden' + triggerIndex] = false;
@@ -8936,129 +8936,6 @@ Ext.ux.Notification = Ext.extend(Ext.Window, {
     focus: Ext.emptyFn
 });
 
-/**
- * Заместитель объекта LiveMessages.Notification, который выводит уведомление о полученных сообщениях от пользователей.
- */
-Ext.ux.MessageNotify = function () {
-    this.eventHandler = {};
-    this.handlerMapper = {
-        socket: this.showMessage
-    };
-};
-
-Ext.ux.MessageNotify.prototype.on = function (event, handler) {
-    var eventName;
-    if (typeof event === 'string') {
-        this.eventHandler[event] = handler;
-    } else {
-        for (eventName in event) {
-            this.eventHandler[eventName] = event[eventName];
-        }
-    }
-};
-
-Ext.ux.MessageNotify.prototype.handler = function (eventName, data) {
-    var eventHandler = this.handlerMapper[eventName];
-    if (eventHandler) {
-        eventHandler.call(this, data);
-    }
-};
-
-Ext.ux.MessageNotify.prototype.showMessage = function (json) {
-    var data = json[0];
-    this.showNotify(data['id'], data['from_user'], data['subject'], data['text']);
-};
-
-Ext.ux.MessageNotify.prototype.showNotify = function (id, user_name, subject, text) {
-    var self = this, icon, notifyWindow;
-    notifyWindow = new Ext.ux.Notification({
-        title: user_name || 'Внимание',
-        html: '<div class="notify">' +
-                '<div class="notify-icon-info"></div>' +
-                '<div class="message"><b>' + subject + '</b></br>' + text + '</div>' +
-              '</div>',
-        iconCls: icon,
-        width: 250,
-        padding: 5
-    });
-
-    notifyWindow.task.delay(6 * 1000); // Скрывает плавно уведомление через 6 сек.
-
-    notifyWindow.show(document);
-};
-/**
- * Заместитель объекта LiveMessages.Notification, который выводит уведомление о выполненных задачах.
- */
-Ext.ux.TaskNotify = function () {
-    this.drawRecords = {};
-    this.eventHandler = {};
-    this.handlerMapper = {
-        socket: this.change
-    };
-};
-
-var Child = function () {};
-Child.prototype = Ext.ux.MessageNotify.prototype;
-Ext.ux.TaskNotify.prototype = new Child();
-
-Ext.ux.TaskNotify.prototype.change = function (json) {
-    var record,
-        data = json[0];
-        id = data['id'];
-
-    if (record = this.drawRecords['task_' + id]) {
-        if (record.active) {
-            this.updateProgress(record['progressBar'], data['progress'], data['state']);
-        } else {
-            if (data['completed']) {
-                this.showNotify(id, data['state'], data['name'], data['progress']);
-            }
-        }
-    } else {
-        this.drawRecords['task_' + id] = {
-            id: id
-        };
-        this.showNotify(id, data['state'], data['name'], data['progress']);
-    }
-};
-
-Ext.ux.TaskNotify.prototype.showNotify = function (id, status, description, progress) {
-    var self = this,
-        icon,
-        notifyWindow,
-        progressBar,
-        record = this.drawRecords['task_' + id];
-
-    progressBar = new Ext.ProgressBar({
-        id: 'task-progress',
-        width: 225,
-        text: status
-    });
-    this.updateProgress(progressBar, progress, status);
-
-    record['progressBar'] = progressBar;
-    record['active'] = true;
-
-    notifyWindow = new Ext.ux.Notification({
-        title: description || 'Внимание',
-        items: [
-            progressBar
-        ],
-        iconCls: icon,
-        width: 250,
-        padding: 5
-    });
-
-    notifyWindow.registerCallbackOnClosed(function () {
-        record.active = false;
-    });
-
-    notifyWindow.show(document);
-};
-
-Ext.ux.TaskNotify.prototype.updateProgress = function (progressBar, value, status) {
-    progressBar.updateProgress(value / 100, status, true);
-};
 /**
  * Объектный грид, включает в себя тулбар с кнопками добавить, редактировать и удалить
  * @param {Object} config
