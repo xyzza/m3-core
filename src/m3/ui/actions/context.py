@@ -188,8 +188,6 @@ class ActionContext(object):
                     for e in elements
                 ]
             else:
-                value = Decimal(raw_value)
-            else:
                 if not arg_type in _PARSERS:
                     raise TypeError('Unknown parser "%r"!' % arg_type)
                 value = _PARSERS[arg_type](raw_value)
