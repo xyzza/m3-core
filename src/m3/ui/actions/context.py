@@ -14,11 +14,11 @@ from django.utils.encoding import force_unicode
 from m3.helpers import logger, date2str
 
 
-#==================================== ИСКЛЮЧЕНИЯ ===========================================
-
+#============================= ИСКЛЮЧЕНИЯ =====================================
 class ActionContextException(Exception):
     """ Базовый класс для исключений контекста """
     pass
+
 
 class RequiredFailed(ActionContextException):
     '''
@@ -29,10 +29,13 @@ class RequiredFailed(ActionContextException):
     def __init__(self, reason):
         self.reason = reason
 
+
 class ConversionFailed(ActionContextException):
     """
-    Исключение, которое выбрасывается если значение из запроса *value*
-    не удалось привести к типу *type* указанному в правиле ActionContextDeclaration
+    Исключение, которое выбрасывается,
+    если значение из запроса *value*
+    не удалось привести к типу *type*,
+    указанному в правиле ActionContextDeclaration
     """
     def __init__(self, value, type, *args, **kwargs):
         super(ConversionFailed, self).__init__(*args, **kwargs)
@@ -40,10 +43,83 @@ class ConversionFailed(ActionContextException):
         self.type = type
 
     def __str__(self):
-        return u'Can not convert value of "%s" in a given type "%s"' % (self.value, self.type)
+        return u'Can not convert value of "%s" in a given type "%s"' % (
+            self.value, self.type)
 
-#====================================== КЛАССЫ =============================================
 
+#================================== ПАРСЕРЫ ===================================
+def _make_datetime_parser(extractor, formats):
+    def parse(value):
+        for (fmt, length) in formats:
+            try:
+                result = extractor(
+                    datetime.datetime.strptime(value[:length], fmt)
+                )
+                break
+            except ValueError:
+                pass
+        else:
+            raise AssertionError()
+        return result
+    return parse
+
+
+def _make_simple_parser(result_type, exceptions=(ValueError, TypeError)):
+    def parse(value):
+        try:
+            result = result_type(value)
+        except exceptions:
+            raise AssertionError()
+        return result
+    return parse
+
+
+def _object_parser(value):
+    try:
+        result = json.loads(value)
+    except ValueError:
+        raise AssertionError()
+    return result
+
+
+def _bool_parser(value):
+    return value in ('true', 'True', 1, '1', 'on', True)
+
+
+_PARSERS = {
+    str: _make_simple_parser(str),
+    unicode: _make_simple_parser(unicode),
+    int: _make_simple_parser(int),
+    float: _make_simple_parser(float),
+    Decimal: _make_simple_parser(Decimal),
+
+    object: _object_parser,
+
+    bool: _bool_parser,
+
+    datetime.datetime: _make_datetime_parser(lambda x: x, formats=(
+        ('%Y-%m-%dT%H:%M:%S', 19),
+        ('%Y-%m-%d %H:%M:%S', 19),
+        ('%d.%m.%Y %H:%M:%S', 19),
+        ('%Y-%m-%dT%H:%M', 16),
+        ('%Y-%m-%d %H:%M', 16),
+        ('%d.%m.%Y %H:%M', 16),
+    )),
+
+    datetime.date: _make_datetime_parser(lambda x: x.date(), formats=(
+        ('%Y-%m-%d', 10),
+        ('%d.%m.%Y', 10),
+        ('%m/%d/%Y', 10),
+    )),
+
+    datetime.time: _make_datetime_parser(lambda x: x.time(), formats=(
+        ('%H:%M:%S', 8),
+        ('%H:%M', 5),
+    )),
+}
+
+
+#================================== КЛАССЫ ====================================
 class ActionContextDeclaration(object):
     """
     Класс, который определяет правило извлечения параметра с именем *name* из
@@ -52,9 +128,11 @@ class ActionContextDeclaration(object):
     в запросе, но наличие обязательно.
     *type* - тип извлекаемого значения.
     *required* - указывает что параметр обязательный.
-    *verbose_name* - человеческое имя параметра, необходимо для сообщений об ошибках.
+    *verbose_name* - человеческое имя параметра,
+    необходимо для сообщений об ошибках.
     """
-    def __init__(self, name='', default=None, type=None, required=False, verbose_name='', *args, **kwargs):
+    def __init__(self, name='', default=None, type=None,
+            required=False, verbose_name='', *args, **kwargs):
         assert type, 'type must be defined!'
         self.name = name
         self.default = default
@@ -63,8 +141,11 @@ class ActionContextDeclaration(object):
         self.verbose_name = verbose_name
 
     def human_name(self):
-        """ Возвращает человеческое название параметра *verbose_name* """
+        """
+        Возвращает человеческое название параметра *verbose_name*
+        """
         return self.verbose_name if self.verbose_name else self.name
+
 
 class ActionContext(object):
     '''
@@ -75,7 +156,7 @@ class ActionContext(object):
 
     class ValuesList():
         '''
-        Класс для описания параметров, которые будут передаваться в виде 
+        Класс для описания параметров, которые будут передаваться в виде
         списка значений, разделенных определенным символом
         '''
         def __init__(self, separator=',', type=int, allow_empty=True):
@@ -93,100 +174,79 @@ class ActionContext(object):
             setattr(self, k, v)
 
     def convert_value(self, raw_value, arg_type):
-        ''' Возвращает значение *raw_value* преобразованное в заданный тип *arg_type* '''
-        value = None
-        if arg_type == int:
-            value = int(raw_value)
-
-        elif arg_type == float:
-            value = float(raw_value)
-
-        elif arg_type == Decimal:
-            # В версиях питона ниже 2.7 в Decimal не поддерживалось создание из float
-            if isinstance(raw_value, float) and sys.version_info < (2, 7):
-                value = Decimal(repr(raw_value))
+        '''
+        Возвращает значение *raw_value*,
+        преобразованное в заданный тип *arg_type*
+        '''
+        try:
+            if isinstance(arg_type, ActionContext.ValuesList):
+                elements = raw_value.split(arg_type.separator)
+                if not arg_type.allow_empty:
+                    elements = [elem for elem in elements if elem]
+                value = [
+                    self.convert_value(e, arg_type.type)
+                    for e in elements
+                ]
             else:
                 value = Decimal(raw_value)
-
-        elif arg_type in [str, unicode]:
-            value = unicode(raw_value)
-
-        elif arg_type == datetime.datetime:
-            # Дата может прийти либо в Немецком формате, 
-            # либо в дефолтном ExtJS формате 2010-06-21T00:00:00
-            if 'T' in raw_value:
-                value = datetime.datetime.strptime(raw_value[:10], '%Y-%m-%d')
             else:
-                value = datetime.datetime.strptime(raw_value, '%d.%m.%Y')
-
-        elif arg_type == datetime.date:
-            if 'T' in raw_value:
-                value = datetime.datetime.strptime(raw_value[:10], '%Y-%m-%d')
-            else:
-                value = datetime.datetime.strptime(raw_value, '%d.%m.%Y')
-            value = value.date()
-
-        elif arg_type == datetime.time:
-            d = datetime.datetime.strptime(raw_value, '%H:%M')
-            value = datetime.time(d.hour, d.minute, 0)
-
-        elif arg_type == bool:
-            value = raw_value in ['true', 'True', 1, '1', 'on', True]
-
-        elif isinstance(arg_type, ActionContext.ValuesList):
-            elements = raw_value.split(arg_type.separator)
-            if not arg_type.allow_empty:
-                elements = [elem for elem in elements if elem]
-            value = map(arg_type.type, elements)
-
-        elif arg_type == object:
-            # обработаем объект как JSON
-            value = json.loads(raw_value)
-
-        else:
+                if not arg_type in _PARSERS:
+                    raise TypeError('Unknown parser "%r"!' % arg_type)
+                value = _PARSERS[arg_type](raw_value)
+        except AssertionError:
             raise ConversionFailed(value=raw_value, type=arg_type)
 
         return value
 
     def build(self, request, rules):
         '''
-        Выполняет заполнение собственных атрибутов согласно переданному *request*
-        исходя из списка правил *rules*
+        Выполняет заполнение собственных атрибутов
+        согласно переданному *request*, исходя из списка правил *rules*
         '''
         params = {}
         if rules:
             for rule in rules:
-                params[rule.name] = [rule.type, False] # [тип параметра; признак того, что параметр включен в context]
+                # [тип параметра; признак того, что параметр включен в context]
+                params[rule.name] = [rule.type, False]
 
         key = value = ptype = None
         try:
             # переносим параметры в контекст из запроса
             for key in request.REQUEST:
                 value = request.REQUEST[key]
-                # Пустые параметры не конвертируем, т.к. они могут вызвать ошибку
+                # Пустые параметры не конвертируем,
+                # т.к. они могут вызвать ошибку
                 if not value:
                     continue
-                # 
-                if params.has_key(key):
+
+                if key in params:
                     ptype = params[key][0]
                     value = self.convert_value(value, ptype)
-                    # Флаг того, что параметр успешно расшифрован и добавлен в контекст
+                    # Флаг того, что параметр успешно расшифрован
+                    # и добавлен в контекст
                     params[key][1] = True
                 setattr(self, key, value)
         except IOError as err:
-            # В некоторых браузерах (предполагается что в ie) происходит следующие:
+            # В некоторых браузерах (предполагается что в ie)
+            # происходит следующие:
             # request.REQUEST читается и в какой-то момент связь прекращается
-            # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка 
+            # из-за того, что браузер разрывает соединение,
+            # в следствии этого происходит ошибка
             # IOError: request data read error
             logger.warning(str(err))
         except ValueError as err:
-            # если ошибка преобразования, то пусть проставится значение по-умолчанию
-            logger.exception(u'Ошибка при преобразовании значения из запроса %s="%s" к типу "%s"'
-                % (key, value, ptype))
+            # если ошибка преобразования,
+            # то пусть проставится значение по-умолчанию
+            logger.exception(
+                u'Ошибка при преобразовании значения '
+                u'из запроса %s="%s" к типу "%s"'
+                % (key, value, ptype)
+            )
 
         # переносим обязательные параметры, которые не встретились в запросе
         for rule in rules if rules else []:
-            if rule.required and rule.default != None and not params[rule.name][1]:
+            if rule.required and rule.default != None and (
+                    not params[rule.name][1]):
                 # если параметр не передан в запросе, но
                 # он является обязательным и задано значение по умолчанию,
                 # то помещаем этот параметр в контекст
