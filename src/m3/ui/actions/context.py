@@ -86,7 +86,7 @@ def _bool_parser(value):
 
 
 _PARSERS = {
-    str: _make_simple_parser(str),
+    str: _make_simple_parser(unicode),  # Иду на поводу у хомячков (FIXME)
     unicode: _make_simple_parser(unicode),
     int: _make_simple_parser(int),
     float: _make_simple_parser(float),
