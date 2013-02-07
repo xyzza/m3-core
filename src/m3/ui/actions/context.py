@@ -7,7 +7,6 @@
 import datetime
 import json
 from decimal import Decimal
-import sys
 
 from django.utils.encoding import force_unicode
 
@@ -104,6 +103,10 @@ _PARSERS = {
         ('%Y-%m-%dT%H:%M', 16),
         ('%Y-%m-%d %H:%M', 16),
         ('%d.%m.%Y %H:%M', 16),
+        ('%Y-%m-%d', 10),
+        ('%d.%m.%Y', 10),
+        ('%H:%M:%S', 8),
+        ('%H:%M', 5),
     )),
 
     datetime.date: _make_datetime_parser(lambda x: x.date(), formats=(
