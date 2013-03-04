@@ -254,8 +254,8 @@ class ObjectManager(models.Manager):
         """
         return [ObjectState.VALID]
     
-    def __init__(self, date = None, state = None):
-        super(ObjectManager, self).__init__()
+    def __init__(self, date = None, state = None, *a, **kw):
+        super(ObjectManager, self).__init__(*a, **kw)
         self.query_on_date = date
         if state:
             if isinstance(state, type([])):
@@ -287,7 +287,9 @@ class BaseObjectModelWState(BaseObjectModel):
         Получает менеджер с параметрами.
         Можно писать так: Model.objects_on_date(datetime.today).filter....
         """
-        return ObjectManager(date = date)
+        manager = ObjectManager(date=date)
+        manager.model = cls
+        return manager
     
     objects_on_date = get_objects_on_date
     
