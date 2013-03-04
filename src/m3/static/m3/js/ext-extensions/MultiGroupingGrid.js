@@ -87,10 +87,16 @@ Ext3.extend(Ext3.ux.grid.MultiGrouping, Ext3.util.Observable, {
        		// Добавим плугин подсказок
 			var tipConf = [];
 			Ext3.each(this.cm.columns,function(column,index){
-	            tipConf.push({
-	                field:column.dataIndex,
-	                tpl:'{'+column.dataIndex+'}'
-	            })
+                if (column.tooltip != undefined) {
+                    // если задана настройка подсказок, то укажем ее
+                    tipConf.push(column.tooltip);
+                } else {
+                    // иначе собственные подсказки
+                    tipConf.push({
+                        field: column.dataIndex,
+                        tpl: '{'+column.dataIndex+'}'
+                    });
+                }
 	        });
 	        tipConf.push({
 	                field:this.groupFieldId,
