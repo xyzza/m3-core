@@ -159,11 +159,11 @@
 
 Примеры подстановки:
 
-.. image:: images/excel_reporting/replace_tag.png
+.. image:: ../images/excel_reporting/replace_tag.png
 
 Результат
 
-.. image:: images/excel_reporting/replace_result.png
+.. image:: ../images/excel_reporting/replace_result.png
 
 Вертикальная развертка
 ----------------------
@@ -188,7 +188,7 @@
 
 Пример развертки:
 	
-.. image:: images/excel_reporting/vertical_tag.png
+.. image:: ../images/excel_reporting/vertical_tag.png
 
 Как видно из примера, регион *currency* состоит из одной строки. В JSON данных currency представляет из себя список из 3-х словарей. Следовательно строка будет скопирована 3 раза. Далее в строки будут подставлены значения из словаря с соответствующим номером в списке. Первой строке первый словарь, второй строке - второй словарь и т.д. Т.е. контекст строки изменяется в зависимости от вложенности развертки и номера строки.
 
@@ -196,7 +196,7 @@
 
 Результат:
 
-.. image:: images/excel_reporting/vertical_result.png
+.. image:: ../images/excel_reporting/vertical_result.png
 
 	
 Горизонтальная развертка
@@ -219,11 +219,11 @@
 
 Пример:
 
-.. image:: images/excel_reporting/goriz_tag.png
+.. image:: ../images/excel_reporting/goriz_tag.png
 
 Результат:
 
-.. image:: images/excel_reporting/goriz_result.png
+.. image:: ../images/excel_reporting/goriz_result.png
 
 Как показала практика, горизонтальная развертка плохо подходит для создания таблиц с неизвестным количеством колонок. Только для построения шапки таблицы.
 
@@ -255,13 +255,13 @@
         
 Пример шаблона:
 
-.. image:: images/excel_reporting/matrix_tag.png
+.. image:: ../images/excel_reporting/matrix_tag.png
 
 Как видно из примера, в строке региона *ЛПУ* нет тегов подстановки *$*, зато есть матрица в комментарии. Горизонтальная развертка используется только для формирования шапки.
 
 Результат:
 
-.. image:: images/excel_reporting/matrix_result.png
+.. image:: ../images/excel_reporting/matrix_result.png
 
 Автовысота
 ----------
@@ -272,7 +272,7 @@
 * В свойствах ячейки нужно включить перенос по словам.
 * Высота определяется в строке в момент открытия в Microsoft Office или Open Office, и может визуально отличаться. Внутри Apache POI её тоже точно определить нельзя. Связано это с тем, что все они используют разные библиотеки для рендеринга шрифтов.
 
-.. image:: images/excel_reporting/autoheight_tag.png
+.. image:: ../images/excel_reporting/autoheight_tag.png
 
 
 Форматирование по условию
@@ -304,11 +304,11 @@
 
 Пример:
 
-.. image:: images/excel_reporting/merged_region_tag.png
+.. image:: ../images/excel_reporting/merged_region_tag.png
 
 Как видно из примера, смежная область получает такие же свойства как у самой верхней левой ячейки области.
 
-.. image:: images/excel_reporting/merged_region_result.png
+.. image:: ../images/excel_reporting/merged_region_result.png
 
 
 Повторение строк для каждого листа
