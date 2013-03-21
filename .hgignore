@@ -23,3 +23,7 @@ syntax: regexp
 .form-backup
 relre:^src/env
 \.DS_Store$
+syntax: glob
+build/*
+dist/*
+src/m3.egg-info/*
