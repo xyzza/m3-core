@@ -12,9 +12,29 @@ import copy
 import inspect
 from uuid import uuid4
 
-from m3_users import GENERIC_USER, SUPER_ADMIN
-from m3_users.helpers import get_assigned_metaroles_query
-from m3_users.metaroles import UserMetarole, get_metarole
+try:
+    from m3_users import GENERIC_USER, SUPER_ADMIN
+    from m3_users.helpers import get_assigned_metaroles_query
+    from m3_users.metaroles import UserMetarole, get_metarole
+except ImportError:
+    # если не установлен пакет m3_users
+    # Всё должно работать без метаролей
+    GENERIC_USER = SUPER_ADMIN = 'none'
+
+    class UserMetarole(object):
+        """
+        Заглушка для класса метаролей
+        """
+        code = GENERIC_USER
+
+        def get_owner_metaroles(self):
+            return []
+
+    def get_assigned_metaroles_query(*args):
+        return []
+
+    def get_metarole(code):
+        return UserMetarole()
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -26,7 +46,6 @@ from m3.helpers import logger
 from m3.ui.actions import ControllerCache, Action, ActionPack
 from m3.core.json import M3JSONEncoder
 
-#from mis.users.metaroles import UserMetaRole, get_metarole
 
 # Константы: "Разделитель", "Блок с текущим временем", "Заполняющий блок"
 SEPARATOR = '-'
@@ -42,18 +61,19 @@ class DesktopException(Exception):
 
 
 class DesktopModel(object):
-    '''
-    Класс, агрегирующий в себе список модулей (start_menu и toolbox) в меню пуск
+    """
+    Класс, агрегирующий в себе список модулей
+    (start_menu и toolbox) в меню пуск
     и список модулей на Рабочем Столе (desktop)
-    '''
+    """
 
     def __init__(self):
-        '''
+        """
         @param start_menu: список основных модулей для меню Пуск
         @param toolbox: список настроечных модулей для меню Пуск
         @param desktop: список модулей на Рабочем столе
         @param toptoolbar: список модулей на верхней панели
-        '''
+        """
         self.start_menu = TypedList(BaseDesktopElement)
         self.toolbox = TypedList(BaseDesktopElement)
         self.desktop = TypedList(DesktopLauncher)
@@ -77,9 +97,9 @@ class BaseDesktopElement(object):
     def _init_component(self, *args, **kwargs):
         '''Заполняет атрибуты экземпляра значениями из kwargs'''
         for k, v in kwargs.items():
-            assert self.__dict__.has_key(k), (
+            assert k in self.__dict__, (
                 'Instance attribute "%s" should be defined in class "%s"!' %
-                    (k, self.__class__.__name__)
+                (k, self.__class__.__name__)
             )
             self.__setattr__(k, v)
 
@@ -90,10 +110,8 @@ class BaseDesktopElement(object):
         raise NotImplementedError()
 
     def __cmp__(self, obj):
-        res = (self.id == obj.id
-            if isinstance(obj, BaseDesktopElement) else False)
+        res = isinstance(obj, BaseDesktopElement) and (self.id == obj.id)
         return not res
-
 
 
 class DesktopLaunchGroup(BaseDesktopElement):
@@ -137,7 +155,9 @@ class DesktopLaunchGroup(BaseDesktopElement):
         clone.index = self.index
         clone.id = self.id
         for subitem in self.subitems:
-            clone.subitems.append( copy.deepcopy(subitem) )
+            clone.subitems.append(
+                copy.deepcopy(subitem)
+            )
         return clone
 
     def render_items(self):
@@ -151,14 +171,16 @@ class DesktopLaunchGroup(BaseDesktopElement):
                 res.append(rendered)
         return '{items: [%s]}' % ','.join(res)
 
-    def __str__(self):
+    def ___str__(self):
         return u'Группа: "%s" at %s' % (self.name, id(self))
 
 
 class DesktopLauncher(BaseDesktopElement):
     '''
-        Класс для работы модулей. Модули могут находится в меню Пуск, на рабочем столе.
-        Данные модули могут включать в себя класс DesktopLaunchGroup в атрибут subitems
+    Класс для работы модулей.
+    Модули могут находится в меню Пуск, на рабочем столе.
+    Данные модули могут включать в себя класс
+    DesktopLaunchGroup в атрибут subitems
     '''
     def __init__(self, *args, **kwargs):
         '''
@@ -168,13 +190,18 @@ class DesktopLauncher(BaseDesktopElement):
         self.url = ''
         self.icon = 'default-launcher'
         self.index = 100
-        self.context = {} # словарь контекста
+        self.context = {}  # словарь контекста
         self._init_component(*args, **kwargs)
         self._set_default_handler()
 
     def _set_default_handler(self):
-            self.handler = 'function(){return sendRequest("%s", AppDesktop.getDesktop(), %s);}' \
-            % (self.url, self.t_render_context())
+        self.handler = (
+            'function(){return sendRequest("%s", '
+            'AppDesktop.getDesktop(), %s);}'
+        ) % (
+            self.url,
+            self.t_render_context()
+        )
 
     def t_is_subitems(self):
         '''
@@ -193,18 +220,24 @@ class DesktopLauncher(BaseDesktopElement):
         return '{%s}' % ','.join([
             'text:"%s"' % self.name.replace('"', "&quot;"),
             'iconCls:"%s"' % self.icon,
-            'handler: function(){return sendRequest("%s", AppDesktop.getDesktop(), %s);}' % (
-                self.url, self.t_render_context()),
+            (
+                'handler: function(){return sendRequest("%s",'
+                ' AppDesktop.getDesktop(), %s);}'
+            ) % (
+                self.url,
+                self.t_render_context()
+            ),
             'scope: this',
         ])
 
-    def __str__(self):
+    def ___str__(self):
         return u'Ярлык: "%s" at %s' % (self.name, id(self))
 
 
 class DesktopShortcut(DesktopLauncher):
     """
-    Отличается от DesktopLauncher тем, что автоматически подцепляет адрес из пака, в зависимости от его типа.
+    Отличается от DesktopLauncher тем,
+    что автоматически подцепляет адрес из пака, в зависимости от его типа.
     """
     def __init__(self, pack, *args, **kwargs):
         """
@@ -237,6 +270,7 @@ class DesktopShortcut(DesktopLauncher):
 
         self._set_default_handler()
 
+
 class MenuSeparator(BaseDesktopElement):
     """
     Специальный разделитель для меню
@@ -259,9 +293,10 @@ class DesktopLoader(object):
     '''
     _lock = threading.RLock()
     _cache = None
-    # Флаг того, что кэш загружен. Из-за ошибок при сборке он может недозаполниться, а поскольку
-    # это операция разовая, больше ошибки не будет. Флаг будет повторять ошибку для облегчения
-    # ее обнаружения.
+    # Флаг того, что кэш загружен.
+    # Из-за ошибок при сборке он может недозаполниться, а поскольку
+    # это операция разовая, больше ошибки не будет.
+    # Флаг будет повторять ошибку для облегчения ее обнаружения.
     _success = False
 
     #Константы определяющие куда добавить элемент
@@ -276,13 +311,18 @@ class DesktopLoader(object):
         try:
             if not cls._success:
                 cls._cache = {}
-                # Из инитов всех приложения пытаемся выполнить register_desktop_menu
+                # Из инитов всех приложения
+                # пытаемся выполнить register_desktop_menu
                 for app_name in settings.INSTALLED_APPS:
                     try:
                         module = import_module('.app_meta', app_name)
                     except ImportError, err:
-                        if err.args[0].find('No module named') == -1 or err.args[0].find('app_meta') == -1:
-                            logger.exception(u'При сборке интерфейса не удалось подключить %s' % app_name)
+                        if err.args[0].find('No module named') == -1 or (
+                                err.args[0].find('app_meta') == -1):
+                            logger.exception(
+                                u'При сборке интерфейса не удалось '
+                                u'подключить %s' % app_name
+                            )
                             raise
                         continue
                     proc = getattr(module, 'register_desktop_menu', None)
@@ -292,7 +332,6 @@ class DesktopLoader(object):
         finally:
             cls._lock.release()
 
-
     @classmethod
     def add_el_to_desktop(cls, desktop, metarole_code):
         '''
@@ -300,7 +339,8 @@ class DesktopLoader(object):
         '''
         def join_list(existing_list, in_list):
             '''
-            Складывает два списка с объектами DesktopLaunchGroup и DesktopLauncher
+            Складывает два списка с объектами
+            DesktopLaunchGroup и DesktopLauncher
             произвольного уровня вложенности.
             Критерием равенства является имя элемента!
             '''
@@ -312,24 +352,24 @@ class DesktopLoader(object):
             for in_el in in_list:
                 assert isinstance(in_el, BaseDesktopElement)
                 # Группа ярлыков, которая уже есть в списке
-                if isinstance(in_el, DesktopLaunchGroup) and names_dict.has_key(in_el.name):
+                if isinstance(in_el, DesktopLaunchGroup) and (
+                        in_el.name in names_dict):
                     # Запускаем рекурсивное слияние
                     ex_el = names_dict[in_el.name]
                     join_list(ex_el.subitems, in_el.subitems)
 
                 # Если ярлык уже в списке, то добавлять повторно не нужно
-                elif names_dict.has_key(in_el.name):
+                elif in_el.name in names_dict:
                     continue
 
                 else:
                     existing_list.append(in_el)
 
-
         # Загрузка кеша
         if not cls._success:
             cls._load_desktop_from_apps()
 
-        items_for_role = cls._cache.get(metarole_code, {})
+        items_for_role = cls._cache.get(metarole_code)
         for place, items in items_for_role.items():
             if place == cls.DESKTOP:
                 join_list(desktop.desktop, items)
@@ -339,7 +379,6 @@ class DesktopLoader(object):
                 join_list(desktop.toolbox, items)
             elif place == cls.TOPTOOLBAR:
                 join_list(desktop.toptoolbar, items)
-
 
     @classmethod
     def sort_desktop(cls, desktop_list, sorting=SORTING):
@@ -356,19 +395,30 @@ class DesktopLoader(object):
     def populate(cls, user, desktop, sorting=SORTING):
         '''
         Метод, который выполняет всю работу по настройке десктопа во вьюшке
+        @user - пользователь или None
+        @desktop - экземпляр DesktopModel
         '''
-
-        assert isinstance(desktop, DesktopModel)
         assert isinstance(user, (User, AnonymousUser))
 
+        roles = []
         if not isinstance(user, AnonymousUser):
-            assign_roles = get_assigned_metaroles_query(user)
+            roles.extend(get_assigned_metaroles_query(user))
             if user.is_superuser:
-                cls.add_el_to_desktop(desktop, SUPER_ADMIN)
-        else:
-            assign_roles = []
+                roles.append(SUPER_ADMIN)
 
-        cls.add_el_to_desktop(desktop, GENERIC_USER) #добавим все ярлычки обобщенного пользователя
+        cls.populate_desktop(desktop, roles, sorting)
+
+    @classmethod
+    def populate_desktop(cls, desktop, roles=None, sorting=SORTING):
+        """
+        Построение Раб.Стола по элементам @desktop(экземпляр DesktopModel),
+        относительно набора ролей @roles.
+        Этот метод НЕ ТРЕБУЕТ django.contrib.auth
+        и экземпляра User в частности.
+        """
+        assert isinstance(desktop, DesktopModel)
+
+        assign_roles = set([GENERIC_USER] + (roles or []))
         for role in assign_roles:
             cls.add_el_to_desktop(desktop, role)
 
@@ -376,7 +426,6 @@ class DesktopLoader(object):
         cls.sort_desktop(desktop.start_menu, sorting=sorting)
         cls.sort_desktop(desktop.toolbox, sorting=sorting)
         cls.sort_desktop(desktop.toptoolbar, sorting=sorting)
-
 
     @classmethod
     def add(cls, metarole, place, element):
@@ -389,19 +438,22 @@ class DesktopLoader(object):
             '''
             for item in existed_list:
                 if isinstance(item, DesktopLaunchGroup):
-                    assert isinstance(item.name, unicode), 'The attribute "name" must be written in Unicode'
+                    assert isinstance(item.name, unicode), (
+                        'The attribute "name" must be written in Unicode')
                     if item.name == name:
                         return item
 
         def insert_item(existed_list, item):
-            # Если добавляемый элемент группа, то нужно проверить есть ли у нас уже такая группа
-            # Если нет - добавляем, иначе нужно зайти в нее и продолжить проверку вниз по дереву
+            # Если добавляемый элемент группа,
+            # то нужно проверить есть ли у нас уже такая группа.
+            # Если нет - добавляем, иначе нужно зайти в нее
+            # и продолжить проверку вниз по дереву
 
             if isinstance(item, DesktopLaunchGroup):
 
                 collision_item = find_by_name(existed_list, item.name)
 
-                if collision_item == None:
+                if collision_item is None:
                     # Раз нет переcений по имени, то можно добавлять
 
                     existed_list.append(item)
@@ -418,28 +470,39 @@ class DesktopLoader(object):
             processed_metaroles.append(metarole)
             element = copy.deepcopy(el)
 
-            # Кэш состоит из 3х уровней: словарь с метаролями, словарь с местами и список конечных элементов
+            # Кэш состоит из 3х уровней: словарь с метаролями,
+            # словарь с местами и список конечных элементов
             items_for_role = cls._cache.get(metarole.code, {})
             items_for_place = items_for_role.get(place, [])
             insert_item(items_for_place, element)
             items_for_role[place] = items_for_place
             cls._cache[metarole.code] = items_for_role
 
-            # Не достаточно добавить элементы только в одну метароль, т.к. она может входить внутрь
-            # другой метароли. Так что нужно пробежаться по ролям которые включают в себя нашу роль.
+            # Недостаточно добавить элементы только в одну метароль,
+            # т.к. она может входить внутрь другой метароли.
+            # Так что нужно пробежаться по ролям,
+            # которые включают в себя нашу роль.
 
             for role in metarole.get_owner_metaroles():
                 insert_for_role(role, element, processed_metaroles)
 
         #===============================================
-        assert 0 <= place <= 3
+        assert place in (
+            cls.DESKTOP,
+            cls.START_MENU,
+            cls.TOOLBOX,
+            cls.TOPTOOLBAR
+        )
+        if isinstance(metarole, basestring):
+            metarole = get_metarole(metarole)
         assert isinstance(metarole, UserMetarole)
 
         insert_for_role(metarole, element)
 
-#===============================================================================
+
+#==============================================================================
 # Разные полезные шорткаты
-#===============================================================================
+#==============================================================================
 
 def add_desktop_launcher(
         name='', url='', icon='', path=None, metaroles=None, places=None):
@@ -450,9 +513,11 @@ def add_desktop_launcher(
     @param url: url, по которому происходит обращение к ланчеру
     @param icon: класс, на основе которого рисуется иконка ланчера
     @param path: список кортежей, которые задают путь к ланчеру в случае, если
-                 этот ланчер спрятан в подменю. каждый элемент пути задается либо
-                 в формате "(название,)", либо "(название, иконка,)",
-                 либо "(название, иконка, индекс)"
+                 этот ланчер спрятан в подменю.
+                 Каждый элемент пути задается либо в одном из форматов:
+                     "(название,)",
+                     "(название, иконка,)",
+                     "(название, иконка, индекс)"
     @param metaroles: список метаролей (либо одиночная метароль)
     '''
     if not metaroles or not places:
@@ -486,11 +551,14 @@ def add_desktop_launcher(
 
     if root:
         root.subitems.append(launcher)
-        launcher = root # мы в ланчеры, значится, будем добавлять самого рута.
+        launcher = root  # мы в ланчеры, значится, будем добавлять самого рута.
 
     for metarole in cleaned_metaroles:
-        mt = get_metarole(metarole) if isinstance(metarole, str) else metarole
+        mt = (
+            get_metarole(metarole)
+            if isinstance(metarole, basestring)
+            else metarole
+        )
         if mt:
             for place in cleaned_places:
                 DesktopLoader.add(mt, place, launcher)
-

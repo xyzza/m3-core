@@ -5,11 +5,16 @@ Created on 12.05.2011
 """
 from django.db.models import ForeignKey
 
-from sqlalchemy.engine.url import URL
-from sqlalchemy.ext.sqlsoup import SqlSoup
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import mapper, relationship
-import sqlalchemy as sa
+try:
+    from sqlalchemy.engine.url import URL
+    from sqlalchemy.ext.sqlsoup import SqlSoup
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import mapper, relationship
+    import sqlalchemy as sa
+except ImportError:
+    # sqlalchemy может быть не установлен
+    URL = SqlSoup = declarative_base = mapper = relationship = sa = None
+
 
 from m3.helpers import logger
 
@@ -50,7 +55,7 @@ class SQLAlchemyWrapper(object):
         "django.db.backends.postgresql_psycopg2": "postgresql",
         "django.db.backends.mysql": "mysql",
     }
-    
+
     ERROR_NO_PK = 'could not assemble any primary key columns for mapped table'
 
     _models_map_cache = None
@@ -60,29 +65,29 @@ class SQLAlchemyWrapper(object):
         default_db = db_config['default']
         url = self._create_url(default_db)
         self.engine = sa.create_engine(url)
-        
+
         # Реверс инжиниринг БД ;)
         self.soup = SqlSoup(self.engine)
         self.soup._metadata.reflect()
         self.metadata = self.soup._metadata
         self.session = self.soup.session
-        
+
     def _create_url(self, db_config):
         """ Возвращает URL для соединения с БД """
         django_driver = db_config['ENGINE']
         driver = self.DRIVER_MAP.get(django_driver)
         if not driver:
             raise AlchemyWrapperError('Driver %s was not found in map' % django_driver)
-        
+
         url = URL(
             drivername = driver,
-            username = db_config['USER'], 
-            password = db_config['PASSWORD'], 
-            host = db_config['HOST'], 
+            username = db_config['USER'],
+            password = db_config['PASSWORD'],
+            host = db_config['HOST'],
             port = db_config['PORT'] or None, # От пустой строки алхимия падает
             database = db_config['NAME'])
         return url
-    
+
     def create_map_class(self, class_name, table):
         """ Возвращает класс обертку над таблицей алхимии """
         base = declarative_base(name=str(class_name))
@@ -137,7 +142,7 @@ class SQLAlchemyWrapper(object):
             logger.warning('Table %s was not reflected in SqlAlchemy metadata' % table_name)
 
     def get_models_map(self, create_mappers=False, create_properties=True):
-        """ 
+        """
         Возвращает объект для быстрого доступа к таблицам SqlAlchemy.
         Атрибуты объекта имеют имена соответствующих моделей Django, а
         их значения - метатаблицы алхимии.
@@ -157,7 +162,7 @@ class SQLAlchemyWrapper(object):
         model_collection = ModelCollection()
         for model in cache.get_models():
             table = self._get_alchemy_table(model)
-            
+
             if table is not None:
                 attr_name = model._meta.object_name
 
@@ -199,11 +204,11 @@ class SQLAlchemyWrapper(object):
 
         self._models_map_cache = model_collection
         return model_collection
-            
-    
+
+
 class ModelCollection(dict):
     """ Объект хранящий атрибуты с именами моделей Django и значениями Table """
-    
+
     def __getattr__(self, name):
         """ Доступ к значениям словаря через точку """
         return self[name]
