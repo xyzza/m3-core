@@ -369,7 +369,7 @@ class DesktopLoader(object):
         if not cls._success:
             cls._load_desktop_from_apps()
 
-        items_for_role = cls._cache.get(metarole_code)
+        items_for_role = cls._cache.get(metarole_code, {})
         for place, items in items_for_role.items():
             if place == cls.DESKTOP:
                 join_list(desktop.desktop, items)
