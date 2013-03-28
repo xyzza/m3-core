@@ -5,8 +5,14 @@ Created on 17.06.2011
 @author: kirov
 '''
 from django.conf import settings
-from sqlalchemy import func, desc, and_
 from datagrouping import GroupingRecordProvider
+
+try:
+    from sqlalchemy import func, desc, and_
+except ImportError:
+    # sqlalchemy может быть не установлен
+    func = desc = and_ = None
+
 
 class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
     '''
@@ -57,7 +63,7 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
                     setattr(item, agg, getattr(i,agg + '__avg'))
             item.calc()
             return item
-    
+
         #print 'read_model(): grouped=%s, offset=%s, level_index=%s, level_keys=%s, begin=%s, end=%s' % (grouped, offset, level_index, level_keys, begin, end)
         res = []
         if grouped:
@@ -67,7 +73,7 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
                 field = None
             else:
                 field = grouped[level_index]
-    
+
             filter = []
             for lev in range(0, level_index):
                 lev_field = grouped[lev]
@@ -92,7 +98,7 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
                 aggr.append(query.c[field])
                 aggr.append(func.count(query.c['id']).label('count'))
                 group.append(query.c[field])
-    
+
             if aggr:
                 if filter:
                     new_query = self.get_data().session.query(*aggr).select_from(query).filter(and_(*filter)).group_by(*group)
@@ -103,8 +109,8 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
                     new_query = self.get_data().session.query(query).filter(and_(*filter))
                 else:
                     new_query = self.get_data().session.query(query)
-    
-            #сортировка 
+
+            #сортировка
             sort_fields = []
             # TODO: пока сортировка сделана только по одному полю
             if len(sorting.keys()) == 1:
@@ -119,7 +125,7 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
                 sort_fields.append(query.c[field])
             if sort_fields:
                 new_query = new_query.order_by(*sort_fields)
-    
+
             # теперь выведем запрошенные элементы уровня
             index = 0
             for i in new_query[begin:end + 1]:
@@ -137,7 +143,7 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
                         key = level_keys[lev]
                         setattr(item, lev_field, key)
                     setattr(item, field, getattr(i,field))
-    
+
                     for agg in aggregates.keys():
                         agg_type = aggregates[agg]
                         if agg_type == 'sum':
@@ -200,7 +206,7 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
             # определим порядок группировки
             for i in grouped:
                 grouped_ranges.append(i)
-    
+
             filter = []
             for lev in range(0, level_index):
                 lev_field = grouped_ranges[lev]
@@ -218,25 +224,25 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
                     total_of_level = self.get_data().session.query(query).filter(and_(*filter)).count()
                 else:
                     total_of_level = self.get_data().session.query(query).count()
-            
+
         else:
             total_of_level = self.get_data().count()
-    
+
         # добавим к количеству также сумму раскрытых элементов
         exp_count = 0
         for exp in expandedItems:
             if exp['count'] == -1:
                 exp['count'] = self.counter(grouped, level_index + 1, level_keys + [exp['id']], exp['expandedItems'])
             exp_count = exp_count + exp['count']
-    
+
         #count_cache[cache_key] = total_of_level+exp_count
-    
+
         #print 'count_model() = %s, total=%s, exp_count=%s' % (total_of_level + exp_count, total_of_level, exp_count)
         return total_of_level + exp_count
 
     def indexer(self, grouped, level_index, level_keys, expandedItems, aggregates, sorting):
         return self.__index_sqlalchemy(grouped, level_index, level_keys, expandedItems, aggregates, sorting)
-    
+
     def __index_sqlalchemy(self, grouped, level_index, level_keys, expandedItems, aggregates, sorting):
         '''
         построение индексов элементов в раскрытом уровне, только для группировок и для тех, которые раскрыты
@@ -247,7 +253,7 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
             # для всех группировочных элементов будут использоваться ключи
             # если берется уровень больший, чем количество группировок, то выдаем просто записи
             field = grouped[level_index]
-    
+
             filter = []
             for lev in range(0, level_index):
                 lev_field = grouped[lev]
@@ -257,7 +263,7 @@ class GroupingRecordSQLAlchemyProvider(GroupingRecordProvider):
                 new_query = self.get_data().session.query(query.c[field]).select_from(query).filter(and_(*filter)).distinct()
             else:
                 new_query = self.get_data().session.query(query.c[field]).select_from(query).distinct()
-            #сортировка 
+            #сортировка
             sort_fields = []
             if field and not field in sorting:
                 #нет заданной сортировки, отсортируем по этому полю

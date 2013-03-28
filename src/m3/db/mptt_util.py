@@ -2,7 +2,10 @@
 
 from django.db.models import signals as model_signals
 
-import mptt
+try:
+    import mptt
+except ImportError:
+    mptt = None
 
 
 def disable_mptt_signals(model):
@@ -13,7 +16,7 @@ def disable_mptt_signals(model):
     if mptt.VERSION < (0, 5):
         from mptt import signals as mptt_signals
         model_signals.pre_save.disconnect(receiver = mptt_signals.pre_save, sender = model)
-    
+
 def enable_mptt_signals(model):
     '''
     Метод включения обработки сигналов обработки дерева
@@ -49,21 +52,21 @@ def rebuild_mptt_tree(model, manage_mptt_signals=True, query_manager='objects'):
             node.save()
         right += 1
         return right
-    
+
     if manage_mptt_signals:
         disable_mptt_signals(model)
-    
+
     opts = model._meta
     qs = model_manager.filter(**{'%s__isnull' % opts.parent_attr: True})
     tree_id = 1
     #l = len(qs)
     for node in qs:
-        #print 'tree=',tree_id, l 
+        #print 'tree=',tree_id, l
         setattr(node, opts.tree_id_attr, tree_id)
         setattr(node, opts.left_attr, 1)
         setattr(node, opts.level_attr, 0)
         right = build_node(model, opts, node.pk, tree_id, 1, 0)
-        setattr(node, opts.right_attr, right)        
+        setattr(node, opts.right_attr, right)
         node.save()
         tree_id += 1
 

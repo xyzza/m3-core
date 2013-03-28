@@ -6,11 +6,18 @@ Created on 14.04.2011
 '''
 import os
 import uuid
-import xlwt
 import csv, cStringIO, codecs
 from django.conf import settings
 from django.db.models import Q, Count, Avg, Max, Min, Sum
 from django.db import connection
+
+try:
+    import xlwt
+except ImportError:
+    class FakeXlwt(object):
+        def __getattr__(self, *args):
+            raise RuntimeError(u'xlwt is not installed!')
+    xlwt = FakeXlwt()
 
 class UnicodeWriter:
     """
@@ -122,7 +129,7 @@ class GroupingRecordProvider(object):
                 return getattr(obj, attr)
             else:
                 return None
-        
+
     def setattr(self, obj, attr, value):
         """
         Установить атрибут объекта или элемент словаря
@@ -131,7 +138,7 @@ class GroupingRecordProvider(object):
             obj[attr] = value
         else:
             setattr(obj, attr, value)
-    
+
     def calc(self, obj):
         """
         Вычислить остальные атрибуты объекта или словаря
@@ -141,7 +148,7 @@ class GroupingRecordProvider(object):
         else:
             if hasattr(obj, 'calc') and callable(obj.calc):
                 obj.calc()
-    
+
     def load(self, destination, source):
         """
         Загрузка объекта destination из атрибутов объекта source
@@ -159,7 +166,7 @@ class GroupingRecordProvider(object):
         else:
             if hasattr(destination, 'load') and callable(destination.load):
                 destination.load(source)
-                
+
     def create_record(self, *args, **kwargs):
         if isinstance(self.proxy_class, dict):
             rec = self.proxy_class.copy()
@@ -819,7 +826,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
     '''
     Провайдер для массива
     '''
-        
+
     def reader(self, grouped, offset, level_index, level_keys, begin, end, aggregates, sorting):
         return self.__read_data(grouped, offset, level_index, level_keys, begin, end, aggregates, sorting)
 

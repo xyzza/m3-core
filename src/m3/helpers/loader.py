@@ -16,7 +16,14 @@ import xml.dom.minidom
 
 from django.utils.encoding import smart_unicode
 from django.db import models, transaction
-from dbfpy.dbf import Dbf
+
+try:
+    from dbfpy.dbf import Dbf
+except ImportError:
+    # Заглушка на случай неустановленного dbfpy
+    class Dbf(object):
+        def __new__(cls, *args, **kwargs):
+            raise RuntimeError(u'dbfpy is not installed!')
 
 
 class DictNotEmptyException(Exception):
@@ -31,7 +38,7 @@ class DictNotEmptyException(Exception):
 
 class DictLoadException(Exception):
     '''
-    Эксепшн, который вызывается, если во время загрузки справочника из файла 
+    Эксепшн, который вызывается, если во время загрузки справочника из файла
     возникла какая-либо ошибка.
     '''
     def __init__(self, model, reason, orig_exc_info=None):
@@ -438,7 +445,7 @@ def _convert_value(field, value):
     elif isinstance(field, models.NullBooleanField):
         value = value.lower()
         if value == 'true':
-            converted_value = True 
+            converted_value = True
         elif value == 'false':
             converted_value = False
         elif value in ['null', 'none', '']:
@@ -460,5 +467,5 @@ def _convert_value(field, value):
         pass
     elif isinstance(field, models.XMLField):
         pass
-    
+
     return converted_value
