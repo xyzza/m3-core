@@ -8,17 +8,26 @@ Created on 29.01.2011
 from django.db import transaction
 from django.conf import settings
 
-from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult, ACD
+from m3.core.exceptions import RelatedError
+from m3.db import BaseObjectModel, safe_delete
+
+from m3.ui.actions import (
+    ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult,
+    ACD, utils
+)
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
 from m3.ui.ext.misc.store import ExtJsonStore
-from m3.ui.actions import utils
 from m3.ui.ext.containers import ExtPagingBar
 from m3.ui.actions.results import ActionResult
-from m3.db import BaseObjectModel, safe_delete
-from m3.core.exceptions import RelatedError
-
-from m3_audit import AuditManager
 from m3.ui.actions.interfaces import IMultiSelectablePack
+from m3.helpers import logger
+
+try:
+    from m3_audit import AuditManager
+except ImportError:
+    # При сборке документации, внешняя Django ничего не знает про m3_audit
+    logger.warning('m3_audit import error')
+
 
 class DictListWindowAction(Action):
     '''
@@ -185,7 +194,7 @@ class DictEditWindowAction(Action):
             # если запрашивали не данные - вернем окно
             return ExtUIScriptResult(base.get_edit_window(win))
         else:
-            # если просили данные, то выжмем их из окна обратно в объект, 
+            # если просили данные, то выжмем их из окна обратно в объект,
             # т.к. в окне могли быть и другие данных (не из этого объекта)
             data_object = {}
             # т.к. мы не знаем какие поля должны быть у объекта - создадим все, которые есть на форме
@@ -252,7 +261,7 @@ class DictSaveAction(Action):
         else:
             obj = self.parent.form_to_object(request, context, self.parent.get_row, self.parent.edit_window)
 
-        # Проверка корректности полей сохраняемого объекта    
+        # Проверка корректности полей сохраняемого объекта
         result = self.parent.validate_row(obj, request)
         if result:
             assert isinstance(result, ActionResult)
@@ -261,7 +270,7 @@ class DictSaveAction(Action):
         result = self.parent.save_row(obj)
         if isinstance(result, OperationResult) and result.success == True:
             # узкое место. после того, как мы переделаем работу экшенов,
-            # имя параметра с идентификатором запси может уже называться не 
+            # имя параметра с идентификатором запси может уже называться не
             # id
             if 'm3_audit' in settings.INSTALLED_APPS:
                 AuditManager().write('dict-changes', user=request.user, model_object=obj, type='new' if not id else 'edit')
@@ -333,7 +342,7 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
     edit_window = None # Уже существующего
 
     # Класс отвечающие за отображение форм:
-    list_form = ExtDictionaryWindow # Форма списка 
+    list_form = ExtDictionaryWindow # Форма списка
     select_form = ExtDictionaryWindow # Форма выбора
 
     # Настройки секретности. Если стоит истина, то в результат добавляется флаг секретности
@@ -346,7 +355,7 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
     list_paging = True
     list_readonly = False
 
-    # Значение колонки по-умолчанию, которое будет подбираться 
+    # Значение колонки по-умолчанию, которое будет подбираться
     # при выборе значения из справочника
     column_name_on_select = 'name'
 
@@ -383,10 +392,10 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
         '''
         return self.list_window_action
 
-    #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================    
+    #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================
     def get_list_url(self):
         '''
-        Возвращает адрес формы списка элементов справочника. 
+        Возвращает адрес формы списка элементов справочника.
         Используется для присвоения адресов в прикладном приложении.
         '''
         return self.list_window_action.get_absolute_url()
@@ -394,7 +403,7 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
     #ISelectablePack
     def get_select_url(self):
         '''
-        Возвращает адрес формы списка элементов справочника. 
+        Возвращает адрес формы списка элементов справочника.
         Используется для присвоения адресов в прикладном приложении.
         '''
         return self.select_window_action.get_absolute_url()
@@ -435,14 +444,14 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
 
     def get_row(self, id):
         '''
-        Метод, который возвращает запись справочника с указанным идентификатором.  
+        Метод, который возвращает запись справочника с указанным идентификатором.
         '''
         raise NotImplementedError()
 
     def get_last_used(self):
         '''
         Метод, который возвращает список записей справочника, которые были выбраны
-        конкретным пользователем в последнее время. 
+        конкретным пользователем в последнее время.
         Записи возвращаются в виде обычного питоновского списка.
         '''
         raise NotImplementedError()
@@ -451,20 +460,20 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
         '''
         Метод отвечает за проверку корректности полей сохраняемого объекта. Если все в порядке,
         то метод не возвращает ничего, иначе результат будет возвращен экшену.
-        Т.е. вернуть можно любой из поддерживаемых в results.py объектов. 
+        Т.е. вернуть можно любой из поддерживаемых в results.py объектов.
         '''
         pass
 
     def save_row(self, obj):
         '''
-        Метод, который выполняет сохранение записи справочника. На момент запуска метода 
+        Метод, который выполняет сохранение записи справочника. На момент запуска метода
         в параметре object находится именно та запись справочника, которую необходимо сохранить.
         '''
         raise NotImplementedError()
 
     def delete_row(self, obj):
         '''
-        Метод, который выполняет удаление записи справочника. На момент запуска метода в 
+        Метод, который выполняет удаление записи справочника. На момент запуска метода в
         параметре object находится именно та запись справочника, которую необходимо удалить.
         '''
         raise NotImplementedError()
@@ -482,7 +491,7 @@ class BaseDictionaryActions(ActionPack, IMultiSelectablePack):
     #IMultiSelectablePack
     def get_display_dict(self, key, value_field='id', display_field='name'):
         """
-        Получить список словарей, необходимый для представления выбранных 
+        Получить список словарей, необходимый для представления выбранных
         значений ExtMultiSelectField
         """
         raise NotImplementedError()
@@ -609,7 +618,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
 
     def _default_filter(self):
         '''
-        Устанавливаем параметры поиска по умолчанию 'code' и 'name' в случае, 
+        Устанавливаем параметры поиска по умолчанию 'code' и 'name' в случае,
         если у модели есть такие поля
         '''
         filter_fields = self.filter_fields
@@ -640,7 +649,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     #IMultiSelectablePack
     def get_display_dict(self, key, value_field='id', display_field='name'):
         """
-        Получить список словарей, необходимый для представления выбранных 
+        Получить список словарей, необходимый для представления выбранных
         значений ExtMultiSelectField
         """
         items = []
@@ -660,7 +669,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
 class BaseEnumerateDictionary(BaseDictionaryActions):
     '''
     Базовый экшен пак для построения справочников основанных на перечислениях, т.е.
-    предопределенных неизменяемых наборах значений. 
+    предопределенных неизменяемых наборах значений.
     '''
     # Класс перечисление с которым работает справочник
     enumerate_class = None
