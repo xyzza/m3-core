@@ -88,7 +88,7 @@ class AuthUserPermissionChecker(AbstractPermissionChecker):
             return False
 
         result = True
-        if self.parent.need_check_permission:
+        if action.parent.need_check_permission:
             if subpermission:
                 assert (
                     subpermission in action.sub_permissions or
