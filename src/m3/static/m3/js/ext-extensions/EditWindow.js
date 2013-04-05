@@ -436,17 +436,20 @@ Ext.m3.EditWindow = Ext.extend(Ext.m3.Window, {
             
             id = complexData[fieldName].id;
             
-            // Создаем запись и добавляем в стор
-            record = new Ext.data.Record();                    
-            record.set('id', id);
-            record.set(field.displayField, complexData[fieldName].value);
-            
-            
-            field.getStore().add([record]);
+            // Запись значения в стор только при условии, что оно не пустое
+            if (id) {
+                // Создаем запись и добавляем в стор
+                record = new Ext.data.Record();
+                record.set('id', id);
+                record.set(field.displayField, complexData[fieldName].value);
+                field.getStore().add([record]);
 
-            // Устанавливаем новое значение
-            field.setValue(id);
-            field.collapse();
+                // Устанавливаем новое значение
+                field.setValue(id);
+                field.collapse();
+            } else {
+                field.clearValue();
+            }
         }
         
         mask.hide();
