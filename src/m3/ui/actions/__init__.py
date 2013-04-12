@@ -39,7 +39,7 @@ class AbstractPermissionChecker(object):
         pass
 
     @abc.abstractmethod
-    def has_pack_permission(self, pack, permission):
+    def has_pack_permission(self, request, pack, permission):
         """
         Метод должен возвращать True, если действие,
         характеризуемое парой @pack/@permission,
@@ -103,7 +103,7 @@ class AuthUserPermissionChecker(AbstractPermissionChecker):
                 result = request.user.has_perm(action.get_perm_code())
         return result
 
-    def has_pack_permission(self, pack, permission):
+    def has_pack_permission(self, request, pack, permission):
         """
         Метод должен возвращать True, если действие,
         характеризуемое парой @pack/@permission,
@@ -128,7 +128,7 @@ class BypassPermissionChecker(AbstractPermissionChecker):
     def has_action_permission(self, request, action, subpermission=None):
         return True
 
-    def has_pack_permission(self, pack, permission):
+    def has_pack_permission(self, request, pack, permission):
         return True
 
 
