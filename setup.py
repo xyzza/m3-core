@@ -5,8 +5,8 @@ requires = []
 with open('src/requires.txt', 'r') as f:
     requires.extend(f.readlines())
 
-setup(name='m3',
-      version='1.0',
+setup(name='m3-core',
+      version='1.0.6.3',
       url='https://src.bars-open.ru/py/m3/m3',
       license='Apache License, Version 2.0',
       author='BARS Group',
