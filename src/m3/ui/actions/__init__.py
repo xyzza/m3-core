@@ -15,7 +15,12 @@ from m3.core.exceptions import ApplicationLogicException
 #==============================================================================
 from results import *
 
-from context import ActionContext, ActionContextDeclaration
+from context import (
+    ActionContext,
+    ActionContextDeclaration,
+    DeclarativeActionContext,
+    RequiredFailed,
+)
 
 ACD = ActionContextDeclaration
 
@@ -39,7 +44,7 @@ class AbstractPermissionChecker(object):
         pass
 
     @abc.abstractmethod
-    def has_pack_permission(self, pack, permission):
+    def has_pack_permission(self, request, pack, permission):
         """
         Метод должен возвращать True, если действие,
         характеризуемое парой @pack/@permission,
@@ -103,7 +108,7 @@ class AuthUserPermissionChecker(AbstractPermissionChecker):
                 result = request.user.has_perm(action.get_perm_code())
         return result
 
-    def has_pack_permission(self, pack, permission):
+    def has_pack_permission(self, request, pack, permission):
         """
         Метод должен возвращать True, если действие,
         характеризуемое парой @pack/@permission,
@@ -128,7 +133,7 @@ class BypassPermissionChecker(AbstractPermissionChecker):
     def has_action_permission(self, request, action, subpermission=None):
         return True
 
-    def has_pack_permission(self, pack, permission):
+    def has_pack_permission(self, request, pack, permission):
         return True
 
 
@@ -354,6 +359,8 @@ class Action(object):
         Метод декларирует необходимость наличия
         определенных параметров в контексте.
         Должен возвращать список из экземпляров *ActionContextDeclaration*
+        либо
+        словарь описания контекста для *DeclarativeActionContext*
         """
         pass
 
@@ -724,15 +731,12 @@ class ActionController(object):
 
             return OperationResult.by_message(msg)
 
-        # Заполняем контект
+        # Заполняем контект и проверяем его
         rules = action.context_declaration()
-        context = self.build_context(request)
-        context.build(request, rules)
-
-        # проверяем контекст
+        context = self.build_context(request, rules)
         try:
-            context.check_required(rules)
-        except ActionContext.RequiredFailed, e:
+            context.build(request, rules)
+        except RequiredFailed as e:
             # если контекст неправильный, то возвращаем
             # фейльный результат операции
             return OperationResult.by_message(
@@ -816,12 +820,15 @@ class ActionController(object):
 
         raise http.Http404()
 
-    def build_context(self, request):
+    def build_context(self, request, rules):
         '''
         Выполняет построение контекста вызова операции ActionContext
         на основе переданного request
         '''
-        return ActionContext()
+        if isinstance(rules, dict):
+            return DeclarativeActionContext()
+        else:
+            return ActionContext()
 
     #==========================================================================
     # Методы, предназначенные для поиска экшенов и паков в контроллере

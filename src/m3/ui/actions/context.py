@@ -85,6 +85,37 @@ def _bool_parser(value):
     return value in ('true', 'True', 1, '1', 'on', True)
 
 
+_datetime_parser = _make_datetime_parser(lambda x: x, formats=(
+    ('%Y-%m-%dT%H:%M:%S', 19),
+    ('%Y-%m-%d %H:%M:%S', 19),
+    ('%d.%m.%Y %H:%M:%S', 19),
+    ('%Y-%m-%dT%H:%M', 16),
+    ('%Y-%m-%d %H:%M', 16),
+    ('%d.%m.%Y %H:%M', 16),
+    ('%Y-%m-%d', 10),
+    ('%d.%m.%Y', 10),
+    ('%H:%M:%S', 8),
+    ('%H:%M', 5),
+)),
+
+
+_date_parser = _make_datetime_parser(
+    lambda x: x.date(),
+    formats=(
+        ('%Y-%m-%d', 10),
+        ('%d.%m.%Y', 10),
+        ('%m/%d/%Y', 10),
+    ))
+
+
+_time_parser = _make_datetime_parser(
+    lambda x: x.time(),
+    formats=(
+        ('%H:%M:%S', 8),
+        ('%H:%M', 5),
+    ))
+
+
 _PARSERS = {
     str: _make_simple_parser(unicode),  # Иду на поводу у хомячков (FIXME)
     unicode: _make_simple_parser(unicode),
@@ -134,7 +165,8 @@ class ActionContextDeclaration(object):
     *verbose_name* - человеческое имя параметра,
     необходимо для сообщений об ошибках.
     """
-    def __init__(self, name='', default=None, type=None,
+    def __init__(
+            self, name='', default=None, type=None,
             required=False, verbose_name='', *args, **kwargs):
         assert type, 'type must be defined!'
         self.name = name
@@ -246,12 +278,14 @@ class ActionContext(object):
 
         # переносим обязательные параметры, которые не встретились в запросе
         for rule in rules if rules else []:
-            if rule.required and rule.default != None and (
+            if rule.required and rule.default is not None and (
                     not params[rule.name][1]):
                 # если параметр не передан в запросе, но
                 # он является обязательным и задано значение по умолчанию,
                 # то помещаем этот параметр в контекст
                 setattr(self, rule.name, rule.default)
+        # проверяем наличие обязательных параметров
+        self.check_required(rules)
 
     def check_required(self, rules):
         '''
@@ -260,7 +294,7 @@ class ActionContext(object):
         if not rules:
             return
         for rule in rules:
-            if rule.required and getattr(self, rule.name, None) == None:
+            if rule.required and getattr(self, rule.name, None) is None:
                 raise ActionContext.RequiredFailed(rule.human_name())
 
     def json(self):
@@ -297,3 +331,91 @@ class ActionContext(object):
             result.__dict__.update(context.__dict__)
         result.__dict__.update(self.__dict__)
         return result
+
+
+#-----------------------------------------------------------------------------
+class DeclarativeActionContext(ActionContext):
+    """
+    ActionContext, использующий декларативное описание контекста вида
+    {
+        # параметр запроса -> параметры разбора
+        'obj_id': {
+            # значение по умолчанию,
+            # используется при отсутствии параметра в запросе
+            # если не указано - параметр считается обязательным
+            'default': '',
+
+            # тип парсера, может быть:
+            # - строкой - именем одного из предопределенных парсеров
+            # - callable-объектом, выполняющим парсинг. Такой объект
+            #   может возбуждать ValueError/TypeError/KeyError/IndexError
+            #   в случае неправильного формата данных, что позволяет
+            #   использовать в качестве парсера что-то вроде:
+            #     'type': ['on', 'yes'].__contains__
+            #     'type': {1: 'Male', 2: 'Female'}.get
+            #     'type': float
+            #     'type': json.loads
+            'type': 'asis'
+
+            # наименование параметра, понятное пользователю
+            # используется в сообщениях об ошибках
+            'verbose_name': u'Идентификатор объекта'
+        },
+        ...
+    }
+    """
+    # "встроенные" парсеры
+    _parsers = {
+        # булево значение
+        'boolean': ('true', 'True', '1', 'on', 'yes').__contains__,
+
+        # json в виде строки
+        'json': json.loads,
+
+        # дата/время
+        'datetime': _datetime_parser,
+        'date': _date_parser,
+        'time': _time_parser,
+
+        # простые типы
+        'int': int,
+        'float': float,
+        'str': str,
+        'unicode': unicode,
+        'decimal': Decimal,
+    }
+
+    def build(self, request, rules):
+        assert isinstance(rules, dict), "@rules must be a dict"
+        for key, parser_data in rules.iteritems():
+            parser = parser_data['type']
+            if not callable(parser):
+                try:
+                    parser = self._parsers[parser]
+                except KeyError:
+                    raise TypeError(
+                        'Неизвестный парсер контекста: "%s"' %
+                        parser
+                    )
+            try:
+                val = request.REQUEST.get(key)
+                if val is None:
+                    if not 'default' in parser_data:
+                        raise RequiredFailed(
+                            parser_data.get('verbose_name', key)
+                        )
+                    val = parser_data['default']
+                else:
+                    val = parser(val)
+            except (ValueError, TypeError, KeyError, IndexError):
+                raise ConversionFailed(type=parser, value=val)
+
+            setattr(self, key, val)
+
+    @classmethod
+    def register_parser(cls, name, parser):
+        """
+        Регистрация парсера @parser по имени @name
+        """
+        assert callable(parser), "@parser must be a callable object"
+        cls._parsers[name] = parser
