@@ -2,6 +2,7 @@
 import threading
 import inspect
 import abc
+import re
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -23,6 +24,9 @@ from context import (
 )
 
 ACD = ActionContextDeclaration
+
+
+_clean_url = lambda s: re.sub(r'^[/^]*(.*?)[$/]*$', r'\1', s)
 
 
 #==============================================================================
@@ -65,7 +69,7 @@ class AbstractPermissionChecker(object):
             code = code[len(settings.ROOT_URL):]
         if subpermission:
             code = '%s#%s' % (code, subpermission)
-        return lambda: code
+        return code
 
 
 class AuthUserPermissionChecker(AbstractPermissionChecker):
@@ -93,7 +97,7 @@ class AuthUserPermissionChecker(AbstractPermissionChecker):
             return False
 
         result = True
-        if action.parent.need_check_permission:
+        if action.need_check_permission:
             if subpermission:
                 assert (
                     subpermission in action.sub_permissions or
@@ -407,9 +411,7 @@ class Action(object):
         assert isinstance(self.controller, ActionController), (
             '%s is not actioncontroller in %s' % (self.controller, self))
         # Очищаем от мусора рег. выр.
-        ignored_chars = ['^', '&', '$']
-        for char in ignored_chars:
-            url = self.url.replace(char, '')
+        url = _clean_url(self.url)
         return self.controller.url + self.get_packs_url() + url
 
     @classmethod
@@ -478,6 +480,21 @@ class ActionPack(object):
                 contr_url = cont.url
                 break
         return contr_url + url
+
+    def get_absolute_url(self):
+        """
+        Возвращает абсолютный путь (НОРМАЛЬНО, в отличие от absolute_url)
+        """
+        assert hasattr(self, 'controller')
+        pack = self
+        if pack.parent:
+            path = []
+            while pack.parent:
+                path.insert(0, pack.url)
+                pack = pack.parent
+        else:
+            path = [pack.url]
+        return '/'.join([pack.controller.url] + map(_clean_url, path))
 
     def get_permission_code(self):
         '''
@@ -901,6 +918,7 @@ class ActionController(object):
 
         if cleaned_pack not in self.top_level_packs:
             self.top_level_packs.append(cleaned_pack)
+            cleaned_pack.controller = self
         ControllerCache.register_controller(self)
 
     def extend_packs(self, packs):
