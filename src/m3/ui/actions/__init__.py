@@ -411,7 +411,7 @@ class Action(object):
         assert isinstance(self.controller, ActionController), (
             '%s is not actioncontroller in %s' % (self.controller, self))
         # Очищаем от мусора рег. выр.
-        url = _clean_url(self.url)
+        url = self.url.replace('$', '')
         return self.controller.url + self.get_packs_url() + url
 
     @classmethod
