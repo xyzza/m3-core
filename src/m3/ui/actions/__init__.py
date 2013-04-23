@@ -21,6 +21,8 @@ from context import (
     ActionContextDeclaration,
     DeclarativeActionContext,
     RequiredFailed,
+    ContextBuildingError,
+    CriticalContextBuildingError,
 )
 
 ACD = ActionContextDeclaration
@@ -753,6 +755,12 @@ class ActionController(object):
         context = self.build_context(request, rules)
         try:
             context.build(request, rules)
+        except CriticalContextBuildingError:
+            # критическая ошибка сбора контекста - должна валиться
+            raise
+        except ContextBuildingError as e:
+            # некритичную ошибку - показываем пользователю
+            return OperationResult.by_message(unicode(e))
         except RequiredFailed as e:
             # если контекст неправильный, то возвращаем
             # фейльный результат операции
