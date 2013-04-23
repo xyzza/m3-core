@@ -46,6 +46,51 @@ class ConversionFailed(ActionContextException):
             self.value, self.type)
 
 
+class ContextBuildingError(ActionContextException):
+    """
+    Ошибка построения контекста
+    """
+    def __init__(self, requiremets=None, errors=None):
+        """
+        @requiremets :: [unicode]
+            обязательные параметры контекста, отсутствующие в запросе
+        @errors :: [unicode]
+            параметры, значение которых не удалось распарсить
+        """
+        assert requiremets or errors, (
+            "requiremets or errors must be provided!")
+        # параметры должны быть либо в "ошибках", либо в "недостающих"
+        assert not set(errors).intersection(requiremets), (
+            "requiremets can't contain errors!")
+        self.errors = errors or []
+        self.requiremets = requiremets or []
+
+    def __repr__(self):
+        return "%s(requiremets=%r, errors=%r)" % (
+            self.__class__.__name__,
+            self.requiremets,
+            self.errors
+        )
+
+    def __unicode__(self):
+        log = []
+        for title, data in (
+                (u"Отсутствуют обязательные параметры:", self.requiremets),
+                (u"Неверно заполнены параметры:", self.errors)):
+            if data:
+                log.extend((
+                    title,
+                    [("- %s" % d) for d in data]))
+        return u"\n".join(log)
+
+
+class CriticalContextBuildingError(ContextBuildingError):
+    """
+    Критическая ошибка построения контекста
+    """
+    pass
+
+
 #================================== ПАРСЕРЫ ===================================
 def _make_datetime_parser(extractor, formats):
     def parse(value):
@@ -387,6 +432,12 @@ class DeclarativeActionContext(ActionContext):
 
     def build(self, request, rules):
         assert isinstance(rules, dict), "@rules must be a dict"
+
+        # аккумуляторы ошибок, связанных с нехваткой и неправильным форматом
+        requiremets = []
+        errors = []
+        only_noncritical = True
+
         for key, parser_data in rules.iteritems():
             parser = parser_data['type']
             if not callable(parser):
@@ -397,20 +448,38 @@ class DeclarativeActionContext(ActionContext):
                         'Неизвестный парсер контекста: "%s"' %
                         parser
                     )
+
+            add_error_to = None
             try:
                 val = request.REQUEST.get(key)
                 if val is None:
-                    if not 'default' in parser_data:
-                        raise RequiredFailed(
-                            parser_data.get('verbose_name', key)
-                        )
-                    val = parser_data['default']
+                    if 'default' in parser_data:
+                        val = parser_data['default']
+                    else:
+                        # параметр обязателен, но не присутствует в запросе
+                        add_error_to = requiremets
                 else:
                     val = parser(val)
             except (ValueError, TypeError, KeyError, IndexError):
-                raise ConversionFailed(type=parser, value=val)
+                # ошибка преобразования
+                add_error_to = errors
+
+            if add_error_to:
+                add_error_to.append(
+                    parser_data.get('verbose_name', key))
+                # ошибка критична, если хотя бы один из параметров
+                # не имеет verbose_name
+                only_noncritical = only_noncritical and (
+                    'verbose_name' in parser_data)
+                continue
 
             setattr(self, key, val)
+
+        if requiremets or errors:
+            if only_noncritical:
+                raise ContextBuildingError(requiremets, errors)
+            else:
+                raise CriticalContextBuildingError(requiremets, errors)
 
     @classmethod
     def register_parser(cls, name, parser):
