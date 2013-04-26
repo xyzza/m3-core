@@ -671,7 +671,12 @@ Ext3.extend(Ext3.ux.grid.livegrid.GridView, Ext3.grid.GridView, {
         this.adjustVisibleRows();
         this.adjustBufferInset();
 
-        //this.onLayout(vw, vh);//kirov
+        // Хак для нормальной прорисовки фильтров после добавления
+        // скрытой колонки.
+        var firstCol = cm.getColumnAt(1);
+        if (firstCol) {
+            g.fireEvent('columnresize', 1, firstCol.width);
+        }
     },
 
     /**
