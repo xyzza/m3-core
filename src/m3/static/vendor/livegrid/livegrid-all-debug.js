@@ -671,7 +671,12 @@ Ext.extend(Ext.ux.grid.livegrid.GridView, Ext.grid.GridView, {
         this.adjustVisibleRows();
         this.adjustBufferInset();
 
-        //this.onLayout(vw, vh);//kirov
+        // Хак для нормальной прорисовки фильтров после добавления
+        // скрытой колонки.
+        var firstCol = cm.getColumnAt(1);
+        if (firstCol) {
+            g.fireEvent('columnresize', 1, firstCol.width);
+        }
     },
 
     /**
