@@ -72,6 +72,8 @@ class ContextBuildingError(ActionContextException):
             self.errors
         )
 
+    __str__ = __repr__
+
     def __unicode__(self):
         log = []
         for title, data in (
@@ -464,7 +466,7 @@ class DeclarativeActionContext(ActionContext):
                 # ошибка преобразования
                 add_error_to = errors
 
-            if add_error_to:
+            if add_error_to is not None:
                 add_error_to.append(
                     parser_data.get('verbose_name', key))
                 # ошибка критична, если хотя бы один из параметров
