@@ -44,7 +44,7 @@ class AbstractPermissionChecker(object):
     @abc.abstractmethod
     def has_action_permission(self, request, action, subpermission=None):
         """
-        Метод должен возвращать True, если выполнеие @action
+        Метод должен возвращать True, если выполнение @action
         допустимо в контексте запроса @request
         """
         pass
@@ -81,11 +81,11 @@ class AuthUserPermissionChecker(AbstractPermissionChecker):
 
     Требует подключения в проекте session-middleware, т.к. опирается
     на наличие в request атрибута 'user',
-    указывающего на текущего ползователя
+    указывающего на текущего пользователя
     """
     def has_action_permission(self, request, action, subpermission=None):
         """
-        Метод должен возвращать True, если выполнеие @action
+        Метод должен возвращать True, если выполнение @action
         допустимо в контексте запроса @request
         """
         # контракт

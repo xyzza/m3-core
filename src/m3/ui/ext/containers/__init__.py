@@ -7,6 +7,7 @@ from container_complex import ExtContainerTable
 from grids import (ExtGrid,
                    ExtGridColumn,
                    ExtGridBooleanColumn,
+                   ExtGridCheckColumn,
                    ExtGridDateColumn,
                    ExtGridNumberColumn,
                    ExtAdvancedTreeGrid,
