@@ -80,9 +80,8 @@ class ContextBuildingError(ActionContextException):
                 (u"Отсутствуют обязательные параметры:", self.requiremets),
                 (u"Неверно заполнены параметры:", self.errors)):
             if data:
-                log.extend((
-                    title,
-                    [("- %s" % d) for d in data]))
+                log.append(title)
+                log.extend([("- %s" % d) for d in data])
         return u"\n".join(log)
 
 
