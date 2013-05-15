@@ -143,21 +143,92 @@ class BypassPermissionChecker(AbstractPermissionChecker):
         return True
 
 
-#========================== экземпляр проверятеля прав ========================
-if hasattr(settings, 'M3_PERMISSION_CHECKER'):
-    # в настройках можно указать свой backend для проверки прав
-    _permission_checker = settings.M3_PERMISSION_CHECKER()
-    assert isinstance(_permission_checker, AbstractPermissionChecker)
-else:
-    # если backend не задан в настройках, то исходим из того,
-    # подключены ли пользователи Django
-    if 'django.contrib.auth' in settings.INSTALLED_APPS:
-        _permission_checker = AuthUserPermissionChecker()
-    else:
-        _permission_checker = BypassPermissionChecker()
+class LegacyPermissionChecker(AbstractPermissionChecker):
+    """
+    Мех-м проверки прав, созданный для совместимости со старыми проектами
+    """
+    @staticmethod
+    def get_perm_code(pack_or_action, subpermission=None):
+        code = pack_or_action.get_absolute_url()
+        # уберем из кода префикс системы,
+        # т.к. код права должен быть относительным
+        if hasattr(settings, 'ROOT_URL') and (
+                code.startswith(settings.ROOT_URL)):
+            code = code[len(settings.ROOT_URL):]
+        if subpermission:
+            code = '%s#%s' % (code, subpermission)
+        return code
 
+    def has_action_permission(self, request, action, subpermission=None):
+        '''
+        Проверка пава на выполнение действия для указанного пользователя
+        '''
+        assert isinstance(action.parent, ActionPack)
+        # Если в наборе действий need_check_permission=True,
+        # а в самом действии False, то права не проверяются
+        # Если в наборе действий need_check_permission=True,
+        # и в самом действии True, то права проверяются
+        # Если в наборе действий need_check_permission=False,
+        # а в самом действии True, то права не проверяются
+        # Если в наборе действий need_check_permission=False,
+        # а в самом действии False, то права не проверяются
+        # Т.е. права проверяются только,
+        # если в наборе действий и в действии включена проверка прав
+        # Признак need_check_permission в вышестоящих наборах действий
+        # не влияет на решение, т.к. в тех наборах свои действия
+
+        # Проверим, что в действии и наборе разрешена проверка прав
+        user_obj = request.user
+        code = self.get_perm_code(action, subpermission)
+        if action.need_check_permission and (
+                action.parent.need_check_permission):
+            # если пользователя нет, значит аноним - ему дадим отпор
+            if user_obj:
+                # проверим что права на выполнение есть
+                return user_obj.has_perm(code)
+            else:
+                return False
+        else:
+            return True
+
+    def has_pack_permission(self, request, pack, permission):
+        '''
+        Проверка на внутреннее право пака для указанного пользователя
+        '''
+        assert isinstance(sub_code, str)
+        # Подчиненные права набора действий
+        # проверяются только в случае разрешения проверки в наборе действий
+        # Если переданный код не прописан в правах этого действия,
+        # то это не наш код - значит всё разрешено
+        user_obj = request.user
+        if pack.need_check_permission and sub_code in pack.sub_permissions:
+            # если пользователя нет, значит аноним - ему дадим отпор
+            if user_obj:
+                # проверим что права на выполнение есть
+                return user_obj.has_perm(self.get_perm_code(pack, sub_code))
+            else:
+                return False
+        return True
+
+#========================== экземпляр проверятеля прав ========================
 _OLD_PERMISSION_CHECKING = getattr(
     settings, 'CONTROLLER_SHOLUD_USE_OLD_PERMISSION_CHECKING', True)
+
+if _OLD_PERMISSION_CHECKING:
+    # backend проверки прав, совместимый со старыми проектами
+    _permission_checker = LegacyPermissionChecker()
+else:
+    if hasattr(settings, 'M3_PERMISSION_CHECKER'):
+        # в настройках можно указать свой backend для проверки прав
+        _permission_checker = settings.M3_PERMISSION_CHECKER()
+        assert isinstance(_permission_checker, AbstractPermissionChecker)
+    else:
+        # если backend не задан в настройках, то исходим из того,
+        # подключены ли пользователи Django
+        if 'django.contrib.auth' in settings.INSTALLED_APPS:
+            _permission_checker = AuthUserPermissionChecker()
+        else:
+            _permission_checker = BypassPermissionChecker()
 
 
 #========================== ИСКЛЮЧЕНИЯ ========================================
@@ -253,7 +324,7 @@ class Action(object):
         '''
         return self.get_permission_code()+'#'+sub_code
 
-    def has_sub_permission(self, user_obj, sub_code, request=None):
+    def has_sub_permission(self, user_obj, sub_code, request):
         '''
         Проверка на внутреннее право для указанного пользователя
         '''
@@ -281,46 +352,12 @@ class Action(object):
         return True
 
     def get_permission_code(self):
-        '''
-        Возвращает код действия, для контроля прав доступа
-        '''
-        code = self.get_absolute_url()
-        # уберем из кода префикс системы,
-        # т.к. код права должен быть относительным
-        if hasattr(settings, 'ROOT_URL') and (
-                code.startswith(settings.ROOT_URL)):
-            return code[len(settings.ROOT_URL):]
-        else:
-            return code
+        # метод оставлен для совместимости
+        return self.get_perm_code()
 
-    def has_permission(self, user_obj, request=None):
-        '''
-        Проверка пава на выполнение действия для указанного пользователя
-        '''
-        assert isinstance(self.parent, ActionPack)
-        # Если в наборе действий need_check_permission=True,
-        # а в самом действии False, то права не проверяются
-        # Если в наборе действий need_check_permission=True,
-        # и в самом действии True, то права проверяются
-        # Если в наборе действий need_check_permission=False,
-        # а в самом действии True, то права не проверяются
-        # Если в наборе действий need_check_permission=False,
-        # а в самом действии False, то права не проверяются
-        # Т.е. права проверяются только,
-        # если в наборе действий и в действии включена проверка прав
-        # Признак need_check_permission в вышестоящих наборах действий
-        # не влияет на решение, т.к. в тех наборах свои действия
-
-        # Проверим, что в действии и наборе разрешена проверка прав
-        if self.need_check_permission and self.parent.need_check_permission:
-            # если пользователя нет, значит аноним - ему дадим отпор
-            if user_obj:
-                # проверим что права на выполнение есть
-                return user_obj.has_perm(self.get_permission_code())
-            else:
-                return False
-        else:
-            return True
+    def has_permission(self, user_obj, request):
+        # метод оставлен для совместимости
+        return self.has_perm(request)
 
     #================= НОВЫЙ ИНТЕРФЕЙС ПРОВЕРКИ ПРАВ ==========================
     def has_perm(self, request, subpermission=None):
@@ -499,43 +536,16 @@ class ActionPack(object):
         return '/'.join([pack.controller.url] + map(_clean_url, path))
 
     def get_permission_code(self):
-        '''
-        Возвращает код, для контроля прав доступа
-        '''
-        code = self.absolute_url()
-        # уберем из кода префикс системы,
-        # т.к. код права должен быть относительным
-        if hasattr(settings, 'ROOT_URL') and (
-                code.startswith(settings.ROOT_URL)):
-            return code[len(settings.ROOT_URL):]
-        else:
-            return code
+        # метод оставлен для совместимости
+        return self.get_perm_code()
 
     def get_sub_permission_code(self, sub_code):
-        '''
-        Возвращает код суб-права
-        '''
-        return self.get_permission_code()+'#'+sub_code
+        # метод оставлен для совместимости
+        return self.get_perm_code(self, sub_code)
 
-    def has_sub_permission(self, user_obj, sub_code, request=None):
-        '''
-        Проверка на внутреннее право для указанного пользователя
-        '''
-        assert isinstance(sub_code, str)
-
-        # Подчиненные права набора действий
-        # проверяются только в случае разрешения проверки в наборе действий
-        # Если переданный код не прописан в правах этого действия,
-        # то это не наш код - значит всё разрешено
-        if self.need_check_permission and sub_code in self.sub_permissions:
-            # если пользователя нет, значит аноним - ему дадим отпор
-            if user_obj:
-                # проверим что права на выполнение есть
-                return user_obj.has_perm(
-                    self.get_sub_permission_code(sub_code))
-            else:
-                return False
-        return True
+    def has_sub_permission(self, user_obj, sub_code, request):
+        # метод оставлен для совместимости
+        return self.has_perm(self, request, sub_code)
 
     #================= НОВЫЙ ИНТЕРФЕЙС ПРОВЕРКИ ПРАВ ==========================
     def has_perm(self, request, permission):
@@ -733,11 +743,7 @@ class ActionController(object):
         Непосредственный вызов экшена с отработкой всех событий
         '''
         # проверим что права на выполнение есть
-        if _OLD_PERMISSION_CHECKING:
-            allowed = action.has_permission(request.user, request)
-        else:
-            allowed = _permission_checker.has_action_permission(
-                request, action)
+        allowed = _permission_checker.has_action_permission(request, action)
 
         if not allowed:
             # Стандартное сообщение об отсутствии прав
