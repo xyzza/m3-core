@@ -121,13 +121,13 @@ class AuthUserPermissionChecker(AbstractPermissionChecker):
         допустимо в контексте запроса @request
         """
         assert isinstance(pack, ActionPack)
-        if subpermission:
-            assert isinstance(subpermission, str)
+        if permission:
+            assert isinstance(permission, str)
 
         result = True
         if pack.need_check_permission:
-            assert subpermission in pack.sub_permissions, (
-                u'Подправо ("%s") должно быть описано в паке' % subpermission)
+            assert permission in pack.sub_permissions, (
+                u'Подправо ("%s") должно быть описано в паке' % permission)
             result = request.user.has_perm(pack.get_perm_code(permission))
         return result
 
@@ -195,17 +195,17 @@ class LegacyPermissionChecker(AbstractPermissionChecker):
         '''
         Проверка на внутреннее право пака для указанного пользователя
         '''
-        assert isinstance(sub_code, str)
+        assert isinstance(permission, str)
         # Подчиненные права набора действий
         # проверяются только в случае разрешения проверки в наборе действий
         # Если переданный код не прописан в правах этого действия,
         # то это не наш код - значит всё разрешено
         user_obj = request.user
-        if pack.need_check_permission and sub_code in pack.sub_permissions:
+        if pack.need_check_permission and permission in pack.sub_permissions:
             # если пользователя нет, значит аноним - ему дадим отпор
             if user_obj:
                 # проверим что права на выполнение есть
-                return user_obj.has_perm(self.get_perm_code(pack, sub_code))
+                return user_obj.has_perm(self.get_perm_code(pack, permission))
             else:
                 return False
         return True
@@ -319,37 +319,12 @@ class Action(object):
     path = None
 
     def get_sub_permission_code(self, sub_code):
-        '''
-        Возвращает код суб-права
-        '''
-        return self.get_permission_code()+'#'+sub_code
+        # метод оставлен для совместимости
+        return self.get_perm_code(sub_code)
 
     def has_sub_permission(self, user_obj, sub_code, request):
-        '''
-        Проверка на внутреннее право для указанного пользователя
-        '''
-        assert isinstance(self.parent, ActionPack)
-        assert isinstance(sub_code, str)
-
-        # Подчиненные права являются независимыми от того,
-        # если ли право на выполнение действия,
-        # т.к. эти права проверяются уже внутри действия
-        # (т.е. уже при его выполнении)
-        # Но должно быть право проверять права в родительском наборе действий!
-        # Если переданный код не прописан в правах этого действия,
-        # то это не наш код - значит всё разрешено
-        # Добавление проверки прав в родительском элементе из экшна
-        if self.parent.need_check_permission and (
-                sub_code in self.sub_permissions.keys()
-                or sub_code in self.parent.sub_permissions.keys()):
-            # если пользователя нет, значит аноним - ему дадим отпор
-            if user_obj:
-                # проверим что права на выполнение есть
-                return user_obj.has_perm(
-                    self.get_sub_permission_code(sub_code))
-            else:
-                return False
-        return True
+        # метод оставлен для совместимости
+        return self.has_perm(request, sub_code)
 
     def get_permission_code(self):
         # метод оставлен для совместимости
@@ -541,11 +516,11 @@ class ActionPack(object):
 
     def get_sub_permission_code(self, sub_code):
         # метод оставлен для совместимости
-        return self.get_perm_code(self, sub_code)
+        return self.get_perm_code(sub_code)
 
     def has_sub_permission(self, user_obj, sub_code, request):
         # метод оставлен для совместимости
-        return self.has_perm(self, request, sub_code)
+        return self.has_perm(request, sub_code)
 
     #================= НОВЫЙ ИНТЕРФЕЙС ПРОВЕРКИ ПРАВ ==========================
     def has_perm(self, request, permission):
