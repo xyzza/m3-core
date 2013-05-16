@@ -10043,7 +10043,7 @@ Ext3.tree.ColumnResizer = Ext3.extend(Ext3.util.Observable, {
         this.hdIndex = this.tree.findHeaderIndex(this.dragHd);
 
         this.proxy.setX(this.hdX);
-        this.proxy.setWidth(x3-this.hdX);
+        this.proxy.setWidth(x - this.hdX);
 
         this.maxWidth = this.tree.outerCt.getWidth() - this.tree.innerBody.translatePoints(this.hdX).left;
     },
