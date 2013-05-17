@@ -26,7 +26,7 @@ MSG_DOESNOTEXISTS = u'Запись справочника с id=%s не найд
 
 
 class ObjectNotFound(Exception):
-    """ К виртуальным справочникам нельзя применить исключение DoesNotExists, 
+    """ К виртуальным справочникам нельзя применить исключение DoesNotExists,
         поэтому если справочник не работает с моделью, то используется это исключение """
     pass
 
@@ -36,7 +36,7 @@ class DictListWindowAction(Action):
     Действие, которое возвращает окно со списком элементов справочника.
     '''
     url = '/list-window$'
-    
+
     def create_window(self, request, context, mode):
         ''' Создаем и настраиваем окно '''
         base = self.parent
@@ -50,7 +50,7 @@ class DictListWindowAction(Action):
         if base.list_paging:
             win.grid.bottom_bar = ExtPagingBar(page_size = 25)
         return win
-            
+
     def create_columns(self, control, columns):
         ''' Добавляем отображаемые колонки. См. описание в базовом классе! '''
         for column in columns:
@@ -63,16 +63,16 @@ class DictListWindowAction(Action):
             else:
                 raise Exception('Incorrect parameter column.')
             control.add_column(**column_params)
-    
+
     def configure_list(self, win):
         base = self.parent
-        
+
         # Устанавливаем источники данных
         grid_store = ExtJsonStore(url = base.rows_action.get_absolute_url(), auto_load=True, remote_sort=True)
         grid_store.total_property = 'total'
         grid_store.root = 'rows'
         win.grid.set_store(grid_store)
-        
+
         if not base.list_readonly:
             # Доступны 3 события: создание нового элемента, редактирование или удаление имеющегося
             win.url_new_grid    = base.edit_window_action.get_absolute_url()
@@ -80,46 +80,46 @@ class DictListWindowAction(Action):
             win.url_delete_grid = base.delete_action.get_absolute_url()
 
             # Если разрешено копирование, то доступно ещё одно событие.
-            if base.allow_copy:
+            if getattr(base, 'allow_copy', False):
                 win.url_copy_grid = base.copy_action.get_absolute_url()
-    
+
     def run(self, request, context):
         win = self.create_window(request, context, mode=0)
         self.create_columns(win.grid, self.parent.list_columns)
         self.configure_list(win)
-        
+
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             win.make_read_only()
-        
+
         return ExtUIScriptResult(self.parent.get_list_window(win))
-    
+
 class DictSelectWindowAction(DictListWindowAction):
     '''
     Действие, возвращающее окно с формой выбора из справочника
     '''
     url = '/select-window$'
-    
+
     def run(self, request, context):
         base = self.parent
         win = self.create_window(request, context, mode=1)
         win.modal = True
         self.create_columns(win.grid, self.parent.list_columns)
         self.configure_list(win)
-        
+
         list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
         win.list_view.set_store(list_store)
-        
+
         # M prefer 12.12.10 >
         # win.column_name_on_select = "name"
         #-----:
         win.column_name_on_select = base.column_name_on_select
         # prefer <
-        
+
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             win.make_read_only()
-        
+
         return ExtUIScriptResult(self.parent.get_select_window(win))
 
 class DictEditWindowAction(Action):
@@ -130,7 +130,7 @@ class DictEditWindowAction(Action):
     def context_declaration(self):
         return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника'),
                 ACD(name='isGetData', default=False, type=bool, required=True, verbose_name = u'признак загрузки данных')]
-    
+
     def run(self, request, context):
         base = self.parent
         is_get_data = context.isGetData
@@ -139,7 +139,7 @@ class DictEditWindowAction(Action):
             obj = base.get_row(context.id)
         except base._nofound_exception:
             return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
-        
+
         # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
         create_new = True
         if isinstance(obj, dict) and obj.get('id') != None:
@@ -155,22 +155,22 @@ class DictEditWindowAction(Action):
         win.form.url = base.save_action.get_absolute_url()
         # укажем адрес для чтения данных
         win.data_url = base.edit_window_action.get_absolute_url()
-        
+
         # проверим право редактирования
         if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
             exclude_list = ['close_btn', 'cancel_btn']
             win.make_read_only(True, exclude_list)
-        
+
         # У окна может быть процедура доп. конфигурации под конкретный справочник
         if hasattr(win, 'configure_for_dictpack') and callable(win.configure_for_dictpack):
             win.configure_for_dictpack(action=self, pack=self.parent,
                                        request=request, context=context)
-        
+
         if not is_get_data:
             # если запрашивали не данные - вернем окно
             return ExtUIScriptResult(base.get_edit_window(win))
         else:
-            # если просили данные, то выжмем их из окна обратно в объект, 
+            # если просили данные, то выжмем их из окна обратно в объект,
             # т.к. в окне могли быть и другие данных (не из этого объекта)
             data_object = {}
             # т.к. мы не знаем какие поля должны быть у объекта - создадим все, которые есть на форме
@@ -203,13 +203,13 @@ class DictRowsAction(Action):
                 dict_list.append(item[0])
             elif isinstance(item, dict) and item.get('data_index'):
                 dict_list.append(item['data_index'])
-        
+
         if hasattr(self.parent, 'modify_rows_query') and callable(self.parent.modify_rows_query):
             rows = self.parent.get_rows_modified(offset, limit, filter, user_sort, request, context)
         else:
             rows = self.parent.get_rows(offset, limit, filter, user_sort)
         return PreJsonResult(rows, self.parent.secret_json, dict_list = dict_list)
-    
+
 class DictLastUsedAction(Action):
     '''
     Действие, которое возвращает список последних использованных действий
@@ -225,7 +225,7 @@ class ListGetRowAction(Action):
     url = '/item$'
     def context_declaration(self):
         return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
-    
+
     def run(self, request, context):
         try:
             result = self.parent.get_row(context.id)
@@ -239,8 +239,8 @@ class DictSaveAction(Action):
     '''
     url = '/save$'
     def context_declaration(self):
-        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]    
-    
+        return [ACD(name='id', default=0, type=int, required=True, verbose_name = u'id элемента справочника')]
+
     def run(self, request, context):
         try:
             if not context.id and self.parent.add_window:
@@ -249,24 +249,24 @@ class DictSaveAction(Action):
                 obj = utils.bind_request_form_to_object(request, self.parent.get_row, self.parent.edit_window)
         except self.parent._nofound_exception:
             return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
-        
-        # Проверка корректности полей сохраняемого объекта    
+
+        # Проверка корректности полей сохраняемого объекта
         result = self.parent.validate_row(obj, request)
         if result:
             assert isinstance(result, ActionResult)
             return result
-        
+
         result = self.parent.save_row(obj)
         if isinstance(result, OperationResult) and result.success == True:
             # узкое место. после того, как мы переделаем работу экшенов,
-            # имя параметра с идентификатором запси может уже называться не 
+            # имя параметра с идентификатором запси может уже называться не
             # id
             if 'm3_audit' in settings.INSTALLED_APPS:
                 AuditManager().write('dict-changes', user=request.user, model_object=obj, \
                                      type='new' if not context.id else 'edit')
             context.id = obj.id
         return result
-    
+
 class ListDeleteRowAction(Action):
     url = '/delete_row$'
     def run(self, request, context):
@@ -278,10 +278,10 @@ class ListDeleteRowAction(Action):
             objs = [self.parent.get_row(id) for id in ids]
         except self.parent._nofound_exception:
             return OperationResult.by_message(MSG_DOESNOTEXISTS % id)
-            
+
         result = self.parent.delete_row(objs)
-        if (isinstance(result, OperationResult) and 
-            result.success == True and 
+        if (isinstance(result, OperationResult) and
+            result.success == True and
                 'm3_audit' in settings.INSTALLED_APPS):
             for obj in objs:
                 AuditManager().write('dict-changes', user=request.user, model_object=obj, type='delete')
@@ -328,36 +328,36 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
     title = ''
     # Список колонок состоящий из кортежей (имя json поля, имя колонки в окне)
     list_columns = []
-    
+
     # Окно для редактирования элемента справочника:
     add_window = None  # Нового
     edit_window = None # Уже существующего
-    
+
     # Класс отвечающие за отображение форм:
-    list_form   = ExtDictionaryWindow # Форма списка 
+    list_form   = ExtDictionaryWindow # Форма списка
     select_form = ExtDictionaryWindow # Форма выбора
-    
+
     # Настройки секретности. Если стоит истина, то в результат добавляется флаг секретности
     secret_json = False
     secret_form = False
-    
+
     # Ширина и высота окна
-    width, height = 510, 400     
-    
+    width, height = 510, 400
+
     list_paging = True
     list_readonly = False
-    
-    # Значение колонки по-умолчанию, которое будет подбираться 
+
+    # Значение колонки по-умолчанию, которое будет подбираться
     # при выборе значения из справочника
     column_name_on_select = 'name'
 
     # Добавлена ли возможность копирования
     allow_copy = False
-    
+
     # права доступа для базовых справочников
     PERM_EDIT = 'edit'
     sub_permissions = {PERM_EDIT: u'Редактирование'}
-    
+
     def __init__(self):
         super(BaseDictionaryActions, self).__init__()
         # В отличие от обычных паков в этом экшены создаются самостоятельно, а не контроллером
@@ -375,46 +375,46 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
         self.actions = [self.list_window_action, self.select_window_action, self.edit_window_action,\
                         self.rows_action, self.last_used_action, self.row_action, self.save_action,\
                         self.delete_action, self.copy_action]
-        
-        # Исключение перехватываемое в экшенах, если объект не найден 
+
+        # Исключение перехватываемое в экшенах, если объект не найден
         self._nofound_exception = ObjectNotFound
-    
-    #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================    
+
+    #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ АДРЕСА =====================
     def get_list_url(self):
         '''
-        Возвращает адрес формы списка элементов справочника. 
+        Возвращает адрес формы списка элементов справочника.
         Используется для присвоения адресов в прикладном приложении.
         '''
         return self.list_window_action.get_absolute_url()
-    
+
     #ISelectablePack
     def get_select_url(self):
         '''
-        Возвращает адрес формы списка элементов справочника. 
+        Возвращает адрес формы списка элементов справочника.
         Используется для присвоения адресов в прикладном приложении.
         '''
         return self.select_window_action.get_absolute_url()
-    
+
     #ISelectablePack
     def get_edit_url(self):
         '''
         Возвращает адрес формы редактирования элемента справочника.
         '''
         return self.edit_window_action.get_absolute_url()
-    
+
     def get_rows_url(self):
         '''
         Возвращает адрес по которому запрашиваются элементы грида
         '''
         return self.rows_action.get_absolute_url()
-    
+
     #ISelectablePack
     def get_autocomplete_url(self):
         '''
         Возвращает адрес по которому запрашиваются элементы подходящие введенному в поле тексту
         '''
         return self.get_rows_url()
-        
+
     #==================== ФУНКЦИИ ВОЗВРАЩАЮЩИЕ ДАННЫЕ =====================
     def get_rows(self, offset, limit, filter, user_sort=''):
         '''
@@ -424,40 +424,40 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
 
     def get_row(self, id):
         '''
-        Метод, который возвращает запись справочника с указанным идентификатором.  
+        Метод, который возвращает запись справочника с указанным идентификатором.
         '''
         raise NotImplementedError()
-    
+
     def get_last_used(self):
         '''
         Метод, который возвращает список записей справочника, которые были выбраны
-        конкретным пользователем в последнее время. 
+        конкретным пользователем в последнее время.
         Записи возвращаются в виде обычного питоновского списка.
         '''
         raise NotImplementedError()
-    
+
     def validate_row(self, obj, request):
         '''
         Метод отвечает за проверку корректности полей сохраняемого объекта. Если все в порядке,
         то метод не возвращает ничего, иначе результат будет возвращен экшену.
-        Т.е. вернуть можно любой из поддерживаемых в results.py объектов. 
+        Т.е. вернуть можно любой из поддерживаемых в results.py объектов.
         '''
         pass
-    
+
     def save_row(self, obj):
         '''
-        Метод, который выполняет сохранение записи справочника. На момент запуска метода 
+        Метод, который выполняет сохранение записи справочника. На момент запуска метода
         в параметре object находится именно та запись справочника, которую необходимо сохранить.
         '''
         raise NotImplementedError()
-    
+
     def delete_row(self, obj):
         '''
-        Метод, который выполняет удаление записи справочника. На момент запуска метода в 
+        Метод, который выполняет удаление записи справочника. На момент запуска метода в
         параметре object находится именно та запись справочника, которую необходимо удалить.
         '''
         raise NotImplementedError()
-    
+
     #ISelectablePack
     def get_display_text(self, key, attr_name = None):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
@@ -478,13 +478,13 @@ class BaseDictionaryActions(ActionPack, ISelectablePack):
 
     #====================== РАБОТА С ОКНАМИ ===============================
     def get_list_window(self, win):
-        ''' Возвращает настроенное окно типа "Список" справочника '''        
+        ''' Возвращает настроенное окно типа "Список" справочника '''
         return win
-    
+
     def get_select_window(self, win):
         ''' Возвращает настроенное окно выбора из справочника '''
         return win
-    
+
     def get_edit_window(self, win):
         ''' Возвращает настроенное окно редактирования элемента справочника '''
         return win
@@ -498,18 +498,18 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
     model = None
     # Список полей модели по которым будет идти поиск
     filter_fields = []
-    
+
     # Порядок сортировки элементов списка. Работает следующим образом:
     # 1. Если в list_columns модели списка есть поле code, то устанавливается сортировка по возрастанию этого поля;
     # 2. Если в list_columns модели списка нет поля code, но есть поле name, то устанавливается сортировка по возрастанию поля name;
     # Пример list_sort_order = ['code', '-name']
     list_sort_order = None
-    
+
     def __init__(self):
         super(BaseDictionaryModelActions, self).__init__()
         if self.model:
             self._nofound_exception = self.model.DoesNotExist
-    
+
     def get_rows_modified(self, offset, limit, filter, user_sort='', request=None, context=None):
         '''
         Возвращает данные для грида справочника
@@ -526,7 +526,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
             query = query[offset: offset + limit]
         result = {'rows': list(query), 'total': total}
         return result
-    
+
     def get_rows(self, offset, limit, filter, user_sort=''):
         sort_order = user_sort.split(',') if user_sort else self.list_sort_order
         filter_fields = self._default_filter()
@@ -537,14 +537,14 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
             query = query[offset: offset + limit]
         result = {'rows': list(query.all()), 'total': total}
         return result
-    
+
 #    def modify_rows_query(self, query, request, context):
 #        '''
-#        Модифицирует запрос на получение данных. Данный метод необходимо определить в 
+#        Модифицирует запрос на получение данных. Данный метод необходимо определить в
 #        дочерних классах.
 #        '''
 #        return query
-    
+
     def get_row(self, id):
         assert isinstance(id, int)
         # Если id нет, значит нужно создать новый объект
@@ -553,7 +553,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         else:
             record = self.model.objects.get(id = id)
         return record
-    
+
     @transaction.commit_on_success
     def save_row(self, obj):
         obj.save()
@@ -569,7 +569,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
                 message = u'Элемент не существует в базе данных.'
             else:
                 for obj in objs:
-                    if (isinstance(obj, BaseObjectModel) or 
+                    if (isinstance(obj, BaseObjectModel) or
                         (hasattr(obj, 'safe_delete') and callable(obj.safe_delete))):
                         try:
                             obj.safe_delete()
@@ -593,32 +593,32 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
             else:
                 # все левые ошибки выпускаем наверх
                 raise
-                     
+
     def _default_filter(self):
         '''
-        Устанавливаем параметры поиска по умолчанию 'code' и 'name' в случае, 
+        Устанавливаем параметры поиска по умолчанию 'code' и 'name' в случае,
         если у модели есть такие поля
         '''
-        filter_fields = self.filter_fields                     
-        if not filter_fields:            
+        filter_fields = self.filter_fields
+        if not filter_fields:
             filter_fields.extend([field.attname for field in self.model._meta.local_fields \
                                   if field.attname in ('code', 'name')])
         return filter_fields
 
-            
+
 class BaseEnumerateDictionary(BaseDictionaryActions):
     '''
     Базовый экшен пак для построения справочников основанных на перечислениях, т.е.
-    предопределенных неизменяемых наборах значений. 
+    предопределенных неизменяемых наборах значений.
     '''
     # Класс перечисление с которым работает справочник
     enumerate_class = None
-    
+
     list_paging = False # Значений как правило мало и они влезают в одну страницу грида
     list_readonly = True
     list_columns = [('code', 'Код', 15),
                     ('name', 'Наименование')]
-    
+
     def get_rows(self, offset, limit, filter, user_sort=''):
         ''' Возвращает данные для грида справочника '''
         assert self.enumerate_class != None, 'Attribute enumerate_class is not defined.'
@@ -637,7 +637,7 @@ class BaseEnumerateDictionary(BaseDictionaryActions):
         assert isinstance(id, int)
         assert id in self.enumerate_class.keys(), 'Enumarate key "%s" is not defined in %s' % (id, self.enumerate_class)
         return id
-    
+
     #ISelectablePack
     def get_display_text(self, key, attr_name = None):
         """ Получить отображаемое значение записи (или атрибута attr_name) по ключу key """
