@@ -703,6 +703,7 @@ class ActionController(object):
             # Бежим по пакам
             for pack in clazz.subpacks:
                 self._build_pack_node(pack, stack)
+                pack.controller = self
             stack.pop()
         else:
             clazz.controller = self
