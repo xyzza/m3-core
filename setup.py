@@ -9,7 +9,7 @@ def read(fname):
     except IOError:
         return ''
 
-setup(name='m3',
+setup(name='m3-core',
       version='2.0-alpha',
       url='https://src.bars-open.ru/py/m3/m3',
       license='Apache License, Version 2.0',
