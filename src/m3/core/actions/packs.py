@@ -10,7 +10,7 @@ from m3.ui.actions import utils
 from m3.ui.ext.containers import ExtPagingBar
 from m3.ui.actions.results import ActionResult
 from m3.db import BaseObjectModel, safe_delete
-from m3.core.exceptions import RelatedError
+from m3.core import RelatedError
 from m3.helpers import logger
 
 try:

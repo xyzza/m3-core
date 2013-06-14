@@ -9,7 +9,7 @@ from django.utils.importlib import import_module
 from django import http
 
 from m3.helpers import logger
-from m3.core.exceptions import ApplicationLogicException
+from m3.core import ApplicationLogicException
 
 #==============================================================================
 # Перенаправление импортов из вложенных модулей
@@ -703,6 +703,7 @@ class ActionController(object):
             # Бежим по пакам
             for pack in clazz.subpacks:
                 self._build_pack_node(pack, stack)
+                pack.controller = self
             stack.pop()
         else:
             clazz.controller = self

@@ -1,9 +1,13 @@
 #coding: utf-8
+import os
 from setuptools import setup, find_packages
 
-requires = []
-with open('src/requires.txt', 'r') as f:
-    requires.extend(f.readlines())
+def read(fname):
+    try:
+        return open(os.path.join(os.path.dirname(__file__),
+            fname)).read()
+    except IOError:
+        return ''
 
 setup(name='m3',
       version='2.0-alpha',
@@ -13,8 +17,9 @@ setup(name='m3',
       author_email='telepenin@bars-open.ru',
       package_dir={'': 'src'},
       packages=find_packages('src'),
-      description=u'Платформа М3',
-      install_requires=requires,
+      description=read('DESCRIPTION'),
+      install_requires=read('REQUIREMENTS'),
+      long_description=read('README'),
       include_package_data=True,
       classifiers=[
         'Intended Audience :: Developers',
@@ -24,4 +29,4 @@ setup(name='m3',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
       ],
-      )
+)
