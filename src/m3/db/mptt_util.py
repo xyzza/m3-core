@@ -37,6 +37,10 @@ def rebuild_mptt_tree(model, manage_mptt_signals=True, query_manager='objects'):
             иначе их надо отключать/включать вручную в вызывающем методе
         query_manager - вместо штатного менеджера запросов objects можно использовать собственный
     '''
+
+    import warnings
+    warnings.warn(DeprecationWarning('''Use MyObj.tree.rebuild() instead
+    http://django-mptt.github.com/django-mptt/mptt.managers.html?highlight=rebuild#mptt.managers.TreeManager.rebuild'''))
     model_manager = getattr(model, query_manager)
 
     def build_node(model, opts, parent_id, tree_id, left, level):
