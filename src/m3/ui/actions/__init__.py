@@ -3,6 +3,7 @@ import threading
 import inspect
 import abc
 import re
+import importlib
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -29,6 +30,18 @@ ACD = ActionContextDeclaration
 
 
 _clean_url = lambda s: re.sub(r'^[/^]*(.*?)[$/]*$', r'\1', s)
+
+
+def _import_by_path(path):
+    """
+    Импортирует объект по пути @path вида "full.package.path.to.some_object"
+    """
+    match = re.match(r'^(?:(.*)\.)?([^.]+)$', path)
+    if match is None:
+        raise ValueError(u'Wrong path to import: %r' % path)
+    module_name, obj_name = match.groups()
+    module = importlib.import_module(module_name)
+    return getattr(module, obj_name)
 
 
 #==============================================================================
@@ -210,25 +223,65 @@ class LegacyPermissionChecker(AbstractPermissionChecker):
                 return False
         return True
 
-#========================== экземпляр проверятеля прав ========================
-_OLD_PERMISSION_CHECKING = getattr(
-    settings, 'CONTROLLER_SHOLUD_USE_OLD_PERMISSION_CHECKING', True)
 
-if _OLD_PERMISSION_CHECKING:
-    # backend проверки прав, совместимый со старыми проектами
-    _permission_checker = LegacyPermissionChecker()
-else:
-    if hasattr(settings, 'M3_PERMISSION_CHECKER'):
-        # в настройках можно указать свой backend для проверки прав
-        _permission_checker = settings.M3_PERMISSION_CHECKER()
-        assert isinstance(_permission_checker, AbstractPermissionChecker)
-    else:
-        # если backend не задан в настройках, то исходим из того,
-        # подключены ли пользователи Django
-        if 'django.contrib.auth' in settings.INSTALLED_APPS:
-            _permission_checker = AuthUserPermissionChecker()
+#========================== экземпляр проверятеля прав ========================
+class LazyContainer(object):
+    """
+    Ленивая обёртка для объектов, указываемых в settings.
+    Предназначена для позднеё загрузки объектов - по первому обращению
+    """
+
+    def __init__(self, fabric):
+        self._fabric = fabric
+
+    def _get_obj(self):
+        if not hasattr(self, '_cache'):
+            self._cache = self._fabric()
+        return self._cache
+
+    def __getattr__(self, attr):
+        if attr == '_cache':
+            return super(LazyContainer, self).__getattribute__(attr)
         else:
-            _permission_checker = BypassPermissionChecker()
+            return getattr(self._get_obj(), attr)
+
+
+def _permission_checker_fabric():
+    """
+    Получение экземпляра permission checker
+    """
+    _OLD_PERMISSION_CHECKING = getattr(
+        settings, 'CONTROLLER_SHOLUD_USE_OLD_PERMISSION_CHECKING', True)
+
+    if _OLD_PERMISSION_CHECKING:
+        # backend проверки прав, совместимый со старыми проектами
+        result = LegacyPermissionChecker
+    else:
+        path = getattr(settings, 'M3_PERMISSION_CHECKER', None)
+        if path is None:
+            # если backend не задан в настройках, то исходим из того,
+            # подключены ли пользователи Django
+            if 'django.contrib.auth' in settings.INSTALLED_APPS:
+                result = AuthUserPermissionChecker
+            else:
+                result = BypassPermissionChecker
+        else:
+            # в настройках можно указать свой backend для проверки прав
+            if isinstance(path, str):
+                # указан строкой - импортируем
+                result = _import_by_path(path)
+            if not (inspect.isclass(result) and issubclass(
+                    result, AbstractPermissionChecker)):
+                raise TypeError(
+                    u'M3_PERMISSION_CHECKER option value must be '
+                    u'a string or class!'
+                )
+    # бэкенд инстанцируется для дальнейшего использования
+    return result()
+
+
+# ленивый экземпляр бэкенда проверки прав
+_permission_checker = LazyContainer(_permission_checker_fabric)
 
 
 #========================== ИСКЛЮЧЕНИЯ ========================================
