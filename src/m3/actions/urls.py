@@ -13,12 +13,9 @@ from django.conf import settings
 from django.utils import importlib
 from django.conf import urls
 
-from m3.data import caching
-from m3.ui import actions
-from shortcuts import get_instance
+from m3 import caching
 
-
-from m3.ui.actions import ControllerCache
+from m3.actions import ControllerCache
 
 
 def get_app_urlpatterns():

@@ -8,8 +8,7 @@ from django.conf import settings
 from django.utils.importlib import import_module
 from django import http
 
-from m3.helpers import logger
-from m3.core import ApplicationLogicException
+from django.utils.log import logger
 
 #==============================================================================
 # Перенаправление импортов из вложенных модулей
@@ -718,6 +717,8 @@ class ActionController(object):
         '''
         Непосредственный вызов экшена с отработкой всех событий
         '''
+        from m3 import ApplicationLogicException
+
         # проверим что права на выполнение есть
         allowed = _permission_checker.has_action_permission(request, action)
 

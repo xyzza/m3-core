@@ -9,8 +9,7 @@ import json
 from decimal import Decimal
 
 from django.utils.encoding import force_unicode
-
-from m3.helpers import logger, date2str
+from django.utils.log import logger
 
 
 #============================= ИСКЛЮЧЕНИЯ =====================================
@@ -349,10 +348,10 @@ class ActionContext(object):
         '''
         def encoder_extender(obj):
             if isinstance(obj, datetime.datetime):
-                result = date2str(obj)
+                result = obj.strftime('%d.%m.%Y')
             # WTF? А где время в верхней строке?
             if isinstance(obj, datetime.date):
-                result = date2str(obj)
+                result = obj.strftime('%d.%m.%Y')
             elif isinstance(obj, datetime.time):
                 result = obj.strftime('%H:%M')
             else:
