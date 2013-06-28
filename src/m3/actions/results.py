@@ -40,7 +40,9 @@ class ActionResult(object):
         pass
 
     def process_http_params(self, response):
-        response.update(self.http_params)
+        if self.http_params:
+            for k, v in self.http_params.items():
+                response[k] = v
         return response
 
 

@@ -2,7 +2,7 @@
 '''
 Вспомогательные функции используемые в паках
 '''
-from m3.core.exceptions import ApplicationLogicException
+from m3 import ApplicationLogicException
 import json
 
 from django.db.models.query_utils import Q
@@ -11,7 +11,7 @@ from django.db import models
 
 def apply_sort_order(query, columns, sort_order):
     '''
-    Закладывает на запрос порядок сортировки. Сначала если в описании колонок columns есть code, 
+    Закладывает на запрос порядок сортировки. Сначала если в описании колонок columns есть code,
     то сортируем по нему, иначе если есть по name. Если задан sort_order, то он главнее всех.
     '''
     if isinstance(sort_order, list):
@@ -31,8 +31,8 @@ def apply_sort_order(query, columns, sort_order):
                     order = 'name'
                 elif name == 'code':
                     order = 'code'
-                    break 
-                
+                    break
+
         query = query.order_by(order) if order else query.all()
     return query
 
@@ -211,7 +211,7 @@ def bind_request_form_to_object(request, obj_factory, form, request_id_name = 'i
     # Получаем наш объект по id и биндим форму к нему
     id = extract_int(request, request_id_name)
     obj = obj_factory(id)
-    
+
     # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
     create_new = True
     if isinstance(obj, dict) and obj.get('id') != None:
@@ -223,23 +223,23 @@ def bind_request_form_to_object(request, obj_factory, form, request_id_name = 'i
     win = form(create_new = create_new)
     win.form.bind_to_request(request)
     win.form.to_object(obj, exclusion)
-    
+
     # Может возникнуть трудноуловимая ошибка, когда в request был id=0 и
     # он присвоился obj.id. В БД не должно быть pk=0
     if not id:
         obj.id = None
-    
+
     return obj
 
 def safe_delete_record(model, id=None):
     '''
     Безопасное удаление записи в базе. В отличие от джанговского ORM не удаляет каскадно.
     Возвращает True в случае успеха, иначе False
-    @deprecated нужно использовать BaseModel.safe_delete() или m3.db.safe_delete(obj) 
+    @deprecated нужно использовать BaseModel.safe_delete() или m3.db.safe_delete(obj)
     '''
     import warnings
     warnings.warn('ui.actions.utils.safe_delete_record(Model, id) must by replaced with m3.db.safe_delete(obj)', DeprecationWarning)
-    
+
     from m3.db import safe_delete
     assert (isinstance(model, models.Model) or issubclass(model, models.Model))
     assert (isinstance(id, int) or isinstance(id, long) or id is None)
@@ -273,10 +273,10 @@ def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_nam
         nodes = branch_node.get_descendants().select_related(parent_field_name)
     else:
         nodes = query.all().select_related(parent_field_name)
-        
+
     if filter:
         nodes = nodes.filter(filter)
-    
+
     # Из каждого узла создаем полный путь до корня
     paths = []
     processed_nodes = set()
@@ -300,17 +300,17 @@ def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_nam
 
     if len(paths) == 0:
         return []
-    
+
     def create_one_tree(path):
         ''' Превращает путь в дерево с понимаемое ExtJS гридом '''
         tree = path[0]
         for i in range(1, len(path)):
             path[i - 1].children = [path[i]]
         return tree
-    
-    # Начальное дерево в удобоваримом для грида формате 
+
+    # Начальное дерево в удобоваримом для грида формате
     tree = [create_one_tree(paths[0])]
-    
+
     # Слияние путей в одно дерево
     def merge(sub_tree, path_slice):
         try:
@@ -323,10 +323,10 @@ def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_nam
             else:
                 # Значит сливаемый путь оказался длиннее чем высота поддерева
                 sub_tree[index].children = [create_one_tree(path_slice[1:])]
-                
+
     for path in paths[1:]:
         merge(tree, path)
-    
+
     def set_tree_attributes(sub_tree):
         '''  Пробегает дерево и устанавливает узлам атрибуты expanded и leaf '''
         if not hasattr(sub_tree, 'children') or len(sub_tree.children) == 0:
@@ -341,35 +341,35 @@ def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_nam
             sub_tree.expanded = True
             for st in sub_tree.children:
                 set_tree_attributes(st)
-    
+
     for sub_tree in tree:
         set_tree_attributes(sub_tree)
-    
+
     return tree
-    
+
 def extract_int(request, key):
-    ''' Извлекает целое число из запроса '''            
+    ''' Извлекает целое число из запроса '''
     try:
         value = request.REQUEST.get(key, None)
     except IOError:
         # В некоторых браузерах (предполагается что в ie) происходит следующие:
         # request.REQUEST читается и в какой-то момент связь прекращается
-        # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка 
+        # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка
         # IOError: request data read error
-        
+
         #logger.warning(str(err))
         raise
-        
+
     if value:
         # если по каким-то причинам пришло не число, а что-то другое
         try:
             value = int(value)
         except ValueError:
-            raise ApplicationLogicException('Произошла ошибка при конвертации.')    
+            raise ApplicationLogicException('Произошла ошибка при конвертации.')
         return value
     else:
         return 0
-    
+
 def extract_int_list(request, key):
     ''' Извлекает список целых чисел из запроса '''
     value = request.REQUEST.get(key, '')

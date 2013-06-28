@@ -2,16 +2,18 @@
 
 from django.db import transaction
 from django.conf import settings
+from django.utils.log import logger
 
-from m3.ui.actions import ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult, ACD
-from m3.ui.ext.windows.complex import ExtDictionaryWindow
-from m3.ui.ext.misc.store import ExtJsonStore
-from m3.ui.actions import utils
-from m3.ui.ext.containers import ExtPagingBar
-from m3.ui.actions.results import ActionResult
+from m3.actions import (
+    ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult, ACD
+)
+from m3_ext.ui.windows.complex import ExtDictionaryWindow
+from m3_ext.ui.misc.store import ExtJsonStore
+from m3_ext.ui.containers import ExtPagingBar
+from m3.actions import utils
+from m3.actions.results import ActionResult
 from m3.db import BaseObjectModel, safe_delete
-from m3.core import RelatedError
-from m3.helpers import logger
+from m3 import RelatedError
 
 try:
     from m3_audit import AuditManager
@@ -19,15 +21,20 @@ except ImportError:
     # При сборке документации, внешняя Django ничего не знает про m3_audit
     logger.warning('m3_audit import error')
 
-from m3.ui.actions.interfaces import ISelectablePack
+from m3.actions.interfaces import ISelectablePack
 
-MSG_DOESNOTEXISTS = u'Запись справочника с id=%s не найдена в базе данных.<br/>' + \
-                    u'Возможно, она была удалена. Пожалуйста, обновите таблицу.'
+MSG_DOESNOTEXISTS = (
+    u'Запись справочника с id=%s не найдена в базе данных.<br/>'
+    u'Возможно, она была удалена. Пожалуйста, обновите таблицу.'
+)
 
 
 class ObjectNotFound(Exception):
-    """ К виртуальным справочникам нельзя применить исключение DoesNotExists,
-        поэтому если справочник не работает с моделью, то используется это исключение """
+    """
+    К виртуальным справочникам нельзя применить исключение DoesNotExists,
+    поэтому если справочник не работает с моделью,
+    то используется это исключение
+    """
     pass
 
 

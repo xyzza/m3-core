@@ -6,17 +6,17 @@
 from django.db import transaction
 from django.dispatch import Signal
 
-from m3.ui.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult,\
+from m3.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult,\
     ActionContextDeclaration, ACD
-from m3.ui.actions import utils
+from m3.actions import utils
 from m3.ui.ext.misc.store import ExtJsonStore
 from m3.ui.ext.windows.complex import ExtDictionaryWindow
-from m3.ui.actions.packs import ListDeleteRowAction, MSG_DOESNOTEXISTS, ObjectNotFound
+from m3.actions.packs import ListDeleteRowAction, MSG_DOESNOTEXISTS, ObjectNotFound
 from m3.ui.ext.containers import ExtPagingBar
 from m3.db import BaseObjectModel, safe_delete
 from m3.core import RelatedError
-from m3.ui.actions.results import ActionResult
-from m3.ui.actions.interfaces import ISelectablePack
+from m3.actions.results import ActionResult
+from m3.actions.interfaces import ISelectablePack
 
 
 class TreeGetNodesAction(Action):

@@ -7,14 +7,10 @@ import json
 
 from django import http
 from django.conf import settings
+from django.utils.log import logger
 
-from m3.helpers import logger
-from m3.ui.actions import Action, ACD
-from m3.ui.actions.results import ActionResult
-
-
-
-
+from m3.actions import Action, ACD
+from m3.actions.results import ActionResult
 
 # !!!!!
 # для работы данного модуля необходимо наличие приложения 'm3_mutex' в INSTALLED_APPS приложения
@@ -221,7 +217,7 @@ class AsyncAction(Action):
             return self.request_operation(request, context)
         elif context.command == self.COMMAND_RESULT:
             return self.result_operation(request, context)
-        
+
     def start_operation(self, request, context):
         worker_instance = self._worker_instance(request, context)
         # если операция уже запущенна, то перезапустим
@@ -241,4 +237,4 @@ class AsyncAction(Action):
 
 
 
-  
+

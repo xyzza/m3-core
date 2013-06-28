@@ -235,10 +235,10 @@ class ActionContext(object):
     RequiredFailed = RequiredFailed
 
     class ValuesList():
-        '''
+        """
         Класс для описания параметров, которые будут передаваться в виде
         списка значений, разделенных определенным символом
-        '''
+        """
         def __init__(self, separator=',', type=int, allow_empty=True):
             # разделитель элементов
             self.separator = separator
@@ -247,9 +247,11 @@ class ActionContext(object):
             self.allow_empty = allow_empty
 
     def __init__(self, **kwargs):
-        '''
+        """
         Параметры kwargs для быстрой инициализации
-        '''
+        """
+        from m3 import date2str
+        self._date2str = date2str
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -333,9 +335,9 @@ class ActionContext(object):
         self.check_required(rules)
 
     def check_required(self, rules):
-        '''
+        """
         Проверяет наличие обязательных параметров
-        '''
+        """
         if not rules:
             return
         for rule in rules:
@@ -343,17 +345,17 @@ class ActionContext(object):
                 raise ActionContext.RequiredFailed(rule.human_name())
 
     def json(self):
-        '''
+        """
         Рендеринг контекста в виде javascript объекта
-        '''
+        """
         def encoder_extender(obj):
             if isinstance(obj, datetime.datetime):
-                result = obj.strftime('%d.%m.%Y')
+                result = self._date2str(obj)
             # WTF? А где время в верхней строке?
             if isinstance(obj, datetime.date):
-                result = obj.strftime('%d.%m.%Y')
+                result = self._date2str(obj)
             elif isinstance(obj, datetime.time):
-                result = obj.strftime('%H:%M')
+                result = self._date2str(obj, '%H:%M')
             else:
                 result = force_unicode(obj)
 

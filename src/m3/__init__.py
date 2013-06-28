@@ -12,10 +12,23 @@ from django.db import models as dj_models
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.contrib import auth
+from django.utils import datetime_safe
 
 import actions
 
 from actions.urls import get_app_urlpatterns
+
+
+def date2str(date, template=None):
+    """
+    datetime.strftime глючит с годом < 1900
+    типа обходной маневр (взято из django)
+    WARNING from django:
+    # This library does not support strftime's \"%s\" or \"%y\" format strings.
+    # Allowed if there's an even number of \"%\"s because they are escaped.
+    """
+    return datetime_safe.new_datetime(date).strftime(
+        template or settings.DATE_FORMAT or '%d.%m.%Y')
 
 
 class AutoLogout(object):
