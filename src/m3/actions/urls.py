@@ -1,21 +1,37 @@
 #coding: utf-8
-'''
+"""
 Хелперы для отработки расширяемых конфигураций url'ов
 Created on 20.05.2010
 
 @author: akvarats
-'''
+"""
 
 import collections
 import inspect
+
+import warnings
 
 from django.conf import settings
 from django.utils import importlib
 from django.conf import urls
 
+
 from m3 import caching
 
-from m3.actions import ControllerCache
+from m3.actions import ControllerCache, Action
+
+
+def _get_instance(obj):
+    if inspect.isclass(obj):
+        warnings.warn(
+            message=(
+                u"Возможность использования классов экшнов/паков"
+                u" вместо экземпляров, будет ликвидирована!"
+            ),
+            category=FutureWarning
+        )
+        return obj()
+    return obj
 
 
 def get_app_urlpatterns():
@@ -76,10 +92,10 @@ def get_url(action):
     Возвращает абсолютный путь до
     '''
     names = []
-    if isinstance(action, actions.Action):
+    if isinstance(action, Action):
         # гениальных ход! - с чем пришли, то и ищем :)
         names.append(action.get_absolute_url())
-    elif inspect.isclass(action) and issubclass(action, actions.Action):
+    elif inspect.isclass(action) and issubclass(action, Action):
         names.append("%s.%s" % (action.__module__, action.__name__))
     elif isinstance(action, str):
         names.append(action)
@@ -116,7 +132,7 @@ def get_pack_by_url(url):
         if hasattr(pack, 'subpacks'):
             packs.extend(pack.subpacks)
 
-        cleaned_pack = get_instance(pack)
+        cleaned_pack = _get_instance(pack)
         if url == cleaned_pack.__class__.absolute_url():
             return cleaned_pack
     return None
@@ -183,7 +199,7 @@ def inner_name_cache_handler(for_actions=True):
 
     packs = collections.deque([])
 
-    controllers = actions.ControllerCache.get_controllers()
+    controllers = ControllerCache.get_controllers()
 
     # считываем паки верхнего уровня
     for controller in controllers:
@@ -216,7 +232,7 @@ def inner_name_cache_handler(for_actions=True):
                 # если имеем дело с экземпляром
                 # экшена, то ключем будет его
                 # полный url
-                if isinstance(action, actions.Action):
+                if isinstance(action, Action):
                     cleaned_action = action
                     url = cleaned_action.get_absolute_url()
                     long_class_name = (
@@ -229,7 +245,7 @@ def inner_name_cache_handler(for_actions=True):
                     keys.extend([url, long_class_name])
                 else:
                     # неважно что нам передали, нам нужен экземпляр класса
-                    cleaned_action = get_instance(action)
+                    cleaned_action = _get_instance(action)
                     # TODO: здесь url может быть не
                     # правильный, т.к. мы сами создали
                     # экземпляр и у него нет ни Pack, ни
@@ -258,13 +274,17 @@ def inner_name_cache_handler(for_actions=True):
                 for key in keys:
                     result[key] = cache_object
         else:
-            cleaned_pack = get_instance(pack)
+            cleaned_pack = _get_instance(pack)
             url = cleaned_pack.__class__.absolute_url()
             cache_object = (cleaned_pack.__class__, url, cleaned_pack)
             # регистрируем как полный класс с модулем, так и просто имя класса
-            keys = [(cleaned_pack.__class__.__module__ + '.' +
-                        cleaned_pack.__class__.__name__),
-                    cleaned_pack.__class__.__name__]
+            keys = [
+                '%s.%s' % (
+                    cleaned_pack.__class__.__module__,
+                    cleaned_pack.__class__.__name__
+                ),
+                cleaned_pack.__class__.__name__
+            ]
             # регистрируем shortname
             shortname = get_shortname(cleaned_pack)
             if shortname:
