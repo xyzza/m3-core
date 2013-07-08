@@ -15,7 +15,9 @@ def disable_mptt_signals(model):
     # Начиная с версии 0.5 сигналов в MPTT больше нет
     if mptt.VERSION < (0, 5):
         from mptt import signals as mptt_signals
-        model_signals.pre_save.disconnect(receiver = mptt_signals.pre_save, sender = model)
+        model_signals.pre_save.disconnect(
+            receiver=mptt_signals.pre_save, sender=model)
+
 
 def enable_mptt_signals(model):
     '''
@@ -23,24 +25,36 @@ def enable_mptt_signals(model):
     '''
     if mptt.VERSION < (0, 5):
         from mptt import signals as mptt_signals
-        model_signals.pre_save.connect(receiver = mptt_signals.pre_save, sender = model)
+        model_signals.pre_save.connect(
+            receiver=mptt_signals.pre_save, sender=model)
 
-def rebuild_mptt_tree(model, manage_mptt_signals=True, query_manager='objects'):
-    '''
+
+def rebuild_mptt_tree(
+        model, manage_mptt_signals=True, query_manager='objects'):
+    """
     Метод пересчета атрибутов MPTT-модели. Может использоваться:
     - при включении новой модели в MPTT
     - при массовой загрузке данных
 
     Параметры:
         model - сама пересчитываемая модель
-        manage_mptt_signals - признак выполнения отключения/включения сигналов MPTT для обработки дерева,
+        manage_mptt_signals - признак выполнения отключения/включения
+            сигналов MPTT для обработки дерева,
             иначе их надо отключать/включать вручную в вызывающем методе
-        query_manager - вместо штатного менеджера запросов objects можно использовать собственный
-    '''
+        query_manager - вместо штатного менеджера запросов objects
+            можно использовать собственный
+    """
 
     import warnings
-    warnings.warn(DeprecationWarning('''Use MyObj.tree.rebuild() instead
-    http://django-mptt.github.com/django-mptt/mptt.managers.html?highlight=rebuild#mptt.managers.TreeManager.rebuild'''))
+    warnings.warn(
+        (
+            'Use MyObj.tree.rebuild() instead '
+            'http://django-mptt.github.com/django-mptt/mptt.managers'
+            '.html?highlight=rebuild#mptt.managers.TreeManager.rebuild'
+        ),
+        DeprecationWarning,
+        stacklevel=2
+    )
     model_manager = getattr(model, query_manager)
 
     def build_node(model, opts, parent_id, tree_id, left, level):

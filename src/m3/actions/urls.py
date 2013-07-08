@@ -28,7 +28,8 @@ def _get_instance(obj):
                 u"Возможность использования классов экшнов/паков"
                 u" вместо экземпляров, будет ликвидирована!"
             ),
-            category=FutureWarning
+            category=FutureWarning,
+            stacklevel=2,
         )
         return obj()
     return obj

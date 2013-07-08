@@ -238,7 +238,12 @@ def safe_delete_record(model, id=None):
     @deprecated нужно использовать BaseModel.safe_delete() или m3.db.safe_delete(obj)
     '''
     import warnings
-    warnings.warn('ui.actions.utils.safe_delete_record(Model, id) must by replaced with m3.db.safe_delete(obj)', DeprecationWarning)
+    warnings.warn((
+        'ui.actions.utils.safe_delete_record(Model, id)'
+        'must by replaced with m3.db.safe_delete(obj)'),
+        DeprecationWarning,
+        stacklevel=2
+    )
 
     from m3.db import safe_delete
     assert (isinstance(model, models.Model) or issubclass(model, models.Model))
