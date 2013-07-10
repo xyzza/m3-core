@@ -6,7 +6,7 @@ Created on 25.10.2011
 '''
 from django import template
 
-from m3.helpers import urls
+from m3.actions import urls
 
 register = template.Library()
 

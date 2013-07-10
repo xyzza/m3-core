@@ -6,15 +6,16 @@
 from django.db import transaction
 from django.dispatch import Signal
 
-from m3.actions import ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult,\
+from m3_ext.ui.results import ExtUIScriptResult
+from m3.actions import ActionPack, Action, PreJsonResult, OperationResult,\
     ActionContextDeclaration, ACD
 from m3.actions import utils
-from m3.ui.ext.misc.store import ExtJsonStore
-from m3.ui.ext.windows.complex import ExtDictionaryWindow
+from m3_ext.ui.misc.store import ExtJsonStore
+from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3.actions.packs import ListDeleteRowAction, MSG_DOESNOTEXISTS, ObjectNotFound
-from m3.ui.ext.containers import ExtPagingBar
+from m3_ext.ui.containers import ExtPagingBar
 from m3.db import BaseObjectModel, safe_delete
-from m3.core import RelatedError
+from m3 import RelatedError
 from m3.actions.results import ActionResult
 from m3.actions.interfaces import ISelectablePack
 
