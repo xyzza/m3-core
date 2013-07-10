@@ -5,7 +5,7 @@ from django.conf import settings
 from django.utils.log import logger
 
 from m3.actions import (
-    ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult, ACD
+    ActionPack, Action, PreJsonResult, OperationResult, ACD
 )
 from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3_ext.ui.misc.store import ExtJsonStore

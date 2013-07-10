@@ -8,21 +8,17 @@ Created on 29.01.2011
 from django.db import transaction
 from django.dispatch import Signal
 
-from m3.ui import actions
-
+from m3 import RelatedError
 from m3.actions import (
-    ActionPack, Action, PreJsonResult, ExtUIScriptResult, OperationResult,
-    ActionContextDeclaration
-)
-from m3.actions import utils
-from m3.ui.ext.misc.store import ExtJsonStore
-from m3.ui.ext.windows.complex import ExtDictionaryWindow
+    ActionPack, Action, PreJsonResult, OperationResult, ACD, utils)
 from m3.actions.packs import ListDeleteRowAction
-from m3.ui.ext.containers import ExtPagingBar
-from m3.db import BaseObjectModel, safe_delete
 from m3.actions.results import ActionResult
 from m3.actions.interfaces import IMultiSelectablePack
-from m3 import RelatedError
+from m3_ext.ui.results import ExtUIScriptResult
+from m3_ext.ui.misc.store import ExtJsonStore
+from m3_ext.ui.windows.complex import ExtDictionaryWindow
+from m3_ext.ui.containers import ExtPagingBar
+from m3.db import BaseObjectModel, safe_delete
 
 
 class TreeGetNodesAction(Action):
@@ -33,13 +29,13 @@ class TreeGetNodesAction(Action):
 
     def context_declaration(self):
         return [
-            actions.ACD(name='node', type=int, required=True, default=0),
-            actions.ACD(name='filter', type=str, required=True, default=0),
+            ACD(name='node', type=int, required=True, default=0),
+            ACD(name='filter', type=str, required=True, default=0),
         ]
 
     def run(self, request, context):
         parent_id = context.node if context.node > 0 else None
-        return actions.PreJsonResult(
+        return PreJsonResult(
             self.parent.get_nodes(request, context, parent_id, context.filter))
 
 
@@ -51,10 +47,8 @@ class TreeGetNodesLikeRows(Action):
 
     def context_declaration(self):
         return [
-            ActionContextDeclaration(
-                name='filter', default='', type=str, required=True),
-            ActionContextDeclaration(
-                name='branch_id', default=0, type=int, required=True)
+            ACD(name='filter', default='', type=str, required=True),
+            ACD(name='branch_id', default=0, type=int, required=True)
         ]
 
     def run(self, request, context):
@@ -190,8 +184,7 @@ class ListNewRowWindowAction(Action):
 
     def context_declaration(self):
         return [
-            ActionContextDeclaration(
-                name=self.parent.contextTreeIdName,
+            ACD(name=self.parent.contextTreeIdName,
                 type=int, required=True, verbose_name=u'Код группы')
         ]
 

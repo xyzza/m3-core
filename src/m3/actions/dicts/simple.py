@@ -12,15 +12,15 @@ from m3 import RelatedError
 from m3.db import BaseObjectModel, safe_delete
 
 from m3.actions import (
-    ActionPack, Action, ExtUIScriptResult, PreJsonResult, OperationResult,
+    ActionPack, Action, PreJsonResult, OperationResult,
     ACD, utils
 )
-from m3.ui.ext.windows.complex import ExtDictionaryWindow
-from m3.ui.ext.misc.store import ExtJsonStore
-from m3.ui.ext.containers import ExtPagingBar
+from m3_ext.ui.containers import ExtPagingBar
 from m3.actions.results import ActionResult
 from m3.actions.interfaces import IMultiSelectablePack
-from m3.helpers import logger
+from m3_ext.ui.windows.complex import ExtDictionaryWindow
+from m3_ext.ui.misc.store import ExtJsonStore
+from m3_legacy import logger
 
 try:
     from m3_audit import AuditManager
