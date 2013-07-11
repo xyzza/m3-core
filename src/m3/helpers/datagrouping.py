@@ -576,19 +576,30 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
 
             #сортировка
             sort_fields = []
-            # TODO: пока сортировка сделана только по одному полю
-            if len(sorting.keys()) == 1:
-                sort_field = sorting.keys()[0]
-                sort_dir = sorting.values()[0]
-                #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
-                if sort_field in aggregates.keys() or sort_field == field or not field:
-                    if sort_field in aggregates.keys() and field:
-                        # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
-                        sort_field = sort_field + '__' + aggregates[sort_field]
-                    if sort_dir == 'DESC':
-                        sort_fields.append('-' + sort_field)
-                    else:
-                        sort_fields.append(sort_field)
+            # оставлено для совместимости
+            if isinstance(sorting, dict) and sorting.keys():
+                for sort_field, sort_dir in sorting.iteritems():
+                    #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
+                    if sort_field in aggregates.keys() or sort_field == field or not field:
+                        if sort_field in aggregates.keys() and field:
+                            # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
+                            sort_field = sort_field + '__' + aggregates[sort_field]
+                        if sort_dir == 'DESC':
+                            sort_fields.append('-' + sort_field)
+                        else:
+                            sort_fields.append(sort_field)
+            # изначальная ошибка была передавать сортировку в dict - надо было сразу в list
+            elif isinstance(sorting, list) and sorting:
+                for sort_field, sort_dir in sorting:
+                    #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
+                    if sort_field in aggregates.keys() or sort_field == field or not field:
+                        if sort_field in aggregates.keys() and field:
+                            # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
+                            sort_field = sort_field + '__' + aggregates[sort_field]
+                        if sort_dir == 'DESC':
+                            sort_fields.append('-' + sort_field)
+                        else:
+                            sort_fields.append(sort_field)
             else:
                 #нет заданной сортировки, отсортируем по этому полю
                 if field:
@@ -641,13 +652,24 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
             # вывести без группировки
             index = 0
             query = self.get_data()
-            if len(sorting.keys()) == 1:
-                sort_field = sorting.keys()[0]
-                sort_dir = sorting.values()[0]
-                if sort_dir == 'DESC':
-                    query = query.order_by('-' + sort_field)
-                else:
-                    query = query.order_by(sort_field)
+            # оставлено для совместимости
+            if isinstance(sorting, dict) and sorting.keys():
+                order = []
+                for sort_field, sort_dir in sorting.iteritems():
+                    if sort_dir == 'DESC':
+                        order.append('-' + sort_field)
+                    else:
+                        order.append(sort_field)
+                query = query.order_by(*order)
+            # изначальная ошибка была передавать сортировку в dict - надо было сразу в list
+            elif isinstance(sorting, list) and sorting:
+                order = []
+                for sort_field, sort_dir in sorting:
+                    if sort_dir == 'DESC':
+                        order.append('-' + sort_field)
+                    else:
+                        order.append(sort_field)
+                query = query.order_by(*order)
             for i in query.all()[begin:end + 1]:
                 item = self.create_record()
                 item.indent = 0
@@ -766,19 +788,30 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
 
             #сортировка
             sort_fields = []
-            # TODO: пока сортировка сделана только по одному полю
-            if len(sorting.keys()) == 1:
-                sort_field = sorting.keys()[0]
-                sort_dir = sorting.values()[0]
-                #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
-                if sort_field in aggregates.keys() or sort_field == field:
-                    if sort_field in aggregates.keys():
-                        # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
-                        sort_field = sort_field + '__' + aggregates[sort_field]
-                    if sort_dir == 'DESC':
-                        sort_fields.append('-' + sort_field)
-                    else:
-                        sort_fields.append(sort_field)
+            # оставлено для совместимости
+            if isinstance(sorting, dict) and sorting.keys():
+                for sort_field, sort_dir in sorting.iteritems():
+                    #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
+                    if sort_field in aggregates.keys() or sort_field == field:
+                        if sort_field in aggregates.keys():
+                            # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
+                            sort_field = sort_field + '__' + aggregates[sort_field]
+                        if sort_dir == 'DESC':
+                            sort_fields.append('-' + sort_field)
+                        else:
+                            sort_fields.append(sort_field)
+            # изначальная ошибка была передавать сортировку в dict - надо было сразу в list
+            elif isinstance(sorting, list) and sorting:
+                for sort_field, sort_dir in sorting:
+                    #необходимо исключить из сортировки поля, которые не входят в aggr, иначе по ним будет сделана ненужная группировка
+                    if sort_field in aggregates.keys() or sort_field == field:
+                        if sort_field in aggregates.keys():
+                            # необходимо добавить суффикс к полю, которое в аггрегатах, иначе сортировать будет не по тому что надо :)
+                            sort_field = sort_field + '__' + aggregates[sort_field]
+                        if sort_dir == 'DESC':
+                            sort_fields.append('-' + sort_field)
+                        else:
+                            sort_fields.append(sort_field)
             else:
                 #нет заданной сортировки, отсортируем по этому полю
                 sort_fields.append(field)
@@ -788,7 +821,6 @@ class GroupingRecordModelProvider(GroupingRecordProvider):
             for i in query:
                 res.append(i[field])
         return res
-
 
 class GroupingRecordDataProvider(GroupingRecordProvider):
     '''
@@ -958,8 +990,24 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                 pre_res.append(item)
 
         # а вот теперь сортируем и граничиваем
-        if len(sorting.keys()) == 1:
-            sorted_data = sorted(pre_res, key=lambda k: self.getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
+        # оставлено для совместимости
+        if isinstance(sorting, dict) and sorting.keys():
+            order = []
+            for sort_field, sort_dir in sorting.iteritems():
+                if sort_dir == 'DESC':
+                    order.append('-' + sort_field)
+                else:
+                    order.append(sort_field)
+            sorted_data = self.multikeysort(pre_res, order)
+        # изначальная ошибка была передавать сортировку в dict - надо было сразу в list
+        elif isinstance(sorting, list) and sorting:
+            order = []
+            for sort_field, sort_dir in sorting:
+                if sort_dir == 'DESC':
+                    order.append('-' + sort_field)
+                else:
+                    order.append(sort_field)
+            sorted_data = self.multikeysort(pre_res, order)
         else:
             sorted_data = pre_res
         index = 0
@@ -1073,7 +1121,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                         level[group_value] = 1
                         aggr_rec = {}
                         aggregate_values[group_value] = aggr_rec
-                        prepared.append(group_value)
+                        prepared.append((group_value, rec))
                     else:
                         level[group_value] = level[group_value] + 1
                         aggr_rec = aggregate_values[group_value]
@@ -1093,7 +1141,7 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
 
             # придется обработать все записи уровня, т.к. требуется еще отсортировать их и лишь потом ограничить количество
-            for i in prepared:
+            for i, rec in prepared:
                 item = self.create_record()
                 self.setattr(item, field, i)
                 self.setattr(item, 'id', i)
@@ -1105,20 +1153,59 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                         self.setattr(item, agg, aggregate_values[i][agg] / self.getattr(item, 'count'))
                     else:
                         self.setattr(item, agg, aggregate_values[i][agg])
+
+                # Добавляем в прокси расшифровку для группируемого поля
+                detail_attr = self.detail_attrs_map.get(field)
+                if detail_attr:
+                    self.setattr(item, detail_attr, self.getattr(rec, detail_attr))
+
                 # проставим значения ключей уровня
                 for lev in range(0, level_index):
                     lev_field = grouped[lev]
                     key = level_keys[lev]
                     self.setattr(item, lev_field, key)
+
+                    # Добавляем в прокси атрибуты для расшифровки
+                    detail_attr = self.detail_attrs_map.get(lev_field)
+                    if detail_attr:
+                        self.setattr(item, detail_attr, self.getattr(rec, detail_attr))
+
                 self.calc(item)
                 pre_res.append(item)
 
             # а вот теперь сортируем и граничиваем
-            if len(sorting.keys()) == 1:
-                sorted_data = sorted(pre_res, key=lambda k: self.getattr(k, sorting.keys()[0]), reverse=(sorting.values()[0] == 'DESC'))
+            # оставлено для совместимости
+            if isinstance(sorting, dict) and sorting.keys():
+                order = []
+                for sort_field, sort_dir in sorting.iteritems():
+                    if sort_dir == 'DESC':
+                        order.append('-' + sort_field)
+                    else:
+                        order.append(sort_field)
+                sorted_data = self.multikeysort(pre_res, order)
+            # изначальная ошибка была передавать сортировку в dict - надо было сразу в list
+            elif isinstance(sorting, list) and sorting:
+                order = []
+                for sort_field, sort_dir in sorting:
+                    if sort_dir == 'DESC':
+                        order.append('-' + sort_field)
+                    else:
+                        order.append(sort_field)
+                sorted_data = self.multikeysort(pre_res, order)
             else:
                 sorted_data = pre_res
 
             for item in sorted_data:
                 res.append(self.getattr(item, 'id'))
         return res
+
+    def multikeysort(self, items, columns):
+        comparers = [ ((col[1:].strip(), -1) if col.startswith('-') else (col.strip(), 1)) for col in columns]
+        def comparer(left, right):
+            for attr, mult in comparers:
+                result = cmp(self.getattr(left, attr), self.getattr(right, attr))
+                if result:
+                    return mult * result
+            else:
+                return 0
+        return sorted(items, cmp=comparer)
