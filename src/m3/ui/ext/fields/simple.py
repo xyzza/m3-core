@@ -7,6 +7,7 @@ Created on 27.02.2010
 '''
 
 from django.conf import settings
+from django.utils.html import escapejs
 from datetime import datetime, date
 
 from m3.helpers import date2str
@@ -242,7 +243,9 @@ class ExtTextArea(BaseExtField):
     def t_render_mask_re(self):
         return '/%s/' % self.mask_re
 
-    def render_base_config(self):       
+    def render_base_config(self):
+        if self.value:
+            self.value = escapejs(self.value)
         super(ExtTextArea, self).render_base_config()
         self._put_config_value('maskRe', self.t_render_mask_re, self.mask_re)
         
