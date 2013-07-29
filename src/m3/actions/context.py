@@ -361,7 +361,17 @@ class ActionContext(object):
 
             return result
 
-        return json.dumps(self.__dict__, default=encoder_extender)
+        # в json попадут только публичные атрибуты контекста,
+        # и при этом только те, которые не callable
+        data = dict(
+            (k, v)
+            for k, v in self.__dict__.iteritems()
+            if not (
+                k.startswith('_') or
+                callable(v)
+            )
+        )
+        return json.dumps(data, default=encoder_extender)
 
     def combine(self, context):
         """

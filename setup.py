@@ -10,7 +10,7 @@ def read(fname):
         return ''
 
 setup(name='m3-core',
-      version='2.0.0-beta',
+      version='2.0.1',
       url='https://src.bars-open.ru/py/m3/m3',
       license='Apache License, Version 2.0',
       author='BARS Group',
@@ -28,6 +28,6 @@ setup(name='m3-core',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-	'Development Status :: 4 - Beta',
+        'Development Status :: 4 - Beta',
       ],
 )
