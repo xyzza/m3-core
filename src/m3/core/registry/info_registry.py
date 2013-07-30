@@ -6,6 +6,8 @@ from calendar import calendar
 from django.db import models
 from django.db.models.query_utils import Q
 
+
+
 PERIOD_INFTY = 0 # в регистре нет периодичности и нет динамически хранящихся
 PERIOD_SECOND = 1 # до секунд
 PERIOD_MINUTE = 2
@@ -15,11 +17,13 @@ PERIOD_MONTH = 5
 PERIOD_QUARTER = 6
 PERIOD_YEAR = 7
 
-def normdate(period, date, begin = True):
-    '''
-    Метод нормализует дату в зависимости от периода
-    @ begin = True - даты выравниваются на начало, иначе на конец
-    '''
+
+def normdate(period, date, begin=True):
+    u""" Метод нормализует дату в зависимости от периода.
+    
+    :param begin: True - даты выравниваются на начало, иначе на конец
+    
+    """
     if not date:
         return None        
     if period == PERIOD_SECOND:
@@ -44,21 +48,23 @@ def normdate(period, date, begin = True):
         return datetime(date.year, 1 if begin else 12, 1 if begin else calendar.monthrange(date.year, 1 if begin else 12)[1], 0 if begin else 23, 0 if begin else 59, 0 if begin else 59)
     return date
 
-def shift_date(period, date, step = 1):
-    '''
-    Метод смещает дату на один пункт периода
-    @ step = смещение
-    '''
+
+def shift_date(period, date, step=1):
+    u""" Метод смещает дату на один пункт периода.
+    
+    :param step: смещение
+    
+    """
     if not date:
         return None        
     elif period == PERIOD_SECOND:
-        return date + timedelta(seconds = step)
+        return date + timedelta(seconds=step)
     elif period == PERIOD_MINUTE:
-        return date + timedelta(minutes = step)
+        return date + timedelta(minutes=step)
     elif period == PERIOD_HOUR:
-        return date + timedelta(hours = step)
+        return date + timedelta(hours=step)
     elif period == PERIOD_DAY:
-        return date + timedelta(days = step)
+        return date + timedelta(days=step)
     elif period == PERIOD_MONTH:
         #TODO: не знаю пока как быстро изменить дату на месяц, т.к. день может быть 31, а в пред. месяце его нет
         return date
@@ -70,20 +76,21 @@ def shift_date(period, date, step = 1):
     else:
         return date
 
+
+
 class OverlapError(Exception):
-    """
+    u"""
     Исключение возникающее при наложении интервалов друг на друга.
     """
     def __init__(self, cls=None):
         self.model_cls = cls
-#    def __str__(self):
-#        return self.exception_message
+
 
 class InvalidIntervalError(Exception):
-    '''
+    u"""
     Исключение возникающее при неверно заданом интервале,
     например если конечная дата меньше начальной.
-    '''
+    """
     pass
 
 
@@ -103,29 +110,43 @@ class BaseInfoModel(models.Model):
     # сформируем запрос по ключу
     @classmethod
     def query_dimentions(cls, data):
-        '''
-        запрос по ключевым полям
-        @data - объект, который содержит данные для сохранения в регистр.
-                Это может быть либо 1) объект модели хранения данных регистра,
-                либо 2) словарь, ключами которого являются имена полей из модели хранения,
-                либо 3) объект любого класса, у которого есть атрибуты с именами
-        '''
-        # добавим в запрос фильтр по ключевым полям, со значениями = текущему объекту, переданным данным
+        """ Запрос по ключевым полям.
+
+        :param data: объект, который содержит данные для сохранения в
+            регистр. Это может быть:
+            - Либо объект модели хранения данных регистра,
+            - Либо словарь, ключами которого являются имена полей из
+              модели хранения,
+            - Либо объект любого класса, у которого есть атрибуты с
+              именами
+        """
+        # Добавим в запрос фильтр по ключевым полям, со значениями =
+        # текущему объекту, переданным данным
         query = cls.objects
         for dim_field in cls.dimentions:
             dim_val = None
             dim_attr = dim_field
+
             if isinstance(dim_field, models.Field):
                 dim_attr = dim_field.name
+
             if isinstance(data, BaseInfoModel):
+                if not hasattr(data, dim_attr):
+                    continue
                 dim_val = getattr(data, dim_attr, None)
+
             elif isinstance(data, dict):
-                if data.has_key(dim_attr):
-                    dim_val = data[dim_attr]
+                if dim_attr not in data:
+                    continue
+                dim_val = data[dim_attr]
+
             elif hasattr(data, dim_attr):
+                if not hasattr(data, dim_attr):
+                    continue
                 dim_val = getattr(data, dim_attr, None)
-            if dim_val:
-                query = query.filter(**{dim_attr: dim_val})
+
+            query = query.filter(**{dim_attr: dim_val})
+
         return query
     
     # сформируем запрос данных на дату
@@ -243,9 +264,9 @@ class BaseInfoModel(models.Model):
 
 
 def RebuildInfoModel(cls):
-    '''
+    u"""
     Перестраивает связи между записями в регистре
-    ''' 
+    """ 
     
     def eq_keys(dims, key1, key2):
         for key_attr in dims:
@@ -267,7 +288,8 @@ def RebuildInfoModel(cls):
             key[key_attr] = dim_val
         return key
     
-    # вытащить записи регистра сгруппированные по ключевым полям и отсортированные по дате
+    # Вытащить записи регистра сгруппированные по ключевым полям и 
+    # отсортированные по дате
     query = cls.objects
     order = []
     dims = []
@@ -307,6 +329,8 @@ def RebuildInfoModel(cls):
         last_rec.info_date_next = normdate(period, datetime.max)
         last_rec._save()
 
+
+
 class BaseIntervalInfoModel(models.Model):
 
     info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
@@ -320,42 +344,56 @@ class BaseIntervalInfoModel(models.Model):
     # сформируем запрос по ключу
     @classmethod
     def query_dimentions(cls, data):
-        '''
-        запрос по ключевым полям
-        @data - объект, который содержит данные для сохранения в регистр.
-                Это может быть либо 1) объект модели хранения данных регистра,
-                либо 2) словарь, ключами которого являются имена полей из модели хранения,
-                либо 3) объект любого класса, у которого есть атрибуты с именами
-        '''
-        # добавим в запрос фильтр по ключевым полям, со значениями = текущему объекту, переданным данным
+        """ Запрос по ключевым полям.
+
+        :param data: объект, который содержит данные для сохранения в
+            регистр. Это может быть:
+            - Либо объект модели хранения данных регистра,
+            - Либо словарь, ключами которого являются имена полей из
+              модели хранения,
+            - Либо объект любого класса, у которого есть атрибуты с
+              именами
+        """
+        # Добавим в запрос фильтр по ключевым полям, со значениями =
+        # текущему объекту, переданным данным
         query = cls.objects
         for dim_field in cls.dimentions:
             dim_val = None
             dim_attr = dim_field
+
             if isinstance(dim_field, models.Field):
                 dim_attr = dim_field.name
+
             if isinstance(data, BaseInfoModel):
+                if not hasattr(data, dim_attr):
+                    continue
                 dim_val = getattr(data, dim_attr, None)
+
             elif isinstance(data, dict):
-                if data.has_key(dim_attr):
-                    dim_val = data[dim_attr]
+                if dim_attr not in data:
+                    continue
+                dim_val = data[dim_attr]
+
             elif hasattr(data, dim_attr):
+                if not hasattr(data, dim_attr):
+                    continue
                 dim_val = getattr(data, dim_attr, None)
-            if dim_val:
-                query = query.filter(**{dim_attr: dim_val})
+
+            query = query.filter(**{dim_attr: dim_val})
+
         return query
     
     # сформируем запрос на интервал дат
     @classmethod 
-    def query_interval(cls, data, date_begin = datetime.min, date_end = datetime.max, include_begin = True, include_end = True):
-        '''
+    def query_interval(cls, data, date_begin=datetime.min, date_end=datetime.max, include_begin=True, include_end=True):
+        u"""
         Выборка записей, попадающий в указанный интервал дат.
         @data - объект или словарь с ключевыми данными
         @date_begin - начало интервала
         @date_end - конец интервала
         @include_begin = True - запись учитывается если начало интервала попадает в интервал записи, иначе не учитывается
         @include_end = True - запись учитывается если конец интервала попадает в интервал записи, иначе не учитывается
-        '''
+        """
         query = cls.query_dimentions(data)
         if cls.period != PERIOD_INFTY:
             date_begin = normdate(cls.period, date_begin, True)
@@ -371,13 +409,13 @@ class BaseIntervalInfoModel(models.Model):
     # сформируем запрос данных на дату
     @classmethod
     def query_on_date(cls, data, date=None, active=True, next=False):
-        '''
+        u"""
         запрос записей на дату
         @data - объект или словарь с ключевыми данными
         @date - дата актуальности, по-умолчанию текущая
         @active = True - значит будут найдены записи, действующие на указанную дату
         @next = False - значит будут найдены записи, действовавшие до даты, иначе ближайшиие записи которые будут действовать
-        '''
+        """
         if date is None:
             date = datetime.now()
 
@@ -489,14 +527,14 @@ class BaseIntervalInfoModel(models.Model):
         abstract = True
 
 
-def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
-    '''
+def RebuildIntervalInfoModel(cls, on_overlap_error=0):
+    u"""
     Перестраивает связи между записями в интервальном регистре
     on_overlap_error: действие при возникновении ошибки перекрытия диапазонов записей
     0 - вызвать exception
     1 - изменить интервал записи с ранней датой начала
     2 - выдать список ID глючных элементов, которые пропущены (после исправления придется еще раз запускать пересчет)
-    ''' 
+    """ 
     
     def eq_keys(dims, key1, key2):
         for key_attr in dims:
@@ -518,7 +556,8 @@ def RebuildIntervalInfoModel(cls, on_overlap_error = 0):
             key[key_attr] = dim_val
         return key
     
-    # вытащить записи регистра сгруппированные по ключевым полям и отсортированные по дате
+    # Вытащить записи регистра сгруппированные по ключевым полям и 
+    # отсортированные по дате
     query = cls.objects
     order = []
     dims = []
