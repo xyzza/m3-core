@@ -30,21 +30,20 @@ from m3.ui.ext.base import ExtUIComponent, BaseExtComponent
 from m3.helpers import get_img_size, logger
 from m3.helpers.datastructures import TypedList
 from m3.ui.actions.interfaces import ISelectablePack, IMultiSelectablePack
-
-
-
-
-#===============================================================================
 from m3.ui.ext.fields.simple import ExtDateTimeField, ExtAdvTimeField
 
+
+#======================================================================
 class ExtForm(BaseExtPanel):
-    '''
+    u"""
     Форма, умеющая биндиться и делать сабмит по урлу
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(ExtForm, self).__init__(*args, **kwargs)
-        self.template = 'ext-panels/ext-form.js' # TODO: отрефакторить под внутриклассовый рендеринг
+
+        # TODO: отрефакторить под внутриклассовый рендеринг
+        self.template = 'ext-panels/ext-form.js'
 
         # Свой layout
         self.layout = 'form'
@@ -63,12 +62,11 @@ class ExtForm(BaseExtPanel):
 
         self.init_component(*args, **kwargs)
 
-    def _get_all_fields(self, item, list = None):
-        '''
+    def _get_all_fields(self, item, list=None):
+        u"""
         Возвращает список всех полей формы включая вложенные в контейнеры
-        '''
-        if list == None:
-            list = []
+        """
+        list = list or []
         if isinstance(item, BaseExtField):
             list.append(item)
 
@@ -78,44 +76,44 @@ class ExtForm(BaseExtPanel):
         return list
 
     def bind_to_request(self, request):
-        '''
+        u"""
         Извлекает из запроса параметры и присваивает их соответствующим полям
         формы
-        '''
+        """
         assert request, 'Request must be define!'
 
         all_fields = self._get_all_fields(self)
         for field in all_fields:
             name = field.name
-            if isinstance(field, ExtFileUploadField) or \
-                isinstance(field, ExtImageUploadField):
+            if isinstance(field, (ExtFileUploadField, ExtImageUploadField)):
                 # Файлы нужно забирать из request.FILES
                 field.memory_file = request.FILES.get(
-                                        ExtFileUploadField.PREFIX + field.name)
-            # возьмем только то, что есть в запросе
+                    ExtFileUploadField.PREFIX + field.name)
+            # Возьмем только то, что есть в запросе
             if name in request.POST:
                 value = request.POST.get(name)
                 field.value = value
 
     #TODO необходимо добавить проверку на возникновение exception'ов
-    def from_object(self, object, exclusion = []):
-        '''
+    def from_object(self, object, exclusion=None):
+        u"""
         Метод выполнения прямого связывания данных атрибутов объекта object и
         полей текущей формы
-        '''
+        """
+        exclusion = exclusion or []
 
         def is_secret_token(value):
-            '''
+            u"""
             Возвращает истину если значение поля содержит секретный ключ с
             персональной информацией. Он не должен биндится,
             т.к. предназначен для обработки в personal.middleware
-            '''
+            """
             return unicode(value)[:2] == u'##'
 
         def _assign_value(value, item):
-            '''
+            u"""
             Конвертирует и присваивает значение value в соответствии типу item.
-            '''
+            """
             if isinstance(item, ExtStringField):
                 if value:
                     item.value = unicode(value)
@@ -123,12 +121,16 @@ class ExtForm(BaseExtPanel):
                     item.value = u''
 
             elif isinstance(item, ExtAdvTimeField):
-                item.value = '%02d:%02d:%02d' % (value.hour,value.minute, value.second)\
-                    if not is_secret_token(value) else unicode(value)
+                if isinstance(value, datetime.time):
+                    item.value = '%02d:%02d:%02d' % (
+                        value.hour, value.minute, value.second)
+                else:
+                    item.value = value
 
             elif isinstance(item, ExtDateTimeField):
                 if isinstance(value, datetime.datetime):
-                    item.value = '%02d.%02d.%04d %02d:%02d:%02d' % (value.day,value.month,value.year,value.hour,value.minute,value.second)
+                    item.value = '%02d.%02d.%04d %02d:%02d:%02d' % (
+                        value.day, value.month, value.year, value.hour, value.minute, value.second)
                 elif isinstance(value, datetime.date):
                     item.value = '%02d.%02d.%04d 00:00:00' % (value.day,value.month,value.year)
                 else:
@@ -154,14 +156,17 @@ class ExtForm(BaseExtPanel):
 
             elif isinstance(item, ExtCheckBox):
                 item.checked = True if value else False
+
             elif isinstance(item, ExtRadio):
                 item.checked = (value == item.value)
+
             elif isinstance(item, ExtMultiSelectField):
                 # У поля выбора может быть сзязанный с ним пак
                 bind_pack = getattr(item, 'pack', None) or getattr(item, 'bind_pack', None)
                 if bind_pack:
                     assert isinstance(bind_pack, IMultiSelectablePack), 'Pack %s must provide IMultiSelectablePack interface' % bind_pack
                     item.value = bind_pack.get_display_dict(value, value_field=item.value_field, display_field=item.display_field)
+
             elif isinstance(item, ExtDictSelectField):
                 # У поля выбора может быть сзязанный с ним пак
                 # TODO после окончательного удаления метода configure_by_dictpack в ExtDictSelectField
@@ -197,6 +202,7 @@ class ExtForm(BaseExtPanel):
 #                        else:
 #                            item.default_text = default_text
                 item.value = value
+
             elif isinstance(item, ExtComboBox) and hasattr(item, 'bind_rule_reverse'):
                 # Комбобокс как правило передает id выбранного значения.
                 #Его не так просто  преобразовать в тип объекта,
@@ -207,16 +213,16 @@ class ExtForm(BaseExtPanel):
                 elif isinstance(item.bind_rule_reverse, dict):
                     item.value = unicode(item.bind_rule_reverse.get(value))
                 else:
-                    raise ValueError('Invalid attribute type bind_rule_reverse. \
-                        Must be a function or a dict.')
+                    raise ValueError(
+                        'Invalid attribute type bind_rule_reverse.'
+                        'Must be a function or a dict.')
 
-            elif isinstance(item, ExtFileUploadField) or \
-                isinstance(item, ExtImageUploadField):
+            elif isinstance(item, (ExtFileUploadField, ExtImageUploadField)):
                 item.value = unicode(value)
                 # Относительную URL ссылку до статики
 
                 if hasattr(settings, 'MEDIA_URL'):
-                    item.file_url = '%s/%s' % (settings.MEDIA_URL,  unicode(value) )
+                    item.file_url = '%s/%s' % (settings.MEDIA_URL,  unicode(value))
                 else:
                     item.file_url = None
 
@@ -237,13 +243,13 @@ class ExtForm(BaseExtPanel):
                 item.value = unicode(value)
 
         def get_value(obj, names):
-            '''
+            u"""
             Ищет в объекте obj поле с именем names и возвращает его значение.
             Если соответствующего поля не оказалось, то возвращает None
 
             names задается в виде списка, т.о. если его длина больше единицы,
             то имеются вложенные объекты и их надо обработать
-            '''
+            """
 
             # hasattr не работает для dict'a
             has_attr = hasattr(obj, names[0]) if not isinstance(obj, dict) else names[0] in obj
@@ -277,12 +283,13 @@ class ExtForm(BaseExtPanel):
                     new_val = new_val if new_val is not None else ''
                     _assign_value(new_val, field)
 
-
     #TODO необходимо добавить проверку на возникновение exception'ов
-    def to_object(self, object, exclusion = []):
-        '''
+    def to_object(self, object, exclusion=None):
+        u"""
         Метод выполнения обратного связывания данных.
-        '''
+        """
+        exclusion = exclusion or []
+
         def _save_image(obj, name, field):
             # Работа с изображением или файлом
             if hasattr(obj, name):
@@ -365,13 +372,13 @@ class ExtForm(BaseExtPanel):
                                 new_img.save(tmb_path)
 
         def set_field(obj, names, value, field=None):
-            '''
+            u"""
             Ищет в объекте obj поле с именем names и присваивает значение value.
             Если соответствующего поля не оказалось, то оно не создается
 
             names задается в виде списка, т.о. если его длина больше единицы,
             то имеются вложенные объекты
-            '''
+            """
 
             # hasattr не работает для dict'a
             has_attr = hasattr(obj, names[0]) if not isinstance(obj, dict) else names[0] in obj
@@ -395,8 +402,9 @@ class ExtForm(BaseExtPanel):
                     set_field(nested, names[1:], value, field)
 
         def try_to_int(value, default=None):
-            ''' Пробует преобразовать value в целое число,
-            иначе возвращает default '''
+            u""" Пробует преобразовать value в целое число,
+            иначе возвращает default
+            """
             if not value:
                 return default
 
@@ -536,7 +544,7 @@ class ExtForm(BaseExtPanel):
                     self.focused_field = child
                     break
 
-#===============================================================================
+#======================================================================
 class ExtPanel(BaseExtPanel):
     '''
     Панель. Kак правило этот контрол включает другие компоненты для отображения
@@ -610,7 +618,7 @@ class ExtPanel(BaseExtPanel):
     def items(self):
         return self._items
 
-#===============================================================================
+#======================================================================
 class ExtTitlePanel(ExtPanel):
     '''
     Расширенная панель с возможностью добавления контролов в заголовок.
@@ -664,7 +672,7 @@ class ExtTitlePanel(ExtPanel):
         return BaseExtComponent.render(self)
 
 
-#===============================================================================
+#======================================================================
 class ExtTabPanel(BaseExtPanel):
     '''
     Класс, отвечающий за работу TabPanel
@@ -719,7 +727,7 @@ class ExtTabPanel(BaseExtPanel):
         return self._items
 
 
-#===============================================================================
+#======================================================================
 class ExtFieldSet(ExtPanel):
     '''
     Объеденяет внутренние элементы и создает рамку для остальных контролов
