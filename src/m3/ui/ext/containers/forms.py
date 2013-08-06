@@ -64,9 +64,15 @@ class ExtForm(BaseExtPanel):
 
     def _get_all_fields(self, item, list=None):
         u"""
-        Возвращает список всех полей формы включая вложенные в контейнеры
+        Возвращает список всех полей формы включая вложенные в контейнеры.
+
+        Используется рекурся с сайд эффектом.
+
         """
-        list = list or []
+
+        if list is None:
+           list =  []
+
         if isinstance(item, BaseExtField):
             list.append(item)
 
