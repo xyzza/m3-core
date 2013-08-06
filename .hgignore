@@ -25,6 +25,7 @@ relre:^src/env
 \.DS_Store$
 syntax: glob
 build/*
+.idea/*
 dist/*
 src/m3.egg-info/*
 src/m3_core.egg-info/*
