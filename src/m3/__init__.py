@@ -7,12 +7,14 @@ import copy
 import datetime
 import json
 import decimal
+import sys
 
 from django.db import models as dj_models
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseServerError
 from django.conf import settings
 from django.contrib import auth
 from django.utils import datetime_safe
+from django.views.debug import ExceptionReporter
 
 import actions
 
@@ -279,3 +281,13 @@ def authenticated_user_required(f):
             return f(request, *args, **kwargs)
 
     return action
+
+
+class PrettyTracebackMiddleware(object):
+    """
+    Middleware, выводящая traceback'и в html-виде
+    """
+    def process_exception(self, request, exception):
+        reporter = ExceptionReporter(request, *sys.exc_info())
+        html = reporter.get_traceback_html()
+        return HttpResponseServerError(html, mimetype='text/html')
