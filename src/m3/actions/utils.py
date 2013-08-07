@@ -2,11 +2,12 @@
 '''
 Вспомогательные функции используемые в паках
 '''
-from m3 import ApplicationLogicException
 import json
 
 from django.db.models.query_utils import Q
 from django.db import models
+
+from exceptions import ApplicationLogicException
 
 
 def apply_sort_order(query, columns, sort_order):

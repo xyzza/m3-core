@@ -18,6 +18,8 @@ from django.views.debug import ExceptionReporter
 
 import actions
 
+from actions import ApplicationLogicException
+
 from actions.urls import get_app_urlpatterns
 
 
@@ -234,23 +236,6 @@ class property_json_encode(property):
     Декоратор для свойств, которые нужно отмечать сериализуемые в M3JSONEncoder
     """
     json_encode = True
-
-
-class ApplicationLogicException(Exception):
-    '''
-    Исключительная ситуация уровня бизнес-логики приложения.
-    '''
-
-    def __init__(self, message):
-        # Это исключение плохо подвергается pickle! пришлось дописать.
-        # пруф:
-        #   http://bugs.python.org/issue1692335
-        #   http://bugs.python.org/issue13751
-        Exception.__init__(self, message)
-        self.exception_message = message
-
-    def __str__(self):
-        return self.exception_message
 
 
 class RelatedError(Exception):
