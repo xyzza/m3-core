@@ -6,7 +6,7 @@ import sys
 
 from django.core.management.base import BaseCommand
 
-from m3.ui.actions import ControllerCache
+from m3.actions import ControllerCache
 
 
 class Command(BaseCommand):
