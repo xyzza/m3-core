@@ -4,6 +4,7 @@ import inspect
 import abc
 import re
 import importlib
+import sys
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -42,6 +43,30 @@ def _import_by_path(path):
     module_name, obj_name = match.groups()
     module = importlib.import_module(module_name)
     return getattr(module, obj_name)
+
+
+def _name_of(obj):
+    """
+    Возвращает для указанного объекта имя вида
+    "package.ClassOfObject"
+    или
+    "package.ClassOfParent.ClassOfObject", если obj имеет атрибут "parent"
+    """
+
+    def cls_name(obj):
+        return (obj if inspect.isclass(obj) else obj.__class__).__name__
+
+    parent = getattr(obj, 'parent', None)
+    if parent:
+        parent = '%s.' % cls_name(parent)
+    else:
+        parent = ''
+
+    package = inspect.getmodule(obj).__name__
+
+    obj = cls_name(obj)
+
+    return '%s.%s%s' % (package, parent, obj)
 
 
 #==============================================================================
@@ -842,7 +867,16 @@ class ActionController(object):
         Обработка входящего запроса *request* от клиента.
         Обрабатывается по аналогии с UrlResolver'ом Django
         """
-        ControllerCache.populate()
+        if settings.DEBUG and not getattr(
+            ControllerCache, '_self_tested', False
+        ):
+            # при первом запросе к серверу производится самодиагностика
+            warns = ControllerCache._self_test()
+            for warn in warns:
+                sys.stderr.write('Self-test warning: %s\n' % warn)
+            ControllerCache._self_tested = True
+        else:
+            ControllerCache.populate()
 
         path = request.path
         matched = self._url_patterns.get(path)
@@ -1266,6 +1300,74 @@ class ControllerCache(object):
         return
 
     #==========================================================================
+    @classmethod
+    def _self_test(cls):
+        """
+        Проверяет корректность регистрации экшнов/паков
+        """
+
+        cls.populate()
+
+        result = []
+
+        def warn_if_class(obj, name):
+            if inspect.isclass(obj):
+                result.append(
+                    '%r is not the instance but class!' % _name_of(obj))
+                return True
+            return False
+
+        def shortname_checker(acc):
+            def check(obj, name):
+                sn = getattr(obj, 'shortname', None) or getattr(
+                        obj, 'shortname', None)
+                if sn:
+                    name = acc.get(sn)
+                    if name:
+                        result.append(
+                            '%r have shortname, reserved for %r!' % (
+                                _name_of(obj), name))
+                    else:
+                        acc[sn] = _name_of(obj)
+            return check
+
+        def existense_checker(acc):
+            def check(obj, name):
+                if name in acc:
+                    result.append(
+                        '%r already registered!' % name)
+                    return True
+                acc.add(name)
+                return False
+            return check
+
+        check_action_sn = shortname_checker({})
+        check_pack_sn = shortname_checker({})
+        check_reregister = existense_checker(set())
+
+        def check_packs(packs):
+            for pack in packs:
+                pack_name = _name_of(pack)
+                if not warn_if_class(pack, pack_name):
+                    check_pack_sn(pack, pack_name)
+                    if pack.subpacks:
+                        result.append(
+                            '%r have subpacks - code smell!' % pack_name)
+                        check_packs(pack.subpacks)
+
+                for action in pack.actions:
+                    action_name = _name_of(action)
+                    if not warn_if_class(action, action_name):
+                        if not check_reregister(action, action_name):
+                            if check_action_sn(action, action_name):
+                                continue
+
+        for cont in cls._controllers:
+            check_packs(cont.top_level_packs)
+
+        return result
+
+
     @classmethod
     def register_controller(cls, controller):
         '''
