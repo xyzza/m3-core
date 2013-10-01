@@ -10,6 +10,7 @@ from m3.actions import (
 from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3_ext.ui.misc.store import ExtJsonStore
 from m3_ext.ui.containers import ExtPagingBar
+from m3_ext.ui.results import ExtUIScriptResult
 from m3.actions import utils
 from m3.actions.results import ActionResult
 from m3.db import BaseObjectModel, safe_delete
