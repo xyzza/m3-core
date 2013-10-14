@@ -336,12 +336,19 @@ class GroupingRecordProvider(object):
         else:
             return None
 
+    def _tune_xls_worksheet(self, worksheet):
+        """
+        Здесь можно задать нужные параметры страницы.
+        """
+        return worksheet
+
     def export_to_xls (self, title, columns, total, grouped, expanded, sorting):
-        '''
-        выгрузка таблицы в xls-файл
-        '''
+        """
+        Выгрузка таблицы в xls-файл
+        """
         w = xlwt.Workbook()
         ws = w.add_sheet('grid')
+        ws = self._tune_xls_worksheet(ws)
 
         title_style = xlwt.easyxf(self.xls_style.get('title') or "font: bold on, height 400;")
         header_style = xlwt.easyxf(self.xls_style.get('header') or
