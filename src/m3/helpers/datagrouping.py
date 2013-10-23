@@ -86,6 +86,18 @@ class RecordProxy(object):
         '''
         pass
 
+
+class DictToRecordProxy(RecordProxy):
+    """
+    Прокси объект для данных, переданных в виде словаря
+    """
+    def load(self, data):
+        """
+        Копирует все записи словаря в атрибуты объекта
+        """
+        self.__dict__.update(data)
+
+
 class GroupingRecordProvider(object):
     '''
     Базовый класс провайдера данных
