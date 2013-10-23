@@ -868,6 +868,8 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                         aggr_rec[agg] = agg_value if aggr_rec.get(agg, 0) < agg_value else aggr_rec.get(agg, 0)
                     elif agg_type == 'avg':
                         aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
+                    elif callable(agg_type):
+                        aggr_rec[agg] = agg_type(aggr_rec.get(agg), agg_value)
                 count += 1
             item = self.create_record()
             self.setattr(item, 'id', None)
@@ -942,6 +944,8 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                                 aggr_rec[agg] = agg_value if aggr_rec.get(agg, 0) < agg_value else aggr_rec.get(agg, 0)
                             elif agg_type == 'avg':
                                 aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
+                            elif callable(agg_type):
+                                aggr_rec[agg] = agg_type(aggr_rec.get(agg), agg_value)
                     else:
                         prepared.append( (rec, rec) )
             # теперь выведем запрошенные элементы уровня
@@ -1146,6 +1150,8 @@ class GroupingRecordDataProvider(GroupingRecordProvider):
                             aggr_rec[agg] = agg_value if aggr_rec.get(agg, 0) < agg_value else aggr_rec.get(agg, 0)
                         elif agg_type == 'avg':
                             aggr_rec[agg] = agg_value + (aggr_rec[agg] if aggr_rec.has_key(agg) else 0)
+                        elif callable(agg_type):
+                            aggr_rec[agg] = agg_type(aggr_rec.get(agg), agg_value)
 
             # придется обработать все записи уровня, т.к. требуется еще отсортировать их и лишь потом ограничить количество
             for i, rec in prepared:
