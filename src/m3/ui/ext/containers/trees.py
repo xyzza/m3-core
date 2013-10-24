@@ -65,7 +65,8 @@ class ExtTree(BaseExtPanel):
 
         self.init_component(*args, **kwargs)
 
-    def make_read_only(self, access_off=True, exclude_list=[], *args, **kwargs):
+    def make_read_only(self, access_off=True, exclude_list=None, *args, **kwargs):
+        exclude_list = exclude_list or []
         # Описание в базовом классе ExtUiComponent.
         # Обрабатываем исключения.
         access_off = self.pre_make_read_only(access_off, exclude_list, *args, **kwargs)
