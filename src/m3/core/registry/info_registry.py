@@ -6,7 +6,7 @@ from calendar import calendar
 from django.db import models
 from django.db.models.query_utils import Q
 
-
+from django.db.models.signals import pre_delete, post_delete
 
 PERIOD_INFTY = 0 # в регистре нет периодичности и нет динамически хранящихся
 PERIOD_SECOND = 1 # до секунд
@@ -17,15 +17,14 @@ PERIOD_MONTH = 5
 PERIOD_QUARTER = 6
 PERIOD_YEAR = 7
 
-
 def normdate(period, date, begin=True):
     u""" Метод нормализует дату в зависимости от периода.
-    
+
     :param begin: True - даты выравниваются на начало, иначе на конец
-    
+
     """
     if not date:
-        return None        
+        return None
     if period == PERIOD_SECOND:
         return datetime(date.year, date.month, date.day, date.hour, date.minute, date.second)
     if period == PERIOD_MINUTE:
@@ -51,12 +50,12 @@ def normdate(period, date, begin=True):
 
 def shift_date(period, date, step=1):
     u""" Метод смещает дату на один пункт периода.
-    
+
     :param step: смещение
-    
+
     """
     if not date:
-        return None        
+        return None
     elif period == PERIOD_SECOND:
         return date + timedelta(seconds=step)
     elif period == PERIOD_MINUTE:
@@ -135,6 +134,10 @@ class InfoModelMeta(models.base.ModelBase):
             if new_class.end_src != new_class.DEFAULT_END:
                 # Если в модели переопеределно поле даты конца, info_date_end нам не нужен. убираем его:
                 new_class._meta.local_fields.remove(_get_fld(new_class.DEFAULT_END))
+
+        # подключим сигналы к классу
+        new_class.connect_to_signals()
+
         return new_class
 
     def replace_field(new_class, old_field, new_field):
@@ -147,6 +150,61 @@ class InfoModelMeta(models.base.ModelBase):
         new_index = new_class._meta.local_fields.index(new_field)
         new_class._meta.local_fields.insert(index, new_class._meta.local_fields.pop(new_index))
 
+    def connect_to_signals(cls):
+        # подключимся к сигналам удаления моделей
+        pre_delete.connect(cls.infomodel_pre_delete, cls, dispatch_uid='base_info_model_pre_delete')
+        post_delete.connect(cls.infomodel_post_delete, cls, dispatch_uid='base_info_model_post_delete')
+
+    def infomodel_pre_delete(cls, instance, **kwargs):
+        # если в параметрах есть признак, то пропустим обработку сигналов
+        if instance._signal_params.get('skip_signals'):
+            return
+        # если объект уже хранится, то найдем записи для изменения
+        if instance.pk:
+            def get_rec(date, lookup):
+                # в зависимости от базовой модели разные фильтры
+                if isinstance(instance, BaseInfoModel):
+                    q = Q(info_date=date)
+                else:
+                    q = instance._gen_Q(lookup, '', date)
+                try:
+                    return instance.query_dimentions(instance).get(q)
+                except (
+                    instance.DoesNotExist,
+                    instance.MultipleObjectsReturned
+                ):
+                    return None
+            old_prev_rec = get_rec(instance.info_date_prev, 'end')
+            old_next_rec = get_rec(instance.info_date_next, 'end')
+        else:
+            old_prev_rec = None
+            old_next_rec = None
+        instance._signal_params['old_prev_rec'] = old_prev_rec
+        instance._signal_params['old_next_rec'] = old_next_rec
+
+    def infomodel_post_delete(cls, instance, **kwargs):
+        # если в параметрах есть признак, то пропустим обработку сигналов
+        if not instance._signal_params.get('skip_signals'):
+            # изменим найденные ранее записи
+            # TODO: тут можно оптимизировать сохранение,
+            # чтобы не было каскада сохранений
+            old_prev_rec = instance._signal_params.get('old_prev_rec')
+            old_next_rec = instance._signal_params.get('old_next_rec')
+            if old_prev_rec:
+                old_prev_rec.save()
+            if old_next_rec:
+                old_next_rec.save()
+
+    @staticmethod
+    def suppress_signals(meth):
+        def inner(inst, *args, **kwargs):
+            inst._signal_params['skip_signals'] = True
+            res = meth(inst, *args, **kwargs)
+            inst._signal_params['skip_signals'] = False
+            return res
+        return inner
+
+
 class BaseInfoModel(models.Model):
     __metaclass__ = InfoModelMeta
 
@@ -155,13 +213,18 @@ class BaseInfoModel(models.Model):
     info_date_prev  = models.DateTimeField(db_index = True, default = datetime.min)
     info_date_next = models.DateTimeField(db_index = True, default = datetime.max)
     info_date = models.DateTimeField(db_index = True, blank = True)
-    
+
     dimentions = [] # перечень реквизитов-измерений
     period = PERIOD_DAY # тип периодичности
 
     # Константы с минимальной и максимальной датами регистра. Для удобства.
     MAX_DATE = datetime.max
     MIN_DATE = datetime.min
+
+    def __init__(self, *args, **kwargs):
+        super(BaseInfoModel, self).__init__(*args, **kwargs)
+        # словарь параметров для передачи через сигналы
+        self._signal_params = {}
 
     # сформируем запрос по ключу
     @classmethod
@@ -204,7 +267,7 @@ class BaseInfoModel(models.Model):
             query = query.filter(**{dim_attr: dim_val})
 
         return query
-    
+
     # сформируем запрос данных на дату
     @classmethod
     def query_on_date(cls, data, date=None, next = False):
@@ -228,7 +291,7 @@ class BaseInfoModel(models.Model):
                 else:
                     query = query.filter(info_date__lte = q_date, info_date_next__gt = q_date)
         return query
-    
+
     # прямая запись объекта, чтобы можно было записывать без доп. обработки
     def _save(self, *args, **kwargs):
         super(BaseInfoModel, self).save(*args, **kwargs)
@@ -238,9 +301,9 @@ class BaseInfoModel(models.Model):
         # если не указана дата записи, то
         if self.period != PERIOD_INFTY and not self.info_date:
             raise Exception('Attribute info_date is not set!')
-        # нормализуем переданные дату и время 
+        # нормализуем переданные дату и время
         self.info_date = normdate(self.period,self.info_date)
-        
+
         # проверим на уникальность записи
         if self.period != PERIOD_INFTY:
             q = self.__class__.query_dimentions(self).filter(info_date = self.info_date)
@@ -276,45 +339,19 @@ class BaseInfoModel(models.Model):
         self._save(*args, **kwargs)
         # изменим найденные ранее записи
         #TODO: тут можно оптимизировать сохранение, чтобы небыло каскада сохранений
-        if old_prev_rec:
-            if old_prev_rec != new_prev_rec:
-                old_prev_rec.save()
-        if old_next_rec:
-            if old_next_rec != new_next_rec:
-                old_next_rec.save()
-        if new_prev_rec:
-            if new_prev_rec.info_date_next != self.info_date:
-                new_prev_rec.info_date_next = self.info_date
-                new_prev_rec._save()
-        if new_next_rec:
-            if new_next_rec.info_date_prev != self.info_date:
-                new_next_rec.info_date_prev = self.info_date
-                new_next_rec._save()
+        old_prev_rec = instance._signal_params.get('old_prev_rec')
+        old_next_rec = instance._signal_params.get('old_next_rec')
+        # нужно проверить что объект есть, т.к. он может быть удален
+        if old_prev_rec and cls.objects.filter(pk=old_prev_rec.pk).exists():
+            old_prev_rec.save()
+        if old_next_rec and cls.objects.filter(pk=old_next_rec.pk).exists():
+            old_next_rec.save()
 
     # прямое удаление, без обработки
+    @InfoModelMeta.suppress_signals
     def _delete(self, *args, **kwargs):
         super(BaseInfoModel, self).delete(*args, **kwargs)
 
-    # переопределим удаление объекта, чтобы изменять соседние записи
-    def delete(self, *args, **kwargs):
-        # если объект уже хранится, то найдем записи для изменения
-        if self.pk:
-            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_prev).exclude(pk = self.pk)
-            old_prev_rec = q.get() if len(q) == 1 else None
-            q = self.__class__.query_dimentions(self).filter(info_date = self.info_date_next).exclude(pk = self.pk)
-            old_next_rec = q.get() if len(q) == 1 else None
-        else:
-            old_prev_rec = None
-            old_next_rec = None
-        # удалим запись
-        self._delete(*args, **kwargs)
-        # изменим найденные ранее записи
-        #TODO: тут можно оптимизировать сохранение, чтобы небыло каскада сохранений
-        if old_prev_rec:
-            old_prev_rec.save()
-        if old_next_rec:
-            old_next_rec.save()
-    
     class Meta:
         abstract = True
 
@@ -322,14 +359,14 @@ class BaseInfoModel(models.Model):
 def RebuildInfoModel(cls):
     u"""
     Перестраивает связи между записями в регистре
-    """ 
-    
+    """
+
     def eq_keys(dims, key1, key2):
         for key_attr in dims:
             if key1[key_attr] != key2[key_attr]:
                 return False
         return True
-    
+
     def get_key(dims, data):
         key = {}
         for key_attr in dims:
@@ -337,14 +374,14 @@ def RebuildInfoModel(cls):
             if isinstance(data, BaseInfoModel):
                 dim_val = getattr(data, key_attr, None)
             elif isinstance(data, dict):
-                if data.has_key(key_attr):
+                if key_attr in data:
                     dim_val = data[key_attr]
             elif hasattr(data, key_attr):
                 dim_val = getattr(data, key_attr, None)
             key[key_attr] = dim_val
         return key
-    
-    # Вытащить записи регистра сгруппированные по ключевым полям и 
+
+    # Вытащить записи регистра сгруппированные по ключевым полям и
     # отсортированные по дате
     query = cls.objects
     order = []
@@ -399,7 +436,7 @@ class BaseIntervalInfoModel(models.Model):
     info_date_next = models.DateTimeField(db_index = True, default = datetime.max)
     info_date_begin = models.DateTimeField(db_index = True, blank = True)
     info_date_end = models.DateTimeField(db_index = True, blank = True)
-    
+
     dimentions = [] # перечень реквизитов-измерений
     period = PERIOD_DAY # тип периодичности
 
@@ -414,6 +451,11 @@ class BaseIntervalInfoModel(models.Model):
     # Если мы переопередяем какие поля нам использовать,
     # мы сами берем на себя отвественность
     # за настройку полей(тип, индексы, default, allow_blank и т.д.)
+
+    def __init__(self, *args, **kwargs):
+        super(BaseIntervalInfoModel, self).__init__(*args, **kwargs)
+        # словарь параметров для передачи через сигналы
+        self._signal_params = {}
 
     def _get_safe_value(self, fld_name):
         u"""
@@ -505,9 +547,9 @@ class BaseIntervalInfoModel(models.Model):
         elif src == 'end':
             return Q(**{_tmpl % (cls.end_src, add): val})
         raise RuntimeError('invalid arg <<src>> for _gen_Q method!')
-    
+
     # сформируем запрос на интервал дат
-    @classmethod 
+    @classmethod
     def query_interval(cls, data, date_begin=datetime.min, date_end=datetime.max, include_begin=True, include_end=True):
         u"""
         Выборка записей, попадающий в указанный интервал дат.
@@ -528,7 +570,7 @@ class BaseIntervalInfoModel(models.Model):
                     filter = filter | (cls._gen_Q('bgn', 'lt', date_end) & cls._gen_Q('end', 'gte', date_end)) # попадание конца интервала в границы записи
         query = query.filter(filter)
         return query
-    
+
     # сформируем запрос данных на дату
     @classmethod
     def query_on_date(cls, data, date=None, active=True, next=False):
@@ -554,7 +596,7 @@ class BaseIntervalInfoModel(models.Model):
                 filter = filter | (cls._gen_Q('bgn', 'lte', q_date_begin) & cls._gen_Q('end', 'gte', q_date_end)) # дата попадает в интервал записи
             query = query.filter(filter)
         return query
-    
+
     # прямая запись объекта, чтобы можно было записывать без доп. обработки
     def _save(self, *args, **kwargs):
         super(BaseIntervalInfoModel, self).save(*args, **kwargs)
@@ -564,13 +606,13 @@ class BaseIntervalInfoModel(models.Model):
         # если не указана дата записи, то
         if self.period != PERIOD_INFTY and (not self._begin or not self._end):
             raise Exception('Attribute info_date is not set!')
-        # нормализуем переданные дату и время 
+        # нормализуем переданные дату и время
         self._begin = normdate(self.period,self._begin, True)
         self._end = normdate(self.period,self._end, False)
 
         if self.period != PERIOD_INFTY and (self._begin > self._end):
             raise InvalidIntervalError("%s > %s"%(self.__class__.begin_src, self.__class__.end_src))
-        
+
         # проверим на уникальность записи
         if self.period != PERIOD_INFTY:
             q = self.__class__.query_interval(self, self._begin, self._end)
@@ -578,7 +620,7 @@ class BaseIntervalInfoModel(models.Model):
                 q = q.exclude(pk = self.pk)
             if q.count() > 0:
                 raise OverlapError( self.__class__ )
-        
+
         # если объект уже хранится, то найдем записи для изменения
         old_prev_rec = None
         old_next_rec = None
@@ -623,29 +665,10 @@ class BaseIntervalInfoModel(models.Model):
                 new_next_rec._save()
 
     # прямое удаление, без обработки
+    @InfoModelMeta.suppress_signals
     def _delete(self, *args, **kwargs):
         super(BaseIntervalInfoModel, self).delete(*args, **kwargs)
 
-    # переопределим удаление объекта, чтобы изменять соседние записи
-    def delete(self, *args, **kwargs):
-        # если объект уже хранится, то найдем записи для изменения
-        if self.pk:
-            q = self.__class__.query_dimentions(self).filter(self.__class__._gen_Q('end','',self.info_date_prev)).exclude(pk = self.pk)
-            old_prev_rec = q.get() if len(q) == 1 else None
-            q = self.__class__.query_dimentions(self).filter(self.__class__._gen_Q('bgn', '', self.info_date_next)).exclude(pk = self.pk)
-            old_next_rec = q.get() if len(q) == 1 else None
-        else:
-            old_prev_rec = None
-            old_next_rec = None
-        # удалим запись
-        self._delete(*args, **kwargs)
-        # изменим найденные ранее записи
-        #TODO: тут можно оптимизировать сохранение, чтобы небыло каскада сохранений
-        if old_prev_rec:
-            old_prev_rec.save()
-        if old_next_rec:
-            old_next_rec.save()
-    
     class Meta:
         abstract = True
 
@@ -657,14 +680,14 @@ def RebuildIntervalInfoModel(cls, on_overlap_error=0):
     0 - вызвать exception
     1 - изменить интервал записи с ранней датой начала
     2 - выдать список ID глючных элементов, которые пропущены (после исправления придется еще раз запускать пересчет)
-    """ 
-    
+    """
+
     def eq_keys(dims, key1, key2):
         for key_attr in dims:
             if key1[key_attr] != key2[key_attr]:
                 return False
         return True
-    
+
     def get_key(dims, data):
         key = {}
         for key_attr in dims:
@@ -672,14 +695,14 @@ def RebuildIntervalInfoModel(cls, on_overlap_error=0):
             if isinstance(data, BaseIntervalInfoModel):
                 dim_val = getattr(data, key_attr, None)
             elif isinstance(data, dict):
-                if data.has_key(key_attr):
+                if key_attr in data:
                     dim_val = data[key_attr]
             elif hasattr(data, key_attr):
                 dim_val = getattr(data, key_attr, None)
             key[key_attr] = dim_val
         return key
-    
-    # Вытащить записи регистра сгруппированные по ключевым полям и 
+
+    # Вытащить записи регистра сгруппированные по ключевым полям и
     # отсортированные по дате
     query = cls.objects
     order = []
@@ -725,7 +748,7 @@ def RebuildIntervalInfoModel(cls, on_overlap_error=0):
                         continue
                     else:
                         raise OverlapError()
-            
+
             last_rec.info_date_next = rec._begin
             last_rec._save()
             rec.info_date_prev = last_rec._end
