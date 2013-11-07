@@ -190,9 +190,10 @@ class InfoModelMeta(models.base.ModelBase):
             # чтобы не было каскада сохранений
             old_prev_rec = instance._signal_params.get('old_prev_rec')
             old_next_rec = instance._signal_params.get('old_next_rec')
-            if old_prev_rec:
+            # нужно проверить что объект есть, т.к. он может быть удален
+            if old_prev_rec and cls.objects.filter(pk=old_prev_rec.pk).exists():
                 old_prev_rec.save()
-            if old_next_rec:
+            if old_next_rec and cls.objects.filter(pk=old_next_rec.pk).exists():
                 old_next_rec.save()
 
     @staticmethod
@@ -338,14 +339,22 @@ class BaseInfoModel(models.Model):
         # сохраним запись
         self._save(*args, **kwargs)
         # изменим найденные ранее записи
-        #TODO: тут можно оптимизировать сохранение, чтобы небыло каскада сохранений
-        old_prev_rec = instance._signal_params.get('old_prev_rec')
-        old_next_rec = instance._signal_params.get('old_next_rec')
-        # нужно проверить что объект есть, т.к. он может быть удален
-        if old_prev_rec and cls.objects.filter(pk=old_prev_rec.pk).exists():
-            old_prev_rec.save()
-        if old_next_rec and cls.objects.filter(pk=old_next_rec.pk).exists():
-            old_next_rec.save()
+        # TODO: тут можно оптимизировать сохранение,
+        # чтобы не было каскада сохранений
+        if old_prev_rec:
+            if old_prev_rec != new_prev_rec:
+                old_prev_rec.save()
+        if old_next_rec:
+            if old_next_rec != new_next_rec:
+                old_next_rec.save()
+        if new_prev_rec:
+            if new_prev_rec.info_date_next != self.info_date:
+                new_prev_rec.info_date_next = self.info_date
+                new_prev_rec._save()
+        if new_next_rec:
+            if new_next_rec.info_date_prev != self.info_date:
+                new_next_rec.info_date_prev = self.info_date
+                new_next_rec._save()
 
     # прямое удаление, без обработки
     @InfoModelMeta.suppress_signals
