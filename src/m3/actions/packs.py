@@ -607,7 +607,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         Устанавливаем параметры поиска по умолчанию 'code' и 'name' в случае,
         если у модели есть такие поля
         '''
-        filter_fields = self.filter_fields
+        filter_fields = self.filter_fields[:]
         if not filter_fields:
             filter_fields.extend([field.attname for field in self.model._meta.local_fields \
                                   if field.attname in ('code', 'name')])

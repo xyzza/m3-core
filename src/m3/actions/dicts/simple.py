@@ -8,6 +8,7 @@ Created on 29.01.2011
 from django.db import transaction
 from django.conf import settings
 
+
 from m3 import RelatedError
 from m3.db import BaseObjectModel, safe_delete
 
@@ -20,6 +21,8 @@ from m3.actions.results import ActionResult
 from m3.actions.interfaces import IMultiSelectablePack
 from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3_ext.ui.misc.store import ExtJsonStore
+from m3_ext.ui.results import ExtUIScriptResult
+
 from m3_legacy import logger
 
 try:
