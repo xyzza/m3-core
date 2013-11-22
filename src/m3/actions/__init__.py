@@ -5,6 +5,7 @@ import abc
 import re
 import importlib
 import sys
+import time
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -26,6 +27,15 @@ from context import (
     ContextBuildingError,
     CriticalContextBuildingError,
 )
+
+if getattr(settings, 'ENABLE_METRICS_COLLECTION', False):
+    import hashlib
+    try:
+        import pystatsd
+    except ImportError as ie:
+        raise ImportError('Metrics collection is enabled, but we failed to '
+                         'import "pystatsd": {0}'.format(unicode(ie)))
+
 
 ACD = ActionContextDeclaration
 
@@ -704,12 +714,19 @@ class ActionController(object):
         # Признак того, что контроллер зарегистрирован во внутреннем кеше
         self._registered = False
 
+        if getattr(settings, 'ENABLE_METRICS_COLLECTION', False):
+            prefix = getattr(settings, 'METRICS_PREFIX', None)
+            host = getattr(settings, 'METRICS_HOST', 'localhost')
+            port = getattr(settings, 'METRICS_PORT', 8125)
+
+            self.statsd_client = pystatsd.Client(host, port, prefix=prefix)
+
     def __str__(self):
         return (
             self.name if self.name
             else super(ActionController, self).__str__()
         )
-
+ 
     #==========================================================================
     # Методы для быстрого поиска экшенов и паков по разным атрибутам
     #==========================================================================
@@ -875,6 +892,8 @@ class ActionController(object):
         matched = self._url_patterns.get(path)
         if matched:
             stack, action = matched
+            
+            processing_started = time.time()
 
             if settings.DEBUG:
                 # Записывает сообщение в логгер если включен тестовый режим
@@ -888,6 +907,15 @@ class ActionController(object):
                     raise
             else:
                 result = self._invoke(request, action, stack)
+
+            if getattr(settings, 'ENABLE_METRICS_COLLECTION', False):
+                md5 = hashlib.md5()
+                md5.update(self.url)
+                url_hash = md5.hexdigest()
+                self.statsd_client.incr('controller_{0}.requests.count'.format(url_hash))
+                self.statsd_client.incr('requests.total'.format(url_hash))
+                self.statsd_client.timing_since('controller_{0}.requests.timing'.format(url_hash), processing_started)
+
 
             if isinstance(result, ActionResult):
                 return result.get_http_response()
