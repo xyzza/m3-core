@@ -12,8 +12,10 @@ from exceptions import ApplicationLogicException
 
 def apply_sort_order(query, columns, sort_order):
     '''
-    Закладывает на запрос порядок сортировки. Сначала если в описании колонок columns есть code,
-    то сортируем по нему, иначе если есть по name. Если задан sort_order, то он главнее всех.
+    Закладывает на запрос порядок сортировки.
+    Сначала если в описании колонок columns есть code,
+    то сортируем по нему, иначе если есть по name.
+    Если задан sort_order, то он главнее всех.
     '''
     if isinstance(sort_order, list):
         query = query.order_by(*sort_order)
@@ -37,110 +39,45 @@ def apply_sort_order(query, columns, sort_order):
         query = query.order_by(order) if order else query.all()
     return query
 
+
 def create_search_filter(filter_text, fields):
     """
-    Фильтрация производится по списку полей fields и введеному пользователем тексту filter_text.
-    Возможны два варианта работы.
-    1) Если количество слов в запросе <= WORDS_LIMIT, то работаем по следующей схеме
+    Фильтрация производится по списку полей fields
+    и введеному пользователем тексту filter_text.
+    работает по следующей схеме
         Пример:
             fields = ['name', 'family']
             filter_text = u'Вася Пупкин'
         Получится условие WHERE:
-            (name like 'Вася' AND name like 'Пупкин') OR (family like 'Вася' AND family like 'Пупкин') OR
-            ((name like 'Вася' and family like 'Пупкин') OR (name like 'Пупкин' and family like 'Вася'))
-    2) Если количество слов в запросе > WORDS_LIMIT, то работаем по следующей схеме
-        Пример:
-            fields = ['name', 'family']
-            filter_text = u'Вася Пупкин Иванович Васильевич Третий'
-        Получится условие WHERE:
-            ((name like 'Вася Пупкин Иванович Васильевич Третий') OR (family like
-                'Вася Пупкин Иванович Васильевич Третий'))
-    В случае если нет полей для поиска и выражение Q не сформировалось возвращает None
+            (name like '%Вася%' or family like '%Вася%') and
+            (name like '%Пупкин%' or family like '%Пупкин%')
+    если один из параметров пуст, то возвращает пустой Q()
     """
-
-    # Максимальное количество слов в запросе для работы по сценарию 1(полный перебор)
-    WORDS_LIMIT = 3
-
-    def create_filter(words,fields):
-        #TODO: нужна оптимизация для исключения повторяющихся условий - сейчас условия повторяются
-        filter = None
-        if not words or not fields:
-            return filter
-
-        if len(words) == 0 or len(fields) == 0:
-            return filter
-
-        if len(words) == 1 and len(fields) == 1:
-            filter = Q(**{fields.pop() + '__icontains': words.pop()})
-            #filter = '('+fields.pop()+'='+words.pop()+')'
-            return filter
-
-        if len(words) > 0 and len(fields) == 1:
-            field = fields.pop()
-            for word in words:
-                fltr = Q(**{field + '__icontains': word})
-                filter = filter & fltr if filter else fltr
-                #fltr = '('+field+'='+word+')'
-                #filter = filter+' and '+fltr if filter else fltr
-            return filter
-
+    filter_all = Q()
+    if filter_text and fields:
+        words = filter_text.split()
         for word in words:
-            filtr = None
+            filter_word = Q()
             for field in fields:
-                sub_fltr = create_filter(set(words)-set([word]),set(fields)-set([field]))
-                if sub_fltr:
-                    fltr = (Q(**{field + '__icontains': word}) & sub_fltr)
-                    #fltr = '('+field+'='+word+' and '+sub_fltr+')'
-                else:
-                    fltr = Q(**{field + '__icontains': word})
-                    #fltr = '('+field+'='+word+')'
-                filtr = (filtr | fltr) if filtr else fltr
-                #filtr = '('+filtr+' or '+fltr+')' if filtr else fltr
-            filter = (filter | filtr) if filter else filtr
-            #filter = '('+filter+' or '+filtr+')' if filter else filtr
-        return filter
+                filter_word |= Q(**{field + '__icontains': word})
+            filter_all &= filter_word
+    return filter_all
 
-    condition = None
-
-    if filter_text:
-        words = [filter_text]
-        # Если в запросе на поиск <= WORDS_LIMIT слов, то работаем по сценарию 1.
-        # Разбиваем текст запроса на слова и осуществляем перебор.
-        if len(filter_text.strip().split(' ')) <= WORDS_LIMIT:
-            words = filter_text.strip().split(' ')
-
-        condition = None
-
-        # Перебираем все поля.
-        for field_name in fields:
-            field_condition = None
-            # И все слова.
-            for word in words:
-                q = Q(**{field_name + '__icontains': word})
-                field_condition = field_condition & q if field_condition else q
-
-            condition = condition | field_condition if condition else field_condition
-
-        if len(words) <= WORDS_LIMIT:
-            # дополнительное условие, если встречаются объединение слов
-            cond = create_filter(set(words), set(fields))
-            if cond:
-                condition = condition | cond if condition else cond
-
-    return condition
 
 def apply_search_filter(query, filter, fields):
     '''
-    Накладывает фильтр поиска на запрос. Вхождение каждого элемента фильтра ищется в заданных полях.
+    Накладывает фильтр поиска на запрос.
+    Вхождение каждого элемента фильтра ищется в заданных полях.
     @param query: Запрос
     @param filter: Строка фильтра
     @param fields: Список полей модели по которым будет поиск
     '''
     assert isinstance(fields, (list, tuple))
     condition = create_search_filter(filter, fields)
-    if condition != None:
+    if condition is not None:
         query = query.filter(condition)
     return query
+
 
 def detect_related_fields(query, list_columns):
     """
@@ -168,60 +105,73 @@ def detect_related_fields(query, list_columns):
 
             # Считаем все что не является последним после точки моделью
             for deep_model in column_fields[1:-1]:
-                model_name = model_name +'__'+ deep_model
+                model_name = model_name + '__' + deep_model
 
             related_models.append(model_name)
 
     new_query = query.select_related(*related_models)
     return new_query
 
-def bind_object_from_request_to_form(request, obj_factory, form, request_id_name = 'id', exclusion=[]):
+
+def bind_object_from_request_to_form(
+        request, obj_factory, form, request_id_name='id', exclusion=None):
     '''
-    Функция извлекает объект из запроса по id, создает его экземпляр и биндит к форме
+    Функция извлекает объект из запроса по id,
+    создает его экземпляр и биндит к форме
     @param request:     Запрос от клиента содержащий id объекта
     @param obj_factory: Функция возвращающая объект по его id
     @param form:        Класс формы к которому привязывается объект
     @param request_id_name:   Имя параметра запроса соответствующего ID объекта
     '''
+    exclusion = exclusion or []
+
     # Получаем объект по id
     id = extract_int(request, request_id_name)
     obj = obj_factory(id)
     if obj is None:
-        raise ApplicationLogicException('Такого элемента не существует, возможно он был удален.\
-                                         Обновите содержимое.')
-    # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
+        raise ApplicationLogicException(
+            'Такого элемента не существует, возможно он был удален.'
+            ' Обновите содержимое.'
+        )
+    # Разница между новым и созданным объектов в том,
+    # что у нового нет id или он пустой
     create_new = True
-    if isinstance(obj, dict) and obj.get('id') != None:
+    if isinstance(obj, dict) and obj.get('id') is not None:
         create_new = False
-    elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
+    elif hasattr(obj, 'id') and getattr(obj, 'id') is not None:
         create_new = False
     # Устанавливаем параметры формы
-    win = form(create_new = create_new)
+    win = form(create_new=create_new)
     # Биндим объект к форме
     win.form.from_object(obj, exclusion)
     return win
 
-def bind_request_form_to_object(request, obj_factory, form, request_id_name = 'id', exclusion=[]):
+
+def bind_request_form_to_object(
+        request, obj_factory, form, request_id_name='id', exclusion=None):
     '''
-    Функция создает объект по id в запросе и заполняет его атрибуты из данных пришедшей формы
+    Функция создает объект по id в запросе
+    и заполняет его атрибуты из данных пришедшей формы
     @param request:     Запрос от клиента содержащий id объекта
     @param obj_factory: Функция возвращающая объект по его id
     @param form:        Класс формы к которому привязывается объект
     @param request_id_name:   Имя параметра запроса соответствующего ID объекта
     '''
+    exclusion = exclusion or []
     # Получаем наш объект по id и биндим форму к нему
     id = extract_int(request, request_id_name)
     obj = obj_factory(id)
 
-    # Разница между новым и созданным объектов в том, что у нового нет id или он пустой
+    # Разница между новым и созданным объектов в том,
+    # что у нового нет id или он пустой
     create_new = True
-    if isinstance(obj, dict) and obj.get('id') != None:
+    if isinstance(obj, dict) and obj.get('id') is not None:
         create_new = False
-    elif hasattr(obj, 'id') and getattr(obj, 'id') != None:
+    elif hasattr(obj, 'id') and getattr(obj, 'id') is not None:
         create_new = False
 
     # Создаем форму для биндинга к ней
-    win = form(create_new = create_new)
+    win = form(create_new=create_new)
     win.form.bind_to_request(request)
     win.form.to_object(obj, exclusion)
 
@@ -232,11 +182,14 @@ def bind_request_form_to_object(request, obj_factory, form, request_id_name = 'i
 
     return obj
 
+
 def safe_delete_record(model, id=None):
     '''
-    Безопасное удаление записи в базе. В отличие от джанговского ORM не удаляет каскадно.
+    Безопасное удаление записи в базе.
+    В отличие от джанговского ORM не удаляет каскадно.
     Возвращает True в случае успеха, иначе False
-    @deprecated нужно использовать BaseModel.safe_delete() или m3.db.safe_delete(obj)
+    @deprecated нужно использовать BaseModel.safe_delete()
+        или m3.db.safe_delete(obj)
     '''
     import warnings
     warnings.warn((
@@ -260,22 +213,30 @@ def safe_delete_record(model, id=None):
             return True
     return safe_delete(obj)
 
-def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_name = 'parent'):
+
+def fetch_search_tree(
+        model_or_query, filter, branch_id=None, parent_field_name='parent'):
     '''
-    По заданному фильтру filter и модели model формирует развернутое дерево с результатами поиска.
+    По заданному фильтру filter и модели model
+    формирует развернутое дерево с результатами поиска.
     Если filter пустой, то получается полностью развернутое дерево.
     '''
-    #branch_id - это элемент ограничивающий дерево, т.е. должны возвращаться только дочерние ему элементы
+    # branch_id - это элемент ограничивающий дерево,
+    # т.е. должны возвращаться только дочерние ему элементы
     # Сначала тупо получаем все узлы подходящие по фильтру
-    assert isinstance(model_or_query, (models.query.QuerySet, models.Manager)) or issubclass(model_or_query, models.Model)
+    assert isinstance(
+        model_or_query,
+        (models.query.QuerySet, models.Manager)
+    ) or issubclass(model_or_query, models.Model)
+
     if isinstance(model_or_query, (models.query.QuerySet, models.Manager)):
         query = model_or_query
         model = model_or_query.model
     else:
         query = model_or_query.objects
         model = model_or_query
-    if branch_id and hasattr(model,'get_descendants'):
-        branch_node = query.get(id = branch_id)
+    if branch_id and hasattr(model, 'get_descendants'):
+        branch_node = query.get(id=branch_id)
         nodes = branch_node.get_descendants().select_related(parent_field_name)
     else:
         nodes = query.all().select_related(parent_field_name)
@@ -322,7 +283,7 @@ def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_nam
         try:
             index = sub_tree.index(path_slice[0])
         except ValueError:
-            sub_tree.append( create_one_tree(path_slice) )
+            sub_tree.append(create_one_tree(path_slice))
         else:
             if hasattr(sub_tree[index], 'children'):
                 merge(sub_tree[index].children, path_slice[1:])
@@ -334,13 +295,17 @@ def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_nam
         merge(tree, path)
 
     def set_tree_attributes(sub_tree):
-        '''  Пробегает дерево и устанавливает узлам атрибуты expanded и leaf '''
+        '''
+        Пробегает дерево и устанавливает узлам атрибуты expanded и leaf
+        '''
         if not hasattr(sub_tree, 'children') or len(sub_tree.children) == 0:
-            # не факт, что это лист, т.к. мы лишь фильтровали дерево - нужно проверить
-            if hasattr(sub_tree,'is_leaf_node'):
+            # не факт, что это лист,
+            # т.к. мы лишь фильтровали дерево - нужно проверить
+            if hasattr(sub_tree, 'is_leaf_node'):
                 sub_tree.leaf = sub_tree.is_leaf_node()
             else:
-                child_nodes = query.filter(Q(**{parent_field_name: sub_tree.id}))
+                child_nodes = query.filter(
+                    Q(**{parent_field_name: sub_tree.id}))
                 if len(child_nodes) == 0:
                     sub_tree.leaf = True
         else:
@@ -353,14 +318,18 @@ def fetch_search_tree(model_or_query, filter, branch_id = None, parent_field_nam
 
     return tree
 
+
 def extract_int(request, key):
-    ''' Извлекает целое число из запроса '''
+    '''
+    Извлекает целое число из запроса
+    '''
     try:
         value = request.REQUEST.get(key, None)
     except IOError:
         # В некоторых браузерах (предполагается что в ie) происходит следующие:
         # request.REQUEST читается и в какой-то момент связь прекращается
-        # из-за того, что браузер разрывает соединение, в следствии этого происходит ошибка
+        # из-за того, что браузер разрывает соединение,
+        # в следствии этого происходит ошибка
         # IOError: request data read error
 
         #logger.warning(str(err))
@@ -371,16 +340,19 @@ def extract_int(request, key):
         try:
             value = int(value)
         except ValueError:
-            raise ApplicationLogicException('Произошла ошибка при конвертации.')
+            raise ApplicationLogicException(
+                'Произошла ошибка при конвертации.')
         return value
     else:
         return 0
+
 
 def extract_int_list(request, key):
     ''' Извлекает список целых чисел из запроса '''
     value = request.REQUEST.get(key, '')
     values = map(int, value.split(','))
     return values
+
 
 def extract_list(request, key):
     data = request.POST.get(key)
@@ -391,12 +363,14 @@ def extract_list(request, key):
         return obj
     return []
 
+
 def apply_column_filter(query, request, map):
     '''
     Накладывает колоночный фильтр
     @param query: Запрос
     @param request: Данные с клиента включающие фильтры
-    @param map: карта связи фильтров в request и полей в объекте: ключ - поле объекта, значение - параметр фильтра, например:
+    @param map: карта связи фильтров в request и полей в объекте:
+        ключ - поле объекта, значение - параметр фильтра, например:
             {'unit__name':'unit_ref_name'}
     '''
     assert isinstance(map, dict)
