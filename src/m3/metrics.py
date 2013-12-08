@@ -67,11 +67,11 @@ def send_controllers_contexts():
 
     ControllerCache.populate()
 
-    controllers = [{
+    controllers = sorted([{
                     get_hash(c.url): {
                         'url': c.url
                     }
-                } for c in ControllerCache._controllers]
+                } for c in ControllerCache._controllers])
 
     parts = prefix.split('.')
     identity = dict(zip(['version', 'region', 'client', 'product'], parts))
