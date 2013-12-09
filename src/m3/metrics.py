@@ -74,16 +74,19 @@ def send_controllers_contexts():
         h.update(s)
         return h.hexdigest()
 
+    assert prefix, 'Identity prefix (METRICS_PREFIX) should be specified!'
+
     ControllerCache.populate()
-
-    controllers = {}
-
-    for c in ControllerCache._controllers:
-        controllers[get_hash(c.url)] = dict(url=c.url)
+    controllers = {}    
+    
+    urls = sorted([c.url for c in ControllerCache._controllers])
+    for url in urls:
+        controllers[get_hash(url)] = dict(url=url)
 
     parts = prefix.split('.')
     identity = dict(zip(['version', 'region', 'client', 'product'], parts))
-    instance_id = filter(lambda x: x.startswith('instance_'), parts)
+    instance_id = [part for part in parts if part.startswith('instance_')]
+
     if instance_id:
         identity['instance'] = instance_id[0][9:]
 
