@@ -23,28 +23,36 @@ except ImportError as ie:
 prefix = getattr(settings, 'METRICS_PREFIX', None)
 host = getattr(settings, 'METRICS_HOST', 'localhost')
 port = getattr(settings, 'METRICS_PORT', 8125)
-endpoint_url = getattr(settings, 'METRICS_CONTEXTS_URL', 'http://localhost:1942/register')
+endpoint_url = getattr(settings, 'METRICS_CONTEXTS_URL',
+                       'http://localhost:1942/register')
 
 statsd_client = pystatsd.Client(host, port, prefix=prefix)
+
 
 def gauge_user_count():
     statsd_client.gauge('users.count', User.objects.count())
 
+
 def gauge_active_users():
     statsd_client.gauge('users.active', Session.objects.count())
+
 
 def logged_out(**kwargs):
     statsd_client.decr('users.active')
 
+
 def logged_in(**kwargs):
     statsd_client.incr('users.active')
 
-def user_deleted(**kwargs): 
-    statsd_client.decr('users.count')    
+
+def user_deleted(**kwargs):
+    statsd_client.decr('users.count')
+
 
 def user_created(**kwargs):
     if not kwargs['instance'].id:
         statsd_client.incr('users.count')
+
 
 def capture_users_metrics(statsd_client):
     gauge_user_count()
@@ -59,6 +67,7 @@ def capture_users_metrics(statsd_client):
 
         User.__metrics_registered = True
 
+
 def send_controllers_contexts():
     def get_hash(s):
         h = hashlib.md5()
@@ -67,11 +76,10 @@ def send_controllers_contexts():
 
     ControllerCache.populate()
 
-    controllers = sorted([{
-                    get_hash(c.url): {
-                        'url': c.url
-                    }
-                } for c in ControllerCache._controllers])
+    controllers = {}
+
+    for c in ControllerCache._controllers:
+        controllers[get_hash(c.url)] = dict(url=c.url)
 
     parts = prefix.split('.')
     identity = dict(zip(['version', 'region', 'client', 'product'], parts))
@@ -88,9 +96,10 @@ def send_controllers_contexts():
     }
 
     try:
-        req = urllib2.Request(endpoint_url, 
+        req = urllib2.Request(endpoint_url,
                               data=json.dumps(packet),
                               headers={'Content-Type': 'application/json'})
-        resp = urllib2.urlopen(req)
+        urllib2.urlopen(req)
+        logging.info('Successfully sent context information.')
     except urllib2.URLError as ue:
         logging.error("Can't send contexts to {0}: {1}".format(endpoint_url, ue))
