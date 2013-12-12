@@ -6,7 +6,7 @@ from django.db import models, connection, transaction, router, connections
 from django.db.models.query import QuerySet
 from django.db.models.deletion import Collector
 
-from m3 import json_encode
+from m3 import json_encode, RelatedError
 
 
 def safe_delete(model):
@@ -140,10 +140,12 @@ class BaseObjectModel(models.Model):
     def safe_delete(self):
         """
         Функция выполняющая "безопасное" удаление записи из БД.
-        В случае, если запись не удалось удалисть по причине нарушения
+        В случае, если запись не удалось удалить по причине нарушения
         целостности, возвращается False, иначе True.
         """
-        return safe_delete(self)
+        if not safe_delete(self):
+            raise RelatedError(
+                u"Объект не может быть удален! Возможно на него есть ссылки.")
 
     def get_related_objects(self, using=None):
         """
