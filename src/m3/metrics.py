@@ -79,9 +79,12 @@ def send_controllers_contexts():
     ControllerCache.populate()
     controllers = {}    
     
-    urls = sorted([c.url for c in ControllerCache._controllers])
-    for url in urls:
+    controller_urls = sorted([c.url for c in ControllerCache._controllers])
+    for url in controller_urls:
         controllers[get_hash(url)] = dict(url=url)
+
+    all_urls = [url for c in ControllerCache._controllers for url in c._url_patterns.keys()]
+    urls = dict([(get_hash(u), u) for u in all_urls])
 
     parts = prefix.split('.')
     identity = dict(zip(['version', 'region', 'client', 'product'], parts))
@@ -94,6 +97,7 @@ def send_controllers_contexts():
         'timestamp': int(time.time()),
         'info': {
             'controller': controllers,
+            'url': urls
         },
         'identity': identity
     }
