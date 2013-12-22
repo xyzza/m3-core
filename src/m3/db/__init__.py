@@ -36,13 +36,12 @@ def safe_delete(model):
     # (т.к. стандартный пересчет вешается на метод self.delete()
     if hasattr(model, '_tree_manager') and callable(
             getattr(model._tree_manager, '_close_gap', None)):
-        #это видимо mptt моедль
+        #это, видимо, mptt модель
         opts = model._meta
-        tree_width = (getattr(model, opts.right_attr) -
-                      getattr(model, opts.left_attr) + 1)
-        target_right = getattr(model, opts.right_attr)
-        tree_id = getattr(model, opts.tree_id_attr)
-        model._tree_manager._close_gap(tree_width, target_right, tree_id)
+        r = getattr(model, getattr(opts, 'right_attr', 'rght'))
+        l = getattr(model, getattr(opts, 'left_attr', 'lft'))
+        t = getattr(model, getattr(opts, 'tree_id_attr', 'tree_id'))
+        model._tree_manager._close_gap(r - l + 1, r, t)
 
     models.signals.post_delete.send(sender=model.__class__, instance=model)
     return True
