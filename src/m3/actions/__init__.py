@@ -882,7 +882,7 @@ class ActionController(object):
         if matched:
             stack, action = matched
 
-            with _STATSD_CLIENT(self.url):
+            with _STATSD_CLIENT(self, request):
                 try:
                     result = self._invoke(request, action, stack)
                 except:
@@ -1380,7 +1380,7 @@ class ControllerCache(object):
         Загружает в кэш ActionController'ы
         из перечисленных в INSTALLED_APPS приложений.
         В каждом из них загружает модуль *app_meta*
-        и пытается выполнить метод *register_actions* внутри него.
+        и пытается выполнить метод *register_actinos* внутри него.
         Выполняется только один раз. Возвращает истину в случае успеха.
         """
         if cls._loaded:
