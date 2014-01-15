@@ -29,3 +29,4 @@ build/*
 dist/*
 src/m3.egg-info/*
 src/m3_core.egg-info/*
+glob:docs/_build/*
