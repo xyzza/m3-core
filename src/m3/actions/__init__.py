@@ -6,6 +6,7 @@ import re
 import importlib
 import sys
 import time
+from functools import wraps
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -74,6 +75,23 @@ def _name_of(obj):
 
     return '%s.%s%s' % (package, parent, obj)
 
+
+def _cached_to(attr_name):
+    """
+    Оборачивает простые методы (без аргументов) и property getters,
+    с целью закэшировать первый полученный результат
+    """
+    def wrapper(fn):
+        @wraps(fn)
+        def inner(self):
+            if hasattr(self, attr_name):
+                result = getattr(self, attr_name)
+            else:
+                result = fn(self)
+                setattr(self, attr_name, result)
+            return result
+        return inner
+    return wrapper
 
 #==============================================================================
 # Абстрактный механизм проверки прав и его реализация,
@@ -362,14 +380,19 @@ class ActionUrlIsNotDefined(ActionException):
 
 #==============================================================================
 class Action(object):
-    '''
+    u"""
     Базовый класс, от которого должны наследоваться все Action'ы в системе.
     Заменяет собой классические вьюшки Django.
-    '''
+    """
 
     # Часть адреса запроса которая однозначно определяет его принадлежность к
     # конкретному Action'у
-    url = ''
+    @property
+    def url(self):
+        u"""
+        автоматически генерируемый url
+        """
+        return r'/%s' % self.__class__.__name__.lower()
 
     # Ссылка на ActionPack к которому принадлежит данный Action
     parent = None
@@ -524,10 +547,47 @@ class ActionPack(object):
     экшенов и паков, схожих по целям.
     '''
     # Адрес экшенпака
-    url = ''
+    @classmethod
+    def get_short_name(cls):
+        """
+        Имя пака для поиска в ControllerCache
+        """
+        name = cls.__dict__.get('_auto_short_name')
+        if not name:
+            name = cls._auto_short_name = _name_of(cls)
+        return name
+
+    @property
+    @_cached_to('__cached_short_name')
+    def short_name(self):
+        # имя пака для поиска в ControllerCache в виде атрибута
+        # для совместимости с m3
+        return self.get_short_name()
+
+    @property
+    def url(self):
+        return r'/%s' % self.short_name
+
+    @classmethod
+    def absolute_url(cls):
+        # получение url для построения внутренних кэшей m3
+        path = [r'/%s' % cls.get_short_name()]
+        pack = cls.parent
+        while pack is not None:
+            path.append(pack.url)
+            pack = pack.parent
+        for cont in ControllerCache.get_controllers():
+            p = cont.find_pack(cls)
+            if p:
+                path.append(cont.url)
+                break
+        return ''.join(reversed(path))
 
     # Ссылка на вышестоящий пакет, тот в котором зарегистрирован данный пакет
     parent = None
+
+    # Ссылка на родительский ActionController
+    controller = None
 
     # Наименование Набора действий для отображения
     verbose_name = None
@@ -559,31 +619,11 @@ class ActionPack(object):
         # зарегистрированных на исполнение в данном пакете
         self.subpacks = []
 
-    @classmethod
-    def absolute_url(cls):
-        """
-        Возвращает полный адрес (url) от контроллера до текущего экшенпака
-        """
-        path = [cls.url]
-        pack = cls.parent
-        while pack is not None:
-            path.append(pack.url)
-            pack = pack.parent
-        url = ''.join(reversed(path))
-
-        contr_url = ''
-        for cont in ControllerCache.get_controllers():
-            p = cont.find_pack(cls)
-            if p:
-                contr_url = cont.url
-                break
-        return contr_url + url
-
     def get_absolute_url(self):
         """
         Возвращает абсолютный путь (НОРМАЛЬНО, в отличие от absolute_url)
         """
-        assert hasattr(self, 'controller')
+        assert self.controller
         pack = self
         if pack.parent:
             path = []
@@ -979,21 +1019,21 @@ class ActionController(object):
     # пакетов действий в контроллер
     #==========================================================================
     def append_pack(self, pack):
-        """ Добавляет *pack*, объект типа ActionPack, в контроллер. """
-        # нам обязательно нужен экземпляр класса
-        # этот метод повторяется кучу раз
-        if isinstance(pack, str):
-            cleaned_pack = self._load_class(pack)()
-        elif inspect.isclass(pack):
-            cleaned_pack = pack()
-        else:
-            cleaned_pack = pack
+        """
+        Добавляет *pack*, объект типа ActionPack, в контроллер.
+        """
+        if not isinstance(pack, ActionPack):
+            raise TypeError(
+                u'Pack must be an instance of ActionPack subclass!')
 
-        self._build_pack_node(cleaned_pack, [])
+        # пак может быть перегруже
+        if pack.short_name in ControllerCache.overrides:
+            pack = ControllerCache.overrides[pack.short_name]
 
-        if cleaned_pack not in self.top_level_packs:
-            self.top_level_packs.append(cleaned_pack)
-            cleaned_pack.controller = self
+        self._build_pack_node(pack, [])
+        if pack not in self.top_level_packs:
+            self.top_level_packs.append(pack)
+            pack.controller = self
         ControllerCache.register_controller(self)
 
     def extend_packs(self, packs):
@@ -1249,6 +1289,8 @@ class ControllerCache(object):
     # словарь зарегистрированных контроллеров в прикладном приложении
     _controllers = set()
 
+    overrides = {}
+
     #==========================================================================
     # Методы, предназначенные для поиска экшенов
     # и паков во всех контроллерах системы
@@ -1271,10 +1313,25 @@ class ControllerCache(object):
         во всех зарегистрированных контроллерах.
         Возвращает экземпляр первого найденного пака.
         """
-        for cont in list(cls._controllers):
-            p = cont.find_pack(pack)
-            if p:
-                return p
+        if inspect.isclass(pack):
+            name = pack.get_short_name()
+        elif isinstance(pack, str) and '.' in pack:
+            name = pack
+        else:
+            raise ValueError(
+                u'Pack must be a class or a string '
+                u'like "package.subpackage.Class"'
+            )
+
+        cls.populate()
+        over = cls.overrides.get(name)
+        if over:
+            return over
+        else:
+            for cont in list(cls._controllers):
+                p = cont.find_pack(pack)
+                if p:
+                    return p
 
     @classmethod
     def find_action(cls, action):
@@ -1389,7 +1446,9 @@ class ControllerCache(object):
         try:
             if cls._loaded:
                 return False
-            # Из инитов всех приложения пытаемся выполнить register_ui_actions
+
+            cls.overrides = {}
+            procs = []
             for app_name in settings.INSTALLED_APPS:
                 try:
                     module = import_module('.app_meta', app_name)
@@ -1397,9 +1456,24 @@ class ControllerCache(object):
                     if err.args[0].find('No module named') == -1:
                         raise
                     continue
+
+                # расширение словаря overridde'ов
+                for original_cls, new_inst in (
+                    getattr(module, 'action_pack_overrides', {}).iteritems()
+                ):
+                    if inspect.isclass(original_cls):
+                        original_cls = original_cls.get_short_name()
+                    cls.overrides[original_cls] = new_inst
+
+                # получение ф-ции - регистратора паков
                 proc = getattr(module, 'register_actions', None)
                 if callable(proc):
-                    proc()
+                    procs.append(proc)
+
+            # собственно, регистрируем экшны
+            for proc in procs:
+                proc()
+
             cls._loaded = True
         finally:
             cls._write_lock.release()
