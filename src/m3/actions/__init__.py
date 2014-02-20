@@ -387,12 +387,7 @@ class Action(object):
 
     # Часть адреса запроса которая однозначно определяет его принадлежность к
     # конкретному Action'у
-    @property
-    def url(self):
-        u"""
-        автоматически генерируемый url
-        """
-        return r'/%s' % self.__class__.__name__.lower()
+    url = ''
 
     # Ссылка на ActionPack к которому принадлежит данный Action
     parent = None
@@ -546,6 +541,8 @@ class ActionPack(object):
     Предназначен для хранения в себе других
     экшенов и паков, схожих по целям.
     '''
+    url = ''
+
     # Адрес экшенпака
     @classmethod
     def get_short_name(cls):
@@ -564,24 +561,25 @@ class ActionPack(object):
         # для совместимости с m3
         return self.get_short_name()
 
-    @property
-    def url(self):
-        return r'/%s' % self.short_name
-
     @classmethod
     def absolute_url(cls):
-        # получение url для построения внутренних кэшей m3
-        path = [r'/%s' % cls.get_short_name()]
+        """
+        Возвращает полный адрес (url) от контроллера до текущего экшенпака
+        """
+        path = [cls.url]
         pack = cls.parent
         while pack is not None:
             path.append(pack.url)
             pack = pack.parent
+        url = ''.join(reversed(path))
+
+        contr_url = ''
         for cont in ControllerCache.get_controllers():
             p = cont.find_pack(cls)
             if p:
-                path.append(cont.url)
+                contr_url = cont.url
                 break
-        return ''.join(reversed(path))
+        return contr_url + url
 
     # Ссылка на вышестоящий пакет, тот в котором зарегистрирован данный пакет
     parent = None
