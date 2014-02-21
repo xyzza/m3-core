@@ -7,7 +7,11 @@ import json
 
 from django import http
 from django.conf import settings
-from django.utils.log import logger
+try:
+    from django.utils.log import logger
+except ImportError:
+    from django.utils.log import getLogger
+    logger = getLogger('django')
 
 from m3.actions import Action, ACD
 from m3.actions.results import ActionResult

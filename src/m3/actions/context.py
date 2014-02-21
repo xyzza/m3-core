@@ -9,7 +9,11 @@ import json
 from decimal import Decimal
 
 from django.utils.encoding import force_unicode
-from django.utils.log import logger
+try:
+    from django.utils.log import logger
+except ImportError:
+    from django.utils.log import getLogger
+    logger = getLogger('django')
 
 
 #============================= ИСКЛЮЧЕНИЯ =====================================

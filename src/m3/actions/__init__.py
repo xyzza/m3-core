@@ -1,18 +1,18 @@
 #coding:utf-8
 import threading
 import inspect
-import abc
 import re
 import importlib
-import sys
-import time
 from functools import wraps
 
 from django.conf import settings
 from django.utils.importlib import import_module
-from django import http
 
-from django.utils.log import logger
+try:
+    from django.utils.log import logger
+except ImportError:
+    from django.utils.log import getLogger
+    logger = getLogger('django')
 
 from results import *
 

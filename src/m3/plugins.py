@@ -9,7 +9,11 @@ import threading
 
 from django.conf import settings
 from django.utils.importlib import import_module
-from django.utils.log import logger
+try:
+    from django.utils.log import logger
+except ImportError:
+    from django.utils.log import getLogger
+    logger = getLogger('django')
 
 
 class ExtensionException(Exception):
