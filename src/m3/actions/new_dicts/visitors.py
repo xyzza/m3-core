@@ -1,5 +1,6 @@
 #coding: utf-8
-from ui.misc import ExtJsonStore
+
+from m3_ext.ui.misc import ExtJsonStore
 
 from m3.actions import utils
 from m3.actions.new_dicts.provider import DataProvider

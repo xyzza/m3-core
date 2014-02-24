@@ -1,5 +1,6 @@
 #coding: utf-8
 import copy
+from django.db import models
 from m3.actions import utils
 from m3.actions.new_dicts.data_utils import ObjectFromJson
 
@@ -19,9 +20,10 @@ class DataProvider(object):
         """получение данных для заполнения формы
         """
         errors = []
+        model = None
         try:
             model = self.model.objects.get(id=id_)
-        except models.exceptions.DoesNotExist as err:
+        except models.exceptions.ObjectDoesNotExist as err:
             errors.append(u"Объект не найден. Возможно он был удален.")
 
         return {"data": model, "errors": errors}
@@ -84,7 +86,7 @@ class DataProvider(object):
         obj = self.model.objects.get(id=id_)
         obj.safe_delete()
         data, errors = self.predelete_object(request)
-        return result, {"data": data, "errors": errors}
+        return {"data": data, "errors": errors}
 
     def presave_object(self, obj, request):
         return True, []

@@ -1,6 +1,6 @@
 #coding: utf-8
 
-from ui.results import ExtUIScriptResult
+from m3_ext.ui.results import ExtUIScriptResult
 from m3.actions import Action, PreJsonResult, ACD, OperationResult
 from m3.db import BaseEnumerate
 
