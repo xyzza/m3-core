@@ -436,16 +436,6 @@ class SelectWindowAction(ListWindowAction):
         self.configure_list(win, request, context)
         self.configure_tree(win, request, context)
 
-        # Ожидается в далеком будущем ;)
-        #win.column_name_on_select = 'fname'
-        #win.list_view.add_column(header=u'Имя', data_index = 'fname')
-        #win.list_view.add_column(header=u'Фамилия', data_index = 'lname')
-        #win.list_view.add_column(header=u'Адрес', data_index = 'adress')
-        # Заглушка, иначе ругается что нет стора
-        win.list_view.set_store(ExtJsonStore(
-            url='/ui/grid-json-store-data', auto_load=False))
-
-        #win.column_name_on_select = 'name'
         win.column_name_on_select = base.column_name_on_select
 
         win = self.parent.get_select_window(win)

@@ -119,9 +119,6 @@ class DictSelectWindowAction(DictListWindowAction):
         self.create_columns(win.grid, self.parent.list_columns)
         self.configure_list(win)
 
-        list_store = ExtJsonStore(url = base.last_used_action.get_absolute_url(), auto_load = False)
-        win.list_view.set_store(list_store)
-
         # M prefer 12.12.10 >
         # win.column_name_on_select = "name"
         #-----:
