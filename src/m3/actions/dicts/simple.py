@@ -103,7 +103,7 @@ class DictListWindowAction(Action):
         self.configure_list(win)
 
         # проверим право редактирования
-        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+        if not self.parent.has_perm(request, self.parent.PERM_EDIT):
             win.make_read_only()
 
         self.configure_window(win, request, context)
@@ -134,7 +134,7 @@ class DictSelectWindowAction(DictListWindowAction):
         # prefer <
 
         # проверим право редактирования
-        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+        if not self.parent.has_perm(request, self.parent.PERM_EDIT):
             win.make_read_only()
 
         self.configure_window(win, request, context)
@@ -182,7 +182,7 @@ class DictEditWindowAction(Action):
         win.data_url = base.edit_window_action.get_absolute_url()
 
         # проверим право редактирования
-        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+        if not self.parent.has_perm(request, self.parent.PERM_EDIT):
             exclude_list = ['close_btn', 'cancel_btn']
             win.make_read_only(True, exclude_list)
 

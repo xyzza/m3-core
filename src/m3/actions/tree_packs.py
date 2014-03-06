@@ -179,7 +179,7 @@ class ListEditRowWindowAction(Action):
         win.form.url = base.save_row_action.get_absolute_url()
 
         # проверим право редактирования
-        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+        if not self.parent.has_perm(request, self.parent.PERM_EDIT):
             win.make_read_only(access_off=True, exclude_list=['cancel_btn','close_btn'])
 
         # У окна может быть процедура доп. конфигурации под конкретный справочник
@@ -238,7 +238,7 @@ class TreeEditNodeWindowAction(Action):
         win.form.url = base.save_node_action.get_absolute_url()
 
         # проверим право редактирования
-        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+        if not self.parent.has_perm(request, self.parent.PERM_EDIT):
             win.make_read_only(access_off = True, exclude_list = ['close_btn','cancel_btn'])
 
         # У окна может быть процедура доп. конфигурации под конкретный справочник
@@ -396,7 +396,7 @@ class ListWindowAction(Action):
         win = self.parent.get_list_window(win)
 
         # проверим право редактирования
-        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+        if not self.parent.has_perm(request, self.parent.PERM_EDIT):
             win.make_read_only()
 
         return ExtUIScriptResult(win)
@@ -421,7 +421,7 @@ class SelectWindowAction(ListWindowAction):
         win.contextTreeIdName = base.contextTreeIdName
 
         # проверим право редактирования
-        if not self.parent.has_sub_permission(request.user, self.parent.PERM_EDIT, request):
+        if not self.parent.has_perm(request, self.parent.PERM_EDIT):
             win.make_read_only()
 
         return ExtUIScriptResult(win)
