@@ -3,6 +3,7 @@ import threading
 import inspect
 import re
 import importlib
+import warnings
 from functools import wraps
 
 from django.conf import settings
@@ -93,6 +94,29 @@ def _cached_to(attr_name):
         return inner
     return wrapper
 
+
+def _must_be_replaced_by(alternative):
+    """
+    Оборачивает устаревший метод таким образом,
+    что при вызове метода выводится предупреждение
+    с рекомендацией замены метода на текущую альтернативу
+    """
+    def wrapper(fn):
+        @wraps(fn)
+        def inner(self, *args, **kwargs):
+            class_name = self.__class__.__name__
+            # if '%' in alternative:
+            #     alternative = alternative % class_name
+            warnings.warn(
+                "'{clazz}.{method}' deprecated! Use '{alternative}'!".format(
+                    clazz=class_name,
+                    method=fn.func_name,
+                    alternative=alternative
+                ), FutureWarning, 2)
+            return fn(self, *args, **kwargs)
+        return inner
+    return wrapper
+
 #==============================================================================
 # Абстрактный механизм проверки прав и его реализация,
 # проверяющая права через механизм django.contrib.auth.models.User.has_perm
@@ -125,11 +149,12 @@ class AbstractPermissionChecker(object):
         '''
         Возвращает код действия, для контроля прав доступа
         '''
-        code = action_or_pack.get_absolute_url()
+        code = _name_of(action_or_pack)
         # уберем из кода префикс системы,
         # т.к. код права должен быть относительным
         if hasattr(settings, 'ROOT_URL') and (
-                code.startswith(settings.ROOT_URL)):
+            code.startswith(settings.ROOT_URL)
+        ):
             code = code[len(settings.ROOT_URL):]
         if subpermission:
             code = '%s#%s' % (code, subpermission)
@@ -420,18 +445,22 @@ class Action(object):
     # Например, путь может быть: "Справочники\Общие" или "Реестры"
     path = None
 
+    @_must_be_replaced_by('%s.get_perm_code')
     def get_sub_permission_code(self, sub_code):
         # метод оставлен для совместимости
         return self.get_perm_code(sub_code)
 
+    @_must_be_replaced_by('%s.has_perm')
     def has_sub_permission(self, user_obj, sub_code, request):
         # метод оставлен для совместимости
         return self.has_perm(request, sub_code)
 
+    @_must_be_replaced_by('%s.get_perm_code')
     def get_permission_code(self):
         # метод оставлен для совместимости
         return self.get_perm_code()
 
+    @_must_be_replaced_by('%s.has_perm')
     def has_permission(self, user_obj, request):
         # метод оставлен для совместимости
         return self.has_perm(request)
@@ -532,7 +561,11 @@ class Action(object):
 
     @classmethod
     def get_verbose_name(cls):
-        return cls.verbose_name if cls.verbose_name else cls.__name__
+        return cls.verbose_name if cls.verbose_name else cls.get_short_name()
+
+    @classmethod
+    def get_short_name(cls):
+        return _name_of(cls)
 
 
 class ActionPack(object):
@@ -642,6 +675,7 @@ class ActionPack(object):
 
     def has_sub_permission(self, user_obj, sub_code, request):
         # метод оставлен для совместимости
+
         return self.has_perm(request, sub_code)
 
     #================= НОВЫЙ ИНТЕРФЕЙС ПРОВЕРКИ ПРАВ ==========================
@@ -760,13 +794,13 @@ class ActionController(object):
     def _add_action_to_search_dicts(self, action, full_path):
         """ Добавляет экшен в словари для быстрого доступа """
         assert isinstance(action, Action)
-        self._actions_by_name[action.__class__.__name__] = (action, full_path)
+        self._actions_by_name[action.get_short_name()] = (action, full_path)
         self._actions_by_type[action.__class__] = (action, full_path)
 
     def _add_pack_to_search_dicts(self, pack):
         """ Добавляет экшенпак в словари для быстрого доступа """
         assert isinstance(pack, ActionPack)
-        self._packs_by_name[pack.__class__.__name__] = pack
+        self._packs_by_name[pack.get_short_name()] = pack
         self._packs_by_type[pack.__class__] = pack
 
     def _rebuild_search_dicts(self):
@@ -963,39 +997,31 @@ class ActionController(object):
     #==========================================================================
     # Методы, предназначенные для поиска экшенов и паков в контроллере
     #==========================================================================
+    @_must_be_replaced_by('ControllerCache.find_pack')
     def find_pack(self, type):
-        """
-        Ищет экшенпак класса *type* внутри иерархии котроллера.
-        Возвращает его экземпляр или None если не находит.
-        *type* может быть классом или строкой с названием класса,
-        это позволяет избежать кроссимпортов.
-        """
-        ControllerCache.populate()
+        return self._find_pack(type)
 
-        if isinstance(type, basestring):
-            return self._packs_by_name.get(type)
-        elif issubclass(type, ActionPack):
-            return self._packs_by_type.get(type)
-        else:
-            raise ValueError('Wrong type of argument %s' % type)
-
+    @_must_be_replaced_by('ControllerCache.find_action')
     def find_action(self, type):
-        """
-        Ищет экшен класса *type* внутри иерархии котроллера.
-        Возвращает его экземпляр или None если не находит.
-        *type* может быть классом или строкой с названием класса,
-        это позволяет избежать кроссимпортов.
-        """
-        ControllerCache.populate()
+        return self._find_action(type)
 
-        if isinstance(type, basestring):
-            clazz, _ = self._actions_by_name.get(type, (None, None))
-        elif issubclass(type, Action):
-            clazz, _ = self._actions_by_type.get(type, (None, None))
+    def _find_pack(self, pack):
+        if isinstance(pack, basestring):
+            inst = self._packs_by_name.get(pack)
+        elif inspect.isclass(pack):
+            inst = self._packs_by_type.get(pack)
         else:
-            raise ValueError('Wrong type of argument %s' % type)
+            raise ValueError('Wrong type of argument %s' % pack)
+        return inst
 
-        return clazz
+    def _find_action(self, action):
+        if isinstance(action, basestring):
+            inst, _ = self._actions_by_name.get(action, (None, None))
+        elif inspect.isclass(action):
+            inst, _ = self._actions_by_type.get(action, (None, None))
+        else:
+            raise ValueError('Wrong type of argument %s' % action)
+        return inst
 
     def get_action_url(self, type):
         """
@@ -1327,7 +1353,7 @@ class ControllerCache(object):
             return over
         else:
             for cont in list(cls._controllers):
-                p = cont.find_pack(pack)
+                p = cont._find_pack(pack)
                 if p:
                     return p
 
@@ -1339,7 +1365,7 @@ class ControllerCache(object):
         Возвращает экземпляр первого найденного экшена.
         """
         for cont in list(cls._controllers):
-            p = cont.find_action(action)
+            p = cont._find_action(action)
             if p:
                 return p
 
