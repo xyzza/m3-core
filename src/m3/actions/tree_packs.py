@@ -1,6 +1,7 @@
 #coding:utf-8
 '''
 Паки для иерархических справочников
++++++++++++++++++++++++++++++++++++
 '''
 
 from django.db import transaction
@@ -25,6 +26,7 @@ class TreeGetNodesAction(Action):
     Вызывает функцию получения узлов дерева у родительского пака
     '''
     url = '/nodes$'
+
     def run(self, request, context):
         parent_id = utils.extract_int(request, 'node')
         if parent_id < 1:
@@ -33,6 +35,7 @@ class TreeGetNodesAction(Action):
         result = self.parent.get_nodes(parent_id, filter)
         return PreJsonResult(result)
 
+
 class TreeGetNodesLikeRows(Action):
     '''
     Возвращает узлы дерева как список. Используется для автокомплита.
@@ -40,11 +43,15 @@ class TreeGetNodesLikeRows(Action):
     url = '/nodes_like_rows$'
 
     def context_declaration(self):
-        return [ActionContextDeclaration(name='filter', default='', type=str, required=True),
-                ActionContextDeclaration(name='branch_id', default=0, type=int, required=True)]
+        return [
+            ActionContextDeclaration(
+                name='filter', default='', type=str, required=True),
+            ActionContextDeclaration(
+                name='branch_id', default=0, type=int, required=True)]
 
     def run(self, request, context):
-        result = self.parent.get_nodes_like_rows(context.filter, context.branch_id)
+        result = self.parent.get_nodes_like_rows(
+            context.filter, context.branch_id)
         return PreJsonResult(result)
 
 
@@ -53,6 +60,7 @@ class TreeGetNodeAction(Action):
     Вызывает функцию получения узла дерева (нужно для редактирования в карточке)
     '''
     url = '/node$'
+
     def context_declaration(self):
         return [ACD(name='id', default=0, type=int, required=True, verbose_name=u'id группы справочника')]
 
@@ -63,11 +71,13 @@ class TreeGetNodeAction(Action):
             return OperationResult.by_message(MSG_DOESNOTEXISTS % context.id)
         return PreJsonResult(result)
 
+
 class TreeSaveNodeAction(Action):
     '''
     Вызывает функцию сохранения узла дерева.
     '''
     url = '/save_node$'
+
     def context_declaration(self):
         return [ACD(name='id', default=0, type=int, required=True, verbose_name=u'id группы справочника')]
 

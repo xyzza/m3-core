@@ -9,10 +9,12 @@
 Содержание:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-Индекс
-============
+    base.rst
+    installation.rst
+    simple_usage.rst
+    contents.rst
 
 * :ref:`genindex`
 * :ref:`modindex`

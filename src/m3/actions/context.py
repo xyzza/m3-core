@@ -1,9 +1,9 @@
 #coding:utf-8
 '''
 Модуль, реализущий работу с контекстом выполнения операции
-
-@author: akvarats
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 '''
+#author: akvarats
 import datetime
 import json
 from decimal import Decimal
@@ -23,7 +23,7 @@ class ActionContextException(Exception):
 
 
 class RequiredFailed(ActionContextException):
-    '''
+    u'''
     Исключительная ситуация, которая выбрасывается в случае
     если фактическое наполнение контекста действия не соответствует
     описанным правилам
@@ -33,7 +33,7 @@ class RequiredFailed(ActionContextException):
 
 
 class ConversionFailed(ActionContextException):
-    """
+    u"""
     Исключение, которое выбрасывается,
     если значение из запроса *value*
     не удалось привести к типу *type*,
@@ -50,15 +50,15 @@ class ConversionFailed(ActionContextException):
 
 
 class ContextBuildingError(ActionContextException):
-    """
+    u"""
     Ошибка построения контекста
     """
     def __init__(self, requiremets=None, errors=None):
-        """
-        @requiremets :: [unicode]
-            обязательные параметры контекста, отсутствующие в запросе
-        @errors :: [unicode]
-            параметры, значение которых не удалось распарсить
+        u"""
+        :param unicode requiremets: обязательные параметры контекста,
+            отсутствующие в запросе
+        :param unicode errors: параметры, значение которых
+            не удалось распарсить
         """
         assert requiremets or errors, (
             "requiremets or errors must be provided!")
@@ -89,7 +89,7 @@ class ContextBuildingError(ActionContextException):
 
 
 class CriticalContextBuildingError(ContextBuildingError):
-    """
+    u"""
     Критическая ошибка построения контекста
     """
     pass
@@ -204,15 +204,21 @@ _PARSERS = {
 
 #================================== КЛАССЫ ====================================
 class ActionContextDeclaration(object):
-    """
-    Класс, который определяет правило извлечения параметра с именем *name* из
+    u"""
+    Класс, который определяет правило извлечения параметра из
     запроса и необходимость его наличия в объекте контекста ActionContext.
-    *default* - значение параметра по умолчанию, используется если его нет
-    в запросе, но наличие обязательно.
-    *type* - тип извлекаемого значения.
-    *required* - указывает что параметр обязательный.
-    *verbose_name* - человеческое имя параметра,
-    необходимо для сообщений об ошибках.
+
+    :param unicode name: имя параметра
+
+    :param type: тип извлекаемого значения
+
+    :param bool required: указывает что параметр обязательный
+
+    :param default: значение параметра по умолчанию, используется если его нет
+        в запросе, но наличие обязательно
+
+    :param unicode verbose_name: человеческое имя параметра,
+        необходимо для сообщений об ошибках
     """
     def __init__(
             self, name='', default=None, type=None,
@@ -232,14 +238,14 @@ class ActionContextDeclaration(object):
 
 
 class ActionContext(object):
-    '''
+    u'''
     Контекст выполнения операции, восстанавливаемый из запроса.
     '''
-    # Для совместимости
+    #: Для совместимости
     RequiredFailed = RequiredFailed
 
     class ValuesList():
-        """
+        u"""
         Класс для описания параметров, которые будут передаваться в виде
         списка значений, разделенных определенным символом
         """
@@ -251,7 +257,7 @@ class ActionContext(object):
             self.allow_empty = allow_empty
 
     def __init__(self, **kwargs):
-        """
+        u"""
         Параметры kwargs для быстрой инициализации
         """
         from m3 import date2str
@@ -260,7 +266,7 @@ class ActionContext(object):
             setattr(self, k, v)
 
     def convert_value(self, raw_value, arg_type):
-        '''
+        u'''
         Возвращает значение *raw_value*,
         преобразованное в заданный тип *arg_type*
         '''
@@ -283,10 +289,18 @@ class ActionContext(object):
         return value
 
     def build(self, request, rules):
-        '''
+        u'''
         Выполняет заполнение собственных атрибутов
-        согласно переданному *request*, исходя из списка правил *rules*
+        согласно переданному запросу, исходя из списка правил
+
+        :param request:запрос, на основе которого производится
+            заполнение контекста
+        :type reques: django.http.Request
+
+        :param rules: правила извлечения контекста из запроса
+        :type rules: список m3_core.actions.context.ActionContextDeclaration
         '''
+
         params = {}
         if rules:
             for rule in rules:
@@ -339,8 +353,13 @@ class ActionContext(object):
         self.check_required(rules)
 
     def check_required(self, rules):
-        """
+        u"""
         Проверяет наличие обязательных параметров
+
+        :param rules: правила извлечения контекста из запроса
+        :type rules: список m3_core.actions.context.ActionContextDeclaration
+
+        :raise: ActionContext.RequiredFailed
         """
         if not rules:
             return
@@ -349,7 +368,7 @@ class ActionContext(object):
                 raise ActionContext.RequiredFailed(rule.human_name())
 
     def json(self):
-        """
+        u"""
         Рендеринг контекста в виде javascript объекта
         """
         def encoder_extender(obj):
@@ -378,14 +397,15 @@ class ActionContext(object):
         return json.dumps(data, default=encoder_extender)
 
     def combine(self, context):
-        """
-        Объединение контекстов друг с другом
-        Дополнение собственного контекста! Существующие значания не заменяются!
-        Выдается новый контекст!!!
-        Пример:
-        ac = ActionContext(a=1, b=2).combine(ActionContext(c=3,a=2))
-        ac.json()
-        {"a": 1, "c": 3, "b": 2}
+        u"""
+        Объединение контекстов друг с другом.
+
+        :param context: контекст, который объединяеться с текущим
+        :type context: m3_core.actions.context.ActionContext
+
+        :return: новый экземпляр контекста, который получился в результате
+            слияния с текущим. Все существовавшие значения сохраняются.
+        :rtype: m3_core.actions.context.ActionContext
         """
         result = ActionContext()
         if context:
@@ -397,33 +417,7 @@ class ActionContext(object):
 #-----------------------------------------------------------------------------
 class DeclarativeActionContext(ActionContext):
     """
-    ActionContext, использующий декларативное описание контекста вида
-    {
-        # параметр запроса -> параметры разбора
-        'obj_id': {
-            # значение по умолчанию,
-            # используется при отсутствии параметра в запросе
-            # если не указано - параметр считается обязательным
-            'default': '',
-
-            # тип парсера, может быть:
-            # - строкой - именем одного из предопределенных парсеров
-            # - callable-объектом, выполняющим парсинг. Такой объект
-            #   может возбуждать ValueError/TypeError/KeyError/IndexError
-            #   в случае неправильного формата данных, что позволяет
-            #   использовать в качестве парсера что-то вроде:
-            #     'type': ['on', 'yes'].__contains__
-            #     'type': {1: 'Male', 2: 'Female'}.get
-            #     'type': float
-            #     'type': json.loads
-            'type': 'asis'
-
-            # наименование параметра, понятное пользователю
-            # используется в сообщениях об ошибках
-            'verbose_name': u'Идентификатор объекта'
-        },
-        ...
-    }
+    ActionContext, использующий декларативное описание контекста    
     """
     # "встроенные" парсеры
     _parsers = {
@@ -447,7 +441,21 @@ class DeclarativeActionContext(ActionContext):
     }
 
     def build(self, request, rules):
-        assert isinstance(rules, dict), "@rules must be a dict"
+        """
+        Выполняет заполнение собственных атрибутов
+        согласно переданному запросу, исходя из списка правил
+
+        :param request:запрос, на основе которого производится
+            заполнение контекста
+        :type reques: django.http.Request
+
+        :param rules: правила извлечения контекста из запроса
+        :type rules: список m3_core.actions.context.ActionContextDeclaration
+
+        :raise: TypeError, ContextBuildingError, CriticalContextBuildingError
+        """
+
+        assert isinstance(rules, dict), "rules must be a dict"
 
         # аккумуляторы ошибок, связанных с нехваткой и неправильным форматом
         requiremets = []
@@ -500,7 +508,12 @@ class DeclarativeActionContext(ActionContext):
     @classmethod
     def register_parser(cls, name, parser):
         """
-        Регистрация парсера @parser по имени @name
+        Регистрация парсера
+
+        :param parser: парсер
+        :type parser: callable-object
+
+        :param unicode name: имя, подо которым регистрируется парсер
         """
         assert callable(parser), "@parser must be a callable object"
         cls._parsers[name] = parser

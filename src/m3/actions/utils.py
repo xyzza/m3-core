@@ -1,6 +1,7 @@
 #coding:utf-8
 '''
 Вспомогательные функции используемые в паках
+++++++++++++++++++++++++++++++++++++++++++++
 '''
 import json
 
@@ -16,6 +17,18 @@ def apply_sort_order(query, columns, sort_order):
     Сначала если в описании колонок columns есть code,
     то сортируем по нему, иначе если есть по name.
     Если задан sort_order, то он главнее всех.
+
+    :param query: запрос, к которому накладывается порядок
+        сортировки
+    :type query: django.db.models.query.QuerySet
+
+    :param columns: список колонок
+    :type columns: dict или tuple
+
+    :param list sort_order: если не пустой, то сортирует по нему
+
+    :return: запрос с наложенной сортировкой
+    :rtype: django.db.models.query.QuerySet
     '''
     if isinstance(sort_order, list):
         query = query.order_by(*sort_order)
@@ -52,6 +65,13 @@ def create_search_filter(filter_text, fields):
             (name like '%Вася%' or family like '%Вася%') and
             (name like '%Пупкин%' or family like '%Пупкин%')
     если один из параметров пуст, то возвращает пустой Q()
+
+    :param str filter_text: текст, пот которому ведется поиск
+
+    :param list fields: список полей, по которым нужно искать
+
+    :return: фильтр, реализующий поиск слов по полям
+    :rtype: django.db.models.query_utils.Q
     """
     filter_all = Q()
     if filter_text and fields:
@@ -68,7 +88,7 @@ def apply_search_filter(query, filter, fields):
     '''
     Накладывает фильтр поиска на запрос.
     Вхождение каждого элемента фильтра ищется в заданных полях.
-    @param query: Запрос
+    @param query: django.db.models.query.QuerySet
     @param filter: Строка фильтра
     @param fields: Список полей модели по которым будет поиск
     '''
@@ -82,6 +102,11 @@ def apply_search_filter(query, filter, fields):
 def detect_related_fields(query, list_columns):
     """
     Определяет необходимость выполнения select_related на запросе.
+
+    :param query: запрос, к которому применяется select_related
+    :type query: django.db.models.query.QuerySet
+
+
     """
     # Люди любят указывать в list_columns такие вещи как client.contragent
     # и вообще цеплять вложенные модели. Специально для них генерируем удобный
@@ -118,10 +143,19 @@ def bind_object_from_request_to_form(
     '''
     Функция извлекает объект из запроса по id,
     создает его экземпляр и биндит к форме
-    @param request:     Запрос от клиента содержащий id объекта
-    @param obj_factory: Функция возвращающая объект по его id
-    @param form:        Класс формы к которому привязывается объект
-    @param request_id_name:   Имя параметра запроса соответствующего ID объекта
+
+    :param request: Запрос от клиента содержащий id объекта
+    :type request: django.http.Request
+
+    :param obj_factory: Функция возвращающая объект по его id
+    :type obj_factory: callable-object
+
+    :param form: Класс формы к которому привязывается объект
+    :type form:
+
+    :param request_id_name: Имя параметра запроса соответствующего ID объекта
+    :type request_id_name:
+
     '''
     exclusion = exclusion or []
 
@@ -322,6 +356,11 @@ def fetch_search_tree(
 def extract_int(request, key):
     '''
     Извлекает целое число из запроса
+
+    :param unicode key: имя параметра
+
+    :return: целочисленное значение параметра с заданным именем
+    :rtype: int
     '''
     try:
         value = request.REQUEST.get(key, None)
@@ -348,7 +387,15 @@ def extract_int(request, key):
 
 
 def extract_int_list(request, key):
-    ''' Извлекает список целых чисел из запроса '''
+    ''' Извлекает список целых чисел из запроса
+        ..note:: разделителем в строком значении должна быть запятая
+
+    :param unicode key: имя параметра
+
+    :return: список целочисленных значений из параметра с
+        заданным именем
+    :rtype: list
+    '''
     value = request.REQUEST.get(key, '')
     values = map(int, value.split(','))
     return values
@@ -367,9 +414,13 @@ def extract_list(request, key):
 def apply_column_filter(query, request, map):
     '''
     Накладывает колоночный фильтр
-    @param query: Запрос
-    @param request: Данные с клиента включающие фильтры
-    @param map: карта связи фильтров в request и полей в объекте:
+
+    :param query: Запрос
+    :type query: django.db.models.query.QuerySet
+
+    :param request: Данные с клиента включающие фильтры
+
+    :param map: карта связи фильтров в request и полей в объекте:
         ключ - поле объекта, значение - параметр фильтра, например:
             {'unit__name':'unit_ref_name'}
     '''
@@ -378,7 +429,7 @@ def apply_column_filter(query, request, map):
     for key, value in map.items():
         filter_word = request.REQUEST.get(value)
         if filter_word:
-            filter = Q(**{key+'__icontains': filter_word})
+            filter = Q(**{key + '__icontains': filter_word})
             cond = filter if not cond else (cond & filter)
     if cond:
         query = query.filter(cond)

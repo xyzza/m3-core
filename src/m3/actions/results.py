@@ -1,6 +1,7 @@
 #coding: utf-8
 """
-Результаты выполнения действий
+Результаты выполнения экшенов
++++++++++++++++++++++++++++++
 """
 
 import json
@@ -21,12 +22,13 @@ class ActionResult(object):
 
     def __init__(self, data=None, http_params={}):
         """
-        *data* - данные, на основе которых будет сформирован
-        результат выполнения действия.
-        Тип объекта, передаваемого через data
-        зависит от дочернего результата.
-        *http_params* - параметры http,
-        которые будут помещены в ответ сервера
+        :param data: данные, на основе которых будет сформирован
+            результат выполнения действия.
+        :type data: Тип объекта, передаваемого через data
+            зависит от дочернего результата.
+
+        :param dict http_params: параметры http,
+            которые будут помещены в ответ сервера
         """
         self.data = data
         self.http_params = (http_params is None and {}) or http_params
@@ -34,12 +36,22 @@ class ActionResult(object):
     @abc.abstractmethod
     def get_http_response(self):
         """
-        Возвращает объект django.http.HttpResponse,
-        соответствующий данном результату выполнения действия
+        :return: соответствующий данному
+            результату выполнения действия ответ
+        :rtype: django.http.HttpResponse
         """
         pass
 
     def process_http_params(self, response):
+        """
+        Добавляет параметры http в ответ
+
+        :param response: ответ, в который добавляются параметры
+        :type response: наследник m3_core.actions.results.ActionResult
+
+        :return: http-ответ с добавленными параметрами
+        :rtype: наследник m3_core.actions.results.ActionResult
+        """
         if self.http_params:
             for k, v in self.http_params.items():
                 response[k] = v
@@ -145,9 +157,15 @@ class OperationResult(ActionResult):
     описанный в виде Ajax результата ExtJS: success или failure.
     В случае если операция выполнена успешно,
     параметр *success* должен быть True, иначе False.
-    *message* - сообщение, поясняющее результат выполнения операции.
-    *code* - текст javascript, который будет выполнен на клиенте в результате
-    обработки результата операции.
+
+    :param boolean success: флаг успеха операции
+
+    :param unicode message: сообщение, поясняющее
+        результат выполнения операции.
+
+    :param unicode code: текст javascript, который будет
+        выполнен на клиенте в результате
+        обработки результата операции.
     """
 
     def __init__(
@@ -168,6 +186,8 @@ class OperationResult(ActionResult):
         Если сообщение не пустое,
         то операция считается проваленной и success=False,
         иначе операция считается успешной success=True.
+
+        :param unicode message: текст сообщения об ошибке, или не указан
         """
         result = OperationResult()
         if message:
@@ -179,6 +199,9 @@ class OperationResult(ActionResult):
         """
         Возвращает объект HttpResponse,
         соответствующий данному результату выполнения операции
+
+        :return: http-ответ, соответствующий данному результату
+        :rtype: django.http.HttpResponse
         """
         result = {
             'message': self.message,
@@ -189,7 +212,7 @@ class OperationResult(ActionResult):
         # Вставляем функцию прямо в JSON без кодирования
         if self.code:
             self.code = self.code.strip()
-            if self.code[len(self.code)-2:len(self.code)] == '()':
+            if self.code[len(self.code) - 2:len(self.code)] == '()':
                 code = ' ,"code": %s' % self.code[:-2]
             else:
                 code = ' ,"code": %s' % self.code

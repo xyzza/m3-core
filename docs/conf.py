@@ -266,3 +266,7 @@ epub_title = project
 epub_author = company
 epub_publisher = company
 epub_copyright = u"2009-%s, %s" % (datetime.now().year, company)
+
+from django.conf import settings
+# Set up the Django settings/environment
+settings.configure()

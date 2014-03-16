@@ -1,11 +1,17 @@
 #coding:utf-8
-import threading
-import inspect
-import re
-import importlib
-import warnings
+"""
+Основные объекты библиотеки: механизмы проверки прав, экшены, паки, контроллеры, кэш контроллеров
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+"""
+import abc
 from functools import wraps
+import inspect
+import importlib
+import threading
+import re
+import warnings
 
+from django import http
 from django.conf import settings
 from django.utils.importlib import import_module
 
@@ -15,9 +21,26 @@ except ImportError:
     from django.utils.log import getLogger
     logger = getLogger('django')
 
-from results import *
+from results import (
+    ActionResult,
+    PreJsonResult,
+    JsonResult,
+    HttpReadyResult,
+    TextResult,
+    XMLResult,
+    BaseContextedResult,
+    OperationResult,
+    ActionRedirectResult
+)
 
-from exceptions import *
+from exceptions import (
+    ApplicationLogicException,
+    ActionException,
+    ActionNotFoundException,
+    ActionPackNotFoundException,
+    ReinitException,
+    ActionUrlIsNotDefined
+)
 
 import utils
 
@@ -117,10 +140,13 @@ def _must_be_replaced_by(alternative):
         return inner
     return wrapper
 
+
 #==============================================================================
 # Абстрактный механизм проверки прав и его реализация,
 # проверяющая права через механизм django.contrib.auth.models.User.has_perm
 #==============================================================================
+
+
 class AbstractPermissionChecker(object):
     """
     Абстрактный механизм проверки прав
@@ -130,8 +156,17 @@ class AbstractPermissionChecker(object):
     @abc.abstractmethod
     def has_action_permission(self, request, action, subpermission=None):
         """
-        Метод должен возвращать True, если выполнение @action
-        допустимо в контексте запроса @request
+        Метод должен возвращать True, если выполнение экшена
+        допустимо в контексте запроса
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :param action: Экшен, наличие прав на выполнение которого проверяется
+        :type action: m3_core.actions.Action
+
+        :return: Допустимость выполнения экшена в контесте запроса
+        :rtype: True или False
         """
         pass
 
@@ -139,8 +174,17 @@ class AbstractPermissionChecker(object):
     def has_pack_permission(self, request, pack, permission):
         """
         Метод должен возвращать True, если действие,
-        характеризуемое парой @pack/@permission,
-        допустимо в контексте запроса @request
+        характеризуемое парой pack/permission,
+        допустимо в контексте запроса
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :param pack: пак, для которого возвращается код доступа
+        :type pack: m3_core.actions.ActionPack
+
+        :return: Допустимость пака в контесте запроса
+        :rtype: True или False
         """
         pass
 
@@ -148,6 +192,16 @@ class AbstractPermissionChecker(object):
     def get_perm_code(action_or_pack, subpermission=None):
         '''
         Возвращает код действия, для контроля прав доступа
+
+        :param action_or_pack: экшен или пак, для которого
+            возвращается код доступа
+        :type action_or_pack: m3_core.actions.Action либо
+            m3_core.actions.ActionPack
+
+        :param basestring subpermission: код подправа
+
+        :return: код действия для контроля прав доступа
+        :rtype: basestring
         '''
         code = _name_of(action_or_pack)
         # уберем из кода префикс системы,
@@ -171,10 +225,7 @@ class AuthUserPermissionChecker(AbstractPermissionChecker):
     указывающего на текущего пользователя
     """
     def has_action_permission(self, request, action, subpermission=None):
-        """
-        Метод должен возвращать True, если выполнение @action
-        допустимо в контексте запроса @request
-        """
+
         # контракт
         assert isinstance(action, Action)
         assert isinstance(action.parent, ActionPack)
@@ -202,11 +253,6 @@ class AuthUserPermissionChecker(AbstractPermissionChecker):
         return result
 
     def has_pack_permission(self, request, pack, permission):
-        """
-        Метод должен возвращать True, если действие,
-        характеризуемое парой @pack/@permission,
-        допустимо в контексте запроса @request
-        """
         assert isinstance(pack, ActionPack)
         if permission:
             assert isinstance(permission, str)
@@ -248,7 +294,7 @@ class LegacyPermissionChecker(AbstractPermissionChecker):
 
     def has_action_permission(self, request, action, subpermission=None):
         '''
-        Проверка пава на выполнение действия для указанного пользователя
+        Проверка пака на выполнение действия для указанного пользователя
         '''
         assert isinstance(action.parent, ActionPack)
         # Если в наборе действий need_check_permission=True,
@@ -298,7 +344,6 @@ class LegacyPermissionChecker(AbstractPermissionChecker):
         return True
 
 
-#========================== экземпляр проверятеля прав ========================
 class LazyContainer(object):
     """
     Ленивая обёртка для объектов, указываемых в settings.
@@ -359,49 +404,6 @@ _permission_checker = LazyContainer(_permission_checker_fabric)
 
 
 #========================== ИСКЛЮЧЕНИЯ ========================================
-class ActionException(Exception):
-    def __init__(self, clazz, *args, **kwargs):
-        super(Exception, self).__init__(*args, **kwargs)
-        self.clazz = clazz
-
-
-class ActionNotFoundException(ActionException):
-    """
-    Возникает в случае, если экшен не найден ни в одном контроллере
-    """
-    def __str__(self):
-        return 'Action "%s" not registered in controller/pack' % self.clazz
-
-
-class ActionPackNotFoundException(ActionException):
-    """
-    Возникает в случае, если пак не найден ни в одном контроллере
-    """
-    def __str__(self):
-        return 'ActionPack "%s" not registered in controller/pack' % self.clazz
-
-
-class ReinitException(ActionException):
-    """
-    Возникает, если из-за неправильной структуры паков один и тот же
-    экземпляр экшена может быть повторно инициализирован неверными значениями.
-    """
-    def __str__(self):
-        return 'Trying to overwrite class "%s"' % self.clazz
-
-
-class ActionUrlIsNotDefined(ActionException):
-    """
-    Возникает если в классе экшена не задан атрибут url.
-    Это грозит тем, что контроллер не сможет найти и вызвать
-    данный экшен при обработке запросов.
-    """
-    def __str__(self):
-        return (
-            'Attribute "url" is not defined '
-            'or empty in action "%s"' % self.clazz
-        )
-
 
 #==============================================================================
 class Action(object):
@@ -410,39 +412,39 @@ class Action(object):
     Заменяет собой классические вьюшки Django.
     """
 
-    # Часть адреса запроса которая однозначно определяет его принадлежность к
-    # конкретному Action'у
+    #: Часть адреса запроса которая однозначно определяет его принадлежность к
+    #: конкретному Action'у
     url = ''
 
-    # Ссылка на ActionPack к которому принадлежит данный Action
+    #: Ссылка на ActionPack к которому принадлежит данный Action
     parent = None
 
-    # Ссылка на контроллер к которому принадлежит данный Action
+    #: Ссылка на контроллер к которому принадлежит данный Action
     controller = None
 
-    # Наименование действия для отображения
+    #: Наименование действия для отображения
     verbose_name = None
 
-    # Признак обработки прав доступа,
-    # при выполнении действия (по-умолчанию отключен)
-    # Как обрабатывается этот признак - смотри в has_permission
+    #: Признак обработки прав доступа,
+    #: при выполнении действия (по-умолчанию отключен)
+    #: Как обрабатывается этот признак - смотри в has_permission
     need_check_permission = False
 
-    # Словарь внутренних прав доступа, используемых в действии
-    # ключ - код права, который совмещается с кодом действия
-    # значение - наименование права
-    # Пример: {'tab2':u'Редактирование вкладки Доп. сведения',
-    #          'work_visible':u'Просмотр сведений о работе'}
-    # Общий код права доступа будет иметь вид:
-    #     /edit#tab2 и /edit#work_visible соответственно
-    # Как обрабатывается этот список - смотри в has_sub_permission
+    #: Словарь внутренних прав доступа, используемых в действии
+    #: ключ - код права, который совмещается с кодом действия
+    #: значение - наименование права
+    #: Пример: {'tab2':u'Редактирование вкладки Доп. сведения',
+    #: 'work_visible':u'Просмотр сведений о работе'}
+    #: Общий код права доступа будет иметь вид:
+    #: /edit#tab2 и /edit#work_visible соответственно
+    #: Как обрабатывается этот список - смотри в has_sub_permission
     sub_permissions = {}
 
-    # Логический путь действия в прикладной системе.
-    # Используется только для отображения и группировки
-    # действий с одинаковым путем.
-    # Также может использоваться для создания меню.
-    # Например, путь может быть: "Справочники\Общие" или "Реестры"
+    #: Логический путь действия в прикладной системе.
+    #: Используется только для отображения и группировки
+    #: действий с одинаковым путем.
+    #: Также может использоваться для создания меню.
+    #: Например, путь может быть: "Справочники\Общие" или "Реестры"
     path = None
 
     @_must_be_replaced_by('%s.get_perm_code')
@@ -471,6 +473,9 @@ class Action(object):
         Интерфейсный метод проверки (под)прав экшна.
 
         Использовать ВМЕСТО has_permission/has_sub_permission
+
+        :param request: запрос
+        :type request: django.http.Request
         """
         return _permission_checker.has_action_permission(
             request, self, subpermission)
@@ -486,30 +491,52 @@ class Action(object):
     def pre_run(self, request, context):
         """
         Метод для предварительной обработки
-        входящего запроса *request* и контекста *context*,
+        входящего запроса и контекста,
         перед передачений в run().
         Если возвращает значение отличное от None,
         обработка запроса прекращается и результат
         уходит во вьюшку контроллера.
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :param context: Контекст выполнения операции, восстанавливаемый
+            из контекств
+        :type context: m3_core.actions.context.ActionContext
+
+        :return: None либо объект для обработке во вьюшке контроллера
         """
         pass
 
     def post_run(self, request, context, response):
         """
-        Метод для постобработка результата работы Action'а.
-        Принимает исходный запрос *request*,
-        результат работы run() *response*
-        и извлеченный контекст *context*.
+        Метод для постобработка результата работы экшенаа.
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :param context: Контекст выполнения операции,
+            востанавливаемый из контекств
+        :type context: m3_core.actions.context.ActionContext
+
+        :param response: результат выполнения экшена
+        :type response: наследник m3_core.actions.results.ActionResult
         """
         pass
 
     def context_declaration(self):
         """
-        Метод декларирует необходимость наличия
+        Метод объявления необходимости наличия
         определенных параметров в контексте.
+
         Должен возвращать список из экземпляров *ActionContextDeclaration*
         либо
         словарь описания контекста для *DeclarativeActionContext*
+
+        :return: описание необходимости наличия определенных параметров
+            в запросе
+        :rtype: list of m3_core.actions.context.ActionContextDeclaration либо
+            m3_core.actions.context.DeclarativeActionContext
         """
         pass
 
@@ -518,7 +545,16 @@ class Action(object):
         Обеспечивает непосредственное исполнение запроса
         (аналог views в Django).
         Обязательно должен быть перекрыт в наследнике.
-        Должен возвращать экземпляр одного из наследников *ActionResult*
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :param context: Контекст выполнения операции,
+            востанавливаемый из контекств
+        :type context: m3_core.actions.context.ActionContext
+
+        :return: результат выполнения экшена
+        :rtype: наследник m3_core.actions.results.ActionResult
         """
         raise NotImplementedError()
 
@@ -529,6 +565,9 @@ class Action(object):
         НО при условии что этот экшен используется
         ТОЛЬКО В ОДНОМ ПАКЕ И КОНТРОЛЛЕРЕ, иначе валим всех!
         Ищет перебором!
+
+        :return: полный путь до действия
+        :rtype: basestring
         '''
         url = ControllerCache.get_action_url(cls)
         if not url:
@@ -538,6 +577,9 @@ class Action(object):
     def get_packs_url(self):
         """
         Возвращает строку, полный адрес от контроллера до текущего экшена
+
+        :return: полный адрес от контроллера до текущего экшена
+        :rtype: basestring
         """
         assert isinstance(self.parent, ActionPack)
         path = []
@@ -581,6 +623,9 @@ class ActionPack(object):
     def get_short_name(cls):
         """
         Имя пака для поиска в ControllerCache
+
+        :return: Имя пака
+        :rtype: basestring
         """
         name = cls.__dict__.get('_auto_short_name')
         if not name:
@@ -614,40 +659,40 @@ class ActionPack(object):
                 break
         return contr_url + url
 
-    # Ссылка на вышестоящий пакет, тот в котором зарегистрирован данный пакет
+    #: Ссылка на вышестоящий пакет, тот в котором зарегистрирован данный пакет
     parent = None
 
-    # Ссылка на родительский ActionController
+    #: Ссылка на родительский ActionController
     controller = None
 
-    # Наименование Набора действий для отображения
+    #: Наименование Набора действий для отображения
     verbose_name = None
 
-    # Признак обработки прав доступа,
-    # при выполнении дочерних действий (по-умолчанию отключен)
-    # Как обрабатывается этот признак - смотри в Action.has_permission
+    #: Признак обработки прав доступа,
+    #: при выполнении дочерних действий (по-умолчанию отключен)
+    #: Как обрабатывается этот признак - смотри в Action.has_permission
     need_check_permission = False
 
-    # Словарь внутренних прав доступа, используемых в наборе действий
-    # ключ - код права, который совмещается с адресом (кодом) набора действий
-    # значение - наименование права
-    # Пример: {'edit':u'Редактирование записи'}
-    # Общий код права доступа будет иметь вид: /users#edit
-    # Как обрабатывается этот список - смотри в has_sub_permission
+    #: Словарь внутренних прав доступа, используемых в наборе действий
+    #: ключ - код права, который совмещается с адресом (кодом) набора действий
+    #: значение - наименование права
+    #: Пример: {'edit':u'Редактирование записи'}
+    #: Общий код права доступа будет иметь вид: /users#edit
+    #: Как обрабатывается этот список - смотри в has_sub_permission
     sub_permissions = {}
 
-    # Логический путь набора действий в прикладной системе.
-    # Используется только для отображения
-    # и группировке наборов с одинаковым путем.
-    # Также может использоваться для создания меню.
-    # Например, путь может быть: "Справочники\Общие" или "Реестры"
+    #: Логический путь набора действий в прикладной системе.
+    #: Используется только для отображения
+    #: и группировке наборов с одинаковым путем.
+    #: Также может использоваться для создания меню.
+    #: Например, путь может быть: "Справочники\Общие" или "Реестры"
     path = None
 
     def __init__(self):
-        # Список действий зарегистрированных на исполнение в данном пакете
+        #: Список действий зарегистрированных на исполнение в данном пакете
         self.actions = []
-        # Список дочерних пакетов (подпакетов),
-        # зарегистрированных на исполнение в данном пакете
+        #: Список дочерних пакетов (подпакетов),
+        #: зарегистрированных на исполнение в данном пакете
         self.subpacks = []
 
     def get_absolute_url(self):
@@ -684,6 +729,9 @@ class ActionPack(object):
         Интерфейсный метод проверки подправ пака.
 
         Использовать ВМЕСТО has_sub_permission
+
+        :param request: запрос
+        :type request: django.http.Request
         """
         return _permission_checker.has_pack_permission(
             request, self, permission)
@@ -699,10 +747,17 @@ class ActionPack(object):
     def pre_run(self, request, context):
         """
         Метод для предварительной обработки
-        входящего запроса *request* и контекста *context*
+        входящего запроса и контекста
         перед передачений в нижестоящий экшен или пак.
         Если возвращает значение отличное от None, обработка запроса
         прекращается и результат уходит во вьюшку контроллера.
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :param context: Контекст выполнения операции, восстанавливаемый
+            из контекств
+        :type context: m3_core.actions.context.ActionContext
         """
         pass
 
@@ -711,11 +766,27 @@ class ActionPack(object):
         Метод для постобработки результата работы вышестоящего экшена или пака.
         Принимает исходный запрос *request*, результат работы *response* и
         извлеченный контекст *context*.
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :param context: Контекст выполнения операции, восстанавливаемый
+            из контекств
+        :type context: m3_core.actions.context.ActionContext
+
+        :param response: ответ, полученный в результате выполнения
+            действия
+        :type response: m3_core.actions.results.ActionResult
         '''
         pass
 
     @classmethod
     def get_verbose_name(cls):
+        """
+        Получение понятного имени пака
+
+        :rtype: unicode
+        """
         return (
             cls.title if hasattr(cls, 'title') and cls.title
             else cls.verbose_name if cls.verbose_name else cls.__name__
@@ -728,8 +799,7 @@ class ActionController(object):
     пользовательских запросов путем передачи
     их на исполнение соответствущим Action'ам
     '''
-
-    # Наименование Контроллера для отображения
+    #: Наименование Контроллера для отображения
     verbose_name = None
 
     class FakePacks:
@@ -743,14 +813,15 @@ class ActionController(object):
         def extend(self, items_list):
             pass
 
-    def __init__(self, url='', name=None):
+    def __init__(self, url="", name=None):
         '''
-        url - используется для отсечения лишней части пути в запросе, поскольку
-              управление в пак передается из вьюшки
-        name - человеческое название контроллера. Используется для отладки.
+        :param basetring url: используется для отсечения лишней части пути в
+            запросе, поскольку управление в пак передается из вьюшки
+        :param basestring name: человеческое название контроллера.
+            Используется для отладки.
         '''
-        # ДЛЯ СОВМЕСТИМОСТИ.
-        # Имитирует список паков торчащий наружу
+        #: ДЛЯ СОВМЕСТИМОСТИ.
+        #: Имитирует список паков торчащий наружу
         self.packs = self.FakePacks()
         self.packs.append = self.append_pack
         self.packs.extend = self.extend_packs
@@ -873,8 +944,10 @@ class ActionController(object):
     def _invoke(self, request, action, stack):
         '''
         Непосредственный вызов экшена с отработкой всех событий
+
+        :param request: запрос
+        :type request: django.http.Request
         '''
-        from m3 import ApplicationLogicException
 
         # проверим что права на выполнение есть
         allowed = _permission_checker.has_action_permission(request, action)
@@ -946,6 +1019,14 @@ class ActionController(object):
         """
         Обработка входящего запроса *request* от клиента.
         Обрабатывается по аналогии с UrlResolver'ом Django
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :return: результат выполнения экшена
+        :rtype: наследник m3_core.actions.results.ActionResult
+
+        :raise: http.Http404
         """
         ControllerCache.populate()
 
@@ -988,6 +1069,15 @@ class ActionController(object):
         '''
         Выполняет построение контекста вызова операции ActionContext
         на основе переданного request
+
+        :param request: запрос
+        :type request: django.http.Request
+
+        :param dict rules: построение контекста
+
+        :return: пустой экземпляр контекста
+        :rtype: m3_core.actions.context.DeclarativeActionContext()
+            или m3_core.actions.context.ActionContext
         '''
         if isinstance(rules, dict):
             return DeclarativeActionContext()
@@ -1044,7 +1134,10 @@ class ActionController(object):
     #==========================================================================
     def append_pack(self, pack):
         """
-        Добавляет *pack*, объект типа ActionPack, в контроллер.
+        Добавляет пак в контроллер.
+
+        :param pack: пак, который добавляется в контроллер
+        :type pack: m3_core.actions.ActionPack
         """
         if not isinstance(pack, ActionPack):
             raise TypeError(
@@ -1063,8 +1156,10 @@ class ActionController(object):
     def extend_packs(self, packs):
         '''
         Производит массовое добавление экшенпаков в контроллер.
-        @param packs: список объектов типа ActionPack,
-        которые необходимо зарегистрировать в контроллере
+
+        :param packs: список паков,
+            которые необходимо зарегистрировать в контроллере
+        :type packs: список объектов m3_core.actions.ActionPack
         '''
         for pack in packs:
             self.append_pack(pack)
@@ -1097,23 +1192,28 @@ class ActionController(object):
         Вставляет экшенпак wrap_pack внутрь иерархии перед dest_pack.
         Таким образом можно перехватывать запросы и ответы пака dest_pack.
 
-        Допустим есть цепочка паков:
-           A1 - X - A2 - A3    |   A1 - Y - X - A2 - A3
-           B1 - B2 - X         |   B1 - B2 - Y - X
-           X - C1 - C2         |   Y - X - C1 - C2
-        Для решения нужно:
-        1. Найти экземпляры пака X
-        2. В цепочку вместо X вставить Y->X c учетом левых и правых участников
-        3. Перестроить адреса пробежавшись по цепочке
 
-        @param dest_pack: Пак который будем оборачивать
-        @param wrap_pack: Оборачивающий пак
+        :param dest_pack: Пак который будем оборачивать
+        :type dest_pack: m3_core.actions.ActionPack
+
+        :param wrap_pack: Оборачивающий пак
+        :type wrap_pack: m3_core.actions.ActionPack
         '''
         assert (
             issubclass(dest_pack, ActionPack) and
             issubclass(wrap_pack, ActionPack)
         )
 
+        """
+        Допустим есть цепочка паков:
+        A1 - X - A2 - A3    |   A1 - Y - X - A2 - A3
+        B1 - B2 - X         |   B1 - B2 - Y - X
+        X - C1 - C2         |   Y - X - C1 - C2
+        Для решения нужно:
+        1. Найти экземпляры пака X
+        2. В цепочку вместо X вставить Y->X c учетом левых и правых участников
+        3. Перестроить адреса пробежавшись по цепочке
+        """
         wrapper = wrap_pack()
         self._add_pack_to_search_dicts(wrapper)
         new_patterns = {}
@@ -1192,9 +1292,14 @@ class ActionController(object):
         Оборачивающий пак можно наследовать от оригинального,
         но тогда вместо оборачивая целесообразно использовать подмену паков.
 
-        @param dest_pack: Пак в который входит оборачиваемый экшен
-        @param dest_action: Оборачиваемый экшен
-        @param wrap_pack: Оборачивающий пак
+        :param dest_pack: Пак в который входит оборачиваемый экшен
+        :type dest_pack: m3_core.actions.ActionPack
+
+        :param dest_action: Оборачиваемый экшен
+        :type dest_action: m3_core.actions.Action
+
+        :param wrap_pack: Оборачивающий пак
+        :type wrap_pack: m3_core.actions.ActionPack
         '''
         assert (
             issubclass(dest_pack, ActionPack) and
@@ -1286,7 +1391,7 @@ class ActionController(object):
 
     def reset(self):
         '''
-        HARD RESET всего что наделал контроллер с паками и экшенами
+        Сброс всего, что наделал контроллер с паками и экшенами
         '''
         for pack in self.top_level_packs:
             if hasattr(pack, '_built'):
@@ -1333,9 +1438,15 @@ class ControllerCache(object):
     @classmethod
     def find_pack(cls, pack):
         """
-        Ищет заданный *pack* по имени класса или классу
+        Ищет заданный пак по имени класса или классу
         во всех зарегистрированных контроллерах.
         Возвращает экземпляр первого найденного пака.
+
+        :param pack: имя класса или класс пака
+        :type pack: строка формата package.Class или класс
+
+        :return: экземпляр найденного пака
+        :rtype: m3_core.actions.ActionPack
         """
         if inspect.isclass(pack):
             name = pack.get_short_name()
@@ -1360,9 +1471,15 @@ class ControllerCache(object):
     @classmethod
     def find_action(cls, action):
         """
-        Ищет заданный *action* по имени класса или классу
+        Ищет заданный экшен по имени класса или классу
         во всех зарегистрированных контроллерах.
         Возвращает экземпляр первого найденного экшена.
+
+        :param action: имя класса или класс экшена
+        :type action: строка формата package.Class или класс
+
+        :return: экземпляр найденного пака
+        :rtype: m3_core.actions.Action
         """
         for cont in list(cls._controllers):
             p = cont._find_action(action)
@@ -1399,7 +1516,7 @@ class ControllerCache(object):
         def shortname_checker(acc):
             def check(obj, name):
                 sn = getattr(obj, 'shortname', None) or getattr(
-                        obj, 'shortname', None)
+                    obj, 'shortname', None)
                 if sn:
                     name = acc.get(sn)
                     if name:
@@ -1446,7 +1563,6 @@ class ControllerCache(object):
 
         return result
 
-
     @classmethod
     def register_controller(cls, controller):
         '''
@@ -1461,8 +1577,11 @@ class ControllerCache(object):
         Загружает в кэш ActionController'ы
         из перечисленных в INSTALLED_APPS приложений.
         В каждом из них загружает модуль *app_meta*
-        и пытается выполнить метод *register_actinos* внутри него.
+        и пытается выполнить метод *register_actions* внутри него.
         Выполняется только один раз. Возвращает истину в случае успеха.
+
+        :return: флаг успешного завершения
+        :rtype: boolean
         """
         if cls._loaded:
             return False
