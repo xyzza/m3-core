@@ -1,6 +1,5 @@
 Простое использование
 =====================
-.. _actions_Action::
 
 Класс Action и его использование
 ++++++++++++++++++++++++++++++++
@@ -30,9 +29,8 @@
             SomeModel.objects.create(a=a, b=b)
             return OperationResult(message=u'Данные сохранены')
 
-Для чего нужен OperationResult будет описано в главе :ref:`actions_results`. Вкратце это один из возможных результатов работы экшена, который автоматически преобразуется в Django HttpResponse внутри контроллера. В нашем случае класс  *OperationResult* указывает успешно ли завершилась операция *success* и несет соответствующее сообщение *message*.
+OperationResult это один из возможных результатов работы экшена, который автоматически преобразуется в Django HttpResponse внутри контроллера. В нашем случае класс  *OperationResult* указывает успешно ли завершилась операция *success* и несет соответствующее сообщение *message*.
 
-.. _actions_ActionPack::
 
 Класс ActionPack и его использование
 ++++++++++++++++++++++++++++++++++++
@@ -82,7 +80,7 @@
 
 Определение контроллера состоит из нескольких этапов:
 
-#. Экземпляр контроллера как правило создается в файле *app_meta.py* внутри приложения. Подробнее о нем в главе :ref:`app_meta_overview`.
+#. Экземпляр контроллера как правило создается в файле *app_meta.py* внутри приложения.
 #. Чтобы передавать в него запросы Django нужно создать вьюшку контроллера *dict_view* и зарегистрировать url pattern для неё в методе *register_urlpatterns*. Он вызывается автоматически для всех приложений.
 #. Регистрация паков в контроллере производится методом *register_actions*.
 
@@ -198,16 +196,14 @@
                     'verbose_name': u'Идентификатор объекта'
                 },
                 # 
-                'date':{
+                'date': {
                     'type': datetime.date,
                     'verbose_name': u'Дата начала действия изменений'
+                },
+                'comment': {
+                    'type': str
                 }
             }
-            return [
-                ACD(name='ids', required=True, type=ActionContext.ValuesList(',', int)),
-                ACD(name='date', required=True, type=datetime.date, verbose_name=u'Дата начала действия изменений'),
-                ACD(name='comment', type=str)
-            ]
         
         @transaction.commit_on_success
         def run(self, request, context):
@@ -241,7 +237,7 @@
 
 * ActionResult используется для хранения и трансформации ответа приложения на запрос. HttpResponse же напротив является готовым ответом и содержит в себе данные специфичные для протокола http, например status_code и cookie. Которые не нужны при написании бизнес-логики.
 * Тип ответа в ActionResult определяется классом и интерфейсом им предоставляемым, а в HttpResponse только mimetype.
-* ActionResult поддерживает передачу контекста (глава :doc:`actions_context`)
+* ActionResult поддерживает передачу контекста
 * ActionResult преобразуется в HttpResponse после обработки запроса в контроллере с помощью метода *get_http_response*.
 
 Благодаря этим особенностям в процессе обработки запроса можно изменять и даже подменять ответы. Например, подключенный плагин может модифицировать форму, передаваемую через ExtUIScriptResult, добавив в нее новые контролы.
@@ -251,7 +247,7 @@
    
 От него наследуется более сложный базовый класс BaseContextedResult, который может передавать контекст в визуальные компоненты и формы.
 
-.. autoclass:: m3.actions.resultsBaseContextedResult
+.. autoclass:: m3.actions.results.BaseContextedResult
    :members:
    
 Простые обёртки над HttpResponse
