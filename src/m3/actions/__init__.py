@@ -842,6 +842,7 @@ class ActionController(object):
         self._packs_by_type = {}
         self._actions_by_type = {}
         self._actions_by_name = {}
+        self._nodes_by_perm = {}
         # TODO: Тоже самое можно добавить для short_name
         # в экшенах вместо m3.helpers.urls
 
@@ -867,12 +868,14 @@ class ActionController(object):
         assert isinstance(action, Action)
         self._actions_by_name[action.get_short_name()] = (action, full_path)
         self._actions_by_type[action.__class__] = (action, full_path)
+        self._nodes_by_perm[action.get_perm_code()] = action
 
     def _add_pack_to_search_dicts(self, pack):
         """ Добавляет экшенпак в словари для быстрого доступа """
         assert isinstance(pack, ActionPack)
         self._packs_by_name[pack.get_short_name()] = pack
         self._packs_by_type[pack.__class__] = pack
+        self._nodes_by_perm[pack.get_perm_code()] = pack
 
     def _rebuild_search_dicts(self):
         """
@@ -1127,6 +1130,12 @@ class ActionController(object):
             raise ValueError('Wrong type of argument %s' % type)
 
         return full_path
+
+    def _find_node_by_perm(self, perm):
+        """
+        Возвращает экшн/пак по коду права
+        """
+        return self._nodes_by_perm.get(perm)
 
     #==========================================================================
     # Методы, предназначенные для добавления/изменения/удаления
@@ -1493,7 +1502,19 @@ class ControllerCache(object):
             act = cont.get_action_by_url(url)
             if act:
                 return act
-        return
+
+    @classmethod
+    def find_node_by_perm(cls, perm):
+        """
+        Возвращает экшн/пак по коду права, или None,
+        если таковых не найдено
+        :param string perm: код права
+        :return: экземпляр найденного пара/экшна
+        """
+        for cont in cls._controllers:
+            node = cont._find_node_by_perm(perm)
+            if node:
+                return node
 
     #==========================================================================
     @classmethod
