@@ -1161,6 +1161,7 @@ class ActionController(object):
             self.top_level_packs.append(pack)
             pack.controller = self
         ControllerCache.register_controller(self)
+        return pack
 
     def extend_packs(self, packs):
         '''
