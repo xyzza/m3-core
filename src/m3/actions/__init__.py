@@ -1415,6 +1415,19 @@ class ActionController(object):
         self._packs_by_type.clear()
         self.top_level_packs = []
 
+    @property
+    def urlpattern(self):
+        """
+        Возвращает кортеж вида (pattern, method), пригодный для регистрации
+        в urlpatterns Django
+        """
+        url = self.url
+        if url.startswith('/'):
+            url = url[1:]
+        if url.endswith('/'):
+            url = url[:-2]
+        return (r'^%s/' % url, self.process_request)
+
 
 class ControllerCache(object):
     '''
