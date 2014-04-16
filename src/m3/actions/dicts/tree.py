@@ -95,7 +95,7 @@ class TreeSaveNodeAction(Action):
 
 class TreeDeleteNodeAction(Action):
     """
-    Получает узел из запроса и откправляет его на удаление
+    Получает узел из запроса и отправляет его на удаление
     """
     url = '/delete_node$'
 
@@ -184,7 +184,9 @@ class ListNewRowWindowAction(Action):
     def context_declaration(self):
         return [
             ACD(name=self.parent.contextTreeIdName,
-                type=int, required=True, verbose_name=u'Код группы')
+                type=int,
+                required=True,
+                verbose_name=u'Код группы')
         ]
 
     def run(self, request, context):
@@ -230,6 +232,7 @@ class TreeEditNodeWindowAction(Action):
             win.make_read_only(
                 access_off=True, exclude_list=['close_btn', 'cancel_btn'])
 
+        # У окна может быть процедура доп. конфигурации под конкретный справочник
         if hasattr(win, 'configure_for_dictpack') and callable(
                 win.configure_for_dictpack):
             win.configure_for_dictpack(
@@ -362,7 +365,9 @@ class ListWindowAction(Action):
                 win.url_drag_grid = base.drag_list.get_absolute_url()
 
     def configure_tree(self, win, request, context):
-        ''' Настраивает дерево групп '''
+        """
+        Настраивает дерево групп
+        """
         base = self.parent
         # Добавляем отображаемые колонки
         for column in base.tree_columns:
@@ -458,7 +463,7 @@ class BaseTreeDictionaryActions(ActionPack, IMultiSelectablePack):
     # 1. вариант (классический)
     #    list_actions = [('code', u'Код'), ('name', u'Наименование')]
     # 2. вариант (классический расширенный)
-    #    - третьим элементом в кортеже идет ширина
+    #   - третьим элементом в кортеже идет ширина
     #    list_actions = [('code', u'Код', 100), ('name', u'Наименование')]
     # 3. вариант (универсальный)
     #    list_actions = [{'name': 'code','header':u'Код', 'width': 100}, (...)]
@@ -652,7 +657,7 @@ class BaseTreeDictionaryActions(ActionPack, IMultiSelectablePack):
     #ISelectablePack
     def get_record(self, key):
         """
-        Получить значение записи по ключу key
+        Получить записи по ключу key
         """
         raise NotImplementedError()
 
@@ -698,39 +703,28 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
     DEFAULT_FILTER_FIELDS = ['code', 'name']
 
     # Настройки для модели дерева
-    # Сама модель дерева
-    tree_model = None
-    # Поля по которым производится поиск в дереве
-    tree_filter_fields = []
-    # Список из кортежей с параметрами выводимых в дерево колонок
-    tree_columns = []
-    # Имя поля ссылающегося на группу
-    tree_parent_field = 'parent'
-    # Если истина, то адреса экшенов дереву не назначаются
-    tree_readonly = False
+    tree_model = None  # Сама модель дерева
+    tree_filter_fields = []  # Поля по которым производится поиск в дереве
+    tree_columns = []  # Список из кортежей с параметрами выводимых в дерево колонок
+    tree_parent_field = 'parent'  # Имя поля ссылающегося на группу
+    tree_readonly = False  # Если истина, то адреса экшенов дереву не назначаются
     tree_order_field = ''
 
     # Настройки модели списка
-    # Не обязательная модель списка связанного с деревом
-    list_model = None
-    # Список из кортежей с параметрами выводимых в грид колонок
-    list_columns = []
-    # Поля по которым производится поиск в списке
-    filter_fields = []
-    # Имя поля ссылающегося на группу
-    list_parent_field = 'parent'
-    # Если истина, то адреса экшенов гриду не назначаются
-    list_readonly = False
+    list_model = None  # Не обязательная модель списка связанного с деревом
+    list_columns = []  # Список из кортежей с параметрами выводимых в грид колонок
+    filter_fields = []  # Поля по которым производится поиск в списке
+    list_parent_field = 'parent'  # Имя поля ссылающегося на группу
+    list_readonly = False  # Если истина, то адреса экшенов гриду не назначаются
+    list_drag_and_drop = True  # Разрешает перетаскивание элементов из грида в другие группы дерева
     list_order_field = ''
     list_paging = True
-    # Разрешает перетаскивание элементов из грида в другие группы дерева
-    list_drag_and_drop = True
 
     # Порядок сортировки элементов списка. Работает следующим образом:
     # 1. Если в list_columns модели списка есть поле code,
-    #    то устанавливается сортировка по возрастанию этого поля;
+    #   то устанавливается сортировка по возрастанию этого поля;
     # 2. Если в list_columns модели списка нет поля code, но есть поле name,
-    #    то устанавливается сортировка по возрастанию поля name;
+    #   то устанавливается сортировка по возрастанию поля name;
     # Пример list_sort_order = ['code', '-name']
     list_sort_order = []
     tree_sort_order = None
@@ -779,7 +773,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
             nodes = list(query)
             # Если имеем дело с листом, нужно передавать параметр leaf = true
             for node in nodes:
-                if self.tree_model.objects.filter(parent=node.id).count() == 0:
+                if not self.tree_model.objects.filter(parent=node.id).exists():
                     node.leaf = 'true'
 
         # генерируем сигнал о том, что узлы дерева подготовлены
@@ -911,10 +905,10 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         return result
 
     def _get_obj(self, model, id):
-        '''
+        """
         Возвращает запись заданной модели model по id
         Если id нет, значит нужно создать новый объект
-        '''
+        """
         assert isinstance(id, int)
         if id == 0:
             obj = model()
@@ -1004,12 +998,10 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         if obj is None:
             message = u'Группа не существует в базе данных.'
         elif self.tree_model.objects.filter(
-            **{self.tree_parent_field: obj}
-        ).count() > 0:
+                **{self.tree_parent_field: obj}).exists():
             message = u'Нельзя удалить группу содержащую в себе другие группы.'
         elif self.list_model and self.list_model.objects.filter(
-            **{self.list_parent_field: obj}
-        ).count() > 0:
+                **{self.list_parent_field: obj}).exists():
             message = u'Нельзя удалить группу содержащую в себе элементы.'
         elif not safe_delete(obj):
             message = (
@@ -1110,13 +1102,10 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
                     })
         return items
 
-#==============================================================================
+#===============================================================================
 # Сигналы, которые посылаются в процессе
 # работы подсистемы древовидных справочника
 #==============================================================================
 
 # сигнал о том, что узлы дерева иерархического справочника подготовлены
 nodes_prepared = Signal(providing_args=['nodes'])
-
-#TODO: Избавиться от копипаста в экшенах.
-#TODO: Написать о себе статью в википедии ;)

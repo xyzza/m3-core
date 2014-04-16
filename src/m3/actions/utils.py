@@ -354,14 +354,14 @@ def fetch_search_tree(
 
 
 def extract_int(request, key):
-    '''
+    """
     Извлекает целое число из запроса
 
-    :param unicode key: имя параметра
+    :param str key: имя параметра
 
     :return: целочисленное значение параметра с заданным именем
     :rtype: int
-    '''
+    """
     try:
         value = request.REQUEST.get(key, None)
     except IOError:
