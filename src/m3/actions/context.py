@@ -208,7 +208,7 @@ class ActionContextDeclaration(object):
     Класс, который определяет правило извлечения параметра из
     запроса и необходимость его наличия в объекте контекста ActionContext.
 
-    :param unicode name: имя параметра
+    :param str name: имя параметра
 
     :param type: тип извлекаемого значения
 

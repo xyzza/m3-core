@@ -25,7 +25,7 @@
         def run(self, request, context):
             """ Основная работа экшена производится здесь """
             a = request.POST.get('A')
-            a = request.POST.get('B')
+            b = request.POST.get('B')
             SomeModel.objects.create(a=a, b=b)
             return OperationResult(message=u'Данные сохранены')
 
