@@ -16,6 +16,11 @@ except ImportError:
     logger = getLogger('django')
 
 
+def _date2str(*args):
+    # lazy import
+    from m3 import date2str
+    return date2str(*args)
+
 #============================= ИСКЛЮЧЕНИЯ =====================================
 class ActionContextException(Exception):
     """ Базовый класс для исключений контекста """
@@ -80,8 +85,9 @@ class ContextBuildingError(ActionContextException):
     def __unicode__(self):
         log = []
         for title, data in (
-                (u"Отсутствуют обязательные параметры:", self.requiremets),
-                (u"Неверно заполнены параметры:", self.errors)):
+            (u"Отсутствуют обязательные параметры:", self.requiremets),
+            (u"Неверно заполнены параметры:", self.errors)
+        ):
             if data:
                 log.append(title)
                 log.extend([("- %s" % d) for d in data])
@@ -260,8 +266,6 @@ class ActionContext(object):
         u"""
         Параметры kwargs для быстрой инициализации
         """
-        from m3 import date2str
-        self._date2str = date2str
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -373,12 +377,12 @@ class ActionContext(object):
         """
         def encoder_extender(obj):
             if isinstance(obj, datetime.datetime):
-                result = self._date2str(obj)
+                result = _date2str(obj)
             # WTF? А где время в верхней строке?
             if isinstance(obj, datetime.date):
-                result = self._date2str(obj)
+                result = _date2str(obj)
             elif isinstance(obj, datetime.time):
-                result = self._date2str(obj, '%H:%M')
+                result = _date2str(obj, '%H:%M')
             else:
                 result = force_unicode(obj)
 
@@ -417,7 +421,7 @@ class ActionContext(object):
 #-----------------------------------------------------------------------------
 class DeclarativeActionContext(ActionContext):
     """
-    ActionContext, использующий декларативное описание контекста    
+    ActionContext, использующий декларативное описание контекста
     """
     # "встроенные" парсеры
     _parsers = {
@@ -440,6 +444,8 @@ class DeclarativeActionContext(ActionContext):
         'decimal': Decimal,
     }
 
+    _mode = None
+
     def build(self, request, rules):
         """
         Выполняет заполнение собственных атрибутов
@@ -454,8 +460,19 @@ class DeclarativeActionContext(ActionContext):
 
         :raise: TypeError, ContextBuildingError, CriticalContextBuildingError
         """
+        assert self.matches(rules), "rules must be a dict or pair!"
 
-        assert isinstance(rules, dict), "rules must be a dict"
+        # определяем режим, если правилла описаны парой
+        if isinstance(rules, tuple):
+            # режим
+            mode = request.REQUEST.get(rules[0])
+            try:
+                # правила для конкретного режима
+                rules = rules[1][mode]
+            except KeyError:
+                raise TypeError('Неизвестный режим: %r=%r' % (rules[0], mode))
+            # ну и запоминаем режим
+            self._mode = mode
 
         # аккумуляторы ошибок, связанных с нехваткой и неправильным форматом
         requiremets = []
@@ -517,3 +534,20 @@ class DeclarativeActionContext(ActionContext):
         """
         assert callable(parser), "@parser must be a callable object"
         cls._parsers[name] = parser
+
+    @classmethod
+    def matches(self, data):
+        """
+        Возвращает True, если объект data "похож" на правила для
+        DeclarativeActionContext
+        :param data: проверяемый объект
+        :param type: object
+
+        :return: True, если data "похож" на набор правил
+        :rtype: boolean
+        """
+        return isinstance(data, dict) or (
+            isinstance(data, tuple) and
+            len(data) == 2 and
+            isinstance(data[0], basestring)
+        )

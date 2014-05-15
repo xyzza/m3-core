@@ -1082,7 +1082,7 @@ class ActionController(object):
         :rtype: m3_core.actions.context.DeclarativeActionContext()
             или m3_core.actions.context.ActionContext
         '''
-        if isinstance(rules, dict):
+        if DeclarativeActionContext.matches(rules):
             return DeclarativeActionContext()
         else:
             return ActionContext()
