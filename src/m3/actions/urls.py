@@ -87,9 +87,9 @@ def get_action(action_name):
 
 
 def get_url(action):
-    '''
+    """
     Возвращает абсолютный путь до
-    '''
+    """
     names = []
     if isinstance(action, Action):
         # гениальных ход! - с чем пришли, то и ищем :)

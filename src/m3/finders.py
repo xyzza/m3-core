@@ -29,13 +29,14 @@ class RecursiveAppDirectoriesFinder(AppDirectoriesFinder):
         self.apps = []
         self.storages = SortedDict()
         visited = set()
+
         def traverse(path, root=False):
             for sub in os.listdir(path):
                 full_path = os.path.abspath(os.path.join(path, sub))
                 if full_path not in visited and os.path.isdir(full_path):
                     if sub == 'static' and not root:
                         storage = self.storage_class(full_path)
-                        storage.prefix = None # Иначе не работает
+                        storage.prefix = None  # Иначе не работает
                         self.apps.append(full_path)
                         self.storages[full_path] = storage
                     else:

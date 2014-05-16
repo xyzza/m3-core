@@ -9,6 +9,7 @@ import abc
 from copy import copy
 
 from django import http
+from django.conf import settings
 
 from context import ActionContext
 
@@ -71,15 +72,22 @@ class PreJsonResult(ActionResult):
     что передаются персональные обезличенные данные
     и их расшифровать перед отправкой клиенту.
     """
+
     def __init__(self, data=None, secret_values=False, dict_list=None):
         super(PreJsonResult, self).__init__(data)
         from m3 import M3JSONEncoder
+
         self.encoder_clz = M3JSONEncoder
         self.secret_values = secret_values
         self.dict_list = dict_list
 
     def get_http_response(self):
         encoder = self.encoder_clz(dict_list=self.dict_list)
+        if settings.DEBUG:
+            encoder.indent = 4
+            encoder.separators = (',', ': ')
+            encoder.sort_keys = True
+
         result = encoder.encode(self.data)
         response = http.HttpResponse(result, mimetype='application/json')
         if self.secret_values:
@@ -93,31 +101,35 @@ class JsonResult(ActionResult):
     в виде готового JSON объекта для возврата в response.
     Для данного класса в *data* храниться строка с данными JSON объекта.
     """
+
     def get_http_response(self):
         return http.HttpResponse(self.data, mimetype='application/json')
 
 
 class HttpReadyResult(ActionResult):
-    '''
+    """
     Результат выполнения операции в виде готового HttpResponse.
     Для данного класса в *data* храниться объект класса HttpResponse.
-    '''
+    """
+
     def get_http_response(self):
         return self.data
 
 
 class TextResult(ActionResult):
-    '''
+    """
     Результат, данные *data* которого напрямую передаются в HttpResponse
-    '''
+    """
+
     def get_http_response(self):
         return http.HttpResponse(self.data)
 
 
 class XMLResult(ActionResult):
-    '''
+    """
     Результат в формате xml, данные которого напрямую передаются в HttpResponse
-    '''
+    """
+
     def get_http_response(self):
         return http.HttpResponse(
             self.data,
@@ -134,6 +146,7 @@ class BaseContextedResult(ActionResult):
     Абстрактный базовый класс, который оперирует понятием результата
     выполнения операции, 'отягощенного некоторым контектом'
     """
+
     def __init__(self, data=None, context=None, http_params={}):
         super(BaseContextedResult, self).__init__(data, http_params)
         self.set_context(context)
@@ -229,6 +242,7 @@ class ActionRedirectResult(object):
     Экшен предварительно находится с помощью метода
     ActionController.get_action_url()
     """
+
     def __init__(self, action, context=None):
         self.action = action
         self.context = context
