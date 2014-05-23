@@ -34,14 +34,18 @@ def _get_instance(obj):
 
 
 def get_app_urlpatterns():
-    '''
+    """
     Возвращает конфигурацию урлов, объявленных в app_meta приложений.
 
     Данная функция не проглатывает ошибки, а выбрасывает все наружу.
     Перехват исключительных ситуаций данной фунции необходимо осуществлять
     вручную в urls.py прикладных приложений
-    '''
-    url_patterns = urls.defaults.patterns('',)
+    """
+    if getattr(urls, 'patterns', None):
+        # Поддержка django over 1.4
+        url_patterns = urls.patterns('',)
+    else:
+        url_patterns = urls.defaults.patterns('',)
 
     for app_name in settings.INSTALLED_APPS:
         try:

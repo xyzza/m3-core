@@ -91,7 +91,7 @@ OperationResult это один из возможных результатов �
     
     def register_urlpatterns():
         """ Регистрация вьюшки контроллера """
-        return urls.defaults.patterns('',
+        return urls.patterns('',
                 (r'^core-dicts/', 'mis.core.dicts.app_meta.dict_view'),
             )
 
