@@ -14,10 +14,8 @@ except ImportError:
 from m3.actions import (
     ActionPack, Action, PreJsonResult, OperationResult, ACD
 )
-from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3_ext.ui.misc.store import ExtJsonStore
 from m3_ext.ui.containers import ExtPagingBar
-from m3_ext.ui.results import ExtUIScriptResult
 from m3.actions import utils
 from m3.actions.results import ActionResult
 from m3.db import BaseObjectModel, safe_delete
@@ -35,6 +33,10 @@ MSG_DOESNOTEXISTS = (
     u'Запись справочника с id=%s не найдена в базе данных.<br/>'
     u'Возможно, она была удалена. Пожалуйста, обновите таблицу.'
 )
+
+
+class ExtDictionaryWindow: pass  #NR
+class ExtUIScriptResult: pass  #NR
 
 
 class ObjectNotFound(Exception):
