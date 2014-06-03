@@ -21,7 +21,7 @@ from m3.actions.results import ActionResult
 from m3.actions.interfaces import IMultiSelectablePack
 from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3_ext.ui.misc.store import ExtJsonStore
-from m3_ext.ui.results import ExtUIScriptResult
+class ExtUIScriptResult: pass
 
 from m3_legacy import logger
 
