@@ -442,6 +442,22 @@ class DeclarativeActionContext(ActionContext):
         'str': str,
         'unicode': unicode,
         'decimal': Decimal,
+
+        # >>> int_or_zero('')
+        # 0
+        # >>> int_or_zero('10')
+        # 10
+        'int_or_zero': lambda raw_str: 0 if not raw_str else int(raw_str),
+
+        # >>> int_or_none('')
+        # None
+        # >>> int_or_none('10')
+        # 10
+        'int_or_none': lambda raw_str: None if not raw_str else int(raw_str),
+
+        # >>> int_list('10,20, 30')
+        # [10, 20, 30]
+        'int_list': lambda raw_str: [int(i.strip()) for i in raw_str.split(',')],
     }
 
     _mode = None
