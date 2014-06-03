@@ -1011,7 +1011,7 @@ class ActionController(object):
         request.target_action = action
 
         # контроллер может сам дополнять контекст
-        self.process_context(context, action)
+        self.process_context(request, context, action)
 
         try:
             # Все ПРЕ обработчики
@@ -1095,7 +1095,7 @@ class ActionController(object):
 
         raise http.Http404()
 
-    def process_context(self, context, action):
+    def process_context(self, request, context, action):
         """
         Метод, позволяющий контроллерам дополнять контекст экшнов
         перед их вызовом
