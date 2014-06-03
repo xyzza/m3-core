@@ -524,6 +524,24 @@ class Action(object):
         """
         pass
 
+    def build_context(self, request, suffix=None):
+        """
+        Возвращает заполненый экземпляр ActionContext
+        :param request: запрос
+        :type request: django.http.Request
+
+        :return: экземпляр ActionContext (или потомка)
+        :rtype: m3_core.actions.context.ActionContext
+        """
+        rules = self.context_declaration()
+        if DeclarativeActionContext.matches(rules):
+            context = DeclarativeActionContext()
+        else:
+            context = ActionContext()
+        if rules is not None:
+            context.build(request, rules)
+        return context
+
     def context_declaration(self):
         """
         Метод объявления необходимости наличия
@@ -942,9 +960,13 @@ class ActionController(object):
             # Для быстрого поиска
             self._add_action_to_search_dicts(clazz, full_path)
 
-            self._url_patterns[full_path] = (stack[:], clazz)
+            self._url_patterns[full_path] = (stack[:], clazz, None)
+            for suff in getattr(clazz, 'suffixes', []):
+                self._url_patterns["%s:%s" % (full_path, suff)] = (
+                    stack[:], clazz, suff
+                )
 
-    def _invoke(self, request, action, stack):
+    def _invoke(self, request, action, stack, suffix=None):
         '''
         Непосредственный вызов экшена с отработкой всех событий
 
@@ -966,11 +988,9 @@ class ActionController(object):
 
             return OperationResult.by_message(msg)
 
-        # Заполняем контект и проверяем его
-        rules = action.context_declaration()
-        context = self.build_context(request, rules)
         try:
-            context.build(request, rules)
+            # Заполняем контект и проверяем его
+            context = action.build_context(request, suffix)
         except CriticalContextBuildingError:
             # критическая ошибка сбора контекста - должна валиться
             raise
@@ -1000,7 +1020,10 @@ class ActionController(object):
             result = action.pre_run(request, context)
             if result is not None:
                 return result
-            response = action.run(request, context)
+            if suffix is None:
+                response = action.run(request, context)
+            else:
+                response = action.run(request, context, suffix)
             result = action.post_run(request, context, response)
             if result is not None:
                 return result
@@ -1035,12 +1058,13 @@ class ActionController(object):
 
         path = request.path
         matched = self._url_patterns.get(path)
+        print request.path, matched
         if matched:
-            stack, action = matched
+            stack, action, suffix = matched
 
             with _STATSD_CLIENT(self, request):
                 try:
-                    result = self._invoke(request, action, stack)
+                    result = self._invoke(request, action, stack, suffix)
                 except:
                     if settings.DEBUG:
                     # Записывает сообщение в логгер если включен тестовый режим
@@ -1067,25 +1091,6 @@ class ActionController(object):
             return result
 
         raise http.Http404()
-
-    def build_context(self, request, rules):
-        '''
-        Выполняет построение контекста вызова операции ActionContext
-        на основе переданного request
-
-        :param request: запрос
-        :type request: django.http.Request
-
-        :param dict rules: построение контекста
-
-        :return: пустой экземпляр контекста
-        :rtype: m3_core.actions.context.DeclarativeActionContext()
-            или m3_core.actions.context.ActionContext
-        '''
-        if DeclarativeActionContext.matches(rules):
-            return DeclarativeActionContext()
-        else:
-            return ActionContext()
 
     #==========================================================================
     # Методы, предназначенные для поиска экшенов и паков в контроллере
