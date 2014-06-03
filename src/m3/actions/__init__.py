@@ -1010,6 +1010,9 @@ class ActionController(object):
         request.target_packs = stack
         request.target_action = action
 
+        # контроллер может сам дополнять контекст
+        self.process_context(context, action)
+
         try:
             # Все ПРЕ обработчики
             for pack in stack:
@@ -1091,6 +1094,13 @@ class ActionController(object):
             return result
 
         raise http.Http404()
+
+    def process_context(self, context, action):
+        """
+        Метод, позволяющий контроллерам дополнять контекст экшнов
+        перед их вызовом
+        """
+        pass
 
     #==========================================================================
     # Методы, предназначенные для поиска экшенов и паков в контроллере
