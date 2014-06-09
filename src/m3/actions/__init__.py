@@ -1061,7 +1061,6 @@ class ActionController(object):
 
         path = request.path
         matched = self._url_patterns.get(path)
-        print request.path, matched
         if matched:
             stack, action, suffix = matched
 
