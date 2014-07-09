@@ -145,6 +145,8 @@ class BaseObjectModel(models.Model):
         if not safe_delete(self):
             raise RelatedError(
                 u"Объект не может быть удален! Возможно на него есть ссылки.")
+        else:
+            return True
 
     def get_related_objects(self, using=None):
         """
