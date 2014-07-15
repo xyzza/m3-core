@@ -1397,7 +1397,7 @@ class ActionController(object):
         Получение списка действий или наборов, находящихся на первом уровне
         '''
         top_packs = []
-        for stack, act in self._url_patterns.values():
+        for stack, act, _ in self._url_patterns.values():
             if len(stack) == 0:
                 # значит экшин на верхнем уровне
                 if act not in top_packs:
