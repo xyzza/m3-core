@@ -950,8 +950,8 @@ class ActionController(object):
                 self._build_pack_node(action, stack)
             # Бежим по пакам
             for pack in clazz.subpacks:
-                self._build_pack_node(pack, stack)
                 pack.controller = self
+                self._build_pack_node(pack, stack)
             stack.pop()
         else:
             clazz.controller = self
@@ -1170,10 +1170,10 @@ class ActionController(object):
         if pack.short_name in ControllerCache.overrides:
             pack = ControllerCache.overrides[pack.short_name]
 
-        self._build_pack_node(pack, [])
         if pack not in self.top_level_packs:
             self.top_level_packs.append(pack)
             pack.controller = self
+        self._build_pack_node(pack, [])
         ControllerCache.register_controller(self)
         return pack
 
