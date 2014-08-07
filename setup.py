@@ -10,7 +10,7 @@ def read(fname):
         return ''
 
 setup(name='m3-core',
-      version='2.0.11.5',
+      version='2.0.11.6',
       url='https://src.bars-open.ru/py/m3/m3',
       license='License :: OSI Approved :: MIT License',
       author='BARS Group',
