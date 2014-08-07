@@ -266,7 +266,7 @@ class BaseObjectModelWVersion(BaseObjectModel):
         """
         if self.id:
             self.version += 1
-        super(BaseObjectModelWVersion, self).save()
+        super(BaseObjectModelWVersion, self).save(*a, **k)
 
     class Meta:
         abstract = True
