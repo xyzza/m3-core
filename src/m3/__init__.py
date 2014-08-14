@@ -84,13 +84,6 @@ class M3JSONEncoder(json.JSONEncoder):
         elif isinstance(obj, decimal.Decimal):
             return str(obj)
 
-        # тут элементы, имеющие атрибут _config (Ext-контролы, обычно)
-        # возвращаются в виде собственно конфига
-        try:
-            return obj._config
-        except AttributeError:
-            pass
-
         # Прошерстим методы и свойства, найдем те,
         # которые могут передаваться на клиента
         # Клонирование словаря происходит потому,
