@@ -1,5 +1,6 @@
 ## История изменений
 
+**3.0.1**
 **2.0.12**
 - Вызов BaseObjectModel.safe_delete теперь возвращает True в случае успеха
 - теперь DeclarativeActionContext поддерживает режимы
