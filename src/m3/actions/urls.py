@@ -11,7 +11,12 @@ import warnings
 
 from django.conf import settings
 from django.utils import importlib
-from django.conf import urls
+
+# совместимость с django 1.6
+try:
+    from django.conf.urls.defaults import patterns
+except ImportError:
+    from django.conf.urls import patterns
 
 
 from m3 import caching
