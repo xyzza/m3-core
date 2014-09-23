@@ -9,12 +9,13 @@ def read(fname):
     except IOError:
         return ''
 
+
 setup(name='m3-core',
       version='3.0.1',
-      url='https://src.bars-open.ru/py/m3/m3',
-      license='License :: OSI Approved :: MIT License',
+      url='https://bitbucket.org/barsgroup/m3-core',
+      license='MIT',
       author='BARS Group',
-      author_email='telepenin@bars-open.ru',
+      author_email='bars@bars-open.ru',
       package_dir={'': 'src'},
       packages=find_packages('src'),
       description=read('DESCRIPTION.md'),
@@ -28,7 +29,9 @@ setup(name='m3-core',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Development Status :: 4 - Beta',
+        'License :: OSI Approved :: MIT License',
+        'Development Status :: 5 - Production/Stable',
       ],
 )
+
 
