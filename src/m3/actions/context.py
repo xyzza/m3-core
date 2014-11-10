@@ -151,7 +151,7 @@ _datetime_parser = _make_datetime_parser(lambda x: x, formats=(
     ('%d.%m.%Y', 10),
     ('%H:%M:%S', 8),
     ('%H:%M', 5),
-)),
+))
 
 
 _date_parser = _make_datetime_parser(
