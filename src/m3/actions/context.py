@@ -209,6 +209,11 @@ _PARSERS = {
 
 
 #================================== КЛАССЫ ====================================
+
+# "Стражник" для значения по умолчанию ActionContextDeclaration.
+_none = object()
+
+
 class ActionContextDeclaration(object):
     u"""
     Класс, который определяет правило извлечения параметра из
@@ -227,7 +232,7 @@ class ActionContextDeclaration(object):
         необходимо для сообщений об ошибках
     """
     def __init__(
-            self, name='', default=None, type=None,
+            self, name='', default=_none, type=None,
             required=False, verbose_name='', *args, **kwargs):
         assert type, 'type must be defined!'
         self.name = name
@@ -347,7 +352,7 @@ class ActionContext(object):
 
         # переносим обязательные параметры, которые не встретились в запросе
         for rule in rules if rules else []:
-            if rule.required and rule.default is not None and (
+            if rule.required and rule.default is not _none and (
                     not params[rule.name][1]):
                 # если параметр не передан в запросе, но
                 # он является обязательным и задано значение по умолчанию,
