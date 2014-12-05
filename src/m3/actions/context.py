@@ -373,7 +373,7 @@ class ActionContext(object):
         if not rules:
             return
         for rule in rules:
-            if rule.required and getattr(self, rule.name, None) is None:
+            if rule.required and getattr(self, rule.name, _none) is _none:
                 raise ActionContext.RequiredFailed(rule.human_name())
 
     def json(self):
