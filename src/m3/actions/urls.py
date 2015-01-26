@@ -47,11 +47,8 @@ def get_app_urlpatterns():
     Перехват исключительных ситуаций данной фунции необходимо осуществлять
     вручную в urls.py прикладных приложений
     """
-    if getattr(urls, 'patterns', None):
-        # Поддержка django over 1.4
-        url_patterns = urls.patterns('',)
-    else:
-        url_patterns = urls.defaults.patterns('',)
+    
+    url_patterns = patterns('',)
 
     for app_name in settings.INSTALLED_APPS:
         try:
