@@ -1,0 +1,21 @@
+notifications: 
+  hipchat: 
+    format: html
+    template: 
+    - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} (<a href='https://pypi.python.org/pypi/m3-core/%{branch}'>%{branch}</a> / <a href='https://bitbucket.org/barsgroup/m3-core/diff/changelog.md?diff2=%{branch}'>Changelog</a>)"
+    rooms: 
+    - b7098c17bc3283dc7ca388b68e3ca3@m3
+script: true
+python: 
+- "2.7"
+install: true
+deploy: 
+  provider: pypi
+  on: 
+    all_branches: true
+    tags: true
+  user: bars-travis
+  distributions: sdist
+  password: 
+    secure: KysYncbcePSHw7o/jHl5nW40n3uCc5jvjmPq1GKde6p+8mFdzBUE0qKwKN/906kZYfW12UkWZkpUDdIViOf6Olr5yP4QcehRhVff+g+cO/g/GZQmXLHIKZVMwRbbogG7LoxSJ5pXIGe4+u2rcXjn/wVERorybZqvC+WjSKyLOh8=
+language: python
