@@ -14,8 +14,6 @@ except ImportError:
 from m3.actions import (
     ActionPack, Action, PreJsonResult, OperationResult, ACD
 )
-from m3_ext.ui.misc.store import ExtJsonStore
-from m3_ext.ui.containers import ExtPagingBar
 from m3.actions import utils
 from m3.actions.results import ActionResult
 from m3.db import BaseObjectModel, safe_delete
@@ -56,6 +54,8 @@ class DictListWindowAction(Action):
         """
         Создаем и настраиваем окно
         """
+        from m3_ext.ui.containers import ExtPagingBar
+        
         base = self.parent
         allow_copy = hasattr(base, 'allow_copy') and base.allow_copy
         win = base.list_form(mode=mode, title=base.title)
@@ -88,6 +88,8 @@ class DictListWindowAction(Action):
             control.add_column(**column_params)
 
     def configure_list(self, win):
+        from m3_ext.ui.misc.store import ExtJsonStore
+
         base = self.parent
 
         # Устанавливаем источники данных
