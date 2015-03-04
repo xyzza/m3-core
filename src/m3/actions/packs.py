@@ -54,6 +54,7 @@ class DictListWindowAction(Action):
         """
         Создаем и настраиваем окно
         """
+        # Защита от кроссимпорта
         from m3_ext.ui.containers import ExtPagingBar
         
         base = self.parent
@@ -88,6 +89,7 @@ class DictListWindowAction(Action):
             control.add_column(**column_params)
 
     def configure_list(self, win):
+        # Защита от кроссимпорта
         from m3_ext.ui.misc.store import ExtJsonStore
 
         base = self.parent
