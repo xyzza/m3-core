@@ -11,7 +11,7 @@ def read(fname):
 
 
 setup(name='m3-core',
-      version='3.0.1.2',
+      version='3.0.1.3',
       url='https://bitbucket.org/barsgroup/m3-core',
       license='MIT',
       author='BARS Group',
