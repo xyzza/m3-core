@@ -18,19 +18,20 @@ def safe_delete(model):
     т.к. стандартный пересчет запускается при вызове model_instance.delete()
     """
     models.signals.pre_delete.send(sender=model.__class__, instance=model)
-    try:
-        cursor = connection.cursor()
-        sql = "DELETE FROM %s WHERE id = %s" % (
-            connection.ops.quote_name(model._meta.db_table), model.id)
-        cursor.execute(sql)
-        transaction.commit_unless_managed()
-    except Exception, e:
-        # Встроенный в Django IntegrityError не генерируется.
-        # Кидаются исключения, специфичные для каждого драйвера БД.
-        # Но по спецификации PEP 249 все они называются IntegrityError
-        if e.__class__.__name__ == 'IntegrityError':
-            return False
-        raise
+    with transaction.atomic():
+        try:
+            cursor = connection.cursor()
+            sql = "DELETE FROM %s WHERE id = %s" % (
+                connection.ops.quote_name(model._meta.db_table), model.id)
+            cursor.execute(sql)
+
+        except Exception, e:
+            # Встроенный в Django IntegrityError не генерируется.
+            # Кидаются исключения, специфичные для каждого драйвера БД.
+            # Но по спецификации PEP 249 все они называются IntegrityError
+            if e.__class__.__name__ == 'IntegrityError':
+                return False
+            raise
 
     # добавим пересчет mptt дерева
     # (т.к. стандартный пересчет вешается на метод self.delete()

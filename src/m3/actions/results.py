@@ -89,7 +89,7 @@ class PreJsonResult(ActionResult):
             encoder.sort_keys = True
 
         result = encoder.encode(self.data)
-        response = http.HttpResponse(result, mimetype='application/json')
+        response = http.HttpResponse(result, content_type='application/json')
         if self.secret_values:
             response['secret_values'] = True
         return response
@@ -103,7 +103,7 @@ class JsonResult(ActionResult):
     """
 
     def get_http_response(self):
-        return http.HttpResponse(self.data, mimetype='application/json')
+        return http.HttpResponse(self.data, content_type='application/json')
 
 
 class HttpReadyResult(ActionResult):
@@ -133,8 +133,7 @@ class XMLResult(ActionResult):
     def get_http_response(self):
         return http.HttpResponse(
             self.data,
-            mimetype='application/xml',
-            content_type='text/xml; charset=utf-8'
+            content_type='application/xml; charset=utf-8'
         )
 
 
