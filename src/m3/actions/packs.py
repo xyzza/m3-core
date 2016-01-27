@@ -8,7 +8,7 @@ from django.conf import settings
 try:
     from django.utils.log import logger
 except ImportError:
-    from django.utils.log import getLogger
+    from logging import getLogger
     logger = getLogger('django')
 
 from m3.actions import (
@@ -329,7 +329,7 @@ class DictSaveAction(Action):
             # узкое место. после того, как мы переделаем работу экшенов,
             # имя параметра с идентификатором запси может уже называться не
             # id
-            if 'm3_audit' in settings.INSTALLED_APPS:
+            if apps.is_installed('m3_audit'):
                 AuditManager().write(
                     'dict-changes',
                     user=request.user,
@@ -356,7 +356,7 @@ class ListDeleteRowAction(Action):
         result = self.parent.delete_row(objs)
         if (isinstance(result, OperationResult) and
                 result.success is True and
-                'm3_audit' in settings.INSTALLED_APPS):
+                apps.is_installed('m3_audit')):
             for obj in objs:
                 AuditManager().write(
                     'dict-changes',

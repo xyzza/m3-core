@@ -11,6 +11,7 @@ import threading
 import re
 import warnings
 
+from django.apps import apps
 from django import http
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -18,7 +19,7 @@ from django.utils.importlib import import_module
 try:
     from django.utils.log import logger
 except ImportError:
-    from django.utils.log import getLogger
+    from logging import getLogger
     logger = getLogger('django')
 
 from results import (
@@ -380,7 +381,7 @@ def _permission_checker_fabric():
         if path is None:
             # если backend не задан в настройках, то исходим из того,
             # подключены ли пользователи Django
-            if 'django.contrib.auth' in settings.INSTALLED_APPS:
+            if apps.is_installed('django.contrib.auth'):
                 result = AuthUserPermissionChecker
             else:
                 result = BypassPermissionChecker
@@ -1609,8 +1610,7 @@ class ControllerCache(object):
     @classmethod
     def populate(cls):
         """
-        Загружает в кэш ActionController'ы
-        из перечисленных в INSTALLED_APPS приложений.
+        Загружает в кэш ActionController'ы для приложений из реестра apps.
         В каждом из них загружает модуль *app_meta*
         и пытается выполнить метод *register_actions* внутри него.
         Выполняется только один раз. Возвращает истину в случае успеха.
@@ -1627,9 +1627,9 @@ class ControllerCache(object):
 
             cls.overrides = {}
             procs = []
-            for app_name in settings.INSTALLED_APPS:
+            for app_config in apps.get_app_configs():
                 try:
-                    module = import_module('.app_meta', app_name)
+                    module = import_module('.app_meta', app_config.name)
                 except ImportError, err:
                     if err.args[0].find('No module named') == -1:
                         raise

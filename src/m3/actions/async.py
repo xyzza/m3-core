@@ -14,7 +14,7 @@ from django.conf import settings
 try:
     from django.utils.log import logger
 except ImportError:
-    from django.utils.log import getLogger
+    from logging import getLogger
     logger = getLogger('django')
 
 from m3.actions import Action, ACD

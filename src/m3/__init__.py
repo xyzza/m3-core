@@ -10,17 +10,27 @@ import decimal
 import sys
 
 from django.db import models as dj_models
+
 from django.http import HttpResponseRedirect, HttpResponseServerError
 from django.conf import settings
 from django.contrib import auth
 from django.utils import datetime_safe
 from django.views.debug import ExceptionReporter
 
+try:
+    from django.db.models.fields.related_descriptors import (
+        ReverseManyToOneDescriptor)
+except ImportError:
+    from django.db.models.fields.related import (
+        ForeignRelatedObjectsDescriptor as ReverseManyToOneDescriptor)
+
 import actions
 
 from actions import ApplicationLogicException
 
 from actions.urls import get_app_urlpatterns
+
+
 
 
 def date2str(date, template=None):
@@ -100,16 +110,14 @@ class M3JSONEncoder(json.JSONEncoder):
         related_objs_attrs = []
         manager_names = []
         if isinstance(obj, dj_models.Model):
-            related_objs = obj._meta.get_all_related_objects()
-            related_objs_attrs = [ro.var_name for ro in related_objs]
-            # Также соберем все атрибуты-менеджеры (их может быть несколько).
+            # Соберем все дескрипторы обратных релейшенов и
+            # все атрибуты-менеджеры (их может быть несколько).
             # Сюда попадет "objects", который исключаем из обработки ниже.
-            for attr in obj.__class__.__dict__:
-                if isinstance(
-                    obj.__class__.__dict__[attr],
-                    dj_models.manager.ManagerDescriptor
-                ):
+            for attr, val in obj.__class__.__dict__.iteritems():
+                if isinstance(val, dj_models.manager.ManagerDescriptor):
                     manager_names.append(attr)
+                elif isinstance(val, ReverseManyToOneDescriptor):
+                    related_objs_attrs.append(attr)
 
         # если передали специальный список атрибутов, то пройдемся по ним
         # атрибуты вложенных объектов разделены точкой

@@ -3,12 +3,11 @@
 Static files finders
 """
 import os
-from importlib import import_module
+from collections import OrderedDict
 
+from django.apps import apps
 from django.contrib.staticfiles.finders import AppDirectoriesFinder, BaseFinder
 from django.core.files.storage import FileSystemStorage
-from django.utils.datastructures import SortedDict
-from django.conf import settings
 
 
 class RecursiveAppDirectoriesFinder(AppDirectoriesFinder):
@@ -25,9 +24,9 @@ class RecursiveAppDirectoriesFinder(AppDirectoriesFinder):
     """
     storage_class = FileSystemStorage
 
-    def __init__(self, apps=None, *args, **kwargs):
+    def __init__(self, app_names=None, *args, **kwargs):
         self.apps = []
-        self.storages = SortedDict()
+        self.storages = OrderedDict()
         visited = set()
 
         def traverse(path, root=False):
@@ -42,10 +41,9 @@ class RecursiveAppDirectoriesFinder(AppDirectoriesFinder):
                     else:
                         traverse(full_path)
 
-        for app in settings.INSTALLED_APPS:
-            mod = import_module(app)
-            location = os.path.dirname(mod.__file__)
-            traverse(location, root=True)
+        for app_config in apps.get_app_configs():
+            print app_config.path
+            traverse(app_config.path, root=True)
 
         # пропускаем __init__ предка, ибо не поведение переопределено
         BaseFinder.__init__(self, *args, **kwargs)

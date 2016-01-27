@@ -9,6 +9,7 @@ import inspect
 
 import warnings
 
+from django.apps import apps
 from django.conf import settings
 from django.utils import importlib
 
@@ -48,9 +49,9 @@ def get_app_urlpatterns():
     '''
     url_patterns = patterns('',)
 
-    for app_name in settings.INSTALLED_APPS:
+    for app_config in apps.get_app_configs():
         try:
-            module = importlib.import_module('.app_meta', app_name)
+            module = importlib.import_module('.app_meta', app_config.name)
         except ImportError, err:
             # по идее, такая ошибка возникает в
             # случае, если у нас для

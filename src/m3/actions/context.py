@@ -12,7 +12,7 @@ from django.utils.encoding import force_unicode
 try:
     from django.utils.log import logger
 except ImportError:
-    from django.utils.log import getLogger
+    from logging import getLogger
     logger = getLogger('django')
 
 
