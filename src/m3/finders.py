@@ -42,7 +42,6 @@ class RecursiveAppDirectoriesFinder(AppDirectoriesFinder):
                         traverse(full_path)
 
         for app_config in apps.get_app_configs():
-            print app_config.path
             traverse(app_config.path, root=True)
 
         # пропускаем __init__ предка, ибо не поведение переопределено
