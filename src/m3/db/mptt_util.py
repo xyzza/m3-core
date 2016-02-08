@@ -74,7 +74,7 @@ def rebuild_mptt_tree(
     if manage_mptt_signals:
         disable_mptt_signals(model)
 
-    opts = model._meta
+    opts = model._mptt_meta
     qs = model_manager.filter(**{'%s__isnull' % opts.parent_attr: True})
     tree_id = 1
     #l = len(qs)
