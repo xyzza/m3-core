@@ -220,7 +220,7 @@ class ForUpdateQuerySet(QuerySet):
 
 
 class ForUpdateManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return ForUpdateQuerySet(self.model, using=self._db)
 ##############################################################
 
@@ -312,17 +312,17 @@ class ObjectManager(models.Manager):
         else:
             self.query_state = self.get_default_state()
 
-    def get_query_set(self):
+    def get_queryset(self):
         # если указывали дату,
         # то отфильтруем на дату, иначе только по состоянию
         if self.query_on_date:
-            return super(ObjectManager, self).get_query_set().filter(
+            return super(ObjectManager, self).get_queryset().filter(
                 begin__lte=self.query_on_date,
                 end__gt=self.query_on_date,
                 state__in=self.query_state
             )
         else:
-            return super(ObjectManager, self).get_query_set().filter(
+            return super(ObjectManager, self).get_queryset().filter(
                 state__in=self.query_state
             )
 

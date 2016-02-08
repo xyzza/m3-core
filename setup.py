@@ -10,7 +10,7 @@ def read(fname):
         return ''
 
 setup(name='m3-core',
-      version='2.1.0.0',
+      version='2.1.0.1',
       url='https://bitbucket.org/barsgroup/m3-core',
       license='MIT',
       author='BARS Group',
