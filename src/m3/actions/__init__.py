@@ -6,15 +6,14 @@
 import abc
 from functools import wraps
 import inspect
-import importlib
 import threading
 import re
 import warnings
+from importlib import import_module
 
 from django.apps import apps
 from django import http
 from django.conf import settings
-from django.utils.importlib import import_module
 
 try:
     from django.utils.log import logger
@@ -73,7 +72,7 @@ def _import_by_path(path):
     if match is None:
         raise ValueError(u'Wrong path to import: %r' % path)
     module_name, obj_name = match.groups()
-    module = importlib.import_module(module_name)
+    module = import_module(module_name)
     return getattr(module, obj_name)
 
 

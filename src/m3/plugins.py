@@ -6,11 +6,11 @@ Created on 17.09.2010
 """
 
 import threading
-
+from importlib import import_module
 
 from django.apps import apps
 from django.conf import settings
-from django.utils.importlib import import_module
+
 try:
     from django.utils.log import logger
 except ImportError:
