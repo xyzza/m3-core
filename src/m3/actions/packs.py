@@ -3,8 +3,11 @@
 Паки и экшены для работы со справочниками
 +++++++++++++++++++++++++++++++++++++++++
 """
+
+from django.apps import apps
 from django.db import transaction
 from django.conf import settings
+
 try:
     from django.utils.log import logger
 except ImportError:
