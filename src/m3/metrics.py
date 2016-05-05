@@ -1,5 +1,4 @@
-#coding: utf-8
-
+# coding: utf-8
 import json
 import hashlib
 import logging
@@ -7,18 +6,20 @@ import time
 import urllib2
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.db.models.signals import post_delete, post_save
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 
 from m3.actions import ControllerCache
+from m3_django_compat import get_user_model
 
 try:
     import pystatsd
 except ImportError as ie:
     raise ImportError('Metrics collection is enabled, but we failed to '
                       'import "pystatsd": {0}'.format(unicode(ie)))
+
+User = get_user_model()
 
 prefix = getattr(settings, 'METRICS_PREFIX', None)
 host = getattr(settings, 'METRICS_HOST', 'localhost')
