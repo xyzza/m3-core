@@ -20,19 +20,19 @@ def _read(fname):
     except IOError:
         return ''
 
-setup(name='m3-core',
-      version='2.0.12.2',
-      url='https://bitbucket.org/barsgroup/m3-core',
-      license='MIT',
-      author='BARS Group',
-      author_email='bars@bars-open.ru',
-      package_dir={'': 'src'},
-      packages=find_packages('src'),
-      description=_read('DESCRIPTION.md'),
-      install_requires=_get_requirements('REQUIREMENTS'),
-      long_description=_read('README.md'),
-      include_package_data=True,
-      classifiers=[
+setup(
+    name='m3-core',
+    url='https://bitbucket.org/barsgroup/m3-core',
+    license='MIT',
+    author='BARS Group',
+    author_email='bars@bars-open.ru',
+    package_dir={'': 'src'},
+    packages=find_packages('src'),
+    description=_read('DESCRIPTION.md'),
+    install_requires=_get_requirements('REQUIREMENTS'),
+    long_description=_read('README.md'),
+    include_package_data=True,
+    classifiers=(
         'Intended Audience :: Developers',
         'Environment :: Web Environment',
         'Natural Language :: Russian',
@@ -41,5 +41,12 @@ setup(name='m3-core',
         'Programming Language :: Python',
         'License :: OSI Approved :: MIT License',
         'Development Status :: 5 - Production/Stable',
-      ],
+    ),
+    dependency_links=(
+        'http://pypi.bars-open.ru/simple/m3-builder',
+    ),
+    setup_requires=(
+        'm3-builder>=1.0.1',
+    ),
+    set_build_info=os.path.dirname(__file__),
 )
