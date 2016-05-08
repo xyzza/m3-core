@@ -1,7 +1,15 @@
 ## История изменений
 
+**2.2.1**
+- Подключение пакета `m3-django-compat>=1.1.0,<1.2.0`.
+- Задействованы менеджеры моделей с поддержкой [переименования метода
+  ``get_query_set`` в ``get_queryset``](https://docs.djangoproject.com/en/1.9/releases/1.6/#get-query-set-and-similar-methods-renamed-to-get-queryset).
+- Задействован [``atomic``](https://docs.djangoproject.com/en/1.9/topics/db/transactions/#django.db.transaction.atomic)
+  совместимый с Django<1.6.
+
 **2.2.0**
-- Подключение пакета `m3-django-compat>=1.0.0,<1.1.0`.
+- Подключение пакета `m3-django-compat>=1.0.0,<1.1.0`. Добавлена поддержка
+  кастомных [моделей учетных записей](https://docs.djangoproject.com/en/1.9/topics/auth/customizing/#auth-custom-user).
 
 **2.0.12.2**
 - В ``ActionContextDeclaration`` добавлена возможность указать ``None`` в качестве значения по-умолчанию
