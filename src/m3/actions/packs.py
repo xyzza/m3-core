@@ -3,7 +3,6 @@
 Паки и экшены для работы со справочниками
 +++++++++++++++++++++++++++++++++++++++++
 """
-from django.db import transaction
 from django.conf import settings
 try:
     from django.utils.log import logger
@@ -14,6 +13,7 @@ except ImportError:
 from m3.actions import (
     ActionPack, Action, PreJsonResult, OperationResult, ACD
 )
+from m3_django_compat import atomic
 from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3_ext.ui.misc.store import ExtJsonStore
 from m3_ext.ui.containers import ExtPagingBar
@@ -679,7 +679,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
             record = self.model.objects.get(id=id)
         return record
 
-    @transaction.commit_on_success
+    @atomic
     def save_row(self, obj):
         obj.save()
         return OperationResult(success=True)
@@ -688,7 +688,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         # Такая реализация обусловлена тем,
         # что IntegrityError невозможно отловить
         # до завершения транзакции, и приходится оборачивать транзакцию.
-        @transaction.commit_on_success
+        @atomic
         def delete_row_in_transaction(self, objs):
             message = ''
             if len(objs) == 0:

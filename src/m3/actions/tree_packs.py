@@ -3,14 +3,13 @@
 Паки для иерархических справочников
 +++++++++++++++++++++++++++++++++++
 '''
-
-from django.db import transaction
 from django.dispatch import Signal
 
 from m3_ext.ui.results import ExtUIScriptResult
 from m3.actions import ActionPack, Action, PreJsonResult, OperationResult,\
     ActionContextDeclaration, ACD
 from m3.actions import utils
+from m3_django_compat import atomic
 from m3_ext.ui.misc.store import ExtJsonStore
 from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3.actions.packs import ListDeleteRowAction, MSG_DOESNOTEXISTS, ObjectNotFound
@@ -945,7 +944,7 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         # Такая реализация обусловлена тем,
         # что IntegrityError невозможно отловить
         # до завершения транзакции, и приходится оборачивать транзакцию.
-        @transaction.commit_on_success
+        @atomic
         def delete_row_in_transaction(self, objs):
             message = ''
             if len(objs) == 0:
