@@ -1,13 +1,6 @@
-#coding:utf-8
-"""
-Created on 29.01.2011
-
-@author: akvarats
-"""
-
+# coding:utf-8
 from django.db import transaction
 from django.conf import settings
-
 
 from m3 import RelatedError
 from m3.db import BaseObjectModel, safe_delete
@@ -22,6 +15,7 @@ from m3.actions.interfaces import IMultiSelectablePack
 from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3_ext.ui.misc.store import ExtJsonStore
 from m3_ext.ui.results import ExtUIScriptResult
+from m3_django_compat import atomic
 
 from m3_legacy import logger
 
@@ -672,7 +666,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
                 return None
         return record
 
-    @transaction.commit_on_success
+    @atomic
     def save_row(self, obj):
         obj.save()
         return OperationResult(success=True)
@@ -681,7 +675,7 @@ class BaseDictionaryModelActions(BaseDictionaryActions):
         # Такая реализация обусловлена тем,
         # что IntegrityError невозможно отловить
         # до завершения транзакции, и приходится оборачивать транзакцию.
-        @transaction.commit_on_success
+        @atomic
         def delete_row_in_transaction(self, objs):
             message = ''
             if len(objs) == 0:

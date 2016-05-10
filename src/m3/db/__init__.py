@@ -1,12 +1,11 @@
-#coding:utf-8
-
+# coding:utf-8
 import datetime
 
 from django.db import models, connection, transaction, router, connections
 from django.db.models.query import QuerySet
 from django.db.models.deletion import Collector
-
 from m3 import json_encode, RelatedError
+from m3_django_compat import Manager
 
 
 def safe_delete(model):
@@ -218,8 +217,8 @@ class ForUpdateQuerySet(QuerySet):
             sql.rstrip() + ' FOR UPDATE', params)
 
 
-class ForUpdateManager(models.Manager):
-    def get_query_set(self):
+class ForUpdateManager(Manager):
+    def get_queryset(self):
         return ForUpdateQuerySet(self.model, using=self._db)
 ##############################################################
 
@@ -289,7 +288,7 @@ class ObjectState(BaseEnumerate):
     values = {VALID: u'Действует', CLOSED: u'Закрыта', DRAFT: u'Черновик'}
 
 
-class ObjectManager(models.Manager):
+class ObjectManager(Manager):
     """
     Менеджер запросов к записям справочника
     Фильтрует записи по периоду действия и состоянию
@@ -311,17 +310,17 @@ class ObjectManager(models.Manager):
         else:
             self.query_state = self.get_default_state()
 
-    def get_query_set(self):
+    def get_queryset(self):
         # если указывали дату,
         # то отфильтруем на дату, иначе только по состоянию
         if self.query_on_date:
-            return super(ObjectManager, self).get_query_set().filter(
+            return super(ObjectManager, self).get_queryset().filter(
                 begin__lte=self.query_on_date,
                 end__gt=self.query_on_date,
                 state__in=self.query_state
             )
         else:
-            return super(ObjectManager, self).get_query_set().filter(
+            return super(ObjectManager, self).get_queryset().filter(
                 state__in=self.query_state
             )
 
