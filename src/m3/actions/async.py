@@ -223,7 +223,7 @@ class AsyncOperationResult(ActionResult):
             'value': self.value,
             'alive': self.alive,
         })
-        return http.HttpResponse(data, mimetype='application/json')
+        return http.HttpResponse(data, content_type='application/json')
 
 
 class AsyncAction(Action):
