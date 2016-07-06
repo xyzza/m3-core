@@ -1,26 +1,22 @@
-#coding:utf-8
-"""
-Платформа разработки приложений ERP типа на python и django
-"""
-
+# coding: utf-8
+u"""Платформа разработки приложений ERP типа на python и django."""
 import copy
 import datetime
-import json
 import decimal
+import json
 import sys
 
-from django.db import models as dj_models
-from django.http import HttpResponseRedirect, HttpResponseServerError
 from django.conf import settings
 from django.contrib import auth
+from django.db import models as dj_models
+from django.http import HttpResponseRedirect, HttpResponseServerError
 from django.utils import datetime_safe
 from django.views.debug import ExceptionReporter
+from m3_django_compat import ModelOptions
 
-import actions
-
-from actions import ApplicationLogicException
-
-from actions.urls import get_app_urlpatterns
+from .actions import ApplicationLogicException
+from .actions import OperationResult
+from .actions.urls import get_app_urlpatterns
 
 
 def date2str(date, template=None):
@@ -100,8 +96,8 @@ class M3JSONEncoder(json.JSONEncoder):
         related_objs_attrs = []
         manager_names = []
         if isinstance(obj, dj_models.Model):
-            related_objs = obj._meta.get_all_related_objects()
-            related_objs_attrs = [ro.var_name for ro in related_objs]
+            related_objs = ModelOptions(obj).get_all_related_objects()
+            related_objs_attrs = [ro.model_name for ro in related_objs]
             # Также соберем все атрибуты-менеджеры (их может быть несколько).
             # Сюда попадет "objects", который исключаем из обработки ниже.
             for attr in obj.__class__.__dict__:
@@ -255,7 +251,7 @@ def authenticated_user_required(f):
         user = request.user
         if not user or not user.is_authenticated():
             if request.is_ajax():
-                res = actions.OperationResult.by_message(
+                res = OperationResult.by_message(
                     u'Вы не авторизованы. Возможно, закончилось время '
                     u'пользовательской сессии.<br>'
                     u'Для повторной аутентификации обновите страницу.')

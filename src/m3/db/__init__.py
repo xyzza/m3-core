@@ -2,10 +2,12 @@
 import datetime
 
 from django.db import models, connection, transaction, router, connections
-from django.db.models.query import QuerySet
 from django.db.models.deletion import Collector
-from m3 import json_encode, RelatedError
+from django.db.models.query import QuerySet
 from m3_django_compat import Manager
+from m3_django_compat import commit_unless_managed
+
+from m3 import json_encode, RelatedError
 
 
 def safe_delete(model):
@@ -22,7 +24,7 @@ def safe_delete(model):
         sql = "DELETE FROM %s WHERE id = %s" % (
             connection.ops.quote_name(model._meta.db_table), model.id)
         cursor.execute(sql)
-        transaction.commit_unless_managed()
+        commit_unless_managed()
     except Exception, e:
         # Встроенный в Django IntegrityError не генерируется.
         # Кидаются исключения, специфичные для каждого драйвера БД.
