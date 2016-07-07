@@ -16,6 +16,7 @@ from m3.actions.interfaces import ISelectablePack
 from m3.actions.results import ActionResult
 from m3.db import BaseObjectModel, safe_delete
 from m3 import RelatedError
+from m3_django_compat import get_request_params
 
 
 logger = getLogger('django')
@@ -234,9 +235,10 @@ class DictRowsAction(Action):
     def run(self, request, context):
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
-        filter = request.REQUEST.get('filter')
-        direction = request.REQUEST.get('dir')
-        user_sort = request.REQUEST.get('sort')
+        request_params = get_request_params(request)
+        filter = request_params.get('filter')
+        direction = request_params.get('dir')
+        user_sort = request_params.get('sort')
         if direction == 'DESC':
             user_sort = '-' + user_sort
         dict_list = []
