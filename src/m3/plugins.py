@@ -1,14 +1,8 @@
-#coding: utf-8
-"""
-Created on 17.09.2010
-
-@author: akvarats
-"""
-
+# coding: utf-8
+from importlib import import_module
 import threading
 
 from django.conf import settings
-from django.utils.importlib import import_module
 try:
     from django.utils.log import logger
 except ImportError:
