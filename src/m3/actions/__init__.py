@@ -60,7 +60,7 @@ _STATSD_CLIENT = create_statsd_client(settings)
 ACD = ActionContextDeclaration
 
 
-clean_url = lambda s: re.sub(r'^[/^]*(.*?)[$/]*$', r'\1', s)
+_clean_url = lambda s: re.sub(r'^[/^]*(.*?)[$/]*$', r'\1', s)
 
 
 def _import_by_path(path):
