@@ -1,19 +1,14 @@
-#coding:utf-8
-'''
-Модуль, реализущий работу с контекстом выполнения операции
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-'''
-#author: akvarats
+# coding:utf-8
+u"""Модуль, реализущий работу с контекстом выполнения операции."""
+from decimal import Decimal
+from logging import getLogger
 import datetime
 import json
-from decimal import Decimal
 
 from django.utils.encoding import force_unicode
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
+
+
+logger = getLogger('django')
 
 
 def _date2str(*args):

@@ -1,13 +1,12 @@
 # coding: utf-8
 from importlib import import_module
+from logging import getLogger
 import threading
 
 from django.conf import settings
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
+
+
+logger = getLogger('django')
 
 
 class ExtensionException(Exception):

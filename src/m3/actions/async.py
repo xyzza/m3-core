@@ -1,24 +1,19 @@
-#coding:utf-8
-"""
-Экшены для работы в асинхронном режиме
-++++++++++++++++++++++++++++++++++++++
-"""
-__author__ = 'ZIgi'
-
+# coding:utf-8
+u"""Экшены для работы в асинхронном режиме."""
 from abc import ABCMeta, abstractmethod
+from logging import getLogger
 from threading import Thread
 import json
 
 from django import http
 from django.conf import settings
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
 
 from m3.actions import Action, ACD
 from m3.actions.results import ActionResult
+
+
+logger = getLogger('django')
+
 
 # !!!!!
 # для работы данного модуля необходимо наличие приложения 'm3_mutex'

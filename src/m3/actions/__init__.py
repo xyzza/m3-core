@@ -3,8 +3,9 @@
 Основные объекты библиотеки: механизмы проверки прав, экшены, паки, контроллеры, кэш контроллеров
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 """
-import abc
 from functools import wraps
+from logging import getLogger
+import abc
 import inspect
 import importlib
 import threading
@@ -14,11 +15,6 @@ import warnings
 from django import http
 from django.conf import settings
 
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
 
 from results import (
     ActionResult,
@@ -54,13 +50,17 @@ from context import (
 
 from metrics import create_statsd_client
 
+
+logger = getLogger('django')
+
+
 _STATSD_CLIENT = create_statsd_client(settings)
 
 
 ACD = ActionContextDeclaration
 
 
-_clean_url = lambda s: re.sub(r'^[/^]*(.*?)[$/]*$', r'\1', s)
+clean_url = lambda s: re.sub(r'^[/^]*(.*?)[$/]*$', r'\1', s)
 
 
 def _import_by_path(path):
