@@ -110,7 +110,7 @@ class ListGetRowsAction(Action):
         parent_id = utils.extract_int(request, 'id')
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
-        filter = request.REQUEST.get('filter')
+        filter = get_request_params(request).get('filter')
         result = self.parent.get_rows(
             request, context, parent_id, offset, limit, filter)
         return PreJsonResult(result)

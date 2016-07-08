@@ -1,19 +1,15 @@
-#coding:utf-8
-'''
-Модуль, реализущий работу с контекстом выполнения операции
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-'''
-#author: akvarats
+# coding:utf-8
+u"""Модуль, реализущий работу с контекстом выполнения операции."""
+from decimal import Decimal
+from logging import getLogger
 import datetime
 import json
-from decimal import Decimal
 
 from django.utils.encoding import force_unicode
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
+from m3_django_compat import get_request_params
+
+
+logger = getLogger('django')
 
 
 def _date2str(*args):
@@ -319,8 +315,7 @@ class ActionContext(object):
         key = value = ptype = None
         try:
             # переносим параметры в контекст из запроса
-            for key in request.REQUEST:
-                value = request.REQUEST[key]
+            for key, value in get_request_params(request).iteritems():
                 # Пустые параметры не конвертируем,
                 # т.к. они могут вызвать ошибку
                 if not value:
@@ -336,7 +331,7 @@ class ActionContext(object):
         except IOError as err:
             # В некоторых браузерах (предполагается что в ie)
             # происходит следующие:
-            # request.REQUEST читается и в какой-то момент связь прекращается
+            # REQUEST читается и в какой-то момент связь прекращается
             # из-за того, что браузер разрывает соединение,
             # в следствии этого происходит ошибка
             # IOError: request data read error
@@ -470,7 +465,7 @@ class DeclarativeActionContext(ActionContext):
         # определяем режим, если правилла описаны парой
         if isinstance(rules, tuple):
             # режим
-            mode = request.REQUEST.get(rules[0])
+            mode = get_request_params(request).get(rules[0])
             try:
                 # правила для конкретного режима
                 rules = rules[1][mode]
@@ -497,7 +492,7 @@ class DeclarativeActionContext(ActionContext):
 
             add_error_to = None
             try:
-                val = request.REQUEST.get(key)
+                val = get_request_params(request).get(key)
                 if val is None:
                     if 'default' in parser_data:
                         val = parser_data['default']

@@ -3,8 +3,9 @@
 Основные объекты библиотеки: механизмы проверки прав, экшены, паки, контроллеры, кэш контроллеров
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 """
-import abc
 from functools import wraps
+from logging import getLogger
+import abc
 import inspect
 import importlib
 import threading
@@ -13,13 +14,7 @@ import warnings
 
 from django import http
 from django.conf import settings
-from django.utils.importlib import import_module
 
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
 
 from results import (
     ActionResult,
@@ -54,6 +49,10 @@ from context import (
 )
 
 from metrics import create_statsd_client
+
+
+logger = getLogger('django')
+
 
 _STATSD_CLIENT = create_statsd_client(settings)
 
@@ -901,7 +900,7 @@ class ActionController(object):
         mod_name = full_path[:dot]
         pack_name = full_path[dot + 1:]
         # Пробуем загрузить
-        mod = import_module(mod_name)
+        mod = importlib.import_module(mod_name)
         clazz = getattr(mod, pack_name)
         return clazz
 
@@ -1629,7 +1628,7 @@ class ControllerCache(object):
             procs = []
             for app_name in settings.INSTALLED_APPS:
                 try:
-                    module = import_module('.app_meta', app_name)
+                    module = importlib.import_module('.app_meta', app_name)
                 except ImportError, err:
                     if err.args[0].find('No module named') == -1:
                         raise

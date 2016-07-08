@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-Static files finders
-"""
-import os
+# coding: utf-8
+"""Static files finders."""
+from collections import OrderedDict
 from importlib import import_module
+import os
 
 from django.contrib.staticfiles.finders import AppDirectoriesFinder, BaseFinder
 from django.core.files.storage import FileSystemStorage
-from django.utils.datastructures import SortedDict
 from django.conf import settings
 
 
@@ -27,7 +25,7 @@ class RecursiveAppDirectoriesFinder(AppDirectoriesFinder):
 
     def __init__(self, apps=None, *args, **kwargs):
         self.apps = []
-        self.storages = SortedDict()
+        self.storages = OrderedDict()
         visited = set()
 
         def traverse(path, root=False):

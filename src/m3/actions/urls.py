@@ -1,16 +1,12 @@
-#coding: utf-8
-"""
-Хелперы для отработки расширяемых конфигураций url'ов
-+++++++++++++++++++++++++++++++++++++++++++++++++++++
-"""
-
+# coding: utf-8
+u"""Хелперы для отработки расширяемых конфигураций url'ов."""
+from importlib import import_module
 import collections
 import inspect
 
 import warnings
 
 from django.conf import settings
-from django.utils import importlib
 
 # совместимость с django 1.6
 try:
@@ -50,7 +46,7 @@ def get_app_urlpatterns():
 
     for app_name in settings.INSTALLED_APPS:
         try:
-            module = importlib.import_module('.app_meta', app_name)
+            module = import_module('.app_meta', app_name)
         except ImportError, err:
             # по идее, такая ошибка возникает в
             # случае, если у нас для

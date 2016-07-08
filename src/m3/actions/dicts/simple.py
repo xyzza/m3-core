@@ -244,9 +244,9 @@ class DictRowsAction(Action):
     def run(self, request, context):
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
-        filter = request.REQUEST.get('filter')
-        direction = request.REQUEST.get('dir')
-        user_sort = request.REQUEST.get('sort')
+        filter = get_request_params(request).get('filter')
+        direction = get_request_params(request).get('dir')
+        user_sort = get_request_params(request).get('sort')
         if direction == 'DESC':
             user_sort = '-' + user_sort
         dict_list = []
