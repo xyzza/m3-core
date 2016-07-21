@@ -1,5 +1,8 @@
 ## История изменений
 
+**2.1.4**
+- Исправлено присвоение родителя в функции ``tree_packs.BaseTreeDictionaryModelActions.drag_node``
+
 **2.1.3**
 - Фикс MANIFEST.in
 
