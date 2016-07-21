@@ -1011,9 +1011,9 @@ class BaseTreeDictionaryModelActions(BaseTreeDictionaryActions):
         node = self.get_node(id)
         # Если id узла на который кидаем <1, значит это корень справочника
         if dest_id < 1:
-            node.parent_id = None
+            node.parent = None
         else:
-            node.parent_id = dest_id
+            node.parent = self.get_node(dest_id)
         node.save()
         return OperationResult()
 
