@@ -1,5 +1,8 @@
 ## История изменений
 
+**2.0.12.3**
+- Исправлено присвоение родителя в функции ``tree_packs.BaseTreeDictionaryModelActions.drag_node``
+
 **2.0.12.2**
 - В ``ActionContextDeclaration`` добавлена возможность указать ``None`` в качестве значения по-умолчанию
 
