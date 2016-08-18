@@ -17,9 +17,8 @@ from m3.actions.interfaces import IMultiSelectablePack
 from m3_ext.ui.misc.store import ExtJsonStore
 from m3_ext.ui.windows.complex import ExtDictionaryWindow
 from m3_ext.ui.containers import ExtPagingBar
+from m3_ext.ui.results import ExtUIScriptResult
 from m3.db import BaseObjectModel, safe_delete
-
-class ExtUIScriptResult: pass
 
 
 class TreeGetNodesAction(Action):

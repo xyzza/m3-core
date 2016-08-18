@@ -903,7 +903,7 @@ class ActionController(object):
         self._actions_by_name.clear()
         self._actions_by_type.clear()
         for full_path, v in self._url_patterns.iteritems():
-            _, action = v
+            _, action, suff = v
             self._add_action_to_search_dicts(action, full_path)
         # Обновлять _packs_by_name и _packs_by_type не нужно!
 
@@ -1247,7 +1247,7 @@ class ActionController(object):
         right_packs = []
 
         for url, value in self._url_patterns.iteritems():
-            packs_list, final_action = value
+            packs_list, final_action, suff = value
 
             # Поиск пака и соседей в списке
             left_pack = None
@@ -1271,7 +1271,7 @@ class ActionController(object):
 
             # Создание нового урла
             full_path = self._build_full_path(packs_list, final_action)
-            new_patterns[full_path] = (packs_list[:], final_action)
+            new_patterns[full_path] = (packs_list[:], final_action, suff)
             current_packs_slice = packs_list[:pos + 1]
 
         self._url_patterns = new_patterns
