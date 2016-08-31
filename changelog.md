@@ -1,5 +1,9 @@
 ## История изменений
 
+**2.2.6**
+- Вместо параметра [`DATE_FORMAT`](https://docs.djangoproject.com/en/1.9/ref/settings/#date-format) из настроек Django используется 
+ `PYTHON_DATE_FORMAT`.
+
 **2.2.5**
 - Исправлено присвоение родителя в функции ``tree_packs.BaseTreeDictionaryModelActions.drag_node``
 
