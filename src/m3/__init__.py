@@ -27,8 +27,10 @@ def date2str(date, template=None):
     # This library does not support strftime's \"%s\" or \"%y\" format strings.
     # Allowed if there's an even number of \"%\"s because they are escaped.
     """
+    default_format = getattr(settings, 'PYTHON_DATE_FORMAT', '%d.%m.%Y')
     return datetime_safe.new_datetime(date).strftime(
-        template or settings.DATE_FORMAT or '%d.%m.%Y')
+        template or default_format
+    )
 
 
 class AutoLogout(object):
