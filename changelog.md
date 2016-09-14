@@ -1,5 +1,8 @@
 ## История изменений
 
+**2.2.6**
+- Изменения для совместимости с Django 1.10.
+
 **2.2.5**
 - Исправлено присвоение родителя в функции ``tree_packs.BaseTreeDictionaryModelActions.drag_node``
 - Вместо параметра [`DATE_FORMAT`](https://docs.djangoproject.com/en/1.9/ref/settings/#date-format) из настроек Django используется 
