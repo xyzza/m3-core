@@ -3,20 +3,11 @@ u"""Хелперы для отработки расширяемых конфиг
 from importlib import import_module
 import collections
 import inspect
-
 import warnings
 
 from django.conf import settings
 
-# совместимость с django 1.6
-try:
-    from django.conf.urls.defaults import patterns
-except ImportError:
-    from django.conf.urls import patterns
-
-
 from m3 import caching
-
 from m3.actions import ControllerCache, Action
 
 
@@ -42,7 +33,7 @@ def get_app_urlpatterns():
     Перехват исключительных ситуаций данной фунции необходимо осуществлять
     вручную в urls.py прикладных приложений
     '''
-    url_patterns = patterns('',)
+    url_patterns = []
 
     for app_name in settings.INSTALLED_APPS:
         try:
