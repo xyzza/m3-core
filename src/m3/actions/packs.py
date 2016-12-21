@@ -23,7 +23,7 @@ logger = getLogger('django')
 
 
 try:
-    from m3_audit import AuditManager
+    from m3_audit.manager import AuditManager
 except ImportError:
     # При сборке документации, внешняя Django ничего не знает про m3_audit
     logger.warning('m3_audit import error')
