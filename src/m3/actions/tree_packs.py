@@ -1,8 +1,5 @@
-#coding:utf-8
-'''
-Паки для иерархических справочников
-+++++++++++++++++++++++++++++++++++
-'''
+# coding: utf-8
+u"""Паки для иерархических справочников."""
 
 from django.db import transaction
 from django.dispatch import Signal
@@ -19,6 +16,7 @@ from m3.db import BaseObjectModel, safe_delete
 from m3 import RelatedError
 from m3.actions.results import ActionResult
 from m3.actions.interfaces import ISelectablePack
+from m3_django_compat import get_request_params
 
 
 class TreeGetNodesAction(Action):
@@ -31,8 +29,9 @@ class TreeGetNodesAction(Action):
         parent_id = utils.extract_int(request, 'node')
         if parent_id < 1:
             parent_id = None
-        filter = request.REQUEST.get('filter')
-        result = self.parent.get_nodes(parent_id, filter)
+        result = self.parent.get_nodes(
+            parent_id, get_request_params(request).get('filter')
+        )
         return PreJsonResult(result)
 
 
@@ -135,9 +134,9 @@ class ListGetRowsAction(Action):
         parent_id = utils.extract_int(request, 'id')
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
-        filter = request.REQUEST.get('filter')
         result = self.parent.get_rows(
-            parent_id, offset, limit, filter)
+            parent_id, offset, limit, get_request_params(request).get('filter')
+        )
         return PreJsonResult(result)
 
 

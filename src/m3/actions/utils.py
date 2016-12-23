@@ -1,14 +1,12 @@
-#coding:utf-8
-'''
-Вспомогательные функции используемые в паках
-++++++++++++++++++++++++++++++++++++++++++++
-'''
+# coding:utf-8
+u""""Вспомогательные функции используемые в паках."""
 import json
 
-from django.db.models.query_utils import Q
 from django.db import models
+from django.db.models.query_utils import Q
+from m3_django_compat import get_request_params
 
-from exceptions import ApplicationLogicException
+from .exceptions import ApplicationLogicException
 
 
 def apply_sort_order(query, columns, sort_order):
@@ -363,10 +361,10 @@ def extract_int(request, key):
     :rtype: int
     """
     try:
-        value = request.REQUEST.get(key, None)
+        value = get_request_params(request).get(key, None)
     except IOError:
         # В некоторых браузерах (предполагается что в ie) происходит следующие:
-        # request.REQUEST читается и в какой-то момент связь прекращается
+        # REQUEST читается и в какой-то момент связь прекращается
         # из-за того, что браузер разрывает соединение,
         # в следствии этого происходит ошибка
         # IOError: request data read error
@@ -387,16 +385,14 @@ def extract_int(request, key):
 
 
 def extract_int_list(request, key):
-    ''' Извлекает список целых чисел из запроса
-        ..note:: разделителем в строком значении должна быть запятая
-
+    """"
+    Извлекает список целых чисел из запроса
+      ..note:: разделителем в строком значении должна быть запятая
     :param unicode key: имя параметра
-
-    :return: список целочисленных значений из параметра с
-        заданным именем
+    :return: список целочисленных значений из параметра с заданным именем
     :rtype: list
-    '''
-    value = request.REQUEST.get(key, '')
+    """
+    value = get_request_params(request).get(key, '')
     values = map(int, value.split(','))
     return values
 
@@ -427,7 +423,7 @@ def apply_column_filter(query, request, map):
     assert isinstance(map, dict)
     cond = None
     for key, value in map.items():
-        filter_word = request.REQUEST.get(value)
+        filter_word = get_request_params(request).get(value)
         if filter_word:
             filter = Q(**{key + '__icontains': filter_word})
             cond = filter if not cond else (cond & filter)

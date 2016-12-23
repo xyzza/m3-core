@@ -1,16 +1,11 @@
-#coding:utf-8
-"""
-Created on 29.01.2011
-
-@author: akvarats
-"""
+# coding: utf-8
 
 from django.db import transaction
 from django.conf import settings
 
-
 from m3 import RelatedError
 from m3.db import BaseObjectModel, safe_delete
+from m3_django_compat import get_request_params
 
 from m3.actions import (
     ActionPack, Action, PreJsonResult, OperationResult,
@@ -249,9 +244,10 @@ class DictRowsAction(Action):
     def run(self, request, context):
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
-        filter = request.REQUEST.get('filter')
-        direction = request.REQUEST.get('dir')
-        user_sort = request.REQUEST.get('sort')
+        request_params = get_request_params(request)
+        filter = request_params.get('filter')
+        direction = request_params.get('dir')
+        user_sort = request_params.get('sort')
         if direction == 'DESC':
             user_sort = '-' + user_sort
         dict_list = []

@@ -1,7 +1,12 @@
 ## История изменений
 
 **3.1.0**
-- Добавлены изменения для совместимости с Django версии 1.8
+- Добавлены изменения для совместимости с Django версии 1.9:
+    - Замена функции getLogger из Django на функцию из модуля logging
+    - Использование функции import_module из importlib
+    - Замена SortedDict из Django на OrderedDict из Python
+    - Замена доступа к атрибуту HttpRequest.REQUEST на get_request_params()
+- Добавлены изменения для совместимости с Django версии 1.8:
     - Прямой вызов Model._meta.get_all_related_objects(...) заменен на
       ModelOptions.get_all_related_objects()
     - Применение совместимого аналога функции commit_unless_managed.
