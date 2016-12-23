@@ -275,4 +275,4 @@ class PrettyTracebackMiddleware(object):
     def process_exception(self, request, exception):
         reporter = ExceptionReporter(request, *sys.exc_info())
         html = reporter.get_traceback_html()
-        return HttpResponseServerError(html, mimetype='text/html')
+        return HttpResponseServerError(html, content_type='text/html')
