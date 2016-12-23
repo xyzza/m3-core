@@ -1,6 +1,10 @@
 ## История изменений
 
 **3.1.0**
+- Добавлены изменения для совместимости с Django версии 1.8
+    - Прямой вызов Model._meta.get_all_related_objects(...) заменен на
+      ModelOptions.get_all_related_objects()
+    - Применение совместимого аналога функции commit_unless_managed.
 - Добавлены изменения для совместимости с Django версии 1.7:
     - Переименование аргумента HttpResponse mimetype в content_type
 - Добавлена совметимость с Django 1.5:
