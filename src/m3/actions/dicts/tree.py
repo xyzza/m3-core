@@ -9,6 +9,7 @@ from django.db import transaction
 from django.dispatch import Signal
 
 from m3 import RelatedError
+from m3_django_compat import get_request_params
 from m3.actions import (
     ActionPack, Action, PreJsonResult, OperationResult, ACD, utils)
 from m3.actions.packs import ListDeleteRowAction
@@ -116,7 +117,7 @@ class ListGetRowsAction(Action):
         parent_id = utils.extract_int(request, 'id')
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
-        filter = request.REQUEST.get('filter')
+        filter = get_request_params(request).get('filter')
         result = self.parent.get_rows(
             request, context, parent_id, offset, limit, filter)
         return PreJsonResult(result)

@@ -1,19 +1,13 @@
-#coding: utf-8
-"""
-Created on 17.09.2010
-
-@author: akvarats
-"""
+# coding: utf-8
 
 import threading
+from logging import getLogger
+from importlib import import_module
 
 from django.conf import settings
-from django.utils.importlib import import_module
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
+
+
+logger = getLogger('django')
 
 
 class ExtensionException(Exception):

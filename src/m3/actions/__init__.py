@@ -1,27 +1,22 @@
-#coding:utf-8
+# coding: utf-8
+u"""
+Основные объекты библиотеки: механизмы проверки прав, экшены, паки,
+контроллеры, кэш контроллеров.
 """
-Основные объекты библиотеки: механизмы проверки прав, экшены, паки, контроллеры, кэш контроллеров
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-"""
-import abc
-from functools import wraps
-import inspect
-import importlib
-import threading
+
 import re
+import abc
+import inspect
+import threading
 import warnings
+from functools import wraps
+from importlib import import_module
+from logging import getLogger
 
 from django import http
 from django.conf import settings
-from django.utils.importlib import import_module
 
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
-
-from results import (
+from .results import (
     ActionResult,
     PreJsonResult,
     JsonResult,
@@ -32,8 +27,7 @@ from results import (
     OperationResult,
     ActionRedirectResult
 )
-
-from exceptions import (
+from .exceptions import (
     ApplicationLogicException,
     ActionException,
     ActionNotFoundException,
@@ -41,10 +35,7 @@ from exceptions import (
     ReinitException,
     ActionUrlIsNotDefined
 )
-
-import utils
-
-from context import (
+from .context import (
     ActionContext,
     ActionContextDeclaration,
     DeclarativeActionContext,
@@ -52,13 +43,12 @@ from context import (
     ContextBuildingError,
     CriticalContextBuildingError,
 )
-
-from metrics import create_statsd_client
+from .metrics import create_statsd_client
+from . import utils
 
 _STATSD_CLIENT = create_statsd_client(settings)
-
-
 ACD = ActionContextDeclaration
+logger = getLogger('django')
 
 
 _clean_url = lambda s: re.sub(r'^[/^]*(.*?)[$/]*$', r'\1', s)
@@ -72,7 +62,7 @@ def _import_by_path(path):
     if match is None:
         raise ValueError(u'Wrong path to import: %r' % path)
     module_name, obj_name = match.groups()
-    module = importlib.import_module(module_name)
+    module = import_module(module_name)
     return getattr(module, obj_name)
 
 

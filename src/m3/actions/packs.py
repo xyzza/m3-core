@@ -1,23 +1,21 @@
-#coding: utf-8
-"""
-Паки и экшены для работы со справочниками
-+++++++++++++++++++++++++++++++++++++++++
-"""
+# coding: utf-8
+u"""Паки и экшены для работы со справочниками."""
+
+from logging import getLogger
+
 from django.db import transaction
 from django.conf import settings
-try:
-    from django.utils.log import logger
-except ImportError:
-    from django.utils.log import getLogger
-    logger = getLogger('django')
 
-from m3.actions import (
-    ActionPack, Action, PreJsonResult, OperationResult, ACD
-)
 from m3.actions import utils
 from m3.actions.results import ActionResult
-from m3.db import BaseObjectModel, safe_delete
+from m3.actions.interfaces import ISelectablePack
+from m3.actions import ActionPack, Action, PreJsonResult, OperationResult, ACD
 from m3 import RelatedError
+from m3.db import BaseObjectModel, safe_delete
+from m3_django_compat import get_request_params
+
+logger = getLogger('django')
+
 
 try:
     from m3_audit import AuditManager
@@ -25,7 +23,6 @@ except ImportError:
     # При сборке документации, внешняя Django ничего не знает про m3_audit
     logger.warning('m3_audit import error')
 
-from m3.actions.interfaces import ISelectablePack
 
 MSG_DOESNOTEXISTS = (
     u'Запись справочника с id=%s не найдена в базе данных.<br/>'
@@ -243,9 +240,10 @@ class DictRowsAction(Action):
     def run(self, request, context):
         offset = utils.extract_int(request, 'start')
         limit = utils.extract_int(request, 'limit')
-        filter = request.REQUEST.get('filter')
-        direction = request.REQUEST.get('dir')
-        user_sort = request.REQUEST.get('sort')
+        request_params = get_request_params(request)
+        filter = request_params.get('filter')
+        direction = request_params.get('dir')
+        user_sort = request_params.get('sort')
         if direction == 'DESC':
             user_sort = '-' + user_sort
         dict_list = []
