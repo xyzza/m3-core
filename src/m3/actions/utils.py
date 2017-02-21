@@ -428,7 +428,7 @@ def apply_column_filter(query, request, map):
         filter_word = get_request_params(request).get(value)
         if filter_word:
             filter_q = Q(**{key + '__icontains': filter_word})
-            cond = filter if not cond else (cond & filter_q)
+            cond = filter_q if not cond else (cond & filter_q)
     if cond:
         query = query.filter(cond)
     return query
