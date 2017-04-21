@@ -4,7 +4,6 @@ python:
 
 install:
   - pip install tox
-  - pip install -r requirements/test.txt --extra-index-url=https://pypi.bars-open.ru/simple
 
 script:
   - tox
