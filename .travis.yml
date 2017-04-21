@@ -1,8 +1,21 @@
-script: true
-install: true
 language: python
-python: 
-- '2.7'
+python:
+  - '2.7'
+
+install:
+  - pip install tox
+  - pip install -r requirements/test.txt --extra-index-url=https://pypi.bars-open.ru/simple
+
+script:
+  - tox
+
+env:
+  - TOXENV=py27-django15
+  - TOXENV=py27-django16
+  - TOXENV=coverage
+
+after_success:
+  - coveralls
 
 deploy: 
   provider: pypi
@@ -10,7 +23,7 @@ deploy:
   password: 
     secure: KysYncbcePSHw7o/jHl5nW40n3uCc5jvjmPq1GKde6p+8mFdzBUE0qKwKN/906kZYfW12UkWZkpUDdIViOf6Olr5yP4QcehRhVff+g+cO/g/GZQmXLHIKZVMwRbbogG7LoxSJ5pXIGe4+u2rcXjn/wVERorybZqvC+WjSKyLOh8=
   on: 
-    tags: true
+    tags: false
   distributions: sdist
 
 notifications:
